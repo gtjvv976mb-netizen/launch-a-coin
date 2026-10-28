@@ -12,9 +12,11 @@ export function solPlain(lamports: number, max = 4) {
 }
 
 export function usdCompact(usd: number) {
-  // Promote values that would round up to the next unit, so $999,700 reads "$1M" (not "$1000K") and $999.70 reads "$1K".
-  if (usd >= 999_500) return `$${(usd / 1_000_000).toFixed(usd >= 10_000_000 ? 1 : 2).replace(/\.0+$/, "")}M`;
-  if (usd >= 999.5) return `$${(usd / 1_000).toFixed(usd >= 100_000 ? 0 : 1).replace(/\.0$/, "")}K`;
+  // Promote values that would round up to the next unit, so $999,700 reads "$1.00M" (not "$1000K") and $999.70 reads
+  // "$1.0K". The decimals stay even when they are zero ("$53.0K", not "$53K"), so a column of figures keeps one
+  // precision per unit and its tabular digits line up.
+  if (usd >= 999_500) return `$${(usd / 1_000_000).toFixed(usd >= 10_000_000 ? 1 : 2)}M`;
+  if (usd >= 999.5) return `$${(usd / 1_000).toFixed(usd >= 100_000 ? 0 : 1)}K`;
   return `$${usd.toFixed(0)}`;
 }
 

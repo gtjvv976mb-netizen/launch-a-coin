@@ -20,7 +20,7 @@
   --color-float: #1f1c19; /* menus, popovers, toasts: one step above the surface, with --shadow-pop */
 
   /* ---- text: two greys far enough apart to read as two (both 4.5:1 or better on every surface above) */
-  --color-ink: #f6f1e7; /* primary text, 13.9:1 on nested */
+  --color-ink: #f2f1ee; /* primary text, 13.9:1 on nested: a low-chroma bone (a yellow cream read as a stock palette) */
   --color-ink-hover: #ffffff;
   --color-slate: #b8b0a3; /* secondary text, labels, inactive nav and tabs (7.3:1 on nested) */
   --color-placeholder: #9c9488; /* meta, timestamps, placeholders (5.2:1 on nested, 4.6:1 on raised) */
@@ -44,7 +44,7 @@
   --color-warn-soft: #2b2414;
 
   /* ---- the primary action: inversion, never gold */
-  --color-cta: #f6f1e7;
+  --color-cta: #f2f1ee;
   --color-cta-hover: #ffffff;
   --color-on-cta: #0d0c0b; /* 17.4:1 on the cream fill */
 
@@ -55,7 +55,7 @@
   --color-tint: var(--color-raised);
   --color-sleeve: #12100e; /* the tray behind a minted card */
   --color-wall-deep: #1d1a17; /* skeleton bars on the ground */
-  --color-track: rgb(246 241 231 / 0.08); /* segmented tracks, chips, ghost hover: one step up on any surface */
+  --color-track: rgb(242 241 238 / 0.08); /* segmented tracks, chips, ghost hover: one step up on any surface */
   --color-wash: rgb(232 189 98 / 0.12); /* the arrival wash on a new feed row (start colour only) */
   --color-neon: var(--color-ink); /* selected outline, active underline, link hover: brightness, not hue */
   --color-neon-ink: var(--color-on-cta);
@@ -151,15 +151,24 @@
   --holo-flat: var(--color-ink);
   --sheen: linear-gradient(transparent, transparent);
 
-  /* ---- layout */
-  --column: 1152px; /* the centred content column from 1024px */
-  --page-gutter: 16px; /* side padding of the page; 24px from 768px (.mdx-main keeps its own --gutter for aside floats) */
+  /* ---- layout and density (.taste-skill/density/rules.md R3 and R6)
+   * The content column is min(100% - 2 x gutter, --column) at every width: main's padding and the top bar's inner
+   * row both use max(gutter, (100% - --sbw - --column) / 2), so they share one left and one right edge. */
+  --column: 1600px; /* the widest the column gets (was 1152px) */
+  --page-gutter: 16px; /* side padding of the page; 24px from 768px, 32px from 1280px */
   --main-pad: var(--page-gutter);
-  --gap-page: 24px; /* page header block to the body (16px on short desktop screens) */
-  --gap-section: 24px; /* between sections in a column */
+  --sbw: 0px; /* main's scrollbar width, measured by AppShell (0 with overlay scrollbars) */
+  --gap-page: 16px; /* page header to the body */
+  --gap-section: 16px; /* between sections and panels */
   --gap-head: 8px; /* a section head to its list */
-  --pad-panel: 16px; /* 20px from 1024px */
+  --gap-grid: 12px; /* between tiles in an auto-fill grid */
+  --pad-panel: 12px; /* panel padding on phones; 16px from 768px */
   --pad-overlay: 16px; /* 24px for desktop dialogs */
+  --row-h: 44px; /* a list or table row on touch; 40px under a fine pointer */
+  --pagehead-h: 56px; /* the page header row at desktop: title 24 + meta 14 + actions on one row */
+  --tile-min: 150px; /* the smallest tile track in an auto-fill grid on phones; 176px from 768px */
+  --tile-min-design: 150px; /* a design tile track (the card art stays legible at 150px) */
+  --actionbar-h: 64px; /* the phone sticky action bar (a 44px control + 2 x 10px) */
   --topbar-h: 48px;
   --tabbar-h: 58px;
 
@@ -179,12 +188,12 @@
   --z-skip: 80;
 
   /* ---- the 3D viewer (styles/screens/viewer.css reads these) */
-  --v3d-ink: #f6f1e7;
+  --v3d-ink: #f2f1ee;
   --v3d-muted: #b8b0a3;
-  --v3d-accent: #f6f1e7;
-  --v3d-control: rgb(246 241 231 / 0.08);
+  --v3d-accent: #f2f1ee;
+  --v3d-control: rgb(242 241 238 / 0.08);
   --v3d-control-border: #756d62;
-  --v3d-control-hover: #f6f1e7;
+  --v3d-control-hover: #f2f1ee;
 
   /* Avatar stops: pale identity tints (a dark initial reads 10:1 or better on each). */
   --avatar-1: #f3d27a;
@@ -209,23 +218,25 @@
 @media (min-width: 768px) {
   :root {
     --page-gutter: 24px;
+    --pad-panel: 16px;
+    --tile-min: 176px;
   }
 }
 @media (min-width: 1024px) {
   :root {
-    --pad-panel: 20px;
     --pad-overlay: 24px;
   }
 }
-@media (min-width: 1024px) and (max-height: 820px) {
+@media (min-width: 1280px) {
   :root {
-    --gap-page: 16px;
+    --page-gutter: 32px;
   }
 }
 @media (pointer: fine) {
   :root {
     --hit: 40px;
     --control-h: 40px;
+    --row-h: 40px;
   }
 }
 

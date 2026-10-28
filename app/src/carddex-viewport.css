@@ -1,47 +1,39 @@
-/* Viewport application: the shell (top bar, tab bar) fills the screen and <main> scrolls inside it at every width.
-   Full-screen views fill <main>, down to a floor that keeps the card usable on short screens; documents and
-   lists grow with their content. Shared (foundation): the fit mechanics, the pagers and the ViewTabs look.
-   Screen sheets tune their own views (styles/screens/*.css). */
+/* Viewport application: the shell (top bar, tab bar) fills the screen and <main> is the page's one scroller at every
+   width (density rule R1, .taste-skill/density/rules.md). Every view grows with its content: nothing shared sets a
+   view's height, and nothing inside a page scrolls on its own (overlays and their bodies excepted). A view is at least
+   main's height, so the foot of a short page still sits at the bottom. Shared (foundation): the scroller, the column
+   arithmetic, the pagers and the ViewTabs look. Screen sheets tune their own views (styles/screens/*.css). */
 html, body { height:100%; overscroll-behavior:none; }
 body { overflow:clip; }
 .cdx-app.cdx-viewport { height:var(--cdx-app-height,100dvh); min-height:0; overflow:clip; }
-/* main: the one scroller. Its inline padding centres the column (min(1152px, 100% - 2 x gutter)); the top bar's
-   inner row uses the same arithmetic, and both reserve the scrollbar gutter so their edges match. */
+/* main: the one scroller. Its inline padding centres the column, min(100% - 2 x gutter, --column): 100% is the app's
+   width and --sbw main's scrollbar (reserved by scrollbar-gutter), so the top bar's inner row, which uses the same
+   arithmetic, ends on the same edge. Phones held sideways keep the notch insets. */
 .cdx-viewport .cdx-viewport-main {
   flex:1;
   min-height:0;
-  padding:16px max(16px, env(safe-area-inset-right)) 16px max(16px, env(safe-area-inset-left));
-  --main-pad:max(16px, env(safe-area-inset-left));
+  --main-pad:max(var(--page-gutter), env(safe-area-inset-left));
+  padding:16px max(var(--page-gutter), env(safe-area-inset-right), (100% - var(--sbw) - var(--column)) / 2) 16px max(var(--page-gutter), env(safe-area-inset-left), (100% - var(--sbw) - var(--column)) / 2);
   overflow-x:clip;
   overflow-y:auto;
   overscroll-behavior:contain;
   scrollbar-gutter:stable;
 }
-@media (min-width:768px) {
-  .cdx-viewport .cdx-viewport-main { padding:24px var(--page-gutter) 16px; --main-pad:var(--page-gutter); }
-}
-@media (min-width:1024px) {
-  .cdx-viewport .cdx-viewport-main { padding-inline:max(var(--page-gutter), (100% - var(--column)) / 2); }
-}
-@media (min-width:1024px) and (max-height:820px) {
-  .cdx-viewport .cdx-viewport-main { padding-top:16px; }
-}
-.cdx-viewport-main > :first-child { height:100%; min-height:0; }
-/* Beats the routes' own min-height:0, so a short landscape screen scrolls instead of shrinking the card to 0px. */
-.cdx-app.cdx-viewport .cdx-viewport-main > :first-child { min-height:var(--cdx-fit-floor,520px); }
-/* Lists and documents grow with their content (a paged legal view keeps its measured frame). */
-.cdx-app.cdx-viewport .cdx-viewport-main > :is(.cdx-discover,.cdx-legal:not(:has(.cdx-paged-copy))) { height:auto; min-height:100%; }
+/* Views grow with their content and are at least main's height. A view never sets height:100% on itself or its
+   panels to fill the screen: that is what made panels scroll inside the page. */
+.cdx-viewport-main > :first-child { min-height:100%; }
 
-/* Pagers (components/carddex/Viewport.tsx) */
+/* Pagers (components/carddex/Viewport.tsx): primitives a screen may still use for content that does not fit. */
 .cdx-page-controls { display:flex; flex:none; min-height:var(--hit); align-items:center; justify-content:space-between; gap:8px; font-size:var(--text-caption); color:var(--color-slate); }
 .cdx-page-controls__label { min-width:0; overflow-wrap:anywhere; }
-.cdx-paged-copy { display:flex; flex-direction:column; height:100%; min-height:0; gap:8px; }
+/* PagedText measures the box it is given; in a view that grows, the box is the text's own height: one page. */
+.cdx-paged-copy { display:flex; flex-direction:column; min-height:0; gap:8px; }
 .cdx-paged-copy__text { position:relative; flex:1; min-height:0; font-size:var(--text-body); line-height:1.55; overflow-wrap:anywhere; }
 
 /* ViewTabs (components/carddex/ViewTabs.tsx): the same segmented look as Tabs (.mdx-tabs) - a track pill, the
    selected option on the nested surface, the label slate to ink. */
 .cdx-view-tabs { display:flex; flex:none; gap:0; padding:4px; border-radius:var(--radius-pill); background:var(--color-track); }
-.cdx-view-tabs button { position:relative; flex:1; min-width:0; height:calc(var(--control-h) - 8px); padding:0 12px; border-radius:var(--radius-pill); font-size:var(--text-body); font-weight:500; color:var(--color-slate); transition:color var(--t-fast) ease, background-color var(--t-fast) ease; }
+.cdx-view-tabs button { position:relative; flex:1; min-width:0; height:calc(var(--control-h) - 8px); padding:0 12px; border-radius:var(--radius-pill); font-size:var(--text-body); font-weight:500; color:var(--color-slate); white-space:nowrap; transition:color var(--t-fast) ease, background-color var(--t-fast) ease; }
 .cdx-view-tabs button::before { content:""; position:absolute; inset:-4px 0; }
 .cdx-view-tabs button[aria-selected=true] { color:var(--color-ink); background:var(--color-nested); }
 .cdx-view-tabs button:focus-visible { outline-offset:-2px; }
@@ -50,13 +42,7 @@ body { overflow:clip; }
 /* A text-link nav item (legal jump nav) keeps the hit size. */
 nav > a.mdx-link.min-h-11 { min-width:var(--hit); justify-content:center; }
 
-@media(max-width:1023px) {
- .cdx-viewport .cdx-hero-turntable__controls { gap:8px; padding-top:8px; }
-}
+/* The on-screen keyboard is up (AppShell useKeyboardFlag): the tab bar steps aside so the field keeps the room. */
 @media(max-width:1023px) {
  html[data-keyboard] .cdx-viewport .mdx-mobile-tabs { display:none; }
-}
-/* Landscape phones on the Designs library: the top bar steps aside so the library keeps its rows. */
-@media(min-width:560px) and (max-width:1023px) and (max-height:360px) {
- .cdx-viewport:has(.cdx-archive) .cdx-topbar { display:none; }
 }

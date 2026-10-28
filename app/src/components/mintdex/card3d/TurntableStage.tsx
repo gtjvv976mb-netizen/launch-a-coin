@@ -27,6 +27,7 @@ import { MintCardFace, cardLabel, cardDesign, cardBackTheme, designedCard } from
 import { getMemeIcon } from "../../../lib/mintdex/meme-icons";
 import { getEdition } from "../../../lib/mintdex/editions";
 import { ChevronButton, Icon } from "../ui";
+import { CardControlButton, CardControls } from "../../carddex/CardControls";
 import { BackFace } from "./backface";
 import { CARD_BOX, extrude, paintAcrylic, paintEdge } from "./extrude";
 import { CasePlate, caseBox } from "./case-chrome";
@@ -635,16 +636,12 @@ export default function TurntableStage({
           </div>
 
           <div className="mdx-v3d__cap">
-            <div className="mdx-v3d__controls" role="group" aria-label="Card controls">
-              <button type="button" className="mdx-v3d__btn" onClick={() => flip(1)} data-v3d="flip">
-                <Icon name="turn-over" strokeWidth={2} />
-                Turn over
-              </button>
+            {/* The compact card-controls row (CardControls, shared with HeroTurntable): icon pills named by their
+                tooltips; View coin keeps its words (it leaves the viewer). */}
+            <CardControls className="mdx-v3d__controls">
+              <CardControlButton icon="turn-over" label="Turn over" onClick={() => flip(1)} data-v3d="flip" />
               {calm ? null : (
-                <button type="button" className="mdx-v3d__btn" onClick={() => setPaused((v) => !v)} data-v3d="play">
-                  <Icon name={paused ? "play" : "pause"} strokeWidth={2} />
-                  {paused ? "Resume spin" : "Pause spin"}
-                </button>
+                <CardControlButton icon={paused ? "play" : "pause"} label={paused ? "Resume spin" : "Pause spin"} onClick={() => setPaused((v) => !v)} data-v3d="play" />
               )}
               {/* Hidden when the viewer shows the coin of the page underneath: it would lead back to itself. */}
               {coinId && !onCoinPage ? (
@@ -658,7 +655,7 @@ export default function TurntableStage({
                   <Icon name="chevron-right" strokeWidth={2} />
                 </Link>
               ) : null}
-            </div>
+            </CardControls>
             <p className="mdx-v3d__hint" aria-hidden>
               <span className="mdx-v3d__hint-fine">Drag to spin, scroll to zoom</span>
               <span className="mdx-v3d__hint-touch">Swipe to spin, pinch to zoom</span>

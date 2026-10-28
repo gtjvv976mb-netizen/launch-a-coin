@@ -14,6 +14,7 @@ function cx(...parts: Array<string | false | null | undefined>) {
  * Portfolio): a larger held back over a slow holo glow, two more backs fanned behind it that drift (paused
  * offscreen, in a hidden tab and under dialogs; still under calm). `inline`: no card back, for a no-results line or
  * an empty list inside a pane (Discover and Designs search, an empty chart or activity, empty Portfolio tabs).
+ * `compact`: a secondary empty state as one line plus one action (density R6); prefer it inside panels.
  */
 export function EmptyState({
   title,
@@ -21,6 +22,7 @@ export function EmptyState({
   action,
   hero = false,
   inline = false,
+  compact = false,
   className = "",
 }: {
   title: ReactNode;
@@ -28,10 +30,23 @@ export function EmptyState({
   action?: ReactNode;
   hero?: boolean;
   inline?: boolean;
+  /** A secondary empty state (density R6): one line (the title, then the body after it) and one action, one row. */
+  compact?: boolean;
   className?: string;
 }) {
   const fanRef = useRef<HTMLDivElement>(null);
   usePauseGate(fanRef, { margin: "0px" });
+  if (compact) {
+    return (
+      <div className={cx("mdx-empty mdx-empty--compact", className)}>
+        <p className="mdx-empty__line">
+          <strong>{title}</strong>
+          {body ? <> {body}</> : null}
+        </p>
+        {action ?? null}
+      </div>
+    );
+  }
   return (
     <div className={cx("mdx-empty", inline && "mdx-empty--inline", className)}>
       <div className="flex max-w-[360px] flex-col items-center text-center">

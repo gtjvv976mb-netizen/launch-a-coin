@@ -313,12 +313,26 @@
 .cdx-archive__vitrine {
   display: flex;
   min-width: 0;
-  min-height: 0;
+  /* The library grows with its designs (main scrolls the page); the preview keeps one screen's height and, beside
+   * the library, sticks at the top while the list scrolls past (a sticky column, not a scroller). */
+  height: max(420px, calc(var(--cdx-app-height, 100dvh) - var(--topbar-h) - 32px - var(--pagehead-h) - var(--gap-page)));
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 16px;
   container-type: size;
+}
+@media (min-width: 768px) {
+  .cdx-archive__vitrine {
+    position: sticky;
+    top: 0;
+    align-self: start;
+  }
+}
+@media (max-width: 1023.98px) {
+  .cdx-archive__vitrine {
+    height: max(420px, calc(var(--cdx-app-height, 100dvh) - var(--topbar-h) - var(--tabbar-h) - 32px - 160px));
+  }
 }
 .cdx-archive__card {
   width: min(380px, calc((100cqh - 132px) * 63 / 88), calc(100cqw - 48px));
@@ -362,13 +376,6 @@
 /* The pair pane keeps its own height, so the footnote sits under the picker instead of at the pane's foot. */
 .cdx-library__pair {
   flex: 0 1 auto;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  /* Room for focus rings inside the scroller. */
-  padding: 4px;
-  margin: -4px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-field) transparent;
 }
 .cdx-library__tools {
   display: flex;
@@ -376,18 +383,7 @@
   flex-direction: column;
   gap: 8px;
 }
-/* The chip row scrolls sideways (the primitive). 4px of room above, below and before the first chip keeps a focused
- * chip's ring inside the scroller; the strip still ends on the column edge, and a 1px spacer after the last chip
- * (plus the 8px gap) leaves room for its ring at the end of the scroll. */
-.cdx-library__chips {
-  margin: -4px 0 -4px -4px;
-  padding: 4px 0 4px 4px;
-}
-.cdx-library__chips::after {
-  content: "";
-  flex: none;
-  width: 1px;
-}
+/* The chip row wraps (the primitive, density R2). */
 .cdx-library__pair-filter {
   display: flex;
   align-items: center;
@@ -420,13 +416,7 @@
   grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
   align-content: start;
   gap: 8px;
-  margin: -4px;
-  padding: 4px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
   list-style: none;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-field) transparent;
 }
 .cdx-library__list > li {
   min-width: 0;

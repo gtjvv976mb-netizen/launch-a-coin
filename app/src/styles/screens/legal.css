@@ -15,22 +15,20 @@
 }
 
 /* ---- the four section links (phones and tablets): pinned under the top bar while the text scrolls */
-/* Sticky offsets count from main's content edge, so the row climbs over main's top padding (16, or 24 from 768)
- * to sit flush under the top bar. */
+/* Sticky offsets count from main's content edge, so the row climbs over main's top padding (16px) to sit flush
+ * under the top bar. The links wrap onto a second line rather than scroll sideways (density R2). */
 .cdx-legal__jump {
   position: sticky;
   top: -16px;
   z-index: 2;
   display: flex;
-  gap: 24px;
+  flex-wrap: wrap;
+  column-gap: 24px;
   margin-inline: calc(var(--main-pad) * -1);
   padding-inline: var(--main-pad);
   border-bottom: 1px solid var(--color-hairline);
   background: var(--color-ground);
-  overflow-x: auto;
-  scrollbar-width: none;
 }
-.cdx-legal__jump::-webkit-scrollbar { display: none; }
 .cdx-legal__jump a {
   display: inline-flex;
   flex: none;
@@ -51,9 +49,6 @@
   color: var(--color-ink);
 }
 .cdx-legal__jump a:focus-visible { outline-offset: -2px; }
-@media (min-width: 768px) {
-  .cdx-legal__jump { top: -24px; }
-}
 /* Short landscape phones: the pinned row would cost a third of the screen, so it scrolls with the page. */
 @media (max-height: 599.98px) {
   .cdx-legal__jump { position: static; }
@@ -211,15 +206,10 @@
     gap: 24px 48px;
   }
   .cdx-legal__jump { display: none; }
+  /* The contents column: sticky where the screen is tall enough to hold it whole (it never scrolls on its own). */
   .cdx-legal__toc {
     grid-area: toc;
-    position: sticky;
-    top: 24px;
     display: block;
-    max-height: calc(var(--cdx-app-height, 100dvh) - var(--topbar-h) - 48px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
   }
   .cdx-legal__summary {
     grid-area: summary;
@@ -239,5 +229,11 @@
     position: sticky;
     top: 24px;
     max-width: none;
+  }
+}
+@media (min-width: 1024px) and (min-height: 760px) {
+  .cdx-legal__toc {
+    position: sticky;
+    top: 24px;
   }
 }

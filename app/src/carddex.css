@@ -1,13 +1,52 @@
-/* Shared card-stage chrome (foundation-owned): the HeroTurntable stage and its control row (Launch preview, Designs
- * preview). Moved out of carddex-cards.css, which keeps only card internals. The controls are the secondary button
- * primitive at sm size (.mdx-btn--outline.mdx-btn--sm, a glyph and its word), the same row as the coin page's case.
- * A screen that wants another spacing tunes `.cdx-hero-turntable__controls` from its own sheet. */
+/* Shared card-stage chrome (foundation-owned): the HeroTurntable stage and the compact card-controls row
+ * (components/carddex/CardControls.tsx), used by Launch, Designs and the 3D viewer. carddex-cards.css keeps only card
+ * internals. A screen that wants another spacing tunes `.cdx-card-controls` from its own sheet. */
 .cdx-hero-turntable { position: relative; width: 100%; }
-.cdx-hero-turntable__controls {
+
+/* The row: 36px icon pills (secondary, nested surface), 8px apart, centred under the card; 44px on touch. */
+.cdx-card-controls {
   position: relative;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
-  padding-top: 16px;
+  padding-top: 12px;
+}
+@media (pointer: coarse), (max-width: 1023.98px) {
+  .cdx-card-controls .cdx-card-control {
+    width: 44px;
+    height: 44px;
+  }
+}
+/* The tooltip: the control's name on the float surface above it. Hover waits a beat (an Operate surface: a pointer
+ * passing over the row does not flash labels); keyboard focus shows it at once. Never on touch (no hover). */
+.cdx-card-control[data-tip]::before {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  z-index: 2;
+  padding: 4px 8px;
+  border-radius: var(--radius-row);
+  background: var(--color-float);
+  box-shadow: var(--shadow-pop);
+  color: var(--color-ink);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-50%);
+  transition: opacity var(--t-fast) ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cdx-card-control[data-tip]:hover::before {
+    opacity: 1;
+    transition-delay: 400ms;
+  }
+}
+.cdx-card-control[data-tip]:focus-visible::before {
+  opacity: 1;
+  transition: none;
 }

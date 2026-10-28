@@ -11,7 +11,7 @@ import {
   solscanTokenUrl,
   type PublicLiveLaunch,
 } from "../../lib/carddex/live/launches";
-import type { CoinSummary, EventRow, SaleRow } from "../../lib/mintdex/types";
+import type { CoinSummary, EventRow } from "../../lib/mintdex/types";
 import { BotTag } from "./trust";
 import {
   Change,
@@ -270,39 +270,6 @@ export function LaunchedSkeleton({ rows = 3 }: { rows?: number }) {
         </li>
       ))}
     </ul>
-  );
-}
-
-/**
- * Card sale row, 52px: thumb, coin name over the buyer, price over the time ago. `isNew` (from a live list)
- * marks a sale that arrived with the latest poll: it enters with the sky wash.
- */
-export function SaleItem({ s, now, isNew = false }: { s: SaleRow; now: number; isNew?: boolean }) {
-  return (
-    <Link
-      to="/coin/$id"
-      params={{ id: s.coinId }}
-      data-new={isNew || undefined}
-      className="mdx-row -mx-2 grid h-[52px] grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 px-2 hover:bg-tint"
-    >
-      <Thumb src={s.image} size={36} />
-      <span className="min-w-0">
-        <span className="block truncate text-[14px] font-semibold leading-[1.25] text-ink">
-          {s.coinName}
-        </span>
-        <span className="flex min-w-0 items-center gap-1.5 text-[12px] leading-[1.3] text-slate">
-          <span className="truncate">to {atName(s.buyer)}</span>
-          {s.buyerIsBot ? <BotTag /> : null}
-        </span>
-      </span>
-      <span className="flex flex-col items-end">
-        <span className="whitespace-nowrap leading-[1.25]">
-          <span className="num text-[15px] text-ink">{solFigure(s.price)}</span>
-          <span className="text-[13px] font-medium text-slate"> SOL</span>
-        </span>
-        <span className="text-[12px] leading-[1.3] text-slate">{timeAgo(s.createdAt, now)}</span>
-      </span>
-    </Link>
   );
 }
 

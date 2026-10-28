@@ -119,9 +119,8 @@
 /* ------------------------------------------------ the form: the one panel */
 .cdx-create-form { display: flex; min-width: 0; flex-direction: column; gap: 20px; }
 @media (min-width: 1024px) {
-  /* Content height (the footer follows the fields), up to the row; a long step scrolls inside, the footer stays. */
-  .cdx-create-form { align-self: start; max-height: 100%; min-height: 0; }
-  .cdx-launch-content { min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin: -4px; padding: 4px; }
+  /* Content height: the form grows with its fields and the footer follows them (nothing scrolls inside the page). */
+  .cdx-create-form { align-self: start; min-height: 0; }
 }
 .cdx-launch-step-head { display: flex; align-items: flex-start; gap: 16px; }
 .cdx-launch-step-head__text { display: flex; min-width: 0; flex: 1; flex-direction: column; align-items: flex-start; gap: 4px; }
@@ -271,7 +270,6 @@ button.cdx-launch-step-head__count { text-decoration: underline; text-decoration
 @media (max-width: 1023.98px) {
   /* The page grows with its step (no clipped fields), and the footer stays in reach at the bottom of the screen
    * while a long step scrolls under it. */
-  .cdx-app.cdx-viewport .cdx-viewport-main > .cdx-launch { height: auto; min-height: 100%; }
   .cdx-launch-step-footer {
     position: sticky;
     /* A sticky box stops at main's content edge; -16px (main's bottom padding) takes it down to the tab bar. */
@@ -338,13 +336,16 @@ button.cdx-launch-step-head__count { text-decoration: underline; text-decoration
   .cdx-create-preview {
     /* Room above and below for the card's turn (its projection swings past its box) and the control row. */
     --cw: min(calc(100cqw - 64px), calc((100cqh - 150px) * 0.7159), 420px);
-    height: 100%;
-    min-height: 0;
+    /* The stage keeps a screen's height (main less its padding, the header row and its gap), so the card's size does
+     * not follow the form beside it; it stretches with a taller form. It never scrolls. */
+    min-height: calc(var(--cdx-app-height, 100dvh) - var(--topbar-h) - 32px - var(--pagehead-h) - var(--gap-page));
     justify-content: center;
     container-type: size;
   }
 }
-.cdx-launch-card { position: relative; width: 100%; }
+/* The card is its stage's width (card3d.css, unlayered, sets .mdx-card3d to 100%), so the stage takes --cw: a wider
+ * column must not grow the card past the screen's height. */
+.cdx-launch-card { position: relative; width: min(100%, var(--cw)); }
 .cdx-launch-card .cdx-hero-turntable { width: 100%; }
 .cdx-launch-card .mdx-card3d { width: var(--cw); margin-inline: auto; }
 .cdx-hero-turntable--viewport .mdx-card3d { perspective: 4000px; }

@@ -667,7 +667,7 @@ export function Tabs<T extends string | number>({
       data-measured={thumb ? "" : undefined}
       data-ready={ready ? "" : undefined}
       className={cx(
-        "mdx-tabs mdx-noscrollbar max-w-full max-lg:overflow-x-auto",
+        "mdx-tabs",
         size === "sm" && "mdx-tabs--sm",
         className,
       )}
@@ -693,15 +693,8 @@ export function Tabs<T extends string | number>({
         const content = (
           <>
             {o.level ? <FrameMini level={o.level} /> : null}
-            <span>
-              {o.label}
-              {o.count != null ? (
-                <>
-                  {" "}
-                  (<span className="num">{o.count}</span>)
-                </>
-              ) : null}
-            </span>
+            <span>{o.label}</span>
+            {o.count != null ? <span className="mdx-tabs__count">{o.count}</span> : null}
           </>
         );
         return (
@@ -1630,14 +1623,18 @@ export function PageFrame({
 }
 
 /**
- * The 56px page header row: h1 + one context line on the left, view controls on the right.
- * Desktop keeps the context to one line (ellipsis); phones let it wrap.
+ * The page header row (density R6): h1 (24px) and one context line (14px) on the left; an optional toolbar (search,
+ * sort, filters, a segmented range), then `aside`, then the actions on the right, all on ONE row, at most
+ * --pagehead-h (56px) tall from 1024px. A toolbar that fits beside the title goes here, never in a second row under
+ * it. Desktop keeps the context to one line (ellipsis); phones let it wrap, and the toolbar and actions wrap onto
+ * the next line at full width.
  */
 export function PageHeader({
   title,
   context,
   right,
   aside,
+  toolbar,
   back,
   wrapContext = false,
   className = "",
@@ -1649,26 +1646,87 @@ export function PageHeader({
   right?: ReactNode;
   /** A data block before `right` (the coin's market cap Stat): bottom-aligned with the context line. */
   aside?: ReactNode;
+  /** View controls that would otherwise make a toolbar row under the title: a search field, a SortMenu, chips. */
+  toolbar?: ReactNode;
   /** Phones only: a 44px utility row above the title (a TextLink back to the list). */
   back?: ReactNode;
   wrapContext?: boolean;
   className?: string;
 }) {
   return (
-    <header className={cx("mdx-pagehead", className)} data-wrap={wrapContext || undefined}>
+    <header className={cx("mdx-pagehead", className)} data-wrap={wrapContext || undefined} data-toolbar={toolbar ? "" : undefined}>
       {back ? <div className="mdx-pagehead__back">{back}</div> : null}
       <div className="mdx-pagehead__text">
         {/* One line on desktop (fitted header row); phones let a long title wrap instead of cutting it. */}
         <h1 className="mdx-h1 mdx-pagehead__title">{title}</h1>
         {context ? <p className="mdx-pagehead__context">{context}</p> : null}
       </div>
-      {aside || right ? (
+      {toolbar || aside || right ? (
         <div className="mdx-pagehead__right">
+          {toolbar ? <div className="mdx-pagehead__tools">{toolbar}</div> : null}
           {aside}
           {right}
         </div>
       ) : null}
     </header>
+  );
+}
+
+/**
+ * The phone sticky action bar (density R7): a screen's primary action (Launch, Buy) stays on screen while the page
+ * scrolls. Below 1024px it sticks to the bottom of <main>, just above the tab bar (and above the keyboard, which
+ * hides the tab bar), full bleed across the gutters, on the ground with a 1px top rule. From 1024px it sits in the
+ * flow where it is placed, unless `phoneOnly` hides it there (the screen shows the same action inline). Put it as
+ * the LAST child of the view root, so it can stick for the whole page; one per screen. `label` names the region.
+ */
+export function ActionBar({
+  label,
+  children,
+  phoneOnly = false,
+  className = "",
+}: {
+  label: string;
+  children: ReactNode;
+  phoneOnly?: boolean;
+  className?: string;
+}) {
+  return (
+    <div role="region" aria-label={label} className={cx("mdx-actionbar", className)} data-phone-only={phoneOnly || undefined}>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * Tiles in an auto-fill grid (density R3): as many columns as fit, each at least `min` (default --tile-min: 150px on
+ * phones, 176px from 768px), so a wider screen gets more columns, not bigger tiles. Renders a <ul role="list">;
+ * pass <li> children. `max` caps a tile's width when a short list should not stretch (e.g. "220px").
+ */
+export function AutoGrid({
+  children,
+  min,
+  max,
+  className = "",
+  label,
+  ref,
+}: {
+  children: ReactNode;
+  min?: string;
+  max?: string;
+  className?: string;
+  label?: string;
+  ref?: Ref<HTMLUListElement>;
+}) {
+  return (
+    <ul
+      ref={ref}
+      role="list"
+      aria-label={label}
+      className={cx("mdx-autogrid", className)}
+      style={{ ...(min ? { "--grid-min": min } : null), ...(max ? { "--grid-max": max } : null) } as CSSProperties}
+    >
+      {children}
+    </ul>
   );
 }
 
@@ -1750,18 +1808,22 @@ export function Stats({
   size = "md",
   cols,
   lead = false,
+  strip = false,
   className = "",
 }: {
   items: StatItem[];
   size?: "md" | "lg";
   cols?: number;
   lead?: boolean;
+  /** One row at every width (density R6 KPI strip): compact 8px/12px cells that shrink, never two rows on phones. */
+  strip?: boolean;
   className?: string;
 }) {
   return (
     <dl
       className={cx("mdx-kpis", className)}
       data-size={size}
+      data-strip={strip || undefined}
       style={{ "--kpi-cols": cols ?? items.length } as CSSProperties}
     >
       {items.map((it, i) => (
@@ -2642,11 +2704,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               onClick={() => dismiss(t.id)}
               className="mdx-toast__x grid h-8 w-8 flex-none place-items-center self-start rounded-pill max-lg:h-11 max-lg:w-11 max-lg:-my-1.5"
             >
-              <svg width="12" height="12" viewBox="0 0 14 14" aria-hidden>
+              <svg width="16" height="16" viewBox="0 0 14 14" aria-hidden>
                 <path
-                  d="M2.5 2.5l9 9M11.5 2.5l-9 9"
+                  d="M3 3l8 8M11 3l-8 8"
                   stroke="currentColor"
-                  strokeWidth="1.6"
+                  strokeWidth="1.5"
                   strokeLinecap="round"
                 />
               </svg>
@@ -3024,9 +3086,11 @@ export function useFlip(ref: { current: HTMLElement | null }, order: Array<strin
       const from = prev.get(r.dataset.flip!);
       const to = now.get(r.dataset.flip!);
       if (from == null || to == null || from === to) continue;
+      // A layout move (website-standard motion-values.md, Springs row: layout 0.3s, no bounce): 300ms on the house
+      // movement curve.
       r.animate([{ transform: `translateY(${from - to}px)` }, { transform: "none" }], {
-        duration: 420,
-        easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        duration: 300,
+        easing: "cubic-bezier(0.76, 0, 0.24, 1)",
       });
     }
     // The joined key stands for the order.

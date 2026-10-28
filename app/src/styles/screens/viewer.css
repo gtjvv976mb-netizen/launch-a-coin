@@ -297,10 +297,18 @@
 }
 
 /* Cards float freely: remove circular bases and floor pools throughout the site (owner, 2026-10-18).
- * Ordinary cast shadows, foil lighting and the 3D motion stay with the cards. The design-colour halo and prism ring
- * are off in both viewers, as on every screen of the true-black-flat restyle: the card is the only colour. */
-.mdx-v3d .mdx-card3d__halo,
-.mdx-inspect .mdx-card3d__halo {
+ * Ordinary cast shadows, foil lighting and the 3D motion stay with the cards. The viewers keep the design-colour
+ * halo the owner asked for (2026-10-18), calm and in the design's one hue: a soft round pool behind the card at low
+ * opacity. The prism ring (a turning conic of five holo hues) stays off: it read as a rainbow. Other screens keep
+ * no halo (the card is the only colour). */
+.mdx-v3d .mdx-card3d[data-depth="hand"] > .mdx-card3d__halo,
+.mdx-inspect .mdx-card3d[data-depth="hand"] > .mdx-card3d__halo {
+  opacity: calc(0.16 + 0.18 * var(--glow-k, 0.5));
+}
+.mdx-v3d .mdx-card3d__halo > b,
+.mdx-inspect .mdx-card3d__halo > b,
+.mdx-v3d .mdx-card3d:not([data-depth="hand"]) > .mdx-card3d__halo,
+.mdx-inspect .mdx-card3d:not([data-depth="hand"]) > .mdx-card3d__halo {
   display: none;
 }
 .mdx-card3d__pedestal,

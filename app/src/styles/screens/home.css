@@ -12,22 +12,9 @@
  *   what the header, tabs, caption and controls leave); the pulse view flows in the page. */
 
 /* ---------------------------------------------------------------- the frame */
-/* Home flows with its content (main scrolls), except where it fits the screen: fit, and the phone's card view. */
-.cdx-app.cdx-viewport .cdx-viewport-main > .cdx-home {
-  height: auto;
-  min-height: 100%;
-}
-@media (min-width: 1280px) and (min-height: 720px) {
-  .cdx-app.cdx-viewport .cdx-viewport-main > .cdx-home {
-    height: 100%;
-    min-height: var(--cdx-fit-floor, 520px);
-  }
-}
+/* Home grows with its content at every width (density R1: main is the one scroller, nothing in the page scrolls on
+ * its own); the shell makes it at least main's height. */
 @media (max-width: 1023.98px) {
-  .cdx-app.cdx-viewport .cdx-viewport-main > .cdx-home:has(> .cdx-home__body[data-home-view="card"]) {
-    height: 100%;
-    min-height: var(--cdx-fit-floor, 520px);
-  }
   .cdx-home.mdx-frame {
     gap: 12px;
   }
@@ -153,9 +140,6 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: auto minmax(0, 1fr);
     align-content: stretch;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
   }
   .cdx-home-trending,
   .cdx-home-collection,
@@ -419,7 +403,7 @@
   }
   .cdx-home__body[data-home-view="card"] {
     flex: none;
-    height: calc(100dvh - var(--topbar-h) - 44px - 32px);
+    min-height: calc(100dvh - var(--topbar-h) - 44px - 32px);
   }
   .cdx-home__caption {
     grid-row: 2;
@@ -709,13 +693,12 @@
 .cdx-home-launched {
   container-type: inline-size;
 }
-/* At fit the list scrolls inside its panel past what the row holds; an empty state sits in the middle of it. */
+/* At fit the list takes the panel's remaining height (it grows with its rows; nothing scrolls inside the page); an
+ * empty state sits in the middle of it. */
 @media (min-width: 1280px) and (min-height: 720px) {
   .cdx-home-launched__list {
     min-height: 0;
     flex: 1;
-    overflow-y: auto;
-    scrollbar-width: thin;
   }
   .cdx-home-launched__empty {
     flex: 1;

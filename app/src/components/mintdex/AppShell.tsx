@@ -865,12 +865,9 @@ function MobileTabs({ pending }: { pending: boolean }) {
 // ---------------------------------------------------------------- shell
 
 /**
- * Desktop: a 224px rail on the canvas (Launch a Card lockup, pill search, five tabs with one sliding pill, guide,
- * wallet card) and the canvas content area. No top bar, no rail panel, no edge line.
- * At 1280x720 and up `main` never scrolls; 1024 to 1279 may scroll as a fallback. `mdx-main` gives full
- * height asides their --gutter (12px float above 820px tall, flush below) and --bleed.
- * Phones (under 1024): 56px canvas header (search, account sheet or guide and Enter), 64px panel tab bar with
- * rounded top corners (44px when held sideways), natural page scroll, safe-area insets on every side.
+ * The shell: the 48px top bar, then <main> (the page's one scroller at every width: views grow with their content,
+ * nothing inside a page scrolls on its own), then the phone tab bar below 1024px (44px when held sideways).
+ * Safe-area insets on every side.
  */
 /**
  * The devnet test site's one line (launch-plan §6 APP, lib/mintdex/site-host.ts): above the page on every width,
@@ -968,6 +965,22 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
     };
   }, []);
 
+  // main's scrollbar width as --sbw: the top bar's row and the toasts add it on their right, so their edges meet the
+  // column's under classic scrollbars (overlay scrollbars measure 0).
+  useEffect(() => {
+    const main = document.getElementById("content");
+    if (!main || typeof ResizeObserver === "undefined") return;
+    const root = document.documentElement;
+    const sync = () => root.style.setProperty("--sbw", `${Math.max(0, main.offsetWidth - main.clientWidth)}px`);
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(main);
+    return () => {
+      ro.disconnect();
+      root.style.removeProperty("--sbw");
+    };
+  }, []);
+
   // The top bar takes its 1px rule once the page scrolls under it (main is the one scroller at every width).
   const shellRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -1031,8 +1044,9 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
         </p>
       ) : null}
       <TopBar searchRef={searchRef} pending={pending} liveLaunch={liveLaunch} />
-      {/* main is the one scroller at every width. Its inline padding centres the 1152px column (the top bar uses
-          the same arithmetic), so a full-height page still fills main and the footer follows the page. */}
+      {/* main is the one scroller at every width (density R1). Its inline padding centres the column (up to 1600px;
+          the top bar uses the same arithmetic). Views grow with their content, at least main's height, and the
+          footer follows the page. */}
       <main
         id="content"
         data-scroll-restoration-id="content"

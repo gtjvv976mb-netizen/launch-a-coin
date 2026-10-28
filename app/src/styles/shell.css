@@ -1,10 +1,11 @@
 /* The app shell (AppShell.tsx): the 48px top bar, the phone tab bar, the page foot and the shell notes.
  * Shared: owned by the foundation, not by a screen group (.taste-skill/restyle/ownership.md). Layer: cdx.
  *
- * Grid arithmetic: from 1024px the column is min(1152px, 100% - 2 x 24px) wide and centred; the top bar's inner row
- * and main's padding use the same max() so the mark sits on the column's left edge and the account control ends on
- * its right edge. At 1440: (1440 - 1152) / 2 = 144px each side. Phones: the full width with 16px gutters (plus the
- * notch insets held sideways). */
+ * Grid arithmetic (density rule R3): the column is min(100% - 2 x gutter, 1600px) at every width (gutters 16 / 24
+ * from 768 / 32 from 1280); the top bar's inner row and main's padding use the same max(), so the mark sits on the
+ * column's left edge and the account control ends on its right edge. --sbw is main's scrollbar width (AppShell
+ * measures it): the bar adds it on the right because it has no scrollbar of its own. At 1440: 32px each side; at
+ * 1920: (1920 - 1600) / 2 = 160px. Phones: 16px gutters (plus the notch insets held sideways). */
 
 .cdx-app.cdx-viewport {
   display: flex;
@@ -25,29 +26,23 @@
    * line the direction keeps on the sticky bar. taste-skill-ignore: a sticky bar's scroll rule, not a resting card. */
   border-bottom: 1px solid transparent;
   transition: border-color var(--t-fast) ease;
-  /* Reserve main's scrollbar width too, so the bar's edges match the column's under classic scrollbars. */
-  overflow: hidden;
-  scrollbar-gutter: stable;
+  /* No overflow clip here: the search suggestions hang below the bar (an overflow:hidden bar cut them off). */
 }
 .cdx-topbar[data-scrolled] {
   border-bottom-color: var(--color-hairline);
 }
 .cdx-topbar__inner {
+  --bar-pad: max(var(--page-gutter), (100% - var(--sbw) - var(--column)) / 2);
   display: flex;
   height: 100%;
   align-items: center;
   gap: 16px;
-  padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
-}
-@media (min-width: 768px) {
-  .cdx-topbar__inner {
-    padding-inline: var(--page-gutter);
-  }
+  padding-left: max(var(--bar-pad), env(safe-area-inset-left));
+  padding-right: calc(max(var(--bar-pad), env(safe-area-inset-right)) + var(--sbw));
 }
 @media (min-width: 1024px) {
   .cdx-topbar__inner {
     gap: 24px;
-    padding-inline: max(var(--page-gutter), (100% - var(--column)) / 2);
   }
 }
 .cdx-topbar__lead {
@@ -368,7 +363,7 @@
 /* ------------------------------------------------ the page foot */
 .cdx-footer {
   display: flex;
-  margin-top: 48px;
+  margin-top: 24px;
   padding: 16px 0 8px;
   flex-wrap: wrap;
   align-items: center;

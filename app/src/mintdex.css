@@ -364,7 +364,6 @@
   .mdx-leaders dt {
     flex: 0 1 auto;
     min-width: 0;
-    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -433,31 +432,44 @@
   .mdx-caption__link {
     margin-top: 16px;
   }
-  /* PageFrame: the view root, a header block then the body. A layer below the screen sheets, so a screen tunes its
-   * own gap and the shell's fit floor (carddex-viewport.css) still applies. */
+  /* PageFrame: the view root, a header row then the body. It grows with its content (density R1: never a fixed
+   * height that makes a panel scroll); the shell makes it at least main's height. A layer below the screen sheets,
+   * so a screen tunes its own gap. */
   .mdx-frame {
     display: flex;
     min-height: 0;
     flex-direction: column;
-    gap: var(--gap-page, 24px);
+    gap: var(--gap-page, 16px);
   }
-  @media (min-width: 1024px) {
-    .mdx-frame {
-      height: 100%;
-    }
-  }
-  @media (min-width: 1024px) and (max-height: 820px) {
-    .mdx-frame {
-      gap: 16px;
-    }
-  }
-  /* EmptyState: centred in the space it is given (screens may shrink it, e.g. the signed-out Portfolio). */
+  /* EmptyState: centred in the space it is given (screens may shrink it, e.g. the signed-out Portfolio). The
+   * default and hero variants are for a screen's PRIMARY empty state only; a secondary one (an empty list inside a
+   * panel, no search results) is `compact`: one line and one action on a single row (density R6). */
   .mdx-empty {
     display: grid;
     height: 100%;
     min-height: 320px;
     place-items: center;
     padding: 32px 16px;
+  }
+  .mdx-empty--compact {
+    display: flex;
+    height: auto;
+    min-height: var(--row-h);
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+    padding: 8px 0;
+    color: var(--color-slate);
+    font-size: var(--text-body);
+    line-height: 20px;
+  }
+  .mdx-empty--compact .mdx-empty__line {
+    min-width: 0;
+    text-wrap: pretty;
+  }
+  .mdx-empty--compact .mdx-empty__line strong {
+    color: var(--color-ink);
+    font-weight: 500;
   }
   /* Shelf caption: 56px strip including the ledge (5 ledge + 10 space + 20 line 1 + 18 line 2 + 3). */
   .mdx-gridcap {
@@ -502,11 +514,16 @@
     border-radius: var(--radius-pill);
     background: var(--color-track);
   }
+  .mdx-tabs {
+    max-width: 100%;
+  }
   .mdx-tabs__tab {
     position: relative;
     z-index: 1;
     display: inline-flex;
-    flex: none;
+    /* Options shrink before the track would overflow its row (no sideways scroll, density R2). */
+    flex: 0 1 auto;
+    min-width: 0;
     height: calc(var(--control-h) - 8px);
     align-items: center;
     justify-content: center;
@@ -540,6 +557,29 @@
   }
   .mdx-tabs__tab:focus-visible {
     outline-offset: -2px;
+  }
+  /* A squeezed option clips its own label, not its hit area (the ::before above). */
+  .mdx-tabs__tab > .grid {
+    min-width: 0;
+    overflow: hidden;
+  }
+  /* A tab's count: a quiet badge after the label ("Holdings 3"), never "(3)". */
+  .mdx-tabs__count {
+    display: inline-grid;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    place-items: center;
+    border-radius: var(--radius-pill);
+    background: var(--color-track);
+    color: var(--color-slate);
+    font-size: var(--text-caption);
+    font-weight: 500;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .mdx-tabs__tab[data-selected] .mdx-tabs__count {
+    color: var(--color-ink);
   }
   .mdx-tabs:not([data-measured]) .mdx-tabs__tab[data-selected] {
     background: var(--color-nested);
@@ -598,6 +638,18 @@
     .mdx-tabs--sm .mdx-tabs__tab::before {
       inset: -4px 0;
     }
+  }
+
+  /* Segmented tabs that fill their row (a phone section switcher): equal options, labels may shorten. */
+  .mdx-tabs--fill {
+    display: flex;
+    width: 100%;
+  }
+  .mdx-tabs--fill .mdx-tabs__tab {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    padding: 0 8px;
   }
 
   /* Buy | Sell (SideToggle): the segmented look, one nested thumb; the selected label takes the market colour. */
@@ -944,7 +996,7 @@
     padding: 0 34px 0 14px;
     border: 0;
     border-radius: var(--radius-pill);
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23F6F1E7' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23F2F1EE' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
       right 14px center / 10px 6px no-repeat var(--color-track);
     font-family: var(--font-sans);
     font-size: var(--text-body);
@@ -957,6 +1009,12 @@
     appearance: none;
     -webkit-appearance: none;
     field-sizing: content;
+  }
+  /* Touch and phones: 16px, like the fields, so iOS Safari never zooms when a select opens. */
+  @media (pointer: coarse), (max-width: 1023.98px) {
+    .mdx-select {
+      font-size: var(--text-lead);
+    }
   }
   .mdx-select option {
     background: var(--color-float);
@@ -1148,7 +1206,8 @@
     position: absolute;
     inset: 0;
     transform: translateX(-100%);
-    background: linear-gradient(90deg, transparent, rgb(140 200 255 / 0.08), transparent);
+    /* Neutral on the dark tokens (the old blue tint read as a stray hue). */
+    background: linear-gradient(90deg, transparent, rgb(242 241 238 / 0.06), transparent);
     animation: mdx-shimmer var(--t-shimmer) linear infinite;
   }
 
@@ -1297,12 +1356,23 @@
   .mdx-overlay[data-state="closed"] {
     animation: mdx-fade-out 160ms var(--ease-out) both;
   }
-  /* Toasts: rise in, fade down on the way out. */
+  /* Toasts: rise in, fade down on the way out. Transitions (an entrance from @starting-style), so a toast that
+   * leaves while still arriving turns round from where it is instead of restarting a keyframe. */
   .mdx-toast {
-    animation: mdx-toast-in 240ms var(--ease-out) both;
+    transition:
+      opacity 240ms var(--ease-out),
+      transform 240ms var(--ease-out);
+  }
+  @starting-style {
+    .mdx-toast {
+      opacity: 0;
+      transform: translateY(12px) scale(0.98);
+    }
   }
   .mdx-toast[data-leaving] {
-    animation: mdx-toast-out 160ms var(--ease-out) both;
+    opacity: 0;
+    transform: translateY(6px);
+    transition-duration: 160ms;
   }
   .mdx-toast--level {
     background: var(--color-float);
@@ -1375,7 +1445,8 @@
     background: var(--color-tint);
   }
 
-  /* Skip link (P1-24): off screen until focused, then an ink pill over the top left of the page. */
+  /* Skip link (P1-24): clipped to nothing until focused (a parked box above the viewport still counted as content
+   * at the left edge), then an ink pill over the top left of the page, at once: a keyboard action does not animate. */
   .mdx-skip {
     position: fixed;
     top: 12px;
@@ -1390,13 +1461,17 @@
     color: var(--color-on-neon, var(--color-neon-ink));
     font-size: 14px;
     font-weight: 600;
-    /* No shadow while parked above the viewport (only on focus): its blur leaked a smudge into the top left (RL-07). */
-    transform: translateY(calc(-100% - 24px));
-    transition: transform var(--t-base) var(--ease-out);
+    white-space: nowrap;
+  }
+  .mdx-skip:not(:focus) {
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
   }
   .mdx-skip:focus,
   .mdx-skip:focus-visible {
-    transform: none;
     box-shadow: var(--shadow-float);
     outline-offset: 3px;
   }
@@ -1528,18 +1603,6 @@
   to {
     opacity: 0;
     transform: scale(0.98);
-  }
-}
-@keyframes mdx-toast-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.98);
-  }
-}
-@keyframes mdx-toast-out {
-  to {
-    opacity: 0;
-    transform: translateY(6px);
   }
 }
 @keyframes mdx-wash {
@@ -1849,35 +1912,6 @@ a:focus-visible .mdx-lift {
   font-size: 16px;
 }
 
-/* Segmented tabs that fill their row (the coin page sections on phones). */
-.mdx-tabs--fill {
-  display: flex;
-  width: 100%;
-}
-.mdx-tabs--fill .mdx-tabs__tab {
-  flex: 1 1 0;
-  justify-content: center;
-  padding: 0 8px;
-}
-
-/* A horizontal snap strip (the Levels designs on phones). No display here: this rule is unlayered, so a
- * display would beat the element's lg:hidden utility; the element sets flex itself. */
-.mdx-strip {
-  gap: 8px;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline: 16px;
-  scrollbar-width: none;
-}
-.mdx-strip::-webkit-scrollbar {
-  display: none;
-}
-.mdx-strip > * {
-  flex: none;
-  scroll-snap-align: center;
-}
-
 @media (max-width: 1023.98px) {
   :root {
     /* What a sticky row under the top bar clears (main scrolls under the bar, so a sticky row sits at 0). */
@@ -2108,6 +2142,122 @@ a:focus-visible .mdx-lift {
       gap: 12px;
     }
   }
+  /* The header's toolbar slot: search, sort, filters on the title's row (no separate toolbar row). From 1024px the
+   * whole header is one row of at most --pagehead-h; the toolbar shrinks first (a field inside it takes the room). */
+  .mdx-pagehead__tools {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  @media (min-width: 1024px) {
+    .mdx-pagehead[data-toolbar] {
+      align-items: center;
+    }
+    .mdx-pagehead[data-toolbar] .mdx-pagehead__right {
+      flex: 1 1 auto;
+      justify-content: flex-end;
+    }
+    .mdx-pagehead__tools {
+      flex-wrap: nowrap;
+    }
+  }
+  @media (max-width: 1023.98px) {
+    .mdx-pagehead__tools {
+      width: 100%;
+      justify-content: flex-start;
+    }
+  }
+
+  /* ActionBar (ui.tsx): the phone sticky action bar. It sticks to main's bottom edge (main scrolls; the tab bar is
+   * below main, so the bar sits just above it, and above the keyboard, which hides the tab bar). Full bleed over
+   * the gutters, the ground with one top rule, like the tab bar. From 1024px it is an ordinary row in the flow. */
+  .mdx-actionbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  @media (max-width: 1023.98px) {
+    .mdx-actionbar {
+      position: sticky;
+      /* A sticky box stops at main's content edge; -16px (main's bottom padding) takes it down to main's visible
+       * bottom, just above the tab bar. */
+      bottom: -16px;
+      z-index: 5;
+      min-height: var(--actionbar-h);
+      margin-inline: calc(var(--main-pad) * -1);
+      padding: 10px var(--main-pad);
+      background: var(--color-ground);
+      /* taste-skill-ignore: the sticky bar's top rule, the one line a floating bar keeps (as the tab bar). */
+      border-top: 1px solid var(--color-hairline);
+    }
+    .mdx-actionbar > :is(.mdx-btn, a.mdx-btn) {
+      flex: 1 1 auto;
+    }
+    /* Toasts rise above the bar instead of covering it. */
+    html:has(.mdx-actionbar) .mdx-toasts {
+      bottom: calc(var(--tabbar-h) + var(--actionbar-h) + 16px + env(safe-area-inset-bottom));
+    }
+  }
+  @media (min-width: 1024px) {
+    .mdx-actionbar[data-phone-only] {
+      display: none;
+    }
+  }
+
+  /* AutoGrid (ui.tsx): auto-fill tracks of at least --grid-min (default --tile-min), so wider screens get more
+   * columns, never bigger tiles; --grid-max caps a tile in a short list. */
+  .mdx-autogrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(var(--grid-min, var(--tile-min)), 100%), var(--grid-max, 1fr)));
+    gap: var(--gap-grid);
+    list-style: none;
+  }
+  .mdx-autogrid > li {
+    min-width: 0;
+  }
+
+  /* A table that never scrolls sideways (density R2): cells carry data-priority="low" (hidden below 768px) or
+   * "mid" (hidden below 480px); merge what is left into two-line cells in the screen if it still does not fit. */
+  .mdx-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: var(--text-body);
+  }
+  .mdx-table :is(th, td) {
+    height: var(--row-h);
+    padding: 0 8px 0 0;
+    border-bottom: 1px solid var(--color-rule);
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mdx-table th {
+    height: 32px;
+    font-size: var(--text-caption);
+    font-weight: 500;
+    color: var(--color-slate);
+  }
+  .mdx-table :is(th, td)[data-num] {
+    padding: 0 0 0 8px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (max-width: 767.98px) {
+    .mdx-table [data-priority="low"] {
+      display: none;
+    }
+  }
+  @media (max-width: 479.98px) {
+    .mdx-table [data-priority="mid"] {
+      display: none;
+    }
+  }
 
   /* KPIs as type in one divided container: label over figure, 1px hairlines between cells, two columns at 360. */
   .mdx-kpis {
@@ -2146,25 +2296,36 @@ a:focus-visible .mdx-lift {
     line-height: 16px;
     color: var(--color-placeholder);
   }
+  /* KPI strip (Stats strip): one row at every width, compact cells that shrink; labels truncate, figures wrap
+   * their change under them. */
+  .mdx-kpis[data-strip] {
+    grid-template-columns: repeat(var(--kpi-cols, 3), minmax(0, 1fr));
+  }
+  .mdx-kpis[data-strip] .mdx-kpi {
+    padding: 8px 12px;
+  }
   @media (max-width: 479.98px) {
-    .mdx-kpis {
+    .mdx-kpis:not([data-strip]) {
       grid-template-columns: repeat(min(var(--kpi-cols, 3), 2), minmax(0, 1fr));
     }
-    .mdx-kpi + .mdx-kpi {
+    .mdx-kpis:not([data-strip]) .mdx-kpi + .mdx-kpi {
       box-shadow: none;
     }
-    .mdx-kpi:nth-child(2n) {
+    .mdx-kpis:not([data-strip]) .mdx-kpi:nth-child(2n) {
       box-shadow: inset 1px 0 0 var(--color-hairline);
     }
-    .mdx-kpi:nth-child(n + 3) {
+    .mdx-kpis:not([data-strip]) .mdx-kpi:nth-child(n + 3) {
       box-shadow: inset 0 1px 0 var(--color-hairline);
     }
-    .mdx-kpi:nth-child(2n):nth-child(n + 3) {
+    .mdx-kpis:not([data-strip]) .mdx-kpi:nth-child(2n):nth-child(n + 3) {
       box-shadow: inset 1px 1px 0 var(--color-hairline);
     }
     /* An odd last cell takes the full row, so no half-row sits empty. */
-    .mdx-kpi:last-child:nth-child(odd) {
+    .mdx-kpis:not([data-strip]) .mdx-kpi:last-child:nth-child(odd) {
       grid-column: 1 / -1;
+    }
+    .mdx-kpis[data-strip] .mdx-kpi {
+      padding: 8px;
     }
   }
 
@@ -2277,16 +2438,12 @@ a:focus-visible .mdx-lift {
   .mdx-chip:active {
     transform: scale(0.96);
   }
+  /* A chip row wraps onto a second line instead of scrolling sideways (density R2). A row that would need more
+   * than two lines on a phone becomes a select in the screen (see rules.md). */
   .mdx-chiprow {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 8px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent);
-  }
-  .mdx-chiprow::-webkit-scrollbar {
-    display: none;
   }
 
   /* CurveTrack: the bonding-curve track (the one gold mark outside a chart) */
@@ -2383,7 +2540,7 @@ a:focus-visible .mdx-lift {
     .mdx-toasts {
       left: auto;
       /* On the column's right edge, like the top bar's last control. */
-      right: max(var(--page-gutter), calc((100vw - var(--column)) / 2));
+      right: calc(max(var(--page-gutter), (100vw - var(--sbw) - var(--column)) / 2) + var(--sbw));
       bottom: var(--page-gutter);
       width: min(400px, calc(100vw - 2 * var(--page-gutter)));
     }
