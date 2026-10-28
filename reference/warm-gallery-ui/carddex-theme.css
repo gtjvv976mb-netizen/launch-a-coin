@@ -1,0 +1,274 @@
+/* CardDex — the collector's folio. A complete light visual world, separate from MintDex's arcade. */
+:root {
+  color-scheme: light;
+  --color-wall: #f3f1e9;
+  --color-plinth: #fffef9;
+  --color-sheet: #eae8de;
+  --color-tint: #e5e7dd;
+  --color-sleeve: #e6e2d7;
+  --color-wall-deep: #e6e2d8;
+  --color-track: #263e2110;
+  --color-wash: #c64c2f18;
+  --color-ink: #18231c;
+  --color-ink-hover: #354c3d;
+  --color-slate: #62685d;
+  --color-placeholder: #727568;
+  --color-field: #a3a698;
+  --color-control-border: #909487;
+  --color-hairline: #cecec1;
+  --color-rule: #deded1;
+  --color-neon: #c64c2f;
+  --color-neon-ink: #fffaf0;
+  --color-zap: #a94730;
+  --color-hype: #a94730;
+  --color-up: #306344;
+  --color-up-hover: #3c7854;
+  --color-up-soft: #30634412;
+  --color-down: #b23d2d;
+  --color-down-hover: #c64c2f;
+  --color-down-soft: #b23d2d12;
+  --font-title: "Newsreader", Georgia, serif;
+  --overlay: #18231c80;
+  --radius-field: 9px;
+  --radius-panel: 16px;
+  --radius-aside: 18px;
+  --radius-pop: 14px;
+  --radius-btn: 8px;
+  --shadow-ring: 0 0 0 1px #18231c14;
+  --shadow-rest: 0 4px 20px -10px #27351a25;
+  --shadow-raise: 0 5px 18px -8px #27351a30;
+  --shadow-lift: 0 10px 25px -10px #27351a30;
+  --shadow-float: 0 15px 40px -15px #27351a40;
+  --shadow-modal: 0 24px 80px -20px #27351a50;
+  --holo: linear-gradient(115deg, #bd482e, #d28e5e, #596d4f);
+  --holo-flat: #c64c2f;
+  --glow-focus: none;
+  --glow-primary: none;
+  --glow-primary-hover: none;
+  --card-shadow: #18231c38;
+}
+html,
+body {
+  background: var(--color-wall);
+  color: var(--color-ink);
+}
+html {
+  scrollbar-color: #a6ac9b #e9e8df;
+}
+body {
+  margin: 0;
+  overflow-x: clip;
+}
+::selection {
+  color: #fff9ed;
+  background: #a94730;
+}
+input,
+textarea {
+  caret-color: #a94730;
+}
+.cdx-shell {
+  isolation: isolate;
+}
+.cdx-site-header {
+  background: #f3f1e9f5;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.cdx-brand {
+  letter-spacing: -0.035em;
+}
+.cdx-brand__seal {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 39px;
+}
+.cdx-nav-link {
+  color: #62685d;
+}
+.cdx-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 19px;
+  height: 1px;
+  background: #c64c2f;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.cdx-nav-link:hover,
+.cdx-nav-link[data-active="true"] {
+  color: #18231c;
+}
+.cdx-nav-link:hover::after,
+.cdx-nav-link[data-active="true"]::after {
+  transform: scaleX(1);
+}
+.cdx-demo-banner {
+  border-bottom: 1px solid #cecec175;
+  font-size: 10px !important;
+}
+.cdx-site-main {
+  width: 100%;
+}
+.cdx-site-main .mdx-page {
+  height: auto;
+  min-height: 0;
+}
+.cdx-site-main .mdx-h1,
+.cdx-site-main .mdx-h2 {
+  font-family: "Newsreader", Georgia, serif;
+  font-weight: 500;
+  font-stretch: normal;
+  letter-spacing: -0.035em;
+  line-height: 1.07;
+}
+.cdx-site-main .mdx-h1 {
+  font-size: clamp(38px, 4.6vw, 66px);
+}
+.cdx-site-main .mdx-h2 {
+  font-size: 30px;
+}
+.cdx-site-main .mdx-plinth {
+  border-radius: 16px;
+  box-shadow: none;
+  border: 1px solid #d5d6c8;
+  background: #fffef9;
+}
+.cdx-shell .mdx-btn {
+  border-radius: 8px;
+  box-shadow: none;
+  background: #e6e6db;
+  color: #18231c;
+  font-weight: 500;
+  text-shadow: none;
+}
+.cdx-shell .mdx-btn--primary {
+  background: #18231c;
+  color: #fffaf0;
+  box-shadow: none !important;
+}
+.cdx-shell .mdx-btn--primary::after {
+  display: none;
+}
+.cdx-shell .mdx-btn--primary:hover:not(:disabled) {
+  background: #354b3c;
+  box-shadow: none;
+}
+.cdx-shell .mdx-btn--buy {
+  background: #306344;
+  color: #fffaf0;
+  box-shadow: none;
+}
+.cdx-shell .mdx-btn--sell {
+  background: #b23d2d;
+  color: #fffaf0;
+  box-shadow: none;
+}
+.cdx-shell .mdx-btn--ghost {
+  background: transparent;
+}
+.cdx-shell .mdx-btn--outline {
+  background: transparent;
+  border: 1px solid #969b8b;
+  color: #18231c;
+}
+.cdx-shell .mdx-input {
+  background: #faf9f3;
+  color: #18231c;
+  border: 1px solid #9b9e8e;
+  border-radius: 8px;
+  box-shadow: none;
+}
+.cdx-shell .mdx-input:focus {
+  border-color: #a94730;
+  outline-color: #a94730;
+  box-shadow: 0 0 0 2px #a9473017;
+}
+.cdx-shell .mdx-input::placeholder {
+  color: #727568;
+}
+.cdx-shell .mdx-tab__foil,
+.cdx-shell .mdx-tab__foil > i {
+  background: #18231c;
+  box-shadow: none;
+}
+.cdx-shell .mdx-tab {
+  color: #62685d;
+}
+.cdx-shell .mdx-tab[data-active],
+.cdx-shell .mdx-tab[aria-selected="true"] {
+  color: #18231c;
+}
+.cdx-mobile-nav {
+  box-shadow: 0 -5px 20px #18231c08;
+}
+.cdx-mobile-nav a {
+  color: #6d7467;
+}
+.cdx-mobile-nav a[data-active="true"] {
+  color: #a94730;
+}
+.cdx-site-foot {
+  margin-top: 42px;
+}
+.cdx-site-foot .mdx-toggle {
+  background: #d5d7cc;
+}
+.cdx-coin-vitrine {
+  background: radial-gradient(ellipse at 50% 35%, #d5d5c7, transparent 65%), #e9e6dc !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+}
+.cdx-coin-vitrine .mdx-cardcase {
+  color: #eef3fa;
+}
+.cdx-coin-heading {
+  padding-bottom: 25px;
+  border-bottom: 1px solid #cecec1;
+}
+.cdx-coin-chart,
+.cdx-coin-history {
+  padding-top: 24px;
+  border-top: 1px solid #cecec1;
+}
+.cdx-coin-folio .mdx-plinth {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding-inline: 0;
+}
+.cdx-portfolio-page .mdx-scroll {
+  overflow: visible;
+}
+.cdx-portfolio-heading h1 {
+  font-family: "Newsreader", Georgia, serif;
+  font-size: clamp(40px, 5vw, 68px);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+}
+.cdx-reveal-in {
+  animation: cdx-folio-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+@keyframes cdx-folio-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cdx-reveal-in {
+    animation: none;
+  }
+}
+:root[data-motion="calm"] .cdx-reveal-in {
+  animation: none;
+}

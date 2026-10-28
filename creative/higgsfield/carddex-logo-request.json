@@ -1,0 +1,16 @@
+{
+  "status": "owner_approved",
+  "count": 1,
+  "quoted_credits": 2.75,
+  "params": {
+    "model": "gpt_image_2_5",
+    "variant": "flare",
+    "quality": "high",
+    "resolution": "2k",
+    "aspect_ratio": "3:2",
+    "background": "transparent",
+    "count": 1,
+    "prompt": "Create a luxury CardDex brand logo: an original geometric three-point crown fused into the top edge of a slightly tilted trading-card silhouette, a precise C cut into its center, platinum-silver and ice-blue on transparent background, paired with the exact wordmark CardDex in a sophisticated bold editorial serif. Clean vector-style flat geometry, unmistakable small-size silhouette, restrained premium collector identity. One final logo lockup, symbol to the left of the wordmark, generously separated elements for cropping. No Ethereum diamond, no extra lettering, no tagline, no fake 3D mockup, no background scene, no badges, no trademarked characters. Crisp 2K brand asset."
+  },
+  "approval": "Approve up to 2.75 additional credits"
+}

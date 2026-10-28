@@ -1,0 +1,51 @@
+{
+  "name": "@mintdex/chain-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "description": "PDAs, tier math, market-cap readers, pump/PumpSwap/MintDex encoders and a tx verifier for MintDex card program v2",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./api": "./src/api/index.ts",
+    "./quote": "./src/quote.ts",
+    "./web3": "./src/web3.ts",
+    "./package.json": "./package.json"
+  },
+  "types": "./src/index.ts",
+  "files": [
+    "src",
+    "idl"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "test": "node --test --test-reporter=spec \"test/**/*.test.ts\"",
+    "typecheck": "tsc -p tsconfig.json",
+    "check": "npm run typecheck && npm test",
+    "idl:sync": "node scripts/sync-idl.mjs",
+    "fixtures:fetch": "node scripts/fetch-fixtures.mjs"
+  },
+  "dependencies": {
+    "@noble/curves": "^1.9.7",
+    "@noble/hashes": "^1.8.0"
+  },
+  "peerDependencies": {
+    "@solana/web3.js": "^1.98.0"
+  },
+  "peerDependenciesMeta": {
+    "@solana/web3.js": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@pump-fun/pump-sdk": "2.0.0",
+    "@solana/spl-token": "^0.4.9",
+    "@solana/web3.js": "^1.98.0",
+    "@types/node": "*",
+    "bs58": "*",
+    "typescript": "^5.7.3"
+  }
+}

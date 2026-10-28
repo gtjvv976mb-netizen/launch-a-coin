@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 630 880" width="630" height="880">
+  <defs>
+    <linearGradient id="field" x2="1" y2="1"><stop stop-color="#283830"/><stop offset=".5" stop-color="#101d1c"/><stop offset="1" stop-color="#142429"/></linearGradient>
+    <linearGradient id="metal" x2=".8" y2="1"><stop stop-color="#fbefcb"/><stop offset=".24" stop-color="#c4a66c"/><stop offset=".48" stop-color="#f1e3bd"/><stop offset=".7" stop-color="#8b6d3c"/><stop offset="1" stop-color="#e2cd9c"/></linearGradient>
+  </defs>
+  <rect width="630" height="880" rx="31.75" fill="url(#field)"/>
+  <g fill="none" stroke="url(#metal)">
+    <rect x="15" y="15" width="600" height="850" rx="23" stroke-width="4"/>
+    <rect x="27" y="27" width="576" height="826" rx="16" stroke-width="1.5"/>
+    <path d="M57 159V57h102m312 0h102v102M57 721v102h102m312 0h102V721M57 190h516M57 690h516" stroke-width="2"/>
+    <path d="m315 66 15 21-15 21-15-21Zm0 706 15 21-15 21-15-21Z" stroke-width="2"/>
+    <g opacity=".65"><ellipse cx="315" cy="440" rx="190" ry="225"/><ellipse cx="315" cy="440" rx="190" ry="225" transform="rotate(20 315 440)"/><ellipse cx="315" cy="440" rx="190" ry="225" transform="rotate(40 315 440)"/><ellipse cx="315" cy="440" rx="190" ry="225" transform="rotate(60 315 440)"/><ellipse cx="315" cy="440" rx="190" ry="225" transform="rotate(80 315 440)"/><ellipse cx="315" cy="440" rx="190" ry="225" transform="rotate(100 315 440)"/><ellipse cx="315" cy="440" rx="190" ry="225" transform="rotate(120 315 440)"/><ellipse cx="315" cy="440" rx="190" ry="225" transform="rotate(140 315 440)"/><ellipse cx="315" cy="440" rx="190" ry="225" transform="rotate(160 315 440)"/></g>
+  </g>
+  <path d="m315 311 112 64v130l-112 64-112-64V375Z" fill="url(#metal)" stroke="#f8eac6" stroke-width="2"/>
+  <path d="m315 327 98 56v114l-98 56-98-56V383Z" fill="#152522" stroke="#b49a65" stroke-width="2"/>
+  <path d="M361 390h-68l-39 50 39 50h68M281 440h80" fill="none" stroke="url(#metal)" stroke-width="9" stroke-linejoin="round"/>
+</svg>

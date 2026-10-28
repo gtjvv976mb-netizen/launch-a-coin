@@ -1,0 +1,11 @@
+{
+ "_source": "Mainnet getTransaction(sig, { encoding: 'base64', maxSupportedTransactionVersion: 1 }), read-only, 2026-10-06. A public third-party pump trade sent as a version 1 transaction (wire bytes start with 0x81). With maxSupportedTransactionVersion 0 the same call answers JSON-RPC error -32015.",
+ "signature": "4fNyNnWST8iFoJDnZgjUoYeochunfwjfYPWD3wqLQKhXh1FdSD7XTtJN7tRBgh7VLS7qJDtnP3mBLw5AKZre9YZw",
+ "slot": 453789184,
+ "version": 1,
+ "transaction": "gQEACw8AAAADoGZzg4BbZP3AP22r3O0iS0nRjZILPyG8RunUZ6wKBwIYW7RwZK1o18LBUFmH4cdNILPIkS0BHhkXjuKpihD62FEXWfl8sEFymq8L9tzdxzl5YHucvrTItqfjvoVVoZ8wlS2rqiwTw41gsSXijlkfqEycgDv0KKyz59w5zJdkoZJFMbiVd2pvblp56nSzQLdsTR23FD11cSqWgrUIaFKrMzo+NXKZuDVNMrhWpVSFP5jCK5PrA/qOunsqlsb6B4Qa90SWQfhJWNxzp2qF2HVvVcAs2sqJuhkyeQw2irFX6S1zSRvR4lOYKVd99ffArdRnKPvB6/Lei76pUM7309N7xUpjg3MADqIssmTTSv9koEte+r+7dN3NBImXsZgVR9fREG57EaWr13oceoX/pB2HGr0QA/Rr4UNLSWrcllHDJudnhXgrQ/mhTtl1WSB+jKoTuovyKbnPJjAVfJEzTlfZtK+njzRUENaZyGC/n4GXc27XVBy5RxZE2kJJqlQIVSt0kOjo9Ra701YG0FWBZZeqo3fs83sKiXz8aj+Yg9BHb70A9ihHamVhpgWhF16GWMmsKHhBfnCzybvPULOzp/DRc78AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADqGXmnuD1SAyrz2Y1fk3C8Y1Y1Fwep0ifs3I9l5PHKmAVbg9pNmWs9E2xVovxdbqlGJy5f10v87ZV0rtv1tGLBaAq50dK77paMzanqgn44NkPM0jumgTORfselMLI3J/W+atKTxlY3AqclMP7csB5lYQ+2kheOiTxDGk5n4GZQPrPE26wH8HE6IPSPItYRKtZo39mrdV8XprDtT4FnTXGTU7FJUR93Tk1uK2dQZvXYXy6853mJKA287kCWC80LmoO7xPqu8Cfr8pHp6D4Wb4D9HjgX+BsjSmjVAcjPJZpRVCvHDQyGIyjpjUVp5aozaR95g+lL84h+yPv05QrBQ/5kMNf+pBVqOVo2o97wHVhUnTPHJLKQfQACcUWqkFMJ8cAbd9uHudY/eGEJdvORszdq2GvxNg7kNJ/69+SjYoYv80NoCAAAAAAAtDgIAAAAABBMeFgANAwwADAAEDRMPCQIOBxQBCwwADQIXEg8RFhAFEwYDCBMTADh0WVsWBQAAOSHMGwAAAAABASsyPAAKFQIAAAAwjxUAAAAAALclvpJMBieMBSNriSqQ36LwIm6J/BzSv+ydlp86i6AI54fbRuARQ/Fm+HlA1kv5OrGg0hZd/TK59XfTrDJbPQI=",
+ "rpcErrorWithVersion0": {
+  "code": -32015,
+  "message": "Transaction version (1) is not supported by the requesting client. Please try the request again with the following configuration parameter: \"maxSupportedTransactionVersion\": 1"
+ }
+}

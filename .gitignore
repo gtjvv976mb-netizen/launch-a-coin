@@ -1,0 +1,14 @@
+node_modules
+dist/
+.wrangler/
+.tanstack/
+.vite/
+.output/
+.env*
+!.env.example
+.dev.vars*
+*.keypair.json
+.keys/
+output/
+.playwright-cli/
+.DS_Store

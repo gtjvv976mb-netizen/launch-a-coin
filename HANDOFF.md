@@ -1,0 +1,17 @@
+# CardDex handoff — 28 October 2026
+
+Independent source snapshot of MintDex commit 1c3a567cfe017d73039a5b6fae45def15e18a62d, exported from tracked files only. Existing uncommitted MintDex work is excluded.
+
+Current authorized build: token + one-of-one creator NFT card, a creator-selected permanent premium design, token buy/sell trading and portfolios. NFT sales, listings, bids, auctions and royalties are removed. CardDex is the platform; creators' intended production token launch provider is pump.fun. The current implementation is simulation only and does not create real pump.fun tokens or on-chain NFTs.
+
+48 designs now have matching premium text-free Higgsfield fronts and reverses, plus measured renderer masks for the creator's artwork and live content. The selected template and material level persist through launch, reads and trades; market-cap and peak values update independently. Eight designs derive a stock ticker/token-pair reference from the catalog. These are visual references, not equity-backed securities.
+
+Latest visual direction overrides the earlier navy/silver exploration: retain the original MintDex application layout and left card stage, with Pokémon-card-inspired gold, cream, charcoal and scarlet chrome. No blue UI chrome. Each card design retains its own colors. The current native brand mark is a wordless gold-foil card and crown, without letters or a CD monogram. Root owns the final theme and logo implementation.
+
+The owner approved the full 98-image Higgsfield set (96 card faces + two site visuals) and one additional logo. All 99 jobs completed; total quoted allocation 272.25 credits. Actual itemized charges were not returned by the tools. The owner rejected the generated logo; it is archived under `brand/logo/archive/`, and the replacement vector refinement incurred no generation spend. Do not repeat paid jobs. The card ledger verifies 96 unique successful jobs, 96 unchanged originals and 192 WebPs with hashes/dimensions, plus independent visual review of all 48 pairs.
+
+Backend persistence, removed-feature guards, isolated sessions/local resources and source-safe build orchestration are implemented. A mixed preview was traced to source changes between the separate client and SSR phases: the bundles contained different logo markup and stylesheet hashes. `bun run build` now waits for both checks and rejects changed captured inputs. Do not treat the older preview/build as final visual evidence.
+
+Final checks: 80 tests pass with 4,182 assertions; TypeScript and the source-guarded client/SSR build pass. The local preview was restarted on port 5310. Playwright verified 32 route/viewport combinations, all 48 front/back phone compositions and touch shimmer, representative full-turn/pause/resume behavior, the warm theme and wordless logo, search/forms, and a local launch→buy→sell→portfolio flow. See the dated build report for exact evidence and limits. No public deployment or real transaction occurred. The independent build is saved in this repository; use its Git log for the snapshot.
+
+Use only local D1/R2 and `carddex_session`. Never reuse MintDex resources or read private wallet/secret paths. Historical program source is archived in `reference/mintdex-chain`; the SDK remains an offline reference. Production still needs a separately implemented, verified pump.fun adapter, creator NFT issuance, durable public artwork/metadata, confirmation/recovery handling and wallet review. See `README.md` for commands and `reports/carddex-build-2026-10-28.md` for evidence and remaining work.

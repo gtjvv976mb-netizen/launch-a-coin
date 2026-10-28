@@ -1,0 +1,13 @@
+{
+ "signature": "4j9i1zREj8p71SjKBGku9HX9ao68QGRvgjHCtQcFEBNnHcaducdaYpEurrk3UyFmZ2yYKKTGp59igU7LbhEduMSN",
+ "slot": 506719228,
+ "blockTime": 1790964192,
+ "version": 0,
+ "err": null,
+ "transaction": "AbpmUEFcPxo5L8KeDENeCz2elCQCIe9XQN1splOhPkDyeYpnjRL5r0Uzx7Goay+8lNteDx2LMq4yYrBKaav8zg+AAQADBuV/w4angEazcmjZg+YVolM0QufR2DubZtRRkreD0X7OrEMprt6urXAUF3i3uX9ktpSGyUm259xXPZZqlQZg2B9b1nH+2TTizkzN8x3Dtt8OPG68Yz/p7831GIuXmcpVZwFW4PaTZlrPRNsVaL8XW6pRicuX9dL/O2VdK7b9bRiwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACs8TbrAfwcTog9I8i1hEq1mjf2at1XxemsO1PgWdNcZORV4R9bLAgo4pYX8ih31UuY4CR+JdtBJCRl2gUJn/PpAQMFAQIEBQMIFBZWe8Yc24QA",
+ "loadedAddresses": {
+  "readonly": [],
+  "writable": []
+ },
+ "computeUnitsConsumed": 13150
+}

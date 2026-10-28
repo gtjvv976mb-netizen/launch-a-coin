@@ -1,0 +1,148 @@
+/* Cosmetic editions share the original MintDex art window, print layout and compact typography. */
+.mdx-edition {
+  --card-radius: 5.04% / 3.61%;
+  color: var(--edition-paper);
+  background: var(--edition-base);
+  overflow: hidden;
+  width: 100%;
+  line-height: 1.5;
+  text-align: left;
+}
+.mdx-edition__paper,
+.mdx-edition__ornament,
+.mdx-edition__lights {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.mdx-edition__paper {
+  z-index: 0;
+  background: linear-gradient(135deg, rgb(255 255 255 / 0.1), transparent 28% 70%, rgb(0 0 0 / 0.16));
+}
+.mdx-edition__ornament { z-index: 1; color: var(--edition-accent); }
+.mdx-edition__ornament svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+.mdx-edition__ornament .mdx-edition__solid { fill: currentColor; stroke: none; }
+/* A purpose-made print is one full flat plane below the unchanged opaque art and readable token panels. */
+.mdx-edition__frame {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+}
+.mdx-edition__frame[hidden] { display: none; }
+.mdx-edition__art {
+  z-index: 2;
+  overflow: hidden;
+  background: var(--edition-base);
+  opacity: 1;
+  box-shadow: 0 0 0 0.7cqw var(--edition-base), 0 0 0 1cqw var(--edition-accent);
+}
+.mdx-edition[data-frame-ready] .mdx-edition__art { box-shadow: none; }
+.mdx-edition__art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+.mdx-edition__art img[hidden] { display: none; }
+.mdx-edition__art-empty,
+.mdx-edition__art-unavailable {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 12%;
+  text-align: center;
+  font: italic 5cqw/1.3 var(--font-serif);
+  color: var(--edition-paper);
+  background: var(--edition-base);
+}
+.mdx-edition :is(.mdx-card__name, .mdx-card__type, .mdx-card__text, .mdx-card__foot) {
+  z-index: 3;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--edition-paper) 94%, white), var(--edition-paper));
+  box-shadow: 0 0 0 0.35cqw color-mix(in srgb, var(--edition-accent) 70%, var(--edition-base));
+}
+.mdx-edition .mdx-card__name { border-radius: 1cqw; }
+.mdx-edition .mdx-card__type { border-radius: 0.6cqw; background: var(--edition-base); color: #f6eeda; }
+.mdx-edition .mdx-card__text { border-radius: 1cqw; }
+.mdx-edition .mdx-card__foot { border-radius: 0.45cqw; }
+.mdx-edition__lights { z-index: 4; }
+.mdx-edition__lights::before,
+.mdx-edition__lights::after { content: none; }
+.mdx-edition__reflection {
+  position: absolute;
+  inset: -65%;
+  background: linear-gradient(112deg, transparent 33%, rgb(255 255 255 / 0.13) 43%, rgb(255 255 255 / 0.24) 49%, transparent 57%);
+  transform: translate(calc((var(--px) - 0.5) * -25%), calc((var(--py) - 0.5) * -13%));
+  mix-blend-mode: soft-light;
+}
+.mdx-edition__sheen {
+  position: absolute;
+  inset: -25% -80%;
+  background: linear-gradient(110deg, transparent 38%, rgb(255 255 255 / 0.02) 42%, rgb(255 255 255 / 0.22) 49%, transparent 58%);
+  transform: translateX(-65%);
+  opacity: 0;
+  mix-blend-mode: screen;
+}
+:root:not([data-motion="calm"]):not([data-motion="lite"]) .mdx-edition__sheen {
+  animation: mdx-edition-sheen 9.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+@keyframes mdx-edition-sheen {
+  0%, 63% { transform: translateX(-65%); opacity: 0; }
+  66% { opacity: 0.65; }
+  83%, 100% { transform: translateX(65%); opacity: 0; }
+}
+:root[data-motion="calm"] .mdx-edition__reflection { transform: none; }
+.mdx-card3d[data-state~="offscreen"] .mdx-edition__sheen,
+.mdx-card3d[data-state~="held"] .mdx-edition__sheen,
+.mdx-card3d__slot:not([data-on]) .mdx-edition__sheen,
+body[data-scroll-locked] .mdx-card3d:not([role="dialog"] .mdx-card3d) .mdx-edition__sheen {
+  animation-play-state: paused;
+}
+
+/* Frame materials and ornaments vary; no theme repositions the original art or readable print. */
+.mdx-edition[data-edition="wildtype"] { background: #1c4a31; }
+.mdx-edition[data-edition="wildtype"] .mdx-edition__paper {
+  inset: 3.5%;
+  border-radius: 2.5cqw;
+  background: linear-gradient(145deg, #d9e99c, #f3e9ba 47%, #b3d07d);
+  box-shadow: inset 0 0 0 0.7cqw #326240, inset 0 0 0 1.2cqw #c9df8c;
+}
+.mdx-edition[data-edition="wildtype"] .mdx-edition__ornament { color: #31613b; }
+.mdx-edition[data-edition="ronin"] { background: #e9dfc5; }
+.mdx-edition[data-edition="ronin"] .mdx-edition__paper {
+  background: linear-gradient(90deg, #e4d5b8, #f0e7d1 50%, #e6d9be 89%, #b63829 89% 94%, #e6d9be 94%);
+}
+.mdx-edition[data-edition="ronin"] .mdx-edition__ornament { color: #685b49; }
+.mdx-edition[data-edition="astral"] .mdx-edition__paper {
+  background: radial-gradient(ellipse at 50% 43%, #3d315c, #18152f 66%);
+}
+.mdx-edition[data-edition="astral"] .mdx-edition__ornament { color: #b9b3d5; }
+.mdx-edition[data-edition="neon-circuit"] .mdx-edition__paper {
+  background: linear-gradient(145deg, #173c45, #0e222b 50% 80%, #173e43);
+}
+.mdx-edition[data-edition="neon-circuit"] .mdx-edition__ornament { color: #90e4d3; }
+.mdx-edition[data-edition="neon-circuit"] .mdx-edition__solid { fill: #ff926f; }
+.mdx-edition[data-edition="sovereign"] .mdx-edition__paper {
+  background: linear-gradient(120deg, #24241a, #11140f 40% 72%, #23271b);
+}
+.mdx-edition[data-edition="sovereign"] .mdx-edition__ornament { color: #d6bd80; }
+.mdx-edition[data-edition="sovereign"] .mdx-edition__reflection {
+  background: linear-gradient(112deg, transparent 33%, rgb(255 228 159 / 0.12) 43%, rgb(255 238 193 / 0.22) 49%, transparent 57%);
+}
+.mdx-edition[data-edition="abyssal"] .mdx-edition__paper {
+  background: linear-gradient(130deg, #3b6b6a, #16434e 33%, #102f3d 70%, #2c6368);
+}
+.mdx-edition[data-edition="abyssal"] .mdx-edition__ornament { color: #c0d8cb; }

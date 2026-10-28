@@ -1,0 +1,10 @@
+/* The coin's NFT stays inside its enclosure when opened in the existing full-screen turntable. */
+.mdx-v3d__zoom[data-cased] {
+  --W: min(calc((100vw - 64px) / 1.12), 360px, calc((100dvh - 300px) / 1.73683));
+  margin-top: calc(var(--W) * 0.28);
+  margin-bottom: calc(var(--W) * 0.06);
+  transform-origin: 50% 50%;
+}
+.mdx-v3d__card[data-cased] .mdx-case__edges {
+  pointer-events: none;
+}

@@ -1,0 +1,271 @@
+/** Reusable cosmetic templates. The creator's selected token always supplies the card identity and artwork. */
+export type MemeIconCategory = "memecoins" | "meme-stocks" | "crypto-companies";
+export type MemeIconKey =
+  | "doge" | "pepe" | "shib" | "bonk" | "wif" | "popcat"
+  | "gamestop" | "amc" | "blackberry" | "nokia"
+  | "coinbase" | "binance" | "kraken" | "strategy";
+
+export type MemeIcon = {
+  key: MemeIconKey;
+  category: MemeIconCategory;
+  /** The reusable template's name, never the token identity. */
+  name: string;
+  /** Collection inspiration used in theme decoration; never the creator's token identity. */
+  inspiration?: string;
+  tagline: string;
+  description: string;
+  finish: string;
+  palette: readonly [string, string, string];
+  frameKind: "higgsfield" | "crafted";
+  /** Six existing generated prints are clipped to their outer frame; crafted styles need no image. */
+  artSrc: string | null;
+  /** Purpose-made, text-free frame and reverse prints; the retained portrait stays available for the chooser. */
+  frameArtSrc?: string;
+  backArtSrc?: string;
+  /** A tight decorative portrait crop in the retained 956 × 1440 source, separate from the creator's artwork. */
+  mascotCrop?: readonly [x: number, y: number, size: number];
+  availability: "preview";
+  priceLamports: null;
+  cap: null;
+};
+
+export const MEME_ICON_CATALOG: readonly MemeIcon[] = [
+  {
+    key: "doge",
+    category: "memecoins",
+    name: "Imperial Gold",
+    inspiration: "Doge",
+    tagline: "Sculpted gold. Meteorite stone. Your token.",
+    description: "Smoked obsidian, satin-gold corner fittings and carved Doge relief around your token's original artwork. A matching sculpted reverse completes the piece.",
+    finish: "Obsidian · satin gold · electrum",
+    palette: ["#101113", "#dab76b", "#eee8d6"],
+    artSrc: "/assets/editions/meme-icons/doge.webp",
+    frameArtSrc: "/assets/editions/meme-icons/doge-premium-front.webp",
+    backArtSrc: "/assets/editions/meme-icons/doge-premium-back.webp",
+    frameKind: "higgsfield",
+    mascotCrop: [140, 150, 750],
+    availability: "preview",
+    priceLamports: null,
+    cap: null,
+  },
+  {
+    key: "pepe",
+    frameArtSrc: "/assets/editions/premium/pepe-front.webp",
+    backArtSrc: "/assets/editions/premium/pepe-back.webp",
+    category: "memecoins",
+    name: "Jade Reliquary",
+    inspiration: "Pepe",
+    tagline: "Carved jade. Still water. A knowing expression.",
+    description: "Deep nephrite and malachite, polished palladium water channels and carved frog relief form the perimeter. The matching reverse presents a monumental jade Pepe sculpture.",
+    finish: "Nephrite jade · malachite · palladium · opal",
+    palette: ["#10271e", "#b0d9a1", "#ecf0d8"],
+    artSrc: "/assets/editions/meme-icons/pepe.webp",
+    frameKind: "higgsfield",
+    mascotCrop: [210, 280, 640],
+    availability: "preview",
+    priceLamports: null,
+    cap: null,
+  },
+  {
+    key: "shib",
+    frameArtSrc: "/assets/editions/premium/shib-front.webp",
+    backArtSrc: "/assets/editions/premium/shib-back.webp",
+    category: "memecoins",
+    name: "Crimson Guardian",
+    inspiration: "Shiba Inu",
+    tagline: "Vermilion lacquer. Porcelain strength.",
+    description: "Layered vermilion urushi, carved ivory porcelain and polished ruthenium form a precise guardian frame. A sculpted Shiba reverse carries the same disciplined lacquer work.",
+    finish: "Vermilion urushi · ivory porcelain · ruthenium",
+    palette: ["#271411", "#efb589", "#f4e7d4"],
+    artSrc: "/assets/editions/meme-icons/shib.webp",
+    frameKind: "higgsfield",
+    mascotCrop: [170, 220, 620],
+    availability: "preview",
+    priceLamports: null,
+    cap: null,
+  },
+  {
+    key: "bonk",
+    frameArtSrc: "/assets/editions/premium/bonk-front.webp",
+    backArtSrc: "/assets/editions/premium/bonk-back.webp",
+    category: "memecoins",
+    name: "Stadium Chrome",
+    inspiration: "BONK",
+    tagline: "Orange enamel. Titanium energy.",
+    description: "Sculpted orange enamel, deep-navy composite and brushed titanium form an energetic sports artifact. The reverse pairs a playful BONK Shiba relief with a machined bat.",
+    finish: "Orange vitreous enamel · titanium · navy composite",
+    palette: ["#12233b", "#ffb767", "#fff0d7"],
+    artSrc: "/assets/editions/meme-icons/bonk.webp",
+    frameKind: "higgsfield",
+    mascotCrop: [290, 180, 550],
+    availability: "preview",
+    priceLamports: null,
+    cap: null,
+  },
+  {
+    key: "wif",
+    frameArtSrc: "/assets/editions/premium/wif-front.webp",
+    backArtSrc: "/assets/editions/premium/wif-back.webp",
+    category: "memecoins",
+    name: "Couture Knit",
+    inspiration: "dogwifhat",
+    tagline: "Cashmere texture. Porcelain character.",
+    description: "Tobacco suede, oatmeal cashmere cable work and restrained rose-metal fittings create a tactile couture frame. The reverse centers a porcelain dogwifhat portrait in a sculpted pink knit beanie.",
+    finish: "Cashmere cable knit · suede · bisque porcelain · rose metal",
+    palette: ["#2c211c", "#e4c0b1", "#f4e8d8"],
+    artSrc: "/assets/editions/meme-icons/wif.webp",
+    frameKind: "higgsfield",
+    mascotCrop: [180, 180, 650],
+    availability: "preview",
+    priceLamports: null,
+    cap: null,
+  },
+  {
+    key: "popcat",
+    frameArtSrc: "/assets/editions/premium/popcat-front.webp",
+    backArtSrc: "/assets/editions/premium/popcat-back.webp",
+    category: "memecoins",
+    name: "Cobalt Pop",
+    inspiration: "Popcat",
+    tagline: "Cobalt porcelain. A sculpted pop.",
+    description: "Cobalt-fired porcelain, ivory ceramic and scarlet enamel create a crisp kinetic frame. The reverse turns Popcat’s wide-open expression into monumental ceramic relief.",
+    finish: "Cobalt porcelain · ivory ceramic · platinum · scarlet enamel",
+    palette: ["#112758", "#edd1ad", "#fff1d6"],
+    artSrc: "/assets/editions/meme-icons/popcat.webp",
+    frameKind: "higgsfield",
+    mascotCrop: [145, 350, 700],
+    availability: "preview",
+    priceLamports: null,
+    cap: null,
+  },
+  {
+    key: "gamestop",
+    frameArtSrc: "/assets/editions/premium/gamestop-front.webp",
+    backArtSrc: "/assets/editions/premium/gamestop-back.webp",
+    category: "meme-stocks",
+    name: "Power Play",
+    inspiration: "GameStop",
+    tagline: "Scarlet hardware, built for the collection.",
+    description: "Scarlet vitreous enamel, forged titanium and dark carbon with sculpted gaming-hardware detail around your token's artwork.",
+    finish: "Scarlet vitreous enamel · forged titanium",
+    palette: ["#21151b", "#f7aaa5", "#fff0df"],
+    artSrc: null,
+    frameKind: "crafted",
+    availability: "preview",
+    priceLamports: null,
+    cap: null,
+  },
+  {
+    key: "amc",
+    category: "meme-stocks",
+    name: "Midnight Premiere",
+    inspiration: "AMC Entertainment",
+    tagline: "A place in the opening-night collection.",
+    description: "Burgundy, champagne-gold lines and fan-shaped Art Deco geometry around your token's artwork.",
+    finish: "Burgundy velvet · champagne foil",
+    palette: ["#30151f", "#e9c78c", "#fff0d9"],
+    artSrc: null,
+    frameKind: "crafted",
+    availability: "preview",
+    priceLamports: null,
+    cap: null,
+  },
+  {
+    key: "blackberry",
+    frameArtSrc: "/assets/editions/premium/blackberry-front.webp",
+    backArtSrc: "/assets/editions/premium/blackberry-back.webp",
+    category: "meme-stocks",
+    name: "Noir Terminal",
+    inspiration: "BlackBerry",
+    tagline: "Graphite precision from the keyboard era.",
+    description: "Black zirconia, deep-plum enamel and palladium hardware, with a tactile unlettered keyboard-device relief on the reverse.",
+    finish: "Black zirconia · palladium · plum enamel",
+    palette: ["#19191f", "#d6caed", "#f4effb"],
+    artSrc: null,
+    frameKind: "crafted",
+    availability: "preview",
+    priceLamports: null,
+    cap: null,
+  },
+  {
+    key: "nokia",
+    category: "meme-stocks",
+    name: "Nordic Signal",
+    inspiration: "Nokia",
+    tagline: "A signal that stays with you.",
+    description: "Ivory ceramic, cobalt enamel and clean silver fittings with the tactile character of classic mobile hardware.",
+    finish: "Ivory ceramic · cobalt enamel",
+    palette: ["#192c4c", "#c4dcf3", "#fff3d9"],
+    artSrc: null,
+    frameKind: "crafted",
+    availability: "preview",
+    priceLamports: null,
+    cap: null,
+  },
+  {
+    key: "coinbase",
+    category: "crypto-companies",
+    name: "Blue Current",
+    inspiration: "Coinbase",
+    tagline: "Cobalt clarity, set in metal.",
+    description: "A vivid blue architectural frame, frosted acrylic and clean aluminum surfaces.",
+    finish: "Frosted acrylic · blue anodized metal",
+    palette: ["#112a5a", "#bddcff", "#f1f6ff"],
+    artSrc: null,
+    frameKind: "crafted",
+    availability: "preview",
+    priceLamports: null,
+    cap: null,
+  },
+  {
+    key: "binance",
+    category: "crypto-companies",
+    name: "Golden Exchange",
+    inspiration: "Binance",
+    tagline: "A precision study in black and gold.",
+    description: "Black enamel, precision gold inlay and a geometric vault frame.",
+    finish: "Black enamel · precision gold inlay",
+    palette: ["#25221a", "#ead081", "#fff0c1"],
+    artSrc: null,
+    frameKind: "crafted",
+    availability: "preview",
+    priceLamports: null,
+    cap: null,
+  },
+  {
+    key: "kraken",
+    category: "crypto-companies",
+    name: "Tidal Vault",
+    inspiration: "Kraken",
+    tagline: "A violet artifact from the depths.",
+    description: "Violet glass tones, engraved waterlines and polished-silver geometry around your token's artwork.",
+    finish: "Violet pressure glass · polished silver",
+    palette: ["#211c43", "#d8c3f3", "#f4edff"],
+    artSrc: null,
+    frameKind: "crafted",
+    availability: "preview",
+    priceLamports: null,
+    cap: null,
+  },
+  {
+    key: "strategy",
+    category: "crypto-companies",
+    name: "Orange Reserve",
+    inspiration: "Strategy",
+    tagline: "An industrial portrait in orange.",
+    description: "Graphite, architectural orange and machined metal composed as a modern collector artifact.",
+    finish: "Machined graphite · orange enamel",
+    palette: ["#30231c", "#f0bb8f", "#ffeedc"],
+    artSrc: null,
+    frameKind: "crafted",
+    availability: "preview",
+    priceLamports: null,
+    cap: null,
+  },
+];
+
+/** Exact template lookup; malformed input never implies an owned edition. */
+export function getMemeIcon(input: unknown): MemeIcon | null {
+  if (typeof input !== "string") return null;
+  return MEME_ICON_CATALOG.find((icon) => icon.key === input) ?? null;
+}

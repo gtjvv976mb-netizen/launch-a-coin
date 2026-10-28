@@ -1,0 +1,3047 @@
+/* ================================================================ card3d.css
+ * The card (MintCard.tsx, card3d/**). Moved out of mintdex.css with the Alive 3D build (refs/alive-3d-spec.md):
+ * the face, its light layers, the 3D scene (thickness, printed back, ground), the case, the Inspect stage, the
+ * moments and the calm version. CARD owns every rule here; page placement lives in alive.css (SITE).
+ *
+ * Performance rules (spec 9.1): continuous motion is transform and opacity only; per-frame variables (--px, --py,
+ * --lit) are written only on .mdx-card__lights and .mdx-card3d__back-lights; light layers move oversized sheets
+ * by transform (never background-position) and clip them (overflow: clip); will-change only on awake hand bodies;
+ * no filter blur shadows (grounds are radial gradients). Every ambient loop is scoped under
+ * :root:not([data-motion="calm"]), so calm starts nothing. Only the Calm motion switch turns motion off: the
+ * device's prefers-reduced-motion setting no longer does by itself (owner 2026-10-17).
+ */
+
+:root {
+  --ease-throw: cubic-bezier(0.12, 0.85, 0.25, 1);
+  --ease-swell: cubic-bezier(0.45, 0, 0.55, 1);
+  --ease-burst: cubic-bezier(0.1, 0.8, 0.2, 1);
+  --ease-deal: cubic-bezier(0.22, 1.12, 0.36, 1);
+  --ease-drift: cubic-bezier(0.37, 0, 0.63, 1);
+  --t-turn: 700ms;
+  --t-spin: 640ms;
+  --t-quick: 300ms;
+  --t-glint: 1200ms;
+  --t-turntable: 6000ms;
+  --t-ascend: 1500ms;
+  --t-unbox: 1100ms;
+  --t-deal: 720ms;
+  --t-liftin: 420ms;
+  --t-rm-fade: 200ms;
+}
+
+/* ---------------------------------------------------------------- the face (MintCardFace) */
+
+.mdx-card {
+  position: relative;
+  /* Named so the compact text layout below can query the card's own width. */
+  container: mdx-card / inline-size;
+  isolation: isolate;
+  user-select: none;
+  -webkit-user-select: none;
+  /* Card guard: 63 x 88 mm with 1/8 in corners (radius 5.04% of width). */
+  border-radius: var(--card-radius, 5.04% / 3.61%);
+  /* 3D faces carry the loading miniature as their own background (one element less per card). */
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+/* The flat card's contact shadow (depth="flat" only; 3D cards stand on their ground). Painted once: a soft core
+ * plus a 24px box-shadow, the same falloff the old 12px blur filter drew, without a filter. */
+.mdx-card__shadow {
+  position: absolute;
+  inset: 3% 3% -1.5% 3%;
+  border-radius: var(--card-radius, 5.04% / 3.61%);
+  background: rgb(40 31 20 / 0.17);
+  box-shadow: 0 0 24px 2px var(--card-shadow);
+  z-index: -1;
+  pointer-events: none;
+}
+.mdx-card__art img {
+  pointer-events: none;
+}
+.mdx-card__ghost {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-radius, 5.04% / 3.61%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+.mdx-card__art {
+  position: absolute;
+  overflow: hidden;
+  border-radius: 1.6cqw;
+  background: #e2d5b8;
+}
+.mdx-card__art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* A touch of print warmth so every coin image sits in the vintage frame. */
+  filter: saturate(0.92) contrast(1.02) sepia(0.06);
+}
+.mdx-card__frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Miniature rasters have softened corner pixels; keep every frame inside the card's cut. */
+  border-radius: inherit;
+  pointer-events: none;
+  display: block;
+}
+.mdx-card__name,
+.mdx-card__type,
+.mdx-card__text,
+.mdx-card__foot {
+  position: absolute;
+  display: flex;
+  color: #2a2418;
+}
+.mdx-card__name {
+  align-items: center;
+  justify-content: space-between;
+  gap: 2cqw;
+  padding: 0 3.4cqw 0 3.8cqw;
+}
+.mdx-card__title {
+  font-family: var(--font-serif);
+  font-size: 6.4cqw;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.005em;
+}
+/* The design numeral ("XIV") at the right of the name bar, like the HP figure on a Pokemon card:
+ * the card serif, bold, in the design accent, small enough that the title keeps its room. */
+.mdx-card__numeral {
+  flex: none;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 4.6cqw;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  font-variant-numeric: lining-nums;
+}
+.mdx-card__type {
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 3cqw;
+  color: #f6eeda;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 2.9cqw;
+  letter-spacing: 0.02em;
+}
+.mdx-card__ticker {
+  font-family: var(--font-mono);
+  font-style: normal;
+  letter-spacing: 0.04em;
+}
+/* Text box budget. The box is 22.5% of the card height, 31.4cqw (63/88 card). Full size:
+ * padding 2.6 + 2.4, gap 1.4, two lore lines 2 x 3.95 x 1.3 = 10.27, rows 0.25 + 1.4 + 3 x 3.51 + 2 x 0.7
+ * = 13.57; 30.24cqw in all. Compact (under 210px): padding 2.6 + 2.2, gap 1.2, lore 2 x 4.7 x 1.25 = 11.75,
+ * two rows 0.25 + 1.4 + 2 x 4.72 + 1 = 12.08; 29.83cqw. Both fit two whole lore lines with room to spare,
+ * so the clamp always ends the second line with an ellipsis. Re-check this sum when any value changes. */
+.mdx-card__text {
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2.6cqw 3.8cqw 2.4cqw;
+  gap: 1.4cqw;
+}
+/* The description leads the text box: italic, dark and easy to read. Two lines, then an ellipsis. */
+.mdx-card__lore {
+  flex: none;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 3.95cqw;
+  line-height: 1.3;
+  color: #2a2418;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-wrap: pretty;
+}
+.mdx-card__rows {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7cqw;
+  border-top: 0.25cqw solid rgba(42, 36, 24, 0.22);
+  padding-top: 1.4cqw;
+}
+.mdx-card__row {
+  display: flex;
+  align-items: baseline;
+  gap: 1.4cqw;
+  font-size: 3.05cqw;
+  line-height: 1.15;
+}
+.mdx-card__row > span {
+  font-weight: 600;
+  color: #2a2418;
+}
+.mdx-card__row i {
+  flex: 1;
+  border-bottom: 0.25cqw dotted rgba(42, 36, 24, 0.35);
+  transform: translateY(-0.6cqw);
+}
+.mdx-card__row b {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+/* The vanity suffix: dark ink, underlined, so "mint" reads first in the accent-colored address. */
+.mdx-card__suffix {
+  font-weight: 600;
+  color: #2a2418;
+  text-decoration: underline;
+  text-decoration-thickness: 0.2cqw;
+  text-underline-offset: 0.5cqw;
+}
+.mdx-card__foot {
+  align-items: center;
+  padding: 0 2.6cqw;
+  font-family: var(--font-mono);
+  font-size: 2.3cqw;
+  /* 7:1 on the darker parchment stop (was #5D5444, 5.9:1). */
+  color: #514838;
+  white-space: nowrap;
+  overflow: hidden;
+}
+/* "bot" after a demo bot's handle (P0-6), like the chrome's BotTag, in the card's own type. */
+.mdx-card__bot {
+  flex: none;
+  margin-left: 0.9cqw;
+  padding: 0 0.9cqw;
+  border-radius: 999px;
+  background: rgb(42 36 24 / 0.1);
+  font-weight: 700;
+  font-size: 0.86em;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+}
+.mdx-card__foot--end {
+  justify-content: flex-end;
+}
+/* The footer text as one block, so a handle wider than the footer piece ends in an ellipsis
+ * (a flex container cannot ellipsize its own text). */
+.mdx-card__clip {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Long and short wording: "Token address" / "Address", 5 / 3 leading address characters, the Holders row.
+ * Compact shows the short set. */
+.mdx-card__short {
+  display: none;
+}
+
+/* Compact text layout for cards under 210px wide. The card switches on its own through the container
+ * query, so server markup is already right before any client measuring; the compact prop forces it.
+ * The two blocks below are the same rules: keep them in sync. */
+.mdx-card--compact .mdx-card__title {
+  font-size: 7.4cqw;
+}
+.mdx-card--compact .mdx-card__numeral {
+  font-size: 5.6cqw;
+}
+.mdx-card--compact .mdx-card__type {
+  font-size: 3.6cqw;
+}
+.mdx-card--compact .mdx-card__text {
+  padding: 2.6cqw 4.2cqw 2.2cqw;
+  gap: 1.2cqw;
+}
+.mdx-card--compact .mdx-card__lore {
+  font-size: 4.7cqw;
+  line-height: 1.25;
+}
+.mdx-card--compact .mdx-card__rows {
+  gap: 1cqw;
+  padding-top: 1.4cqw;
+}
+.mdx-card--compact .mdx-card__row {
+  font-size: 4.1cqw;
+}
+.mdx-card--compact .mdx-card__foot {
+  font-size: 3.2cqw;
+}
+.mdx-card--compact .mdx-card__long,
+.mdx-card--compact .mdx-card__row--holders {
+  display: none;
+}
+.mdx-card--compact .mdx-card__short {
+  display: inline;
+}
+@container mdx-card (width < 210px) {
+  .mdx-card__title {
+    font-size: 7.4cqw;
+  }
+  .mdx-card__numeral {
+    font-size: 5.6cqw;
+  }
+  .mdx-card__type {
+    font-size: 3.6cqw;
+  }
+  .mdx-card__text {
+    padding: 2.6cqw 4.2cqw 2.2cqw;
+    gap: 1.2cqw;
+  }
+  .mdx-card__lore {
+    font-size: 4.7cqw;
+    line-height: 1.25;
+  }
+  .mdx-card__rows {
+    gap: 1cqw;
+    padding-top: 1.4cqw;
+  }
+  .mdx-card__row {
+    font-size: 4.1cqw;
+  }
+  .mdx-card__foot {
+    font-size: 3.2cqw;
+  }
+  .mdx-card__long,
+  .mdx-card__row--holders {
+    display: none;
+  }
+  .mdx-card__short {
+    display: inline;
+  }
+}
+
+/* ---------------------------------------------------------------- the light (spec 4.6, owner override 2026-10-11)
+ * One light in the room. .mdx-card__lights holds every light layer, on top of the face. The engine writes --px /
+ * --py (where the light falls, 0..1) and --lit (how strongly the finish catches it, 0..1) on this one container
+ * (and px, py on the art window). A card nobody holds shows its rest light: the scene's --rest-* (the light its
+ * rest pose catches; a shelf column's own), the scroll shimmer's (tablelight.ts), or the still light below on a
+ * flat face. Every card is lit at rest: never dark and flat.
+ * Each gradient lives on an oversized sheet (an element or pseudo element k times the card) that moves by
+ * transform: translate((1 - px) * (1 - k) / k * 100%) lands it where background-position (1 - px) * 100% would,
+ * without a repaint of the gradient. Opacity is continuous: rest + (live - rest) * lit.
+ *
+ * The finish, one rung per design (keyed on data-tier; data-finish stays for the bursts and the light pool):
+ *   holo2    the holo group: the design's rainbow (a sheet), times its foil texture (a tile), times a light spot (a
+ *            radial sheet fading to the design's floor), in one isolated group with a static filter, blended onto
+ *            the frame (color-dodge; soft-light for the pearl rungs, overlay for gold). The spot is what makes it
+ *            read as holo instead of tint: the rainbow lives around the light.
+ *   shine    the metal specular band along the keylines (the frame's luminance is the map).
+ *   sparkle  glitter that flares near the light (a tile sheet under a radial mask).
+ *   holo     the picture's own rainbow or glitter (the full-art rungs, XI to XIV).
+ *   poke     the Pokemon-style holo pattern and the glare that follows the light (one element, two pseudo layers).
+ *   gloss    the laminate's window reflection.
+ *   rim      the die-cut foil edge: a thin ring in the design's metal, so even a 160px card reads as foil.
+ * Every rung is holographic and the climb stays readable: I to III pearl (soft-light, pastel), IV to VI etched
+ * metal and cool or warm pearl, VII to X foil iridescence that lives near the light, XI to XIV saturated full
+ * holo with glitter and a holo picture; gold stays Legend's (refs/cards-v4/ladder.md, owner override). */
+.mdx-card {
+  /* The holo group. */
+  --h-blend: color-dodge;
+  --h-filter: brightness(0.75) contrast(1.25) saturate(1.2);
+  --h-rest: 0.35;
+  --h-live: 0.8;
+  --spot-floor: #3a3a3a;
+  /* The specular band. */
+  --spec: #ffffff;
+  --shine-rest: 0.2;
+  --shine-live: 0.7;
+  /* Glitter. */
+  --g-rest: 0.25;
+  --g-live: 1;
+  /* The rim. */
+  --rim-blend: screen;
+  --rim-rest: 0.3;
+  --rim-live: 0.75;
+}
+.mdx-card__lights {
+  /* The rest light (card3d.css --rest-* on the scene, else the still light: light.ts STILL_LIGHT). The engine and
+   * the table light override these three on this element only. */
+  --px: var(--rest-px, 0.3);
+  --py: var(--rest-py, 0.22);
+  --lit: var(--rest-lit, 0.45);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: clip;
+  border-radius: var(--card-radius, 5.04% / 3.61%);
+}
+.mdx-card__holo2,
+.mdx-card__shine,
+.mdx-card__sparkle {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+  border-radius: inherit;
+  /* The frame copy the card's frame img loaded (MintCard sets it once the frame is in: one download), minus holes. */
+  -webkit-mask-image: var(--foil-mask);
+  mask-image: var(--foil-mask);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-composite: source-out;
+  mask-composite: subtract;
+  /* --pulse: the table sweep lifts the finish to its live strength for a moment (registered, main thread). */
+  opacity: calc(var(--o-rest) + (var(--o-live) - var(--o-rest)) * max(var(--lit), var(--pulse, 0)));
+}
+/* No mask yet (the frame is still loading, or no JS): no finish, rather than light over the whole card. */
+.mdx-card:not([data-lit]) :is(.mdx-card__holo2, .mdx-card__shine, .mdx-card__sparkle) {
+  visibility: hidden;
+}
+/* The sheets. */
+.mdx-card__rainbow,
+.mdx-card__spot,
+.mdx-card__shine::before,
+.mdx-card__sparkle::before,
+.mdx-card__rim::before,
+.mdx-card__gloss::before,
+.mdx-card__holo::before,
+.mdx-card3d__back-foil::before,
+.mdx-card3d__back-seal::before,
+.mdx-case__gloss::before {
+  --k: 3;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--k) * 100%);
+  height: calc(var(--k) * 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  /* 2D on purpose: a trivial 3D transform would promote every sheet of every card to its own layer. */
+  transform: translate(
+    calc((1 - var(--px)) * (1 - var(--k)) / var(--k) * 100%),
+    calc((1 - var(--py)) * (1 - var(--k)) / var(--k) * 100%)
+  );
+  pointer-events: none;
+}
+.mdx-card__shine::before,
+.mdx-card__sparkle::before,
+.mdx-card__rim::before,
+.mdx-card__gloss::before,
+.mdx-card__holo::before,
+.mdx-card3d__back-foil::before,
+.mdx-card3d__back-seal::before,
+.mdx-case__gloss::before {
+  content: "";
+}
+
+/* 1. The holo group. */
+.mdx-card__holo2 {
+  --o-rest: var(--h-rest);
+  --o-live: var(--h-live);
+  isolation: isolate;
+  mix-blend-mode: var(--h-blend);
+  filter: var(--h-filter);
+}
+.mdx-card__rainbow {
+  display: block;
+}
+/* The design's foil texture: a tile that slides a little against the light (it reads as embossed under the foil). */
+.mdx-card__tex {
+  position: absolute;
+  inset: -4%;
+  display: none;
+  background-repeat: repeat;
+  mix-blend-mode: multiply;
+  transform: translate(calc((var(--px) - 0.5) * -2.5%), calc((var(--py) - 0.5) * -2.5%));
+}
+/* The light spot: full strength near the light, the design's floor elsewhere (multiply). */
+.mdx-card__spot {
+  --k: 2.4;
+  display: block;
+  mix-blend-mode: multiply;
+  background-image: radial-gradient(circle closest-side, #fff 0%, #fff 18%, var(--spot-floor) 62%, var(--spot-floor));
+}
+
+/* 2. The specular band along the keylines: the frame's luminance is the map, bright ink catches the most. */
+.mdx-card__shine {
+  --o-rest: var(--shine-rest);
+  --o-live: var(--shine-live);
+  mix-blend-mode: color-dodge;
+  -webkit-mask-mode: luminance, alpha;
+  mask-mode: luminance, alpha;
+}
+.mdx-card__shine::before {
+  background-image: linear-gradient(115deg, transparent 43%, var(--spec) 48.5%, #fff 50%, var(--spec) 51.5%, transparent 57%);
+}
+
+/* 3. Glitter: a tile on a sheet under a radial mask, so flecks flare near the light and never dust the text box. */
+.mdx-card__sparkle {
+  --o-rest: var(--g-rest);
+  --o-live: var(--g-live);
+  mix-blend-mode: color-dodge;
+}
+.mdx-card__sparkle::before {
+  --k: 2;
+  background-repeat: repeat;
+  background-size: 140px 140px;
+  -webkit-mask-image: radial-gradient(circle closest-side, #000 8%, rgb(0 0 0 / 0.55) 30%, transparent 55%);
+  mask-image: radial-gradient(circle closest-side, #000 8%, rgb(0 0 0 / 0.55) 30%, transparent 55%);
+}
+
+/* 4. Holo art (the full-art rungs, 3D faces): a faint rainbow or glitter over the picture, only in the light.
+ * Every channel under 205: color-dodge with a full channel blows that channel out on dark ink (QA: the art's
+ * blacks rose from 11 to 48 on a lit gold card). */
+.mdx-card__holo {
+  position: absolute;
+  overflow: clip;
+  pointer-events: none;
+  border-radius: 1.6cqw;
+  mix-blend-mode: color-dodge;
+  opacity: calc(var(--lit) * var(--holo-live, 0));
+}
+.mdx-card__holo::before {
+  background-image: repeating-linear-gradient(
+    110deg,
+    rgb(205 96 152 / 0.9) 0%,
+    rgb(205 176 96 / 0.9) 2.2%,
+    rgb(96 196 152 / 0.9) 4.4%,
+    rgb(96 160 205 / 0.9) 6.6%,
+    rgb(152 120 205 / 0.9) 8.8%,
+    rgb(205 96 152 / 0.9) 11%
+  );
+}
+
+/* 5. The Pokemon-style holo (owner 2026-10-17, "make the card full 3d like pokemon cards"; our own take on the
+ * poke-holo look). ONE element per face (and per back), two pseudo layers, no extra JS and no extra composited
+ * layer: both read the --px, --py and --lit the engine already writes on .mdx-card__lights (pointer tilt, gyro,
+ * spin, scroll shimmer), so the pattern slides and the glare follows wherever the light falls.
+ *   ::before  shine: the design's holo pattern (rainbow bands, foil bars, crosshatch, glitter, gold) by
+ *             background-position against the light, color-dodge (soft-light or overlay on the low rungs), under
+ *             the rung's mask: the frame minus the text panels (reverse holo, IV to X) or the whole card minus
+ *             the text panels (full art, XI to XIV), so the parchment and its text never shimmer (IV to X wear the
+ *             frame mask; I to III are an unmasked laminate sheen).
+ *   ::after   glare: a radial highlight centered on the light, overlay.
+ * The ladder (one rung per design, data-tier):
+ *   I to III     sheen: a soft white laminate band (Nova adds a few star flecks)
+ *   IV to VI     regular holo: fine foil bars with a pastel rainbow on the frame
+ *   VII to X     cosmos: rainbow bands and a glitter galaxy on the frame
+ *   XI, XII      radiant: a crosshatch rainbow over the frame and the art
+ *   XIII         secret rare: a saturated rainbow and glitter over the frame and the art
+ *   XIV          gold secret rare: a gold sweep, rainbow glitter and the strongest glare
+ * Calm: the pattern rests at the still light, quieter (below). */
+.mdx-card__poke {
+  --mx: calc(var(--px) * 100%);
+  --my: calc(var(--py) * 100%);
+  --pk-rest: 0.12;
+  --pk-live: 0.5;
+  --gl-rest: 0.08;
+  --gl-live: 0.5;
+  --gl-a: 0.62;
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.mdx-card__poke::before,
+.mdx-card__poke::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.mdx-card__poke::before {
+  background-image: var(--pk-img, none);
+  background-size: var(--pk-size, 250% 250%);
+  background-position: var(--pk-pos, var(--mx) var(--my));
+  background-repeat: repeat;
+  background-blend-mode: var(--pk-bblend, normal);
+  mix-blend-mode: var(--pk-blend, soft-light);
+  filter: var(--pk-filter, none);
+  -webkit-mask-image: var(--pk-mask, none);
+  mask-image: var(--pk-mask, none);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-composite: source-out;
+  mask-composite: subtract;
+  opacity: calc(var(--pk-rest) + (var(--pk-live) - var(--pk-rest)) * max(var(--lit), var(--pulse, 0)));
+}
+.mdx-card__poke::after {
+  background-image: radial-gradient(
+    farthest-corner circle at var(--mx) var(--my),
+    rgb(255 255 255 / var(--gl-a)) 6%,
+    rgb(255 255 255 / calc(var(--gl-a) * 0.55)) 22%,
+    rgb(255 255 255 / 0) 48%,
+    rgb(0 0 0 / 0.28) 100%
+  );
+  mix-blend-mode: overlay;
+  opacity: calc(var(--gl-rest) + (var(--gl-live) - var(--gl-rest)) * var(--lit));
+}
+/* A frame-masked rung waits for the mask (no holo over an unmasked card). */
+.mdx-card:not([data-lit]) .mdx-card__poke::before {
+  visibility: hidden;
+}
+
+/* I to III: sheen. */
+.mdx-card[data-tier] .mdx-card__poke {
+  --pk-img: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgb(255 255 255 / 0.35) 44%,
+    rgb(255 255 255 / 0.85) 50%,
+    rgb(255 255 255 / 0.35) 56%,
+    transparent 70%
+  );
+}
+.mdx-card[data-tier="surge"] .mdx-card__poke {
+  --pk-live: 0.46;
+  --gl-live: 0.46;
+}
+.mdx-card[data-tier="nova"] .mdx-card__poke {
+  --pk-live: 0.55;
+  --gl-live: 0.5;
+  --pk-blend: overlay;
+  --pk-img:
+    radial-gradient(circle at 30% 40%, #fff 0 0.6px, transparent 1.3px),
+    radial-gradient(circle at 70% 20%, #fff 0 0.5px, transparent 1.1px),
+    linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 0.35) 44%, rgb(255 255 255 / 0.85) 50%, rgb(255 255 255 / 0.35) 56%, transparent 70%);
+  --pk-size: 37px 41px, 53px 47px, 250% 250%;
+  --pk-pos: calc(var(--px) * 18px) calc(var(--py) * 14px), calc(var(--px) * -22px) calc(var(--py) * 20px), var(--mx) var(--my);
+}
+
+/* IV to VI: regular holo on the frame. Foil bars (they slide fast) through a pastel rainbow (it slides slow). */
+.mdx-card:is([data-tier="tide"], [data-tier="apex"], [data-tier="ember"]) .mdx-card__poke {
+  --pk-blend: color-dodge;
+  --pk-mask: var(--foil-mask);
+  --pk-rest: 0.18;
+  --pk-live: 0.62;
+  --gl-live: 0.5;
+  --pk-filter: brightness(0.62) contrast(1.6) saturate(1.1);
+  --pk-bblend: overlay;
+  --pk-img:
+    repeating-linear-gradient(90deg, #0e152e 0%, hsl(180 10% 62%) 3.8%, hsl(180 29% 70%) 4.5%, hsl(180 10% 62%) 5.2%, #0e152e 10%, #0e152e 12%),
+    repeating-linear-gradient(0deg, hsl(2 100% 76%) 0%, hsl(53 100% 72%) 7%, hsl(93 100% 72%) 14%, hsl(176 100% 78%) 21%, hsl(228 100% 78%) 28%, hsl(283 100% 76%) 35%, hsl(2 100% 76%) 42%);
+  --pk-size: 260% 100%, 200% 600%;
+  --pk-pos: calc(var(--px) * 120%) 0, 0 calc(var(--py) * 100%);
+}
+.mdx-card[data-tier="ember"] .mdx-card__poke {
+  --pk-live: 0.7;
+}
+
+/* VII to X: cosmos on the frame. Diagonal rainbow bands and a glitter galaxy; the flecks drift at their own depth. */
+.mdx-card:is([data-tier="bloom"], [data-tier="mythic"], [data-tier="aurora"], [data-tier="relic"]) .mdx-card__poke {
+  --pk-blend: color-dodge;
+  --pk-mask: var(--foil-mask);
+  --pk-rest: 0.24;
+  --pk-live: 0.8;
+  --gl-live: 0.56;
+  --gl-a: 0.68;
+  --pk-filter: brightness(0.72) contrast(1.45) saturate(1.35);
+  --pk-img:
+    radial-gradient(circle at 25% 35%, #fff 0 0.7px, rgb(255 255 255 / 0) 1.6px),
+    radial-gradient(circle at 60% 70%, #ffe7a3 0 0.8px, rgb(255 231 163 / 0) 1.7px),
+    radial-gradient(circle at 80% 15%, #a8ffd9 0 0.6px, rgb(168 255 217 / 0) 1.5px),
+    radial-gradient(circle at 40% 85%, #d9b3ff 0 0.9px, rgb(217 179 255 / 0) 2px),
+    repeating-linear-gradient(
+      125deg,
+      hsl(2 70% 46%) 0%,
+      hsl(53 70% 44%) 5%,
+      hsl(93 70% 42%) 10%,
+      hsl(176 70% 46%) 15%,
+      hsl(228 70% 50%) 20%,
+      hsl(283 70% 48%) 25%,
+      hsl(2 70% 46%) 30%
+    );
+  --pk-size: 29px 31px, 43px 37px, 61px 53px, 79px 71px, 300% 300%;
+  --pk-pos:
+    calc(var(--px) * 30px) calc(var(--py) * 24px),
+    calc(var(--px) * -40px) calc(var(--py) * 32px),
+    calc(var(--px) * 52px) calc(var(--py) * -44px),
+    calc(var(--px) * -18px) calc(var(--py) * -16px),
+    var(--mx) var(--my);
+}
+.mdx-card[data-tier="aurora"] .mdx-card__poke,
+.mdx-card[data-tier="relic"] .mdx-card__poke {
+  --pk-live: 0.9;
+  --gl-live: 0.6;
+}
+
+/* XI and XII: radiant, over the frame and the art. Two crossing foil hatches over a rainbow (full art: the whole
+ * card minus the text panels). */
+.mdx-card:is([data-tier="frost"], [data-tier="regal"]) .mdx-card__poke {
+  --pk-blend: color-dodge;
+  --pk-mask: linear-gradient(#000 0 0), var(--foil-holes);
+  --pk-rest: 0.22;
+  --pk-live: 0.72;
+  --gl-live: 0.64;
+  --gl-a: 0.72;
+  --pk-filter: brightness(0.7) contrast(1.5) saturate(1.4);
+  --pk-bblend: screen, multiply, normal;
+  --pk-img:
+    repeating-linear-gradient(45deg, rgb(0 0 0 / 0) 0 3px, rgb(255 255 255 / 0.22) 3.5px 4.5px, rgb(0 0 0 / 0) 5px 8px),
+    repeating-linear-gradient(-45deg, #1b1b2a 0 3px, #8a8a9a 3.5px 4.5px, #1b1b2a 5px 8px),
+    repeating-linear-gradient(
+      110deg,
+      hsl(2 90% 62%) 0%,
+      hsl(53 90% 60%) 6%,
+      hsl(93 90% 58%) 12%,
+      hsl(176 90% 62%) 18%,
+      hsl(228 90% 66%) 24%,
+      hsl(283 90% 64%) 30%,
+      hsl(2 90% 62%) 36%
+    );
+  --pk-size: auto, auto, 300% 300%;
+  --pk-pos: calc(var(--px) * 12px) 0, calc(var(--px) * -12px) 0, var(--mx) var(--my);
+}
+.mdx-card[data-tier="frost"] .mdx-card__poke {
+  /* Icy: the rainbow leans cool. */
+  --pk-filter: brightness(0.7) contrast(1.5) saturate(1.1) hue-rotate(-12deg);
+}
+
+/* XIII: secret rare. A saturated rainbow with glitter over the frame and the art. */
+.mdx-card[data-tier="celestial"] .mdx-card__poke {
+  --pk-blend: color-dodge;
+  --pk-mask: linear-gradient(#000 0 0), var(--foil-holes);
+  --pk-rest: 0.3;
+  --pk-live: 0.85;
+  --gl-live: 0.7;
+  --gl-a: 0.78;
+  --pk-filter: brightness(0.74) contrast(1.55) saturate(1.6);
+  --pk-img:
+    radial-gradient(circle at 25% 35%, #fff 0 0.8px, rgb(255 255 255 / 0) 1.8px),
+    radial-gradient(circle at 70% 60%, #fff 0 0.6px, rgb(255 255 255 / 0) 1.4px),
+    radial-gradient(circle at 45% 85%, #ffe7a3 0 0.9px, rgb(255 231 163 / 0) 2px),
+    repeating-linear-gradient(
+      125deg,
+      hsl(2 100% 58%) 0%,
+      hsl(40 100% 56%) 4%,
+      hsl(93 100% 52%) 8%,
+      hsl(176 100% 56%) 12%,
+      hsl(228 100% 62%) 16%,
+      hsl(283 100% 60%) 20%,
+      hsl(330 100% 60%) 24%,
+      hsl(2 100% 58%) 28%
+    );
+  --pk-size: 31px 29px, 47px 43px, 67px 59px, 300% 300%;
+  --pk-pos:
+    calc(var(--px) * 34px) calc(var(--py) * 26px),
+    calc(var(--px) * -46px) calc(var(--py) * 38px),
+    calc(var(--px) * 58px) calc(var(--py) * -48px),
+    var(--mx) var(--my);
+}
+
+/* XIV: gold secret rare, the top of the ladder. A gold sweep with rainbow glitter over the frame and the art, the
+ * strongest glare. */
+.mdx-card[data-tier="legend"] .mdx-card__poke {
+  --pk-blend: color-dodge;
+  --pk-mask: linear-gradient(#000 0 0), var(--foil-holes);
+  --pk-rest: 0.16;
+  --pk-live: 0.62;
+  --gl-live: 0.62;
+  --gl-a: 0.75;
+  --pk-filter: brightness(0.62) contrast(1.6) saturate(1.25);
+  --pk-img:
+    radial-gradient(circle at 25% 35%, #fff 0 0.9px, rgb(255 255 255 / 0) 2px),
+    radial-gradient(circle at 70% 60%, #a8ffd9 0 0.7px, rgb(168 255 217 / 0) 1.6px),
+    radial-gradient(circle at 45% 85%, #ffb3e6 0 0.8px, rgb(255 179 230 / 0) 1.8px),
+    radial-gradient(circle at 85% 20%, #a8d4ff 0 0.7px, rgb(168 212 255 / 0) 1.6px),
+    linear-gradient(
+      125deg,
+      #3a2400 0%,
+      #a8740e 14%,
+      #e8c46a 24%,
+      #7a5200 34%,
+      #e8b84a 46%,
+      #f2d488 52%,
+      #8a5c00 62%,
+      #d9a43a 76%,
+      #e8c46a 86%,
+      #3a2400 100%
+    );
+  --pk-size: 27px 31px, 41px 37px, 57px 61px, 73px 67px, 300% 300%;
+  --pk-pos:
+    calc(var(--px) * 36px) calc(var(--py) * 30px),
+    calc(var(--px) * -48px) calc(var(--py) * 40px),
+    calc(var(--px) * 60px) calc(var(--py) * -50px),
+    calc(var(--px) * -26px) calc(var(--py) * -22px),
+    var(--mx) var(--my);
+}
+
+/* The back: the Holo Seal plate's own holo (a soft cosmos rainbow, color-dodge, the plate's luminance as the map)
+ * and the same glare. */
+.mdx-card__poke--back {
+  --pk-blend: color-dodge;
+  --pk-mask: var(--back-mask);
+  --pk-rest: 0.18;
+  --pk-live: 0.6;
+  --gl-live: 0.5;
+  --pk-filter: brightness(0.7) contrast(1.4) saturate(1.3);
+  --pk-img:
+    radial-gradient(circle at 25% 35%, #fff 0 0.7px, rgb(255 255 255 / 0) 1.6px),
+    radial-gradient(circle at 60% 70%, #a8d4ff 0 0.8px, rgb(168 212 255 / 0) 1.7px),
+    repeating-linear-gradient(
+      125deg,
+      hsl(2 70% 50%) 0%,
+      hsl(53 70% 48%) 6%,
+      hsl(93 70% 46%) 12%,
+      hsl(176 70% 50%) 18%,
+      hsl(228 70% 54%) 24%,
+      hsl(283 70% 52%) 30%,
+      hsl(2 70% 50%) 36%
+    );
+  --pk-size: 31px 29px, 47px 43px, 300% 300%;
+  --pk-pos: calc(var(--px) * 30px) calc(var(--py) * 24px), calc(var(--px) * -40px) calc(var(--py) * 32px), var(--mx) var(--my);
+}
+.mdx-card__poke--back::before {
+  -webkit-mask-mode: luminance;
+  mask-mode: luminance;
+}
+.mdx-card3d__back:not([data-lit]) .mdx-card__poke--back::before {
+  visibility: hidden;
+}
+
+/* Calm: nothing animates and the light never moves; the holo rests as a quiet sheen. */
+:root[data-motion="calm"] .mdx-card__poke::before {
+  opacity: calc(var(--pk-rest) * 0.75);
+}
+:root[data-motion="calm"] .mdx-card__poke::after {
+  opacity: var(--gl-rest);
+}
+
+/* 6. The laminate (3D faces only): a broad soft window reflection that slides against the light. Overlay, not
+ * screen: it leaves dark ink dark (QA: a screen band lifted a held card's blacks from 20 to 51). */
+.mdx-card__gloss {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+  border-radius: inherit;
+  mix-blend-mode: overlay;
+  opacity: calc(0.2 + 0.6 * var(--lit));
+}
+.mdx-card__gloss::before,
+.mdx-case__gloss::before {
+  background-image: linear-gradient(
+    118deg,
+    transparent 34%,
+    rgb(255 255 255 / 0.05) 41%,
+    rgb(255 255 255 / 0.22) 46.5%,
+    rgb(255 255 255 / 0.05) 50%,
+    rgb(255 255 255 / 0.14) 53%,
+    transparent 60%
+  );
+  transform: translate(calc(var(--px) * -66.667%), calc(var(--py) * -66.667%));
+}
+
+/* 7. The rim: the die-cut foil edge, a 0.9cqw ring (min 1px) holding a sheet of the design's metal that turns with
+ * the light. Its own static ring mask, no frame mask. */
+.mdx-card__rim {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+  border-radius: inherit;
+  padding: max(1px, 0.9cqw);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  mix-blend-mode: var(--rim-blend);
+  opacity: calc(var(--rim-rest) + (var(--rim-live) - var(--rim-rest)) * var(--lit));
+}
+
+/* 8. Bevel: the die-cut edge catching the light (3D faces and the back). */
+.mdx-card3d .mdx-card__lights,
+.mdx-card3d__back-lights {
+  box-shadow:
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.45),
+    inset 1px 1.5px 0 rgb(255 255 255 / 0.32),
+    inset -1px -1.5px 0 rgb(30 20 10 / 0.22);
+}
+
+/* The art window: the picture is printed in the face plane (owner 2026-10-17, one solid slab: no parallax, no
+ * depth between art, frame and text); the bezel throws a soft printed inner shadow on it. */
+.mdx-card__art img {
+  position: absolute;
+  left: -3%;
+  top: -3%;
+  width: 106%;
+  height: 106%;
+}
+.mdx-card__art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 1.8cqw 2cqw -1.4cqw rgb(0 0 0 / 0.42),
+    inset 0 -0.35cqw 0 rgb(255 255 255 / 0.16);
+}
+
+/* ---------------------------------------------------------------- the finish ladder: one rung per design */
+
+/* I Spark. Matte pearl: a pastel pearl laminate over paper grain, saturation held near 40%. */
+.mdx-card[data-tier="spark"] {
+  --h-blend: overlay;
+  --h-filter: saturate(0.9) brightness(1.04);
+  --h-rest: 0.55;
+  --h-live: 0.95;
+  --spot-floor: #8c8c8c;
+  --shine-rest: 0.08;
+  --shine-live: 0.32;
+  --rim-rest: 0.25;
+  --rim-live: 0.6;
+}
+.mdx-card[data-tier="spark"] .mdx-card__rainbow {
+  background-image: repeating-linear-gradient(115deg, #ffc9e4 0%, #fff0c2 6%, #c4f5dc 12%, #c8dcff 18%, #e3cbff 24%, #ffc9e4 30%);
+}
+.mdx-card[data-tier="spark"] .mdx-card__tex {
+  display: block;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' seed='21' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .7 .4'/%3E%3C/filter%3E%3Crect width='140' height='140' fill='%23c4c4c4'/%3E%3Crect width='140' height='140' filter='url(%23f)'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
+}
+.mdx-card[data-tier="spark"] .mdx-card__rim::before {
+  background-image: linear-gradient(115deg, #cfc9be 0%, #fbf8f2 22%, #ece2f2 38%, #f7f2e4 56%, #cbc6bc 78%, #f4efe6 100%);
+}
+
+/* II Surge. Pearl and bolt etch: a cool pearl through diagonal etched lines that light cobalt white near the light. */
+.mdx-card[data-tier="surge"] {
+  --h-blend: overlay;
+  --h-filter: saturate(1) contrast(1.1);
+  --h-rest: 0.6;
+  --h-live: 1;
+  --spot-floor: #7a7a7a;
+  --spec: #d6e4ff;
+  --shine-rest: 0.12;
+  --shine-live: 0.45;
+  --rim-rest: 0.28;
+  --rim-live: 0.65;
+}
+.mdx-card[data-tier="surge"] .mdx-card__rainbow {
+  background-image: repeating-linear-gradient(115deg, #c9d8ff 0%, #fff1cc 6%, #bdeaff 12%, #d9ccff 18%, #c9d8ff 24%);
+}
+.mdx-card[data-tier="surge"] .mdx-card__tex {
+  display: block;
+  background-image: repeating-linear-gradient(62deg, #ffffff 0 1px, #b4b4b4 1px 4.5px);
+}
+.mdx-card[data-tier="surge"] .mdx-card__rim::before {
+  background-image: linear-gradient(115deg, #a8b8e8 0%, #f4f8ff 20%, #cddcff 36%, #ffffff 50%, #9fb2e6 70%, #e9efff 100%);
+}
+
+/* III Nova. Starlight pearl: a pastel pearl repeat over pearl grain, four point star glints near the light. */
+.mdx-card[data-tier="nova"] {
+  --h-blend: soft-light;
+  --h-filter: contrast(1.15) saturate(1.5);
+  --h-rest: 0.62;
+  --h-live: 1;
+  --spot-floor: #8a8a8a;
+  --spec: #efe6ff;
+  --shine-rest: 0.22;
+  --shine-live: 0.7;
+  --g-rest: 0.3;
+  --g-live: 1;
+  --rim-rest: 0.35;
+  --rim-live: 0.8;
+}
+.mdx-card[data-tier="nova"] .mdx-card__rainbow {
+  background-image: repeating-linear-gradient(115deg, #ffb8e3 0%, #ffe9a8 5%, #b4ffd9 10%, #b0dcff 15%, #d7b8ff 20%, #ffb8e3 25%);
+}
+.mdx-card[data-tier="nova"] .mdx-card__tex {
+  display: block;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 .45'/%3E%3C/filter%3E%3Crect width='160' height='160' fill='%23ccc'/%3E%3Crect width='160' height='160' filter='url(%23f)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+.mdx-card[data-tier="nova"] .mdx-card__sparkle::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='white'%3E%3Cpath d='M20 10l1.6 6.4L28 18l-6.4 1.6L20 26l-1.6-6.4L12 18l6.4-1.6z'/%3E%3Cpath d='M86 44l1 4 4 1-4 1-1 4-1-4-4-1 4-1z'/%3E%3Cpath d='M60 92l1.4 5.6 5.6 1.4-5.6 1.4L60 106l-1.4-5.6L53 99l5.6-1.4z'/%3E%3Ccircle cx='104' cy='100' r='1.3'/%3E%3Ccircle cx='38' cy='64' r='1'/%3E%3Ccircle cx='96' cy='14' r='1.2'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 120px 120px;
+}
+.mdx-card[data-tier="nova"] .mdx-card__rim::before {
+  background-image: linear-gradient(115deg, #e9dcff 0%, #ffe1f1 20%, #fff6dc 40%, #dcfff0 60%, #dcecff 80%, #e9dcff 100%);
+}
+
+/* IV Tide. Silver wave etch: a cool silver pearl through 28 degree engraved lines, under a silver specular. */
+.mdx-card[data-tier="tide"] {
+  --h-filter: brightness(0.8) contrast(1.25) saturate(1);
+  --h-rest: 0.5;
+  --h-live: 0.95;
+  --spot-floor: #2a2a2a;
+  --spec: #e6f2f8;
+  --shine-rest: 0.25;
+  --shine-live: 0.75;
+  --rim-rest: 0.32;
+  --rim-live: 0.8;
+}
+.mdx-card[data-tier="tide"] .mdx-card__rainbow {
+  background-image: repeating-linear-gradient(115deg, #9fd4dc 0%, #d6e9f2 5%, #b9c8e8 10%, #c8f0e6 15%, #e8f4f8 18%, #9fd4dc 22%);
+}
+.mdx-card[data-tier="tide"] .mdx-card__tex {
+  display: block;
+  background-image: repeating-linear-gradient(28deg, #ffffff 0 0.9px, #9c9c9c 0.9px 3.2px);
+}
+.mdx-card[data-tier="tide"] .mdx-card__rim::before {
+  background-image: linear-gradient(115deg, #8fa3b0 0%, #ffffff 20%, #cfe3ec 35%, #7d8f9c 55%, #f4fbff 75%, #9fb2bf 100%);
+}
+
+/* V Apex. Pewter guilloche: a champagne pearl through an engine-turned guilloche, under a pewter band. */
+.mdx-card[data-tier="apex"] {
+  --h-filter: brightness(0.78) contrast(1.3) saturate(0.95);
+  --h-rest: 0.5;
+  --h-live: 0.95;
+  --spot-floor: #2a2a2a;
+  --spec: #e6dccb;
+  --shine-rest: 0.25;
+  --shine-live: 0.75;
+  --rim-rest: 0.32;
+  --rim-live: 0.8;
+}
+.mdx-card[data-tier="apex"] .mdx-card__rainbow {
+  background-image: repeating-linear-gradient(115deg, #ead9bf 0%, #f4ece0 5%, #d9d3e6 10%, #e9dfc6 15%, #fff4e2 18%, #ead9bf 22%);
+}
+.mdx-card[data-tier="apex"] .mdx-card__tex {
+  display: block;
+  background-image:
+    repeating-radial-gradient(circle at 30% 30%, #ffffff 0 0.9px, #b0b0b0 0.9px 4px),
+    repeating-radial-gradient(circle at 70% 70%, #ffffff 0 0.9px, #cdcdcd 0.9px 4px);
+  background-size: 64px 64px;
+  background-blend-mode: multiply;
+}
+.mdx-card[data-tier="apex"] .mdx-card__rim::before {
+  background-image: linear-gradient(115deg, #a8a090 0%, #fff8ea 22%, #d8d0c2 40%, #8c8578 60%, #f2ece0 80%, #b3ab9c 100%);
+}
+
+/* VI Ember. Copper flame etch: a warm copper pearl through flame strokes, under a copper band. */
+.mdx-card[data-tier="ember"] {
+  --h-filter: brightness(0.8) contrast(1.3) saturate(1.15);
+  --h-rest: 0.5;
+  --h-live: 0.95;
+  --spot-floor: #2a2a2a;
+  --spec: #ffc4a4;
+  --shine-rest: 0.26;
+  --shine-live: 0.78;
+  --rim-rest: 0.34;
+  --rim-live: 0.82;
+}
+.mdx-card[data-tier="ember"] .mdx-card__rainbow {
+  background-image: repeating-linear-gradient(115deg, #ffb48a 0%, #ffd9b0 5%, #ff9c8a 10%, #ffe0c4 15%, #f5b8a0 18%, #ffb48a 22%);
+}
+.mdx-card[data-tier="ember"] .mdx-card__tex {
+  display: block;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='96'%3E%3Crect width='30' height='96' fill='%23a3a3a3'/%3E%3Cpath d='M5 96C9 72 1 56 6 36S7 8 4 0M15 96c4-22-3-40 2-58s1-26-2-38M25 96c3-20-2-36 2-52s0-30-1-44' stroke='%23fff' stroke-width='1.2' fill='none'/%3E%3C/svg%3E");
+  background-size: 30px 96px;
+}
+.mdx-card[data-tier="ember"] .mdx-card__rim::before {
+  background-image: linear-gradient(115deg, #b0603a 0%, #ffd2b8 22%, #f0a07a 40%, #8a4424 60%, #ffe2cc 80%, #c47048 100%);
+}
+
+/* VII Bloom. Rose pearl foil: strong pink, blue and cream iridescence on the embossed blossoms, pearl flecks. */
+.mdx-card[data-tier="bloom"] {
+  --h-filter: brightness(0.9) contrast(1.25) saturate(1.4);
+  --h-rest: 0.55;
+  --h-live: 1;
+  --spot-floor: #2e2e2e;
+  --spec: #fbe3ee;
+  --shine-rest: 0.3;
+  --shine-live: 0.8;
+  --g-rest: 0.15;
+  --g-live: 0.6;
+  --rim-rest: 0.38;
+  --rim-live: 0.85;
+}
+.mdx-card[data-tier="bloom"] .mdx-card__rainbow {
+  background-image: repeating-linear-gradient(115deg, #ff9ccf 0%, #ffe6b0 4%, #a8d8ff 8%, #ffc2e2 12%, #fff1d6 16%, #9ccfff 20%, #ff9ccf 24%);
+}
+.mdx-card[data-tier="bloom"] .mdx-card__tex {
+  display: block;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 .45'/%3E%3C/filter%3E%3Crect width='160' height='160' fill='%23ccc'/%3E%3Crect width='160' height='160' filter='url(%23f)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+.mdx-card[data-tier="bloom"] .mdx-card__sparkle::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.5' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 30 0 0 0 -21'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23f)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+.mdx-card[data-tier="bloom"] .mdx-card__rim::before {
+  background-image: linear-gradient(115deg, #f6c6dd 0%, #ffffff 18%, #d9e8f6 34%, #fbefd8 50%, #f0b8d4 68%, #ffffff 84%, #d9e8f6 100%);
+}
+
+/* VIII Mythic. Black chrome and oil slick: a thin film rainbow that lights only a patch of the black varnish near
+ * the light and slides across it as the card turns; chrome keylines flash; a chrome rim. */
+.mdx-card[data-tier="mythic"] {
+  --h-filter: brightness(0.85) contrast(1.3) saturate(1.5);
+  --h-rest: 0.75;
+  --h-live: 1;
+  --spot-floor: #0a0a0a;
+  --spec: #dfe7f5;
+  --shine-rest: 0.35;
+  --shine-live: 0.95;
+  --rim-rest: 0.45;
+  --rim-live: 0.95;
+}
+.mdx-card[data-tier="mythic"] .mdx-card__rainbow {
+  background-image: repeating-linear-gradient(122deg, #ff4fb8 0%, #ffcf4f 2.6%, #4fffc4 5.2%, #4fb2ff 7.8%, #b24fff 10.4%, #ff4fb8 13%);
+}
+.mdx-card[data-tier="mythic"] .mdx-card__rim::before {
+  background-image: linear-gradient(115deg, #8fa0b8 0%, #ffffff 18%, #ff8fd2 30%, #ffe08f 38%, #8fffd8 46%, #8fd0ff 54%, #ffffff 66%, #6c7486 100%);
+}
+
+/* IX Aurora. Aurora wash: green and violet curtains, two band sets moving at different rates, silver star glints. */
+.mdx-card[data-tier="aurora"] {
+  --h-filter: brightness(0.85) contrast(1.25) saturate(1.45);
+  --h-rest: 0.55;
+  --h-live: 1;
+  --spot-floor: #1c1c1c;
+  --spec: #e6e0ff;
+  --shine-rest: 0.3;
+  --shine-live: 0.8;
+  --g-rest: 0.3;
+  --g-live: 1;
+  --rim-rest: 0.4;
+  --rim-live: 0.88;
+}
+.mdx-card[data-tier="aurora"] .mdx-card__rainbow {
+  background-image: repeating-linear-gradient(100deg, #3dffb0 0%, #8f9cff 4%, #b070ff 8%, #5ae0ff 12%, #6fffd0 16%, #3dffb0 20%);
+}
+.mdx-card[data-tier="aurora"] .mdx-card__tex {
+  display: block;
+  mix-blend-mode: screen;
+  background-image: repeating-linear-gradient(
+    78deg,
+    rgb(120 255 200 / 0) 0%,
+    rgb(120 255 200 / 0.5) 4%,
+    rgb(190 130 255 / 0) 9%,
+    rgb(190 130 255 / 0.45) 14%,
+    rgb(120 255 200 / 0) 19%
+  );
+}
+.mdx-card[data-tier="aurora"] .mdx-card__sparkle::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='white'%3E%3Cpath d='M20 10l1.6 6.4L28 18l-6.4 1.6L20 26l-1.6-6.4L12 18l6.4-1.6z'/%3E%3Cpath d='M86 44l1 4 4 1-4 1-1 4-1-4-4-1 4-1z'/%3E%3Cpath d='M60 92l1.4 5.6 5.6 1.4-5.6 1.4L60 106l-1.4-5.6L53 99l5.6-1.4z'/%3E%3Ccircle cx='104' cy='100' r='1.3'/%3E%3Ccircle cx='38' cy='64' r='1'/%3E%3Ccircle cx='96' cy='14' r='1.2'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 90px 90px;
+}
+.mdx-card[data-tier="aurora"] .mdx-card__rim::before {
+  background-image: linear-gradient(115deg, #b8a8f0 0%, #ffffff 18%, #8febc4 36%, #e3a8f5 54%, #9fe0d0 72%, #ffffff 86%, #b8a8f0 100%);
+}
+
+/* X Relic. Brushed bronze: a bronze sweep through fine brushed streaks, under a bronze specular. */
+.mdx-card[data-tier="relic"] {
+  --h-filter: brightness(0.82) contrast(1.3) saturate(1.15);
+  --h-rest: 0.55;
+  --h-live: 1;
+  --spot-floor: #202020;
+  --spec: #edb57a;
+  --shine-rest: 0.32;
+  --shine-live: 0.85;
+  --rim-rest: 0.4;
+  --rim-live: 0.88;
+}
+.mdx-card[data-tier="relic"] .mdx-card__rainbow {
+  background-image: linear-gradient(115deg, #5a3510 15%, #c8823c 33%, #ffd9a0 46%, #fff0d8 50%, #ffd9a0 54%, #c8823c 67%, #5a3510 85%);
+}
+.mdx-card[data-tier="relic"] .mdx-card__tex {
+  display: block;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.004 .9' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.3 0 0 0 -.15'/%3E%3C/filter%3E%3Crect width='220' height='220' fill='%238f8f8f'/%3E%3Crect width='220' height='220' filter='url(%23f)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+.mdx-card[data-tier="relic"] .mdx-card__rim::before {
+  background-image: linear-gradient(115deg, #8a5a2a 0%, #ffdcb0 20%, #edb57a 38%, #6a4018 58%, #f8c890 80%, #a06a34 100%);
+}
+
+/* XI Frost. Ice holo: a cyan, blue and violet sun pillar rainbow through crystalline veins, white glitter, a holo
+ * picture. */
+.mdx-card[data-tier="frost"] {
+  --h-filter: brightness(0.6) contrast(1.4) saturate(1.5);
+  --h-rest: 0.6;
+  --h-live: 1;
+  --spot-floor: #303030;
+  --spec: #e8fbff;
+  --shine-rest: 0.36;
+  --shine-live: 0.9;
+  --g-rest: 0.35;
+  --g-live: 1;
+  --holo-live: 0.22;
+  --rim-rest: 0.45;
+  --rim-live: 0.95;
+}
+.mdx-card[data-tier="frost"] .mdx-card__rainbow {
+  background-image:
+    repeating-linear-gradient(0deg, hsl(185 100% 70%) 0%, hsl(205 100% 72%) 3%, hsl(230 100% 75%) 6%, hsl(265 100% 76%) 9%, hsl(185 100% 70%) 12%),
+    repeating-linear-gradient(133deg, #0e1a2e 0%, hsl(195 30% 62%) 3.8%, hsl(195 50% 72%) 4.5%, hsl(195 30% 62%) 5.2%, #0e1a2e 10%, #0e1a2e 12%);
+  background-blend-mode: hard-light;
+}
+.mdx-card[data-tier="frost"] .mdx-card__tex {
+  display: block;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='turbulence' baseFrequency='.028' numOctaves='3' seed='14' stitchTiles='stitch'/%3E%3CfeColorMatrix values='2.8 0 0 0 -.25 2.8 0 0 0 -.25 2.8 0 0 0 -.25 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23f)'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
+}
+.mdx-card[data-tier="frost"] .mdx-card__sparkle::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.5' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 30 0 0 0 -21'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23f)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+.mdx-card[data-tier="frost"] .mdx-card__rim::before {
+  background-image: linear-gradient(115deg, #a8e6ff 0%, #ffffff 16%, #b39dff 32%, #4fc3f7 48%, #e8fbff 64%, #4dd9c0 80%, #a8e6ff 100%);
+}
+
+/* XII Regal. Crimson holo damask: a gold and rose rainbow through a damask lattice, warm flecks, a gold specular on
+ * the scrollwork, a holo picture. */
+.mdx-card[data-tier="regal"] {
+  --h-filter: brightness(0.74) contrast(1.4) saturate(1.45);
+  --h-rest: 0.65;
+  --h-live: 1;
+  --spot-floor: #2a2a2a;
+  --spec: #ffd98a;
+  --shine-rest: 0.38;
+  --shine-live: 0.9;
+  --g-rest: 0.25;
+  --g-live: 0.85;
+  --holo-live: 0.22;
+  --rim-rest: 0.45;
+  --rim-live: 0.95;
+}
+.mdx-card[data-tier="regal"] .mdx-card__rainbow {
+  background-image: repeating-linear-gradient(115deg, #ffc14d 0%, #ff5c8a 3%, #ffd978 6%, #e8336b 9%, #ffb36b 12%, #ffc14d 15%);
+}
+.mdx-card[data-tier="regal"] .mdx-card__tex {
+  display: block;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Crect width='44' height='44' fill='%23adadad'/%3E%3Cpath d='M22 0L44 22L22 44L0 22Z' fill='none' stroke='%23fff' stroke-width='1.1'/%3E%3Cpath d='M22 13c3.4 4.5 3.4 4.5 0 9c-3.4-4.5-3.4-4.5 0-9zM22 31c3.4-4.5 3.4-4.5 0-9c-3.4 4.5-3.4 4.5 0 9zM13 22c4.5-3.4 4.5-3.4 9 0c-4.5 3.4-4.5 3.4-9 0zM31 22c-4.5-3.4-4.5-3.4-9 0c4.5 3.4 4.5 3.4 9 0z' fill='%23fff' fill-opacity='.85'/%3E%3Ccircle cx='0' cy='0' r='2.2' fill='%23fff'/%3E%3Ccircle cx='44' cy='0' r='2.2' fill='%23fff'/%3E%3Ccircle cx='0' cy='44' r='2.2' fill='%23fff'/%3E%3Ccircle cx='44' cy='44' r='2.2' fill='%23fff'/%3E%3C/svg%3E");
+  background-size: 44px 44px;
+}
+.mdx-card[data-tier="regal"] .mdx-card__sparkle::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.16' numOctaves='2' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='.6 0 0 0 .55 0 .6 0 0 .42 0 0 .7 0 .12 0 0 0 16 -10.6'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23f)'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+}
+.mdx-card[data-tier="regal"] .mdx-card__rim::before {
+  background-image: linear-gradient(115deg, #e8336b 0%, #ffd978 18%, #fff1c4 30%, #ff5c8a 48%, #ffc14d 66%, #fff1c4 82%, #e8336b 100%);
+}
+
+/* XIII Celestial. Cosmos prism: two sun pillar gradients (hard light) through a galaxy (overlay), dense white
+ * glitter, a faint rainbow over the whole picture, a rainbow rim. */
+.mdx-card[data-tier="celestial"] {
+  --h-filter: brightness(0.5) contrast(1.35) saturate(1.5);
+  --h-rest: 0.6;
+  --h-live: 0.95;
+  --spot-floor: #3a3a3a;
+  --shine-rest: 0.32;
+  --shine-live: 0.85;
+  --g-rest: 0.4;
+  --g-live: 1;
+  --holo-live: 0.32;
+  --rim-rest: 0.5;
+  --rim-live: 1;
+}
+.mdx-card[data-tier="celestial"] .mdx-card__rainbow {
+  background-image:
+    repeating-linear-gradient(0deg, hsl(2 100% 73%) 0%, hsl(53 100% 69%) 3%, hsl(93 100% 69%) 6%, hsl(176 100% 76%) 9%, hsl(228 100% 74%) 12%, hsl(283 100% 73%) 15%, hsl(2 100% 73%) 18%),
+    repeating-linear-gradient(133deg, #0e152e 0%, hsl(180 10% 60%) 3.8%, hsl(180 29% 66%) 4.5%, hsl(180 10% 60%) 5.2%, #0e152e 10%, #0e152e 12%);
+  background-blend-mode: hard-light;
+}
+.mdx-card[data-tier="celestial"] .mdx-card__tex {
+  display: block;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.011' numOctaves='4' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='2.4 0 0 0 -.5 0 2.4 0 0 -.62 0 0 2.6 0 -.4 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='320' height='320' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 320px 320px;
+}
+.mdx-card[data-tier="celestial"] .mdx-card__sparkle::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.5' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 30 0 0 0 -21'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23f)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+.mdx-card[data-tier="celestial"] .mdx-card__rim::before {
+  background-image: linear-gradient(115deg, #ff7fd1 0%, #ffe27f 16%, #7fffc8 32%, #7fc4ff 48%, #c17fff 64%, #ff7fd1 80%, #ffe27f 100%);
+}
+
+/* XIV Legend. Secret rare gold: a deep gold sweep over the leaf (overlay, on Legend's own light map so the emerald
+ * enamel stays deep green), a hot gold specular, gold glitter flaring near the light, gold dust on the picture, a
+ * gold rim and a gold edge. */
+.mdx-card[data-tier="legend"] {
+  --h-blend: overlay;
+  --h-filter: brightness(0.95) contrast(1.3) saturate(1.2);
+  --h-rest: 0.6;
+  --h-live: 0.95;
+  --spot-floor: #9a9a9a;
+  --spec: #ffd36b;
+  --shine-rest: 0.38;
+  --shine-live: 0.85;
+  --g-rest: 0.32;
+  --g-live: 1;
+  --holo-live: 0.14;
+  --rim-blend: overlay;
+  --rim-rest: 0.55;
+  --rim-live: 1;
+}
+.mdx-card[data-tier="legend"] :is(.mdx-card__holo2, .mdx-card__sparkle) {
+  -webkit-mask-mode: luminance, alpha;
+  mask-mode: luminance, alpha;
+}
+.mdx-card[data-tier="legend"] .mdx-card__rainbow {
+  background-image: linear-gradient(115deg, rgb(70 36 0) 18%, #d9a21e 36%, #ffd36b 46%, #fff4cf 50%, #ffd36b 54%, #d9a21e 64%, rgb(70 36 0) 82%);
+}
+.mdx-card[data-tier="legend"] .mdx-card__tex {
+  display: block;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.16' numOctaves='2' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='.6 0 0 0 .55 0 .6 0 0 .42 0 0 .7 0 .12 0 0 0 16 -10.6'/%3E%3C/filter%3E%3Crect width='120' height='120' fill='%23444'/%3E%3Crect width='120' height='120' filter='url(%23f)'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+}
+.mdx-card[data-tier="legend"] .mdx-card__sparkle::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.5' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .92 0 0 0 0 .7 30 0 0 0 -21.5'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23f)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+.mdx-card[data-tier="legend"] .mdx-card__holo::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.5' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .92 0 0 0 0 .7 30 0 0 0 -21.5'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23f)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 120px 120px;
+}
+.mdx-card[data-tier="legend"] .mdx-card__rim::before {
+  background-image: linear-gradient(115deg, #8a5a12 0%, #ffe9a8 20%, #fff8e0 28%, #e2b350 40%, #8a5a12 60%, #ffd36b 80%, #fff1c4 100%);
+}
+
+/* The table sweep (L4, owner override: the glint relay is now a holo pass): one card at a time catches a rainbow
+ * band through its foil, a soft white band over the whole card, and its holo, shine and glitter pulse to their
+ * live strength. Compositor only, no registered property animated. */
+.mdx-card__glint {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+  border-radius: inherit;
+  -webkit-mask-image: var(--foil-mask);
+  mask-image: var(--foil-mask);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-composite: source-out;
+  mask-composite: subtract;
+  mix-blend-mode: color-dodge;
+}
+/* The bands sweep by background-position under a static skew (paint only: no layout, and no compositor animation,
+ * which on a blended layer would composite it and draw the card's face at a low scale, see will-change below). */
+.mdx-card__glint::before,
+.mdx-card__lights::after {
+  content: "";
+  position: absolute;
+  top: -25%;
+  bottom: -25%;
+  left: -30%;
+  right: -30%;
+  transform: skewX(-16deg);
+  background-repeat: no-repeat;
+  background-size: 26% 100%;
+  background-position: -50% 0;
+  pointer-events: none;
+}
+.mdx-card__glint::before {
+  /* The band through the foil is color-dodge: a lower peak keeps it a glint, never a white blowout. */
+  opacity: 0.55;
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-holo-pink, #ff9ccf) 20%,
+    var(--color-holo-butter, #ffe58a) 34%,
+    rgb(255 255 255 / 0.9) 50%,
+    var(--color-holo-mint, #8ff5c8) 66%,
+    var(--color-holo-sky, #8fd0ff) 80%,
+    transparent
+  );
+}
+.mdx-card__lights::after {
+  background-size: 30% 100%;
+  background-image: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.9) 50%, transparent);
+  mix-blend-mode: soft-light;
+}
+
+/* The glint bands exist only during a glint (no idle boxes, no layers). The wave's sheen (data-sheen, moments.ts)
+ * is the light band alone, so a whole shelf can catch it in turn. */
+.mdx-card3d:not([data-glint]):not([data-sheen]) .mdx-card__lights::after,
+.mdx-card3d:not([data-glint]) .mdx-card__glint {
+  display: none;
+}
+/* The pulse of the sweep (registered, so it interpolates on the main thread: the holo, shine and glitter rise to
+ * their live strength through their opacity formula, never through a compositor opacity animation). */
+@property --pulse {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --flash {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+/* Flash: the reveal's holo pass over the new design (hand cards: Ascend, the mint reveal, fast steps). */
+.mdx-card__lights::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-size: 300% 100%;
+  background-repeat: no-repeat;
+  background-position: 0% 0;
+  background-image: linear-gradient(
+    105deg,
+    transparent 30%,
+    var(--color-holo-pink) 40%,
+    var(--color-holo-butter) 45%,
+    #fff 50%,
+    var(--color-holo-mint) 55%,
+    var(--color-holo-sky) 60%,
+    var(--color-holo-lilac) 65%,
+    transparent 74%
+  );
+  mix-blend-mode: screen;
+  opacity: var(--flash);
+  pointer-events: none;
+  /* Only while it plays. */
+  display: none;
+}
+.mdx-card__lights[data-flash]::before {
+  display: block;
+  animation: mdx-flash 900ms var(--ease-sheen);
+}
+@keyframes mdx-flash {
+  0% {
+    --flash: 0;
+    background-position: 0% 0;
+  }
+  18% {
+    --flash: 0.85;
+  }
+  100% {
+    --flash: 0;
+    background-position: 100% 0;
+  }
+}
+@keyframes mdx-glint {
+  from {
+    background-position: -50% 0;
+  }
+  to {
+    background-position: 150% 0;
+  }
+}
+@keyframes mdx-pulse {
+  50% {
+    --pulse: 1;
+  }
+}
+
+/* A lite face (Home ghosts, far coverflow cards): the design's miniature as the frame and the 96px art. */
+.mdx-card--lite .mdx-card__frame {
+  image-rendering: auto;
+}
+
+/* ---------------------------------------------------------------- the 3D scene (Card3D, spec 4.4)
+ * Outside in: .mdx-card3d (perspective, hit area, an inline-size container: 100cqw is the card width) >
+ * __enter (one-shot entrances) > __idle (CSS float) > __pose (the spring pose) > edges + back + faces. Every
+ * wrapper keeps preserve-3d and none sets overflow, filter, mask, clip-path, opacity < 1, isolation or a blend
+ * mode (each would flatten the card). Fades go on the scene or on a slot. */
+.mdx-card3d {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 63 / 88;
+  container-type: inline-size;
+  perspective: 1100px;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  border-radius: 5.04% / 3.61%;
+  outline: none;
+}
+.mdx-card3d[data-depth="hand"] {
+  perspective: 1200px;
+}
+/* A permission prompt belongs in page flow, clear of the cards and their gesture surfaces. */
+.mdx-phone-tilt {
+  justify-content: flex-end;
+  padding: 6px 16px 0;
+}
+.mdx-phone-tilt:empty {
+  display: none;
+}
+.mdx-phone-tilt .mdx-card3d__chip {
+  position: static;
+  min-height: 44px;
+  transform: none;
+}
+/* Table cards are small: a nearer eye, so their rest pose, sway and a pick-up read as 3D at 160 to 260px wide
+ * (owner override 2026-10-11: 640px, was 760px, which left the rest lean too faint to see). */
+.mdx-card3d[data-depth="table"] {
+  perspective: 640px;
+}
+
+/* The rest pose (owner override 2026-10-11: every card is a posed, lit object at rest; motion only adds to it).
+ * --rest-rx leans the top back, --rest-ry turns the face toward +x (deg), --rest-a is the pair as one angle;
+ * --rest-px/py/lit is the light that pose catches (light.ts restLight and restAngle; tests/card3d checks these
+ * fallbacks against HAND_REST and TABLE_REST).
+ * The pose is one static CSS `rotate` on __enter, the scene's direct child, so the scene's perspective reaches it
+ * while the card below stays one flat layer (its face rasterizes sharp at the pose); a deal, the unbox and the sway
+ * (all on `transform`) compose with it and never jump, and the engine's pose adds to it.
+ * Table cards: a shelf cell sets its column's fan (--fan-*, ui.tsx Shelf), else a small lean. Hand cards: a page
+ * may set its own lean (--hand-*, alive.css). Calm caps the lean (--rest-k). */
+.mdx-card3d {
+  --rest-rx: var(--fan-rx, 5);
+  --rest-ry: var(--fan-ry, -4);
+  --rest-a: var(--fan-a, 6.403);
+  --rest-px: var(--fan-px, 0.388);
+  --rest-py: var(--fan-py, 0.321);
+  --rest-lit: var(--fan-lit, 0.485);
+}
+.mdx-card3d[data-depth="hand"] {
+  --rest-rx: var(--hand-rx, 5);
+  --rest-ry: var(--hand-ry, -10);
+  --rest-a: var(--hand-a, 11.18);
+  --rest-px: var(--hand-px, 0.222);
+  --rest-py: var(--hand-py, 0.321);
+  --rest-lit: var(--hand-lit, 0.76);
+}
+.mdx-card3d > .mdx-card3d__enter {
+  rotate: var(--rest-rx) var(--rest-ry) 0 calc(var(--rest-a) * var(--rest-k, 1) * 1deg);
+}
+/* The phone coin hero (coin.tsx CoinPhoneHero, ChainCoinPage.tsx CardArt): a still 112px table card that turns
+ * toward its name and price, on a nearer eye so it still reads as 3D (light.ts restLight of rx 5, ry 8). */
+.mdx-card3d.mdx-card3d--hero {
+  perspective: 420px;
+  --fan-rx: 5;
+  --fan-ry: 8;
+  --fan-a: 9.434;
+  --fan-px: 0.723;
+  --fan-py: 0.321;
+  --fan-lit: 0.657;
+}
+
+/* The design's template (templates.ts, inline on the scene): the cut edge (--e1 the face side, --e2, the --core line,
+ * --e3 the back side, --edge-fill the material, --edge-shine), the printed back (--bk-*) and the halo (--glow,
+ * --glow-k). These are the fallbacks for a scene without a design (the standalone CardBack). */
+.mdx-card3d {
+  --e1: #f8f3e8;
+  --e2: #e2d8c2;
+  --core: #5c5a66;
+  --e3: #d8ccb2;
+  --edge-shine: 0.3;
+  --bk-field: #000;
+  --bk-ink: #fff;
+  --bk-motif: none;
+}
+.mdx-card3d[tabindex]:focus-visible {
+  outline: 2px solid var(--color-zap, #38d9ff);
+  outline-offset: 6px;
+}
+.mdx-card3d__enter,
+.mdx-card3d__idle,
+.mdx-card3d__pose,
+.mdx-card3d__edges {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+.mdx-card3d__pose {
+  /* The slab's thickness (owner 2026-10-17, "one solid thin 3d card"): 1.3% of the width like a real trading card,
+   * at least 2px so the edge still reads edge-on on a phone card. About 3.4px on a 264px card. */
+  --t: max(2px, 1.3cqw);
+}
+.mdx-card3d__edges {
+  pointer-events: none;
+}
+.mdx-card3d__edges > b,
+.mdx-case__edges > b {
+  position: absolute;
+  display: block;
+}
+/* The cut edge catches the light as the card turns (templates.ts --edge-shine): a highlight across the wall whose
+ * strength is the wall's outward normal (--nx, --ny, extrude.ts) turned by the pose (--ex, --ey on the edges host,
+ * written by the engine and the viewer) against a light up and to the left
+ * of the viewer, to the fourth power. Drawn in the wall itself (its ::after), no extra plane. */
+.mdx-card3d__edges > b::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 0, rgb(255 255 255 / 0.9) 50%, transparent 100%);
+  opacity: 0;
+  pointer-events: none;
+}
+@supports (opacity: pow(0.5, 4)) {
+  .mdx-card3d__edges > b::after {
+    --sx: calc(var(--nx, 0) * cos(var(--ey, 0deg)));
+    --sy: calc(var(--ny, 0) * cos(var(--ex, 0deg)) + var(--nx, 0) * sin(var(--ey, 0deg)) * sin(var(--ex, 0deg)));
+    --sz: calc(var(--ny, 0) * sin(var(--ex, 0deg)) - var(--nx, 0) * sin(var(--ey, 0deg)) * cos(var(--ex, 0deg)));
+    opacity: calc(var(--edge-shine, 0.3) * pow(max(0, -0.42 * var(--sx) - 0.3 * var(--sy) + 0.86 * var(--sz)), 4));
+  }
+}
+.mdx-card3d__faces {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.mdx-card3d__slot {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+}
+.mdx-card3d__slot[data-on],
+.mdx-card3d__slot[data-leaving] {
+  visibility: visible;
+}
+.mdx-card3d__slot[data-on] {
+  z-index: 1;
+}
+.mdx-card3d__slot > .mdx-card {
+  position: absolute;
+  inset: 0;
+}
+.mdx-card3d .mdx-card__shadow {
+  display: none;
+}
+/* The printed back: the Holo Seal plate. Its keylines and guilloche catch the light (the plate's own luminance is
+ * the map) and the seal's holo runs with the light. */
+.mdx-card3d__back {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 5.04% / 3.61%;
+  background: #1c1b26;
+  transform: rotateY(180deg) translateZ(calc(var(--t) / 2));
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+/* CardBack hand: the back is the face (no turn). */
+.mdx-card3d__back--face {
+  transform: none;
+}
+.mdx-card3d__back > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+/* The design's back (templates.ts): the shared Holo Seal plate recolored in the template's palette, in this plane.
+ * ::before multiplies the template's ink over the plate (the cream keylines, the seal), ::after screens the
+ * template's field over it (the dark ground takes the design's hue), then the motif, screened at its strength (templates.ts motifK). */
+.mdx-card3d__back-tint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.mdx-card3d__back-tint::before,
+.mdx-card3d__back-tint::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.mdx-card3d__back-tint::before {
+  background: var(--bk-ink);
+  mix-blend-mode: multiply;
+}
+.mdx-card3d__back-tint::after {
+  background:
+    var(--bk-motif),
+    radial-gradient(120% 90% at 50% 45%, color-mix(in srgb, var(--bk-field) 88%, white) 0%, var(--bk-field) 55%, color-mix(in srgb, var(--bk-field) 70%, black) 100%);
+  mix-blend-mode: screen;
+}
+.mdx-card3d__back-lights {
+  --px: 0.5;
+  --py: 0.5;
+  --lit: 0;
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.mdx-card3d__back-foil {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  -webkit-mask-image: var(--back-mask);
+  mask-image: var(--back-mask);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  mask-mode: luminance;
+  mix-blend-mode: color-dodge;
+  opacity: calc(0.3 + 0.6 * var(--lit));
+}
+.mdx-card3d__back:not([data-lit]) .mdx-card3d__back-foil {
+  visibility: hidden;
+}
+.mdx-card3d__back-foil::before {
+  background-image: var(--bk-foil, linear-gradient(115deg, transparent 36%, #ff9ccf 42%, #ffe58a 46%, #8ff5c8 50%, #8fd0ff 54%, #c9a8ff 58%, transparent 64%));
+}
+.mdx-card3d__back-seal {
+  position: absolute;
+  left: 30.6%;
+  top: 33.9%;
+  width: 38.8%;
+  height: 31.9%;
+  overflow: clip;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  mix-blend-mode: soft-light;
+  opacity: calc(0.6 + 0.4 * var(--lit));
+}
+.mdx-card3d__back-seal::before {
+  background-image: linear-gradient(125deg, #ff7fb6 0%, #ffd84d 12%, #4de3a5 24%, #4db2ff 36%, #a77dff 48%, #ff7fb6 60%, #ffd84d 72%, #4de3a5 84%, #4db2ff 100%);
+}
+.mdx-card3d__back .mdx-card__gloss {
+  opacity: calc(0.45 + 0.55 * var(--lit));
+}
+/* A resting card is one flat layer under its static rest pose (the CSS `rotate` on __enter, which the scene's
+ * perspective reaches): no 3D context, one layer, and Chrome rasterizes its face at the pose, so its text is sharp
+ * while the light orbits or shimmers over it (QA 2026-10-11 at 3x: a 3D context at rest drew the face at a low
+ * scale, jagged text). It turns 3D the moment it is picked up, dragged, turned, dealt or peeks (data-edge, set by
+ * the engine). The back mounts on a table card's first hold or deal. */
+.mdx-card3d[data-depth="table"]:not([data-state~="awake"]):not([data-state~="dealing"]) :is(.mdx-card3d__enter, .mdx-card3d__idle, .mdx-card3d__pose),
+.mdx-card3d:not([data-edge]):not([data-state~="dealing"]) :is(.mdx-card3d__enter, .mdx-card3d__idle, .mdx-card3d__pose) {
+  transform-style: flat;
+}
+/* Flat and turned over (a card at rest on its back): backface culling needs the 3D context, so the back paints
+ * as the face (its half turn and the pose's cancel out) and the face and the case's front plate step aside
+ * (opacity, not visibility: the shown slot sets its own visibility). */
+.mdx-card3d[data-side="back"]:not([data-edge]):not([data-state~="dealing"]) :is(.mdx-card3d__faces, .mdx-case__plate--front) {
+  opacity: 0;
+}
+.mdx-card3d[data-side="back"]:not([data-edge]):not([data-state~="dealing"]) :is(.mdx-card3d__back, .mdx-case__plate--back) {
+  backface-visibility: visible;
+  -webkit-backface-visibility: visible;
+}
+/* The edge at rest: while the card is flat, its thin cut edge is painted as one solid hard edge in the design's
+ * edge color on the side its rest pose turns toward you (a shelf's column fan turns it), plus a soft contact shadow.
+ * In card width units so every size reads the same. Static paint, no layer. */
+.mdx-card3d:not([data-edge]):not([data-side="back"]) .mdx-card3d__faces {
+  --sx: calc(var(--rest-ry) * -0.05cqw + 0.06cqw);
+  --sy: calc(var(--rest-rx) * 0.09cqw);
+  border-radius: 5.04% / 3.61%;
+  box-shadow:
+    var(--sx) var(--sy) 0 0 var(--e2),
+    calc(var(--sx) + 0.3cqw) calc(var(--sy) + 1.4cqw) 2.4cqw 0 rgb(40 31 20 / 0.26);
+}
+/* In 3D the face plane stands half the stock in front, the back plane half the stock behind, and the cut edge joins
+ * them: one solid slab. Flat (at rest) the face has no transform: a 3D transform would make it its own layer under
+ * the rest pose's perspective, and with the light layers composited over it Chrome draws that layer at a low scale
+ * (QA 2026-10-11 at 3x: jagged text). The case's front plate likewise. */
+.mdx-card3d[data-edge] .mdx-card3d__faces {
+  transform: translateZ(calc(var(--t) / 2));
+}
+/* The edge only while the card is in 3D (data-edge: a hold, a peek, a turn, a drag; data-spin3d: a list card
+ * turning): display, so a resting card's walls are no layers at all. A dealt card flies as a zero-thickness card
+ * (its face and its flight back share one plane, back to back), so it has no edge to show either. */
+.mdx-card3d:not([data-edge]):not([data-spin3d]) :is(.mdx-card3d__edges, .mdx-case__edges),
+.mdx-card3d[data-state~="dealing"] :is(.mdx-card3d__edges, .mdx-case__edges) {
+  display: none;
+}
+.mdx-card3d[data-depth="table"]:not([data-side="back"]):not([data-state~="awake"]):not([data-state~="dealing"]) .mdx-card3d__back {
+  display: none;
+}
+.mdx-card3d[data-depth="table"]:not([data-state~="awake"]):not([data-state~="dealing"]) .mdx-card3d__faces {
+  backface-visibility: visible;
+  -webkit-backface-visibility: visible;
+}
+/* The flight back (deal and shuffle, table cards): while a card flies face down, its back is one pseudo element
+ * on __enter painted with the deck's plate, so a dealt shelf mounts no back faces and no walls (QA: a 130 ms task
+ * on a slowed CPU). A card picked up later mounts its real back as before. */
+.mdx-card3d[data-depth="table"][data-state~="dealing"] > .mdx-card3d__enter::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 5.04% / 3.61%;
+  background: #1c1b26 url("/assets/carddex-back.svg") center / cover no-repeat;
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  pointer-events: none;
+}
+/* will-change (spec 9.1.5, owner override 2026-10-11): on the pose only while it moves (data-state "moving": a
+ * hold that tilts, a drag, a turn, a peek), never at rest. Never on the light layers, and no compositor animation
+ * on them: a composited blend layer inside the card makes Chrome draw the whole face through an isolated surface
+ * at about 1x under the rest pose's perspective (QA 2026-10-11 at 3x: jagged text and art). The orbiting light
+ * repaints the card's one layer instead, at full resolution. */
+.mdx-card3d[data-state~="moving"] .mdx-card3d__pose {
+  will-change: transform;
+}
+
+/* The ground: a radial-gradient ellipse (never a blurred box), outside the 3D chain. The engine writes only its
+ * transform and opacity. */
+.mdx-card3d__ground {
+  position: absolute;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+}
+.mdx-card3d__ground::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+.mdx-card3d__ground[data-ground="shadow"] {
+  left: 4.5%;
+  right: 1.5%;
+  top: 11%;
+  bottom: -5.5%;
+}
+/* A tight contact shadow where the card's foot meets the table (the card stands on it), over the soft cast shadow. */
+.mdx-card3d__ground[data-ground="shadow"]::before {
+  background:
+    radial-gradient(46% 3.2% at 47% 93.6%, rgb(40 31 20 / 0.34), rgb(40 31 20 / 0)),
+    radial-gradient(closest-side, rgb(40 31 20 / 0.42), rgb(40 31 20 / 0.24) 58%, rgb(40 31 20 / 0.08) 82%, transparent);
+}
+.mdx-card3d__ground[data-ground="floor"] {
+  left: 6%;
+  width: 88%;
+  top: 99.5%;
+  height: 9%;
+}
+.mdx-card3d__ground[data-ground="floor"]::before {
+  background: radial-gradient(closest-side, rgb(40 31 20 / 0.5), rgb(40 31 20 / 0.22) 55%, transparent);
+}
+.mdx-card3d__ground[data-ground="none"] {
+  display: none;
+}
+/* The light pool: the design's ring color glows on the table under a card you pick up (fine pointers only, so it
+ * never adds width on phones). */
+.mdx-card3d__ground[data-pool]::after {
+  content: "";
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: -14%;
+  height: 46%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--pool, #fff), transparent);
+  opacity: 0;
+  transition: opacity 320ms var(--ease-room);
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mdx-card3d__ground[data-pool]::after {
+    display: block;
+  }
+  .mdx-card3d[data-state~="held"] .mdx-card3d__ground[data-pool]::after {
+    opacity: 0.85;
+  }
+}
+
+/* The burst host (Ascend, mint reveal, claim): behind the card, mounted only during a burst, clipped. */
+.mdx-card3d__fxb {
+  position: absolute;
+  inset: -30%;
+  overflow: clip;
+  pointer-events: none;
+}
+.mdx-card3d__fxb > i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+.mdx-fx-glow {
+  width: 92%;
+}
+.mdx-fx-rays {
+  width: 100%;
+  -webkit-mask-image: radial-gradient(closest-side, #000 14%, rgb(0 0 0 / 0.7) 40%, transparent 72%);
+  mask-image: radial-gradient(closest-side, #000 14%, rgb(0 0 0 / 0.7) 40%, transparent 72%);
+}
+.mdx-fx-ring {
+  width: 62%;
+  border: 2px solid rgb(255 255 255 / 0.95);
+}
+.mdx-fx-charge {
+  width: 81%;
+}
+
+/* ---------------------------------------------------------------- the neon halo (hype arcade, owner 2026-10-17)
+ * Every 3D card glows in its design's color behind it; the glow is stronger for higher designs (--glow-k climbs
+ * with the ladder) and the top four wear a turning prism ring. It sits outside the 3D chain (like the ground), so
+ * the card's face stays one flat, sharp layer. Static paint (no layer per card); at full motion only the prism ring
+ * of the top designs turns, by transform. Calm keeps the still glow. */
+.mdx-card3d {
+  --glow: #3dffb5;
+  --glow-k: 0.3;
+}
+.mdx-card3d__halo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 5.04% / 3.61%;
+  /* A neon edge glow in the design's color: the blur and the spread climb with the design (static paint). */
+  box-shadow:
+    0 0 calc(8px + 22px * var(--glow-k)) calc(var(--glow-k) * 3px) color-mix(in srgb, var(--glow) calc(30% + 55% * var(--glow-k)), transparent),
+    0 0 calc(30px + 50px * var(--glow-k)) 0 color-mix(in srgb, var(--glow) calc(10% + 30% * var(--glow-k)), transparent);
+}
+/* Hand cards turn all the way round: their glow is a soft round pool behind them, not an edge (an edge would
+ * stay put while the card turns). */
+.mdx-card3d[data-depth="hand"] > .mdx-card3d__halo {
+  inset: -7% -18%;
+  border-radius: 50%;
+  box-shadow: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 75%, transparent) 0%, color-mix(in srgb, var(--glow) 32%, transparent) 55%, transparent 100%);
+  opacity: calc(0.3 + 0.6 * var(--glow-k));
+}
+.mdx-card3d[data-depth="hand"] > .mdx-card3d__halo > b {
+  inset: 2% 10%;
+}
+/* The prism ring (frost and up): a turning conic of the holo colors behind the card, faded to a soft ring by a
+ * radial mask, in a still round host that clips it (a turning box's corners never add scroll). */
+.mdx-card3d__halo > b {
+  position: absolute;
+  /* Inside the page gutter (16px) at every card size: a box past it would add scroll. */
+  inset: -6% -7%;
+  display: none;
+  border-radius: 50%;
+  overflow: clip;
+}
+.mdx-card3d__halo > b::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: 100%;
+  aspect-ratio: 1;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #3dffb5, #38d9ff, #8b7bff, #ff3dce, #ffe45c, #3dffb5);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 62%, #000 84%, transparent 100%);
+  mask-image: radial-gradient(closest-side, transparent 62%, #000 84%, transparent 100%);
+  opacity: 0.75;
+}
+.mdx-card3d:is([data-metal="frost"], [data-metal="regal"], [data-metal="celestial"], [data-metal="legend"]) > .mdx-card3d__halo > b {
+  display: block;
+}
+/* The inline turntable (owner 2026-10-17, spin.ts): a list card stands on a small neon pedestal and, while it is in
+ * view, turns slowly in place. The pedestal is static paint under the card (outside the 3D chain): a glow pool, a
+ * dark disc with a neon rim in the design's color and its side band. While the card spins, its edge glow becomes a
+ * soft round pool like a hand card's (an edge glow would stay flat while the card turns). */
+.mdx-card3d__pedestal {
+  position: absolute;
+  /* Its own stacking context: the disc's z-index stays inside it, so the card always paints over the pedestal. */
+  z-index: 0;
+  left: -8cqw;
+  right: -8cqw;
+  bottom: -6cqw;
+  height: 17cqw;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow, #3dffb5) 46%, transparent) 0%, color-mix(in srgb, var(--glow, #3dffb5) 14%, transparent) 62%, transparent 100%);
+}
+.mdx-card3d__pedestal::before,
+.mdx-card3d__pedestal::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  border-radius: 50%;
+}
+/* The side band: the disc's thickness, a darker ellipse just under it. */
+.mdx-card3d__pedestal::after {
+  top: 30%;
+  height: 50%;
+  background: linear-gradient(to bottom, #0b1022, #05070f);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--glow, #3dffb5) 30%, transparent);
+}
+/* The top disc with its neon rim. */
+.mdx-card3d__pedestal::before {
+  z-index: 1;
+  top: 14%;
+  height: 50%;
+  background: radial-gradient(ellipse at 50% 42%, #1d2440 0%, #0e1328 62%, #090c1a 100%);
+  box-shadow:
+    inset 0 0 0 1.5px color-mix(in srgb, var(--glow, #3dffb5) 85%, white),
+    0 0 10px 1px color-mix(in srgb, var(--glow, #3dffb5) 60%, transparent);
+}
+/* Spinning list cards keep their isolated 3D pose, front/back planes and rounded perimeter. The same
+ * extruded walls stay mounted through spin-to-drag transitions, so no rectangular edge pierces a corner. */
+.mdx-card3d[data-spin3d] > .mdx-card3d__enter {
+  rotate: none;
+}
+.mdx-card3d[data-spin3d] {
+  perspective: none;
+}
+.mdx-card3d[data-spin3d][data-turntable] .mdx-card3d__idle > .mdx-card3d__pose {
+  transform-style: preserve-3d;
+}
+.mdx-card3d[data-spin3d][data-turntable] .mdx-card3d__pose > .mdx-card3d__faces {
+  transform: translateZ(calc(var(--t) / 2));
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* The painted rest edge would turn with the face; the cut edge carries it now. */
+  box-shadow: none;
+}
+.mdx-card3d[data-spin3d][data-turntable] .mdx-card3d__pose > .mdx-card3d__back {
+  display: block;
+}
+.mdx-card3d[data-turntable][data-spin] > .mdx-card3d__halo {
+  inset: -4% -14%;
+  border-radius: 50%;
+  box-shadow: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 60%, transparent) 0%, color-mix(in srgb, var(--glow) 22%, transparent) 55%, transparent 100%);
+  opacity: calc(0.25 + 0.5 * var(--glow-k));
+}
+@media (forced-colors: active) {
+  .mdx-card3d__pedestal {
+    display: none;
+  }
+}
+/* A card being dealt hides its glow until it lands. */
+.mdx-card3d[data-state~="dealing"] > .mdx-card3d__halo {
+  opacity: 0;
+}
+@keyframes mdx-prism {
+  to {
+    transform: rotate(360deg);
+  }
+}
+:root:not([data-motion]) .mdx-card3d > .mdx-card3d__halo > b::before {
+  animation: mdx-prism 7s linear infinite;
+}
+:root:not([data-motion="calm"]) .mdx-card3d[data-state~="offscreen"] > .mdx-card3d__halo > b::before,
+:root:not([data-motion="calm"]) body[data-scroll-locked] .mdx-card3d:not([role="dialog"] .mdx-card3d) > .mdx-card3d__halo > b::before {
+  animation-play-state: paused !important;
+}
+@media (forced-colors: active) {
+  .mdx-card3d__halo {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------- ambient life (all only turned on)
+ * L3 sway on table cards (not a still one: data-still, idle "none"), the L4 holo sweep, case rim pulse. Paused
+ * offscreen, while held and under an open dialog (Radix marks the body data-scroll-locked; cards inside the
+ * dialog keep going). Never under calm; sway and sweep never under lite. The sway rides on top of the card's
+ * static rest pose (the CSS `rotate` on __enter): it adds to it, never replaces it.
+ * The sway is a 3D lean on __enter, the scene's direct child, so the scene's perspective reaches it while the
+ * rest of the chain stays flat (a compositor animation whose keyframes hold no perspective rasterizes sharp on
+ * a 3x phone; perspective() inside the keyframes did not). Symmetric ends, so the middle of the swing is the
+ * rest pose: a dealt card starts its sway there (moments.ts sets --float-delay to minus half a period) and the
+ * deal hands over without a jump. The deal and the shuffle own __enter while they run (animation-name none). */
+:root:not([data-motion="calm"]):not([data-motion="lite"]) .mdx-card3d[data-depth="table"]:not([data-still]) > .mdx-card3d__enter {
+  animation: mdx-sway var(--float-dur, 7s) var(--ease-drift) var(--float-delay, 0s) infinite alternate;
+}
+:root:not([data-motion="calm"]):not([data-motion="lite"]) .mdx-card3d[data-depth="table"][data-state~="dealing"] > .mdx-card3d__enter {
+  animation-name: none;
+}
+/* A spinning list turntable holds its lean still (the pose carries it; one moving 3D context per card). */
+:root:not([data-motion="calm"]):not([data-motion="lite"]) .mdx-card3d[data-depth="table"][data-spin3d] > .mdx-card3d__enter {
+  animation-name: none;
+}
+:root:not([data-motion="calm"]):not([data-motion="lite"]) .mdx-card3d[data-glint] .mdx-card__lights::after {
+  animation: mdx-glint var(--t-glint) var(--ease-sheen);
+}
+:root:not([data-motion="calm"]):not([data-motion="lite"]) .mdx-card3d[data-sheen] .mdx-card__lights::after {
+  animation: mdx-glint 900ms var(--ease-sheen);
+}
+:root:not([data-motion="calm"]):not([data-motion="lite"]) .mdx-card3d[data-glint] .mdx-card__glint::before {
+  animation: mdx-glint var(--t-glint) var(--ease-sheen);
+}
+:root:not([data-motion="calm"]):not([data-motion="lite"]) .mdx-card3d[data-glint] .mdx-card__lights {
+  animation: mdx-pulse var(--t-glint) var(--ease-sheen);
+}
+:root:not([data-motion="calm"]) .mdx-case[data-near] .mdx-case__rim {
+  animation: mdx-rim 2.4s var(--ease-swell) infinite alternate;
+}
+/* !important: the rules that start these loops use the animation shorthand (it resets the play state) and win
+ * on specificity, so a plain pause never applied (QA: floats ran offscreen and behind dialogs). */
+:root:not([data-motion="calm"]) .mdx-card3d:is([data-state~="held"], [data-state~="offscreen"], [data-state~="dealing"]) > .mdx-card3d__enter,
+:root:not([data-motion="calm"]) body[data-scroll-locked] .mdx-card3d:not([role="dialog"] .mdx-card3d) > .mdx-card3d__enter,
+:root:not([data-motion="calm"]) .mdx-case:has(> [data-state~="offscreen"]) .mdx-case__rim,
+:root:not([data-motion="calm"]) body[data-scroll-locked] .mdx-case:not([role="dialog"] .mdx-case) .mdx-case__rim {
+  animation-play-state: paused !important;
+}
+/* The sway: a slow lean in 3D (the scene's perspective) and a 4px bob over a still ground (a breathing ground was
+ * one more layer a card, 12 on a shelf, for a change nobody could see under the lean). Smaller than it was: the
+ * rest pose already shows the card in 3D, so the sway only keeps it alive (and its text sharp). */
+@keyframes mdx-sway {
+  from {
+    transform: translate3d(0, -2px, 0) rotateX(1.8deg) rotateY(-4deg);
+  }
+  to {
+    transform: translate3d(0, 2px, 0) rotateX(-1.8deg) rotateY(4deg);
+  }
+}
+@keyframes mdx-rim {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 0.7;
+  }
+}
+
+/* ---------------------------------------------------------------- CardBack (standalone) and CardDeck */
+.mdx-cardback {
+  position: relative;
+  isolation: isolate;
+  aspect-ratio: 63 / 88;
+  border-radius: 5.04% / 3.61%;
+}
+.mdx-cardback::before {
+  content: "";
+  position: absolute;
+  inset: 3% 3% -1.5% 3%;
+  border-radius: inherit;
+  background: rgb(40 31 20 / 0.17);
+  box-shadow: 0 0 24px 2px var(--card-shadow);
+  z-index: -1;
+}
+.mdx-cardback img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+.mdx-deck {
+  position: absolute;
+  width: 44px;
+  aspect-ratio: 63 / 88;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms var(--ease-room);
+}
+.mdx-deck[data-active] {
+  opacity: 1;
+}
+.mdx-deck > i {
+  position: absolute;
+  inset: 0;
+  border-radius: 5.04% / 3.61%;
+  background: #1c1b26 url("/assets/carddex-back.svg") center / cover no-repeat;
+  box-shadow: 0 1px 2px rgb(29 27 24 / 0.3), 0 4px 10px -4px rgb(29 27 24 / 0.35);
+}
+.mdx-deck > i:nth-child(1) {
+  transform: rotate(-4deg);
+}
+.mdx-deck > i:nth-child(2) {
+  transform: translate(2px, 2px);
+}
+.mdx-deck > i:nth-child(3) {
+  transform: translate(4px, 4px) rotate(3deg);
+}
+
+/* "Tilt to shine" (iOS, after mount): a glass chip over the card, a full 44px tap target like every phone control. */
+.mdx-card3d__chip {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  z-index: 4;
+  transform: translateX(-50%);
+  height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(10 14 22 / 0.82);
+  color: var(--color-ink, #eef3fa);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 0 0 1px rgb(61 255 181 / 0.4), 0 0 14px -4px rgb(61 255 181 / 0.5), 0 6px 16px -8px rgb(0 0 0 / 0.6);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+/* ---------------------------------------------------------------- the case (CardCase, spec 4.10)
+ * The inner card is unchanged. A clear 112-unit slab surrounds its 100 × 139.683 box: 6-unit sides and foot,
+ * 28 above when labeled. Padding reserves the whole slab in document flow. CasePlate is also shared by the
+ * coin-specific full-screen turntable; it therefore carries usable labeled defaults outside this wrapper. */
+.mdx-case {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  container: mdx-case / inline-size;
+  padding: 5.357142857%;
+}
+.mdx-case__scene {
+  perspective: 1400px;
+  cursor: grab;
+}
+.mdx-case__scene[data-state~="dragging"] {
+  cursor: grabbing;
+}
+.mdx-case__scene .mdx-card3d__pose {
+  --T: 6.5cqw;
+  --case-top: -6cqw;
+}
+.mdx-case[data-variant="labeled"] {
+  padding-top: 25%;
+}
+.mdx-case[data-variant="labeled"] .mdx-card3d__pose {
+  --case-top: -28cqw;
+}
+.mdx-case[data-variant="holder"] .mdx-case__label,
+.mdx-case[data-variant="auto"] .mdx-case__label {
+  display: none;
+}
+@media (min-width: 1280px) and (min-height: 860px) {
+  .mdx-case[data-variant="auto"] {
+    padding-top: 25%;
+  }
+  .mdx-case[data-variant="auto"] .mdx-card3d__pose {
+    --case-top: -28cqw;
+  }
+  .mdx-case[data-variant="auto"] .mdx-case__label {
+    display: grid;
+  }
+}
+.mdx-case__edges {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+.mdx-case__plate {
+  position: absolute;
+  left: -6cqw;
+  right: -6cqw;
+  top: var(--case-top, -28cqw);
+  bottom: -6cqw;
+  border-radius: 7.5cqw;
+  pointer-events: none;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.mdx-card3d[data-edge] .mdx-case__plate--front {
+  transform: translateZ(calc(var(--T, 6.5cqw) / 2));
+}
+.mdx-case__plate--back {
+  transform: rotateY(180deg) translateZ(calc(var(--T, 6.5cqw) / 2));
+}
+/* No fill over the printed card. The acrylic reads through two polished perimeter bevels, a recessed gasket
+ * and the fine contact shadow at the seat. Every layer is decorative and cannot intercept a drag or tap. */
+.mdx-case__acrylic {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1.5px rgb(255 255 255 / 0.88),
+    inset 0 0 0 0.8cqw rgb(226 238 247 / 0.13),
+    inset 0 0 0 1cqw rgb(255 255 255 / 0.32),
+    0 0 0 0.5px rgb(75 98 118 / 0.35),
+    0 1.7cqw 3.5cqw -1.2cqw rgb(0 0 0 / 0.25);
+}
+.mdx-case__bevel {
+  position: absolute;
+  inset: 1.25cqw;
+  border-radius: 6.3cqw;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.3),
+    0 0 0 0.5px rgb(93 118 137 / 0.22),
+    0.35cqw 0.4cqw 0 0 rgb(255 255 255 / 0.1);
+}
+.mdx-case__gasket {
+  position: absolute;
+  left: 5.1cqw;
+  top: calc(-1 * var(--case-top, -28cqw) - 0.9cqw);
+  width: 101.8cqw;
+  height: 141.483cqw;
+  border-radius: 5.9cqw;
+  box-shadow:
+    inset 0 0 0 0.7cqw rgb(15 23 32 / 0.31),
+    0 0 0 0.5px rgb(255 255 255 / 0.5),
+    0 0.8cqw 1.6cqw -0.5cqw rgb(0 0 0 / 0.38);
+}
+.mdx-case__well {
+  position: absolute;
+  left: calc(6cqw - 2px);
+  top: calc(-1 * var(--case-top, -28cqw) - 2px);
+  width: calc(100cqw + 4px);
+  height: calc(139.683cqw + 4px);
+  border-radius: 5.6cqw;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.7),
+    0 0 0 1px rgb(15 23 32 / 0.3),
+    0 0.5cqw 1cqw rgb(0 0 0 / 0.22);
+}
+.mdx-case__rail {
+  position: absolute;
+  top: 5cqw;
+  bottom: 5cqw;
+  width: 0.6cqw;
+  border-radius: 1cqw;
+  background: linear-gradient(180deg, transparent, rgb(255 255 255 / 0.65) 24%, rgb(210 234 249 / 0.18) 70%, transparent);
+}
+.mdx-case__rail--left {
+  left: 2.5cqw;
+}
+.mdx-case__rail--right {
+  right: 2.5cqw;
+  opacity: 0.6;
+}
+/* The existing pose-driven light moves only across the clear rim and header, never across the card print. */
+.mdx-case__gloss {
+  --px: 0.5;
+  --py: 0.5;
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  border-radius: inherit;
+  clip-path: polygon(evenodd,
+    0 0, 100% 0, 100% 100%, 0 100%, 0 0,
+    6cqw calc(-1 * var(--case-top, -28cqw)),
+    6cqw calc(-1 * var(--case-top, -28cqw) + 139.683cqw),
+    106cqw calc(-1 * var(--case-top, -28cqw) + 139.683cqw),
+    106cqw calc(-1 * var(--case-top, -28cqw)),
+    6cqw calc(-1 * var(--case-top, -28cqw)));
+}
+.mdx-case__gloss::before {
+  background-image: linear-gradient(
+    112deg,
+    transparent 37%,
+    rgb(255 255 255 / 0.13) 41%,
+    rgb(255 255 255 / 0.02) 44%,
+    transparent 47%,
+    rgb(255 255 255 / 0.07) 51.5%,
+    transparent 55%
+  );
+}
+.mdx-case__rim {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 2px var(--next-ring, transparent), 0 0 22px 2px var(--next-ring, transparent);
+  opacity: 0;
+}
+.mdx-case[data-near] .mdx-case__rim {
+  opacity: 0.45;
+}
+/* The ivory insert carries the collection, actual mint identifier and one-of-one edition. It claims no grade,
+ * certification or external registry. Its geometry matches the exported marketplace case. */
+.mdx-case__label {
+  display: grid;
+  position: absolute;
+  left: 6cqw;
+  right: 6cqw;
+  top: 6cqw;
+  height: 17cqw;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2.6cqw;
+  padding: 0 5cqw 0 3.5cqw;
+  overflow: hidden;
+  border-radius: 1.8cqw;
+  background: linear-gradient(135deg, #fffdf6, #f6eeda 62%, #ece4d1);
+  box-shadow: 0 0 0 1px rgb(25 34 43 / 0.45), inset 0 1px 0 rgb(255 255 255 / 0.9), 0 0.6cqw 1cqw rgb(0 0 0 / 0.18);
+  color: #242b35;
+  text-align: left;
+}
+.mdx-case__name {
+  min-width: 0;
+  line-height: 1.15;
+}
+.mdx-case__name b {
+  display: block;
+  overflow: hidden;
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 6cqw;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.mdx-case__name span,
+.mdx-case__no span {
+  font-family: var(--font-addr);
+  font-size: 3.3cqw;
+  color: #555d64;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.mdx-case__no {
+  text-align: right;
+  line-height: 1.1;
+}
+.mdx-case__no b {
+  display: block;
+  font-family: var(--font-card-serif);
+  font-weight: 700;
+  font-size: 6cqw;
+  color: #242b35;
+  letter-spacing: 0.04em;
+}
+.mdx-case__holo {
+  --px: 0.5;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 2.2cqw;
+  overflow: clip;
+}
+.mdx-case__holo::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 300%;
+  background: linear-gradient(170deg, #f6c6dd, #f7eac2 12%, #c8f0de 24%, #c6e0f5 36%, #dccdf5 48%, #f6c6dd 60%, #f7eac2 72%, #c8f0de 84%, #c6e0f5);
+  transform: translateY(calc(var(--px) * -66.667%));
+}
+/* Every action lives outside the slab. At narrow case widths, three 44px icon targets fit in one row. */
+.mdx-case__controls {
+  display: flex;
+  position: relative;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: calc(6% + 14px);
+  z-index: 5;
+}
+/* The permission prompt can wrap onto a second row without changing the slab geometry. */
+.mdx-case__controls .mdx-card3d__chip {
+  position: static;
+  inset: auto;
+  height: 44px;
+  padding: 0 18px;
+  transform: none;
+  font-size: 13px;
+}
+.mdx-case[data-controls="none"] > .mdx-card3d__chip {
+  position: relative;
+  inset: auto;
+  display: table;
+  margin: calc(6% + 14px) auto 0;
+  transform: none;
+}
+.mdx-case__btn {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-sheet, #151c29);
+  color: var(--color-ink, #eef3fa);
+  font: 600 13px/1 var(--font-sans);
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: var(--shadow-raise), 0 0 0 1px rgb(56 217 255 / 0.32);
+  transition:
+    transform var(--t-fast, 160ms) var(--ease-spring),
+    background-color var(--t-fast, 160ms) var(--ease-room);
+}
+.mdx-case__btn-label {
+  display: none;
+}
+@container mdx-case (min-width: 232px) {
+  .mdx-case__btn {
+    width: auto;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+  .mdx-case__btn > svg {
+    display: none;
+  }
+  .mdx-case__btn-label {
+    display: inline;
+  }
+}
+.mdx-case .mdx-v3dbtn--case {
+  position: relative;
+  inset: auto;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  opacity: 1;
+  transform: none;
+}
+.mdx-case .mdx-v3dbtn--case::before {
+  content: none;
+}
+.mdx-case__btn:focus-visible {
+  outline: 2px solid var(--color-zap, #38d9ff);
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  .mdx-case__btn:hover {
+    transform: translateY(-1px);
+    background: rgb(22 30 46 / 0.94);
+  }
+}
+.mdx-case__btn:active {
+  transform: scale(0.97);
+}
+.mdx-case__scene:focus-visible {
+  outline: none;
+}
+.mdx-case__scene:focus-visible .mdx-case__plate--front .mdx-case__acrylic {
+  outline: 2px solid var(--color-zap, #38d9ff);
+  outline-offset: 4px;
+}
+
+/* ---------------------------------------------------------------- Inspect: the velvet stage (InspectStage.tsx)
+ * A night vitrine: a static spotlight from the top, a warm floor glow and a tier-tinted floor pool in place of a
+ * reflection (never -webkit-box-reflect). */
+.mdx-inspect {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: clip;
+  background: radial-gradient(ellipse 60% 70% at 50% 34%, #3b352d 0%, #1f1c18 52%, #100f0d 100%);
+  color: #f6f2ea;
+  outline: none;
+}
+/* The spotlight runs the full height of the stage (a fixed 900px box ended in a hard line on taller screens). */
+.mdx-inspect__spot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -10%;
+  bottom: 0;
+  pointer-events: none;
+  background: conic-gradient(
+    from 160deg at 50% 0%,
+    transparent 0deg,
+    rgb(255 246 228 / 0.1) 14deg,
+    rgb(255 246 228 / 0.13) 20deg,
+    rgb(255 246 228 / 0.1) 26deg,
+    transparent 40deg
+  );
+}
+.mdx-inspect__floor {
+  position: absolute;
+  left: 50%;
+  bottom: 7%;
+  width: 720px;
+  height: 120px;
+  margin-left: -360px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgb(255 240 215 / 0.12), transparent);
+}
+/* --iw measures the complete case, whose flow box already reserves the 28-unit labeled header and 6-unit foot.
+ * Fit its 173.683 / 112 aspect between the title and external Turn over bar without a second top reservation. */
+.mdx-inspect__stage {
+  /* The turntable stands upright: a small lean back, no turn (light.ts restLight and restAngle of rx 4, ry 0). */
+  --hand-rx: 4;
+  --hand-ry: 0;
+  --hand-a: 4;
+  --hand-px: 0.5;
+  --hand-py: 0.357;
+  --hand-lit: 0.329;
+  --iw: min(calc((100dvh - 190px) / 1.551), calc(100vw - 48px), 560px);
+  position: relative;
+  width: var(--iw);
+  margin: 0;
+}
+.mdx-inspect__pool {
+  position: absolute;
+  left: -30%;
+  right: -30%;
+  bottom: -18%;
+  height: 22%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side, var(--pool, #fff), transparent);
+  opacity: 0.35;
+}
+.mdx-inspect .mdx-card3d__ground {
+  opacity: 0.8;
+}
+.mdx-inspect__title {
+  position: absolute;
+  top: 22px;
+  left: 24px;
+  margin: 0;
+  font: 600 15px/1.3 var(--font-sans);
+  color: rgb(246 242 234 / 0.82);
+}
+.mdx-inspect__bar {
+  position: absolute;
+  bottom: max(26px, env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mdx-inspect__btn {
+  height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  color: #f6f2ea;
+  font: 600 14px/1 var(--font-sans);
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16);
+  transition: background-color var(--t-fast, 160ms) var(--ease-room);
+}
+@media (hover: hover) {
+  .mdx-inspect__btn:hover {
+    background: rgb(255 255 255 / 0.16);
+  }
+}
+.mdx-inspect__btn:focus-visible {
+  outline: 2px solid #f6f2ea;
+  outline-offset: 2px;
+}
+.mdx-inspect__close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+}
+/* "Tilt to shine" as a bar button (beside Turn over). */
+.mdx-inspect__bar .mdx-card3d__chip {
+  position: static;
+  height: 44px;
+  transform: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* ---------------------------------------------------------------- calm (spec section 10, owner override 2026-10-11)
+ * The Calm motion switch (html[data-motion="calm"]; the only thing that turns motion off, owner 2026-10-17):
+ * nothing moves, nothing is lost, and the card is still a posed, lit, holographic object. Calm is about movement,
+ * not depth: every card
+ * keeps its static rest pose (hand leans capped at 6 deg by --rest-k), its painted edge, its ground and its
+ * holo parked at the rest light. No body is ever created, so no idle orbit, scroll shimmer, gyro, sway, sweep or
+ * peek; the edge stays hidden; the back sits just in front of the face without the turn and side changes
+ * crossfade in 200 ms; face swaps crossfade (Card3D). The 3D viewer is the exception: a drag still turns its card,
+ * so it keeps the whole slab (face, edge, back). */
+:root[data-motion="calm"] {
+  --rest-k: 0.6;
+}
+:root[data-motion="calm"] .mdx-card3d:not(.mdx-v3d__card) .mdx-card3d__edges,
+:root[data-motion="calm"] .mdx-case__edges {
+  display: none;
+}
+:root[data-motion="calm"] .mdx-card3d:not(.mdx-v3d__card) .mdx-card3d__back:not(.mdx-card3d__back--face) {
+  opacity: 0;
+  transform: translateZ(calc(var(--t) / 2 + 0.4px));
+}
+:root[data-motion="calm"] .mdx-case__plate--back {
+  opacity: 0;
+  transform: translateZ(calc(var(--T) / 2 + 0.4px));
+}
+/* Match the inline hide rule before adding the selected side so its opacity cannot win the cascade. */
+:root[data-motion="calm"] .mdx-card3d:not(.mdx-v3d__card)[data-side="back"] .mdx-card3d__back:not(.mdx-card3d__back--face),
+:root[data-motion="calm"] .mdx-card3d[data-side="back"] .mdx-case__plate--back {
+  opacity: 1;
+}
+:root[data-motion="calm"] .mdx-card3d[data-side="back"] .mdx-card3d__faces,
+:root[data-motion="calm"] .mdx-card3d[data-side="back"] .mdx-case__plate--front {
+  opacity: 0;
+}
+:root[data-motion="calm"] .mdx-card3d__slot,
+:root[data-motion="calm"] .mdx-card3d__back,
+:root[data-motion="calm"] .mdx-card3d__faces,
+:root[data-motion="calm"] .mdx-case__plate {
+  transition: opacity var(--t-rm-fade) var(--ease-room) !important;
+}
+:root[data-motion="calm"] .mdx-case__scene {
+  cursor: default;
+}
+
+/* ---------------------------------------------------------------- forced colors and more contrast */
+@media (forced-colors: active) {
+  /* The finish, gloss, glints and bursts are pure light; the frame art carries the design. Edges stay. */
+  .mdx-card__lights,
+  .mdx-card3d__back-lights,
+  .mdx-card3d__fxb,
+  .mdx-case__gloss,
+  .mdx-case__holo,
+  .mdx-case__rim {
+    display: none;
+  }
+  .mdx-case__acrylic {
+    outline: 1px solid CanvasText;
+    outline-offset: -1px;
+  }
+}
+@media (prefers-contrast: more) {
+  .mdx-card__gloss,
+  .mdx-card__poke::after {
+    display: none;
+  }
+  .mdx-case__acrylic {
+    box-shadow:
+      inset 0 0 0 2px rgb(255 255 255 / 0.95),
+      0 0 0 1px rgb(29 27 24 / 0.6);
+  }
+}
+
+/* ---------------------------------------------------------------- View in 3D (owner 2026-10-17, view3d.tsx)
+ * The rotate button over a card's top right corner: on hover or keyboard focus of the card (always shown on touch
+ * screens, which have no hover), and the full-screen turntable viewer (TurntableStage.tsx). */
+.mdx-v3d-host {
+  position: relative;
+  -webkit-touch-callout: none;
+}
+.mdx-v3dbtn {
+  position: absolute;
+  z-index: 6;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  color: var(--color-neon, #3dffb5);
+  background: rgb(8 11 20 / 0.78);
+  border: 1px solid rgb(61 255 181 / 0.55);
+  box-shadow: 0 0 14px -2px rgb(61 255 181 / 0.55);
+  opacity: 0;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.mdx-v3d-host:focus-within > .mdx-v3dbtn,
+.mdx-v3dbtn:focus-visible {
+  opacity: 1;
+}
+.mdx-v3dbtn > svg {
+  transition: transform var(--t-base) var(--ease-room);
+}
+@media (hover: hover) and (pointer: fine) {
+  .mdx-v3d-host:hover > .mdx-v3dbtn {
+    opacity: 1;
+  }
+  .mdx-v3dbtn:hover {
+    transform: scale(1.06);
+    box-shadow: var(--glow-neon, 0 0 16px rgb(61 255 181 / 0.6));
+  }
+  :root:not([data-motion="calm"]) .mdx-v3dbtn:hover > svg {
+    transform: rotate(-18deg);
+  }
+}
+.mdx-v3dbtn:active {
+  transform: scale(0.96);
+}
+:root[data-motion="calm"] .mdx-v3dbtn {
+  transform: none;
+}
+.mdx-v3dbtn:focus-visible {
+  outline: 2px solid var(--color-zap, #38d9ff);
+  outline-offset: 2px;
+}
+@media (hover: none) {
+  .mdx-v3dbtn {
+    opacity: 0.94;
+    width: 32px;
+    height: 32px;
+    top: 6px;
+    right: 6px;
+  }
+}
+/* Keep the compact rotate glyph clear of the artwork while giving touch a 44px target. */
+@media (pointer: coarse) {
+  .mdx-v3dbtn::before {
+    content: "";
+    position: absolute;
+    inset: -7px;
+    border-radius: inherit;
+  }
+}
+/* The Home turntable, the Designs card and the coin case: always shown (one card on the page, no hover needed). */
+.mdx-v3dbtn--stage {
+  opacity: 1;
+}
+/* On the case: at the picture window's lower left, mirroring the Inspect pill (the art window is the same box on
+ * all fourteen frames). The host is an inline-size container, so this holds above the phone's button row too. */
+.mdx-casehost:has(> .mdx-v3dbtn--case) {
+  container-type: inline-size;
+}
+.mdx-v3dbtn--case {
+  right: auto;
+  left: calc(8.6cqw + 8px);
+  top: calc(100cqw * 88 / 63 * 0.533 - 38px);
+  width: 30px;
+  height: 30px;
+  opacity: 1;
+}
+
+/* The viewer: a night stage with a neon floor, the card on a turntable, its caption under it. */
+.mdx-v3d {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  color: var(--color-ink, #eef3fa);
+  background: radial-gradient(ellipse 70% 58% at 50% 44%, #16213d 0%, #0a0f1f 52%, #03040a 100%);
+  outline: none;
+  overflow: clip;
+  overscroll-behavior: contain;
+}
+.mdx-v3d__sky {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 50% 30% at 50% 72%, color-mix(in srgb, var(--color-neon, #3dffb5) 10%, transparent), transparent 70%),
+    radial-gradient(ellipse 40% 50% at 18% 20%, rgb(255 61 206 / 0.1), transparent 70%),
+    radial-gradient(ellipse 40% 50% at 82% 24%, rgb(56 217 255 / 0.1), transparent 70%);
+}
+.mdx-v3d__sky::after {
+  /* The neon grid floor (still). */
+  content: "";
+  position: absolute;
+  left: -25%;
+  right: -25%;
+  bottom: 0;
+  height: 42%;
+  background:
+    repeating-linear-gradient(to right, rgb(61 255 181 / 0.16) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(to bottom, rgb(61 255 181 / 0.16) 0 1px, transparent 1px 40px);
+  transform: perspective(420px) rotateX(58deg);
+  transform-origin: 50% 100%;
+  -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 90%);
+  mask-image: linear-gradient(to top, #000 10%, transparent 90%);
+}
+.mdx-v3d__bar {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: max(16px, env(safe-area-inset-top)) 16px 0;
+}
+.mdx-v3d__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-neon, #3dffb5);
+  text-shadow: 0 0 12px rgb(61 255 181 / 0.6);
+}
+.mdx-v3d__tools {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+.mdx-v3d__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink, #eef3fa);
+  background: rgb(21 28 41 / 0.72);
+  border: 1px solid rgb(148 178 220 / 0.22);
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+.mdx-v3d__btn:hover {
+  border-color: rgb(61 255 181 / 0.8);
+  box-shadow: 0 0 16px -2px rgb(61 255 181 / 0.5);
+}
+.mdx-v3d__btn:focus-visible,
+.mdx-v3d__go:focus-visible {
+  outline: 2px solid var(--color-zap, #38d9ff);
+  outline-offset: 2px;
+}
+.mdx-v3d__close {
+  width: 40px;
+  padding: 0;
+}
+.mdx-v3d__stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  touch-action: none;
+  cursor: grab;
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.mdx-v3d__stage[data-dragging] {
+  cursor: grabbing;
+}
+.mdx-v3d__zoom {
+  --W: min(70vw, 360px, calc((100dvh - 300px) * 63 / 88));
+  position: relative;
+  width: var(--W);
+  margin-bottom: calc(var(--W) * 0.1);
+  transform-origin: 50% 62%;
+}
+.mdx-v3d__card {
+  perspective: 1500px;
+  cursor: inherit;
+}
+/* The turntable: a glow pool, the disc's side band and the disc (a circle squashed into an ellipse, so the ring on
+ * it turns in perspective with the card: view3d writes only its rotate). */
+.mdx-v3d__pedestal {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--W) * 88 / 63);
+  width: calc(var(--W) * 1.5);
+  height: 0;
+  translate: -50% 0;
+  pointer-events: auto;
+}
+.mdx-v3d__pedestal > i {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+.mdx-v3d__ped-glow {
+  top: 0;
+  translate: 0 -50%;
+  scale: 1.25 0.42;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow-c, #3dffb5) 42%, transparent), transparent 100%);
+}
+.mdx-v3d__ped-side {
+  top: calc(var(--W) * 0.075);
+  translate: 0 -50%;
+  scale: 1 0.3;
+  background: linear-gradient(to bottom, #111832, #04060d 70%);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--color-hype, #ff3dce) 55%, transparent),
+    0 0 40px 4px color-mix(in srgb, var(--color-hype, #ff3dce) 30%, transparent);
+}
+.mdx-v3d__ped-top {
+  top: 0;
+  translate: 0 -50%;
+  scale: 1 0.3;
+  overflow: clip;
+  background: radial-gradient(closest-side, #222b4c 0%, #121a33 62%, #0a0f22 100%);
+  box-shadow:
+    inset 0 0 0 3px var(--color-neon, #3dffb5),
+    inset 0 0 26px 2px color-mix(in srgb, var(--color-neon, #3dffb5) 45%, transparent),
+    0 0 30px 2px color-mix(in srgb, var(--color-neon, #3dffb5) 45%, transparent);
+}
+.mdx-v3d__ped-top > b {
+  position: absolute;
+  inset: 7%;
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side, rgb(0 0 0 / 0.55) 0 22%, transparent 23% 100%),
+    repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--glow-c, #38d9ff) 70%, transparent) 0 2deg, transparent 2deg 15deg);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 60%, #000 62% 96%, transparent 98%);
+  mask-image: radial-gradient(closest-side, transparent 60%, #000 62% 96%, transparent 98%);
+}
+.mdx-v3d__step {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  translate: 0 -50%;
+  background: rgb(21 28 41 / 0.78);
+}
+.mdx-v3d__step--prev {
+  left: 16px;
+}
+.mdx-v3d__step--next {
+  right: 16px;
+}
+.mdx-v3d__cap {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px max(18px, env(safe-area-inset-bottom));
+  text-align: center;
+}
+.mdx-v3d__name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.mdx-v3d__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--color-slate, #9ba8bc);
+}
+.mdx-v3d__ticker {
+  color: var(--color-ink, #eef3fa);
+  font-weight: 600;
+}
+.mdx-v3d__go {
+  margin-top: 4px;
+}
+.mdx-v3d__hint {
+  font-size: 12px;
+  color: var(--color-slate, #9ba8bc);
+}
+.mdx-v3d__hint-touch {
+  display: none;
+}
+@media (hover: none) {
+  .mdx-v3d__hint-fine {
+    display: none;
+  }
+  .mdx-v3d__hint-touch {
+    display: inline;
+  }
+}
+@media (max-width: 767px) {
+  .mdx-v3d__zoom {
+    --W: min(64vw, 300px, calc((100dvh - 330px) * 63 / 88));
+  }
+  .mdx-v3d__btn {
+    padding: 0 12px;
+  }
+  .mdx-v3d__badge {
+    display: none;
+  }
+  .mdx-v3d__step {
+    top: auto;
+    bottom: 6px;
+    translate: none;
+  }
+  .mdx-v3d__name {
+    font-size: 20px;
+  }
+}
+@media (forced-colors: active) {
+  .mdx-v3d__pedestal,
+  .mdx-v3d__sky {
+    display: none;
+  }
+}
+
+/* Cards float freely: remove circular bases and floor pools throughout the site (owner, 2026-10-18).
+ * Ordinary cast shadows, card halos, foil lighting and the 3D motion stay with the cards. */
+.mdx-card3d__pedestal,
+.mdx-tt__plinth,
+.mdx-v3d__pedestal,
+.mdx-card3d__ground[data-ground="floor"],
+.mdx-inspect__floor,
+.mdx-inspect__pool {
+  display: none;
+}
+.mdx-card3d__ground[data-pool]::after {
+  content: none;
+}

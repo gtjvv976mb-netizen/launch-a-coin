@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-28",
+  "provider": "Higgsfield",
+  "kind": "existing completed jobs displayed; no new generation",
+  "card_jobs_presented": 96,
+  "galleries": [
+    {
+      "from": 2,
+      "to": 25,
+      "count": 24,
+      "all_found": true
+    },
+    {
+      "from": 26,
+      "to": 49,
+      "count": 24,
+      "all_found": true
+    },
+    {
+      "from": 50,
+      "to": 73,
+      "count": 24,
+      "all_found": true
+    },
+    {
+      "from": 74,
+      "to": 97,
+      "count": 24,
+      "all_found": true
+    }
+  ],
+  "source_ledger": "jobs-cards.json",
+  "website_jobs": "Previously presented once after completion",
+  "logo_job": "Single-image auto-widget; rejected design archived"
+}

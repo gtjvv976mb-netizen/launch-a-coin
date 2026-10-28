@@ -1,0 +1,184 @@
+/* CardDex: the original card-led application, in a vivid collector-card palette. */
+:root {
+  color-scheme: light;
+  --color-wall: #f6edcd;
+  --color-plinth: #fff9e8;
+  --color-sheet: #fffdf5;
+  --color-tint: #eee4cf;
+  --color-sleeve: #e2d4b7;
+  --color-wall-deep: #e2d4b7;
+  --color-track: rgb(129 88 24 / .09);
+  --color-wash: rgb(255 213 58 / .3);
+  --color-ink: #30271d;
+  --color-ink-hover: #211910;
+  --color-slate: #675a46;
+  --color-placeholder: #7a6d58;
+  --color-field: #ac9871;
+  --color-control-border: #9a8055;
+  --color-hairline: #cdbd98;
+  --color-rule: #dfd2b7;
+  --color-neon: #8b5915;
+  --color-neon-ink: #30251b;
+  --color-zap: #9b5d15;
+  --color-hype: #b62b2e;
+  --color-up: #12654e;
+  --color-up-hover: #0b513f;
+  --color-up-soft: rgb(18 101 78 / .1);
+  --color-down: #bb2939;
+  --color-down-hover: #9f2030;
+  --color-down-soft: rgb(187 41 57 / .09);
+  --cdx-frame: #8b5915;
+  --cdx-frame-deep: #211c16;
+  --cdx-yellow: #ffda45;
+  --cdx-yellow-light: #fff1a0;
+  --holo: linear-gradient(125deg, #fff8bc, #ffdb48 38%, #fff3a0 65%, #f6b92b);
+  --holo-flat: #ffda45;
+  --sheen: linear-gradient(105deg, transparent 30%, rgb(255 255 255 / .7) 48%, rgb(255 247 194 / .8) 52%, transparent 74%);
+  --glow-neon: 0 2px 0 #b78319, 0 0 0 1px #dbab2b, 0 5px 16px -8px rgb(133 90 0 / .35);
+  --glow-neon-hi: 0 2px 0 #b78319, 0 0 0 1px #bf8e15, 0 7px 20px -8px rgb(133 90 0 / .4);
+  --glow-zap: 0 0 0 1px #8b5915, 0 3px 14px -7px rgb(139 89 21 / .3);
+  --glow-focus: 0 0 0 4px rgb(139 89 21 / .16), 0 0 0 1px #8b5915;
+  --card-shadow: rgb(63 44 17 / .24);
+  --overlay: rgb(35 27 17 / .68);
+  --shadow-raise: 0 2px 6px -3px rgb(67 49 22 / .2);
+  --shadow-lift: 0 8px 24px -12px rgb(67 49 22 / .3);
+  --shadow-modal: 0 24px 90px -24px rgb(43 30 12 / .42);
+}
+html, body { background: var(--color-wall); color: var(--color-ink); }
+html { scrollbar-color: #b2955f #eee3c9; }
+::selection { background: #ffe16b; color: #30251b; }
+input, textarea { caret-color: #8b5915; }
+
+/* Obsidian navigation is the dark outer sleeve; content stays warm, readable card paper. */
+.mdx-rail, .mdx-mhead, .mdx-mobile-tabs {
+  --color-wall: #29231d;
+  --color-plinth: #251f19;
+  --color-sheet: #40372a;
+  --color-tint: #4b3f2b;
+  --color-ink: #fff8df;
+  --color-ink-hover: #fff;
+  --color-slate: #dfd0ac;
+  --color-placeholder: #d5c49d;
+  --color-neon: #ffe36a;
+  --color-zap: #ffe36a;
+  --color-control-border: #a89264;
+  --color-hairline: #796740;
+  --color-track: rgb(255 231 173 / .1);
+  background: linear-gradient(155deg, #3d3020, #211c16 68%, #171510);
+  color: var(--color-ink);
+}
+.mdx-rail { border-right: 3px solid #d7a72d; box-shadow: 3px 0 0 rgb(255 248 202 / .8); }
+.mdx-mhead { border-bottom: 2px solid #d7a72d; }
+.mdx-mobile-tabs { border-top: 3px solid #d7a72d; box-shadow: 0 -5px 18px -12px rgb(58 39 13 / .3); }
+.mdx-rail .mdx-link { color: var(--color-ink); }
+.mdx-display, .mdx-h1 { color: #503616; }
+.cdx-app .cdx-eyebrow::before { content: ""; display: inline-block; width: 5px; height: 8px; background: #c6323b; margin-right: 7px; transform: skewX(-15deg); }
+.mdx-rail-pill {
+  background: linear-gradient(100deg, rgb(255 222 74 / .17), rgb(255 239 161 / .05));
+  box-shadow: inset 0 0 0 1px rgb(255 228 118 / .55);
+}
+.mdx-tab[data-active="true"] { color: #ffe36a; text-shadow: none; }
+.mdx-tab__tile::before, .mdx-mtab__icon::before { box-shadow: inset 0 0 0 1px #fff0a1, 0 2px 5px rgb(41 27 11 / .2); }
+.mdx-tab__foil > i { background: conic-gradient(from 30deg, #ffec87, #e9ad26, #fff6bc, #ffce35, #ffec87); }
+.mdx-tabs__thumb, .mdx-tabs:not([data-measured]) .mdx-tabs__tab[aria-pressed="true"] {
+  box-shadow: 0 0 0 1px #bca16b, 0 2px 4px rgb(99 65 17 / .08);
+}
+[data-testid="local-demo-note"] {
+  background: #ffe575;
+  color: #57421d;
+  border-color: #d4a837;
+}
+[data-testid="local-demo-note"] .text-ink { color: #30271d; }
+.mdx-phone-tilt { background: #eee4cf; border-bottom: 1px solid #cdbd98; }
+.mdx-ticker, .mdx-ticker[data-empty] {
+  background: linear-gradient(90deg, #fff0aa, #fff9e8 22%, #fff9e8 78%, #eee1bf);
+  border-bottom: 1px solid #cdbd98;
+  box-shadow: none;
+}
+.mdx-ticker[data-activity="past"] { box-shadow: none; }
+.mdx-ticker__item[data-tone="hype"] { --tone: var(--color-hype); }
+.mdx-ticker__tag { text-shadow: none; }
+
+/* Paper, warm engraving and yellow foil recall a premium pack without changing the app layout. */
+.mdx-sky {
+  background:
+    radial-gradient(ellipse at 75% 3%, rgb(255 243 192 / .8), transparent 55%),
+    radial-gradient(ellipse at 10% 83%, rgb(255 224 103 / .5), transparent 55%),
+    #f6edcd;
+}
+.mdx-sky::after { background: repeating-linear-gradient(0deg, rgb(134 112 58 / .018) 0 1px, transparent 1px 4px); }
+.mdx-sky__a--1 {
+  background: radial-gradient(42% 46% at 18% 14%, rgb(255 211 54 / .28), transparent 75%), radial-gradient(40% 44% at 86% 22%, rgb(195 115 54 / .1), transparent 75%);
+}
+.mdx-sky__a--2 { background: radial-gradient(closest-side, rgb(200 148 53 / .14), transparent 78%); }
+.mdx-sky__stars {
+  opacity: .3;
+  background-image: radial-gradient(1.2px 1.2px at 12% 18%, #9b742d 50%, transparent 52%), radial-gradient(1.2px 1.2px at 68% 42%, #b28a22 50%, transparent 52%), radial-gradient(1px 1px at 32% 76%, #ad8848 50%, transparent 52%);
+}
+.mdx-sky__floor > i > b {
+  background-image: linear-gradient(to right, rgb(139 103 43 / .1) 1px, transparent 1px), linear-gradient(to bottom, rgb(139 103 43 / .1) 1px, transparent 1px);
+}
+.mdx-sky__floor::after {
+  background: linear-gradient(to bottom, #f6edcd, transparent 50%), linear-gradient(to right, #f6edcd, transparent 24%, transparent 76%, #f6edcd);
+}
+.mdx-holo-ink {
+  background-image: linear-gradient(100deg, transparent 38%, rgb(255 243 159 / .9) 50%, transparent 62%), linear-gradient(100deg, #8b5915, #9b6617 45%, #503616);
+}
+.mdx-vitrine__beam { background: radial-gradient(ellipse 34% 90% at 50% 0%, rgb(255 216 66 / .22), transparent 70%); }
+.mdx-vitrine__dust i { background: radial-gradient(circle, #fff7ce, rgb(255 216 66 / .7) 40%, transparent 72%); }
+.mdx-tt__plinth { display: none; }
+.cdx-app .mdx-plinth, .cdx-app .rounded-panel.bg-plinth, .cdx-app .cdx-archive__vitrine, .cdx-app .cdx-create-preview {
+  border: 2px solid #a67d2c;
+  background: linear-gradient(155deg, #fffdf1, #fff8de);
+  box-shadow: inset 0 0 0 4px #ffdf68, inset 0 0 0 5px rgb(181 136 26 / .3), 0 7px 22px -14px rgb(104 70 24 / .2);
+}
+.cdx-app .cdx-archive__vitrine { padding: 24px 22px 20px; }
+.cdx-app .cdx-create-preview { padding: 24px; }
+.cdx-app .cdx-design-row {
+  border-color: #cfbc91;
+  background: #fffdf1;
+  box-shadow: inset 0 1px 0 #fff;
+}
+.cdx-app .cdx-design-row[aria-pressed="true"] {
+  background: #fff0a7;
+  border-color: #8c6221;
+  box-shadow: inset 0 0 0 1px #8c6221;
+}
+.cdx-app .cdx-filter button[aria-pressed="true"] { background: #8b5915; color: #fff9df; border-color: #8b5915; }
+.cdx-app .cdx-filter button[aria-pressed="true"] span { opacity: .9; }
+.cdx-app .cdx-hero-turntable__controls button { background: #fff8df; border-color: #baa373; color: #6c4b1c; }
+.cdx-app .cdx-stock-reference { background: #f4e6bc; border-color: #cdbd98; border-radius: 7px; padding-inline: 10px; }
+.mdx-input { background: #fffdf4; border-color: #9a8055; color: #30271d; }
+.mdx-rail .mdx-input { background: #40372a; color: #fff8df; border-color: #ab925e; }
+.mdx-btn--outline { border: 1px solid #ae8a45; box-shadow: 0 2px 0 #decca6; }
+.mdx-btn--buy, .mdx-btn--sell, .mdx-side > button[aria-pressed="true"] { color: #fffdf0; }
+.mdx-btn--buy { box-shadow: 0 2px 0 #074935; }
+.mdx-btn--sell { box-shadow: 0 2px 0 #8f1726; }
+.mdx-side::before, .mdx-side[data-side="sell"]::before { box-shadow: none; }
+.mdx-dialog, .mdx-menu, .mdx-pop { border: 2px solid #a67d2c; }
+@media (hover: hover) and (pointer: fine) {
+  .cdx-app .cdx-design-row:hover { background: #fff4c7; border-color: #a67d2c; }
+  .cdx-app .cdx-filter button:hover:not([aria-pressed="true"]) { background: #f0dfb4; }
+  .mdx-btn--buy:hover:not([aria-disabled="true"]) { box-shadow: 0 2px 0 #074935, 0 5px 15px -9px #12654e; }
+  .mdx-btn--sell:hover:not([aria-disabled="true"]) { box-shadow: 0 2px 0 #8f1726, 0 5px 15px -9px #bb2939; }
+}
+@media (min-width: 1024px) {
+  .cdx-app .cdx-coin-market, .cdx-app .cdx-coin-actions {
+    border: 2px solid #a67d2c;
+    background: linear-gradient(155deg, #fffdf1, #fff8de);
+    box-shadow: inset 0 0 0 4px #ffdf68, inset 0 0 0 5px rgb(181 136 26 / .3), 0 7px 22px -14px rgb(104 70 24 / .2);
+  }
+  .cdx-app .mdx-coin [data-pane].rounded-panel.bg-plinth {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+@media (max-width: 580px) {
+  .cdx-app .cdx-archive__vitrine { padding: 26px 18px 22px; }
+  .cdx-app .cdx-create-preview { padding: 22px; }
+}
+@media (forced-colors: active) {
+  .mdx-rail, .mdx-mhead, .mdx-mobile-tabs, .mdx-sky { background: Canvas; }
+  .cdx-app .rounded-panel.bg-plinth, .cdx-app .cdx-archive__vitrine, .cdx-app .cdx-create-preview, .cdx-app .cdx-design-row { box-shadow: none; }
+}

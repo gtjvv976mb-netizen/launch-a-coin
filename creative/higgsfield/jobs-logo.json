@@ -1,0 +1,4 @@
+{
+  "error": "gpt_image_2_5 backend request failed (429): rate_limit_reached",
+  "error_code": "INVALID_ARGUMENT"
+}

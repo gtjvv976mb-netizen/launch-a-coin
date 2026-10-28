@@ -1,0 +1,34 @@
+{
+  "approved_credits": 5.5,
+  "submission": {
+    "jobs": [
+      {
+        "index": 0,
+        "job_id": "42622872-101e-4215-96e6-bc07a26827d8",
+        "status": "pending"
+      },
+      {
+        "index": 1,
+        "job_id": "45da1ae1-9179-46ca-86e7-46def31adc0c",
+        "status": "pending"
+      }
+    ],
+    "submitted_count": 2,
+    "failed_count": 0
+  },
+  "status": "2_completed",
+  "jobs": [
+    {
+      "index": 0,
+      "job_id": "42622872-101e-4215-96e6-bc07a26827d8",
+      "status": "completed",
+      "local_asset": "creative/higgsfield/website-concept.webp"
+    },
+    {
+      "index": 1,
+      "job_id": "45da1ae1-9179-46ca-86e7-46def31adc0c",
+      "status": "completed",
+      "local_asset": "app/public/assets/carddex/higgsfield/website-environment.webp"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "_readme": "Mainnet Config for 23-initialize.js, filled with the defaults the user accepted ('use defaults' to every line of refs/mainnet/user-decisions.md, 2026-10-06; values from refs/mainnet/fix-plan.md section 6.1). Copy to mainnet-config.json (same folder) on the setup machine and replace every REPLACE_ value with the public keys 10-keys.sh prints and your Squads addresses. Amounts are lamports (1 SOL = 1000000000) as strings. sol_usd_e6 'auto' takes the live Pyth price at initialize (the field is unused while price_source is 1, Pyth). The top-level fields go into initialize; the 'setup' block is applied by the setup transactions that follow it once the upgraded program is deployed (observers, collection, the new Config fields).",
+  "paused": 0,
+  "price_source": 1,
+  "price_authority": "11111111111111111111111111111111",
+  "treasury": "REPLACE_WITH_TREASURY_ADDRESS (decision D4: VAULT #1 of the settings multisig, not the multisig account Squads shows first; it must already hold >= 0.00065024 SOL; the scripts refuse anything else)",
+  "pyth_price_account": "7UVimffxr9ow1uXYxsr4LHAcV58mLzhmwaeKvJ1pjLiE",
+  "launch_fee": "20000000",
+  "min_bid": "50000000",
+  "protocol_fee_bps": 250,
+  "creator_royalty_bps": 500,
+  "max_conf_bps": 200,
+  "max_price_step_bps": 2000,
+  "mcap_multiplier": 1,
+  "sweep_flags": 7,
+  "sol_usd_e6": "auto",
+  "max_price_age_secs": 120,
+  "evolve_hold_slots": 18000,
+  "vanity_modulus": "11316496",
+  "vanity_residue": "8725513",
+  "tier_thresholds_usd": ["15000", "50000", "100000", "150000", "200000", "300000", "400000", "500000", "600000", "700000", "800000", "900000", "1000000"],
+  "card_uri_base": "https://mintdex.fun/c/",
+  "coin_uri_base": "https://mintdex.fun/m/",
+  "evolve_min_obs": 8,
+  "evolve_max_step": 2,
+  "min_price_interval_secs": 300,
+  "setup": {
+    "_readme": "Applied after initialize (fix-plan 4.6, 23-initialize.js on the upgraded program): set_observers, init_collection, then update_tier_config(tier_guard 1) with set_config_ext(mask 15). Roles: 1 COUNT, 2 CAP, 4 PAUSE (crank and standby 3 = count + cap; watcher 6 = cap + pause, never count).",
+    "evolve_min_observers": 1,
+    "observers": [
+      { "role": "crank", "roles": 3, "pubkey": "REPLACE_WITH_CRANK_PUBKEY (10-keys.sh; the Worker's CRANK_SECRET_KEY, set by you with 30-worker-secrets.sh)" },
+      { "role": "standby", "roles": 3, "pubkey": "REPLACE_WITH_STANDBY_OBSERVER_PUBKEY (10-keys.sh; kept offline)" },
+      { "role": "watcher", "roles": 6, "pubkey": "REPLACE_WITH_WATCHER_PUBKEY (10-keys.sh; the watcher Worker's key, set by you with 30-worker-secrets.sh)" }
+    ],
+    "register_flags": 3,
+    "tier_guard": 1,
+    "outside_royalty_bps": 0,
+    "ticket_authority": "REPLACE_WITH_TICKETS_PUBKEY (10-keys.sh; decision D11)",
+    "ticket_allowance": 300,
+    "collection": { "name": "MintDex Cards", "uri": "https://mintdex.fun/c/collection.json" },
+    "admin_multisig": "REPLACE_WITH_SETTINGS_MULTISIG_ADDRESS (decision D4: the Squads multisig S itself, not a vault; the scripts check that the treasury above is its vault #1)"
+  }
+}

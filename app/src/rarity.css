@@ -1,0 +1,107 @@
+/* Permanent rarity cues. The card's existing light engine supplies the moving finish above this layer. */
+.mdx-tiercraft {
+  --craft-bright: #efe4c9;
+  --craft-base: #c6b99a;
+  --craft-shade: #7d705d;
+  --craft-recess: #302822;
+  --craft-enamel: #77706b;
+  --craft-gem-light: #fff5de;
+  --craft-gem: #c4b68d;
+  --craft-gem-dark: #75653e;
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  /* Keep this in the face's ordinary paint order: sharp text needs no transformed backing layer. */
+}
+.mdx-tiercraft__bright { stop-color: var(--craft-bright); }
+.mdx-tiercraft__base { stop-color: var(--craft-base); }
+.mdx-tiercraft__shade { stop-color: var(--craft-shade); }
+.mdx-tiercraft__gem-light { stop-color: var(--craft-gem-light); }
+.mdx-tiercraft__gem { stop-color: var(--craft-gem); }
+.mdx-tiercraft__gem-dark { stop-color: var(--craft-gem-dark); }
+.mdx-tiercraft__recess { fill: var(--craft-recess); stroke: var(--craft-recess); opacity: .8; }
+rect.mdx-tiercraft__recess { fill: none; opacity: .54; }
+.mdx-tiercraft__keyline { opacity: .8; }
+.mdx-tiercraft__hairline { opacity: .65; }
+.mdx-tiercraft__engraving { stroke: var(--craft-recess); opacity: .8; }
+.mdx-tiercraft__pressed { fill: var(--craft-bright); opacity: .56; }
+.mdx-tiercraft__seal { fill: var(--craft-enamel); stroke: var(--craft-shade); }
+.mdx-tiercraft__emblem { opacity: .96; }
+.mdx-tiercraft__facet { stroke: var(--craft-gem-light); opacity: .72; }
+.mdx-tiercraft__crystal { opacity: .94; }
+.mdx-tiercraft__constellation { opacity: .84; }
+.mdx-tiercraft__reeding { opacity: .78; }
+.mdx-tiercraft__enamel { stroke: var(--craft-enamel); }
+.mdx-tiercraft__seal-detail { opacity: .62; }
+
+/* Entry cards retain their printed character; silver / copper only arrive with intaglio at IV. */
+.mdx-tiercraft[data-level="1"],
+.mdx-tiercraft[data-level="2"],
+.mdx-tiercraft[data-level="3"] {
+  --craft-bright: #e8dcc2; --craft-base: #e8dcc2; --craft-shade: #e8dcc2;
+}
+.mdx-tiercraft[data-tier="spark"] { --craft-enamel: #8b817e; --craft-recess: #4d4541; }
+.mdx-tiercraft[data-tier="surge"] { --craft-enamel: #2a4083; --craft-recess: #101e52; }
+.mdx-tiercraft[data-tier="nova"] { --craft-enamel: #8274b1; --craft-recess: #4e3f78; }
+.mdx-tiercraft[data-tier="tide"] {
+  --craft-bright: #e7f5f4; --craft-base: #a5c2c8; --craft-shade: #536a72;
+  --craft-enamel: #155a60; --craft-recess: #063b40;
+}
+.mdx-tiercraft[data-tier="apex"] {
+  --craft-bright: #f2e7d6; --craft-base: #bcb3a0; --craft-shade: #726a5d;
+  --craft-enamel: #7d581d; --craft-recess: #543d18;
+}
+.mdx-tiercraft[data-tier="ember"] {
+  --craft-bright: #ffe0c5; --craft-base: #d98c65; --craft-shade: #8f4c36;
+  --craft-enamel: #9a3227; --craft-recess: #6f231d;
+}
+.mdx-tiercraft[data-tier="bloom"] {
+  --craft-bright: #fff0f1; --craft-base: #e2bfcf; --craft-shade: #a1768d;
+  --craft-enamel: #853c55; --craft-recess: #4e2032;
+}
+.mdx-tiercraft[data-tier="mythic"] {
+  --craft-bright: #f8f7ff; --craft-base: #9fa8ba; --craft-shade: #4c4c63;
+  --craft-enamel: #191621; --craft-recess: #08070d;
+}
+.mdx-tiercraft[data-tier="aurora"] {
+  --craft-bright: #eeeaff; --craft-base: #bcb9e1; --craft-shade: #71638f;
+  --craft-enamel: #44215c; --craft-recess: #220f37;
+}
+.mdx-tiercraft[data-tier="relic"] {
+  --craft-bright: #ffe2b8; --craft-base: #c99260; --craft-shade: #7c4b2d;
+  --craft-enamel: #744629; --craft-recess: #4a2918;
+}
+.mdx-tiercraft[data-tier="frost"] {
+  --craft-bright: #f0ffff; --craft-base: #b2d6ec; --craft-shade: #6286a4;
+  --craft-enamel: #305b7d; --craft-recess: #25455b;
+  --craft-gem-light: #f0ffff; --craft-gem: #8bd8f1; --craft-gem-dark: #477cc6;
+}
+.mdx-tiercraft[data-tier="regal"] {
+  /* Rose metal keeps the ruby tier distinct from Legend's full gold body. */
+  --craft-bright: #ffe8de; --craft-base: #dcb5ab; --craft-shade: #94646b;
+  --craft-enamel: #670c30; --craft-recess: #3e0b24;
+  --craft-gem-light: #ffb5c0; --craft-gem: #bd1e51; --craft-gem-dark: #610a35;
+}
+.mdx-tiercraft[data-tier="celestial"] {
+  --craft-bright: #ebfaff; --craft-base: #bfc0ef; --craft-shade: #6b62af;
+  --craft-enamel: #29205f; --craft-recess: #171135;
+  --craft-gem-light: #c0f0ff; --craft-gem: #537cdb; --craft-gem-dark: #2c2e93;
+}
+.mdx-tiercraft[data-tier="legend"] {
+  --craft-bright: #fff5c6; --craft-base: #e6bf60; --craft-shade: #8b621e;
+  --craft-enamel: #095537; --craft-recess: #5d431a;
+  --craft-gem-light: #b5ffce; --craft-gem: #18875b; --craft-gem-dark: #06422f;
+}
+
+/* Miniature and Calm cards keep the same silhouette and hierarchy. Only hairline detail recedes. */
+.mdx-tiercraft[data-lite] .mdx-tiercraft__hairline,
+.mdx-tiercraft[data-lite] .mdx-tiercraft__engraving,
+.mdx-tiercraft[data-lite] .mdx-tiercraft__constellation { opacity: .45; }
+@media (forced-colors: active) {
+  .mdx-tiercraft { forced-color-adjust: none; }
+}

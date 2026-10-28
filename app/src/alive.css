@@ -1,0 +1,1258 @@
+/* ================================================================ alive.css
+ * Page, background and showcase placement for the Alive 3D build (refs/alive-3d-spec.md, SITE owns this file):
+ * plinth, aura, ghosts, dressing, sky, coverflow track, spotlight, odometer, rank glide, headline ink, Stepper
+ * pause, Calm switch. Card rules live in card3d.css (CARD).
+ *
+ * Rules (spec 9.1, 10.1): continuous motion is transform and opacity only (the headline sheen is the one small
+ * paint animation); every ambient loop is declared only for the full motion level (:root:not([data-motion])),
+ * so calm and lite start nothing (only the Calm switch sets calm: the device's reduced motion setting no longer
+ * does, owner 2026-10-17); loops pause under .is-paused
+ * (offscreen, hidden tab, open dialog: usePauseGate); every showcase host clips, so nothing adds scroll.
+ */
+
+/* ---------------------------------------------------------------- shared */
+
+/* Loops pause where nobody sees them. CSS animations only: the card engine gates its own frames. An open dialog
+ * (Radix marks the body data-scroll-locked) pauses the page's own loops that have no gate of their own: the rail
+ * tile and the headline ink (QA: both kept running behind dialogs). */
+.is-paused,
+.is-paused *,
+.is-paused *::before,
+.is-paused *::after,
+body[data-scroll-locked] .mdx-tab__foil > i,
+body[data-scroll-locked] .mdx-holo-ink {
+  animation-play-state: paused !important;
+}
+
+/* ---------------------------------------------------------------- sky (L9, hype arcade)
+ * Behind every page: a fixed layer with a slow aurora (three soft neon glows that drift and turn), a starfield that
+ * twinkles and a neon grid floor that scrolls toward you. Everything moves by transform or opacity only, on a handful
+ * of layers; the whole sky pauses while the tab is hidden (data-paused, AppShell) and under an open dialog. Lite
+ * keeps the still picture, calm too (nothing moves). */
+.mdx-sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: clip;
+  pointer-events: none;
+  contain: strict;
+  background: var(--color-wall);
+}
+.mdx-sky > i,
+.mdx-sky > b {
+  position: absolute;
+  display: block;
+}
+/* The aurora: two layers of soft neon glows (radial gradients, no filter) that drift and turn slowly. Two layers,
+ * not one per glow: each moving layer costs its full size in raster memory (spec 9.1 layer budget). */
+.mdx-sky__a--1 {
+  inset: -12%;
+  background:
+    radial-gradient(42% 46% at 18% 14%, rgb(61 255 181 / 0.2), rgb(61 255 181 / 0.06) 55%, transparent 75%),
+    radial-gradient(40% 44% at 86% 22%, rgb(56 217 255 / 0.18), rgb(56 130 255 / 0.06) 55%, transparent 75%);
+}
+.mdx-sky__a--2 {
+  left: 18%;
+  bottom: -34%;
+  width: 70%;
+  height: 80%;
+  background: radial-gradient(closest-side, rgb(255 61 206 / 0.16), rgb(140 80 255 / 0.06) 55%, transparent 78%);
+}
+/* Stars: two still tiles of tiny dots at different pitches (painted with the sky, no layer). */
+.mdx-sky__stars {
+  inset: 0;
+  opacity: 0.55;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 52%),
+    radial-gradient(1px 1px at 68% 42%, #cfe9ff 50%, transparent 52%),
+    radial-gradient(1.2px 1.2px at 32% 76%, #fff 50%, transparent 52%),
+    radial-gradient(1px 1px at 86% 84%, #bfffe6 50%, transparent 52%),
+    radial-gradient(1px 1px at 48% 8%, #ffd6f4 50%, transparent 52%),
+    radial-gradient(1.6px 1.6px at 22% 52%, rgb(255 255 255 / 0.7) 50%, transparent 55%),
+    radial-gradient(1.4px 1.4px at 74% 14%, rgb(168 245 255 / 0.7) 50%, transparent 55%);
+  background-size: 260px 260px;
+}
+/* The grid floor: a plane laid back in perspective at the foot of the screen; its lines scroll toward you by one
+ * cell (transform). It fades into the night toward the horizon and the sides under a still fog in the sky's own
+ * color (::after), not a mask: a mask over a moving layer re-renders the whole masked surface every frame. It sits
+ * under the aurora, so the glows still wash over it. */
+.mdx-sky__floor {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 42%;
+  perspective: 380px;
+  perspective-origin: 50% 0%;
+  overflow: clip;
+}
+.mdx-sky__floor::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, var(--color-wall) 0%, rgb(6 8 13 / 0) 48%),
+    linear-gradient(to right, var(--color-wall) 0%, rgb(6 8 13 / 0) 24%, rgb(6 8 13 / 0) 76%, var(--color-wall) 100%);
+}
+.mdx-sky__floor > i {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  top: 0;
+  height: 150%;
+  transform-origin: 50% 0;
+  transform: rotateX(62deg);
+  overflow: clip;
+}
+.mdx-sky__floor > i > b {
+  position: absolute;
+  inset: -64px 0 0;
+  display: block;
+  background-image:
+    linear-gradient(to right, rgb(61 255 181 / 0.17) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(56 217 255 / 0.16) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+/* A faint scanline sheen over the whole sky (static). */
+.mdx-sky::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom, rgb(255 255 255 / 0.018) 0 1px, transparent 1px 3px);
+}
+@keyframes mdx-aurora-1 {
+  from {
+    transform: translate3d(-3%, -2%, 0) rotate(-4deg) scale(1);
+  }
+  to {
+    transform: translate3d(4%, 5%, 0) rotate(5deg) scale(1.08);
+  }
+}
+@keyframes mdx-aurora-2 {
+  from {
+    transform: translate3d(0, 0, 0) scale(0.95);
+  }
+  to {
+    transform: translate3d(-22%, -12%, 0) scale(1.15);
+  }
+}
+@keyframes mdx-floor {
+  to {
+    transform: translate3d(0, 64px, 0);
+  }
+}
+:root:not([data-motion]) .mdx-sky__a--1 {
+  animation: mdx-aurora-1 34s var(--ease-drift, ease-in-out) infinite alternate;
+}
+:root:not([data-motion]) .mdx-sky__a--2 {
+  animation: mdx-aurora-2 42s var(--ease-drift, ease-in-out) -14s infinite alternate;
+}
+:root:not([data-motion]) .mdx-sky__floor > i > b {
+  animation: mdx-floor 3.2s linear infinite;
+}
+.mdx-sky[data-paused] *,
+body[data-scroll-locked] .mdx-sky * {
+  animation-play-state: paused !important;
+}
+/* The Inspect stage covers the screen: the sky behind it stops and drops its layers. */
+body:has(.mdx-inspect) .mdx-sky {
+  display: none;
+}
+/* Phones: a lighter sky (a shorter floor). */
+@media (max-width: 1023.98px) {
+  .mdx-sky__floor {
+    height: 32%;
+  }
+}
+
+/* ---------------------------------------------------------------- rail tile drift (L11)
+ * Over the active tab's foil tile, at full motion only: the same foil as an oversized sheet that drifts by
+ * transform over 12 s. Lite, calm, more contrast and forced colors keep the still foil underneath. */
+.mdx-tab__foil {
+  position: absolute;
+  inset: 0;
+  display: none;
+  border-radius: inherit;
+  overflow: clip;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-base) var(--ease-room);
+}
+.mdx-tab__foil > i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: 300%;
+  height: 300%;
+  background: var(--holo);
+  background-size: 100% 100%;
+  transform: translate(calc(var(--row, 0) * -12%), -33.333%);
+}
+.mdx-tab__foil::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.2);
+}
+.mdx-tab__tile > .mdx-icon {
+  z-index: 1;
+}
+@keyframes mdx-tile-drift {
+  from {
+    transform: translate(-8%, -26%);
+  }
+  to {
+    transform: translate(-52%, -40%);
+  }
+}
+@media (prefers-contrast: no-preference) {
+  /* Only the active tab's foil exists: an idle one would still cost a layer each. */
+  :root:not([data-motion]) .mdx-tab[data-active="true"] .mdx-tab__foil {
+    display: block;
+    opacity: 1;
+  }
+  :root:not([data-motion]) .mdx-tab[data-active="true"] .mdx-tab__foil > i {
+    animation: mdx-tile-drift 12s var(--ease-drift, ease-in-out) infinite alternate;
+    animation-delay: calc(var(--row, 0) * -2s);
+  }
+  :root:not([data-motion]) .mdx-tab[data-pending] .mdx-tab__foil {
+    opacity: 0.45;
+  }
+}
+@media (forced-colors: active) {
+  .mdx-tab__foil {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------- headline ink (L12)
+ * "card." in a deep holo ink (every stop at least 4.5:1 on the wall). A white sheen sweeps it once on load and
+ * every 9 s at full motion (the one allowed small paint animation). */
+.mdx-holo-ink {
+  background-image:
+    linear-gradient(100deg, rgb(255 255 255 / 0) 38%, rgb(255 255 255 / 0.85) 50%, rgb(255 255 255 / 0) 62%),
+    linear-gradient(100deg, #3dffb5 0%, #38d9ff 45%, #ff3dce 100%);
+  background-size:
+    300% 100%,
+    100% 100%;
+  background-position:
+    130% 0,
+    0 0;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 18px rgb(61 255 181 / 0.35));
+}
+@keyframes mdx-ink-once {
+  from {
+    background-position:
+      130% 0,
+      0 0;
+  }
+  to {
+    background-position:
+      -30% 0,
+      0 0;
+  }
+}
+@keyframes mdx-ink-loop {
+  0%,
+  100% {
+    background-position:
+      130% 0,
+      0 0;
+  }
+  0.01% {
+    background-position:
+      130% 0,
+      0 0;
+  }
+  16% {
+    background-position:
+      -30% 0,
+      0 0;
+  }
+  16.01%,
+  99.99% {
+    background-position:
+      130% 0,
+      0 0;
+  }
+}
+:root:not([data-motion="calm"]) .mdx-holo-ink {
+  animation: mdx-ink-once 1.6s var(--ease-sheen) 0.5s both;
+}
+:root:not([data-motion]) .mdx-holo-ink {
+  animation:
+    mdx-ink-once 1.6s var(--ease-sheen) 0.5s both,
+    mdx-ink-loop 9s linear 2.1s infinite;
+}
+
+/* ---------------------------------------------------------------- Home: the turntable vitrine (5.1)
+ * --W is the card's width: 260px under fit; at fit the size container's fill, so that the card (88/63 W) and the
+ * plinth hanging 0.2W under it both fit its height (QA: the plinth ran off the foot of a 1920x1080 screen), and
+ * the group (the prev ghost's 0.24W, the card, the 36px gap and the 240px caption) fits its width. The group
+ * sits centered: the ghosts have room on both sides and the stage no longer leaves an empty right half. */
+.mdx-lot {
+  --W: min(260px, calc(100vw - 32px));
+}
+/* Phones: the dots and Pause stay above the tab bar on the first screen (QA: hidden under it at 375x812). The
+ * card, its plinth room and the dots take 1.567W under a header block of about 430px. */
+@media (max-width: 1023.98px) {
+  .mdx-lot {
+    --W: min(260px, calc(100vw - 32px), max(200px, calc((100dvh - 430px) / 1.567)));
+  }
+}
+@media (min-width: 1280px) and (min-height: 720px) {
+  .mdx-lot {
+    --W: min(calc((100cqh - 8px) / 1.597), calc((100cqw - 290px) / 1.26));
+    justify-content: center;
+    padding-left: calc(var(--W) * 0.24);
+    padding-bottom: calc(var(--W) * 0.2);
+  }
+}
+.mdx-tt {
+  width: var(--W);
+  /* Under fit the plinth hangs below the card: room for it before the dots (which may sit on its foot). */
+  margin-bottom: calc(var(--W) * 0.17);
+  /* The featured card rests turned toward its caption (on the right at fit), lit from that side (light.ts
+   * restLight and restAngle of rx 5, ry 10). */
+  --hand-ry: 10;
+  --hand-a: 11.18;
+  --hand-px: 0.778;
+}
+@media (min-width: 1280px) and (min-height: 720px) {
+  .mdx-tt {
+    margin-bottom: 0;
+  }
+}
+.mdx-tt__card {
+  position: relative;
+  z-index: 3;
+  display: block;
+  -webkit-user-drag: none;
+}
+
+/* The plinth: a top ellipse (1.2W by 0.26W) whose center sits 0.06W under the card's bottom, a 3px holo rim
+ * behind it, a side band, and a pool of the tier's light standing in for a reflection. */
+.mdx-tt__plinth {
+  position: absolute;
+  left: calc(var(--W) * -0.1);
+  width: calc(var(--W) * 1.2);
+  top: calc(100% - var(--W) * 0.07);
+  height: calc(var(--W) * 0.27);
+  z-index: 1;
+  pointer-events: none;
+}
+.mdx-tt__plinth > i {
+  position: absolute;
+  display: block;
+}
+.mdx-tt__band {
+  left: 0;
+  right: 0;
+  top: calc(var(--W) * 0.13);
+  height: calc(var(--W) * 0.14);
+  border-radius: 0 0 50% 50% / 0 0 calc(var(--W) * 0.13) calc(var(--W) * 0.13);
+  background: linear-gradient(to bottom, #1a2233 0%, #10151f 60%, #0a0e15 100%);
+  box-shadow: 0 10px 30px -10px rgb(61 255 181 / 0.35);
+}
+.mdx-tt__rim {
+  left: -3px;
+  right: -3px;
+  top: -3px;
+  height: calc(var(--W) * 0.26 + 6px);
+  border-radius: 50%;
+  background: conic-gradient(from 200deg, #3dffb5, #38d9ff, #8b7bff, #ff3dce, #ffe45c, #3dffb5);
+  box-shadow: 0 0 22px rgb(61 255 181 / 0.55), 0 0 60px -10px rgb(255 61 206 / 0.45);
+}
+.mdx-tt__top {
+  left: 0;
+  right: 0;
+  top: 0;
+  height: calc(var(--W) * 0.26);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 40%, #1f2a3d 0%, #141b29 55%, #0c111a 100%);
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.3), inset 0 0 24px rgb(61 255 181 / 0.12);
+}
+.mdx-tt__pool {
+  left: 16%;
+  right: 16%;
+  top: calc(var(--W) * 0.03);
+  height: calc(var(--W) * 0.17);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 50%, var(--pool, #fff) 0%, rgb(255 255 255 / 0) 70%);
+  opacity: 0.6;
+  transition: background 600ms var(--ease-room);
+}
+
+/* The aura: a 1.6W disc of four soft glows in the tier's colors behind the card. Two layers crossfade. */
+.mdx-tt__aura {
+  position: absolute;
+  left: calc(var(--W) * -0.3);
+  top: calc(var(--W) * (44 / 63 - 0.8));
+  width: calc(var(--W) * 1.6);
+  height: calc(var(--W) * 1.6);
+  z-index: 0;
+  pointer-events: none;
+  /* The turning square must never widen the page: the disc clips it. */
+  overflow: clip;
+  border-radius: 50%;
+}
+.mdx-tt__aura-spin {
+  position: absolute;
+  inset: 0;
+}
+.mdx-tt__aura-spin > i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 30%, var(--a1) 0%, rgb(255 255 255 / 0) 36%),
+    radial-gradient(circle at 70% 32%, var(--a2) 0%, rgb(255 255 255 / 0) 34%),
+    radial-gradient(circle at 68% 72%, var(--a3) 0%, rgb(255 255 255 / 0) 34%),
+    radial-gradient(circle at 30% 68%, var(--a4) 0%, rgb(255 255 255 / 0) 36%);
+  opacity: 0;
+  transition: opacity 600ms var(--ease-room);
+}
+.mdx-tt__aura-spin > i[data-on] {
+  opacity: 0.5;
+}
+@keyframes mdx-aura {
+  to {
+    transform: rotate(360deg);
+  }
+}
+:root:not([data-motion]) .mdx-tt__aura-spin {
+  animation: mdx-aura 26s linear infinite;
+}
+
+/* The ghosts: the previous and next featured coins far behind, out of focus (set once, only their float moves).
+ * Each fades out toward its outer edge, so wherever the page clips it (the rail edge at x 224) there is no hard
+ * vertical cut (QA). */
+.mdx-tt__ghosts {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  perspective: 1200px;
+  perspective-origin: 50% 40%;
+  pointer-events: none;
+}
+.mdx-tt__ghost {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--W);
+  pointer-events: auto;
+  cursor: pointer;
+  transform: translate3d(calc(var(--W) * -0.26), calc(var(--W) * -0.03), -160px) rotateZ(-7deg);
+}
+.mdx-tt__ghost--next {
+  transform: translate3d(calc(var(--W) * 0.18), calc(var(--W) * -0.05), -200px) rotateZ(5deg);
+}
+@media (max-width: 1279.98px), (max-height: 719.98px) {
+  .mdx-tt__ghost {
+    transform: translate3d(calc(var(--W) * -0.3), calc(var(--W) * -0.04), -180px) rotateZ(-6deg);
+  }
+  .mdx-tt__ghost--next {
+    transform: translate3d(calc(var(--W) * 0.3), calc(var(--W) * -0.04), -180px) rotateZ(6deg);
+  }
+}
+.mdx-tt__lens {
+  filter: blur(3px) saturate(0.9);
+  opacity: 0.5;
+  transition: opacity var(--t-base) var(--ease-room);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 16%);
+  mask-image: linear-gradient(to right, transparent, #000 16%);
+}
+.mdx-tt__ghost--next .mdx-tt__lens {
+  -webkit-mask-image: linear-gradient(to left, transparent, #000 16%);
+  mask-image: linear-gradient(to left, transparent, #000 16%);
+}
+@media (hover: hover) {
+  .mdx-tt__ghost:hover .mdx-tt__lens {
+    opacity: 0.72;
+  }
+}
+@keyframes mdx-ghost-float {
+  from {
+    transform: translate3d(0, 3px, 0);
+  }
+  to {
+    transform: translate3d(0, -7px, 0);
+  }
+}
+:root:not([data-motion]) .mdx-tt__float {
+  animation: mdx-ghost-float 9s var(--ease-drift, ease-in-out) infinite alternate;
+}
+:root:not([data-motion]) .mdx-tt__ghost--next .mdx-tt__float {
+  animation-duration: 11s;
+  animation-delay: -4s;
+}
+
+/* "Drag to spin to the next card": first visit only, at the card's top right (5.1) just above it, never on its
+ * corner gem. 12px up, clear of the breathing card's rise (about 7px: at 6px the card's top edge touched it), and
+ * right-aligned, clear of "How it works" on narrow phones. A turn sweeps far past the card's box, so the chip
+ * goes the moment the card turns (index.tsx). Fades in, then out with its 6 s. */
+.mdx-tt__hint {
+  position: absolute;
+  top: -38px;
+  right: 0;
+  width: max-content;
+  z-index: 4;
+  display: inline-flex;
+  height: 26px;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-sheet);
+  box-shadow: var(--shadow-raise), 0 0 0 1px rgb(61 255 181 / 0.4), 0 0 14px -2px rgb(61 255 181 / 0.45);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-ink);
+  pointer-events: none;
+  animation: mdx-hint 6s var(--ease-room) both;
+}
+@keyframes mdx-hint {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  8%,
+  86% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+:root[data-motion="calm"] .mdx-tt__hint {
+  display: none;
+}
+
+/* "Tilt to shine" (iOS, after mount): on the plinth's top, under the card, never over its footer. */
+.mdx-tt__chip {
+  top: calc(100% + var(--W) * 0.035);
+  bottom: auto;
+}
+
+/* The vitrine's dressing (L8): bokeh, dust (clipped by the stage) and one light beam over the card. */
+.mdx-vitrine {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: clip;
+  pointer-events: none;
+}
+/* The beam falls from above the stage: the dressing fades in over the stage's top 18% (a mask, so the sky's glow
+ * shows through there instead of a wall-colored band), and the stage's top edge (under the phone header) never
+ * shows as a line. */
+.mdx-vitrine {
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%);
+  mask-image: linear-gradient(to bottom, transparent, #000 18%);
+}
+.mdx-vitrine__bokeh b {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--sz);
+  height: var(--sz);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--c) 0%, rgb(255 255 255 / 0) 68%);
+  opacity: 0.32;
+}
+.mdx-vitrine__beam {
+  position: absolute;
+  left: calc(50% - 210px);
+  top: -12%;
+  width: 420px;
+  height: 112%;
+  background: radial-gradient(ellipse 34% 90% at 50% 0%, rgb(120 255 220 / 0.22) 0%, rgb(120 255 220 / 0) 70%);
+  transform-origin: 50% 0;
+  opacity: 0.85;
+}
+.mdx-vitrine__dust > div {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+.mdx-vitrine__dust i {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 255 255 / 0.95) 0%, rgb(140 255 220 / 0.9) 40%, rgb(140 255 220 / 0) 72%);
+}
+/* At fit the card stands in the centered group: the beam falls on it. Its center is the stage's middle plus
+ * 0.12W minus 138px (half the gap and caption), with W estimated from the viewport (the lot's own size is not
+ * visible from here). */
+@media (min-width: 1280px) and (min-height: 720px) {
+  .mdx-vitrine__beam {
+    left: calc(50% - 348px + (100vh - 247px) * 0.075);
+  }
+}
+@keyframes mdx-bokeh {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(var(--dx), var(--dy), 0) scale(1.18);
+  }
+}
+@keyframes mdx-beam {
+  from {
+    transform: rotate(-3deg);
+  }
+  to {
+    transform: rotate(3deg);
+  }
+}
+@keyframes mdx-dust {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--dx), -140px, 0);
+  }
+}
+:root:not([data-motion]) .mdx-vitrine__bokeh b {
+  animation: mdx-bokeh var(--d) var(--ease-drift, ease-in-out) var(--del) infinite alternate;
+}
+:root:not([data-motion]) .mdx-vitrine__beam {
+  animation: mdx-beam 17s var(--ease-drift, ease-in-out) infinite alternate;
+}
+:root:not([data-motion]) .mdx-vitrine__dust > div {
+  animation: mdx-dust var(--d) linear var(--del) infinite;
+}
+/* The sky behind every page carries the glows now (hype arcade): the vitrine keeps three bokeh; phones also fewer
+ * motes. */
+.mdx-vitrine__bokeh b:nth-child(n + 4) {
+  display: none;
+}
+@media (max-width: 1023.98px) {
+  .mdx-vitrine__dust i:nth-child(n + 4) {
+    display: none;
+  }
+}
+/* Lite keeps the stage, without its extras; calm keeps nothing that moves. */
+:root[data-motion="lite"] .mdx-vitrine__dust,
+:root[data-motion="calm"] .mdx-vitrine,
+:root[data-motion="calm"] .mdx-tt__aura {
+  display: none;
+}
+
+/* The Stepper's Pause/Play (an auto-advancing carousel only): hidden under calm, where nothing advances. */
+.mdx-playbtn {
+  transition:
+    background-color var(--t-fast) var(--ease-room),
+    transform var(--t-press) var(--ease-spring);
+}
+@media (hover: hover) {
+  .mdx-playbtn:hover {
+    background: var(--color-track);
+  }
+}
+.mdx-playbtn:active {
+  transform: scale(0.94);
+}
+:root[data-motion="calm"] .mdx-playbtn {
+  display: none;
+}
+
+/* ---------------------------------------------------------------- Calm motion switch (10.2) */
+.mdx-switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 22px;
+  border-radius: var(--radius-pill);
+  background: rgb(148 178 220 / 0.18);
+  box-shadow: inset 0 0 0 1px rgb(150 180 230 / 0.16);
+  transition: background-color var(--t-fast) var(--ease-room);
+}
+.mdx-switch[data-on] {
+  background: var(--color-neon);
+  box-shadow: 0 0 12px rgb(61 255 181 / 0.5);
+}
+.mdx-switch[aria-disabled="true"] {
+  cursor: default;
+}
+.mdx-switch:not([data-ready]),
+.mdx-switch[aria-disabled="true"][data-on] {
+  opacity: 0.55;
+}
+.mdx-switch__thumb {
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-ink);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
+  transition: transform var(--t-base) var(--ease-spring);
+}
+.mdx-switch[data-on] .mdx-switch__thumb {
+  transform: translateX(14px);
+  background: var(--color-neon-ink);
+}
+
+/* ---------------------------------------------------------------- odometer (M19)
+ * The real text holds the width and baseline (and is what copy and screen readers get); the columns roll over it. */
+.mdx-odo {
+  position: relative;
+  display: inline-block;
+}
+.mdx-odo__text {
+  color: transparent;
+}
+.mdx-odo__roll {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  overflow: clip;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.mdx-odo__d {
+  display: block;
+  height: 1lh;
+  overflow: clip;
+}
+.mdx-odo__d > span {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(calc(var(--n, 0) * -1lh));
+  transition: transform 600ms var(--ease-room);
+}
+.mdx-odo__d b {
+  display: block;
+  height: 1lh;
+  font-weight: inherit;
+}
+
+/* ---------------------------------------------------------------- feeds (M20, M21) */
+
+/* Thumb tilt: a feed row's thumb turns a little toward you on hover. */
+@media (hover: hover) {
+  :root:not([data-motion="calm"]) .mdx-row .mdx-thumb {
+    transition: transform var(--t-fast) var(--ease-room);
+  }
+  :root:not([data-motion="calm"]) .mdx-row:hover .mdx-thumb {
+    transform: perspective(240px) rotateY(8deg);
+  }
+}
+
+/* Ladder rows (Designs): hovering a row tilts its frame mini. */
+.mdx-ladrow .mdx-mini {
+  transition: transform var(--t-fast) var(--ease-room);
+}
+@media (hover: hover) {
+  .mdx-ladrow:hover .mdx-mini {
+    transform: perspective(120px) rotateY(10deg);
+  }
+}
+
+/* ---------------------------------------------------------------- shelves (M7 to M9, L13) */
+
+/* The deck the shelf deals from and gathers to: a small stack at the shelf's top center (hidden at rest). It sits
+ * under the cards (z 0, before the rows in the DOM): a card dealt off it flies over it and a card that has landed
+ * covers it, so it never hides a face-up card's name (QA), and it stays below the phone's sticky header (z 30).
+ * Low enough that the gathered pile stays inside the shelf instead of spilling over the header row. */
+.mdx-shelf__deck {
+  position: absolute;
+  left: calc(50% - 22px);
+  top: 18px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* The parallax shelf (desktop, full motion, fine pointer): the shelf leans toward the pointer and cells sit at
+ * their own depths; a soft spotlight follows the pointer on the wall behind. The host fades out over its last
+ * 90px on every side, so the spot never shows the host's straight edges near the grid's border (QA). */
+.mdx-shelf__spothost {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: clip;
+  pointer-events: none;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, #000 90px, #000 calc(100% - 90px), transparent),
+    linear-gradient(to bottom, transparent, #000 90px, #000 calc(100% - 90px), transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent, #000 90px, #000 calc(100% - 90px), transparent),
+    linear-gradient(to bottom, transparent, #000 90px, #000 calc(100% - 90px), transparent);
+  mask-composite: intersect;
+}
+.mdx-shelf__spot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(61 255 181 / 0.16) 0%, rgb(56 217 255 / 0.06) 40%, rgb(56 217 255 / 0) 62%);
+  opacity: 0;
+  transition: opacity 400ms var(--ease-room);
+}
+.mdx-shelf--3d {
+  isolation: isolate;
+}
+/* 3D only while the pointer leans the shelf (data-lean): at rest it is flat and costs no layers. */
+@media (hover: hover) and (pointer: fine) {
+  :root:not([data-motion]) .mdx-shelf--3d[data-lean] {
+    perspective: 1800px;
+  }
+  :root:not([data-motion]) .mdx-shelf--3d[data-lean] :is(.mdx-shelf__rotor, .mdx-shelf__row, .mdx-shelf__grid, .mdx-shelf__cell) {
+    transform-style: preserve-3d;
+  }
+  :root:not([data-motion]) .mdx-shelf--3d[data-lean] .mdx-shelf__z {
+    transform: translateZ(var(--z, 0px));
+  }
+  :root:not([data-motion]) .mdx-shelf--3d[data-lean] .mdx-shelf__ledge {
+    transform: translateZ(-20px);
+  }
+  /* The flat row, grid and cell boxes at z 0 sat in front of the cards set further back and took their clicks
+   * (QA: 12 of 15 clicks on some cards missed the coin). While the shelf leans, only the cards themselves (and
+   * the shelf host, for the lean's own pointer events) are hit targets. */
+  :root:not([data-motion]) .mdx-shelf--3d[data-lean] :is(.mdx-shelf__rotor, .mdx-shelf__row, .mdx-shelf__grid, .mdx-shelf__cell) {
+    pointer-events: none;
+  }
+  :root:not([data-motion]) .mdx-shelf--3d[data-lean] .mdx-shelf__z {
+    pointer-events: auto;
+  }
+}
+:root[data-motion] .mdx-shelf__spothost {
+  display: none;
+}
+
+/* ---------------------------------------------------------------- Designs: the coverflow (5.4)
+ * --W is the center card's width. Side cards fan back on either side and slide on a change (420ms). */
+.mdx-cf__stage {
+  --W: min(260px, 72vw, max(160px, calc((100dvh - 470px) * 0.716)));
+}
+/* Desktop: the card leaves 5% of the stage's height above it for an Ascend's lift and swell, so where the stage is
+ * short the climbing card's face stays under the top clip below (266px wide at 1280x720, spec floor 264). */
+@media (min-width: 1024px) {
+  .mdx-cf__stage {
+    --W: min(calc(100cqh * 0.95 * 63 / 88), calc(100cqw * 0.5), 400px);
+  }
+}
+/* The stage clips (no scroll from the side cards), with a margin so an Ascend's lift is not cut flat at the top
+ * (browsers without overflow-clip-margin clip at the edge). It is its own stacking context: the center card's
+ * z-index stays inside it and can never rise over the phone's sticky header (QA: at some scroll positions the
+ * card drew over the header and took its taps). The top edge clips nearer, under the page subtitle: 20px into
+ * the 24px gap above the stage, 12px into the 16px gap on short screens (QA: at 1280x720 and 1440x900 the edge-on
+ * moment of each climb turn crossed the subtitle). The sides and the foot (the card's ground) keep the 32px. */
+.mdx-cf {
+  overflow-clip-margin: 32px;
+  isolation: isolate;
+  clip-path: inset(-20px -32px -32px);
+}
+@media (max-height: 820px) and (min-width: 1024px) {
+  .mdx-cf {
+    clip-path: inset(-12px -32px -32px);
+  }
+}
+.mdx-cf__center {
+  width: var(--W);
+  z-index: 21;
+}
+/* The center card's eye (owner override 2026-10-11: 1800px flattened it until it read as a picture; at 1200px its
+ * rest lean and slab read as a card in hand, like every other hand card). Its lean is smaller than the default so
+ * the coverflow stays balanced around it. */
+.mdx-cf__center .mdx-card3d {
+  perspective: 1200px;
+}
+.mdx-cf__center {
+  --hand-ry: -7;
+  --hand-a: 8.602;
+  --hand-px: 0.305;
+  --hand-lit: 0.608;
+}
+.mdx-cf__track {
+  position: absolute;
+  inset: 0;
+  perspective: 1400px;
+  perspective-origin: 50% calc(100% - var(--W) * 0.698);
+  pointer-events: none;
+}
+/* Desktop: the side cards fade out toward the stage's edges, so the outer ones never end in a hard vertical cut
+ * where the page clips them (QA: sliced at the rail edge, x 224). Phones keep their two neighbours peeking in
+ * from the screen edges (outside this box). */
+@media (min-width: 1024px) {
+  .mdx-cf__track {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+  }
+}
+.mdx-cf__item {
+  position: absolute;
+  bottom: 0;
+  left: calc(50% - var(--W) * 0.39);
+  width: calc(var(--W) * 0.78);
+  pointer-events: auto;
+  cursor: pointer;
+  transform: translate3d(var(--x), calc(var(--W) * -0.153), var(--z)) rotateY(var(--ry));
+  transition:
+    transform 420ms var(--ease-room),
+    opacity 420ms var(--ease-room);
+}
+/* A side card's contact shadow (MintCardFace draws none): a soft ellipse under its foot, no filter. It turns and
+ * blurs with the card, so it costs nothing per frame. */
+.mdx-cf__item::after {
+  content: "";
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  top: calc(100% - 4%);
+  height: 10%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(0 0 0 / 0.6), rgb(0 0 0 / 0));
+  pointer-events: none;
+}
+/* Phones: only the neighbors, peeking in at the screen edges. */
+@media (max-width: 1023.98px) {
+  .mdx-cf__item {
+    display: none;
+  }
+  .mdx-cf__item[data-near] {
+    display: block;
+    opacity: 0.6 !important;
+    transform: translate3d(calc(var(--W) * 0.86 * var(--sg, 1)), calc(var(--W) * -0.153), calc(var(--W) * -0.6))
+      rotateY(var(--ry));
+  }
+}
+
+/* ---------------------------------------------------------------- coin page: the case (5.2)
+ * The case rests turned a little toward the page (it stands in the left column), lit from that side (light.ts
+ * restLight of rx 5, ry 8). With the case label on screens 860px tall and up, the spacer above it grows to the
+ * label's height. */
+.mdx-casehost {
+  --hand-ry: 8;
+  --hand-a: 9.434;
+  --hand-px: 0.723;
+  --hand-lit: 0.657;
+}
+@media (min-width: 1280px) and (min-height: 860px) {
+  .mdx-case-spacer {
+    max-height: calc(264px * 0.22 + 8px);
+  }
+}
+@media (min-width: 1440px) and (min-height: 860px) {
+  .mdx-case-spacer {
+    max-height: calc(300px * 0.22 + 8px);
+  }
+}
+@media (min-width: 1680px) and (min-height: 860px) {
+  .mdx-case-spacer {
+    max-height: calc(340px * 0.22 + 8px);
+  }
+}
+
+/* ---------------------------------------------------------------- the empty binder (signed-out Portfolio)
+ * EmptyState hero: a held card back in its tray over a slow holo glow, two more backs fanned behind it that
+ * drift on their own phases. The glow turns inside a clipped disc (it never widens the page). */
+.mdx-fan {
+  --W: 150px;
+  position: relative;
+  width: var(--W);
+  margin-top: 12px;
+}
+@media (min-width: 1024px) {
+  .mdx-fan {
+    --W: 164px;
+  }
+}
+@media (min-width: 1440px) and (min-height: 860px) {
+  .mdx-fan {
+    --W: 204px;
+  }
+}
+.mdx-fan__hero {
+  position: relative;
+  z-index: 2;
+  width: var(--W);
+}
+.mdx-fan__card {
+  position: absolute;
+  bottom: 3%;
+  width: calc(var(--W) * 0.8);
+  z-index: 1;
+  pointer-events: none;
+}
+.mdx-fan__card--l {
+  left: calc(var(--W) * -0.36);
+  transform: rotate(-13deg);
+  transform-origin: 100% 100%;
+}
+.mdx-fan__card--r {
+  left: calc(var(--W) * 0.56);
+  transform: rotate(13deg);
+  transform-origin: 0 100%;
+}
+.mdx-fan__aura {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: calc(var(--W) * 2.3);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  z-index: 0;
+  overflow: clip;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.mdx-fan__aura > i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 30%, #ff3dce 0%, rgb(255 61 206 / 0) 36%),
+    radial-gradient(circle at 70% 34%, #38d9ff 0%, rgb(56 217 255 / 0) 34%),
+    radial-gradient(circle at 64% 72%, #3dffb5 0%, rgb(61 255 181 / 0) 34%),
+    radial-gradient(circle at 30% 68%, #8b7bff 0%, rgb(139 123 255 / 0) 36%);
+  opacity: 0.42;
+}
+@keyframes mdx-fan-float {
+  from {
+    transform: translate3d(0, 5px, 0) rotate(-2.5deg);
+  }
+  to {
+    transform: translate3d(0, -9px, 0) rotate(3deg);
+  }
+}
+:root:not([data-motion]) .mdx-fan__aura > i {
+  animation: mdx-aura 30s linear infinite;
+}
+:root:not([data-motion="calm"]) .mdx-fan__float {
+  animation: mdx-fan-float 7s var(--ease-drift, ease-in-out) infinite alternate;
+}
+:root:not([data-motion="calm"]) .mdx-fan__card--r .mdx-fan__float {
+  animation-duration: 8.6s;
+  animation-delay: -3.4s;
+}
+@media (forced-colors: active) {
+  .mdx-fan__aura {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------- live trade ticker (hype arcade)
+ * A 34px strip over the main column (under the phone header): the real activity feed scrolling right to left. The
+ * track holds the rows twice and slides by half its width, so the loop never jumps. It holds still under the
+ * pointer, with the Pause button, offscreen, in a hidden tab and under dialogs (.is-paused); calm makes it a still
+ * row that scrolls sideways by hand. */
+.mdx-ticker {
+  position: relative;
+  display: flex;
+  height: 34px;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  padding-left: 12px;
+  overflow: clip;
+  border-bottom: 1px solid rgb(61 255 181 / 0.14);
+  background: linear-gradient(90deg, rgb(61 255 181 / 0.07), rgb(13 18 27 / 0.82) 18%, rgb(13 18 27 / 0.82) 82%, rgb(255 61 206 / 0.07));
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.4), 0 10px 24px -18px rgb(61 255 181 / 0.6);
+  font-size: 12.5px;
+  line-height: 1;
+}
+.mdx-ticker[data-empty] {
+  background: rgb(13 18 27 / 0.6);
+}
+.mdx-ticker__live {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-neon);
+}
+.mdx-ticker[data-activity="past"] {
+  border-bottom-color: var(--color-hairline);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.4);
+}
+.mdx-ticker[data-activity="past"] .mdx-ticker__live {
+  color: var(--color-slate);
+}
+.mdx-ticker__past-dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: currentColor;
+}
+.mdx-ticker__view {
+  position: relative;
+  min-width: 0;
+  flex: 1 1 auto;
+  height: 100%;
+  overflow: clip;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 32px, #000 calc(100% - 40px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 32px, #000 calc(100% - 40px), transparent);
+}
+.mdx-ticker__track {
+  display: flex;
+  width: max-content;
+  height: 100%;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mdx-ticker__item {
+  flex: none;
+  padding-right: 22px;
+}
+.mdx-ticker__link {
+  display: inline-flex;
+  height: 26px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px 0 4px;
+  border-radius: var(--radius-pill);
+  color: var(--color-ink);
+  white-space: nowrap;
+  transition: background-color var(--t-fast) var(--ease-room);
+}
+@media (hover: hover) {
+  .mdx-ticker__link:hover {
+    background: var(--color-track);
+  }
+}
+.mdx-ticker__link .mdx-thumb {
+  border-radius: 50% !important;
+}
+.mdx-ticker__tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--tone, var(--color-zap));
+  text-shadow: 0 0 10px var(--tone, var(--color-zap));
+}
+.mdx-ticker__sym {
+  font-weight: 700;
+}
+.mdx-ticker__amt {
+  color: var(--tone, var(--color-slate));
+  font-weight: 600;
+}
+.mdx-ticker__item[data-tone="up"] {
+  --tone: var(--color-up);
+}
+.mdx-ticker__item[data-tone="down"] {
+  --tone: var(--color-down);
+}
+.mdx-ticker__item[data-tone="hype"] {
+  --tone: #ff7ae0;
+}
+.mdx-ticker__item[data-tone="tier"] {
+  --tone: color-mix(in oklab, var(--tk, #ffe45c), #fff 30%);
+}
+.mdx-ticker__item[data-tone="zap"] {
+  --tone: var(--color-zap);
+}
+.mdx-ticker__pause {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  color: var(--color-slate);
+  border-left: 1px solid rgb(150 180 230 / 0.1);
+  transition: color var(--t-fast) var(--ease-room);
+}
+@media (hover: hover) {
+  .mdx-ticker__pause:hover {
+    color: var(--color-ink);
+  }
+}
+.mdx-ticker__pause:focus-visible {
+  outline-offset: -3px;
+}
+@keyframes mdx-ticker {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+:root:not([data-motion="calm"]) .mdx-ticker__track {
+  animation: mdx-ticker var(--dur, 60s) linear infinite;
+}
+:root:not([data-motion="calm"]) .mdx-ticker:hover .mdx-ticker__track,
+:root:not([data-motion="calm"]) .mdx-ticker[data-held] .mdx-ticker__track {
+  animation-play-state: paused;
+}
+/* Still (calm): one copy of the rows, scrolled by hand. */
+:root[data-motion="calm"] .mdx-ticker__view {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+:root[data-motion="calm"] .mdx-ticker__item[aria-hidden],
+:root[data-motion="calm"] .mdx-ticker__pause {
+  display: none;
+}
+@media (max-width: 1023.98px) {
+  .mdx-ticker {
+    height: 44px;
+    padding-left: max(12px, env(safe-area-inset-left));
+  }
+  .mdx-ticker__pause {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ---------------------------------------------------------------- forced colors, more contrast */
+@media (forced-colors: active) {
+  .mdx-sky > *,
+  .mdx-sky::after,
+  .mdx-vitrine,
+  .mdx-tt__aura,
+  .mdx-tt__ghosts,
+  .mdx-tt__pool,
+  .mdx-shelf__spothost {
+    display: none;
+  }
+  .mdx-holo-ink {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+  }
+  .mdx-tt__rim {
+    background: CanvasText;
+  }
+  .mdx-switch {
+    outline: 1px solid CanvasText;
+  }
+}
+@media (prefers-contrast: more) {
+  .mdx-tt__lens {
+    opacity: 0.3;
+  }
+  .mdx-switch {
+    box-shadow: inset 0 0 0 1px var(--color-ink);
+  }
+}

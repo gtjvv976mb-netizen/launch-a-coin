@@ -1,0 +1,39 @@
+{
+  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "eslint.config.js"],
+  "compilerOptions": {
+    "target": "ES2022",
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
+
+    /* Bundler mode */
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": false,
+    "noEmit": true,
+    // Lets the root route import app-meta.json (page metadata committed by the
+    // marketplace meta API) at build time.
+    "resolveJsonModule": true,
+
+    /* Linting */
+    "skipLibCheck": true,
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@higgsfield-ai/icons/*": ["./src/lib/quanta-material-icons.ts"],
+      // M3 (refs/chain/m3-contract.md §7.4): the chain SDK from the repo, aliased the same way in vite.config.ts.
+      // "/api" and "/quote" import nothing heavy (main chunk safe); the full entry is for lazy chunks only and
+      // needs @noble/* installed in app/ (app:wallet adds them).
+      "@mintdex/chain-sdk/api": ["../chain/sdk/src/api/index.ts"],
+      "@mintdex/chain-sdk/quote": ["../chain/sdk/src/quote.ts"],
+      "@mintdex/chain-sdk": ["../chain/sdk/src/index.ts"],
+      "@noble/curves/*": ["./node_modules/@noble/curves/*"],
+      "@noble/hashes/*": ["./node_modules/@noble/hashes/*"]
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "carddex-local",
+  "main": "dist/server/server.js",
+  "compatibility_date": "2025-05-01",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+    "not_found_handling": "none"
+  },
+  "vars": {
+    "HF_ENV": "local",
+    "APP_SLUG": "carddex"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "carddex-local",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "STORAGE",
+      "bucket_name": "carddex-local"
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+// Reference fixture generator (scratchpad only): builds the Pyth post instructions with @pythnetwork/pyth-solana-receiver
+// 0.16.0 from a synthetic accumulator update, so the SDK encoders can be checked byte for byte without network access.
+const D = __dirname + "/node_modules/@pythnetwork/pyth-solana-receiver/dist/cjs";
+const anchor = require("@coral-xyz/anchor");
+const W = require(D + "/idl/wormhole_core_bridge_solana.cjs");
+const PO = require(D + "/idl/pyth_push_oracle.cjs");
+const RC = require(D + "/idl/pyth_solana_receiver.cjs");
+const pick = (m) => m.IDL || Object.values(m).find((x) => x && x.instructions);
+const { Keypair, PublicKey, Connection } = require("@solana/web3.js");
+const crypto = require("crypto");
+
+function u16be(n) { const b = Buffer.alloc(2); b.writeUInt16BE(n); return b; }
+function priceMessage(feedId, price, conf, expo, publish, prevPublish, ema, emaConf) {
+  const b = Buffer.alloc(1 + 32 + 8 + 8 + 4 + 8 + 8 + 8 + 8);
+  let o = 0; b.writeUInt8(0, o); o += 1; feedId.copy(b, o); o += 32;
+  b.writeBigInt64BE(price, o); o += 8; b.writeBigUInt64BE(conf, o); o += 8; b.writeInt32BE(expo, o); o += 4;
+  b.writeBigInt64BE(publish, o); o += 8; b.writeBigInt64BE(prevPublish, o); o += 8; b.writeBigInt64BE(ema, o); o += 8; b.writeBigUInt64BE(emaConf, o);
+  return b;
+}
+const seeded = (seed, n) => { const out = Buffer.alloc(n); let x = seed; for (let i = 0; i < n; i++) { x = (x * 1103515245 + 12345) >>> 0; out[i] = x >>> 24; } return out; };
+// a VAA-shaped buffer: version 1, guardian set index 4 (BE), 13 signatures of 66 bytes, then a body
+const sigs = 13;
+const vaa = Buffer.concat([Buffer.from([1]), Buffer.from([0, 0, 0, 4]), Buffer.from([sigs]), seeded(7, sigs * 66), seeded(9, 120)]);
+const feedId = Buffer.from("ef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d", "hex");
+const msg = priceMessage(feedId, 15_012_345_678n, 7_654_321n, -8, 1_790_000_000n, 1_789_999_999n, 15_001_000_000n, 6_000_000n);
+const proof = [seeded(11, 20), seeded(12, 20), seeded(13, 20)];
+const update = Buffer.concat([u16be(msg.length), msg, Buffer.from([proof.length]), ...proof]);
+const pnau = Buffer.concat([Buffer.from("504e4155", "hex"), Buffer.from([1, 0]), Buffer.from([0]), Buffer.from([0]), u16be(vaa.length), vaa, Buffer.from([1]), update]);
+
+const payer = Keypair.fromSeed(Buffer.alloc(32, 1));
+const encodedVaa = Keypair.fromSeed(Buffer.alloc(32, 2));
+const connection = new Connection("http://127.0.0.1:1"); // never called
+connection.getMinimumBalanceForRentExemption = async (n) => (n + 128) * 6960;
+const wallet = { publicKey: payer.publicKey, signTransaction: async (t) => t, signAllTransactions: async (t) => t };
+(async () => {
+  const provider = new anchor.AnchorProvider(connection, wallet, {});
+  const addrMod = require(D + "/address.cjs");
+  const r = {
+    wormhole: new anchor.Program(pick(W), addrMod.DEFAULT_WORMHOLE_PROGRAM_ID, provider),
+    pushOracle: new anchor.Program(pick(PO), addrMod.DEFAULT_PUSH_ORACLE_PROGRAM_ID, provider),
+    receiver: new anchor.Program(pick(RC), addrMod.DEFAULT_RECEIVER_PROGRAM_ID, provider),
+    getPriceFeedAccountAddress: (shard, feed) => {
+      const b = Buffer.alloc(2); b.writeUInt16LE(shard);
+      return PublicKey.findProgramAddressSync([b, Buffer.from(feed)], addrMod.DEFAULT_PUSH_ORACLE_PROGRAM_ID)[0];
+    },
+  };
+  // the package draws a fresh keypair for the encoded VAA: pin it for the fixture
+  const web3 = require("@solana/web3.js");
+  const realKeypair = web3.Keypair;
+  const orig = web3.Keypair.prototype.constructor;
+  const { postInstructions, closeInstructions } = await (async () => {
+    const vaaMod = require(D + "/vaa.cjs");
+    const post = await vaaMod.buildEncodedVaaCreateInstruction(r.wormhole, vaa, encodedVaa);
+    const init = await r.wormhole.methods.initEncodedVaa().accounts({ encodedVaa: encodedVaa.publicKey }).instruction();
+    const w1 = await r.wormhole.methods.writeEncodedVaa({ data: vaa.subarray(0, vaaMod.VAA_SPLIT_INDEX), index: 0 }).accounts({ draftVaa: encodedVaa.publicKey }).instruction();
+    const w2 = vaa.length > vaaMod.VAA_SPLIT_INDEX ? await r.wormhole.methods.writeEncodedVaa({ data: vaa.subarray(vaaMod.VAA_SPLIT_INDEX), index: vaaMod.VAA_SPLIT_INDEX }).accounts({ draftVaa: encodedVaa.publicKey }).instruction() : null;
+    const addr = require(D + "/address.cjs");
+    const verify = await r.wormhole.methods.verifyEncodedVaaV1().accounts({ draftVaa: encodedVaa.publicKey, guardianSet: addr.getGuardianSetPda(vaaMod.getGuardianSetIndex(vaa), r.wormhole.programId) }).instruction();
+    const { parseAccumulatorUpdateData } = require("@pythnetwork/price-service-sdk");
+    const parsed = parseAccumulatorUpdateData(pnau);
+    const up = await r.pushOracle.methods.updatePriceFeed({ merklePriceUpdate: parsed.updates[0], treasuryId: 7 }, 0, [...feedId]).accounts({
+      config: addr.getConfigPda(r.receiver.programId), encodedVaa: encodedVaa.publicKey, priceFeedAccount: r.getPriceFeedAccountAddress(0, feedId),
+      pythSolanaReceiver: r.receiver.programId, treasury: addr.getTreasuryPda(7, r.receiver.programId),
+    }).instruction();
+    const close = await r.wormhole.methods.closeEncodedVaa().accounts({ encodedVaa: encodedVaa.publicKey }).instruction();
+    return { postInstructions: [post.instruction, init, w1, ...(w2 ? [w2] : []), verify, up], closeInstructions: [close] };
+  })();
+  const j = (ix) => ({ programId: ix.programId.toBase58(), keys: ix.keys.map((k) => [k.pubkey.toBase58(), k.isSigner, k.isWritable]), data: Buffer.from(ix.data).toString("hex") });
+  const out = {
+    source: "@pythnetwork/pyth-solana-receiver 0.16.0 (synthetic accumulator update; generated in the scratchpad, see chain/sdk/test/pyth.test.ts)",
+    pnau: pnau.toString("base64"),
+    payer: payer.publicKey.toBase58(),
+    encodedVaa: encodedVaa.publicKey.toBase58(),
+    treasuryId: 7,
+    rentPerByteAndOverhead: "(len + 128) * 6960",
+    post: postInstructions.map(j),
+    close: closeInstructions.map(j),
+    priceFeedAccount: r.getPriceFeedAccountAddress(0, feedId).toBase58(),
+  };
+  console.log(JSON.stringify(out, null, 1));
+})().catch((e) => { console.error(e); process.exit(1); });

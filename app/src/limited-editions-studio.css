@@ -1,0 +1,62 @@
+/* One gallery extends the existing token-preview workbench; category changes never replace its draft. */
+.mdx-limited-studio .mdx-meme-studio__categories {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.mdx-limited-studio .mdx-meme-studio__categories button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-inline: 12px;
+}
+.mdx-limited-studio__count { color: var(--color-slate); font-size: 11px; font-variant-numeric: tabular-nums; }
+.mdx-limited-studio .mdx-meme-studio__theme { margin: 10px 0 0; }
+.mdx-limited-ownership {
+  margin: 0 0 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-hairline);
+}
+.mdx-limited-ownership h3 {
+  margin: 0 0 14px;
+  color: var(--color-ink);
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 650;
+}
+.mdx-limited-ownership__outcomes { display: grid; gap: 16px; margin: 0; }
+.mdx-limited-ownership__outcomes > div { display: grid; gap: 4px; }
+.mdx-limited-ownership__outcomes dt { color: var(--color-ink); font-size: 13px; font-weight: 600; line-height: 1.5; }
+.mdx-limited-ownership__outcomes dd,
+.mdx-limited-ownership__body p {
+  max-width: 53ch;
+  color: var(--color-slate);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.mdx-limited-ownership__details { margin-top: 16px; }
+.mdx-limited-ownership__details summary {
+  width: fit-content;
+  min-height: 44px;
+  padding-block: 11px;
+  color: var(--color-ink);
+  font-size: 13px;
+  line-height: 1.7;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mdx-limited-ownership__details summary::marker { color: var(--meme-accent); }
+.mdx-limited-ownership__body { padding: 6px 0 4px; }
+.mdx-limited-ownership__body p + p { margin-top: 12px; }
+.mdx-limited-ownership__selection { display: grid; gap: 10px; margin: 0 0 14px; }
+.mdx-limited-ownership__selection > div { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 10px; }
+.mdx-limited-ownership__selection dt,
+.mdx-limited-ownership__selection dd { font-size: 12px; line-height: 1.7; }
+.mdx-limited-ownership__selection dt { color: var(--color-slate); }
+.mdx-limited-ownership__selection dd { min-width: 0; color: var(--color-ink); overflow-wrap: anywhere; }
+.mdx-limited-ownership__selection dd span { color: var(--color-slate); }
+.mdx-limited-ownership__mint dd { font-family: var(--font-mono); font-size: 11px; }
+.mdx-limited-ownership__body .mdx-limited-ownership__preview { font-size: 11px; }
+@media (max-width: 640px) {
+  .mdx-limited-studio .mdx-meme-studio__categories { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

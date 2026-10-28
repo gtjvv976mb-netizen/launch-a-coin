@@ -1,0 +1,2359 @@
+/* MintDex brand layer: Holo Soft (refs/soft-modern-delta.md). Warm pearl canvas, floating paper panels,
+ * pill controls, one foil from the Holo Seal. Cards stay the most colorful objects; every minted card sits in
+ * a tray concentric with its corner. Shadows are warm and belong only to things that float (asides, raised
+ * controls, hover, menus, toasts, dialogs). Card rules (.mdx-card*) belong to the card renderer: leave them. */
+
+
+/* ---------------------------------------------------------------- fonts */
+
+/* Chrome: Instrument Sans (variable wght 400 to 700, wdth 75 to 100). */
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("/fonts/instrument-sans-latin-wdth-normal.woff2") format("woff2");
+  font-weight: 400 700;
+  font-stretch: 75% 100%;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("/fonts/instrument-sans-latin-ext-wdth-normal.woff2") format("woff2");
+  font-weight: 400 700;
+  font-stretch: 75% 100%;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* Addresses and transaction hashes only. */
+@font-face {
+  font-family: "Fragment Mono";
+  src: url("/fonts/fragment-mono-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Chrome titles and identifiers: Newsreader, cut to wght 500 to 700 with opsz pinned at 28 (40 KB instead of
+ * 132 KB; backlog P1-29: display, h1 and plates use 500, the active Levels plate 600, the wordmark 700). Roman only. */
+@font-face {
+  font-family: "Newsreader";
+  src: url("/fonts/newsreader-latin-opsz-normal.woff2") format("woff2");
+  font-weight: 500 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Newsreader";
+  src: url("/fonts/newsreader-latin-ext-opsz-normal.woff2") format("woff2");
+  font-weight: 500 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* Metric-matched fallback so the swap does not shift titles: Georgia is 2.7% wider than Newsreader 500. */
+@font-face {
+  font-family: "Newsreader Fallback";
+  src: local("Georgia");
+  size-adjust: 97.3%;
+  ascent-override: 75.5%;
+  descent-override: 27.2%;
+  line-gap-override: 0%;
+}
+
+/* Card only (unchanged faces). */
+@font-face {
+  font-family: "Libre Caslon Text";
+  src: url("/fonts/libre-caslon-text-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Libre Caslon Text";
+  src: url("/fonts/libre-caslon-text-400i.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Libre Caslon Text";
+  src: url("/fonts/libre-caslon-text-700.woff2") format("woff2");
+  font-weight: 700 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Courier Prime";
+  src: url("/fonts/courier-prime-400.woff2") format("woff2");
+  font-weight: 400 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Courier Prime";
+  src: url("/fonts/courier-prime-700.woff2") format("woff2");
+  font-weight: 600 900;
+  font-display: swap;
+}
+
+/* ---------------------------------------------------------------- variants */
+
+/* Short desktop screens (height 820 or less): tighter padding and the collapse rules. */
+@custom-variant short (@media (max-height: 820px) and (min-width: 1024px));
+/* Wider asides and Coin columns. */
+@custom-variant wide (@media (min-width: 1440px));
+@custom-variant xwide (@media (min-width: 1680px));
+/* The full no-scroll template: 1280x720 and up. */
+@custom-variant fit (@media (min-width: 1280px) and (min-height: 720px));
+
+/* ---------------------------------------------------------------- tokens (soft-modern delta section 3) */
+
+@theme static {
+  /* Hype arcade (owner direction 2026-10-17): a near-black ground, neon accents, glow on what you press. The
+   * surface names (wall, plinth, sheet, tint, sleeve, wall-deep) are kept so every utility keeps working; their
+   * values are the dark ramp now. Body text (ink, slate) is at least 7:1 and 4.5:1 on every panel. */
+  --color-wall: #06080d; /* canvas: content ground and rail ground (the aurora shows through above it) */
+  --color-plinth: #0d121b; /* panel: asides, content panels, dialogs, menus, mobile bars */
+  --color-sheet: #151c29; /* fields, active rail pill, segmented thumb, secondary buttons, wallet card */
+  --color-tint: #182131; /* row hover on panel, chip buttons, Buy | Sell track, key hint */
+  --color-sleeve: #080b11; /* the tray behind every minted card, nowhere else */
+  --color-wall-deep: #121826; /* skeletons on the canvas */
+  --color-track: rgb(148 178 220 / 0.1); /* segmented tracks, select pills, ghost hover, progress and slider tracks */
+  --color-wash: rgb(61 255 181 / 0.16); /* arrival wash on a new feed row, start color only */
+
+  /* Ink and text */
+  --color-ink: #eef3fa; /* text, focus, chart line */
+  --color-ink-hover: #ffffff;
+  --color-slate: #9ba8bc; /* secondary text, inactive tabs, column headers, ticks, identifiers (7:1 on plinth) */
+  --color-placeholder: #8592a6; /* placeholder inside sheet fields only (5:1 on sheet) */
+  --color-field: #3a465b; /* decorative rules and leader dots */
+  --color-control-border: #5d6d85; /* interactive boundaries: at least 3:1 on sheet and panel surfaces */
+  --color-hairline: #263044; /* chart grid, table header rule, ledge line */
+  --color-rule: #1a2232; /* row dividers on panel */
+
+  /* Neon accents: mint leads the brand, electric cyan and hot magenta back it up. */
+  --color-neon: #3dffb5; /* primary buttons, active nav, the brand glow */
+  --color-neon-ink: #021a10; /* labels on a neon fill (13:1) */
+  --color-zap: #38d9ff; /* focus rings, links on hover, secondary glow */
+  --color-hype: #ff3dce; /* tier-ups, launches, the hot accent */
+
+  /* Market: green and red only ever mean the market, always with a sign or a triangle. */
+  --color-up: #2ee59d;
+  --color-up-hover: #52f0b1; /* Buy fill hover */
+  --color-up-soft: rgb(46 229 157 / 0.12); /* change pill background, up */
+  --color-down: #ff5d7d;
+  --color-down-hover: #ff7a94; /* Sell fill hover */
+  --color-down-soft: rgb(255 93 125 / 0.13); /* change pill background, down */
+
+  /* Foil stops, sampled from the Holo Seal symbol. Four meanings only (delta section 8). */
+  --color-holo-pink: #f6c6dd;
+  --color-holo-butter: #f7eac2;
+  --color-holo-mint: #c8f0de;
+  --color-holo-sky: #c6e0f5;
+  --color-holo-lilac: #dccdf5;
+
+  /* Radius roles (chrome had 0). Not the shadcn --radius-sm|md|lg|xl aliases in styles.css. */
+  --radius-chip: 6px; /* "/" key hint, tiny tags */
+  --radius-row: 12px; /* list row hover, ladder rows, menu items, quick amount chips, chart tooltip, skeletons */
+  --radius-field: 14px; /* inputs, rail tabs and rail pill, buttons inside .mdx-pair rows */
+  --radius-pop: 18px; /* menus, popovers, toasts, wallet card, dropzone */
+  --radius-panel: 24px; /* content panels, phone panels and dialogs, mobile tab bar top corners */
+  --radius-aside: 28px; /* full height asides, the Launch form panel, desktop dialogs */
+  --radius-pill: 999px; /* every button, segmented tracks and thumbs, Buy | Sell, select pills, chips, tracks, dots */
+  /* Backlog token contract aliases (P0-1): buttons and bottom sheets pick up the roles above. */
+  --radius-btn: var(--radius-pill);
+  --radius-sheet: var(--radius-panel);
+
+  /* Shadows: six, cool black (the dark ramp), plus a hairline of light on the top edge of raised things. */
+  --shadow-ring: 0 0 0 1px rgb(150 180 230 / 0.09);
+  --shadow-rest: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 0 0 1px rgb(150 180 230 / 0.08), 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 30px -12px rgb(0 0 0 / 0.7);
+  --shadow-raise: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 0 0 1px rgb(150 180 230 / 0.1), 0 3px 8px -2px rgb(0 0 0 / 0.5);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.4), 0 12px 24px -10px rgb(0 0 0 / 0.7);
+  --shadow-float: 0 0 0 1px rgb(150 180 230 / 0.12), 0 6px 14px -4px rgb(0 0 0 / 0.5), 0 22px 44px -16px rgb(0 0 0 / 0.8);
+  --shadow-modal: 0 0 0 1px rgb(150 180 230 / 0.14), 0 10px 30px -8px rgb(0 0 0 / 0.6), 0 44px 90px -30px rgb(0 0 0 / 0.9), 0 0 80px -20px rgb(61 255 181 / 0.18);
+
+  /* Motion easings. No --ease-in / --ease-out here: those are Tailwind defaults that components/ui reads
+   * (Tailwind's --ease-in already equals the backlog's cubic-bezier(.4, 0, 1, 1)). No linear() anywhere. */
+  --ease-room: cubic-bezier(0.2, 0.8, 0.2, 1); /* entrances, color, hover */
+  --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1); /* about 6% overshoot: thumbs, rail pill, card lift, press release, dialogs, toasts */
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1); /* exits only */
+  --ease-sheen: cubic-bezier(0.45, 0, 0.25, 1); /* the primary sheen sweep */
+
+  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Chrome titles and identifiers only. A new name: the card guard pins --font-serif and --font-display. */
+  /* Hype arcade: titles are Instrument Sans at its condensed, heavy end (the Newsreader faces stay declared above
+   * for anything that still names them). */
+  --font-title: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-addr: "Fragment Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-card-serif: "Libre Caslon Text", Georgia, "Times New Roman", serif;
+  --font-card-mono: "Courier Prime", ui-monospace, Menlo, monospace;
+  /* Card only: MintCard's "Your art here" placeholder uses the font-display utility. */
+  --font-display: var(--font-card-serif);
+}
+
+:root {
+  --card-shadow: rgba(0, 0, 0, 0.55); /* contact shadow, read by .mdx-card__shadow and .mdx-cardback */
+  --overlay: rgb(2 4 9 / 0.72); /* dialog backdrop, no blur */
+  --rail-w: 224px;
+  /* The foil: a small surface approximation of the Holo Seal's blob gradient. */
+  /* The chrome foil is neon now (the card faces keep their own pastel holo stops above). */
+  --holo: linear-gradient(125deg, #3dffb5 0%, #38d9ff 38%, #8b7bff 66%, #ff3dce 100%);
+  --holo-flat: #3dffb5; /* flat fallback: forced colors and print */
+  --sheen: linear-gradient(105deg, transparent 30%, rgb(255 255 255 / 0.5) 46%, rgb(200 255 240 / 0.55) 52%, rgb(255 255 255 / 0.5) 58%, transparent 74%);
+  /* Neon glows (box-shadow lists): primary buttons, active nav, focus. */
+  --glow-neon: 0 0 0 1px rgb(61 255 181 / 0.9), 0 0 14px rgb(61 255 181 / 0.45), 0 0 34px -6px rgb(61 255 181 / 0.5);
+  --glow-neon-hi: 0 0 0 1px rgb(120 255 205 / 1), 0 0 18px rgb(61 255 181 / 0.65), 0 0 48px -4px rgb(61 255 181 / 0.6);
+  --glow-zap: 0 0 0 1px rgb(56 217 255 / 0.55), 0 0 16px -2px rgb(56 217 255 / 0.45);
+  --glow-focus: 0 0 0 4px rgb(56 217 255 / 0.22), 0 0 18px rgb(56 217 255 / 0.35);
+  /* Durations (delta 3.4). Stagger is capped at 10 items (240ms). */
+  --t-press: 100ms;
+  --t-fast: 160ms;
+  --t-base: 220ms;
+  --t-slow: 300ms;
+  --t-progress: 700ms;
+  --t-sheen: 900ms;
+  --t-wash: 1600ms;
+  --t-shimmer: 1600ms;
+  --stagger: 24ms;
+  /* Backlog P0-1 names, as aliases of the delta durations above. */
+  --dur-press: var(--t-press);
+  --dur-fast: var(--t-fast);
+  --dur-base: var(--t-base);
+  --dur-slow: var(--t-slow);
+  --dur-celebrate: 1100ms;
+}
+/* A registered color so tier fills can crossfade (Levels climb, Coin progress). Not --accent: the card owns that name. */
+@property --tier {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #3dffb5;
+}
+::selection {
+  background: var(--color-neon);
+  color: var(--color-neon-ink);
+}
+
+/* Card guard: the card keeps its faces whatever the chrome does. The inherited
+ * text settings below reproduce what the card always inherited (Courier Prime,
+ * regular, left aligned) so a chrome ancestor can never restyle it. */
+.mdx-card {
+  --font-serif: var(--font-card-serif);
+  --font-display: var(--font-card-serif);
+  --font-mono: var(--font-card-mono);
+  font-family: var(--font-card-mono);
+  font-weight: 400;
+  font-style: normal;
+  font-stretch: 100%;
+  line-height: 1.5;
+  letter-spacing: normal;
+  text-align: left;
+  text-transform: none;
+}
+
+/* Data numerals: condensed 85, medium, tabular. */
+@utility num {
+  font-family: var(--font-sans);
+  font-stretch: 85%;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+/* Contract addresses and transaction hashes. Fragment Mono ships 400 only: never synthesize bold. */
+@utility addr {
+  font-family: var(--font-addr);
+  font-size: 12.5px;
+  line-height: 1.3;
+  letter-spacing: 0;
+  font-weight: 400;
+  font-synthesis: none;
+}
+
+@layer base {
+  html,
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    min-height: 100dvh;
+  }
+  /* Focus: an electric cyan ring with a glow (outline for the shape, the glow where nothing else draws a shadow). */
+  :focus-visible {
+    outline: 2px solid var(--color-zap);
+    outline-offset: 2px;
+  }
+  :where(a, summary, [role="button"], [tabindex], .mdx-link, .mdx-tab, .mdx-mtab, .mdx-row):focus-visible {
+    box-shadow: var(--glow-focus);
+  }
+  /* Every ring is rounded (delta 13.3): text links, the logo link and plain buttons have no radius of their
+   * own, so their ring takes a soft 6px corner. :where keeps this at zero specificity, so any element with its
+   * own radius (pills, fields, rows) keeps that shape. Section titles that take focus (focusNear) too. */
+  :where(a, button, summary, [role="button"], [tabindex], [data-focus-home]):focus-visible {
+    border-radius: 6px;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+  /* No double-tap zoom delay on anything you press (backlog P0-1). */
+  a,
+  button,
+  [role="button"],
+  input,
+  select,
+  textarea,
+  label,
+  summary {
+    touch-action: manipulation;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.mdx-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-hairline) transparent;
+}
+.mdx-noscrollbar {
+  scrollbar-width: none;
+}
+.mdx-noscrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------------------------------------------------------------- card: moved to card3d.css (CARD owns every .mdx-card rule) */
+
+
+/* ---------------------------------------------------------------- chrome components
+ * Layered so Tailwind utilities on the same element always win. Every custom :hover sits inside
+ * @media (hover: hover), so a tap never leaves a hover style behind (backlog P0-1). */
+
+@layer components {
+  /* Type roles (delta section 5). Newsreader (--font-title) sets only the display line, page titles, the
+   * wordmark and plates: never under 15px, never italic, never a control, row, stat, caption name or section
+   * title. Everything you work in is Instrument Sans. */
+  .mdx-display {
+    font-family: var(--font-title);
+    font-size: clamp(36px, 6.4vh, 54px);
+    line-height: 1;
+    font-weight: 700;
+    font-stretch: 78%;
+    letter-spacing: -0.015em;
+    color: var(--color-ink);
+    text-wrap: balance;
+    text-shadow: 0 0 28px rgb(61 255 181 / 0.18);
+  }
+  .mdx-h1 {
+    font-family: var(--font-title);
+    font-size: 30px;
+    line-height: 1;
+    font-weight: 700;
+    font-stretch: 80%;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+    /* Accent guard: room for accented capitals and descenders inside truncate, layout neutral. Newsreader's
+     * ring on A reaches 0.90em against a 0.735em ascent, so at 30px on a 1.0 line it needs 5px above the line box. */
+    padding-block: 6px 4px;
+    margin-block: -6px -4px;
+  }
+  /* Section title: sans 16/600 (was serif 18). */
+  .mdx-h2 {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.25;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+  /* Featured caption name (Home, Levels, Launch preview): sans 26/600. Coin names are user entered and the
+   * Caption truncates, so it keeps a 4px accent guard. */
+  .mdx-name {
+    font-family: var(--font-sans);
+    font-size: 26px;
+    line-height: 1.15;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--color-ink);
+    padding-block: 4px;
+    margin-block: -4px;
+  }
+  /* Identifiers, not data: "No. 004", Roman design numerals, guide step numbers. */
+  .mdx-plate {
+    font-family: var(--font-title);
+    font-weight: 600;
+    font-stretch: 85%;
+    font-variant-numeric: lining-nums tabular-nums;
+    letter-spacing: 0;
+  }
+  .mdx-small {
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--color-slate);
+  }
+  .mdx-micro {
+    font-size: 12px;
+    line-height: 1.3;
+    font-weight: 500;
+    color: var(--color-slate);
+  }
+  /* Unit after a value: same size, sans 500, slate ("14.78 SOL"). */
+  .mdx-unit {
+    font-family: var(--font-sans);
+    font-stretch: 100%;
+    font-weight: 500;
+    font-variant-numeric: normal;
+    color: var(--color-slate);
+  }
+
+  /* ------------------------------------------------ signature: trays, ledge, leaders, panels, captions */
+
+  /* The ledge every card stands on keeps its 5px layout box; its line is one faded hairline at the top
+   * edge, painted behind the trays (the ledge is never positioned above a pocket). */
+  .mdx-ledge {
+    height: 5px;
+    background: linear-gradient(to right, transparent, var(--color-hairline) 8%, var(--color-hairline) 92%, transparent) top / 100% 1px no-repeat;
+  }
+  /* The tray every minted card sits in, closed on all four sides and concentric with the card's 1/8 in
+   * corner (the percentage form on the tray box: 0.6px off on shelves, 1.2px on featured trays). Drawn
+   * outside the box with a negative inset, so it changes no layout and no fit math. Never shadowed. Wraps
+   * .mdx-lift, never the reverse: on hover the card rises out of its tray while the tray stays put. */
+  .mdx-pocket {
+    --pocket: 6px;
+    position: relative;
+    isolation: isolate;
+  }
+  /* A soft recess the card stands in (owner override 2026-10-11: the flat cream tray framed every card like a
+   * sticker): shaded under its top lip, a lit bottom lip, the card's own contact shadow on its floor. Static
+   * paint, inset shadows only. */
+  .mdx-pocket::before {
+    content: "";
+    position: absolute;
+    inset: calc(var(--pocket) * -1);
+    border-radius: calc(5.04% + var(--pocket)) / calc(3.61% + var(--pocket));
+    background:
+      linear-gradient(180deg, rgb(0 0 0 / 0.35), rgb(0 0 0 / 0) 28%, rgb(61 255 181 / 0) 80%, rgb(61 255 181 / 0.06)),
+      var(--color-sleeve);
+    box-shadow:
+      inset 0 2px 6px -1px rgb(0 0 0 / 0.7),
+      inset 0 1px 1px rgb(0 0 0 / 0.5),
+      inset 0 -1px 0 rgb(120 200 255 / 0.12),
+      0 1px 0 rgb(120 200 255 / 0.06),
+      0 0 0 1px rgb(150 180 230 / 0.07);
+    pointer-events: none;
+    z-index: -1;
+  }
+  .mdx-pocket--featured {
+    --pocket: 12px;
+  }
+  /* An empty pocket on a binder page (Market, few cards): the tray holds only a card's dashed outline, at the
+   * card's own corner, so it reads as room for a card and never as a card or a skeleton. */
+  .mdx-slot {
+    border: 1.5px dashed var(--color-hairline);
+    border-radius: 5.04% / 3.61%;
+  }
+  @media (max-width: 1023.98px) {
+    .mdx-pocket {
+      --pocket: 4px;
+    }
+    .mdx-pocket--featured {
+      --pocket: 8px;
+    }
+  }
+  /* Dotted leaders for label-to-figure definition rows (Caption rows, trade quote list only): round 2px
+   * dots at a 5px pitch, copied from the card's own stat rows. The label truncates first; the dots never
+   * shrink below 8px; the value never wraps. */
+  .mdx-leaders > div {
+    display: flex;
+    align-items: baseline;
+  }
+  .mdx-leaders dt {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .mdx-leaders dd {
+    flex: 1 0 auto;
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .mdx-leaders dd::before {
+    content: "";
+    flex: 1 1 8px;
+    min-width: 8px;
+    height: 2px;
+    margin-left: 8px;
+    background: radial-gradient(circle, var(--color-field) 0.9px, transparent 1.15px) 0 50% / 5px 2px repeat-x;
+    transform: translateY(-3px);
+  }
+  /* Paper panel. Content panels carry a 1px ring only; full height asides add .mdx-aside (below). */
+  .mdx-plinth {
+    background: color-mix(in srgb, var(--color-plinth) 90%, transparent);
+    padding: 20px;
+    border-radius: var(--radius-aside);
+    box-shadow: var(--shadow-ring);
+  }
+  /* main sets these: --gutter is the float inset of an aside, --bleed how far it runs through main's padding. */
+  .mdx-main {
+    --gutter: 0px;
+    --bleed: calc(var(--main-pad) - var(--gutter));
+  }
+  @media (min-width: 1024px) {
+    .mdx-main {
+      --gutter: 12px;
+    }
+    .mdx-aside {
+      margin-block: calc(var(--bleed) * -1);
+      margin-right: calc(var(--bleed) * -1);
+      border-radius: var(--radius-aside);
+      box-shadow: var(--shadow-rest);
+    }
+  }
+  /* Short screens (1280x720, 1366x768): asides are flush with only their inner corners rounded, so the
+   * float costs no height. */
+  @media (min-width: 1024px) and (max-height: 820px) {
+    .mdx-main {
+      --gutter: 0px;
+    }
+    .mdx-aside {
+      border-radius: var(--radius-aside) 0 0 var(--radius-aside);
+    }
+  }
+  .mdx-caption {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  /* Shelf caption: 56px strip including the ledge (5 ledge + 10 space + 20 line 1 + 18 line 2 + 3). */
+  .mdx-gridcap {
+    height: 56px;
+    min-width: 0;
+    padding-top: 15px;
+  }
+  .mdx-gridcap__name {
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+  a:focus-visible .mdx-gridcap__name {
+    text-decoration-line: underline;
+  }
+  @media (hover: hover) {
+    a:hover .mdx-gridcap__name {
+      text-decoration-line: underline;
+    }
+  }
+  /* Frame mini (FrameMini): a 1px ink hairline just outside the art, so pale frames (Frost's ice holo, Nova's lilac)
+   * keep an edge on the canvas and the panel. Round like the card it names. */
+  .mdx-mini {
+    border-radius: 1.5px;
+    outline: 1px solid rgb(220 235 255 / 0.28);
+    outline-offset: 0;
+  }
+  /* Card back (.mdx-cardback): moved to card3d.css. */
+
+  /* ------------------------------------------------ navigation */
+
+  /* Rail tab (the rail sits on the canvas). One sliding sheet pill marks the active tab; the active tab's
+   * icon tile wears the foil (a mini Holo Seal). Active reads without color: sheet pill, weight 600, foil
+   * tile behind an ink glyph. */
+  .mdx-tab {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    height: 40px;
+    align-items: center;
+    gap: 10px;
+    padding: 0 8px;
+    border-radius: var(--radius-field);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--color-slate);
+    transition:
+      color var(--t-fast) var(--ease-room),
+      background-color var(--t-fast) var(--ease-room);
+  }
+  @media (hover: hover) {
+    .mdx-tab:hover:not([data-active="true"]) {
+      background: var(--color-track);
+      color: var(--color-ink);
+    }
+  }
+  .mdx-tab[data-active="true"] {
+    color: var(--color-neon);
+    font-weight: 600;
+    text-shadow: 0 0 12px rgb(61 255 181 / 0.45);
+  }
+  .mdx-tab:focus-visible {
+    outline-offset: -2px; /* inset ring: never clipped by the rail's overflow */
+  }
+  .mdx-tab__tile {
+    position: relative;
+    display: grid;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    place-items: center;
+    border-radius: 8px;
+  }
+  .mdx-tab__tile::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--holo);
+    background-size: 300% 300%;
+    background-position: calc(var(--row, 0) * 18%) 50%; /* each row catches the foil at a different angle */
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.2), 0 0 12px rgb(61 255 181 / 0.5);
+    opacity: 0;
+    transform: scale(0.7);
+    transition:
+      opacity var(--t-base) var(--ease-room),
+      transform var(--t-base) var(--ease-spring);
+  }
+  .mdx-tab[data-active="true"] .mdx-tab__tile::before {
+    opacity: 1;
+    transform: none;
+  }
+  .mdx-tab__tile > .mdx-icon {
+    position: relative;
+  }
+  /* The glyph on the lit neon tile is dark ink, so it keeps its contrast. */
+  .mdx-tab[data-active="true"] .mdx-tab__tile > .mdx-icon {
+    color: var(--color-neon-ink);
+  }
+  .mdx-rail-pill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 0;
+    height: 40px;
+    pointer-events: none;
+    border-radius: var(--radius-field);
+    background: linear-gradient(90deg, rgb(61 255 181 / 0.14), rgb(61 255 181 / 0.04));
+    box-shadow:
+      inset 0 0 0 1px rgb(61 255 181 / 0.45),
+      0 0 18px -4px rgb(61 255 181 / 0.45);
+    transform: translateY(calc(var(--i, 0) * 40px));
+    transition:
+      transform var(--t-slow) var(--ease-spring),
+      opacity var(--t-fast) var(--ease-room);
+  }
+  /* Mobile tab bar cell: the active icon sits on a foil pill. */
+  .mdx-mtab {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--color-slate);
+    transition: color var(--t-fast) var(--ease-room);
+  }
+  .mdx-mtab[data-active="true"] {
+    color: var(--color-neon);
+    font-weight: 600;
+  }
+  .mdx-mtab[data-active="true"] .mdx-mtab__icon > .mdx-icon {
+    color: var(--color-neon-ink);
+  }
+  .mdx-mtab__icon {
+    position: relative;
+    display: grid;
+    width: 48px;
+    height: 28px;
+    place-items: center;
+    border-radius: var(--radius-pill);
+    transition: transform var(--t-press) var(--ease-room);
+  }
+  .mdx-mtab__icon::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--holo);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.2), 0 0 14px rgb(61 255 181 / 0.55);
+    opacity: 0;
+    transform: scale(0.7);
+    transition:
+      opacity var(--t-base) var(--ease-room),
+      transform var(--t-base) var(--ease-spring);
+  }
+  .mdx-mtab[data-active="true"] .mdx-mtab__icon::before {
+    opacity: 1;
+    transform: none;
+  }
+  .mdx-mtab:active .mdx-mtab__icon {
+    transform: scale(0.94);
+  }
+  /* The tab whose page is still loading after 120ms (backlog P0-2): its foil waits at half strength until
+   * the page lands, then fills in. No loop; the page-change line carries the progress. */
+  .mdx-tab[data-pending] .mdx-tab__tile::before,
+  .mdx-mtab[data-pending] .mdx-mtab__icon::before {
+    opacity: 0.45;
+  }
+  .mdx-mtab__icon > .mdx-icon {
+    position: relative;
+  }
+
+  /* In-view tabs: segmented. A pill track with one sheet thumb that slides to the selection (Tabs measures
+   * it). Before the first measurement (SSR, hydration) the selected option paints its own thumb. */
+  .mdx-tabs {
+    position: relative;
+    display: inline-flex;
+    height: 40px;
+    flex: none;
+    align-items: center;
+    gap: 0;
+    padding: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--color-track);
+  }
+  .mdx-tabs__tab {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    flex: none;
+    height: 32px;
+    align-items: center;
+    gap: 6px;
+    padding: 0 14px;
+    border-radius: var(--radius-pill);
+    background: none;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--color-slate);
+    transition: color var(--t-fast) var(--ease-room);
+  }
+  @media (hover: hover) {
+    .mdx-tabs__tab:hover:not(:disabled) {
+      color: var(--color-ink);
+    }
+  }
+  .mdx-tabs__tab[aria-pressed="true"] {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+  .mdx-tabs__tab:disabled {
+    color: var(--color-slate);
+    opacity: 0.6;
+  }
+  .mdx-tabs:not([data-measured]) .mdx-tabs__tab[aria-pressed="true"] {
+    background: var(--color-sheet);
+    box-shadow: var(--shadow-raise), 0 0 0 1px rgb(61 255 181 / 0.35);
+  }
+  .mdx-tabs__thumb {
+    position: absolute;
+    z-index: 0;
+    top: 4px;
+    left: 0;
+    height: 32px;
+    width: var(--w, 0px);
+    transform: translateX(var(--x, 0px));
+    border-radius: var(--radius-pill);
+    background: var(--color-sheet);
+    box-shadow: var(--shadow-raise), 0 0 0 1px rgb(61 255 181 / 0.35), 0 0 14px -4px rgb(61 255 181 / 0.5);
+    pointer-events: none;
+  }
+  .mdx-tabs:not([data-measured]) .mdx-tabs__thumb {
+    display: none;
+  }
+  .mdx-tabs[data-ready] .mdx-tabs__thumb {
+    transition:
+      transform 280ms var(--ease-spring),
+      width 280ms var(--ease-spring);
+  }
+  .mdx-tabs--sm {
+    height: 32px;
+  }
+  .mdx-tabs--sm .mdx-tabs__tab {
+    height: 24px;
+    padding: 0 10px;
+    font-family: var(--font-sans);
+    font-stretch: 85%;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+  .mdx-tabs--sm .mdx-tabs__thumb {
+    height: 24px;
+  }
+
+  /* Buy | Sell: a 40px pill track with one CSS thumb, driven by data-side on the wrapper. */
+  .mdx-side {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 40px;
+    padding: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--color-tint);
+  }
+  .mdx-side::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    border-radius: var(--radius-pill);
+    background: var(--color-up);
+    transition:
+      transform 280ms var(--ease-spring),
+      background-color 200ms var(--ease-room);
+  }
+  .mdx-side[data-side="sell"]::before {
+    transform: translateX(100%);
+    background: var(--color-down);
+  }
+  .mdx-side > button {
+    position: relative;
+    z-index: 1;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-slate);
+    transition: color var(--t-fast) var(--ease-room);
+  }
+  @media (hover: hover) {
+    .mdx-side > button:hover {
+      color: var(--color-ink);
+    }
+  }
+  .mdx-side > button[aria-pressed="true"] {
+    color: var(--color-neon-ink);
+  }
+  .mdx-side::before {
+    box-shadow: 0 0 16px -2px var(--color-up);
+  }
+  .mdx-side[data-side="sell"]::before {
+    box-shadow: 0 0 16px -2px var(--color-down);
+  }
+
+  /* ------------------------------------------------ buttons and links */
+
+  /* Every button is a pill. Heights 44 (md), 32 (sm), 48 (lg); Accept stays 28 (h-7). */
+  .mdx-btn {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    height: 44px;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 22px;
+    border: 0;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+    user-select: none;
+    transition:
+      background-color var(--t-fast) var(--ease-room),
+      color var(--t-fast) var(--ease-room),
+      box-shadow var(--t-base) var(--ease-room),
+      transform var(--t-base) var(--ease-spring);
+  }
+  .mdx-btn--sm {
+    height: 32px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+  .mdx-btn--lg {
+    height: 48px;
+    padding: 0 26px;
+  }
+  .mdx-btn--block {
+    width: 100%;
+  }
+
+  /* Primary: a clean ink pill at rest. Foil only on touch, as one sheen per hover. */
+  .mdx-btn--primary {
+    background: var(--color-neon);
+    color: var(--color-neon-ink);
+    box-shadow: var(--glow-neon);
+  }
+  .mdx-btn--primary::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1; /* above the fill, under the label (the button isolates) */
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    background: var(--sheen) 125% 0 / 250% 100% no-repeat;
+  }
+  /* Secondary. The class keeps the name "outline" so no call site changes. */
+  .mdx-btn--outline {
+    background: var(--color-sheet);
+    color: var(--color-ink);
+    box-shadow:
+      0 0 0 1px rgb(56 217 255 / 0.32),
+      var(--shadow-raise);
+  }
+  /* Ghost: text button with a pill hover. */
+  .mdx-btn--ghost {
+    background: transparent;
+    color: var(--color-ink);
+  }
+  /* Chip: quick amounts. Soft rect, not a pill, so it sits well under the 14px field. */
+  .mdx-btn--chip {
+    height: 32px;
+    padding: 0;
+    border-radius: var(--radius-row);
+    background: var(--color-tint);
+    color: var(--color-ink);
+  }
+  /* Market fills: never foil. */
+  .mdx-btn--buy {
+    background: var(--color-up);
+    color: var(--color-neon-ink);
+    box-shadow: 0 0 0 1px rgb(46 229 157 / 0.8), 0 0 16px -2px rgb(46 229 157 / 0.55);
+  }
+  .mdx-btn--sell {
+    background: var(--color-down);
+    color: #1a0208;
+    box-shadow: 0 0 0 1px rgb(255 93 125 / 0.8), 0 0 16px -2px rgb(255 93 125 / 0.55);
+  }
+  /* Icon: 32px circle in the secondary recipe (pager and stepper chevrons). */
+  .mdx-btn--icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+  }
+
+  @media (hover: hover) {
+    .mdx-btn:hover:not(:disabled, [aria-disabled="true"], .mdx-btn--ghost, .mdx-btn--chip, .mdx-btn--primary, .mdx-btn--buy, .mdx-btn--sell, .mdx-btn--outline) {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lift);
+    }
+    .mdx-btn:is(.mdx-btn--primary, .mdx-btn--buy, .mdx-btn--sell, .mdx-btn--outline):hover:not(:disabled, [aria-disabled="true"]) {
+      transform: translateY(-1px);
+    }
+    .mdx-btn--primary:hover:not(:disabled, [aria-disabled="true"]) {
+      background: #6bffc7;
+      box-shadow: var(--glow-neon-hi);
+    }
+    .mdx-btn--primary:hover:not(:disabled, [aria-disabled="true"])::after {
+      animation: mdx-sheen var(--t-sheen) var(--ease-sheen) both;
+    }
+    .mdx-btn--outline:hover:not(:disabled, [aria-disabled="true"]) {
+      box-shadow:
+        var(--glow-zap),
+        var(--shadow-lift);
+    }
+    .mdx-btn--ghost:hover:not(:disabled, [aria-disabled="true"]) {
+      background: var(--color-track);
+    }
+    .mdx-btn--chip:hover:not(:disabled, [aria-disabled="true"]) {
+      background: var(--color-sheet);
+      box-shadow: var(--shadow-raise);
+    }
+    .mdx-btn--buy:hover:not(:disabled, [aria-disabled="true"]) {
+      background: var(--color-up-hover);
+      box-shadow: 0 0 0 1px rgb(82 240 177 / 1), 0 0 24px rgb(46 229 157 / 0.6);
+    }
+    .mdx-btn--sell:hover:not(:disabled, [aria-disabled="true"]) {
+      background: var(--color-down-hover);
+      box-shadow: 0 0 0 1px rgb(255 122 148 / 1), 0 0 24px rgb(255 93 125 / 0.6);
+    }
+  }
+
+  /* Press: scale in 100ms, then spring back over 220ms on release. After the hover rules so it wins
+   * while the pointer is still over the button. */
+  .mdx-btn:active:not(:disabled, [aria-disabled="true"]) {
+    transform: scale(0.97);
+    transition-duration: var(--t-press);
+    transition-timing-function: var(--ease-room);
+  }
+  .mdx-btn--ghost:active:not(:disabled, [aria-disabled="true"]) {
+    background: rgb(148 178 220 / 0.16);
+  }
+  .mdx-btn--chip:active:not(:disabled, [aria-disabled="true"]) {
+    transform: scale(0.96);
+  }
+
+  /* Disabled (native or aria-disabled, which Button uses so focus survives a busy or disabled state) keeps
+   * the label, often the reason, readable: track fill, slate label, no shadow, no motion. */
+  .mdx-btn:disabled,
+  .mdx-btn[aria-disabled="true"] {
+    background: var(--color-track);
+    color: var(--color-slate);
+    box-shadow: none;
+    transform: none;
+    cursor: not-allowed;
+  }
+  .mdx-btn[aria-busy="true"] {
+    cursor: progress;
+  }
+  .mdx-btn:disabled::after,
+  .mdx-btn[aria-disabled="true"]::after {
+    display: none;
+  }
+  /* After the generic disabled rule (same specificity, later wins). */
+  .mdx-btn--icon:disabled,
+  .mdx-btn--icon[aria-disabled="true"] {
+    background: transparent;
+    box-shadow: 0 0 0 1px rgb(150 180 230 / 0.12);
+    color: var(--color-field);
+  }
+  /* An input and a button side by side share the field radius. */
+  .mdx-pair .mdx-btn {
+    border-radius: var(--radius-field);
+  }
+  /* Feedback where you clicked (backlog P1-8). Success: the label becomes a check that draws itself and the
+   * done word ("Bought"), for 1.1s. Error: one 320ms shake (two keyframe names alternate so a second error in
+   * a row shakes again); the field beside it turns red through aria-invalid. */
+  .mdx-btn__done {
+    animation: mdx-enter 220ms var(--ease-spring) backwards;
+  }
+  .mdx-check path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+  .mdx-btn__done .mdx-check path {
+    animation: mdx-check-draw 320ms var(--ease-room) 60ms backwards;
+  }
+  .mdx-btn[data-feedback="error"][data-seq="0"] {
+    animation: mdx-shake-a 320ms var(--ease-room);
+  }
+  .mdx-btn[data-feedback="error"][data-seq="1"] {
+    animation: mdx-shake-b 320ms var(--ease-room);
+  }
+
+  .mdx-link {
+    display: inline;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-weight: 500;
+    color: var(--color-ink);
+    text-align: inherit;
+    text-decoration-line: none;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    cursor: pointer;
+  }
+  .mdx-link:focus-visible {
+    text-decoration-line: underline;
+  }
+  @media (hover: hover) {
+    .mdx-link:hover:not(:disabled) {
+      text-decoration-line: underline;
+      text-decoration-color: var(--color-zap);
+    }
+  }
+  .mdx-link:disabled {
+    color: var(--color-slate);
+    text-decoration-line: none;
+    cursor: not-allowed;
+  }
+
+  /* Phones (backlog P1-25): 44px touch targets. Small buttons and chips grow to 44 (min-height also beats
+   * a height utility such as Accept's h-7), chevrons become 44px circles, segmented tracks 44px, range
+   * options at least 44 wide, and .mdx-hit widens a text link's hit area without moving its text. */
+  @media (max-width: 1023.98px) {
+    .mdx-btn--sm,
+    .mdx-btn--chip {
+      min-height: 44px;
+    }
+    .mdx-btn--icon {
+      width: 44px;
+      height: 44px;
+    }
+    .mdx-tabs,
+    .mdx-tabs--sm {
+      height: 44px;
+    }
+    .mdx-tabs__tab,
+    .mdx-tabs__thumb,
+    .mdx-tabs--sm .mdx-tabs__tab,
+    .mdx-tabs--sm .mdx-tabs__thumb {
+      height: 36px;
+    }
+    .mdx-tabs--sm .mdx-tabs__tab {
+      min-width: 44px;
+      justify-content: center;
+    }
+    .mdx-hit {
+      position: relative;
+    }
+    /* At least 44px tall whatever the text size (a 20px link reaches 12px past each edge), and 8px wider. */
+    .mdx-hit::before {
+      content: "";
+      position: absolute;
+      top: min(-6px, calc((100% - 44px) / 2));
+      bottom: min(-6px, calc((100% - 44px) / 2));
+      left: -8px;
+      right: -8px;
+    }
+    /* Segmented options and Buy | Sell fill their 44px track (wave 5 audit): the hit area covers the track's
+     * 4px padding above and below each 36px option. */
+    .mdx-side {
+      height: 44px;
+    }
+    .mdx-tabs__tab::before,
+    .mdx-side > button::before {
+      content: "";
+      position: absolute;
+      inset: -4px 0;
+    }
+  }
+
+  /* ------------------------------------------------ fields */
+
+  .mdx-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--color-slate);
+  }
+  .mdx-input {
+    display: block;
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-field);
+    background: var(--color-sheet);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    color: var(--color-ink);
+    transition:
+      border-color var(--t-fast) var(--ease-room),
+      box-shadow var(--t-fast) var(--ease-room);
+  }
+  .mdx-input::placeholder {
+    color: var(--color-placeholder);
+    opacity: 1;
+  }
+  @media (hover: hover) {
+    .mdx-input:hover:not(:disabled, :focus) {
+      border-color: var(--color-slate);
+    }
+  }
+  .mdx-input:focus,
+  .mdx-input:focus-visible {
+    outline: none;
+    border-color: var(--color-zap);
+    box-shadow: var(--glow-focus);
+  }
+  .mdx-input[aria-invalid="true"] {
+    border-color: var(--color-down);
+  }
+  .mdx-input[aria-invalid="true"]:focus {
+    box-shadow: 0 0 0 4px rgb(255 93 125 / 0.2);
+  }
+  /* An invalid field stays red under the pointer too (P1-8, P1-9): the hover border must not hide the error. */
+  @media (hover: hover) {
+    .mdx-input[aria-invalid="true"]:hover:not(:disabled, :focus) {
+      border-color: var(--color-down);
+    }
+  }
+  .mdx-input:disabled {
+    background: var(--color-tint);
+    color: var(--color-slate);
+  }
+  /* Phones: 16px keeps iOS Safari from zooming the page when a field takes focus. Size utilities
+   * (text-[20px] on the trade amount) still win, since utilities sit in a later layer. */
+  @media (max-width: 1023.98px) {
+    .mdx-input {
+      font-size: 16px;
+    }
+  }
+  textarea.mdx-input {
+    height: auto;
+    padding: 10px 14px;
+    line-height: 1.45;
+    resize: none;
+  }
+  /* Sort select and Discover's design menu trigger: 36px pills on the track. The "Design" / "Sort" label
+   * stays outside in slate. The select hugs the chosen label where the browser can size it to content. */
+  .mdx-select,
+  .mdx-menu-trigger {
+    height: 36px;
+    padding: 0 32px 0 14px;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23EEF3FA' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      right 14px center / 10px 6px no-repeat var(--color-track);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-ink);
+    cursor: pointer;
+    transition: background-color var(--t-fast) var(--ease-room);
+  }
+  /* Phones (P1-25): the sort select and the design menu trigger are 44px pills. */
+  @media (max-width: 1023.98px) {
+    .mdx-select,
+    .mdx-menu-trigger {
+      height: 44px;
+    }
+  }
+
+  .mdx-select {
+    appearance: none;
+    -webkit-appearance: none;
+    field-sizing: content;
+  }
+  .mdx-menu-trigger {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  @media (hover: hover) {
+    .mdx-select:hover,
+    .mdx-menu-trigger:hover {
+      background-color: rgb(148 178 220 / 0.18);
+    }
+  }
+  .mdx-menu-trigger[data-state="open"] {
+    background-color: rgb(148 178 220 / 0.18);
+  }
+  /* Launch art dropzone. */
+  .mdx-drop {
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 1px dashed var(--color-control-border);
+    border-radius: var(--radius-pop);
+    background: var(--color-sheet);
+    text-align: center;
+    cursor: pointer;
+    transition:
+      border-color var(--t-fast) var(--ease-room),
+      background-color var(--t-fast) var(--ease-room);
+  }
+  .mdx-drop[data-over="true"] {
+    border-style: solid;
+    border-color: var(--color-neon);
+    box-shadow: var(--glow-neon);
+    background: var(--color-tint);
+  }
+
+  /* Levels slider: 6px pill track, fill in the current design's accent (set --tier and --fill), 20px sheet
+   * thumb with a 2px ink ring. For the fill to meet the thumb center use --fill: calc(10px + (100% - 20px) * p). */
+  .mdx-range {
+    /* The design accents are deep inks made for a light page: lifted toward white so they read on the dark track. */
+    --tier-lit: color-mix(in oklab, var(--tier), #fff 45%);
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 24px;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+    transition: --tier var(--t-slow) var(--ease-room);
+  }
+  .mdx-range::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(to right, var(--tier-lit) 0 var(--fill, 0%), var(--color-track) var(--fill, 0%) 100%);
+  }
+  .mdx-range::-moz-range-track {
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: var(--color-track);
+  }
+  .mdx-range::-moz-range-progress {
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: var(--tier-lit);
+  }
+  .mdx-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    margin-top: -7px;
+    border: 2px solid var(--color-ink);
+    border-radius: 50%;
+    background: var(--color-sheet);
+    box-shadow: var(--shadow-raise);
+    transition: transform var(--t-fast) var(--ease-spring);
+  }
+  .mdx-range::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--color-ink);
+    border-radius: 50%;
+    background: var(--color-sheet);
+    box-shadow: var(--shadow-raise);
+    transition: transform var(--t-fast) var(--ease-spring);
+  }
+  @media (hover: hover) {
+    .mdx-range:hover::-webkit-slider-thumb {
+      transform: scale(1.1);
+    }
+    .mdx-range:hover::-moz-range-thumb {
+      transform: scale(1.1);
+    }
+  }
+  .mdx-range:active::-webkit-slider-thumb {
+    transform: scale(1.15);
+  }
+  .mdx-range:active::-moz-range-thumb {
+    transform: scale(1.15);
+  }
+  /* Touch (backlog P1-25): a 44px hit row and a 24px thumb. */
+  @media (pointer: coarse) {
+    .mdx-range {
+      height: 44px;
+    }
+    .mdx-range::-webkit-slider-thumb {
+      width: 24px;
+      height: 24px;
+      margin-top: -9px;
+    }
+    .mdx-range::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  /* Coin design progress: 4px pill track, fill in the NEXT design's accent (set --tier on an ancestor). */
+  .mdx-progress {
+    height: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--color-track);
+    overflow: hidden;
+  }
+  .mdx-progress__fill {
+    height: 100%;
+    border-radius: inherit;
+    background: color-mix(in oklab, var(--tier, var(--color-neon)), #fff 40%);
+    box-shadow: 0 0 10px color-mix(in oklab, var(--tier, var(--color-neon)), #fff 40%);
+    transition: width var(--t-progress) var(--ease-room);
+  }
+  /* A design unlocked (P1-19): the fill completes in the old target's color, then snaps back to the new
+   * progress without sliding backwards. */
+  .mdx-progress__fill[data-snap] {
+    transition: none;
+  }
+
+  /* Home stepper dots: the active one widens into an 18x6 foil pill with a 1px ink ring. */
+  .mdx-step-dot {
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: rgb(220 235 255 / 0.28);
+    transition:
+      width 280ms var(--ease-spring),
+      background-color var(--t-fast) var(--ease-room);
+  }
+  .mdx-step-dot[data-active] {
+    width: 18px;
+    background: var(--holo);
+    box-shadow: 0 0 10px rgb(61 255 181 / 0.6);
+  }
+
+  /* Skeletons: the shimmer is the only infinite animation, and only while a skeleton is mounted. */
+  .mdx-skeleton,
+  .mdx-skeleton--wall {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-row);
+  }
+  .mdx-skeleton {
+    background: var(--color-tint);
+  }
+  .mdx-skeleton--wall {
+    background: var(--color-wall-deep);
+  }
+  .mdx-skeleton::after,
+  .mdx-skeleton--wall::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgb(140 200 255 / 0.08), transparent);
+    animation: mdx-shimmer var(--t-shimmer) linear infinite;
+  }
+
+  /* ------------------------------------------------ rows, thumbs, avatars, live dot */
+
+  .mdx-row {
+    border-radius: var(--radius-row);
+    transition: background-color var(--t-fast) var(--ease-room);
+  }
+  .mdx-row[data-new] {
+    animation: mdx-wash var(--t-wash) var(--ease-room) backwards;
+  }
+  /* Keyboard focus on a row (P1-24): an inset ring that follows the row radius and never gets clipped by an
+   * overflow-hidden list, plus the hover tint. */
+  .mdx-row:focus-visible {
+    outline-offset: -2px;
+    background-color: var(--color-tint);
+  }
+  .mdx-thumb {
+    outline: 1px solid rgb(200 225 255 / 0.12);
+    outline-offset: -1px;
+  }
+  /* The 6px live dot (the one green without a sign). It pings once on mount and on each real event. */
+  .mdx-live {
+    position: relative;
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    flex: none;
+    border-radius: var(--radius-pill);
+    background: var(--color-up);
+    box-shadow: 0 0 8px var(--color-up);
+  }
+  .mdx-live__ping {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--color-up);
+    animation: mdx-ping 700ms var(--ease-room) both;
+  }
+  /* Live updates paused (P1-17): the dot is slate and still. */
+  .mdx-live[data-paused] {
+    background: var(--color-slate);
+    box-shadow: none;
+  }
+  /* Pause or resume live updates: a small slate text button in a live list's header. */
+  .mdx-livepause {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-chip);
+    background: none;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--color-slate);
+    cursor: pointer;
+    transition: color var(--t-fast) var(--ease-room);
+  }
+  @media (hover: hover) {
+    .mdx-livepause:hover {
+      color: var(--color-ink);
+    }
+  }
+  .mdx-livepause:focus-visible {
+    outline-offset: 3px;
+  }
+
+  /* ------------------------------------------------ pop surfaces */
+
+  .mdx-menu {
+    padding: 6px;
+    border-radius: var(--radius-pop);
+    background: var(--color-plinth);
+    box-shadow: var(--shadow-float);
+    transform-origin: var(--radix-dropdown-menu-content-transform-origin, var(--radix-popover-content-transform-origin, center top));
+  }
+  .mdx-menu-item {
+    display: flex;
+    width: 100%;
+    height: 36px;
+    align-items: center;
+    padding: 0 12px;
+    border-radius: var(--radius-row);
+    background: transparent;
+    font-size: 14px;
+    color: var(--color-ink);
+    text-align: left;
+    white-space: nowrap;
+    transition: background-color var(--t-fast) var(--ease-room);
+  }
+  @media (hover: hover) {
+    .mdx-menu-item:hover:not(:disabled) {
+      background: var(--color-tint);
+    }
+  }
+  .mdx-menu-item:focus-visible {
+    background: var(--color-tint);
+    outline-offset: -2px;
+  }
+  .mdx-menu-item:disabled {
+    color: var(--color-slate);
+    cursor: not-allowed;
+  }
+  /* Phones: 44px rows, the touch size used everywhere else on mobile. */
+  @media (max-width: 1023.98px) {
+    .mdx-menu-item {
+      height: 44px;
+    }
+  }
+  /* Radix menu rows (keyboard highlight follows data-highlighted). A checked row is ink 600 with a check
+   * glyph at its end. */
+  .mdx-menu-check {
+    position: relative;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .mdx-menu-check[data-highlighted] {
+    background: var(--color-tint);
+  }
+  .mdx-menu-check[data-state="checked"] {
+    font-weight: 600;
+  }
+  .mdx-menu-check[data-state="checked"]::after {
+    content: "";
+    flex: none;
+    width: 14px;
+    height: 14px;
+    background: currentColor;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3 7.5l2.5 2.5L11 4.5' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3 7.5l2.5 2.5L11 4.5' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+  }
+  /* Menus and popovers: opacity and scale from the Radix transform origin. Radix keeps a closing surface
+   * mounted until its animationend, so the exit plays with no JS. */
+  .mdx-pop {
+    animation: mdx-pop-in 180ms var(--ease-room) both;
+  }
+  .mdx-pop[data-state="closed"] {
+    animation: mdx-pop-out 120ms var(--ease-exit) both;
+  }
+  /* Dialogs. Centering uses Tailwind's separate translate property, so these keyframes compose with it. */
+  .mdx-dialog {
+    animation: mdx-dialog-in 280ms var(--ease-spring) both;
+  }
+  .mdx-dialog[data-state="closed"] {
+    animation: mdx-dialog-out 160ms var(--ease-exit) both;
+  }
+  .mdx-overlay {
+    animation: mdx-fade 200ms var(--ease-room) both;
+  }
+  .mdx-overlay[data-state="closed"] {
+    animation: mdx-fade-out 160ms var(--ease-exit) both;
+  }
+  /* Toasts: rise in, fade 6px down on the way out. The level toast wears the holo rim and one sheen. */
+  .mdx-toast {
+    animation: mdx-toast-in 260ms var(--ease-spring) both;
+  }
+  .mdx-toast[data-leaving] {
+    animation: mdx-toast-out 160ms var(--ease-exit) both;
+  }
+  .mdx-toast--level {
+    position: relative;
+    isolation: isolate;
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(var(--color-sheet), var(--color-sheet)) padding-box,
+      var(--holo) border-box;
+    box-shadow: var(--shadow-float), 0 0 26px -4px rgb(255 61 206 / 0.5);
+  }
+  .mdx-toast--level::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: var(--sheen) 125% 0 / 250% 100% no-repeat;
+    animation: mdx-sheen var(--t-sheen) var(--ease-sheen) 200ms both;
+  }
+  /* Toast controls (backlog P1-2): a round Dismiss button and an underlined action, both in the toast's own
+   * text color, so they read on ink and on the error fill alike. */
+  .mdx-toast__x {
+    color: inherit;
+    opacity: 0.72;
+    transition:
+      opacity var(--t-fast) var(--ease-room),
+      background-color var(--t-fast) var(--ease-room);
+  }
+  .mdx-toast__x:focus-visible {
+    opacity: 1;
+    background: rgb(148 178 220 / 0.18);
+  }
+  @media (hover: hover) {
+    .mdx-toast__x:hover {
+      opacity: 1;
+      background: rgb(148 178 220 / 0.18);
+    }
+  }
+  .mdx-toast__x:focus-visible,
+  .mdx-toast__action:focus-visible {
+    outline-color: currentColor;
+  }
+  .mdx-toast__action {
+    display: inline;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  /* Unread count on the Portfolio tab (P1-13): an ink pill at the row's end; on the phone tab bar, an 8px ink
+   * dot on the icon's corner. Neutral ink: the foil and market colors keep their meanings. */
+  .mdx-badge {
+    display: inline-grid;
+    min-width: 18px;
+    height: 18px;
+    margin-left: auto;
+    padding: 0 5px;
+    place-items: center;
+    border-radius: var(--radius-pill);
+    background: var(--color-hype);
+    color: #fff;
+    box-shadow: 0 0 10px rgb(255 61 206 / 0.6);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    animation: mdx-enter 260ms var(--ease-spring) backwards;
+  }
+  .mdx-badge--dot {
+    position: absolute;
+    top: 1px;
+    right: 9px;
+    min-width: 0;
+    width: 8px;
+    height: 8px;
+    margin: 0;
+    padding: 0;
+    box-shadow: 0 0 0 2px var(--color-plinth);
+  }
+
+  /* Rail search suggestions (P1-14): the active option (arrow keys or pointer) takes the row tint. */
+  .mdx-suggest[data-active] {
+    background: var(--color-tint);
+  }
+
+  /* Skip link (P1-24): off screen until focused, then an ink pill over the top left of the page. */
+  .mdx-skip {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 80;
+    display: inline-flex;
+    height: 40px;
+    align-items: center;
+    padding: 0 18px;
+    border-radius: var(--radius-pill);
+    background: var(--color-neon);
+    color: var(--color-neon-ink);
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: var(--shadow-float);
+    transform: translateY(calc(-100% - 24px));
+    transition: transform var(--t-base) var(--ease-spring);
+  }
+  .mdx-skip:focus,
+  .mdx-skip:focus-visible {
+    transform: none;
+    outline-offset: 3px;
+  }
+  /* The skip target takes focus without a ring around the whole page. */
+  #content:focus {
+    outline: none;
+  }
+
+  /* Page-change line (backlog P0-2): 2px ink along the top of the content column. It creeps toward the end
+   * while the next page loads (shown only after 120ms), completes and fades out when it lands. Reduced motion:
+   * a still line while loading. */
+  .mdx-routebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 45;
+    height: 2px;
+    border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+    background: linear-gradient(90deg, var(--color-neon), var(--color-zap), var(--color-hype));
+    box-shadow: 0 0 10px rgb(61 255 181 / 0.7);
+    opacity: 0;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    pointer-events: none;
+  }
+  @media (min-width: 1024px) {
+    .mdx-routebar {
+      left: var(--rail-w);
+    }
+  }
+  .mdx-routebar[data-phase="loading"] {
+    opacity: 1;
+    transform: scaleX(0.82);
+    transition:
+      transform 8s cubic-bezier(0.08, 0.7, 0.2, 1),
+      opacity var(--t-fast) var(--ease-room);
+  }
+  .mdx-routebar[data-phase="done"] {
+    opacity: 0;
+    transform: scaleX(1);
+    transition:
+      transform var(--t-base) var(--ease-room),
+      opacity var(--t-base) var(--ease-room) var(--t-fast);
+  }
+
+  /* Focus on a button keeps its own glow and adds the cyan one. */
+  .mdx-btn:focus-visible {
+    box-shadow: var(--glow-focus);
+  }
+  .mdx-btn--primary:focus-visible {
+    box-shadow: var(--glow-neon), var(--glow-focus);
+  }
+
+  .mdx-icon {
+    display: inline-block;
+    flex: none;
+    width: var(--s, 22px);
+    height: var(--s, 22px);
+    background: currentColor;
+    mask: var(--src) center / contain no-repeat;
+    -webkit-mask: var(--src) center / contain no-repeat;
+  }
+}
+
+@media (max-height: 820px) and (min-width: 1024px) {
+  .mdx-h1 {
+    font-size: 28px;
+  }
+  .mdx-plinth {
+    padding: 16px;
+  }
+}
+/* Market phone captions (GridCaption stack): under 170px the two prices take a line each, so neither is cut. */
+.mdx-gridcap--stack {
+  container-type: inline-size;
+}
+@container (width < 170px) {
+  .mdx-gridcap--stack .mdx-gridcap__sub {
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
+    gap: 0;
+  }
+}
+@media (max-width: 1023px) {
+  .mdx-display {
+    font-size: 36px;
+  }
+  .mdx-h1 {
+    font-size: 26px;
+  }
+  .mdx-plinth {
+    padding: 16px;
+    border-radius: var(--radius-panel);
+  }
+}
+/* The narrowest phones (320): page titles step down so "Same coin. Fourteen designs." keeps one line. */
+@media (max-width: 359px) {
+  .mdx-h1 {
+    font-size: 23px;
+  }
+}
+
+/* Live number change: the numeral jumps to Up or Down for one frame, then eases back over 600ms.
+ * Unlayered so it beats a text color utility on the same element. */
+.mdx-flash {
+  transition: color 600ms var(--ease-room);
+}
+.mdx-flash[data-flash="up"] {
+  color: var(--color-up);
+  transition: none;
+}
+.mdx-flash[data-flash="down"] {
+  color: var(--color-down);
+  transition: none;
+}
+
+/* ---------------------------------------------------------------- motion (delta section 7)
+ * Every moment answers something: a touch, a change of place, a new value, a new event, a load. Fill mode is
+ * `backwards` wherever an entrance meets hover styles, so a finished animation never pins a style. */
+
+@keyframes mdx-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes mdx-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+/* The band sits at 30 to 74% of a 250% wide image: 125% starts it fully past the left edge and -20% ends
+ * it fully past the right, so it never pops in or parks at an edge. */
+@keyframes mdx-sheen {
+  from {
+    opacity: 1;
+    background-position: 125% 0;
+  }
+  to {
+    opacity: 1;
+    background-position: -20% 0;
+  }
+}
+@keyframes mdx-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+@keyframes mdx-pop-out {
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+@keyframes mdx-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+}
+@keyframes mdx-dialog-out {
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+@keyframes mdx-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+@keyframes mdx-toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes mdx-wash {
+  from {
+    background-color: var(--color-wash);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+@keyframes mdx-ping {
+  from {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+@keyframes mdx-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+.mdx-fade {
+  animation: mdx-fade 160ms var(--ease-room) both;
+}
+
+/* List and card entrances: fade from 0 and rise 6px, delayed i x 24ms, capped at 10. Polls keep stable keys,
+ * so they never replay it; first mounts and page turns do. Set --i yourself on loose items (.mdx-enter). */
+@keyframes mdx-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.mdx-enter,
+.mdx-stagger > * {
+  animation: mdx-enter 260ms var(--ease-room) calc(var(--i, 0) * var(--stagger)) backwards;
+}
+.mdx-stagger > :nth-child(2) { --i: 1; }
+.mdx-stagger > :nth-child(3) { --i: 2; }
+.mdx-stagger > :nth-child(4) { --i: 3; }
+.mdx-stagger > :nth-child(5) { --i: 4; }
+.mdx-stagger > :nth-child(6) { --i: 5; }
+.mdx-stagger > :nth-child(7) { --i: 6; }
+.mdx-stagger > :nth-child(8) { --i: 7; }
+.mdx-stagger > :nth-child(9) { --i: 8; }
+.mdx-stagger > :nth-child(10) { --i: 9; }
+.mdx-stagger > :nth-child(n + 11) { --i: 10; }
+.mdx-stagger > .mdx-row[data-new] {
+  animation:
+    mdx-enter 260ms var(--ease-room) backwards,
+    mdx-wash var(--t-wash) var(--ease-room) backwards;
+}
+/* Settled lists (useSettled): the entrance has played. A poll that reorders rows moves them in the DOM, which
+ * restarts a CSS animation, so settled rows drop it; rows that really arrived (data-new) keep theirs. */
+.mdx-stagger[data-settled] > :not([data-new]),
+[data-settled] .mdx-enter {
+  animation: none;
+}
+
+/* Page entrance on route mount (pathname change). The rail never moves. */
+@keyframes mdx-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.mdx-page {
+  animation: mdx-page-in var(--t-base) var(--ease-room) backwards;
+}
+/* Nothing a card does (a lift, a deal, a burst) may scroll the page sideways (refs/alive-3d-spec.md F3): main
+ * clips (clip on phones, hidden from 1024px, clip at fit), at its padding edge, so the Home ghosts and the coverflow
+ * neighbours may bleed into the gutter up to the screen edge. The page itself does not clip: on phones that would
+ * cut them flat 16px in, and on desktop it would cut the asides' bleed. */
+
+/* Number tick: the new value (a keyed span) slides in from below (up) or above (down). */
+@keyframes mdx-tick-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+  }
+}
+@keyframes mdx-tick-down {
+  from {
+    opacity: 0;
+    transform: translateY(-0.35em);
+  }
+}
+.mdx-tick {
+  display: inline-block;
+  animation: mdx-tick-up var(--t-base) var(--ease-room) backwards;
+}
+.mdx-tick[data-dir="down"] {
+  animation-name: mdx-tick-down;
+}
+
+/* Home featured step: directional (--d is 1 for next, -1 for previous). */
+@keyframes mdx-lot-out {
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--d, 1) * -12px));
+  }
+}
+@keyframes mdx-lot-in {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--d, 1) * 12px)) translateY(4px);
+  }
+}
+.mdx-lot-out {
+  animation: mdx-lot-out var(--t-fast) var(--ease-exit) both;
+}
+.mdx-lot-in {
+  animation: mdx-lot-in 280ms var(--ease-spring) both;
+}
+
+/* Chart (backlog P1-23): the line draws itself once on mount and on a range change (keyed; polls keep it),
+ * the endpoint springs in as the line reaches it, and new gridlines fade in. pathLength={1} on the path makes
+ * the draw independent of its length. */
+@keyframes mdx-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+.mdx-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: mdx-draw var(--t-progress) var(--ease-room) backwards;
+}
+@keyframes mdx-dot-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+.mdx-dot-in {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mdx-dot-in var(--t-base) var(--ease-spring) 560ms backwards;
+}
+/* The chart line glows (static filter: the draw animates its dash, never the glow). */
+.mdx-chartline {
+  filter: drop-shadow(0 0 5px rgb(61 255 181 / 0.55));
+}
+.mdx-grid-in {
+  animation: mdx-fade var(--t-slow) var(--ease-room) backwards;
+}
+
+/* A design unlocks while you watch (backlog P1-19): the design chip springs in with its new name, next to the
+ * card's own evolve. Only on a real unlock after mount, never on the first frame. */
+@keyframes mdx-chip-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+  60% {
+    opacity: 1;
+  }
+}
+.mdx-chip-pop {
+  display: inline-flex;
+  animation: mdx-chip-pop 420ms var(--ease-spring) backwards;
+}
+
+/* Button feedback (P1-8): the check stroke draws itself; the error shake is transform only. */
+@keyframes mdx-check-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@keyframes mdx-shake-a {
+  0%,
+  100% {
+    transform: none;
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+@keyframes mdx-shake-b {
+  0%,
+  100% {
+    transform: none;
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+/* Card lift: the card wrapper rises 6px out of its tray; the card's own shadow travels with it. */
+.mdx-lift {
+  transition: transform var(--t-slow) var(--ease-spring);
+}
+a:focus-visible .mdx-lift {
+  transform: translateY(-6px);
+}
+@media (hover: hover) {
+  a:hover .mdx-lift {
+    transform: translateY(-6px);
+  }
+}
+
+/* Touch press feedback (backlog P0-1): no hover on touch screens, so a press answers instead. */
+@media (hover: none) {
+  .mdx-menu-item:active:not(:disabled),
+  .mdx-row:active,
+  [data-row]:active {
+    background-color: var(--color-tint);
+    transform: scale(0.97);
+    transition-duration: 80ms;
+  }
+  a:active .mdx-lift {
+    transform: translateY(-2px) scale(0.99);
+    transition-duration: 90ms;
+    transition-timing-function: var(--ease-room);
+  }
+}
+
+/* ---------------------------------------------------------------- phones (backlog P1-1, P1-5, P1-6, P1-22)
+ * Unlayered on purpose: vaul injects its drawer rules unlayered, so the sheet's own timing and grip must sit
+ * at the same level; the coin page panes must beat display utilities. Nothing here applies at 1024px and up
+ * except the sheet rules, and sheets only open on phones. */
+
+/* Bottom sheet (components/mintdex/sheet.tsx). vaul slides it up (transform) and fades the overlay; these set
+ * the house timing: in with vaul's own soft curve, out on the exit curve. Reduced motion makes both instant. */
+.mdx-sheet[data-vaul-drawer] {
+  animation-duration: 340ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+.mdx-sheet[data-vaul-drawer][data-state="closed"] {
+  animation-duration: 200ms;
+  animation-timing-function: var(--ease-exit);
+}
+.mdx-sheet-overlay[data-vaul-overlay] {
+  animation-duration: 240ms;
+}
+.mdx-sheet-overlay[data-vaul-overlay][data-state="closed"] {
+  animation-duration: 200ms;
+  animation-timing-function: var(--ease-exit);
+}
+.mdx-sheet__grip {
+  flex: none;
+  width: 36px;
+  height: 5px;
+  margin: 8px auto 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-hairline);
+}
+.mdx-sheet__head {
+  padding: 2px max(20px, env(safe-area-inset-right)) 0 max(20px, env(safe-area-inset-left));
+}
+.mdx-sheet__body {
+  padding: 12px max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom))
+    max(20px, env(safe-area-inset-left));
+}
+/* A dialog's call to action stays on the sheet's bottom edge while its content scrolls (a short screen, the
+ * keyboard up). Flat panel-colored shadows paint the strip above it (and, when it is the last thing in the
+ * sheet, the padding below it) so scrolled content never shows around it; no layout change. */
+.mdx-sheet__body .mdx-sheet-foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  background: var(--color-plinth);
+  box-shadow: 0 -10px 0 var(--color-plinth);
+}
+.mdx-sheet__body .mdx-sheet-foot:last-child {
+  box-shadow:
+    0 -10px 0 var(--color-plinth),
+    0 24px 0 var(--color-plinth);
+}
+
+/* The off-screen field the header search taps first, so the iOS keyboard stays up while Discover opens and
+ * its own field takes focus (one-tap search, P1-6). 16px: no zoom on focus. */
+.mdx-kb-proxy {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+  font-size: 16px;
+}
+
+/* Segmented tabs that fill their row (the coin page sections on phones). */
+.mdx-tabs--fill {
+  display: flex;
+  width: 100%;
+}
+.mdx-tabs--fill .mdx-tabs__tab {
+  flex: 1 1 0;
+  justify-content: center;
+  padding: 0 8px;
+}
+
+/* A horizontal snap strip (the Levels designs on phones). No display here: this rule is unlayered, so a
+ * display would beat the element's lg:hidden utility; the element sets flex itself. */
+.mdx-strip {
+  gap: 8px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 16px;
+  scrollbar-width: none;
+}
+.mdx-strip::-webkit-scrollbar {
+  display: none;
+}
+.mdx-strip > * {
+  flex: none;
+  scroll-snap-align: center;
+}
+
+@media (max-width: 1023.98px) {
+  :root {
+    /* What a sticky row under the phone header clears. */
+    --mhead-h: 56px;
+  }
+  /* Safe areas (P1-6): the side insets of a notched phone held sideways, inside the 16px gutter. */
+  .mdx-mhead,
+  .mdx-main {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+  [data-tabbar] {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Coin page sections (P1-5): one pane at a time, picked by the segmented tabs (?tab=). The server renders
+   * the right pane from the URL, so nothing waits on JS. A pane that comes back plays the list entrance. */
+  .mdx-coin[data-tab="trade"] [data-pane]:not([data-pane="trade"]),
+  .mdx-coin[data-tab="card"] [data-pane]:not([data-pane="card"]),
+  .mdx-coin[data-tab="chart"] [data-pane]:not([data-pane="chart"]),
+  .mdx-coin[data-tab="trades"] [data-pane]:not([data-pane="trades"]) {
+    display: none;
+  }
+  .mdx-coin [data-pane] {
+    animation: mdx-enter 260ms var(--ease-room) backwards;
+  }
+  .mdx-coin__tabs {
+    top: var(--mhead-h);
+  }
+}
+/* Installed to the home screen: the header clears the status bar. */
+@media (max-width: 1023.98px) and (display-mode: standalone) {
+  :root {
+    --mhead-h: calc(56px + env(safe-area-inset-top));
+  }
+  .mdx-mhead {
+    height: var(--mhead-h);
+    padding-top: env(safe-area-inset-top);
+  }
+}
+/* Phones held sideways (P1-6): the header scrolls away and the tab bar is 44px, icon beside label. */
+@media (max-width: 1023.98px) and (max-height: 500px) {
+  :root {
+    --mhead-h: 0px;
+  }
+  .mdx-mhead {
+    position: static;
+  }
+  [data-tabbar] .mdx-mtab {
+    height: 44px;
+    flex-direction: row;
+    gap: 6px;
+  }
+  .mdx-main {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  }
+}
+/* While the on-screen keyboard is up the tab bar steps aside, so a keyboard that resizes the page
+ * (interactive-widget=resizes-content) never stacks the bar on top of it. html[data-keyboard] (AppShell) keys on
+ * the keyboard itself, not on focus: a field that stays focused after the keyboard closes gets the bar back. */
+@media (max-width: 1023.98px) {
+  html[data-keyboard] [data-tabbar] {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------- accessibility layer (delta 6.16) */
+
+/* The Calm motion switch (refs/alive-3d-spec.md 10.2) is the only thing that stops motion: full motion is the
+ * default for everyone, whatever the device's reduced-motion setting. html[data-motion="calm"] is set before first
+ * paint (the head script, from localStorage) or live by the switch. Every transition and animation is instant: hard
+ * swaps, no lifts, no flashes, no stagger waits. Card CSS (card3d.css) re-enables its own 200ms crossfades with
+ * class rules that beat this one. */
+:root[data-motion="calm"] *,
+:root[data-motion="calm"] *::before,
+:root[data-motion="calm"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  animation-delay: 0s !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0s !important;
+  scroll-behavior: auto !important;
+}
+:root[data-motion="calm"]::view-transition-group(*),
+:root[data-motion="calm"]::view-transition-old(*),
+:root[data-motion="calm"]::view-transition-new(*) {
+  animation: none !important;
+}
+:root[data-motion="calm"] .mdx-lift,
+:root[data-motion="calm"] a:hover .mdx-lift,
+:root[data-motion="calm"] a:focus-visible .mdx-lift,
+:root[data-motion="calm"] a:active .mdx-lift,
+:root[data-motion="calm"] .mdx-btn:hover,
+:root[data-motion="calm"] .mdx-btn:active,
+:root[data-motion="calm"] .mdx-row:active,
+:root[data-motion="calm"] .mdx-menu-item:active,
+:root[data-motion="calm"] [data-row]:active,
+:root[data-motion="calm"] .mdx-mtab:active .mdx-mtab__icon {
+  transform: none !important;
+}
+:root[data-motion="calm"] .mdx-btn[data-feedback="error"],
+:root[data-motion="calm"] .mdx-btn--primary:hover::after,
+:root[data-motion="calm"] .mdx-toast--level::after,
+:root[data-motion="calm"] .mdx-live__ping,
+:root[data-motion="calm"] .mdx-skeleton::after,
+:root[data-motion="calm"] .mdx-skeleton--wall::after {
+  animation: none !important;
+}
+:root[data-motion="calm"] .mdx-live__ping,
+:root[data-motion="calm"] .mdx-skeleton::after,
+:root[data-motion="calm"] .mdx-skeleton--wall::after {
+  display: none;
+}
+/* Card-owned calm rules: card3d.css. */
+
+@media (prefers-contrast: more) {
+  .mdx-rail-pill {
+    background: var(--color-neon);
+    box-shadow: none;
+  }
+  .mdx-tab[data-active="true"] {
+    color: var(--color-neon-ink);
+    text-shadow: none;
+  }
+  .mdx-tab[data-active="true"] .mdx-tab__tile::before {
+    opacity: 0;
+  }
+  .mdx-tabs__thumb,
+  .mdx-tabs:not([data-measured]) .mdx-tabs__tab[aria-pressed="true"] {
+    box-shadow: 0 0 0 1px var(--color-ink);
+  }
+  .mdx-plinth,
+  .mdx-aside,
+  .mdx-pocket::before {
+    box-shadow: 0 0 0 1px var(--color-field);
+  }
+  .mdx-btn--outline {
+    box-shadow: 0 0 0 1px var(--color-ink);
+  }
+  [data-chip] {
+    box-shadow: 0 0 0 1px var(--color-ink);
+  }
+}
+
+@media (forced-colors: active) {
+  /* Card-owned forced colors rules: card3d.css. */
+  .mdx-tab__tile::before,
+  .mdx-mtab__icon::before,
+  .mdx-step-dot[data-active] {
+    background: var(--holo-flat);
+    forced-color-adjust: none;
+  }
+  .mdx-tab[data-active="true"],
+  .mdx-mtab[data-active="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+  .mdx-tabs__thumb,
+  .mdx-side::before {
+    outline: 1px solid CanvasText;
+  }
+  .mdx-progress__fill {
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+}
