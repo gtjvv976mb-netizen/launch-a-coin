@@ -1,7 +1,9 @@
 /**
  * The page-level not-found and error states, one look everywhere (the root and the router's defaults): the empty
- * state's card back, one title, one sentence and two actions (a button and a "Go home" link). The title is also an h1
- * for screen readers and the route announcer, which lands focus on a page's h1 after a page change.
+ * state's card back on its ledge (no halo: styles/screens/overlays.css .cdx-status), one title, one sentence that
+ * says what to do, then one button and a "Go home" link. The title is also an h1 for screen readers and the route
+ * announcer, which lands focus on a page's h1 after a page change. The server's own 500 page (lib/error-page.ts)
+ * draws the same words in the same colours without the app.
  */
 import { lazy, Suspense, type ReactNode } from "react";
 
@@ -18,10 +20,10 @@ function StatusPage({ title, body, action }: { title: string; body: string; acti
       <h1 className="sr-only">{title}</h1>
       <Suspense fallback={null}>
         <EmptyState
-          className="mdx-page"
+          className="mdx-page cdx-status"
           title={<span aria-hidden>{title}</span>}
           body={body}
-          action={<div className="flex items-center gap-5">{action}</div>}
+          action={action}
         />
       </Suspense>
     </>

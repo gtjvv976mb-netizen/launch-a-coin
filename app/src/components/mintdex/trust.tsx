@@ -38,9 +38,8 @@ import { absoluteUrl, canonicalCoinPath } from "../../lib/mintdex/seo";
 import type { CoinDetail } from "../../lib/mintdex/types";
 import { MintCard } from "./MintCard";
 import { useSessionUi } from "./session";
-import { Button, Modal, Pocket, menuCollisionPadding, useToast } from "./ui";
+import { Button, Icon, Modal, Pocket, menuCollisionPadding, useToast } from "./ui";
 import { Sheet, isPhoneNow } from "./sheet";
-import { ViewportPages } from "../carddex/live/ViewportPages";
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -357,37 +356,32 @@ export function LaunchedDialog({
   }, [open]);
   return (
     <Modal open={open} onOpenChange={onOpenChange} title={IS_SIM ? "Your demo card is ready" : "Your card is ready"}>
-      <div className="cdx-launched-deck cdx-overlay-deck"><ViewportPages label="Your new card pages" pages={[
-      <div key="card" className="cdx-launched-art">
-        <div ref={cardRef} className="cdx-launched-art__card">
-          <Pocket featured className="w-full">
-            {/* The reveal (M14): the card starts face down and turns one and a half times into a burst and
-                confetti once the dialog is open (under calm: the face at once, no confetti). */}
-            <MintCard card={coin} depth="hand" />
-          </Pocket>
+      {/* One page (code-06): the new card, one sentence, then [Copy link] [Post on X]. */}
+      <div className="cdx-launched">
+        <div className="cdx-launched-art">
+          <div ref={cardRef} className="cdx-launched-art__card">
+            <Pocket featured className="w-full">
+              {/* The reveal (M14): the card starts face down and turns one and a half times into a burst and
+                  confetti once the dialog is open (under calm: the face at once, no confetti). */}
+              <MintCard card={coin} depth="hand" />
+            </Pocket>
+          </div>
         </div>
-      </div>,
-      <div key="share" className="cdx-launched-copy cdx-overlay-copy">
-        <p className="text-pretty text-body leading-[1.5] text-slate">
+        <p className="cdx-launched-copy">
           {dexNo(coin.dexNo)} in the collection. You hold the one-of-one ${coin.ticker} card in your chosen design.
           {IS_SIM ? " This is a demo; no real coin or NFT has been minted." : ""}
         </p>
-      {/* flex-1 only in the row: in the phone column a zero basis squashed both buttons to 15px bars (QA). */}
-      <div className="mdx-sheet-foot flex flex-col gap-2 sm:flex-row-reverse">
-        <a
-          className="mdx-btn mdx-btn--primary flex-none sm:flex-1"
-          href={xIntent(share.text, url)}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Post on X
-        </a>
-        <Button variant="outline" className="flex-none sm:flex-1" onClick={() => void copyLink(url)}>
-          Copy link
-        </Button>
+        <div className="cdx-overlay-actions mdx-sheet-foot">
+          <Button variant="outline" onClick={() => void copyLink(url)}>
+            Copy link
+          </Button>
+          <a className="mdx-btn mdx-btn--primary" href={xIntent(share.text, url)} target="_blank" rel="noopener noreferrer">
+            Post on X
+            <span className="sr-only"> (opens in a new tab)</span>
+            <Icon name="external" />
+          </a>
+        </div>
       </div>
-      </div>,
-      ]} /></div>
     </Modal>
   );
 }

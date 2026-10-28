@@ -4,6 +4,11 @@ import { Button, Modal } from "./ui";
 
 // ---------------------------------------------------------------- confirm dialog
 
+/**
+ * A one-page question: the consequence in one or two sentences, then [cancel] [confirm] on the right. tone "danger"
+ * (a choice that cannot be undone) draws the confirm in the negative recipe and puts focus on the cancel, so Enter
+ * never takes the irreversible answer by accident.
+ */
 export function ConfirmDialog({
   open,
   onOpenChange,
@@ -13,6 +18,7 @@ export function ConfirmDialog({
   cancelLabel = "Cancel",
   pending = false,
   pendingLabel,
+  tone = "primary",
   onConfirm,
 }: {
   open: boolean;
@@ -23,20 +29,27 @@ export function ConfirmDialog({
   cancelLabel?: ReactNode;
   pending?: boolean;
   pendingLabel?: ReactNode;
+  tone?: "primary" | "danger";
   onConfirm: () => void;
 }) {
+  const danger = tone === "danger";
   return (
     <Modal open={open} onOpenChange={onOpenChange} title={title}>
-      <div className="cdx-confirm-copy text-pretty text-[15px] leading-[1.5] text-slate">
-        {children}
-      </div>
-      <div className="cdx-confirm-actions mdx-sheet-foot flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button variant="outline" onClick={() => onOpenChange(false)}>
-          {cancelLabel}
-        </Button>
-        <Button pending={pending} pendingLabel={pendingLabel} onClick={onConfirm}>
-          {confirmLabel}
-        </Button>
+      <div className="cdx-confirm">
+        <div className="cdx-overlay-copy">{children}</div>
+        <div className="cdx-overlay-actions mdx-sheet-foot">
+          <Button variant="outline" data-autofocus={danger || undefined} onClick={() => onOpenChange(false)}>
+            {cancelLabel}
+          </Button>
+          <Button
+            variant={danger ? "danger" : "primary"}
+            pending={pending}
+            pendingLabel={pendingLabel}
+            onClick={onConfirm}
+          >
+            {confirmLabel}
+          </Button>
+        </div>
       </div>
     </Modal>
   );

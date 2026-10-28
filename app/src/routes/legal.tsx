@@ -286,27 +286,43 @@ const SECTIONS: Section[] = [
   },
 ];
 
-/** One readable document: a short summary, then every section with real headings and linkable anchors. */
+/** Every heading the contents list can mark: the four sections and the topics under them, in reading order. */
+const HEADINGS = SECTIONS.flatMap((s) => [s.id as string, ...s.items.map((i) => i.id)]);
+
+/**
+ * One readable document (a Read screen): the title row, then from 1024px three columns on the column's grid: the
+ * contents (every section and topic, the one you are reading marked), the text in a ~65-character measure, and the
+ * short version beside it. Under 1024px: the four section links stay pinned under the top bar, then the short
+ * version, then the text. Every heading is a linkable anchor; the [TO FILL] slots stay marked until the operator
+ * supplies the facts.
+ */
 function Legal() {
   const { tab } = Route.useSearch();
   const docRef = useRef<HTMLDivElement>(null);
-  const [current, setCurrent] = useState<Section["id"]>("terms");
+  const [current, setCurrent] = useState<string>(SECTIONS[0].id);
+  // A heading jumped to (a contents link or a #hash) stays marked while the page scrolls to it, and at the end of
+  // the page where it cannot reach the top; the reader's own scroll (wheel, touch, keys) lets the position decide.
+  const pinned = useRef<string | null>(null);
 
-  // The page itself scrolls (main#content, or the window when there is no app frame), so the jump nav follows
-  // that scroller: the section whose heading has reached the top of its view is current; at the very end, the last.
+  // The page itself scrolls (main#content, or the window when there is no app frame), so the contents follow
+  // that scroller: the last heading that has reached the top of its view is current; at the very end, the last.
   const scroller = useCallback((): HTMLElement | null => docRef.current?.closest<HTMLElement>("#content") ?? null, []);
   const update = useCallback(() => {
     const doc = docRef.current;
     if (!doc) return;
+    if (pinned.current) {
+      setCurrent(pinned.current);
+      return;
+    }
     const box = scroller();
     const top = box ? box.getBoundingClientRect().top : 0;
-    let next: Section["id"] = SECTIONS[0].id;
-    for (const s of SECTIONS) {
-      const el = document.getElementById(s.id);
-      if (el && el.getBoundingClientRect().top - top <= 48) next = s.id;
+    let next = HEADINGS[0];
+    for (const id of HEADINGS) {
+      const el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top - top <= 96) next = id;
     }
     const el = box ?? document.documentElement;
-    if (el.scrollTop > 0 && el.scrollTop + el.clientHeight >= el.scrollHeight - 2) next = SECTIONS[SECTIONS.length - 1].id;
+    if (el.scrollTop > 0 && el.scrollTop + el.clientHeight >= el.scrollHeight - 2) next = HEADINGS[HEADINGS.length - 1];
     setCurrent(next);
   }, [scroller]);
 
@@ -315,7 +331,10 @@ function Legal() {
     const land = () => {
       const hash = decodeURIComponent(window.location.hash.slice(1));
       const target = hash && document.getElementById(hash) ? hash : tab;
-      if (target && target !== "terms") document.getElementById(target)?.scrollIntoView({ block: "start" });
+      if (target && target !== "terms") {
+        pinned.current = target;
+        document.getElementById(target)?.scrollIntoView({ block: "start" });
+      }
       update();
     };
     land();
@@ -330,63 +349,114 @@ function Legal() {
 
   useEffect(() => {
     const target: HTMLElement | Window = scroller() ?? window;
-    // Four rect reads per scroll event: cheap enough to run directly, and it keeps working in a background tab.
+    // A rect read per heading per scroll event: cheap enough to run directly, and it keeps working in a background tab.
+    const release = () => {
+      pinned.current = null;
+    };
     target.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
+    for (const type of ["wheel", "touchstart", "keydown", "pointerdown"]) {
+      window.addEventListener(type, release, { passive: true, capture: true });
+    }
     return () => {
       target.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
+      for (const type of ["wheel", "touchstart", "keydown", "pointerdown"]) {
+        window.removeEventListener(type, release, { capture: true });
+      }
     };
   }, [scroller, update]);
 
-  function onNav(e: MouseEvent<HTMLAnchorElement>, id: Section["id"]) {
+  function onNav(e: MouseEvent<HTMLAnchorElement>, id: string) {
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
     const el = document.getElementById(id);
     if (!el) return;
     history.replaceState(history.state, "", `#${id}`);
+    pinned.current = id;
     setCurrent(id);
     el.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" });
     el.focus({ preventScroll: true });
   }
 
+  const section = SECTIONS.find((s) => s.id === current || s.items.some((i) => i.id === current))?.id ?? SECTIONS[0].id;
+
   return (
     <PageFrame className="cdx-legal">
       <PageHeader title="Terms, privacy and risks" context={`Launch a Card · Updated ${UPDATED}`} wrapContext />
-      <nav className="cdx-legal__nav" aria-label="Sections">
-        {SECTIONS.map((s) => (
-          <a
-            key={s.id}
-            href={`#${s.id}`}
-            onClick={(e) => onNav(e, s.id)}
-            aria-current={current === s.id ? "location" : undefined}
-          >
-            {s.title}
-          </a>
-        ))}
-      </nav>
-      <div ref={docRef} className="cdx-legal__doc" tabIndex={0} role="region" aria-label="Terms, privacy and risks">
-        <section className="cdx-legal__summary" aria-labelledby="legal-summary">
+      <div className="cdx-legal__layout">
+        {/* Phones and tablets: the four sections, pinned under the top bar while the text scrolls. */}
+        <nav className="cdx-legal__jump" aria-label="Sections">
+          {SECTIONS.map((s) => (
+            <a
+              key={s.id}
+              href={`#${s.id}`}
+              onClick={(e) => onNav(e, s.id)}
+              aria-current={section === s.id ? "location" : undefined}
+            >
+              {s.title}
+            </a>
+          ))}
+        </nav>
+        {/* From 1024px: every section and topic; the one in view is marked. */}
+        <nav className="cdx-legal__toc" aria-labelledby="legal-contents">
+          <p id="legal-contents" className="cdx-legal__toc-head">
+            Contents
+          </p>
+          <ol>
+            {SECTIONS.map((s) => (
+              <li key={s.id}>
+                <a
+                  href={`#${s.id}`}
+                  onClick={(e) => onNav(e, s.id)}
+                  className="cdx-legal__toc-section"
+                  data-open={section === s.id || undefined}
+                  aria-current={current === s.id ? "location" : undefined}
+                >
+                  {s.title}
+                </a>
+                <ol>
+                  {s.items.map((item) => (
+                    <li key={item.id}>
+                      <a
+                        href={`#${item.id}`}
+                        onClick={(e) => onNav(e, item.id)}
+                        aria-current={current === item.id ? "location" : undefined}
+                      >
+                        {item.title}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </li>
+            ))}
+          </ol>
+        </nav>
+        <aside className="cdx-legal__summary" aria-labelledby="legal-summary">
           <h2 id="legal-summary">The short version</h2>
           <ul>
             <li>Demo prices, balances and trades are simulated. Test funds have no cash value.</li>
             <li>Wallet launches create a real pump.fun token and cost real SOL. You approve each transaction.</li>
             <li>Real memecoins can lose all value.</li>
           </ul>
-        </section>
-        {SECTIONS.map((s) => (
-          <section key={s.id} aria-labelledby={s.id}>
-            <h2 id={s.id} tabIndex={-1}>
-              {s.title}
-            </h2>
-            {s.items.map((item) => (
-              <Fragment key={item.id}>
-                <h3 id={item.id}>{item.title}</h3>
-                {item.body}
-              </Fragment>
-            ))}
-          </section>
-        ))}
+        </aside>
+        <div ref={docRef} className="cdx-legal__doc">
+          {SECTIONS.map((s) => (
+            <section key={s.id} aria-labelledby={s.id}>
+              <h2 id={s.id} tabIndex={-1}>
+                {s.title}
+              </h2>
+              {s.items.map((item) => (
+                <Fragment key={item.id}>
+                  <h3 id={item.id} tabIndex={-1}>
+                    {item.title}
+                  </h3>
+                  {item.body}
+                </Fragment>
+              ))}
+            </section>
+          ))}
+        </div>
       </div>
     </PageFrame>
   );

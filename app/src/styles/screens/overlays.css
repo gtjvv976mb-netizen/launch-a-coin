@@ -1,66 +1,518 @@
-/* dialogs, sheets, the demo-entry and guide dialogs, confirm dialogs screen sheet. Owned by the "overlays" screen group (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css).
- * The blocks below were moved here unchanged from the shared sheets, in their old cascade order; tokens: carddex-theme.css. */
+/* Overlays screen sheet: dialogs, sheets, the demo-entry, guide, confirm and launched dialogs, the wallet menu and
+ * wallet connect dialog, toasts and the 404 / error pages. Owned by the "overlays" screen group
+ * (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css). Tokens: carddex-theme.css.
+ *
+ * Only what floats is lifted (--shadow-modal for dialogs and sheets, --shadow-pop for menus and toasts, each with
+ * the one white ring); nothing else here has a border or a lift. Elevation inside a panel is by lightness: the
+ * panel is the surface, rows and wells are nested. The motion is the primitives' own (mintdex.css .mdx-dialog,
+ * .mdx-pop, .mdx-toast and the vaul sheet timing): opacity and a short rise, instant under reduced motion. */
 
-/* ---- moved from carddex-theme.css (same order as there) */
-.mdx-dialog { border: 2px solid var(--color-control-border); }
+/* ---------------------------------------------------------------- the panel: desktop dialog and phone sheet
+ * Components: dialog-modal.tsx (from 1024px) and sheet-drawer.tsx (phones). Height follows the content up to the
+ * window; past that the body scrolls inside and a .mdx-sheet-foot stays on the bottom edge. */
+.cdx-overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background: var(--overlay);
+}
+.cdx-overlay {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-modal); /* taste-skill-ignore: a dialog or sheet floats (the one ring and its drop) */
+  outline: none;
+}
+.cdx-overlay--dialog {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: var(--z-overlay);
+  /* The separate translate property, so the dialog keyframes (transform) compose with the centring. */
+  translate: -50% -50%;
+  width: calc(100vw - 32px);
+  max-height: calc(var(--cdx-app-height, 100dvh) - 48px);
+  gap: 16px;
+  padding: var(--pad-overlay);
+  border-radius: var(--radius-aside);
+}
+.cdx-overlay--sheet {
+  --sheet-pad: max(16px, env(safe-area-inset-left), env(safe-area-inset-right));
+  --sheet-pad-b: max(16px, env(safe-area-inset-bottom));
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: var(--z-overlay);
+  width: 100%;
+  max-width: 600px;
+  max-height: calc(var(--cdx-app-height, 100dvh) - 32px);
+  margin-inline: auto;
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  /* Vaul paints a 200%-height background tail below the panel while dragging; it must not add page scroll. */
+  overflow: clip;
+}
+.cdx-overlay__grip {
+  flex: none;
+  width: 36px;
+  height: 4px;
+  margin: 8px auto 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-field);
+}
+.cdx-overlay__head {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.cdx-overlay--sheet .cdx-overlay__head {
+  padding: 4px var(--sheet-pad) 0;
+}
+/* The title's first line centres on the 36px Close (26px line + 5px). */
+.cdx-overlay__title {
+  min-width: 0;
+  padding-top: 5px;
+  color: var(--color-ink);
+  font-size: var(--text-title);
+  line-height: var(--text-title--line-height);
+  font-weight: 600;
+  text-wrap: balance;
+}
+.cdx-overlay__close {
+  margin-right: -6px;
+}
+.cdx-overlay__body {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+  /* 4px of room so focus rings at the body's edges are not clipped by the scroll box. */
+  margin: -4px;
+  padding: 4px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-hairline) transparent;
+}
+.cdx-overlay--sheet .cdx-overlay__body {
+  margin: 0;
+  padding: 16px var(--sheet-pad) var(--sheet-pad-b);
+}
+/* The call to action stays on the panel's bottom edge while the body scrolls (sticky bottom 0 is the body's
+ * content edge, above its padding). Its own top padding is the opaque band above the buttons; a flat
+ * surface-coloured band (no blur, no offset colour) paints the body padding below it, so scrolled content never
+ * shows around it. */
+.cdx-overlay__body .mdx-sheet-foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  background: var(--color-surface);
+  box-shadow: 0 4px 0 var(--color-surface); /* taste-skill-ignore: a flat band in the panel's own colour, not a lift */
+}
+.cdx-overlay--sheet .cdx-overlay__body .mdx-sheet-foot {
+  box-shadow: 0 var(--sheet-pad-b) 0 var(--color-surface); /* taste-skill-ignore: the same flat band */
+}
+/* The Launch design browser fills a fixed frame (its grid is sized by the frame): keep the frame on phones too
+ * (launch.css holds the desktop height). */
+.cdx-overlay--sheet:has(.cdx-design-browser) {
+  height: min(600px, calc(var(--cdx-app-height, 100dvh) - 12px));
+}
 
-/* ---- moved from carddex-overlays.css (whole file, same order) */
-/* Dialog content is a deck of explicit pages, never an inner scroll container. */
-.mdx-dialog {
-  height:min(600px,calc(var(--cdx-app-height,100dvh) - 32px));
-  max-height:calc(var(--cdx-app-height,100dvh) - 32px);
-  gap:16px;
+/* ---------------------------------------------------------------- dialog content
+ * Body copy is one or two sentences of 14px slate; a heading inside a dialog is never larger than its title.
+ * Actions sit on the right, [secondary] [primary], with one primary; a caption (Step 2 of 5) on the left. */
+.cdx-overlay-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--color-slate);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
 }
-.mdx-dialog__head { margin:0; }
-.mdx-dialog__body,.mdx-sheet__body { display:flex; flex:1; min-height:0; flex-direction:column; }
-.mdx-sheet[data-vaul-drawer] {
-  height:min(600px,calc(var(--cdx-app-height,100dvh) - 12px));
-  max-height:calc(var(--cdx-app-height,100dvh) - 12px);
-  /* Vaul paints a 200%-height background tail below the panel while dragging.
-     Its decorative tail must not extend this paged app's viewport. */
-  overflow:clip;
+.cdx-overlay-copy h3 {
+  color: var(--color-ink);
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  font-weight: 600;
+  text-wrap: balance;
 }
-.mdx-sheet__body .mdx-sheet-foot { position:static; box-shadow:none; }
-.mdx-sheet__body .mdx-sheet-foot:last-child { box-shadow:none; }
-.cdx-overlay-deck { display:flex; flex:1; min-height:0; flex-direction:column; gap:14px; }
-.cdx-overlay-deck .cdx-viewport-pages { display:flex; flex:1; min-height:0; flex-direction:column; gap:14px; }
-.cdx-overlay-deck .cdx-viewport-pages__body { display:flex; flex:1; min-height:0; flex-direction:column; }
-.cdx-overlay-deck .cdx-viewport-pages > nav { flex:none; display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.cdx-overlay-deck .cdx-viewport-pages > nav > span { flex:none; font-size:12px; font-variant-numeric:tabular-nums; color:var(--color-slate); }
-.cdx-overlay-copy { min-width:0; display:flex; flex-direction:column; gap:14px; font-size:15px; line-height:1.5; color:var(--color-slate); overflow-wrap:anywhere; }
-.cdx-overlay-copy h3 { font-size:20px; line-height:1.25; font-weight:650; color:var(--color-ink); }
-.cdx-overlay-copy dl { display:grid; gap:12px; }
-.cdx-overlay-copy dd { margin-top:5px; }
-.cdx-overlay-copy > a { align-self:flex-start; min-height:44px; display:inline-flex; align-items:center; }
-.cdx-overlay-actions { display:flex; flex:none; margin-top:auto; justify-content:space-between; align-items:center; gap:12px; }
-.cdx-overlay-actions > span { font-size:12px; color:var(--color-slate); font-variant-numeric:tabular-nums; }
-.cdx-enter-form { justify-content:space-between; }
-.cdx-enter-submit { display:grid; grid-template-columns:auto minmax(0,1fr); flex:none; gap:8px; margin-top:auto; }
-.cdx-enter-submit .mdx-btn { white-space:normal; }
-.cdx-confirm-copy { flex:1; min-height:0; overflow-wrap:anywhere; }
-.cdx-confirm-actions { flex:none; margin-top:16px; }
-.cdx-confirm-actions .mdx-btn { white-space:normal; }
-.cdx-launched-art { display:flex; flex:1; min-height:0; align-items:center; justify-content:center; container-type:size; }
-.cdx-launched-art__card { width:min(230px,calc((100cqh - 24px)*.6),82cqw); }
-.cdx-launched-copy { flex:1; min-height:0; justify-content:space-between; }
-.cdx-launched-copy > .mdx-sheet-foot { flex:none; }
-@media(max-width:1023px) {
-  .mdx-sheet__body { padding:12px max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); }
-  .mdx-sheet__head { padding-inline:max(16px,env(safe-area-inset-right)); }
-  .cdx-overlay-copy { font-size:15px; gap:12px; }
-  .cdx-overlay-copy h3 { font-size:19px; }
-  .cdx-overlay-deck .cdx-viewport-pages > nav > button { min-height:44px; }
+.cdx-overlay-copy > .mdx-link {
+  align-self: flex-start;
+  margin-top: 4px;
 }
-@media(max-height:440px) {
-  .mdx-dialog { padding:12px; gap:8px; height:calc(var(--cdx-app-height,100dvh) - 12px); max-height:calc(var(--cdx-app-height,100dvh) - 12px); }
-  .mdx-sheet__body { padding:6px 12px max(8px,env(safe-area-inset-bottom)); }
-  .mdx-sheet__grip { height:3px; margin-top:5px; }
-  .mdx-sheet__head { padding-top:0; padding-inline:12px; }
-  .mdx-sheet__head [data-vaul-title] { padding-top:7px; }
-  .cdx-enter-form { gap:8px; }
-  .cdx-enter-submit .mdx-btn { min-height:40px; padding-block:7px; }
-  .cdx-enter-form .mdx-input { height:40px; }
+.cdx-overlay-actions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 24px;
+}
+.cdx-overlay-actions__note {
+  margin-right: auto;
+  color: var(--color-placeholder);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+}
+.cdx-overlay--sheet .cdx-overlay-actions {
+  padding-top: 16px;
+}
+/* Narrow phones: the buttons share the row and wrap to full width when they do not fit, the primary last (nearest
+ * the thumb). Wider sheets keep them at their own width on the right, as in the dialog. */
+@media (max-width: 479.98px) {
+  .cdx-overlay--sheet .cdx-overlay-actions > .mdx-btn {
+    flex: 1 1 auto;
+  }
 }
 
-/* ---- moved from carddex-viewport.css (same order as there) */
-.mdx-dialog__body,.mdx-sheet__body { min-height:0; overflow:clip; display:flex; flex-direction:column; }
+/* ---------------------------------------------------------------- Try the demo (session.tsx EnterDialog) */
+.cdx-enter {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.cdx-enter__intro {
+  color: var(--color-slate);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  text-wrap: pretty;
+}
+.cdx-enter__note {
+  margin-top: -4px;
+  color: var(--color-placeholder);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  text-wrap: pretty;
+}
+.cdx-enter .cdx-overlay-actions {
+  padding-top: 8px;
+}
+
+/* ---------------------------------------------------------------- How Launch a Card works (session.tsx GuideDialog)
+ * Every step in one grid cell: the panel keeps the tallest step's height, so Next never moves the buttons. */
+.cdx-guide {
+  display: flex;
+  flex-direction: column;
+}
+.cdx-guide__steps {
+  display: grid;
+}
+.cdx-guide__step {
+  grid-area: 1 / 1;
+}
+.cdx-guide__step:not([data-current]) {
+  visibility: hidden;
+}
+.cdx-guide__facts {
+  display: grid;
+  gap: 8px;
+}
+.cdx-guide__facts dt {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.cdx-guide__step .mdx-calm {
+  margin-top: 8px;
+}
+
+/* ---------------------------------------------------------------- confirm (confirm.tsx) */
+.cdx-confirm {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------------------------------------------------------------- your card is ready (trust.tsx LaunchedDialog)
+ * The card sized to the room the window leaves (about 300px of title, copy and buttons), 120 to 220px wide. */
+.cdx-launched {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.cdx-launched-art {
+  display: flex;
+  justify-content: center;
+  padding-block: 8px;
+}
+.cdx-launched-art__card {
+  width: min(220px, 60vw, max(120px, calc((var(--cdx-app-height, 100dvh) - 320px) * 0.71)));
+}
+.cdx-launched-copy {
+  color: var(--color-slate);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  text-wrap: pretty;
+}
+.cdx-launched .cdx-overlay-actions {
+  padding-top: 8px;
+}
+
+/* ---------------------------------------------------------------- the wallet menu (wallet-menu.tsx)
+ * The account first, then Portfolio and the faucet, a rule, Start over in the negative colour. */
+.cdx-overlay-menu {
+  z-index: var(--z-overlay);
+  display: flex;
+  width: 260px;
+  max-width: calc(100vw - 24px);
+  flex-direction: column;
+  outline: none;
+}
+.cdx-overlay-menu__account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px 12px;
+}
+.cdx-overlay-menu__handle {
+  overflow: hidden;
+  color: var(--color-slate);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cdx-overlay-menu__balance {
+  color: var(--color-ink);
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  white-space: nowrap;
+}
+.cdx-overlay-menu__note {
+  flex: none;
+  align-self: flex-start;
+  margin-left: auto;
+  color: var(--color-placeholder);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  white-space: nowrap;
+}
+.cdx-overlay-menu__rule {
+  margin: 4px 8px;
+  border: 0;
+  border-top: 1px solid var(--color-hairline);
+}
+.cdx-overlay-menu__danger {
+  color: var(--color-down-hover);
+}
+
+/* ---------------------------------------------------------------- connect a Solana wallet (wallet-connect.tsx)
+ * Installed wallets as nested rows (one press each), then where to get one. Two skeleton rows while the browser's
+ * wallets are read; errors in the negative pill pair, the not-on-mainnet note in the warning pair. */
+.cdx-wallet-connect {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.cdx-wallet-connect__line {
+  color: var(--color-slate);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  text-wrap: pretty;
+}
+.cdx-wallet-connect__group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cdx-wallet-connect__label {
+  color: var(--color-placeholder);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  font-weight: 500;
+}
+.cdx-wallet-connect__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  list-style: none;
+}
+.cdx-wallet-connect__row {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: var(--radius-row);
+  background: var(--color-nested);
+  color: var(--color-ink);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--t-hover) ease,
+    transform var(--t-press) var(--ease-out);
+}
+.cdx-wallet-connect__row > svg {
+  flex: none;
+  color: var(--color-placeholder);
+}
+.cdx-wallet-connect__row:active:not([aria-disabled="true"]) {
+  transform: scale(0.97);
+}
+.cdx-wallet-connect__row[aria-disabled="true"] {
+  color: var(--color-slate);
+  cursor: not-allowed;
+}
+.cdx-wallet-connect__row[aria-busy="true"] {
+  color: var(--color-ink);
+  cursor: progress;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cdx-wallet-connect__row:hover:not([aria-disabled="true"]) {
+    background: var(--color-raised);
+  }
+}
+/* No press scale under Calm or reduced motion: the colour still answers. */
+:root[data-motion="calm"] .cdx-wallet-connect__row:active {
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion-pref="full"]) .cdx-wallet-connect__row {
+    transition-property: background-color;
+  }
+  :root:not([data-motion-pref="full"]) .cdx-wallet-connect__row:active {
+    transform: none;
+  }
+}
+.cdx-wallet-connect__row-name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.cdx-wallet-connect__icon {
+  flex: none;
+  border-radius: var(--radius-chip);
+  outline: 1px solid var(--image-outline);
+  outline-offset: -1px;
+}
+.cdx-wallet-connect__skeleton {
+  display: block;
+  height: 52px;
+  border-radius: var(--radius-row);
+  background: var(--color-nested);
+}
+.cdx-wallet-connect__empty {
+  color: var(--color-ink);
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  font-weight: 600;
+}
+.cdx-wallet-connect__get {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  list-style: none;
+}
+.cdx-wallet-connect__get a {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  gap: 4px;
+}
+.cdx-wallet-connect__get a > svg {
+  color: var(--color-slate);
+}
+.cdx-wallet-connect__account {
+  padding: 12px 16px;
+  border-radius: var(--radius-row);
+  background: var(--color-nested);
+}
+.cdx-wallet-connect__who {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cdx-wallet-connect__name {
+  color: var(--color-ink);
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  font-weight: 600;
+}
+.cdx-wallet-connect__address {
+  margin-top: 4px;
+  color: var(--color-slate);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.cdx-wallet-connect__error,
+.cdx-wallet-connect__warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius-row);
+  color: var(--color-ink);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  text-wrap: pretty;
+}
+.cdx-wallet-connect__error > svg,
+.cdx-wallet-connect__warn > svg {
+  flex: none;
+  margin-top: 2px;
+}
+.cdx-wallet-connect__error {
+  background: var(--color-down-soft);
+}
+.cdx-wallet-connect__error > svg {
+  color: var(--color-down-hover);
+}
+.cdx-wallet-connect__warn {
+  background: var(--color-warn-soft);
+}
+.cdx-wallet-connect__warn > svg {
+  color: var(--color-warn);
+}
+
+/* ---------------------------------------------------------------- toasts (ui.tsx ToastProvider; placement in mintdex.css)
+ * The float surface with one shadow; status in a small glyph, never a coloured fill: a check on the raised step
+ * for done, the warning glyph in the negative colour for an error. Dismiss reaches the hit size. */
+.mdx-toast {
+  min-height: 48px;
+}
+.mdx-toast__ok {
+  background: var(--color-raised);
+  color: var(--color-ink);
+}
+.mdx-toast[data-kind="err"] {
+  background: var(--color-float);
+}
+.mdx-toast[data-kind="err"]::before {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background: var(--color-down-hover);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 2.25 14.25 13.5H1.75L8 2.25Z'/%3E%3Cpath d='M8 6.5v3M8 11.6v.1'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 2.25 14.25 13.5H1.75L8 2.25Z'/%3E%3Cpath d='M8 6.5v3M8 11.6v.1'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.mdx-toast__x {
+  position: relative;
+}
+.mdx-toast__x::after {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - var(--hit)) / 2));
+  border-radius: inherit;
+}
+
+/* ---------------------------------------------------------------- 404 and error pages (PageStatus.tsx)
+ * The card back on its ledge without its glow: the page is quiet, the card is the only colour. */
+.cdx-status .mdx-card3d__halo {
+  display: none;
+}
+.cdx-status .mdx-empty__action {
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}

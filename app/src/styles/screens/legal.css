@@ -1,32 +1,243 @@
 /* Legal (/legal) screen sheet. Owned by the "overlays" screen group (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css).
- * The blocks below were moved here unchanged from the shared sheets, in their old cascade order; tokens: carddex-theme.css. */
+ * A Read screen on the dark ground (routes/legal.tsx). From 1280px, three columns on the 1152px column's grid:
+ * contents 220 + 64 + text 1fr (540, capped at a 65-character measure) + 64 + the short version 264 = 1152. From
+ * 1024px, contents 200 + 48 + the short version over the text. Under 1024px one column: the section links pinned
+ * under the top bar, the short version, the text.
+ * Tokens: carddex-theme.css. */
 
-/* ---- moved from carddex-viewport.css (same order as there) */
-/* Lists and documents grow with their content (a paged legal view keeps its measured frame). */
-.cdx-app.cdx-viewport .cdx-viewport-main > :is(.cdx-discover,.cdx-legal:not(:has(.cdx-paged-copy))) { height:auto; min-height:100%; }
-.cdx-legal { gap:12px; }
-/* A Read page: keep the capped column centred on wide screens instead of leaving a dead strip on the right. */
-@media (min-width:1024px) { .cdx-app .cdx-legal { width:100%; max-width:760px; margin-inline:auto; }
+/* The page grows with its text (carddex-viewport.css lets .cdx-legal take height:auto in main). */
+
+.cdx-legal__layout {
+  --legal-measure: 46ch; /* about 65 characters a line: Instrument Sans averages ~0.69ch a glyph */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
-/* One document scrolled by the page (main#content) under a jump nav; the current section is underlined. */
-.cdx-legal__nav { flex:none; display:flex; flex-wrap:wrap; column-gap:20px; }
-.cdx-legal__nav a { display:inline-flex; align-items:center; justify-content:center; min-width:44px; min-height:44px; border-bottom:2px solid transparent; font-size:15px; font-weight:500; color:var(--color-slate); text-decoration:none; transition:color 160ms cubic-bezier(.22,1,.36,1), border-color 160ms cubic-bezier(.22,1,.36,1); }
-.cdx-legal__nav a:hover { color:var(--color-ink); }
-.cdx-legal__nav a[aria-current] { color:var(--color-ink); font-weight:600; border-bottom-color:var(--color-neon); }
-.cdx-legal__doc { padding:4px 8px 32px 2px; border-radius:var(--radius-row); }
-.cdx-legal__doc > section { max-width:65ch; }
-.cdx-legal__doc h2 { margin-top:32px; font-size:21px; font-weight:600; line-height:1.3; color:var(--color-ink); scroll-margin-top:8px; }
-.cdx-legal__doc h2:focus { outline:none; }
-.cdx-legal__doc h3 { margin-top:20px; font-size:16px; font-weight:600; line-height:1.35; color:var(--color-ink); scroll-margin-top:8px; }
-/* About 65 characters a line: Instrument Sans averages ~0.69ch a glyph, so 46ch, not 65ch. */
-.cdx-legal__doc p, .cdx-legal__doc li { max-width:46ch; margin-top:6px; font-size:15px; line-height:1.6; color:var(--color-ink); text-wrap:pretty; }
-.cdx-legal__summary { padding:4px 16px 16px; border-radius:var(--radius-row); background:var(--color-plinth); }
-.cdx-legal__doc .cdx-legal__summary h2 { margin-top:12px; font-size:17px; }
-.cdx-legal__summary ul { margin-top:4px; padding-left:20px; list-style:disc; }
+
+/* ---- the four section links (phones and tablets): pinned under the top bar while the text scrolls */
+/* Sticky offsets count from main's content edge, so the row climbs over main's top padding (16, or 24 from 768)
+ * to sit flush under the top bar. */
+.cdx-legal__jump {
+  position: sticky;
+  top: -16px;
+  z-index: 2;
+  display: flex;
+  gap: 24px;
+  margin-inline: calc(var(--main-pad) * -1);
+  padding-inline: var(--main-pad);
+  border-bottom: 1px solid var(--color-hairline);
+  background: var(--color-ground);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.cdx-legal__jump::-webkit-scrollbar { display: none; }
+.cdx-legal__jump a {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--hit);
+  min-height: var(--hit);
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  color: var(--color-slate);
+  font-size: var(--text-body);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color var(--t-hover) ease;
+}
+.cdx-legal__jump a[aria-current] {
+  border-bottom-color: var(--color-ink);
+  color: var(--color-ink);
+}
+.cdx-legal__jump a:focus-visible { outline-offset: -2px; }
+@media (min-width: 768px) {
+  .cdx-legal__jump { top: -24px; }
+}
+/* Short landscape phones: the pinned row would cost a third of the screen, so it scrolls with the page. */
+@media (max-height: 599.98px) {
+  .cdx-legal__jump { position: static; }
+}
+
+/* ---- contents (from 1024px) */
+.cdx-legal__toc { display: none; }
+.cdx-legal__toc-head {
+  margin-bottom: 4px;
+  padding-left: 13px;
+  color: var(--color-placeholder);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  font-weight: 500;
+}
+.cdx-legal__toc ol { list-style: none; }
+.cdx-legal__toc a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: var(--hit);
+  padding: 4px 0 4px 13px;
+  border-left: 1px solid var(--color-hairline);
+  color: var(--color-slate);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  text-decoration: none;
+  text-wrap: pretty;
+  transition: color var(--t-hover) ease;
+}
+.cdx-legal__toc ol ol a { padding-left: 25px; }
+.cdx-legal__toc-section { font-weight: 500; }
+.cdx-legal__toc-section[data-open] { color: var(--color-ink); }
+/* Only the section in view lists its topics: four rows plus at most nine. */
+.cdx-legal__toc-section:not([data-open]) + ol { display: none; }
+.cdx-legal__toc a[aria-current] { color: var(--color-ink); }
+.cdx-legal__toc a[aria-current]::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: -1px;
+  width: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--color-ink);
+}
+.cdx-legal__toc a:focus-visible { outline-offset: -2px; border-radius: var(--radius-chip); }
+@media (hover: hover) and (pointer: fine) {
+  .cdx-legal__jump a:hover,
+  .cdx-legal__toc a:hover { color: var(--color-ink); }
+}
+
+/* ---- the short version */
+.cdx-legal__summary {
+  padding: var(--pad-panel);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+}
+.cdx-legal__summary h2 {
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.cdx-legal__summary ul {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  padding-left: 18px;
+  list-style: disc;
+}
+.cdx-legal__summary li {
+  color: var(--color-slate);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  text-wrap: pretty;
+}
+.cdx-legal__summary li::marker { color: var(--color-placeholder); }
+
+/* ---- the text */
+.cdx-legal__doc { min-width: 0; padding-bottom: 32px; }
+.cdx-legal__doc > section + section { margin-top: 48px; }
+.cdx-legal__doc h2 {
+  font-size: var(--text-title);
+  line-height: var(--text-title--line-height);
+  font-weight: 600;
+  color: var(--color-ink);
+  text-wrap: balance;
+  scroll-margin-top: calc(var(--hit) + 16px);
+}
+.cdx-legal__doc h3 {
+  max-width: var(--legal-measure);
+  margin-top: 24px;
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  font-weight: 600;
+  color: var(--color-ink);
+  text-wrap: balance;
+  scroll-margin-top: calc(var(--hit) + 16px);
+}
+.cdx-legal__doc h2 + h3 { margin-top: 16px; }
+/* Headings take focus after a jump (screen readers land on them); the scroll is the visible answer. */
+.cdx-legal__doc :is(h2, h3):focus { outline: none; }
+.cdx-legal__doc p {
+  max-width: var(--legal-measure);
+  margin-top: 8px;
+  color: var(--color-ink);
+  font-size: var(--text-lead);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+/* An operator fact still to supply: an obvious marked slot, never a guess (kept as it was). */
 .cdx-legal__fill { padding:0 4px; border:1px dashed var(--color-hype); border-radius:var(--radius-chip); background:var(--color-tint); color:var(--color-ink); font-weight:600; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
-.cdx-legal__fees { width:100%; margin-top:12px; border-collapse:collapse; font-size:14px; line-height:1.5; }
-.cdx-legal__fees th, .cdx-legal__fees td { padding:8px 12px 8px 0; border-bottom:1px solid var(--color-rule); text-align:left; vertical-align:top; }
-.cdx-legal__fees thead th { font-size:12px; font-weight:600; color:var(--color-slate); border-bottom-color:var(--color-hairline); }
-.cdx-legal__fees tbody th { width:40%; font-weight:600; color:var(--color-ink); }
-@media(max-width:639px) { .cdx-legal__fees tbody th { width:44%; } .cdx-legal__nav { column-gap:16px; }
+.cdx-legal__fees {
+  width: 100%;
+  max-width: 640px;
+  margin-top: 16px;
+  border-collapse: collapse;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+.cdx-legal__fees th,
+.cdx-legal__fees td {
+  padding: 12px 16px 12px 0;
+  border-bottom: 1px solid var(--color-rule);
+  text-align: left;
+  vertical-align: top;
+  color: var(--color-ink);
+}
+.cdx-legal__fees td { color: var(--color-slate); }
+.cdx-legal__fees thead th {
+  padding-block: 8px;
+  border-bottom-color: var(--color-hairline);
+  color: var(--color-placeholder);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  font-weight: 500;
+}
+.cdx-legal__fees tbody th { width: 40%; font-weight: 600; }
+.cdx-legal__fees tbody tr:last-child > * { border-bottom: 0; }
+@media (max-width: 639.98px) {
+  .cdx-legal__fees tbody th { width: 44%; }
+}
+
+/* ---- from 1024px: contents | the short version over the text; from 1280px: contents | text | the short version */
+@media (min-width: 1024px) {
+  .cdx-legal__layout {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "toc summary"
+      "toc doc";
+    align-items: start;
+    gap: 24px 48px;
+  }
+  .cdx-legal__jump { display: none; }
+  .cdx-legal__toc {
+    grid-area: toc;
+    position: sticky;
+    top: 24px;
+    display: block;
+    max-height: calc(var(--cdx-app-height, 100dvh) - var(--topbar-h) - 48px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  .cdx-legal__summary {
+    grid-area: summary;
+    max-width: calc(var(--legal-measure) + 2 * var(--pad-panel));
+  }
+  .cdx-legal__doc { grid-area: doc; }
+  .cdx-legal__doc :is(h2, h3) { scroll-margin-top: 24px; }
+}
+@media (min-width: 1280px) {
+  .cdx-legal__layout {
+    grid-template-columns: 220px minmax(0, 1fr) 264px;
+    grid-template-rows: auto;
+    grid-template-areas: "toc doc summary";
+    column-gap: 64px;
+  }
+  .cdx-legal__summary {
+    position: sticky;
+    top: 24px;
+    max-width: none;
+  }
 }

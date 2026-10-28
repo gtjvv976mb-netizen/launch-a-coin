@@ -1,8 +1,8 @@
 /**
  * "View in 3D" (owner 2026-10-17: "make each card 3d viewable turntable"). Every card on the site carries a small
- * rotate button (on hover or focus; always shown on touch screens); a mouse hold on the card, or a double click on
- * a card that is not a link, opens it too. The viewer itself (TurntableStage.tsx) is a lazy chunk: the card on a
- * neon turntable, spinning all the way round.
+ * rotate button on its corner, shown at rest on every pointer (code-08: never hover-only); a mouse hold on the card,
+ * or a double click on a card that is not a link, opens it too. The viewer itself (TurntableStage.tsx) is a lazy
+ * chunk: the card on the flat ground, spinning all the way round.
  *
  * This file is the tiny part in the main chunk: the provider (one viewer per page), the button, the host wrapper
  * and the deep link. Opening sets ?view3d=<id> on the URL with history.replaceState (outside the router, so no
@@ -27,6 +27,7 @@ import {
 } from "react";
 
 import type { CardData } from "../MintCard";
+import { Icon } from "../icons";
 
 /** One card the viewer can show. `coinId` links "View coin" (absent for a design preview with no coin). */
 export type View3DItem = {
@@ -246,28 +247,6 @@ export function useView3D() {
   return useContext(View3DCtx);
 }
 
-/** The rotate-360 glyph. */
-export function Rotate3DIcon({ size = 16 }: { size?: number }) {
-  return (
-    <svg
-      aria-hidden
-      viewBox="0 0 24 24"
-      width={size}
-      height={size}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.9"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 5.2c4.8 0 8.6 1.9 8.6 4.3 0 1.6-1.7 3-4.3 3.7" />
-      <path d="M12 13.8c-4.8 0-8.6-1.9-8.6-4.3 0-1.4 1.3-2.6 3.3-3.4" />
-      <path d="M9.6 11.6l2.4 2.2-2.4 2.2" />
-      <rect x="9.3" y="2.6" width="5.4" height="7.6" rx="1" />
-    </svg>
-  );
-}
-
 /** The small "View in 3D" button. It registers its card, so the viewer can find it, its list and the deep link. */
 export function View3DButton({
   item,
@@ -303,7 +282,8 @@ export function View3DButton({
       ref={ref}
       type="button"
       className={`mdx-v3dbtn ${className}`}
-      aria-label={`View ${item.card.name} in 3D`}
+      // The name starts with the words of the tooltip (WCAG 2.5.3).
+      aria-label={`View in 3D: ${item.card.name}`}
       aria-haspopup="dialog"
       title="View in 3D"
       data-v3d-btn={id}
@@ -317,7 +297,7 @@ export function View3DButton({
         ctx.open(id, e.currentTarget);
       }}
     >
-      <Rotate3DIcon />
+      <Icon name="rotate-3d" />
     </button>
   );
 }
