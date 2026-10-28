@@ -181,15 +181,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 /**
- * Motion level before first paint: legacy saved Calm choices are superseded by the automatic-motion default
- * (owner 2026-10-18). A new explicit Calm choice uses mdx-motion-v2 and puts
- * html[data-motion="calm"] in place before anything animates. Full motion is the default for everyone: the device's
- * reduced motion setting no longer turns it off by itself (owner, 2026-10-17), and every page starts full (the
- * watchdog's lite lasts for one page). The only server and client difference on the page, so <html> carries
- * suppressHydrationWarning. The CSP allows inline scripts.
+ * Motion level before first paint. A stored Calm motion choice (mdx-motion-v2) wins in either direction: "calm"
+ * puts html[data-motion="calm"] in place, "full" keeps full motion and marks html[data-motion-pref="full"] so the
+ * CSS reduced-motion fallback stands down. With no stored choice, the device's reduced motion setting starts the
+ * page calm. Legacy keys (mdx-motion, mdx-motion-lite) are ignored. The only server and client difference on the
+ * page, so <html> carries suppressHydrationWarning. The CSP allows inline scripts.
  */
 const MOTION_SCRIPT =
-  'try{if(localStorage.getItem("mdx-motion-v2")==="calm")document.documentElement.dataset.motion="calm"}catch(e){}';
+  'var d=document.documentElement,v=null;try{v=localStorage.getItem("mdx-motion-v2")}catch(e){}try{if(v==="full")d.dataset.motionPref="full";if(v==="calm"||(v!=="full"&&matchMedia("(prefers-reduced-motion: reduce)").matches))d.dataset.motion="calm"}catch(e){}';
 
 function RootShell({ children }: { children: ReactNode }) {
   return (

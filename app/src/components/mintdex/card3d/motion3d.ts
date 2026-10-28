@@ -60,8 +60,9 @@ export function useFreshMount(): boolean {
 }
 
 /**
- * "full" on the server. Calm wins (only the Calm motion switch: the device's prefers-reduced-motion setting no
- * longer turns motion off by itself, owner 2026-10-17), then lite (the frame-rate watchdog, this page only).
+ * "full" on the server. Calm wins (the Calm motion switch, or the device's reduced motion setting while the visitor
+ * has not chosen: the head script and the media listener below set html[data-motion]), then lite (the frame-rate
+ * watchdog, this page only).
  */
 export function motionLevel(): MotionLevel {
   if (typeof document === "undefined") return "full";
@@ -111,15 +112,36 @@ export function useMotionLevel(): MotionLevel {
  */
 let liteSource: "watchdog" | null = null;
 
-/** The Calm motion switch: localStorage["mdx-motion-v2"] and html[data-motion], live. */
+const REDUCE_QUERY = "(prefers-reduced-motion: reduce)";
+function deviceReduces() {
+  try {
+    return window.matchMedia(REDUCE_QUERY).matches;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The Calm motion switch: localStorage["mdx-motion-v2"] and html[data-motion], live. Turning it off on a device
+ * that asks for reduced motion stores "full", so the visitor's choice beats the device setting on later pages.
+ */
 export function setCalm(on: boolean) {
   if (typeof document === "undefined") return;
+  const d = document.documentElement;
+  const keepFull = !on && deviceReduces();
   try {
     if (on) localStorage.setItem(CALM_KEY, "calm");
+    else if (keepFull) localStorage.setItem(CALM_KEY, "full");
     else localStorage.removeItem(CALM_KEY);
   } catch {
     /* storage blocked: the attribute still applies for this page */
   }
+  if (keepFull) d.dataset.motionPref = "full";
+  else delete d.dataset.motionPref;
+  applyCalm(on);
+}
+
+function applyCalm(on: boolean) {
   const d = document.documentElement;
   if (on) d.dataset.motion = "calm";
   else if (liteSource) d.dataset.motion = "lite";
@@ -153,6 +175,21 @@ function clearWatchdogLite() {
  * longer start a page in lite. Every page starts full; the watchdog still drops a page that cannot keep up to lite.
  */
 if (typeof window !== "undefined") {
+  // The device's reduced motion setting changing mid-visit: follow it while the visitor has not chosen.
+  try {
+    window.matchMedia(REDUCE_QUERY).addEventListener("change", (e) => {
+      let stored: string | null = null;
+      try {
+        stored = localStorage.getItem(CALM_KEY);
+      } catch {
+        /* storage blocked: no stored choice */
+      }
+      if (stored === "calm" || stored === "full") return;
+      applyCalm(e.matches);
+    });
+  } catch {
+    /* no matchMedia: the head script's choice stands */
+  }
   // After the head script (it already set calm from the switch); never during render. A lite left by an older
   // build's sticky session key is dropped and the page starts full.
   queueMicrotask(() => {

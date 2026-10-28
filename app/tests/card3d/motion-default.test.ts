@@ -1,7 +1,6 @@
-// Full motion is the default for everyone (owner 2026-10-17, "set the motion in full motion on the default motion"):
-// the device's prefers-reduced-motion setting no longer turns motion off by itself; only the Calm motion switch
-// (html[data-motion="calm"], localStorage["mdx-motion-v2"]) does. No device boot heuristic drops a page to lite; the
-// frame-rate watchdog still can, for one page.
+// Full motion is the default, except that a device asking for reduced motion starts calm until the visitor chooses
+// (A11Y-1, MOT-1): the Calm motion switch (html[data-motion="calm"], localStorage["mdx-motion-v2"] "calm" or "full")
+// overrides it either way. No device boot heuristic drops a page to lite; the frame-rate watchdog still can.
 
 import { afterEach, describe, expect, test } from "bun:test";
 import fs from "node:fs";
@@ -45,27 +44,28 @@ describe("full motion by default", () => {
     expect(motionLevel()).toBe("lite");
   });
 
-  test("nothing in the app reads prefers-reduced-motion (CSS media queries, matchMedia, Tailwind motion-*)", () => {
-    const hits = walk(SRC).filter((f) => /prefers-reduced-motion\s*:|motion-(reduce|safe):/.test(fs.readFileSync(f, "utf8")));
-    expect(hits.map((f) => path.relative(SRC, f))).toEqual([]);
-  });
-
-  test("returning visitors start automatic motion, while new explicit Calm choices persist", () => {
+  test("the head script: a stored choice wins either way, otherwise the device's reduced motion setting starts calm", () => {
     const root = read("routes/__root.tsx");
     const script = root.match(/const MOTION_SCRIPT =\s*'([^']*)'/)?.[1] ?? "";
     expect(script.length).toBeGreaterThan(0);
-    for (const [stored, expected] of [
-      [{}, undefined],
-      [{ "mdx-motion": "calm", "mdx-motion-lite": "1" }, undefined],
-      [{ "mdx-motion-v2": "calm" }, "calm"],
+    for (const [stored, reduce, expected] of [
+      [{}, false, undefined],
+      [{}, true, "calm"],
+      [{ "mdx-motion": "calm", "mdx-motion-lite": "1" }, false, undefined],
+      [{ "mdx-motion-v2": "calm" }, false, "calm"],
+      [{ "mdx-motion-v2": "full" }, true, undefined],
     ] as const) {
       const document = { documentElement: { dataset: {} as Record<string, string> } };
-      runInNewContext(script, { document, localStorage: { getItem: (key: string) => (stored as Record<string, string>)[key] ?? null } });
+      runInNewContext(script, {
+        document,
+        matchMedia: () => ({ matches: reduce }),
+        localStorage: { getItem: (key: string) => (stored as Record<string, string>)[key] ?? null },
+      });
       expect(document.documentElement.dataset.motion).toBe(expected);
     }
     const document = { documentElement: { dataset: {} as Record<string, string> } };
-    runInNewContext(script, { document, localStorage: { getItem: () => { throw new Error("Storage blocked"); } } });
-    expect(document.documentElement.dataset.motion).toBeUndefined();
+    runInNewContext(script, { document, matchMedia: () => ({ matches: true }), localStorage: { getItem: () => { throw new Error("Storage blocked"); } } });
+    expect(document.documentElement.dataset.motion).toBe("calm");
   });
 
   test("no boot heuristic: cores, memory and data saver never start a page in lite", () => {

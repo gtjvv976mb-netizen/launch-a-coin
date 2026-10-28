@@ -119,11 +119,13 @@ const ADVANCE_MS = 16000;
 const ADVANCE_LITE_MS = 20000;
 /** Let the viewer finish inspecting a card before the carousel resumes, without stopping its ambient motion. */
 const INTERACTION_HOLD_MS = 6000;
-/** The caption fades out and back in around the swap (260 ms in all). */
+/** The caption switches with the selection and fades in (mdx-fade, 160 ms); the class comes off after 260 ms. */
 const CAPTION_HALF_MS = 130;
-/** If a swap is never reported (a card that could not turn), the caption follows the selection after this. */
+/** If a swap is never reported (a card that could not turn), the card's own link follows the selection after this. */
 const CAPTION_FALLBACK_MS = 1800;
 const HINT_KEY = "mdx-hint-drag";
+/** The visitor's Pause on the featured cards, kept for later visits (MOT-7). */
+const PAUSE_KEY = "mdx-featured-paused";
 /** Activity rows in the natural flow (phones, 1024 to 1279); the fitted desktop shows as many as its column holds. */
 const FLOW_ACTIVITY_ROWS = 5;
 
@@ -457,36 +459,26 @@ function Home() {
   const prevCoin = count > 1 ? featured[(lot.index - 1 + count) % count] : null;
   const nextCoin = count > 1 ? featured[(lot.index + 1) % count] : null;
 
-  // What the card shows right now: the swap happens while its back faces the viewer (onSwapped), and the caption,
-  // the aura and the link follow that, not the target.
+  // What the card shows right now: the swap happens while its back faces the viewer (onSwapped), and the aura and
+  // the card's own link follow that. The caption (name, figures, View coin) follows the selection in the same
+  // render as the URL and the dots (F5): a click on View coin always opens the coin the dots point at.
   const [shownId, setShownId] = useState<string | null>(target?.id ?? null);
   const shown = featured.find((c) => c.id === shownId) ?? target;
-  const [capPhase, setCapPhase] = useState<"idle" | "out" | "in">("idle");
-  const [captionId, setCaptionId] = useState<string | null>(target?.id ?? null);
-  const caption = featured.find((c) => c.id === captionId) ?? shown;
-  const capTimers = useRef<Array<ReturnType<typeof setTimeout>>>([]);
+  const [capPhase, setCapPhase] = useState<"idle" | "in">("idle");
+  const caption = target ?? shown;
+  const [captionFor, setCaptionFor] = useState<string | null>(target?.id ?? null);
+  if ((target?.id ?? null) !== captionFor) {
+    // A new selection: the caption's text changes now and fades in (no fade under calm).
+    setCaptionFor(target?.id ?? null);
+    setCapPhase(prefersReducedMotion() ? "idle" : "in");
+  }
   useEffect(() => {
-    const list = capTimers.current;
-    return () => list.forEach(clearTimeout);
-  }, []);
+    if (capPhase !== "in") return;
+    const t = setTimeout(() => setCapPhase("idle"), CAPTION_HALF_MS * 2);
+    return () => clearTimeout(t);
+  }, [capPhase, captionFor]);
   function onSwapped(key: string) {
     setShownId(key);
-    if (key === captionId) return;
-    capTimers.current.forEach(clearTimeout);
-    capTimers.current = [];
-    if (prefersReducedMotion()) {
-      setCaptionId(key);
-      setCapPhase("idle");
-      return;
-    }
-    setCapPhase("out");
-    capTimers.current.push(
-      setTimeout(() => {
-        setCaptionId(key);
-        setCapPhase("in");
-        capTimers.current.push(setTimeout(() => setCapPhase("idle"), CAPTION_HALF_MS * 2));
-      }, CAPTION_HALF_MS),
-    );
   }
   // A swap that is never reported (the card could not turn): the caption follows the selection anyway.
   useEffect(() => {
@@ -523,6 +515,23 @@ function Home() {
   // the pointer is over the stage, focus is inside, the stage is offscreen, the tab is hidden, a dialog is open or
   // Pause was pressed. Calm: never. Auto steps neither write the URL nor announce.
   const [playing, setPlaying] = useState(true);
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(PAUSE_KEY) === "1") setPlaying(false);
+    } catch {
+      /* storage blocked: the carousel starts playing */
+    }
+  }, []);
+  const togglePlay = () => {
+    const next = !playing;
+    setPlaying(next);
+    try {
+      if (next) localStorage.removeItem(PAUSE_KEY);
+      else localStorage.setItem(PAUSE_KEY, "1");
+    } catch {
+      /* storage blocked: the choice holds for this visit */
+    }
+  };
   // The stage's own loops run while the stage is on screen and the viewer has not pressed Pause.
   const [ambientLive, setAmbientLive] = useState(true);
   const still = !playing || !ambientLive;
@@ -568,7 +577,12 @@ function Home() {
   };
   useEffect(() => {
     const body = turntableCtl.current?.body;
-    if (!playing && body) body.flip.snap(body.flip.x);
+    // Pause settles the card on its nearest front face (F7), never frozen edge-on or showing its back.
+    if (!playing && body && !turntableCtl.current?.busy) {
+      const front = Math.round(body.flip.x / 360) * 360;
+      if (motionLevel() === "calm") body.flip.snap(front);
+      else body.flip.t = front;
+    }
     turntableLastFrame.current = 0;
     Engine.kick();
   }, [playing]);
@@ -710,12 +724,7 @@ function Home() {
   const recent = hasRecentActivity(activity, now);
   const keysHint = useId();
 
-  const captionMotion =
-    capPhase === "out"
-      ? "opacity-0 transition-opacity duration-[130ms] ease-room"
-      : capPhase === "in"
-        ? "mdx-fade"
-        : "";
+  const captionMotion = capPhase === "in" ? "mdx-fade" : "";
 
   // A click on the card opens the coin it shows, writing that coin to the URL first, so Back returns to it.
   function openShown(e: ReactMouseEvent<HTMLAnchorElement>) {
@@ -745,8 +754,9 @@ function Home() {
       announce={lot.announce}
       prevLabel="Previous featured card"
       nextLabel="Next featured card"
+      // Calm never advances the carousel, so there is nothing to pause: no Pause button that says otherwise.
       playing={playing}
-      onTogglePlay={() => setPlaying((p) => !p)}
+      onTogglePlay={level === "calm" ? undefined : togglePlay}
       dotsOnly
       align={align}
       className={cls}
@@ -766,7 +776,7 @@ function Home() {
         <Vitrine hold={!playing} onLive={setAmbientLive} />
         {/* Headline block: Home's header. */}
         <div className="cdx-home__intro flex-none">
-          {/* "card." wears a deep holo ink and catches a white sheen on load (and every 9 s at full motion). */}
+          {/* "card." wears a deep holo ink and catches a white sheen once on load. */}
           <h1 className="mdx-display mdx-home-arrival mdx-home-arrival--title">
             Every coin is a <span className={cx("mdx-holo-ink", still && "is-paused")}>card.</span>
           </h1>

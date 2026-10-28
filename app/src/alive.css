@@ -227,8 +227,8 @@ body:has(.mdx-inspect) .mdx-sky {
 }
 
 /* ---------------------------------------------------------------- headline ink (L12)
- * "card." in a deep holo ink (every stop at least 4.5:1 on the wall). A white sheen sweeps it once on load and
- * every 9 s at full motion (the one allowed small paint animation). */
+ * "card." in a deep holo ink (every stop at least 4.5:1 on the wall). A white sheen sweeps it once on load (the one
+ * allowed small paint animation). */
 .mdx-holo-ink {
   background-image:
     linear-gradient(100deg, rgb(255 255 255 / 0) 38%, rgb(255 255 255 / 0.85) 50%, rgb(255 255 255 / 0) 62%),
@@ -259,37 +259,9 @@ body:has(.mdx-inspect) .mdx-sky {
       0 0;
   }
 }
-@keyframes mdx-ink-loop {
-  0%,
-  100% {
-    background-position:
-      130% 0,
-      0 0;
-  }
-  0.01% {
-    background-position:
-      130% 0,
-      0 0;
-  }
-  16% {
-    background-position:
-      -30% 0,
-      0 0;
-  }
-  16.01%,
-  99.99% {
-    background-position:
-      130% 0,
-      0 0;
-  }
-}
+/* Once only (MOT-4): the old 9 s repeat repainted the headline forever for no one's benefit. */
 :root:not([data-motion="calm"]) .mdx-holo-ink {
   animation: mdx-ink-once 1.6s var(--ease-sheen) 0.5s both;
-}
-:root:not([data-motion]) .mdx-holo-ink {
-  animation:
-    mdx-ink-once 1.6s var(--ease-sheen) 0.5s both,
-    mdx-ink-loop 9s linear 2.1s infinite;
 }
 
 /* ---------------------------------------------------------------- Home: the turntable vitrine (5.1)
@@ -683,6 +655,12 @@ body:has(.mdx-inspect) .mdx-sky {
   background: rgb(148 178 220 / 0.18);
   box-shadow: inset 0 0 0 1px rgb(150 180 230 / 0.16);
   transition: background-color var(--t-fast) var(--ease-room);
+}
+/* The pill draws 36x22; its touch target is 44x44 (MOT-7). The row around it is the switch's label too. */
+.mdx-switch::after {
+  content: "";
+  position: absolute;
+  inset: -11px -4px;
 }
 .mdx-switch[data-on] {
   background: var(--color-neon);

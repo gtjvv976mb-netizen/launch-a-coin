@@ -31,7 +31,12 @@ export function HeroTurntable({ card, className = "", playing: controlled, onPla
   };
   useEffect(() => {
     const body = slots.ctl.current?.body;
-    if (!playing && body) body.flip.snap(body.flip.x);
+    // Pause settles the card on its nearest front face (F7), never frozen edge-on or showing its back; calm snaps.
+    if (!playing && body && !slots.ctl.current?.busy) {
+      const front = Math.round(body.flip.x / 360) * 360;
+      if (motionLevel() === "calm") body.flip.snap(front);
+      else body.flip.t = front;
+    }
     lastFrame.current = 0;
     Engine.kick();
   }, [playing]);

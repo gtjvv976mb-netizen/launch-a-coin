@@ -1997,8 +1997,16 @@
     transform: rotate(360deg);
   }
 }
-:root:not([data-motion]) .mdx-card3d > .mdx-card3d__halo > b::before {
+/* The featured (hand) card's halo turns; a card in a grid or list only while it has keyboard focus or the mouse
+ * (MOT-3: a browse grid never moves by itself). */
+:root:not([data-motion]) .mdx-card3d:not([data-depth="table"]) > .mdx-card3d__halo > b::before,
+:root:not([data-motion]) .mdx-card3d[data-depth="table"]:focus-within > .mdx-card3d__halo > b::before {
   animation: mdx-prism 7s linear infinite;
+}
+@media (hover: hover) and (pointer: fine) {
+  :root:not([data-motion]) .mdx-card3d[data-depth="table"]:hover > .mdx-card3d__halo > b::before {
+    animation: mdx-prism 7s linear infinite;
+  }
 }
 :root:not([data-motion="calm"]) .mdx-card3d[data-state~="offscreen"] > .mdx-card3d__halo > b::before,
 :root:not([data-motion="calm"]) body[data-scroll-locked] .mdx-card3d:not([role="dialog"] .mdx-card3d) > .mdx-card3d__halo > b::before {
@@ -2020,8 +2028,15 @@
  * a 3x phone; perspective() inside the keyframes did not). Symmetric ends, so the middle of the swing is the
  * rest pose: a dealt card starts its sway there (moments.ts sets --float-delay to minus half a period) and the
  * deal hands over without a jump. The deal and the shuffle own __enter while they run (animation-name none). */
-:root:not([data-motion="calm"]):not([data-motion="lite"]) .mdx-card3d[data-depth="table"]:not([data-still]) > .mdx-card3d__enter {
+/* MOT-3: only the card with keyboard focus or the mouse sways; a grid of cards never drifts by itself. A dealt or
+ * spinning card keeps no sway (the rules below set animation-name none; the :not()s keep this one from beating them). */
+:root:not([data-motion="calm"]):not([data-motion="lite"]) .mdx-card3d[data-depth="table"]:not([data-still]):not([data-spin3d]):not([data-state~="dealing"]):focus-within > .mdx-card3d__enter {
   animation: mdx-sway var(--float-dur, 7s) var(--ease-drift) var(--float-delay, 0s) infinite alternate;
+}
+@media (hover: hover) and (pointer: fine) {
+  :root:not([data-motion="calm"]):not([data-motion="lite"]) .mdx-card3d[data-depth="table"]:not([data-still]):not([data-spin3d]):not([data-state~="dealing"]):hover > .mdx-card3d__enter {
+    animation: mdx-sway var(--float-dur, 7s) var(--ease-drift) var(--float-delay, 0s) infinite alternate;
+  }
 }
 :root:not([data-motion="calm"]):not([data-motion="lite"]) .mdx-card3d[data-depth="table"][data-state~="dealing"] > .mdx-card3d__enter {
   animation-name: none;

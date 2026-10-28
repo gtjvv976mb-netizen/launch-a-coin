@@ -1449,9 +1449,9 @@ export function LivePause({
 /**
  * The Calm motion switch (refs/alive-3d-spec.md 10.2): a role="switch" pill that turns every ambient loop, 3D
  * turn and celebration into the still version (setCalm keeps the choice in this browser and sets
- * html[data-motion] live). It is the only thing that turns motion off: full motion is the default for everyone and
- * the switch is open to every visitor, whatever the device's reduced motion setting (owner, 2026-10-17). Its state
- * renders after mount: the server HTML shows it off and disabled until hydration, same size.
+ * html[data-motion] live). A device that asks for reduced motion starts it on; the switch stays the visitor's
+ * override in either direction. Its state renders after mount: the server HTML shows it off and disabled until
+ * hydration, same size.
  */
 export function CalmSwitch({ className = "", size = "sm" }: { className?: string; size?: "sm" | "md" }) {
   const level = useMotionLevel();
@@ -2721,9 +2721,8 @@ export function usePageKeys(
 
 /**
  * The one reduced motion check for JS motion (false on the server). Every JS-driven moment asks it; CSS
- * motion is switched off by the calm block in mintdex.css. Only the Calm motion switch (html[data-motion="calm"],
- * set by the head script from localStorage or live by setCalm) turns motion off: full motion is the default for
- * everyone, and the device's prefers-reduced-motion setting no longer turns it off by itself (owner, 2026-10-17).
+ * motion is switched off by the calm block in mintdex.css. html[data-motion="calm"] is set by the head script (a
+ * stored Calm choice, or the device's reduced motion setting when nothing is stored) or live by setCalm.
  */
 export function prefersReducedMotion() {
   if (typeof window === "undefined") return false;
