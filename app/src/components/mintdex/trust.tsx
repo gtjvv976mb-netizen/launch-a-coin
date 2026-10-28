@@ -63,15 +63,15 @@ export function ModeBadge({ className = "" }: { className?: string }) {
   if (!MODE_COPY.badge) return null;
   const body = (close: () => void, fromSheet = false) => (
     <>
-      <p className="text-[13px] leading-[1.45] text-slate max-lg:text-[15px] max-lg:leading-[1.5]">
+      <p className="text-body text-slate max-lg:text-lead">
         {MODE_COPY.explainer}
       </p>
       {MODE_COPY.usdNote ? (
-        <p className="mt-2 text-[13px] leading-[1.45] text-slate max-lg:text-[15px] max-lg:leading-[1.5]">
+        <p className="mt-2 text-body text-slate max-lg:text-lead">
           {MODE_COPY.usdNote}.
         </p>
       ) : null}
-      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] leading-5 max-lg:mt-4 max-lg:text-[15px]">
+      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-body max-lg:mt-4 max-lg:text-lead">
         {/* Devnet: where the free SOL comes from (the guide has its own links in the rail and header). */}
         {FAUCET ? (
           <a href={FAUCET.href} target="_blank" rel="noopener noreferrer" className="mdx-link mdx-hit" onClick={close}>
@@ -109,13 +109,8 @@ export function ModeBadge({ className = "" }: { className?: string }) {
             e.preventDefault();
             setSheet(true);
           }}
-          className={cx(
-            "relative inline-flex h-[22px] flex-none items-center rounded-pill bg-sheet px-[7px] text-[12px] font-semibold leading-none text-ink",
-            "shadow-[0_0_0_1px_rgb(29_27_24/0.16)] transition-[background-color,box-shadow] duration-(--t-fast) ease-room",
-            "hover:shadow-[0_0_0_1px_rgb(29_27_24/0.32)] data-[state=open]:shadow-[0_0_0_1px_rgb(29_27_24/0.32)]",
-            "max-lg:before:absolute max-lg:before:inset-x-[-4px] max-lg:before:inset-y-[-11px] max-lg:before:content-['']",
-            className,
-          )}
+          // The one demo signal (styles/shell.css .cdx-demo-pill): a track pill that reaches the hit size.
+          className={cx("cdx-demo-pill", className)}
         >
           {MODE_COPY.badge}
         </button>
@@ -128,7 +123,7 @@ export function ModeBadge({ className = "" }: { className?: string }) {
           collisionPadding={menuCollisionPadding()}
           className="mdx-menu mdx-pop z-50 w-[min(300px,calc(100vw_-_24px))] p-4 outline-none"
         >
-          <p className="mb-1 text-[14px] font-semibold leading-[1.3] text-ink">{MODE_COPY.badge}</p>
+          <p className="mb-1 text-body font-semibold text-ink">{MODE_COPY.badge}</p>
           {body(() => setOpen(false))}
         </Popover.Content>
       </Popover.Portal>
@@ -146,10 +141,8 @@ export function BotTag({ className = "" }: { className?: string }) {
   return (
     <span
       title={BOT_HINT}
-      className={cx(
-        "inline-flex h-[18px] flex-none items-center rounded-pill bg-track px-1.5 align-[1px] text-[12px] font-semibold leading-none text-slate",
-        className,
-      )}
+      // The Badge recipe (neutral): demo figures keep this label (mintdex.css .mdx-tag).
+      className={cx("mdx-tag align-[1px]", className)}
     >
       bot<span className="sr-only">, {BOT_HINT.toLowerCase()}</span>
     </span>
@@ -166,7 +159,7 @@ export function SimTag({ className = "" }: { className?: string }) {
     <span
       title={SIM_TAG_HINT}
       className={cx(
-        "inline-flex h-[18px] flex-none items-center rounded-pill bg-track px-1.5 align-[1px] text-[12px] font-semibold leading-none text-slate",
+        "inline-flex h-[18px] flex-none items-center rounded-pill bg-track px-1.5 align-[1px] text-caption font-semibold leading-none text-slate",
         className,
       )}
     >
@@ -284,7 +277,7 @@ export function ShareButton({
               value={url}
               aria-label="Link to this page"
               onFocus={(e) => e.currentTarget.select()}
-              className="mdx-input h-9 px-2.5 text-[13px]"
+              className="mdx-input h-9 px-2.5 text-body"
             />
           ) : (
             <button
@@ -375,7 +368,7 @@ export function LaunchedDialog({
         </div>
       </div>,
       <div key="share" className="cdx-launched-copy cdx-overlay-copy">
-        <p className="text-pretty text-[15px] leading-[1.5] text-slate">
+        <p className="text-pretty text-body leading-[1.5] text-slate">
           {dexNo(coin.dexNo)} in the collection. You hold the one-of-one ${coin.ticker} card in your chosen design.
           {IS_SIM ? " This is a demo; no real coin or NFT has been minted." : ""}
         </p>

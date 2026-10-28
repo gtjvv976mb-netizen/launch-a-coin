@@ -60,7 +60,6 @@ import { getPairAsset } from "../../lib/carddex/pairs";
 import { marketCapText, marketCapWatch, quoteAtoms, quoteNumber } from "../../lib/carddex/quote-display";
 import { formatQuoteAmount, parseQuoteAmount, quoteMetrics } from "../../lib/carddex/quote-simulation";
 import { aggregateCandles, candleInterval, candleIntervalLabel } from "../../lib/carddex/candles";
-import "../../carddex-chart.css";
 import { PageControls, usePageCapacity } from "../carddex/Viewport";
 import { ViewTabs, tabDomId } from "../carddex/ViewTabs";
 import type { CoinDetail, CoinPage, TradeRow } from "../../lib/mintdex/types";

@@ -1,0 +1,21 @@
+/* Portfolio (/portfolio) screen sheet. Owned by the "coin" screen group (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css).
+ * The blocks below were moved here unchanged from the shared sheets, in their old cascade order; tokens: carddex-theme.css. */
+
+/* ---- moved from carddex-viewport.css (same order as there) */
+.cdx-portfolio { gap:10px; }
+.cdx-portfolio > header { height:auto; min-height:40px; }
+.cdx-portfolio__summary { flex:none; padding:10px; }
+.cdx-portfolio__rows { flex:1; min-height:0; }
+.cdx-portfolio__cards { height:100%; min-height:0; display:grid; grid-template-columns:repeat(var(--page-columns,1),minmax(0,1fr)); grid-template-rows:repeat(var(--page-rows,1),minmax(0,1fr)); gap:14px; }
+.cdx-portfolio__cards > div { min-height:0; container-type:size; display:flex; align-items:center; justify-content:center; }
+.cdx-portfolio__cards a { width:min(78cqw,calc((100cqh - 70px)*.57)); }
+.cdx-balance-grid { height:100%; display:grid; grid-template-columns:repeat(var(--page-columns,1),minmax(0,1fr)); grid-template-rows:repeat(var(--page-rows,1),minmax(0,1fr)); gap:8px; }
+.cdx-balance-grid > div { min-width:0; padding:10px; background:var(--color-surface); border-radius:8px; display:flex; flex-direction:column; justify-content:center; font-size:13px; }
+.cdx-balance-grid dd { overflow-wrap:anywhere; }@media(max-width:1023px) {
+ .cdx-portfolio__summary .mdx-num { font-size:21px; }
+}@media(max-width:1023px) {
+ .cdx-portfolio > header > div > p { display:none; }
+}
+.cdx-viewport .cdx-portfolio-empty { min-height:0; padding-block:12px; }
+.cdx-portfolio .mdx-tabs { width:100%; min-width:0; overflow:visible; }
+.cdx-portfolio .mdx-tabs__tab { flex:1; min-width:0; padding-inline:8px; font-size:12px; }

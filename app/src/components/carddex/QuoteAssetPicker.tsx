@@ -4,7 +4,6 @@ import {
   PAIR_ASSETS, PAIR_ASSETS_SOURCE, allowedQuotesForDesign, boundQuoteForDesign,
   getPairAsset, getTradingPair, matchingDesignsForQuote, preferredDesignForQuote, type PairAsset, type PairAssetKey,
 } from "../../lib/carddex/pairs";
-import "../../carddex-pairs.css";
 import { ViewTabs, tabPanelProps } from "./ViewTabs";
 
 export const pairKindLabel = (asset: Readonly<PairAsset>) => ({ native: "Native quote", stable: "Stablecoin quote", stock: "Tokenized stock quote", meme: "Memecoin quote", collector: "Collector token quote" })[asset.kind];

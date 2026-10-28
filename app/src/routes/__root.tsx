@@ -92,7 +92,7 @@ function buildHead(meta: AppMeta, devnetSite = false, notFound = false) {
       },
       { title },
       { name: "description", content: description },
-      { name: "theme-color", content: "#29231d" },
+      { name: "theme-color", content: "#0d0c0b" },
       { name: "application-name", content: "Launch a Card" },
       // Which build this is (launch-plan D4 and E checks: curl the HTML and read it). sim, devnet or mainnet.
       { name: "carddex-mode", content: MODE },
@@ -141,7 +141,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="grid h-full min-h-[60dvh] place-items-center px-4">
       <div className="flex max-w-md flex-col items-center gap-2 text-center">
         <h1 className="mdx-h1">{ROUTE_ERROR.title}</h1>
-        <p className="text-[15px] text-slate">{ROUTE_ERROR.body}</p>
+        <p className="text-body text-slate">{ROUTE_ERROR.body}</p>
         <div className="mt-4 flex items-center gap-5">
           <Button
             onClick={() => {
@@ -199,7 +199,7 @@ const MOTION_SCRIPT =
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" style={{ colorScheme: "light" }} suppressHydrationWarning>
+    <html lang="en" style={{ colorScheme: "dark" }} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: MOTION_SCRIPT }} />
         <HeadContent />

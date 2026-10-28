@@ -10,7 +10,6 @@ import { listCoins } from "../lib/mintdex/api";
 import { getCardDesign } from "../lib/carddex/designs";
 import { marketCapText } from "../lib/carddex/quote-display";
 import { pageHead } from "../lib/mintdex/seo";
-import "../carddex.css";
 
 export const Route = createFileRoute("/discover")({
   validateSearch: searchSchema({

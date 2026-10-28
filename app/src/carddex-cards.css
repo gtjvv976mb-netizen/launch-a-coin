@@ -1,4 +1,9 @@
 /* Fixed creator-selected prints. Every face is clipped inside the same rounded physical slab. */
+/* Card micro-type (VD-07, moved from carddex-a11y.css): at hero size the footer plates keep a 10px floor; the plates
+ * keep their place and width, only the type grows into them. Unlayered with the card internals, as before. */
+@container (min-width: 280px) {
+  .mdx-card__foot { font-size: max(10px, 2.3cqw); }
+}
 .mdx-card[data-carddex-premium] { overflow: hidden; --h-rest: .43; --h-live: .85; --shine-rest: .3; --shine-live: .8; --rim-rest: .5; --rim-live: .9; }
 .mdx-card[data-carddex-premium]::after { content: ""; position: absolute; inset: .8%; z-index: 7; border-radius: 4.4% / 3.15%; pointer-events: none; box-shadow: inset 0 0 0 .24cqw rgb(255 250 226 / .65), inset 0 0 0 .8cqw rgb(10 9 17 / .3); }
 .mdx-card[data-carddex-premium] .mdx-card__frame { filter: saturate(1.1) contrast(1.06); }
@@ -140,12 +145,6 @@
 .cdx-design-back[data-back-layout="stock-aapl"] .cdx-design-back__seal { border-radius: 28%; }
 .cdx-design-back[data-back-layout="stock-mstr"] .cdx-design-back__seal { border-radius: 40%; }
 .cdx-design-back[data-back-layout="stock-coin"] .cdx-design-back__seal { box-shadow: 0 1.5cqw 3cqw #0007, 0 0 0 1.4cqw var(--design-base), 0 0 0 2cqw var(--design-metal), 0 0 0 2.8cqw var(--design-base), 0 0 0 3.1cqw var(--design-paper); }
-.cdx-hero-turntable { position: relative; width: 100%; }
-.cdx-hero-turntable__controls { position: relative; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 24px; }
-.cdx-hero-turntable__controls button { min-height: 44px; padding: 10px 14px; border: 1px solid currentColor; border-radius: 6px; background: transparent; font: 500 12px/1 var(--font-sans); transition: background-color .18s ease-out, transform .14s ease-out; }
-.cdx-hero-turntable__controls button:hover { background: #a56e3014; }
-.cdx-hero-turntable__controls button:active { transform: scale(.97); }
-.cdx-hero-turntable__controls button:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
 
 /* Optional verified Higgsfield prints. Missing or undecoded assets retain their native design. */
 .cdx-generated-front { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: fill; border-radius: inherit; pointer-events: none; opacity: 0; }

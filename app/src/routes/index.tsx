@@ -51,7 +51,6 @@ import { sol, usdCompact } from "../lib/mintdex/format";
 import { tierForLevel } from "../lib/mintdex/tiers";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_ORIGIN, pageHead } from "../lib/mintdex/seo";
 import type { CoinSummary } from "../lib/mintdex/types";
-import "../home-motion.css";
 import { Card3DView } from "../components/mintdex/card3d/Card3D";
 import { Engine, motionLevel, type Body } from "../components/mintdex/card3d/motion3d";
 import type { SceneCtl } from "../components/mintdex/card3d/scene";
@@ -396,7 +395,7 @@ function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
     <div className="mdx-caption max-lg:grid max-lg:grid-cols-[minmax(0,1fr)_auto] max-lg:items-center max-lg:gap-x-4">
       <h2 className="mdx-name mt-0 truncate">{c.name}</h2>
       <dl
-        className="mdx-leaders mt-4 flex flex-col gap-2 max-lg:col-start-1 max-lg:mt-1"
+        className="mdx-leaders flex flex-col"
         style={{ minHeight: `${rows * 30 - 8}px` }}
       >
         <div>
@@ -414,7 +413,7 @@ function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
           </dd>
         </div>
       </dl>
-      <div className="mt-4 max-lg:col-start-2 max-lg:row-span-2 max-lg:row-start-1 max-lg:mt-0">
+      <div>
         <ButtonLink to="/coin/$id" params={{ id: c.id }} size="sm" variant="outline">
           {HOME_COPY.viewCoin}
         </ButtonLink>
@@ -799,7 +798,7 @@ function Home() {
     <div
       data-home-view={homeView}
       data-ambient-paused={still || undefined}
-      className="mdx-page mdx-home cdx-home grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_calc(var(--aside)_-_var(--main-pad))] lg:gap-5 lg:max-xl:[--aside:300px] xl:[--aside:340px] wide:[--aside:360px] fit:h-full fit:grid-rows-[minmax(0,1fr)]"
+      className="mdx-page mdx-home cdx-home lg:grid fit:h-full fit:grid-rows-[minmax(0,1fr)]"
     >
       {/* Both views stay mounted (CSS shows one on phones): each tab points at its own element, which keeps its
           desktop landmark role and name. */}
@@ -976,7 +975,7 @@ function Home() {
       <aside
         id={`${homeViewsId}-pulse`}
         aria-label="Trending and activity"
-        className="cdx-home__aside mdx-plinth mdx-aside flex min-w-0 flex-col gap-6 lg:pt-[calc(2rem_-_var(--gutter))] short:gap-5 short:pt-6 fit:min-h-0 fit:overflow-hidden"
+        className="cdx-home__aside mdx-plinth mdx-aside min-w-0 fit:min-h-0"
       >
         <section className="flex flex-none flex-col gap-1">
           <SectionHead title="Trending" right={<TextLink to="/discover">See all</TextLink>} />

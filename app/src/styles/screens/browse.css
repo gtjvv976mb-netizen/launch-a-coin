@@ -1,0 +1,769 @@
+/* Discover (/discover) and Designs (/levels) screen sheet. Owned by the "browse" screen group (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css).
+ * The blocks below were moved here unchanged from the shared sheets, in their old cascade order; tokens: carddex-theme.css. */
+
+/* ---- moved from alive.css (same order as there) */
+/* ---------------------------------------------------------------- Designs: the coverflow (5.4)
+ * --W is the center card's width. Side cards fan back on either side and slide on a change (420ms). */
+.mdx-cf__stage {
+  --W: min(260px, 72vw, max(160px, calc((100dvh - 470px) * 0.716)));
+}
+/* Desktop: the card leaves 5% of the stage's height above it for an Ascend's lift and swell, so where the stage is
+ * short the climbing card's face stays under the top clip below (266px wide at 1280x720, spec floor 264). */
+@media (min-width: 1024px) {
+  .mdx-cf__stage {
+    --W: min(calc(100cqh * 0.95 * 63 / 88), calc(100cqw * 0.5), 400px);
+  }
+}
+/* The stage clips (no scroll from the side cards), with a margin so an Ascend's lift is not cut flat at the top
+ * (browsers without overflow-clip-margin clip at the edge). It is its own stacking context: the center card's
+ * z-index stays inside it and can never rise over the phone's sticky header (QA: at some scroll positions the
+ * card drew over the header and took its taps). The top edge clips nearer, under the page subtitle: 20px into
+ * the 24px gap above the stage, 12px into the 16px gap on short screens (QA: at 1280x720 and 1440x900 the edge-on
+ * moment of each climb turn crossed the subtitle). The sides and the foot (the card's ground) keep the 32px. */
+.mdx-cf {
+  overflow-clip-margin: 32px;
+  isolation: isolate;
+  clip-path: inset(-20px -32px -32px);
+}
+@media (max-height: 820px) and (min-width: 1024px) {
+  .mdx-cf {
+    clip-path: inset(-12px -32px -32px);
+  }
+}
+.mdx-cf__center {
+  width: var(--W);
+  z-index: 21;
+}
+/* The center card's eye (owner override 2026-10-11: 1800px flattened it until it read as a picture; at 1200px its
+ * rest lean and slab read as a card in hand, like every other hand card). Its lean is smaller than the default so
+ * the coverflow stays balanced around it. */
+.mdx-cf__center .mdx-card3d {
+  perspective: 1200px;
+}
+.mdx-cf__center {
+  --hand-ry: -7;
+  --hand-a: 8.602;
+  --hand-px: 0.305;
+  --hand-lit: 0.608;
+}
+.mdx-cf__track {
+  position: absolute;
+  inset: 0;
+  perspective: 1400px;
+  perspective-origin: 50% calc(100% - var(--W) * 0.698);
+  pointer-events: none;
+}
+/* Desktop: the side cards fade out toward the stage's edges, so the outer ones never end in a hard vertical cut
+ * where the page clips them (QA: sliced at the rail edge, x 224). Phones keep their two neighbours peeking in
+ * from the screen edges (outside this box). */
+@media (min-width: 1024px) {
+  .mdx-cf__track {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+  }
+}
+.mdx-cf__item {
+  position: absolute;
+  bottom: 0;
+  left: calc(50% - var(--W) * 0.39);
+  width: calc(var(--W) * 0.78);
+  pointer-events: auto;
+  cursor: pointer;
+  transform: translate3d(var(--x), calc(var(--W) * -0.153), var(--z)) rotateY(var(--ry));
+  transition:
+    transform 420ms var(--ease-room),
+    opacity 420ms var(--ease-room);
+}
+/* A side card's contact shadow (MintCardFace draws none): a soft ellipse under its foot, no filter. It turns and
+ * blurs with the card, so it costs nothing per frame. */
+.mdx-cf__item::after {
+  content: "";
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  top: calc(100% - 4%);
+  height: 10%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(0 0 0 / 0.6), rgb(0 0 0 / 0));
+  pointer-events: none;
+}
+/* Phones: only the neighbors, peeking in at the screen edges. */
+@media (max-width: 1023.98px) {
+  .mdx-cf__item {
+    display: none;
+  }
+  .mdx-cf__item[data-near] {
+    display: block;
+    opacity: 0.6 !important;
+    transform: translate3d(calc(var(--W) * 0.86 * var(--sg, 1)), calc(var(--W) * -0.153), calc(var(--W) * -0.6))
+      rotateY(var(--ry));
+  }
+}
+
+/* ---- moved from carddex-theme.css (same order as there) */
+.cdx-app .cdx-archive__vitrine {
+  border: 2px solid var(--color-control-border);
+  background: linear-gradient(155deg, var(--color-surface), var(--color-surface));
+  box-shadow: inset 0 0 0 4px var(--color-raised), inset 0 0 0 5px rgb(181 136 26 / .3), 0 7px 22px -14px rgb(104 70 24 / .2);
+}
+.cdx-app .cdx-archive__vitrine { padding: 24px 22px 20px; }
+.cdx-app .cdx-design-row {
+  border-color: var(--color-rule);
+  background: var(--color-surface);
+  box-shadow: inset 0 1px 0 #fff;
+}
+.cdx-app .cdx-design-row[aria-pressed="true"] {
+  background: var(--color-raised);
+  border-color: var(--color-control-border);
+  box-shadow: inset 0 0 0 1px var(--color-control-border);
+}
+.cdx-app .cdx-filter button[aria-pressed="true"] { background: var(--color-neon); color: var(--color-surface); border-color: var(--color-neon); }
+.cdx-app .cdx-filter button[aria-pressed="true"] span { opacity: .9; }
+.cdx-app .cdx-stock-reference { background: var(--color-raised); border-color: var(--color-hairline); border-radius: 7px; padding-inline: 10px; }@media (hover: hover) and (pointer: fine) {
+  .cdx-app .cdx-design-row:hover { background: var(--color-raised); border-color: var(--color-control-border); }
+  .cdx-app .cdx-filter button:hover:not([aria-pressed="true"]) { background: var(--color-raised); }
+}
+@media (max-width: 580px) {
+  .cdx-app .cdx-archive__vitrine { padding: 26px 18px 22px; }
+}@media (forced-colors: active) {
+.cdx-app .cdx-archive__vitrine, .cdx-app .cdx-design-row { box-shadow: none; }
+}
+
+/* ---- moved from carddex-gallery.css (same order as there) */
+.cdx-app .cdx-archive__head { gap:16px; align-items:center; }
+.cdx-app .cdx-archive__head > div { min-width:0; }
+.cdx-app .cdx-archive__head h1 { margin:0; }
+.cdx-app .cdx-muted { font-size:13px; margin-top:5px; }
+.cdx-app .cdx-use-design { min-height:40px; padding:9px 16px; font-size:12px; }
+.cdx-app .cdx-archive__vitrine { border:1px solid var(--color-rule); background:var(--color-surface); box-shadow:none; }
+
+/* The design library displays artwork rather than rows of settings. */
+.cdx-app .cdx-archive__body { grid-template-columns:minmax(0,1.2fr) minmax(340px,.8fr); gap:28px; }
+.cdx-app .cdx-archive__vitrine { border:0; background:transparent; box-shadow:none; padding:12px 30px 8px; gap:12px; }
+.cdx-app .cdx-archive__card { width:min(440px,calc((100cqh - 142px)*.715909),calc(100cqw - 72px)); max-width:none; }
+.cdx-app .cdx-archive__caption h2 { font-size:21px; margin:0; }
+.cdx-app .cdx-archive__caption { max-width:100%; }
+.cdx-app .cdx-archive__caption .cdx-demo-note { margin-top:4px; }
+.cdx-app .cdx-stock-reference { border:0; background:transparent; padding:3px 0; margin-top:5px; }
+.cdx-app .cdx-library__tools input { height:40px; min-height:40px; }
+.cdx-app .cdx-library, .cdx-app .cdx-library__tools { min-width:0; }
+.cdx-app .cdx-filter { flex-wrap:nowrap; overflow-x:auto; margin:8px 0 12px; gap:3px; scrollbar-width:thin; }
+.cdx-app .cdx-filter button { flex:none; min-height:36px; border:0; padding:6px 8px; border-radius:6px; font-size:var(--type-min); }
+.cdx-app .cdx-filter button[aria-pressed="true"] { background:var(--color-ink); color:var(--color-surface); }
+.cdx-app .cdx-library__list { grid-template-columns:repeat(2,minmax(0,1fr)); grid-auto-rows:minmax(244px,max-content); gap:14px 12px; padding:6px 6px 12px; }
+.cdx-app .cdx-design-row { position:relative; flex-direction:column; align-items:center; gap:9px; padding:14px 9px 10px; border:1px solid transparent; border-radius:10px; background:transparent; box-shadow:none; }
+.cdx-app .cdx-design-row:hover { background:var(--color-nested); border-color:var(--color-rule); }
+.cdx-app .cdx-design-row[aria-pressed="true"] { background:var(--color-raised); border-color:var(--color-control-border); box-shadow:none; }
+.cdx-app .cdx-design-row__preview { width:min(124px,82%); height:auto; aspect-ratio:63 / 88; }
+.cdx-app .cdx-design-row__text { width:100%; text-align:center; }
+.cdx-app .cdx-design-row__text strong { font-size:12px; font-weight:550; }
+.cdx-app .cdx-design-row__text small { margin-top:2px; font-size:var(--type-min); }
+.cdx-app .cdx-design-row__arrow { position:absolute; top:7px; right:9px; font-size:13px; }
+.cdx-app .cdx-library__foot { padding-top:8px; font-size:var(--type-min); }
+.cdx-app .cdx-token-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:32px 36px; padding:12px 26px 28px; }
+.cdx-app .cdx-token-cell { max-width:310px; }
+.cdx-app .cdx-token-cell__caption { padding-top:12px; }
+.cdx-app .cdx-discover__tools { gap:9px; }
+.cdx-app .cdx-discover__tools input { max-width:360px; }
+@media (min-width:1680px) {
+ .cdx-app .cdx-token-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+}@media (max-width:1023px) {
+ .cdx-app .cdx-archive__body { grid-template-columns:minmax(0,1fr); gap:28px; }
+ .cdx-app .cdx-archive__vitrine { container-type:normal; padding:20px 18px 10px; gap:12px; }
+ .cdx-app .cdx-archive__card { width:min(300px,calc(100vw - 84px)); }
+ .cdx-app .cdx-archive__caption h2 { font-size:20px; }
+ .cdx-app .cdx-library__list { overflow:visible; grid-template-columns:repeat(3,minmax(0,1fr)); }
+ .cdx-app .cdx-library__tools input { height:44px; }
+ .cdx-app .cdx-filter button { min-height:44px; }
+ .cdx-app .cdx-token-grid { grid-template-columns:repeat(2,minmax(0,1fr)); overflow:visible; gap:28px; padding-inline:12px; }
+}
+@media (max-width:560px) {
+ .cdx-app .cdx-archive__head { align-items:start; flex-wrap:nowrap; }
+ .cdx-app .cdx-archive__head > div { flex:1; }
+ .cdx-app .cdx-use-design { flex:none; width:auto; min-height:44px; padding:9px 12px; font-size:var(--type-min); }
+ .cdx-app .cdx-archive__head .mdx-h1 { font-size:var(--type-page-title-sm); max-width:9ch; }
+ /* Discover's title is one line: a 9ch box let "The collection." spill onto its Simulated chip. */
+ .cdx-app .cdx-archive__head .cdx-discover__title { max-width:none; }
+ .cdx-app .cdx-archive__head .cdx-muted { max-width:24ch; font-size:12px; }
+ .cdx-app .cdx-library__list { grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+ .cdx-app .cdx-token-grid { grid-template-columns:1fr; gap:30px; padding:12px 26px 24px; }
+ .cdx-app .cdx-token-cell { max-width:290px; }
+}
+@media (max-width:359px) {
+ .cdx-app .cdx-archive__head .mdx-h1 { font-size:var(--type-page-title-sm); }
+ .cdx-app .cdx-archive__card { width:min(260px,calc(100vw - 76px)); }
+}
+
+/* ---- moved from carddex-a11y.css (same order as there) */
+.cdx-archive__pair-link { position: relative; }
+.cdx-archive__pair-link::before {
+  content: "";
+  position: absolute;
+  inset: min(-4px, calc((100% - 40px) / 2)) -4px;
+}@media (pointer: coarse) {
+html .cdx-app .cdx-filter button { min-height: 44px; }
+  .cdx-archive__pair-link::before { inset: min(-6px, calc((100% - 44px) / 2)) -4px; }
+}
+
+html .cdx-app .cdx-filter,
+html .cdx-viewport .cdx-filter {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  margin: 8px 0 12px;
+  padding-bottom: 2px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+html .cdx-app .cdx-filter button,
+html .cdx-viewport .cdx-filter button {
+  flex: none;
+  min-width: 0;
+  min-height: 40px;
+  gap: 6px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-track);
+  color: var(--color-ink);
+  font-size: 13px;
+  justify-content: center;
+}
+html .cdx-app .cdx-filter button span {
+  color: var(--color-slate);
+  font-size: var(--type-min);
+  font-variant-numeric: tabular-nums;
+  opacity: 1;
+}
+html .cdx-app .cdx-filter button[aria-pressed="true"] {
+  background: var(--color-ink);
+  color: var(--color-sheet);
+}
+html .cdx-app .cdx-filter button[aria-pressed="true"] span { color: var(--color-tint); }
+@media (hover: hover) and (pointer: fine) {
+  html .cdx-app .cdx-filter button:hover:not([aria-pressed="true"]) { background: var(--color-tint); }
+}
+@media (pointer: coarse) {
+  html .cdx-app .cdx-filter button,
+  html .cdx-viewport .cdx-filter button { min-height: 44px; }
+}
+
+/* ---- moved from carddex-viewport.css (same order as there) */
+.cdx-fit-region { flex:1; min-height:0; }
+.cdx-viewport .cdx-discover { gap:10px; }
+.cdx-viewport .cdx-archive__head { flex:none; min-height:40px; }
+.cdx-viewport .cdx-discover__tools { flex:none; margin:0; }
+/* Discover is a natural card list: two columns on phones and tablets, as many 190px columns as fit above. */
+.cdx-app.cdx-viewport .cdx-token-grid { flex:none; overflow:visible; margin:0; padding:8px 4px 4px; list-style:none; gap:28px 20px; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); grid-template-rows:none; }
+.cdx-token-item { min-width:0; display:flex; justify-content:center; }
+.cdx-app.cdx-viewport .cdx-token-cell { max-width:290px; min-height:0; display:flex; flex-direction:column; }
+.cdx-viewport .cdx-token-cell__caption { width:100%; flex:none; min-height:50px; padding-top:9px; }
+.cdx-token-cell__name { min-width:0; margin:0; font:inherit; }
+.cdx-viewport .cdx-token-cell__caption strong { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cdx-discover__count { flex:none; margin:0; font-size:13px; color:var(--color-slate); }
+.cdx-viewport .cdx-discover .cdx-empty { display:flex; flex-direction:column; align-items:flex-start; gap:12px; padding:20px 4px; color:var(--color-slate); }
+.cdx-viewport .cdx-discover .cdx-empty > p { color:var(--color-ink); font-size:15px; overflow-wrap:anywhere; }
+.cdx-empty__actions { display:flex; flex-wrap:wrap; gap:8px; }
+.cdx-discover__more { display:flex; flex-direction:column; align-items:center; gap:6px; padding:8px 0 16px; font-size:12px; color:var(--color-slate); }
+@media(max-width:1023px) {
+ .cdx-app.cdx-viewport .cdx-token-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px 12px; padding-inline:0; }
+}
+.cdx-viewport .cdx-archive { gap:10px; }
+.cdx-viewport .cdx-archive__body { flex:1; min-height:0; overflow:clip; gap:20px; }
+.cdx-viewport .cdx-archive__vitrine { min-height:0; container-type:size; padding:0 18px; gap:6px; }
+.cdx-viewport .cdx-archive__card { width:min(400px,calc((100cqh - 116px)*.57),calc(100cqw - 70px)); }
+.cdx-viewport .cdx-archive__caption { flex:none; }
+.cdx-viewport .cdx-archive__caption h2 { font-size:18px; }
+.cdx-viewport .cdx-library { min-height:0; display:flex; flex-direction:column; overflow:clip; gap:8px; }
+.cdx-viewport .cdx-library__tools { flex:none; }
+.cdx-viewport .cdx-library__pair-filter { display:flex; align-items:center; gap:10px; margin-top:6px; }
+.cdx-viewport .cdx-library__pair-filter label { flex:none; color:var(--color-ink); font-size:12px; font-weight:550; }
+.cdx-viewport .cdx-library__pair-filter select { flex:1; width:100%; min-width:0; min-height:44px; font-size:16px; }
+.cdx-viewport .cdx-filter { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); margin:6px 0 0; overflow:visible; gap:2px; }
+.cdx-viewport .cdx-filter button { min-width:0; min-height:32px; padding:4px; font-size:var(--type-min); justify-content:center; }
+/* The design filters wrap rather than scroll, so a chip past the edge (Limited) is never hidden. */
+html .cdx-viewport .cdx-library__tools .cdx-filter { flex-wrap:wrap; overflow-x:visible; }
+.cdx-viewport .cdx-library__list { flex:1; min-height:0; overflow:clip; padding:4px; gap:8px; grid-template-columns:repeat(var(--page-columns,2),minmax(0,1fr)); grid-template-rows:repeat(var(--page-rows,1),minmax(0,1fr)); grid-auto-rows:initial; }
+.cdx-viewport .cdx-design-row { min-height:0; padding:8px 5px; overflow:clip; container-type:size; gap:6px; justify-content:center; }
+.cdx-viewport .cdx-design-row__preview { width:min(118px,calc((100cqh - 58px)*.63),78cqw); flex:none; }
+.cdx-viewport .cdx-design-row__text small { display:none; }
+.cdx-viewport .cdx-design-row__pair { display:block; margin-top:3px; font-size:var(--type-min); line-height:1.2; color:var(--color-slate); font-weight:600; white-space:nowrap; }
+.cdx-viewport .cdx-library__foot { margin:0; flex:none; }
+.cdx-archive-mobile-tabs { display:none; }@media(max-width:1023px) {
+ .cdx-viewport .cdx-archive__body { display:flex; flex-direction:column; gap:0; }
+ .cdx-archive-mobile-tabs { display:flex; }
+ .cdx-archive--preview .cdx-library, .cdx-archive--library .cdx-archive__vitrine { display:none; }
+ .cdx-viewport .cdx-archive__vitrine { flex:1; }
+ .cdx-viewport .cdx-library { flex:1; }
+ .cdx-viewport .cdx-archive__head h1 { max-width:none; font-size:var(--type-page-title-sm); }
+ .cdx-viewport .cdx-archive__head .cdx-muted { display:none; }
+ .cdx-viewport .cdx-archive__head .cdx-use-design { min-height:40px; padding:7px 9px; font-size:var(--type-min); }
+ .cdx-viewport .cdx-discover__tools { display:grid; grid-template-columns:minmax(0,1fr) auto; }
+ .cdx-viewport .cdx-discover__tools input { width:100%; min-width:0; }
+ .cdx-viewport .cdx-discover__tools select { width:auto; min-width:max-content; padding-right:36px; }
+ .cdx-viewport .cdx-library__foot { font-size:var(--type-min); }
+}
+.cdx-viewport .cdx-archive__card .cdx-hero-turntable__controls { width:max-content; max-width:calc(100cqw - 24px); margin-left:50%; transform:translateX(-50%); flex-wrap:nowrap; gap:4px; }
+.cdx-archive__pair-link { min-height:32px; font-size:12px; display:inline-flex; align-items:center; justify-content:center; }
+.cdx-category-select { display:none; }
+@media(max-width:1023px) {
+ .cdx-viewport .cdx-archive__head h1 { font-size:var(--type-page-title-sm); white-space:nowrap; }
+ .cdx-library-desktop-tabs { display:none; }
+ .cdx-viewport .cdx-library__tools { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:6px; }
+ .cdx-viewport .cdx-library__tools .cdx-filter { display:none; }
+ .cdx-category-select { display:block; width:100%; min-width:0; font-size:16px; padding-inline:8px; }
+ .cdx-viewport .cdx-library__tools input { min-width:0; font-size:16px; padding-inline:8px; }
+ .cdx-viewport .cdx-library__pair-filter { grid-column:1 / -1; margin:0; }
+ .cdx-archive-mobile-tabs button { padding-inline:6px; }
+}
+/* Landscape phones keep filters in one row so card choices and paging remain usable. */
+@media(min-width:560px) and (max-width:1023px) and (max-height:440px) {
+ .cdx-viewport .cdx-archive { position:relative; }
+ .cdx-viewport .cdx-archive__head { align-items:center; flex-wrap:nowrap; }
+ .cdx-viewport .cdx-archive__head .cdx-use-design { flex:none; width:auto; }
+ .cdx-archive-mobile-tabs { position:absolute; top:0; left:150px; right:116px; }
+ .cdx-viewport .cdx-library__tools:has(.cdx-library__pair-filter) { grid-template-columns:minmax(0,1fr) minmax(0,.9fr) minmax(0,1.25fr); }
+ .cdx-viewport .cdx-library__pair-filter { grid-column:auto; gap:6px; }
+ .cdx-viewport .cdx-library__pair-filter label { font-size:var(--type-min); }
+ .cdx-viewport .cdx-library__pair-filter select { padding-inline:8px; }
+ .cdx-viewport .cdx-library__foot { display:none; }
+ .cdx-viewport .cdx-design-row { flex-direction:row; gap:8px; padding:4px 6px; }
+ .cdx-viewport .cdx-design-row__preview { width:min(54px,calc((100cqh - 8px)*.715909)); }
+ .cdx-viewport .cdx-design-row__text { width:auto; text-align:left; }
+ .cdx-viewport .cdx-design-row__arrow { display:none; }
+}
+
+/* ---- moved from carddex.css (same order as there) */
+.cdx-muted {
+  color: var(--color-slate);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 8px;
+}
+.cdx-archive,
+.cdx-discover {
+  min-height: 0;
+}
+.cdx-archive__head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  flex: none;
+}
+.cdx-archive__head h1 {
+  margin-top: 6px;
+}
+.cdx-use-design {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  font-size: 13px;
+  min-height: 44px;
+  white-space: nowrap;
+}
+.cdx-archive__body {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(340px, 0.9fr);
+  gap: 28px;
+  min-height: 0;
+  flex: 1;
+}
+.cdx-archive__vitrine {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  min-height: 0;
+  border: 1px solid var(--color-hairline);
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgb(137 178 227 / 0.08), transparent 65%),
+    var(--color-plinth);
+  padding: 22px 20px 18px;
+  overflow: clip;
+  container-type: size;
+  scroll-margin-top: 100px;
+}
+.cdx-archive__halo {
+  position: absolute;
+  z-index: -1;
+  inset: 8% 10% 32%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse,
+    color-mix(in srgb, var(--cdx-accent) 10%, transparent),
+    transparent 70%
+  );
+  opacity: 0.7;
+}
+.cdx-archive__card {
+  width: clamp(170px, calc((100cqh - 280px) * 0.7159), 300px);
+  max-width: 85%;
+  flex: none;
+}
+.cdx-archive__caption {
+  text-align: center;
+  max-width: 410px;
+}
+.cdx-archive__caption h2 {
+  font-family: var(--font-title);
+  font-weight: 650;
+  font-size: 24px;
+  line-height: 1.2;
+  margin-top: 4px;
+}
+.cdx-archive__caption > p:not(.cdx-eyebrow, .cdx-stock-reference) {
+  color: var(--color-slate);
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 8px 0 0;
+}
+.cdx-demo-note {
+  display: block;
+  color: var(--color-slate);
+  font-size: var(--type-min);
+  line-height: 1.5;
+  margin-top: 8px;
+}
+.cdx-archive__caption .cdx-text-action {
+  margin-top: 6px;
+}
+.cdx-library {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.cdx-library__tools {
+  flex: none;
+}
+.cdx-library__tools input {
+  height: 44px;
+  font-size: 16px;
+}
+.cdx-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 18px;
+}
+.cdx-filter button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  border-radius: 8px;
+  padding: 6px 9px;
+  color: var(--color-slate);
+  font-size: var(--type-min);
+  border: 1px solid transparent;
+  transition:
+    background 0.16s,
+    color 0.16s;
+}
+.cdx-filter button span {
+  font-size: var(--type-min);
+  opacity: 0.7;
+}
+.cdx-filter button[aria-pressed="true"] {
+  color: var(--color-neon);
+  background: var(--color-track);
+  border-color: var(--color-control-border);
+}
+.cdx-filter button:hover {
+  background: var(--color-track);
+}
+.cdx-library__list {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 3px 6px 6px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  align-content: start;
+  scrollbar-width: thin;
+}
+.cdx-design-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 90px;
+  min-width: 0;
+  border-radius: 12px;
+  border: 1px solid var(--color-hairline);
+  text-align: left;
+  padding: 12px;
+  background: color-mix(in srgb, var(--color-plinth) 90%, transparent);
+  transition:
+    transform 0.18s,
+    border-color 0.18s,
+    background 0.18s;
+}
+.cdx-design-row:hover {
+  transform: translateY(-2px);
+  background: var(--color-sheet);
+  border-color: var(--color-control-border);
+}
+.cdx-design-row[aria-pressed="true"] {
+  border-color: var(--color-neon);
+  background: var(--color-track);
+}
+.cdx-design-row__preview {
+  position: relative;
+  width: 39px;
+  height: 55px;
+  flex: none;
+}
+.cdx-design-row__preview .mdx-card {
+  width: 100%;
+}
+.cdx-design-row__text {
+  flex: 1;
+  min-width: 0;
+}
+.cdx-design-row__text strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.cdx-design-row__text small {
+  display: block;
+  margin-top: 5px;
+  color: var(--color-slate);
+  font-size: var(--type-min);
+  line-height: 1.3;
+}
+.cdx-design-row__arrow {
+  color: var(--color-neon);
+  font-size: 16px;
+}
+.cdx-library__foot {
+  flex: none;
+  color: var(--color-slate);
+  font-size: var(--type-min);
+  line-height: 1.6;
+  padding-top: 12px;
+}
+.cdx-stock-reference {
+  padding: 8px 0;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  border-block: 1px solid var(--color-hairline);
+  margin-top: 12px;
+  font-size: var(--type-min);
+  color: var(--color-slate);
+}
+.cdx-stock-reference b {
+  color: var(--color-neon);
+  font-weight: 500;
+}
+.cdx-discover__tools {
+  display: flex;
+  gap: 12px;
+  flex: none;
+}
+.cdx-discover__tools input {
+  max-width: 480px;
+  font-size: 16px;
+}
+.cdx-discover__tools select {
+  width: 150px;
+  min-height: 44px;
+  font-size: 14px;
+}
+.cdx-token-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 30px 24px;
+  min-height: 0;
+  overflow-y: auto;
+  align-content: start;
+  padding: 10px 14px 35px;
+  scrollbar-width: thin;
+}
+.cdx-token-cell {
+  min-width: 0;
+  max-width: 290px;
+  width: 100%;
+  margin-inline: auto;
+}
+.cdx-token-cell__caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 15px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.cdx-token-cell__caption > div {
+  min-width: 0;
+}
+.cdx-token-cell__caption > div:first-child {
+  flex: 1;
+}
+.cdx-token-cell__caption > div:last-child {
+  text-align: right;
+}
+.cdx-token-cell__caption strong,
+.cdx-token-cell__caption span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cdx-token-cell__caption strong {
+  font-size: 14px;
+}
+.cdx-token-cell__caption > div:first-child > span,
+.cdx-token-cell > p {
+  color: var(--color-slate);
+}
+.cdx-token-cell > p {
+  font-size: var(--type-min);
+  padding-top: 4px;
+}
+.cdx-empty {
+  padding: 36px 10px;
+  font-size: 14px;
+  color: var(--color-slate);
+  grid-column: 1/-1;
+}
+.cdx-design-row:active {
+  transform: translateY(1px);
+}
+.cdx-filter button:focus-visible,
+.cdx-design-row:focus-visible {
+  outline: 2px solid var(--color-zap);
+  outline-offset: 2px;
+}
+@media (min-width: 1024px) and (max-height: 800px) {
+  .cdx-archive__caption > p:not(.cdx-eyebrow, .cdx-stock-reference) {
+    display: none;
+  }
+  .cdx-archive__vitrine {
+    gap: 12px;
+    padding: 16px;
+  }
+  .cdx-archive__card {
+    width: clamp(170px, calc((100cqh - 220px) * 0.7159), 250px);
+  }
+  .cdx-archive__caption h2 {
+    font-size: 20px;
+  }
+}
+@media (min-width: 1024px) and (max-width: 1250px) {
+  .cdx-library__list {
+    grid-template-columns: 1fr;
+  }
+  .cdx-token-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1023px) {
+  .cdx-archive__head {
+    align-items: start;
+    flex-wrap: wrap;
+  }
+  .cdx-archive__body {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .cdx-archive__card {
+    width: 245px;
+  }
+  .cdx-archive__vitrine {
+    padding: 27px 18px 22px;
+    gap: 22px;
+    container-type: normal;
+  }
+  .cdx-library__list {
+    overflow: visible;
+    padding: 0;
+  }
+  .cdx-library__foot {
+    padding-bottom: 20px;
+  }
+  .cdx-token-grid {
+    overflow: visible;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px 22px;
+    padding: 10px 8px 35px;
+  }
+}@media (max-width: 580px) {
+  .cdx-archive__head h1 {
+    font-size: 31px;
+  }
+  .cdx-use-design {
+    width: 100%;
+  }
+  .cdx-archive__vitrine {
+    border-radius: 16px;
+  }
+  .cdx-archive__card {
+    width: 225px;
+  }
+  .cdx-design-row {
+    gap: 9px;
+    padding: 10px 8px;
+    min-height: 86px;
+  }
+  .cdx-design-row__preview {
+    width: 31px;
+    height: 44px;
+  }
+  .cdx-design-row__text strong {
+    font-size: 12px;
+  }
+  .cdx-design-row__arrow {
+    font-size: 13px;
+  }
+  .cdx-filter {
+    gap: 3px;
+  }
+  .cdx-filter button {
+    padding-inline: 8px;
+    min-height: 44px;
+    font-size: var(--type-min);
+  }
+  .cdx-token-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 18px;
+    padding-inline: 4px;
+  }
+  .cdx-token-cell__caption {
+    gap: 5px;
+    font-size: var(--type-min);
+  }
+  .cdx-token-cell__caption strong {
+    font-size: 12px;
+  }
+  .cdx-discover__tools {
+    gap: 8px;
+  }
+  .cdx-discover__tools input {
+    min-width: 0;
+  }
+  .cdx-discover__tools select {
+    width: 117px;
+    font-size: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cdx-design-row {
+    transition: none;
+  }
+  .cdx-design-row:hover {
+    transform: none;
+  }
+}

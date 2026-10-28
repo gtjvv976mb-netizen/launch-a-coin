@@ -8,7 +8,6 @@ import type { CardData } from "../mintdex/MintCard";
 import { CanonicalCardFace } from "./CanonicalCardFace";
 import { PairBadge } from "./QuoteAssetPicker";
 import { PageControls, usePageCapacity } from "./Viewport";
-import "../../carddex-design-picker.css";
 
 const DESIGN_GROUPS = [
   ["all", "All designs"],

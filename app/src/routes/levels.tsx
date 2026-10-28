@@ -18,7 +18,6 @@ import { MEME_PAIR_PRESETS } from "../lib/carddex/design-pairings";
 import { initialQuoteReserves, quoteMetrics } from "../lib/carddex/quote-simulation";
 import { PairBadge, QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
 import { ViewTabs, tabPanelProps } from "../components/carddex/ViewTabs";
-import "../carddex.css";
 
 export const Route = createFileRoute("/levels")({
   validateSearch: searchSchema({

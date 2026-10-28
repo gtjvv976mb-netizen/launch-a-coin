@@ -43,9 +43,7 @@ import { parseLiveAmount } from "../components/carddex/live/amounts";
 import { BUY_DOES_NOT_FIT, BUY_FIT_AFTER_SIGN_IN, useLiveBuyFit } from "../components/carddex/live/buy-fit";
 import { PagedMessage } from "../components/carddex/live/PagedMessage";
 import type { LiveLaunchIntent } from "../lib/carddex/live/types";
-import "../carddex-live.css";
 import { ViewTabs } from "../components/carddex/ViewTabs";
-import "../carddex-launch.css";
 
 // The mainnet launch panel (wallet signing, ed25519) loads only in live mode, so the test-mode studio skips it.
 const LiveLaunchPanel = lazy(() => import("../components/carddex/live/LiveLaunchPanel").then((m) => ({ default: m.LiveLaunchPanel })));

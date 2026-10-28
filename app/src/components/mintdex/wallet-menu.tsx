@@ -1,4 +1,4 @@
-/** The signed-in rail wallet menu (AppShell's WalletBlock): Portfolio, the faucet, Start over. Loaded on demand. */
+/** The signed-in wallet menu (the top bar's AccountControl): Portfolio, the faucet, Start over. Loaded on demand. */
 import * as Popover from "@radix-ui/react-popover";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -19,10 +19,10 @@ export default function WalletMenu({ me }: { me: NonNullable<Me> }) {
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content
-          side="top"
-          align="start"
+          side="bottom"
+          align="end"
           sideOffset={8}
-          className="mdx-menu mdx-pop z-50 flex w-[var(--radix-popover-trigger-width)] min-w-[200px] flex-col outline-none"
+          className="mdx-menu mdx-pop z-50 flex min-w-[220px] flex-col outline-none"
         >
           <Link to="/portfolio" className="mdx-menu-item" onClick={() => setOpen(false)}>
             Open portfolio
@@ -37,7 +37,7 @@ export default function WalletMenu({ me }: { me: NonNullable<Me> }) {
           </button>
           <button
             type="button"
-            className="mdx-menu-item"
+            className="mdx-menu-item text-down-hover"
             onClick={() => {
               setOpen(false);
               setConfirm(true);

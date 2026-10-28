@@ -21,7 +21,6 @@ import { lazy, Suspense, useEffect, useSyncExternalStore, type ReactNode, type R
 
 import { useOpenedOnce } from "./opened-once";
 
-import "../../carddex-overlays.css";
 
 export const PHONE_MQ = "(max-width: 1023.98px)";
 

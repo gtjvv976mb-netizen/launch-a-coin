@@ -1,3 +1,10 @@
+/* dialogs, sheets, the demo-entry and guide dialogs, confirm dialogs screen sheet. Owned by the "overlays" screen group (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css).
+ * The blocks below were moved here unchanged from the shared sheets, in their old cascade order; tokens: carddex-theme.css. */
+
+/* ---- moved from carddex-theme.css (same order as there) */
+.mdx-dialog { border: 2px solid var(--color-control-border); }
+
+/* ---- moved from carddex-overlays.css (whole file, same order) */
 /* Dialog content is a deck of explicit pages, never an inner scroll container. */
 .mdx-dialog {
   height:min(600px,calc(var(--cdx-app-height,100dvh) - 32px));
@@ -54,3 +61,6 @@
   .cdx-enter-submit .mdx-btn { min-height:40px; padding-block:7px; }
   .cdx-enter-form .mdx-input { height:40px; }
 }
+
+/* ---- moved from carddex-viewport.css (same order as there) */
+.mdx-dialog__body,.mdx-sheet__body { min-height:0; overflow:clip; display:flex; flex-direction:column; }

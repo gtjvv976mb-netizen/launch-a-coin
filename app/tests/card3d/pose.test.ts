@@ -252,7 +252,10 @@ function cssNumber(css: string, selector: string, prop: string): number {
 
 describe("the rest pose (owner override 2026-10-11)", () => {
   const card3d = fs.readFileSync(path.resolve(import.meta.dir, "../../src/card3d.css"), "utf8");
-  const alive = fs.readFileSync(path.resolve(import.meta.dir, "../../src/alive.css"), "utf8");
+  // The page leans moved with their screens (styles/screens/home.css, coin.css); read them with alive.css.
+  const alive = ["../../src/alive.css", "../../src/styles/screens/home.css", "../../src/styles/screens/coin.css"]
+    .map((f) => fs.readFileSync(path.resolve(import.meta.dir, f), "utf8"))
+    .join("\n");
 
   test("hand cards lean back and turn; the light they catch is lit well above the floor", () => {
     expect(HAND_REST).toEqual({ rx: 5, ry: -10 });

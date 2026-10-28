@@ -2,7 +2,6 @@ import { useRef, useState, type Ref } from "react";
 import { PagedMessage } from "./PagedMessage";
 import { Button, Modal } from "../../mintdex/ui";
 import { connectLiveWallet, disconnectLiveWallet, useLiveWallet } from "./wallet";
-import "../../../carddex-live.css";
 
 export function LiveWalletButton({ compact = false, quiet = false, buttonRef }: { compact?: boolean; quiet?: boolean; buttonRef?: Ref<HTMLButtonElement> }) {
   const wallet = useLiveWallet();

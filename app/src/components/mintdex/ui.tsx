@@ -148,6 +148,7 @@ import {
 } from "react";
 
 import { thumbSources } from "../../lib/mintdex/art";
+import { Icon, type IconName } from "./icons";
 // The card sheets stay in the global stylesheet, first, where the card3d barrel import used to put them: every
 // page that shows a card back (the 404 included) needs them, and the cascade keeps its order.
 import "../../themed-card-backs.css";
@@ -168,6 +169,7 @@ import { useOpenedOnce } from "./opened-once";
 import { tabDomId, tabKeys, tabPanelDomId } from "../carddex/ViewTabs";
 
 export { ancestry, focusNear, focusPageHome };
+export { Icon, type IconName };
 
 /** Every card is a Pokemon card: 63 x 88 mm. */
 export const CARD_ASPECT = 63 / 88;
@@ -225,8 +227,13 @@ export function Hallmark({ size = 28, className = "" }: { size?: number; classNa
 
 // ---------------------------------------------------------------- buttons and links
 
-/** "outline" renders the secondary recipe (a sheet pill with a hairline ring); the name is kept for call sites. */
-export type ButtonVariant = "primary" | "outline" | "ghost" | "chip" | "buy" | "sell";
+/**
+ * One recipe per variant (mintdex.css @layer components, .mdx-btn): "primary" is the cream pill (one per view),
+ * "outline" renders the secondary recipe (a quiet nested pill; the name is kept for call sites), "ghost" is text
+ * with a track hover, "danger" a destructive confirm, "chip" a quick amount. "buy"/"sell" stay for the inherited
+ * chain pages only.
+ */
+export type ButtonVariant = "primary" | "outline" | "ghost" | "danger" | "chip" | "buy" | "sell";
 export type ButtonSize = "md" | "sm" | "lg";
 
 export function buttonClass({
@@ -442,16 +449,100 @@ export function TextLink({
 }
 
 function Chevron({ dir }: { dir: "left" | "right" }) {
+  return <Icon name={dir === "left" ? "chevron-left" : "chevron-right"} />;
+}
+
+/**
+ * An icon-only button: a 36px circle (32 with size="sm") with a 16px glyph, reaching the hit size through ::after.
+ * `label` is required: it is the accessible name and the tooltip. Icon-only is for close, search, menu, help,
+ * chevrons and the card-corner 3D button; everything else gets words (Button with an icon child).
+ * tone "quiet": transparent with a track hover (bars, dialogs, the search clear); "secondary": the nested pill.
+ */
+export function IconButton({
+  icon,
+  label,
+  tone = "quiet",
+  size = "md",
+  className = "",
+  type = "button",
+  disabled,
+  onClick,
+  ref,
+  ...rest
+}: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
+  icon: IconName;
+  label: string;
+  tone?: "quiet" | "secondary";
+  size?: "md" | "sm";
+  ref?: Ref<HTMLButtonElement>;
+}) {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden fill="none">
-      <path
-        d={dir === "left" ? "M8.75 3.5 5.25 7l3.5 3.5" : "M5.25 3.5 8.75 7l-3.5 3.5"}
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <button
+      ref={ref}
+      type={type}
+      aria-label={label}
+      title={label}
+      aria-disabled={disabled || undefined}
+      onClick={disabled ? undefined : onClick}
+      className={cx(
+        "mdx-btn mdx-btn--icon",
+        tone === "quiet" ? "mdx-btn--ghost" : "mdx-btn--outline",
+        size === "sm" && "mdx-btn--sm",
+        className,
+      )}
+      {...rest}
+    >
+      <Icon name={icon} />
+    </button>
+  );
+}
+
+/**
+ * A filter chip (Discover and Designs categories): a track pill at the control height, ink label, an optional
+ * count in caption slate ("Classics 7"). Pressed is aria-pressed (ink fill, ground label). One row, never wrapping:
+ * put chips in a `.mdx-chiprow` (nowrap, scrolls sideways with an edge fade when it overflows).
+ */
+export function Chip({
+  pressed = false,
+  count,
+  onClick,
+  children,
+  className = "",
+}: {
+  pressed?: boolean;
+  count?: number;
+  onClick?: () => void;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <button type="button" aria-pressed={pressed} onClick={onClick} className={cx("mdx-chip", className)}>
+      {children}
+      {count != null ? <span className="mdx-chip__count num">{count}</span> : null}
+    </button>
+  );
+}
+
+/**
+ * A read-only status pill, never interactive: 20px tall, 12/600. tone "neutral" (track and slate: "optional",
+ * "you", "Simulated"), "up" and "down" (the soft market pair), "ink" (a count that needs action), "gold" (a data
+ * mark only, e.g. the current period; never on chrome).
+ */
+export function Badge({
+  tone = "neutral",
+  children,
+  className = "",
+  title,
+}: {
+  tone?: "neutral" | "up" | "down" | "ink" | "gold";
+  children: ReactNode;
+  className?: string;
+  title?: string;
+}) {
+  return (
+    <span className={cx("mdx-tag", className)} data-tone={tone} title={title}>
+      {children}
+    </span>
   );
 }
 
@@ -694,7 +785,7 @@ export function SortMenu<T extends string>({
   const id = useId();
   return (
     <div className={cx("inline-flex h-10 flex-none items-center gap-2 max-lg:h-11", className)}>
-      <label htmlFor={id} className={cx("text-[13px] text-slate", labelClassName)}>
+      <label htmlFor={id} className={cx("text-body text-slate", labelClassName)}>
         {label}
       </label>
       <select
@@ -732,9 +823,9 @@ export function Pager({
   const p = Math.min(Math.max(0, page), pages - 1);
   return (
     <div className={cx("flex flex-none items-center gap-2", className)}>
-      <span className="mr-1 whitespace-nowrap text-[13px] text-slate" aria-live="polite">
-        Page <span className="num text-[14px] text-ink">{p + 1}</span> of{" "}
-        <span className="num text-[14px] text-ink">{pages}</span>
+      <span className="mr-1 whitespace-nowrap text-body text-slate" aria-live="polite">
+        Page <span className="num text-body text-ink">{p + 1}</span> of{" "}
+        <span className="num text-body text-ink">{pages}</span>
       </span>
       <ChevronButton
         dir="left"
@@ -906,15 +997,15 @@ export function Field({
         <label htmlFor={htmlFor} className="mdx-label mb-0">
           {label}
         </label>
-        {right ? <span className="text-[12px] text-slate">{right}</span> : null}
+        {right ? <span className="text-caption text-slate">{right}</span> : null}
       </div>
       {children}
       {error ? (
-        <p id={helpId} role="alert" className="mt-1.5 text-[13px] leading-[1.45] text-down">
+        <p id={helpId} role="alert" className="mt-1.5 text-body leading-[1.45] text-down">
           {error}
         </p>
       ) : help ? (
-        <p id={helpId} className="mt-1.5 text-[13px] leading-[1.45] text-slate">
+        <p id={helpId} className="mt-1.5 text-body leading-[1.45] text-slate">
           {help}
         </p>
       ) : null}
@@ -944,7 +1035,7 @@ export function Input({
       className={cx(
         "mdx-input",
         size === "lg" && "h-12",
-        numeric && "num text-[20px]",
+        numeric && "num text-title",
         prefix != null && "pl-8",
         suffix != null && "pr-14",
         className,
@@ -956,13 +1047,13 @@ export function Input({
   return (
     <div className="relative">
       {prefix != null && (
-        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[15px] text-slate">
+        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-body text-slate">
           {prefix}
         </span>
       )}
       {input}
       {suffix != null && (
-        <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[14px] text-slate">
+        <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-body text-slate">
           {suffix}
         </span>
       )}
@@ -972,12 +1063,14 @@ export function Input({
 
 // ---------------------------------------------------------------- values
 
+/** Figure sizes on the type scale (12 / 14 / 16 / 20 / 24, and the one 30px lead figure a screen may have). */
 const NUM_SIZE = {
-  xs: "text-[13px] leading-[1.3]",
-  sm: "text-[14px] leading-[1.3]",
-  md: "text-[17px] leading-[1.2]",
-  lg: "text-[20px] leading-[1.1]",
-  hero: "text-[clamp(32px,5.6vh,44px)] leading-none tracking-[-0.01em]",
+  xs: "text-caption",
+  sm: "text-body",
+  md: "text-lead",
+  lg: "text-title",
+  xl: "text-heading",
+  hero: "text-figure tracking-[-0.01em]",
 } as const;
 const NUM_TONE = { ink: "text-ink", slate: "text-slate", inherit: "" } as const;
 
@@ -1100,10 +1193,9 @@ export function LabelNum({
 }
 
 /**
- * Direction is never color alone: a triangle (inline SVG, the font has no geometric shapes) plus the
- * absolute percentage. One decimal under 100%. Zero renders "0.0%" in slate with no triangle.
- * `pill` sets it on a soft green or red pill (track for zero): only the Coin hero and the Home caption;
- * dense rows keep the plain colored text.
+ * A signed change: "+4.1%" in --color-up, "−2.3%" in --color-down, tabular; direction is in the sign, never colour
+ * alone. One decimal under 100%. Zero renders "0.0%" in slate with no sign. `pill` sets it on the soft pair (track
+ * for zero): the Coin hero and the Home caption; dense rows keep the plain coloured text (mintdex.css .mdx-change).
  */
 export function Change({
   v,
@@ -1121,41 +1213,21 @@ export function Change({
 }) {
   const pct = Number.isFinite(v) ? Math.abs(v * 100) : 0;
   const text = pct >= 100 ? pct.toFixed(0) : pct.toFixed(1);
-  const pillCls = "inline-flex h-[22px] items-center gap-1 rounded-pill px-2";
   if (text === "0.0") {
     if (hideZero) return null;
     return (
-      <span className={cx("num text-slate", pill && cx(pillCls, "bg-track"), className)}>
+      <span className={cx("mdx-change num", className)} data-dir="flat" data-pill={pill || undefined}>
         <span className="sr-only">No change {period}: </span>0.0%
       </span>
     );
   }
   const up = v > 0;
+  // The sign carries the direction in the text, so it is read too ("plus 4.1 percent"); never colour alone. U+2212 is
+  // the typographic minus. A plain text node, so a screen's span rules never put the sign on its own line.
   return (
-    <span
-      className={cx(
-        "num",
-        pill ? pillCls : "inline-flex items-baseline gap-1",
-        up ? "text-up" : "text-down",
-        pill && (up ? "bg-up-soft" : "bg-down-soft"),
-        className,
-      )}
-    >
-      <svg
-        width="7"
-        height="6"
-        viewBox="0 0 7 6"
-        aria-hidden
-        fill="currentColor"
-        className="flex-none self-center"
-        style={up ? undefined : { transform: "rotate(180deg)" }}
-      >
-        <path d="M3.5 0 7 6H0z" />
-      </svg>
-      <span>
-        <span className="sr-only">{up ? "Up" : "Down"} </span>
-        {text}%<span className="sr-only"> {period}</span>
-      </span>
+    <span className={cx("mdx-change num", className)} data-dir={up ? "up" : "down"} data-pill={pill || undefined}>
+      {up ? "+" : "\u2212"}
+      {text}%<span className="sr-only"> {period}</span>
     </span>
   );
 }
@@ -1192,7 +1264,7 @@ export function Address({
 
   if (!address) {
     return (
-      <span className={cx("text-[13px] text-slate", className)}>
+      <span className={cx("text-body text-slate", className)}>
         Address ends in mint, assigned at launch.
       </span>
     );
@@ -1269,7 +1341,7 @@ export function Address({
               {copied ? <CheckIcon size={12} /> : <CopyGlyph />}
             </span>
           ) : (
-            <span className="whitespace-nowrap text-[13px] font-medium text-ink underline-offset-4 group-hover:underline">
+            <span className="whitespace-nowrap text-body font-medium text-ink underline-offset-4 group-hover:underline">
               {copied ? "Copied" : MODE_COPY.copyAddress}
             </span>
           )}
@@ -1367,7 +1439,7 @@ export function TierTag({
         "inline-flex items-center gap-1.5 font-medium text-ink",
         !plain && "rounded-pill py-0.5 pl-1.5 pr-2.5",
         !plain && (size === "md" ? "min-h-7" : "min-h-6"),
-        size === "md" ? "text-[14px]" : "text-[13px]",
+        size === "md" ? "text-body" : "text-body",
         className,
       )}
       style={plain ? undefined : { background: t.tint }}
@@ -1416,7 +1488,7 @@ export function Avatar({
     <span
       aria-hidden
       className={cx(
-        "grid flex-none place-items-center rounded-pill font-semibold leading-none text-[#05070c]",
+        "grid flex-none place-items-center rounded-pill font-semibold leading-none text-on-cta",
         className,
       )}
       style={{ width: size, height: size, fontSize: Math.round(size * 0.44), background: stop }}
@@ -1498,7 +1570,16 @@ export function LivePause({
  * override in either direction. Its state renders after mount: the server HTML shows it off and disabled until
  * hydration, same size.
  */
-export function CalmSwitch({ className = "", size = "sm" }: { className?: string; size?: "sm" | "md" }) {
+export function CalmSwitch({
+  className = "",
+  size = "sm",
+  compact = false,
+}: {
+  className?: string;
+  size?: "sm" | "md";
+  /** The top bar's form: the words in caption slate beside the pill, no full-width row. */
+  compact?: boolean;
+}) {
   const level = useMotionLevel();
   const [state, setState] = useState<{ ready: boolean; on: boolean }>({ ready: false, on: false });
   useEffect(() => {
@@ -1507,12 +1588,8 @@ export function CalmSwitch({ className = "", size = "sm" }: { className?: string
   const locked = !state.ready;
   // The row is the switch's label, so a tap anywhere on it (the words included) toggles, not only the 36px pill.
   return (
-    <label className={cx("flex min-h-11 items-center justify-between gap-3", className)}>
-      <span className="min-w-0">
-        <span className={cx("block font-medium text-ink", size === "md" ? "text-[15px]" : "text-[13px]")}>
-          Calm motion
-        </span>
-      </span>
+    <label className={cx("mdx-calm", compact && "mdx-calm--compact", className)} data-size={size}>
+      <span className="mdx-calm__label">Calm motion</span>
       <button
         type="button"
         role="switch"
@@ -1546,7 +1623,7 @@ export function PageFrame({
   className?: string;
 }) {
   return (
-    <div className={cx("flex min-h-0 flex-col gap-6 short:gap-4 lg:h-full", className)}>
+    <div className={cx("mdx-frame", className)}>
       {children}
     </div>
   );
@@ -1560,32 +1637,36 @@ export function PageHeader({
   title,
   context,
   right,
+  aside,
+  back,
   wrapContext = false,
   className = "",
 }: {
   title: ReactNode;
+  /** One line about the data or the object (the finding, the count, the scope), 14px slate, at every width. */
   context?: ReactNode;
+  /** At most one primary (ButtonLink/Button) and one secondary or IconButton. */
   right?: ReactNode;
+  /** A data block before `right` (the coin's market cap Stat): bottom-aligned with the context line. */
+  aside?: ReactNode;
+  /** Phones only: a 44px utility row above the title (a TextLink back to the list). */
+  back?: ReactNode;
   wrapContext?: boolean;
   className?: string;
 }) {
   return (
-    <header
-      className={cx(
-        "flex flex-none flex-wrap items-end justify-between gap-x-6 gap-y-3 lg:flex-nowrap",
-        wrapContext ? "lg:min-h-14" : "lg:h-14",
-        className,
-      )}
-    >
-      <div className="min-w-0">
+    <header className={cx("mdx-pagehead", className)} data-wrap={wrapContext || undefined}>
+      {back ? <div className="mdx-pagehead__back">{back}</div> : null}
+      <div className="mdx-pagehead__text">
         {/* One line on desktop (fitted header row); phones let a long title wrap instead of cutting it. */}
-        <h1 className="mdx-h1 -mb-1 pb-1 lg:truncate max-lg:[text-wrap:balance]">{title}</h1>
-        {context ? (
-          <p className={cx("mt-1 text-[13px] leading-[1.45] text-slate", !wrapContext && "lg:truncate")}>{context}</p>
-        ) : null}
+        <h1 className="mdx-h1 mdx-pagehead__title">{title}</h1>
+        {context ? <p className="mdx-pagehead__context">{context}</p> : null}
       </div>
-      {right ? (
-        <div className="flex min-w-0 max-w-full flex-none items-center gap-6">{right}</div>
+      {aside || right ? (
+        <div className="mdx-pagehead__right">
+          {aside}
+          {right}
+        </div>
       ) : null}
     </header>
   );
@@ -1636,42 +1717,129 @@ export function SectionHead({
           heading
         )}
         {right == null ? null : typeof right === "string" ? (
-          <span className="flex-none text-[13px] text-slate">{right}</span>
+          <span className="flex-none text-body text-slate">{right}</span>
         ) : (
-          <span className="flex-none text-[13px]">{right}</span>
+          <span className="flex-none text-body">{right}</span>
         )}
       </div>
     </div>
   );
 }
 
+export type StatItem = {
+  label: string;
+  /** The figure. Missing is a grey dash: pass null (never "--" or a made-up zero). */
+  value: ReactNode | null;
+  unit?: ReactNode;
+  /** A signed change shown after the figure (Change v), or any small node such as a Badge. */
+  change?: ReactNode;
+  /** One caption line under the figure ("of 1,000,000", "vs 24h ago"). */
+  sub?: ReactNode;
+  watch?: number;
+  tick?: boolean;
+};
+
+/**
+ * KPIs as type in one divided container (house rule: no tile per KPI, no icon, no sparkline): a 12px slate label
+ * above a tabular figure, cells split by 1px hairlines; two columns at 360px. `lead` sets the first figure as the
+ * screen's one 30px lead figure (Portfolio total, the coin's market cap); the others stay at 24 (`size="lg"`) or
+ * 16 (`size="md"`). `KpiGroup` is the same component under the name the screens use.
+ */
 export function Stats({
   items,
   size = "md",
   cols,
+  lead = false,
   className = "",
 }: {
-  items: Array<{ label: string; value: ReactNode; unit?: ReactNode; watch?: number; tick?: boolean }>;
+  items: StatItem[];
   size?: "md" | "lg";
   cols?: number;
+  lead?: boolean;
   className?: string;
 }) {
   return (
     <dl
-      className={cx("grid gap-4", className)}
-      style={{ gridTemplateColumns: `repeat(${cols ?? items.length}, minmax(0, 1fr))` }}
+      className={cx("mdx-kpis", className)}
+      data-size={size}
+      style={{ "--kpi-cols": cols ?? items.length } as CSSProperties}
     >
-      {items.map((it) => (
-        <div key={it.label} className="min-w-0">
-          <dt className="mdx-micro truncate">{it.label}</dt>
-          <dd className="mt-1 truncate">
-            <Num size={size === "lg" ? "lg" : "md"} unit={it.unit} watch={it.watch} tick={it.tick}>
-              {it.value}
-            </Num>
+      {items.map((it, i) => (
+        <div key={it.label} className="mdx-kpi" data-lead={(lead && i === 0) || undefined}>
+          <dt className="mdx-kpi__label">{it.label}</dt>
+          <dd className="mdx-kpi__value">
+            {it.value == null ? (
+              <span className="mdx-dash" aria-label="Not available">
+                {"\u2014"}
+              </span>
+            ) : (
+              <Num size={lead && i === 0 ? "hero" : size === "lg" ? "xl" : "md"} unit={it.unit} watch={it.watch} tick={it.tick}>
+                {it.value}
+              </Num>
+            )}
+            {it.change != null ? <span className="mdx-kpi__change">{it.change}</span> : null}
           </dd>
+          {it.sub != null ? <dd className="mdx-kpi__sub">{it.sub}</dd> : null}
         </div>
       ))}
     </dl>
+  );
+}
+export const KpiGroup = Stats;
+
+/**
+ * The signature element: the bonding-curve track. Every pump.fun coin is on a curve until it graduates; the gold
+ * fill is the true ratio (no stub at zero), the label reads "Curve 64%" and, past graduation, "Graduated". It is a
+ * progressbar with a text value, so a screen reader hears "Curve 64%, 36% left to graduation". Missing data is a
+ * grey dash. `size="sm"` (tiles, rows) drops the trailing note; `note` overrides it ("Graduates at 85 SOL").
+ */
+export function CurveTrack({
+  progress,
+  graduated = false,
+  size = "md",
+  label = "Curve",
+  note,
+  className = "",
+}: {
+  /** 0..1 (CoinSummary.curveProgress); null or undefined when the coin has no curve data. */
+  progress: number | null | undefined;
+  graduated?: boolean;
+  size?: "sm" | "md";
+  label?: string;
+  note?: ReactNode;
+  className?: string;
+}) {
+  const known = progress != null && Number.isFinite(progress);
+  const pct = known ? Math.round(Math.min(1, Math.max(0, progress)) * 100) : 0;
+  const done = graduated || (known && pct >= 100);
+  const valueText = !known
+    ? `${label}: not available`
+    : done
+      ? `${label} complete: graduated`
+      : `${label} ${pct}%, ${100 - pct}% left to graduation`;
+  return (
+    <div className={cx("mdx-curve", className)} data-size={size} data-done={done || undefined}>
+      <div className="mdx-curve__head">
+        <span className="mdx-curve__label">
+          {label}{" "}
+          {known ? <span className="num">{done ? "100%" : `${pct}%`}</span> : <span className="mdx-dash">{"\u2014"}</span>}
+        </span>
+        {size === "md" ? (
+          <span className="mdx-curve__note">{note ?? (done ? "Graduated" : known ? "to graduation" : null)}</span>
+        ) : null}
+      </div>
+      <div
+        className="mdx-curve__track"
+        role="progressbar"
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={known ? pct : undefined}
+        aria-valuetext={valueText}
+      >
+        {known && pct > 0 ? <span className="mdx-curve__fill" style={{ width: `${done ? 100 : pct}%` }} /> : null}
+      </div>
+    </div>
   );
 }
 
@@ -1724,24 +1892,24 @@ export function Caption({
 }) {
   return (
     <div className={cx("mdx-caption", className)}>
-      {no != null ? <span className="mdx-plate text-[15px] leading-[1.3] text-slate">{no}</span> : null}
+      {no != null ? <span className="mdx-plate text-body leading-[1.3] text-slate">{no}</span> : null}
       {/* mt-0 cancels the accent guard's -4px top margin: its 4px top padding is the gap under No. */}
       <As className="mdx-name mt-0 truncate">{name}</As>
       {level != null ? (
         <TierTag level={level} size="md" suffix={tierSuffix} className="mt-2 self-start" />
       ) : null}
       {rows?.length ? (
-        <dl className="mdx-leaders mt-4 flex flex-col gap-2">
+        <dl className="mdx-leaders mdx-caption__rows">
           {rows.map((r, i) => (
             <div key={i}>
-              <dt className="text-[13px] text-slate">{r.label}</dt>
+              <dt className="text-body text-slate">{r.label}</dt>
               <dd>{r.value}</dd>
             </div>
           ))}
         </dl>
       ) : null}
       {children}
-      {link ? <div className="mt-4">{link}</div> : null}
+      {link ? <div className="mdx-caption__link">{link}</div> : null}
     </div>
   );
 }
@@ -1770,12 +1938,12 @@ export function GridCaption({
   return (
     <div className={cx("mdx-gridcap", stack && "mdx-gridcap--stack", className)}>
       <div className="flex h-5 items-baseline justify-between gap-2 leading-5">
-        <span className="mdx-gridcap__name min-w-0 truncate text-[14px] font-semibold text-ink">
+        <span className="mdx-gridcap__name min-w-0 truncate text-body font-semibold text-ink">
           {name}
         </span>
-        {value != null ? <span className="num flex-none text-[14px] text-ink">{value}</span> : null}
+        {value != null ? <span className="num flex-none text-body text-ink">{value}</span> : null}
       </div>
-      <div className="mdx-gridcap__sub flex h-[18px] items-baseline justify-between gap-2 text-[13px] leading-[18px]">
+      <div className="mdx-gridcap__sub flex h-[18px] items-baseline justify-between gap-2 text-body leading-[18px]">
         <span className="min-w-0 truncate">{sub}</span>
         {subRight != null ? <span className="flex flex-none items-center">{subRight}</span> : null}
       </div>
@@ -2429,7 +2597,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           hold.current.focus = false;
           resume();
         }}
-        className="pointer-events-none fixed inset-x-4 bottom-[calc(76px_+_env(safe-area-inset-bottom))] z-[60] flex flex-col items-stretch gap-2 lg:bottom-4 lg:left-[calc(var(--rail-w)_+_16px)] lg:right-auto lg:w-[min(400px,calc(100vw_-_var(--rail-w)_-_32px))]"
+        className="mdx-toasts"
       >
         {toasts.map((t) => (
           <div
@@ -2438,15 +2606,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             data-kind={t.kind}
             data-leaving={t.leaving ? "" : undefined}
             className={cx(
-              "mdx-toast pointer-events-auto flex items-center gap-3 rounded-pop py-2 pl-4 pr-2 leading-[1.4] shadow-float",
-              t.kind === "err" ? "bg-down text-[#1a0208]" : "bg-sheet text-ink",
-              t.kind === "level" ? "mdx-toast--level text-[15px] font-semibold" : "text-[14px]",
+              "mdx-toast pointer-events-auto flex items-center gap-3",
+              t.kind === "level" && "mdx-toast--level",
             )}
           >
             {t.kind === "ok" ? (
               <span
                 aria-hidden
-                className="grid h-[18px] w-[18px] flex-none place-items-center rounded-pill bg-neon text-neon-ink"
+                className="mdx-toast__ok grid h-[18px] w-[18px] flex-none place-items-center rounded-pill"
               >
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                   <path

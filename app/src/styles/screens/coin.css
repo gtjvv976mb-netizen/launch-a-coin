@@ -1,0 +1,134 @@
+/* Coin (/coin/$id): header, case, chart, trade ticket, trades, details screen sheet. Owned by the "coin" screen group (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css).
+ * The blocks below were moved here unchanged from the shared sheets, in their old cascade order; tokens: carddex-theme.css. */
+
+/* ---- moved from alive.css (same order as there) */
+/* ---------------------------------------------------------------- coin page: the case (5.2)
+ * The case rests turned a little toward the page (it stands in the left column), lit from that side (light.ts
+ * restLight of rx 5, ry 8). With the case label on screens 860px tall and up, the spacer above it grows to the
+ * label's height. */
+.mdx-casehost {
+  --hand-ry: 8;
+  --hand-a: 9.434;
+  --hand-px: 0.723;
+  --hand-lit: 0.657;
+}
+@media (min-width: 1280px) and (min-height: 860px) {
+  .mdx-case-spacer {
+    max-height: calc(264px * 0.22 + 8px);
+  }
+}
+@media (min-width: 1440px) and (min-height: 860px) {
+  .mdx-case-spacer {
+    max-height: calc(300px * 0.22 + 8px);
+  }
+}
+@media (min-width: 1680px) and (min-height: 860px) {
+  .mdx-case-spacer {
+    max-height: calc(340px * 0.22 + 8px);
+  }
+}
+
+/* ---- moved from carddex-theme.css (same order as there) */
+@media (min-width: 1024px) {
+  .cdx-app .cdx-coin-market, .cdx-app .cdx-coin-actions {
+    border: 2px solid var(--color-control-border);
+    background: linear-gradient(155deg, var(--color-surface), var(--color-surface));
+    box-shadow: inset 0 0 0 4px var(--color-raised), inset 0 0 0 5px rgb(181 136 26 / .3), 0 7px 22px -14px rgb(104 70 24 / .2);
+  }
+  .cdx-app .mdx-coin [data-pane].rounded-panel.bg-plinth {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+/* ---- moved from carddex-gallery.css (same order as there) */
+.cdx-app .cdx-coin-market, .cdx-app .cdx-coin-actions { border:1px solid var(--color-rule); background:var(--color-surface); box-shadow:none; }
+@media (min-width:1280px) {
+ .cdx-app .mdx-coin { grid-template-columns:minmax(300px,.9fr) minmax(300px,1fr) 268px; gap:20px; }
+ .cdx-app .mdx-coin .mdx-case-spacer { max-height:18px; }
+ .cdx-app .mdx-coin .cdx-coin-object { height:min(700px,calc(100dvh - 280px)); max-height:min(700px,calc(100dvh - 280px)); flex:0 1 auto; }
+ .cdx-app .mdx-coin .cdx-coin-objectstage > .hidden { width:min(100cqw,calc((100cqh - 94px)*112/173.683)); }
+ .cdx-app .mdx-coin .mdx-case__controls { flex-wrap:nowrap; gap:6px; }
+ .cdx-app .mdx-coin .mdx-case__btn { min-width:0; min-height:40px; padding:6px 9px; background:transparent; color:var(--color-slate); border:0; box-shadow:none; font-size:12px; }
+ .cdx-app .mdx-coin .mdx-case__controls .mdx-card3d__chip { flex:none; padding:0 9px; }
+ .cdx-app .mdx-coin .mdx-input { height:40px; min-height:40px; }
+ .cdx-app .cdx-coin-actions { padding:16px; }
+}
+@media (min-width:1680px) {
+ .cdx-app .mdx-coin { grid-template-columns:minmax(340px,1fr) minmax(360px,1.2fr) 290px; }
+}
+
+/* ---- moved from carddex-viewport.css (same order as there) */
+/* Coin sections are real screen tabs, with a permanent desktop case beside them. */
+.cdx-coin-screen { display:flex; flex-direction:column; gap:10px; height:100%; min-height:0; }
+.cdx-coin-screen__head { display:flex; flex:none; align-items:center; justify-content:space-between; gap:12px; min-width:0; }
+.cdx-coin-screen__head > :first-child { min-width:0; }
+.cdx-coin-screen__head h1 { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cdx-coin-screen__tabs { flex:none; }
+.cdx-coin-screen__tabs .mdx-tabs { width:100%; overflow:visible; }
+.cdx-coin-screen__tabs .mdx-tabs button { min-width:0; padding-inline:10px; }
+.cdx-coin-screen__body { display:grid; grid-template-columns:minmax(0,1.12fr) minmax(300px,.88fr); gap:28px; flex:1; min-height:0; }
+.cdx-coin-screen__object { min-height:0; container-type:size; display:flex; align-items:center; justify-content:center; }
+.cdx-coin-screen__case { width:min(440px,calc((100cqh - 100px)*112/173.683),calc(100cqw - 60px)); }
+.cdx-coin-screen__pane { min-height:0; display:flex; flex-direction:column; gap:12px; padding:12px; }
+.cdx-coin-screen[data-tab=card] .cdx-coin-screen__pane, .cdx-coin-screen[data-tab=details] .cdx-coin-screen__pane { overflow-y:auto; }
+.cdx-coin-screen__story { font-size:15px; line-height:1.55; max-width:68ch; overflow-wrap:anywhere; white-space:pre-line; }
+.cdx-coin-screen__chart { flex:1; min-height:0; }
+.cdx-coin-screen__chart .cdx-candles { min-height:0; }
+.cdx-coin-screen__trades { flex:1; min-height:0; }
+.cdx-trades-page { flex:1; min-height:0; }
+.cdx-coin-screen__ownership { flex:none; display:flex; flex-direction:column; }
+.cdx-coin-screen__ownership dl > div { padding-block:12px; border-bottom:1px solid var(--color-rule); font-size:14px; }
+.cdx-coin-screen__ownership dt { color:var(--color-slate); font-size:12px; }
+.cdx-coin-screen__ownership dd { margin-top:4px; overflow-wrap:anywhere; }
+.cdx-trade-ticket { min-height:0; gap:12px; }
+.cdx-trade-ticket[data-ticket-step=amount] .cdx-trade-ticket__review,.cdx-trade-ticket[data-ticket-step=review] .cdx-trade-ticket__amount { display:none; }
+.cdx-trade-ticket .mdx-leaders { margin-top:14px; }
+.cdx-trade-ticket #trade-msg { overflow-wrap:anywhere; }
+.cdx-trade-ticket .cdx-trade-ticket__review { min-height:0; }
+@media(max-width:1023px) {
+ .cdx-coin-screen__head { align-items:center; }
+ .cdx-coin-screen__head > span { display:none; }
+ .cdx-coin-screen__head .mdx-h1 { font-size:var(--type-page-title-sm); }
+ .cdx-coin-screen__tabs .mdx-tabs button { padding-inline:7px; font-size:var(--type-min); }
+ .cdx-coin-screen__body { display:flex; flex-direction:column; gap:0; }
+ .cdx-coin-screen__pane { flex:1; padding:6px; }
+ .cdx-coin-screen[data-tab=card] .cdx-coin-screen__pane { display:none; }
+ .cdx-coin-screen:not([data-tab=card]) .cdx-coin-screen__object { display:none; }
+ .cdx-coin-screen__object { flex:1; }
+ .cdx-coin-screen__case { width:min(360px,calc((100cqh - 100px)*112/173.683),calc(100cqw - 48px)); }
+ .cdx-coin-screen__ownership dl > div { padding-block:10px; }
+}
+.cdx-coin-screen__chart .cdx-candles__plot { flex:1; height:auto; min-height:100px; }
+.cdx-coin-screen__chart > .flex:has(.mdx-tabs) { flex-wrap:wrap; }
+/* A size-contained header needs an explicit flex basis; otherwise its intrinsic width is zero. */
+.cdx-coin-screen__head > header { width:100%; flex:1; }
+
+/* ---- moved from carddex-chart.css (whole file, same order) */
+/* Candles keep their values still; only new observations receive a brief opacity cue. */
+.cdx-candles__plot { min-height: 180px; }
+.cdx-candles__svg { border-radius: 5px; outline-offset: 3px; }
+.cdx-candles__svg:focus-visible { outline: 2px solid var(--color-neon); }
+.cdx-candles__tooltip {
+  position: absolute;
+  top: 0;
+  left: 4px;
+  z-index: 1;
+  pointer-events: none;
+  width: min(294px, calc(100% - 8px));
+  padding: 7px 10px 8px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 7px;
+  color: var(--color-ink);
+  background: var(--color-sheet);
+  box-shadow: var(--shadow-raise);
+}
+.cdx-candles__time { display: block; margin-bottom: 4px; color: var(--color-slate); font-size: var(--type-min); line-height: 1.2; }
+.cdx-candles__values { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.cdx-candles__values span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.cdx-candles__values small { font-size: var(--type-min); line-height: 1; color: var(--color-slate); }
+.cdx-candles__values b { font-size: var(--type-min); font-weight: 500; line-height: 1; }
+.cdx-candles__new { animation: cdx-candle-observed 300ms ease-out both; }
+@keyframes cdx-candle-observed { from { opacity: .35; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .cdx-candles__new { animation: none; } }
