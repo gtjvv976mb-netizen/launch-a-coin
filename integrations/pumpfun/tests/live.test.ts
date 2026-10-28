@@ -61,6 +61,7 @@ function mockRpc() {
     getTransaction: async (signature: string) => transactions.get(signature) ?? null,
     getSignatureStatuses: async (signatures: string[]) => ({ context: { slot }, value: signatures.map((signature) => transactions.has(signature) ? { err: null, confirmations: null, confirmationStatus: "finalized", slot } : null) }),
     getBlockHeight: async () => height,
+    getEpochInfo: async () => ({ epoch: 1000, slotIndex: 100, slotsInEpoch: 432_000, absoluteSlot: slot, blockHeight: height }),
     sendRawTransaction: async (bytes: Uint8Array) => { sent++; if (transportFails) throw new Error("Transport timed out"); return bs58.encode(VersionedTransaction.deserialize(bytes).signatures[0]); },
   } as unknown as LiveConnection;
   function remember(plan: WalletTransactionPlan, signature: string) {
@@ -245,6 +246,32 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     await rpc.addToken(input); rpc.addNft(input);
     await expect(assertNftMintReplaceable(input, { connection: rpc.connection, lastValidBlockHeight: 1200 })).rejects.toThrow("already exists");
     await expect(assertTokenMintReplaceable(input, { connection: rpc.connection, lastValidBlockHeight: 1200 })).rejects.toThrow("already exists");
+  });
+
+  test("replacement absence is checked at or after the same finalized bank that proves expiry", async () => {
+    const input = defaultInput(), rpc = mockRpc(); rpc.height(1201);
+    const reads: unknown[] = [];
+    rpc.connection.getEpochInfo = async (commitment) => {
+      reads.push(commitment);
+      return { epoch: 1000, slotIndex: 100, slotsInEpoch: 432_000, absoluteSlot: slot, blockHeight: 1201 };
+    };
+    // Model a lagging account backend returning a pre-creation absence while
+    // another backend has already observed the finalized block-height expiry.
+    rpc.connection.getAccountInfoAndContext = async (_mint, config) => {
+      reads.push(config);
+      return { context: { slot: slot - 1 }, value: null };
+    };
+    for (const check of [assertNftMintReplaceable, assertTokenMintReplaceable]) {
+      await expect(check(input, { connection: rpc.connection, lastValidBlockHeight: 1200 })).rejects.toThrow("predates the finalized expiry check");
+    }
+    expect(reads).toEqual(["finalized", { commitment: "finalized", minContextSlot: slot }, "finalized", { commitment: "finalized", minContextSlot: slot }]);
+    rpc.connection.getAccountInfoAndContext = async (_mint, config) => {
+      expect(config).toEqual({ commitment: "finalized", minContextSlot: slot });
+      return { context: { slot }, value: info(CORE_PROGRAM_ID, new Uint8Array()) };
+    };
+    await expect(assertNftMintReplaceable(input, { connection: rpc.connection, lastValidBlockHeight: 1200 })).rejects.toThrow("already exists");
+    rpc.connection.getEpochInfo = async () => ({ epoch: 1000, slotIndex: 100, slotsInEpoch: 432_000, absoluteSlot: slot });
+    await expect(assertNftMintReplaceable(input, { connection: rpc.connection, lastValidBlockHeight: 1200 })).rejects.toThrow("valid finalized expiry context");
   });
 
   test("an expired unissued NFT can change signer address without changing its immutable binding", async () => {

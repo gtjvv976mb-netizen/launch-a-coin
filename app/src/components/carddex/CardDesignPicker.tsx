@@ -12,6 +12,7 @@ export function CardDesignPicker({
   quoteAssetKey,
   ticker,
   disabled = false,
+  compact = false,
 }: {
   value: string;
   onChange: (key: string) => void;
@@ -19,11 +20,12 @@ export function CardDesignPicker({
   quoteAssetKey?: string;
   ticker?: string;
   disabled?: boolean;
+  compact?: boolean;
 }) {
   const id = useId();
   const quoteKey = quoteAssetKey ?? defaultQuoteForDesign(value).key;
   return (
-    <div className={`cdx-design-picker ${className}`}>
+    <div className={`cdx-design-picker ${compact ? "cdx-design-picker--compact" : ""} ${className}`}>
       <div className="mb-1 flex items-center justify-between gap-3">
         <label htmlFor={id} className="block text-[13px] font-semibold text-ink">
           Card design
@@ -60,10 +62,10 @@ export function CardDesignPicker({
           </optgroup>
         ))}
       </select>
-      <p className="mt-2 text-[13px] leading-relaxed text-slate">
+      {!compact ? <><p className="mt-2 text-[13px] leading-relaxed text-slate">
         One permanent finish. Paired editions select their matching quote asset.
       </p>
-      <PairBadge quoteAssetKey={quoteKey} ticker={ticker || "YOUR TOKEN"} compact />
+      <PairBadge quoteAssetKey={quoteKey} ticker={ticker || "YOUR TOKEN"} compact /></> : null}
     </div>
   );
 }

@@ -23,7 +23,6 @@ import {
 } from "../../lib/mintdex/api";
 import { FAUCET_AMOUNT, TOKEN_UNIT, TRADE_FEE_BPS } from "../../lib/mintdex/constants";
 import {
-  COIN_COPY,
   FLOW,
   MODE_COPY,
   REPORT_REASONS,
@@ -58,7 +57,9 @@ import {
 import { getCardDesign } from "../../lib/carddex/designs";
 import { getPairAsset } from "../../lib/carddex/pairs";
 import { marketCapText, marketCapWatch, quoteAtoms, quoteNumber } from "../../lib/carddex/quote-display";
-import { formatQuoteAmount, parseQuoteAmount, initialQuoteReserves, quoteMetrics } from "../../lib/carddex/quote-simulation";
+import { formatQuoteAmount, parseQuoteAmount, quoteMetrics } from "../../lib/carddex/quote-simulation";
+import { aggregateCandles, candleInterval, candleIntervalLabel } from "../../lib/carddex/candles";
+import "../../carddex-chart.css";
 import type { CoinDetail, CoinPage, TradeRow } from "../../lib/mintdex/types";
 import { CardBack, CardCase, View3DButton, useView3DGestures, type Card3DHandle } from "./card3d";
 import { useClaimable } from "./cases";
@@ -621,18 +622,13 @@ function niceStep(span: number, count: number) {
   return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * mag;
 }
 
-/**
- * A round ink step line and hairline grid track token market cap, with the current value at the endpoint.
- * ring color beside its frame mini and slate label. The endpoint pings once when a new trade lands after
- * mount (never on the first frame, never under reduced motion). No area fill.
- */
+/** Actual post-trade observations, aggregated to OHLC. Empty time buckets remain gaps. */
 export function McapChart({
   trades,
   currentUsd,
   currentQuote,
   quoteAssetKey = "sol",
   createdAt,
-  level,
   tradeCount,
   pane,
   className = "",
@@ -642,7 +638,7 @@ export function McapChart({
   currentQuote?: number;
   quoteAssetKey?: string;
   createdAt: number;
-  /** How many trades the coin has had, when the chart points are not one per trade (devnet). */
+  /** Total history can exceed the latest 400 observations supplied by the catalogue. */
   tradeCount?: number;
   /** Compatibility input; card designs never change the chart. */
   level: number;
@@ -655,234 +651,172 @@ export function McapChart({
   const chartFigure = (value: number) => quoteNative ? quoteNumber(value, true) : usdCompact(value);
   const [range, setRange] = useState<RangeKey>("all");
   const [hover, setHover] = useState<number | null>(null);
-  // The clock starts on the client so server and client render the same first frame.
+  // Server and first client frame use the same observation clock.
   const [clock, setClock] = useState<number | null>(null);
   useEffect(() => {
     setClock(Date.now());
-    const t = setInterval(() => setClock(Date.now()), 15_000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setClock(Date.now()), 15_000);
+    return () => clearInterval(timer);
   }, []);
-  // Before measuring, the server and the first client frame draw at a width guessed from the viewport cookie
-  // (phones: the screen less the gutters and the panel padding), and the svg scales to its box either way, so
-  // nothing (the latest prices, the $ axis) is cut off on the right while a phone tab waits for layout.
   const vp = useLoaderViewport();
   const [ref, size] = useSize<HTMLDivElement>(
     vp && vp.w < 1024 ? { width: Math.max(200, vp.w - 64), height: 240 } : { width: 560, height: 240 },
   );
-  // Endpoint ping (delta 7, moment 12): keyed by the newest trade's time, set only when it changes after
-  // mount, so the server markup and the first client frame never carry it.
-  const newestTrade = trades.length ? trades[trades.length - 1].createdAt : null;
+  const newestTrade = trades.reduce((latest, trade) => Math.max(latest, trade.id), 0);
   const seenTrade = useRef(newestTrade);
   const [ping, setPing] = useState<number | null>(null);
   useEffect(() => {
-    if (newestTrade == null || newestTrade === seenTrade.current) return;
+    if (!newestTrade || newestTrade === seenTrade.current) return;
     seenTrade.current = newestTrade;
     if (!prefersReducedMotion()) setPing(newestTrade);
   }, [newestTrade]);
-  const W = Math.max(200, Math.round(size.width));
-  const H = Math.max(120, Math.round(size.height));
-  const padL = 2;
-  const padR = 52;
-  const padT = 18;
-  const padB = 10;
 
-  const lastT = trades.length ? trades[trades.length - 1].createdAt : createdAt;
+  const samples = useMemo(() => trades.flatMap((trade) => {
+    // A quote-native sample must never fall back to an unrelated USD number, or vice versa.
+    const value = quoteNative ? trade.mcapQuote : trade.mcapUsd;
+    return value != null && Number.isFinite(value) && value >= 0 && Number.isFinite(trade.createdAt)
+      ? [{ t: trade.createdAt, v: value, sequence: trade.id }] : [];
+  }), [trades, quoteNative]);
+  const lastT = samples.reduce((latest, sample) => Math.max(latest, sample.t), createdAt);
+  const firstT = samples.reduce((first, sample) => Math.min(first, sample.t), lastT);
   const now = Math.max(clock ?? lastT, lastT);
-
-  const points = useMemo(() => {
-    const ms = RANGES.find((r) => r.key === range)!.ms;
-    const from = Number.isFinite(ms) ? now - ms : Math.min(createdAt, now);
-    const launchMetrics = quoteMetrics(initialQuoteReserves(quoteAssetKey), quoteAssetKey);
-    const launchUsd = quoteNative ? launchMetrics.mcapQuote : launchMetrics.mcapUsd ?? 0;
-    const pts: Array<{ t: number; v: number }> = [];
-    const before = [...trades].reverse().find((t) => t.createdAt < from);
-    pts.push({ t: from, v: before ? (before.mcapUsd ?? before.mcapQuote ?? launchUsd) : launchUsd });
-    for (const t of trades) if (t.createdAt >= from) pts.push({ t: t.createdAt, v: t.mcapUsd ?? t.mcapQuote ?? launchUsd });
-    pts.push({ t: now, v: currentValue });
-    return pts;
-  }, [trades, range, currentValue, quoteNative, quoteAssetKey, createdAt, now]);
-
-  const t0 = points[0].t;
-  const t1 = points[points.length - 1].t;
-  let vMin = Math.min(...points.map((p) => p.v));
-  let vMax = Math.max(...points.map((p) => p.v));
-  if (vMax - vMin < vMax * 0.04) {
-    vMax *= 1.03;
-    vMin *= 0.97;
-  }
-  const span = vMax - vMin || 1;
-  vMin = Math.max(0, vMin - span * 0.08);
-  vMax += span * 0.12;
-  const x = (t: number) => padL + ((t - t0) / Math.max(1, t1 - t0)) * (W - padL - padR);
-  const y = (v: number) => padT + (1 - (v - vMin) / (vMax - vMin)) * (H - padT - padB);
-  // 1px lines sit on the pixel grid.
-  const yl = (v: number) => Math.round(y(v)) + 0.5;
-
-  // Step line: market cap holds until the next trade.
-  let d = "";
-  points.forEach((p, i) => {
-    const px = x(p.t).toFixed(1);
-    const py = y(p.v).toFixed(1);
-    if (i === 0) d += `M${px} ${py}`;
-    else d += ` H${px} V${py}`;
-  });
-
+  const rangeMs = RANGES.find((option) => option.key === range)!.ms;
+  const from = Number.isFinite(rangeMs) ? Math.max(createdAt, now - rangeMs) : firstT;
+  const W = Math.max(200, Math.round(size.width));
+  const H = Math.max(160, Math.round(size.height));
+  const padL = 4, padR = 62, padT = 24, padB = 26;
+  const plotWidth = W - padL - padR;
+  const interval = candleInterval(Math.max(1_000, now - from), Math.max(18, Math.floor(plotWidth / 9)));
+  const candles = useMemo(() => aggregateCandles(samples, { from, to: now, interval }), [samples, from, now, interval]);
+  const t0 = Math.floor(from / interval) * interval;
+  const t1 = Math.max(t0 + interval * 2, Math.ceil((now + 1) / interval) * interval);
+  const bounds = candles.flatMap((candle) => [candle.low, candle.high]);
+  if (Number.isFinite(currentValue) && currentValue >= 0) bounds.push(currentValue);
+  let vMin = bounds.length ? Math.min(...bounds) : 0;
+  let vMax = bounds.length ? Math.max(...bounds) : 1;
+  const valuePadding = Math.max((vMax - vMin) * .12, vMax * .025, vMax === 0 ? 1 : Number.MIN_VALUE);
+  vMin = Math.max(0, vMin - valuePadding);
+  vMax += valuePadding;
+  const x = (time: number) => padL + ((time - t0) / Math.max(1, t1 - t0)) * plotWidth;
+  const candleX = (time: number) => x(time + interval / 2);
+  const y = (value: number) => padT + (1 - (value - vMin) / (vMax - vMin || 1)) * (H - padT - padB);
   const step = niceStep(vMax - vMin, 4);
   const ticks: number[] = [];
-  for (let v = Math.ceil(vMin / step) * step; v <= vMax && ticks.length < 8; v += step)
-    ticks.push(v);
+  for (let value = Math.ceil(vMin / step) * step; value <= vMax && ticks.length < 8; value += step) ticks.push(value);
+  const selected = candles.find((candle) => candle.t === hover);
+  const bodyWidth = Math.max(2, Math.min(11, interval / (t1 - t0) * plotWidth * .65));
+  const intervalText = candleIntervalLabel(interval);
+  const isTruncated = (tradeCount ?? trades.length) > trades.length;
+  const timeLabel = (time: number) => {
+    const date = new Date(time);
+    return t1 - t0 >= 86_400_000
+      ? `${date.getUTCDate()} ${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][date.getUTCMonth()]}`
+      : `${String(date.getUTCHours()).padStart(2, "0")}:${String(date.getUTCMinutes()).padStart(2, "0")}${interval < 60_000 ? `:${String(date.getUTCSeconds()).padStart(2, "0")}` : ""}`;
+  };
+  const timeTicks = [t0, t0 + (t1 - t0) / 2, t1];
+  const selectedTime = selected ? new Date(selected.firstAt).toISOString().slice(0, interval < 60_000 ? 19 : 16).replace("T", " ") : "";
 
-  const hp = hover != null ? points[hover] : undefined;
-  // Under two trades the plot is a flat line or a single step: say so in words instead.
-  const traded = tradeCount ?? trades.length;
-  const few = traded < 2;
-
-  function onMove(e: React.PointerEvent<SVGSVGElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const px = ((e.clientX - rect.left) / rect.width) * W;
-    let best = 0;
-    let bestD = Infinity;
-    points.forEach((p, i) => {
-      const dd = Math.abs(x(p.t) - px);
-      if (dd < bestD) {
-        bestD = dd;
-        best = i;
-      }
-    });
-    setHover(best);
+  function onMove(event: React.PointerEvent<SVGSVGElement>) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const px = (event.clientX - rect.left) / rect.width * W;
+    let closest = candles[0];
+    for (const candle of candles) {
+      if (!closest || Math.abs(candleX(candle.t) - px) < Math.abs(candleX(closest.t) - px)) closest = candle;
+    }
+    if (closest) setHover(closest.t);
   }
 
+  function onKey(event: React.KeyboardEvent<SVGSVGElement>) {
+    if (!candles.length || !["ArrowLeft", "ArrowRight", "Home", "End", "Escape"].includes(event.key)) return;
+    event.preventDefault();
+    if (event.key === "Escape") { setHover(null); return; }
+    const index = candles.findIndex((candle) => candle.t === hover);
+    const next = event.key === "Home" ? 0 : event.key === "End" ? candles.length - 1
+      : index === -1 ? candles.length - 1
+      : Math.max(0, Math.min(candles.length - 1, index + (event.key === "ArrowLeft" ? -1 : 1)));
+    setHover(candles[next].t);
+  }
+
+  const description = selected
+    ? `${selectedTime} UTC. Open ${chartFigure(selected.open)}, high ${chartFigure(selected.high)}, low ${chartFigure(selected.low)}, close ${chartFigure(selected.close)}${quoteNative ? ` ${quoteSymbol}` : ""}.`
+    : `${intervalText} market-cap candles from observed trades${quoteNative ? `, in ${quoteSymbol}` : ""}. Left and right arrow keys inspect candles. Gaps have no observed trades.`;
+
   return (
-    <section className={cx("flex flex-col", className)} aria-label="Market cap chart" data-pane={pane}>
+    <section className={cx("cdx-candles flex flex-col", className)} aria-label="Market cap candlestick chart" data-pane={pane}>
       <SectionHead
         title={quoteNative ? `Market cap · ${quoteSymbol}` : "Market cap"}
-        right={
-          few ? undefined : (
-            <Tabs
-              size="sm"
-              label="Chart range"
-              value={range}
-              options={RANGE_OPTIONS}
-              onChange={(r) => {
-                setRange(r);
-                setHover(null);
-              }}
-            />
-          )
-        }
+        right={<Tabs size="sm" label="Chart range" value={range} options={RANGE_OPTIONS}
+          onChange={(next) => { setRange(next); setHover(null); }} />}
       />
-      <div
-        ref={ref}
-        className={cx(
-          "relative mt-2 lg:h-[260px] xl:mt-1 xl:h-auto xl:min-h-0 xl:flex-1",
-          few ? "h-[120px]" : "h-[240px]",
-        )}
-      >
-        {few ? (
+      <div ref={ref} className="cdx-candles__plot relative mt-2 h-[240px] lg:h-[260px] xl:mt-1 xl:h-auto xl:min-h-0 xl:flex-1">
+        {!candles.length ? (
           <div className="absolute inset-0 grid place-items-center rounded-row border border-dashed border-hairline px-6 text-center">
-            <p className="max-w-[280px] text-pretty text-[13px] leading-[1.45] text-slate">
-              {traded === 0 ? COIN_COPY.chartNone : COIN_COPY.chartOne}
+            <p className="max-w-[270px] text-pretty text-[13px] leading-[1.45] text-slate">
+              {samples.length ? "No trades in this range. Choose a wider view." : "The first token trade will begin this chart."}
             </p>
           </div>
         ) : (
-          <svg
-            width="100%"
-            height="100%"
-            viewBox={`0 0 ${W} ${H}`}
-            className="absolute inset-0 block touch-pan-y select-none"
-            onPointerMove={onMove}
-            onPointerLeave={() => setHover(null)}
-            role="img"
-            aria-label={`Market cap chart, now ${chartFigure(currentValue)}${quoteNative ? ` ${quoteSymbol}` : ""}`}
-          >
-            {ticks.map((v) => (
-              <g key={v} className="mdx-grid-in">
-                <line
-                  x1={padL}
-                  x2={W - padR}
-                  y1={yl(v)}
-                  y2={yl(v)}
-                  className="stroke-hairline"
-                  strokeWidth={1}
-                />
-                <text x={W - padR + 8} y={y(v) + 4} className="num fill-slate" fontSize={11}>
-                  {chartFigure(v)}
-                </text>
+          <svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`}
+            className="cdx-candles__svg absolute inset-0 block touch-pan-y select-none"
+            onPointerMove={onMove} onPointerDown={onMove}
+            onPointerLeave={(event) => { if (event.pointerType !== "touch") setHover(null); }}
+            onKeyDown={onKey} onBlur={() => setHover(null)} tabIndex={0} role="img"
+            aria-label={`Market cap candlesticks, current ${chartFigure(currentValue)}${quoteNative ? ` ${quoteSymbol}` : ""}`}>
+            <desc>{description}</desc>
+            {ticks.map((value) => (
+              <g key={value}>
+                <line x1={padL} x2={W - padR} y1={Math.round(y(value)) + .5} y2={Math.round(y(value)) + .5}
+                  className="stroke-hairline" strokeOpacity={.65} strokeWidth={1} />
+                <text x={W - padR + 8} y={y(value) + 4} className="num fill-slate" fontSize={10}>{chartFigure(value)}</text>
               </g>
             ))}
-            {/* Draws itself on mount and on a range change (keyed), never on a poll (P1-23). */}
-            <path
-              key={range}
-              d={d}
-              pathLength={1}
-              fill="none"
-              className="mdx-draw mdx-chartline stroke-neon"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            {ping != null ? (
-              <circle
-                key={ping}
-                cx={x(t1)}
-                cy={y(currentValue)}
-                r={3.5}
-                aria-hidden
-                className="mdx-live__ping fill-neon"
-                style={{ transformBox: "fill-box", transformOrigin: "center" }}
-              />
+            {Number.isFinite(currentValue) && currentValue >= 0 ? (
+              <line x1={padL} x2={W - padR} y1={y(currentValue)} y2={y(currentValue)}
+                className="stroke-slate" strokeWidth={1} strokeDasharray="3 4" strokeOpacity={.45} />
             ) : null}
-            {/* Springs in as the drawn line reaches it (keyed with the line). */}
-            <circle
-              key={`end-${range}`}
-              cx={x(t1)}
-              cy={y(currentValue)}
-              r={3.5}
-              className="mdx-dot-in fill-neon stroke-sheet"
-              strokeWidth={2}
-            />
-            {hp && (
-              <g>
-                <line
-                  x1={Math.round(x(hp.t)) + 0.5}
-                  x2={Math.round(x(hp.t)) + 0.5}
-                  y1={padT}
-                  y2={H - padB}
-                  className="stroke-slate"
-                  strokeOpacity={0.4}
-                  strokeWidth={1}
-                />
-                <circle
-                  cx={x(hp.t)}
-                  cy={y(hp.v)}
-                  r={4}
-                  className="fill-ink stroke-plinth"
-                  strokeWidth={2}
-                />
-              </g>
-            )}
+            {candles.map((candle, index) => {
+              const center = candleX(candle.t);
+              const flat = candle.close === candle.open;
+              const color = flat ? "var(--color-slate)" : candle.close > candle.open ? "var(--color-up)" : "var(--color-down)";
+              const latest = index === candles.length - 1;
+              return (
+                <g key={candle.t} data-candle="" data-direction={flat ? "flat" : candle.close > candle.open ? "up" : "down"}
+                  className={latest && ping != null ? "cdx-candles__new" : undefined}
+                  style={{ color, opacity: selected && selected.t !== candle.t ? .55 : 1 }}>
+                  <line x1={center} x2={center} y1={y(candle.high)} y2={y(candle.low)}
+                    stroke="currentColor" strokeWidth={1.3} />
+                  {flat ? <line x1={center - bodyWidth / 2} x2={center + bodyWidth / 2} y1={y(candle.open)} y2={y(candle.open)}
+                    stroke="currentColor" strokeWidth={1.8} />
+                    : <rect x={center - bodyWidth / 2} y={Math.min(y(candle.open), y(candle.close))}
+                      width={bodyWidth} height={Math.max(1.5, Math.abs(y(candle.close) - y(candle.open)))}
+                      rx={.6} fill="currentColor" />}
+                </g>
+              );
+            })}
+            {timeTicks.map((time, index) => (
+              <text key={index} x={x(time)} y={H - 5} textAnchor={index === 0 ? "start" : index === 2 ? "end" : "middle"}
+                className="num fill-slate" fontSize={10}>{timeLabel(time)}</text>
+            ))}
+            {selected ? <line x1={candleX(selected.t)} x2={candleX(selected.t)} y1={padT} y2={H - padB}
+              className="stroke-ink" strokeWidth={1} strokeOpacity={.4} strokeDasharray="2 3" /> : null}
           </svg>
         )}
-        {hp && !few && (
-          <div
-            className="pointer-events-none absolute top-0 flex items-baseline gap-2 whitespace-nowrap rounded-row bg-ink px-2.5 py-1.5 shadow-float"
-            style={{
-              left: Math.min(Math.max(0, x(hp.t) - 56), W - 150),
-              animation: "mdx-fade 120ms var(--ease-room) both",
-            }}
-          >
-            <span className="num text-[14px] leading-none text-plinth">{chartFigure(hp.v)}{quoteNative ? ` ${quoteSymbol}` : ""}</span>
-            <span className="text-[12px] leading-none text-hairline">
-              {hover === points.length - 1 ? "Now" : timeAgo(hp.t, now)}
-            </span>
+        {selected ? (
+          <div className="cdx-candles__tooltip" aria-hidden="true">
+            <span className="cdx-candles__time">{selectedTime} UTC</span>
+            <div className="cdx-candles__values">
+              {([["O", selected.open], ["H", selected.high], ["L", selected.low], ["C", selected.close]] as const).map(([label, value]) => (
+                <span key={label}><small>{label}</small><b className="num">{chartFigure(value)}</b></span>
+              ))}
+            </div>
           </div>
-        )}
+        ) : null}
       </div>
-      {/* What the USD figures mean (P0-5). The chart above is flexible, so on desktop this line comes out of
-          the chart's height, never out of the page. */}
-      {quoteNative ? <p className="mt-1 flex-none text-[12px] leading-4 text-slate">Simulated market cap in {quoteSymbol}. No live USD conversion.</p> : MODE_COPY.usdNote ? (
-        <p className="mt-1 flex-none text-[12px] leading-4 text-slate">{MODE_COPY.usdNote}</p>
-      ) : null}
+      <p className="cdx-candles__note mt-1 flex-none text-[11px] leading-4 text-slate">
+        {candles.length ? `${intervalText} candles · UTC${isTruncated ? ` · latest ${trades.length} trades` : ""}${samples.length === 1 ? " · one observed trade" : ""}` : "Observed trades only"}
+        {quoteNative ? ` · demo ${quoteSymbol}` : MODE_COPY.usdNote ? ` · ${MODE_COPY.usdNote}` : ""}
+      </p>
+      <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">{selected ? description : ""}</span>
     </section>
   );
 }

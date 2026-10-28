@@ -363,9 +363,6 @@ function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
   return (
     <div className="mdx-caption max-lg:grid max-lg:grid-cols-[minmax(0,1fr)_auto] max-lg:items-center max-lg:gap-x-4">
       <h2 className="mdx-name mt-0 truncate">{c.name}</h2>
-      <p className="mt-2 text-[13px] text-slate max-lg:hidden">
-        {getCardDesign(c.cardTemplate).name}
-      </p>
       <dl
         className="mdx-leaders mt-4 flex flex-col gap-2 max-lg:col-start-1 max-lg:mt-1"
         style={{ minHeight: `${rows * 30 - 8}px` }}
@@ -668,7 +665,7 @@ function Home() {
   }, [count]);
   const hint = hintOn !== null && hintOn === target?.id;
 
-  const trending = data.trending.slice(0, 5);
+  const trending = data.trending.slice(0, 3);
   // What the order means (the Worker ranks by 24h volume, then by the latest trade): on a quiet day every coin has
   // zero volume and the list is simply the most recently traded.
   const trendingBasis = trending.some((c) => (c.volume24h ?? 0) > 0)
@@ -736,31 +733,28 @@ function Home() {
   return (
     <div
       data-ambient-paused={still || undefined}
-      className="mdx-page mdx-home grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_calc(var(--aside)_-_var(--main-pad))] lg:gap-5 lg:max-xl:[--aside:300px] xl:[--aside:340px] wide:[--aside:360px] fit:h-full fit:grid-rows-[minmax(0,1fr)]"
+      className="mdx-page mdx-home cdx-home grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_calc(var(--aside)_-_var(--main-pad))] lg:gap-5 lg:max-xl:[--aside:300px] xl:[--aside:340px] wide:[--aside:360px] fit:h-full fit:grid-rows-[minmax(0,1fr)]"
     >
       {/* ------------------------------------------------ stage (wall) */}
       <section className="relative isolate flex min-w-0 flex-col fit:min-h-0">
         {/* The vitrine's light, bokeh and dust behind the whole stage (the beam falls from the top edge). */}
         <Vitrine hold={!playing} onLive={setAmbientLive} />
         {/* Headline block: Home's header. */}
-        <div className="flex-none">
+        <div className="cdx-home__intro flex-none">
           {/* "card." wears a deep holo ink and catches a white sheen on load (and every 9 s at full motion). */}
           <h1 className="mdx-display mdx-home-arrival mdx-home-arrival--title">
             Every coin is a <span className={cx("mdx-holo-ink", still && "is-paused")}>card.</span>
           </h1>
           {/* What is real first (P0-5), then why anyone bids (P1-27). On the devnet test site the banner above
               the page already says what is real, so the hero keeps one line. */}
-          <p className="mdx-home-arrival mdx-home-arrival--copy mt-3 max-w-[60ch] text-[15px] leading-[1.5] text-slate">
+          <p className="cdx-home__copy mdx-home-arrival mdx-home-arrival--copy">
             <span className="sm:block">
               {!IS_SIM && CARD_BIDDING_SUSPENDED
                 ? "Choose one premium design for your token. Keep it from day one."
                 : WORDS.heroBid}
             </span>
           </p>
-          <HeroActions
-            className="mdx-home-arrival mdx-home-arrival--actions mt-5 max-lg:hidden"
-            guide={openGuide}
-          />
+          <ButtonLink to="/launch" className="cdx-home__launch">Create a card</ButtonLink>
         </div>
 
         {/* The featured cards (P1-21): a carousel of one slide at a time that turns to the next coin by itself,
@@ -792,12 +786,12 @@ function Home() {
             role="group"
             aria-roledescription="slide"
             aria-label={lot.count ? `${lot.index + 1} of ${lot.count}` : "No cards yet"}
-            className="relative mt-4 lg:mt-8 fit:mt-10 fit:min-h-0 fit:flex-1 fit:[container-type:size]"
+            className="cdx-home__display relative fit:min-h-0 fit:flex-1 fit:[container-type:size]"
           >
             {/* Phones: reserve room for the funding notice, sticky header, ticker, headline, caption and the
                 full Pause/stepper controls above the tab bar. Short phones retain a readable 190px card and
                 natural scrolling. This overrides alive.css's older header-only height allowance. */}
-            <div className="mdx-lot relative flex flex-col items-center max-lg:[--W:min(260px,calc(100vw_-_32px),max(190px,calc((100dvh_-_550px)/1.567)))]! fit:h-full fit:flex-row fit:items-end fit:gap-9">
+            <div className="mdx-lot cdx-home__lot relative flex flex-col items-center fit:h-full">
               {/* Desktop chevrons stay at the edges. Phones keep the entire card clear for direct rotation,
                   with navigation and Pause in a separate row below the caption. */}
               <div className="mdx-tt relative flex-none">
@@ -857,36 +851,12 @@ function Home() {
                     <CardBack depth="hand" />
                   </div>
                 )}
-                {/* The permission button lives outside the card link; mobile places it in stable flow below. */}
-                {shown && target && !hint ? (
-                  <GyroChip className="mdx-tt__chip max-lg:hidden" />
-                ) : null}
-                {hint && mounted ? (
-                  <span aria-hidden className="mdx-tt__hint mdx-chip max-lg:hidden">
-                    Drag the card to rotate
-                  </span>
-                ) : null}
-                {lot.count > 1 ? (
-                  <>
-                    <ChevronButton
-                      dir="left"
-                      label="Previous featured card"
-                      onClick={() => lot.step((lot.index - 1 + lot.count) % lot.count)}
-                      className="absolute -left-[22px] top-[calc(var(--W)*44/63)] z-10 -translate-y-1/2 bg-sheet shadow-raise max-lg:hidden"
-                    />
-                    <ChevronButton
-                      dir="right"
-                      label="Next featured card"
-                      onClick={() => lot.step((lot.index + 1) % lot.count)}
-                      className="absolute -right-[22px] top-[calc(var(--W)*44/63)] z-10 -translate-y-1/2 bg-sheet shadow-raise max-lg:hidden"
-                    />
-                  </>
-                ) : null}
+
               </div>
               {/* The caption column. The caption is not keyed on the coin: it fades out and in around the swap by
                   class, so "View coin" stays the same element and keeps focus (P1-21). Its figures are keyed inside
                   LotCaption. The dots and Pause sit right under it (under the column at fit). */}
-              <div className="mt-2 w-[360px] max-w-full lg:mt-4 lg:w-[260px] fit:mt-0 fit:w-[240px] fit:flex-none">
+              <div className="cdx-home__caption">
                 <div className={captionMotion}>
                   {caption ? (
                     <LotCaption coin={caption} rows={captionRows} />
@@ -898,10 +868,9 @@ function Home() {
                     </Caption>
                   )}
                 </div>
-                {stepper("mt-5 hidden fit:flex", "start")}
               </div>
               {shown && target ? (
-                <div className="mdx-tt__touchtools lg:hidden">
+                <div className="cdx-home__touchtools">
                   <p className="text-center text-[12px] leading-4 text-slate">
                     Drag the card to rotate
                   </p>
@@ -909,13 +878,13 @@ function Home() {
                 </div>
               ) : null}
               {lot.count > 1 ? (
-                <div className="mdx-tt__phonecontrols lg:hidden">
+                <div className="cdx-home__controls">
                   <ChevronButton
                     dir="left"
                     label="Previous featured card"
                     onClick={() => lot.step((lot.index - 1 + lot.count) % lot.count)}
                   />
-                  {stepper("mdx-tt__phonestepper", "center")}
+                  {stepper("cdx-home__stepper", "center")}
                   <ChevronButton
                     dir="right"
                     label="Next featured card"
@@ -923,15 +892,11 @@ function Home() {
                   />
                 </div>
               ) : null}
-              {stepper(
-                "mdx-tt__dots relative z-[2] mt-2 hidden w-[260px] max-w-full lg:flex fit:hidden",
-                "center",
-              )}
+
             </div>
           </div>
         </div>
         {/* Phones: Launch and Explore under the featured card (the first screen keeps the card and its caption). */}
-        <HeroActions className="mt-5 justify-center lg:hidden" />
       </section>
 
       {/* ------------------------------------------------ aside (plinth)
@@ -940,7 +905,7 @@ function Home() {
           "Trending" keeps its y either way. Like the Market, Levels and Coin asides. */}
       <aside
         aria-label="Trending and activity"
-        className="mdx-plinth mdx-aside flex min-w-0 flex-col gap-6 lg:pt-[calc(2rem_-_var(--gutter))] short:gap-5 short:pt-6 fit:min-h-0 fit:overflow-hidden"
+        className="cdx-home__aside mdx-plinth mdx-aside flex min-w-0 flex-col gap-6 lg:pt-[calc(2rem_-_var(--gutter))] short:gap-5 short:pt-6 fit:min-h-0 fit:overflow-hidden"
       >
         <section className="flex-none">
           <SectionHead title="Trending" right={<TextLink to="/discover">See all</TextLink>} />
@@ -962,7 +927,9 @@ function Home() {
           )}
         </section>
 
-        <section className="flex min-h-0 flex-1 flex-col">
+        <details className="cdx-home__activity">
+          <summary>Recent activity</summary>
+          <div className="flex min-h-0 flex-1 flex-col">
           {/* "Activity", not "Live activity": in test mode most rows are demo bots (P0-6, decision C7), and the
               line under the heading says so. FitList measures the space left, so it shows one row fewer. */}
           <SectionHead
@@ -998,7 +965,8 @@ function Home() {
           ) : (
             <EmptyLine>No activity yet.</EmptyLine>
           )}
-        </section>
+          </div>
+        </details>
       </aside>
     </div>
   );

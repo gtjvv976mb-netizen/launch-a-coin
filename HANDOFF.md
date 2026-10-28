@@ -2,9 +2,19 @@
 
 Public name is **Launch a Card** and public origin is **https://launchacard.fun** (owner-selected). Internal project folder `carddex`, asset filenames, CSS and database/session identifiers are retained for recoverability. MintDex is an independent project and must not be changed or reused.
 
+## Latest card-first simplification
+
+The owner requested less clutter, smaller fields and stronger card emphasis. The compact Launch is implemented (33/67 details/card desktop; single prominent phone card with Inspect, no miniature duplicate). Fields are40px desktop/44px phone; optional description/social/initial-buy/transaction settings are disclosed. Existing pair confirmation, immutable fields, paid-transaction acceptance, review, exact signing and recovery logic remain. Mainnet stays disabled without public setup.
+
+Global UI now has a narrower176px charcoal rail, quiet engraved paper, thin panels, one featured-card caption/navigation row, disclosed Home activity and no global ticker/RoyalMotion decoration. Full card motion and both-face shimmer remain. Design thumbnails are124px art previews rather than39px settings icons, selected designs are larger, Limited filter links correctly show20designs, and phone clipping/contrast/gallery-overlap defects are fixed. Phones default to Card on coin pages; desktop shows a larger complete cased object.
+
+Charts are actual-observation OHLC candlesticks with quote-native units, UTC/time ranges, pointer/touch/keyboard inspection and honest empty/sparse/truncated history. No fake wicks, volume or interpolated observations. A new shared finalized-bank check fixes stale account absence during expired token/NFT replacement, using getEpochInfo height+slot and minContextSlot-bound account lookup. Regression covers both assets.
+
+Latest checks:147app tests/8,452assertions and24adapter tests/421assertions pass, as do app/adapter TypeScript, the source-guarded client/SSR build, Impeccable detector and Worker dry-run. Launch QA covers1440/1280×720/768/390/320; chart QA coversTSLAX+DOGE at1440/390/320 and all ranges; other route/phone/card-case checks pass with no overflow or runtime errors. Actual physical gyro sensors, real wallet signatures and broadcasts remain untested. No funds, remote resources, deployment or paid image generation occurred. See reports/launch-a-card-card-first-2026-10-28.md and companion compact-launch/candle reports. Preview remains127.0.0.1:5310.
+
 ## Current implementation
 
-Default `/launch` is the real creator-wallet flow; `?mode=demo` explicitly selects the test flow. Details remain left/full canonical card right, with a phone miniature and usable 3D inspector even after immutable launch review. No automatic card evolution, NFT sales, bids, auctions or royalties. Existing rounded 3D cards, both-face shimmer and full-motion default remain.
+Default `/launch` is the real creator-wallet flow; `?mode=demo` explicitly selects the test flow. Details remain left/full canonical card right, with one prominent phone card and usable 3D inspector even after immutable launch review. No automatic card evolution, NFT sales, bids, auctions or royalties. Existing rounded 3D cards, both-face shimmer and full-motion default remain.
 
 The isolated `integrations/pumpfun` official-SDK adapter is now imported only by server launch code. It prepares complete create_v2 transactions for freshly admitted native SOL or one of 15 exact custom quote assets, with optional exact initial buy, live balances/rent/fee review and transaction simulation. It independently verifies finalized token creation before a separate Metaplex Core NFT issuance. Core metadata and token/quote/design/hash binding attributes are immutable; creator owns the NFT, and no royalties plugin is added. Oversized custom-quote initial buys fail clearly rather than being dropped.
 

@@ -14,7 +14,7 @@ All functions accept an injected connection from `createMainnetConnection(rpcUrl
 - `verifyTokenLaunch(input, {connection, signature, expectedMessageSha256})` independently verifies finality, successful execution, exact Pump creation/optional buy, mint/curve owners, creator, quote and token metadata.
 - `prepareCreatorNftTransaction(input, {connection, tokenSignature, tokenMessageSha256})` requires fresh finalized token verification, then prepares one Core asset owned by the creator. Creation and permanent metadata authority removal are atomic. Its sole plugin is immutable binding Attributes; there is no Royalties plugin or collection. A matching existing asset returns `already-created` instead.
 - `verifyCreatorNft` and `recoverCreatorLaunch` verify the existing Core account even without a known NFT signature. Recovery distinguishes token pending, token created/NFT pending and complete.
-- `assertNftMintReplaceable` / `assertTokenMintReplaceable` require finalized expiry and an absent old mint. The server must also atomically compare the checked intent and complete prepared-plan set after RPC verification.
+- `assertNftMintReplaceable` / `assertTokenMintReplaceable` require finalized expiry and an absent old mint. The expiry height and slot come from one finalized epoch bank; the subsequent absence read must meet that minimum context slot. The server must also atomically compare the checked intent and complete prepared-plan set after RPC verification.
 
 `LiveLaunchInput` extends the base creator/mint/name/symbol/metadata/quote/card input with `nftMint`, optional `nftName`, initial-buy atoms, slippage, and required live commitments `renderedCardSha256` / `nftMetadataSha256`. Reviewed source-art hashes are checked against all 96 approved WebPs.
 
@@ -30,7 +30,7 @@ bun test tests
 bun run typecheck
 ```
 
-**23 tests / 415 assertions and TypeScript pass.** Checks cover all 16 quote identities, all 48 designs, all 96 source hashes, positional accounts, live buy inputs/minimums, simulation and packet failures, immutable Core state, signatures, retry uncertainty, expiry and separate-stage recovery. Synthetic signing/relay tests use a fake blockhash and mock-only RPC. Actual SDK plans pass the app’s independent browser verifier for all 16 quotes and Core issuance.
+**24 tests / 421 assertions and TypeScript pass.** Checks cover all 16 quote identities, all 48 designs, all 96 source hashes, positional accounts, live buy inputs/minimums, simulation and packet failures, immutable Core state, signatures, retry uncertainty, context-bound expiry/absence and separate-stage recovery. Synthetic signing/relay tests use a fake blockhash and mock-only RPC. Actual SDK plans pass the app’s independent browser verifier for all 16 quotes and Core issuance.
 
 Separate **unsigned mainnet program simulations** passed at slots 462361248 (TSLAX token create, 1011 bytes) and 462361249 (Core create/authority removal, 885 bytes). Deserialized Core state confirmed creator ownership, both immutable authorities, six binding attributes and no Royalties plugin. These were independent simulations: no token/NFT was issued, no wallet prompt was used and nothing was sent. Evidence is retained under `output/research/pump-custom-pairs-2026-10-28/`; `scripts/readonly-simulation.ts` performs only public reads and unsigned simulations.
 

@@ -38,9 +38,9 @@ import type { CoinDetail } from "../../lib/mintdex/types";
 /** Phone sections (P1-5): one at a time under the hero, kept in ?tab= so a notification can link to the card. */
 type CoinTab = "trade" | "card" | "chart" | "trades";
 const TAB_OPTIONS: Array<{ value: CoinTab; label: string }> = [
-  { value: "trade", label: "Trade" },
   { value: "card", label: "Card" },
   { value: "chart", label: "Chart" },
+  { value: "trade", label: "Trade" },
   { value: "trades", label: "Trades" },
 ];
 
@@ -127,12 +127,12 @@ function CoinView() {
   const initial = Route.useLoaderData();
   const { id } = Route.useParams();
   const { minted, tab: tabParam } = Route.useSearch();
-  const tab: CoinTab = tabParam ?? "trade";
+  const tab: CoinTab = tabParam ?? "card";
   const navigate = Route.useNavigate();
   const heroRef = useRef<HTMLElement>(null);
   const setTab = (next: CoinTab) => {
     void navigate({
-      search: (p) => ({ ...p, tab: next === "trade" ? undefined : next }),
+      search: (p) => ({ ...p, tab: next === "card" ? undefined : next }),
       replace: true,
       resetScroll: false,
     });
@@ -217,8 +217,8 @@ function CoinView() {
           A small flexible spacer aligns it with the stats on taller screens. */}
       <div className="contents xl:flex xl:min-h-0 xl:flex-col xl:[grid-area:1/1/2/2]">
         <div aria-hidden className="mdx-case-spacer hidden xl:block xl:min-h-0 xl:flex-[1_1_0%] xl:max-h-[72px]" />
-        <div className="order-1 flex flex-col max-lg:hidden lg:order-none lg:self-end lg:[grid-area:1/1/3/2] xl:min-h-0 xl:max-h-[calc(264px*173.683/112+65px)] xl:flex-[1000_1_0%] xl:self-stretch wide:max-h-[calc(300px*173.683/112+65px)] xwide:max-h-[calc(340px*173.683/112+65px)]">
-          <div className="relative flex justify-center pt-6 lg:pt-0 xl:min-h-0 xl:flex-1 xl:items-end xl:justify-start xl:[container-type:size]">
+        <div className="cdx-coin-object order-1 flex flex-col max-lg:hidden lg:order-none lg:self-end lg:[grid-area:1/1/3/2] xl:min-h-0 xl:max-h-[calc(264px*173.683/112+65px)] xl:flex-[1000_1_0%] xl:self-stretch wide:max-h-[calc(300px*173.683/112+65px)] xwide:max-h-[calc(340px*173.683/112+65px)]">
+          <div className="cdx-coin-objectstage relative flex justify-center pt-6 lg:pt-0 xl:min-h-0 xl:flex-1 xl:items-end xl:justify-start xl:[container-type:size]">
             <CoinObject coin={coin} latestTradeId={latestTradeId} />
           </div>
           <Ledge />
@@ -246,6 +246,7 @@ function CoinView() {
         <div className="cdx-coin-market contents lg:flex lg:flex-col lg:rounded-panel lg:bg-plinth lg:p-4 lg:shadow-ring lg:[grid-area:4/1/5/3] xl:min-h-0 xl:flex-1">
           <McapChart
             trades={trades}
+            tradeCount={coin.trades}
             currentUsd={coin.mcapUsd}
             currentQuote={coin.mcapQuote}
             quoteAssetKey={coin.quoteAssetKey}

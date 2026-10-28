@@ -45,7 +45,7 @@ export type LiveConnection = Pick<Connection,
   "getGenesisHash" | "getMultipleAccountsInfoAndContext" | "getAccountInfoAndContext" |
   "getAccountInfo" | "getLatestBlockhash" | "getRecentPrioritizationFees" |
   "getFeeForMessage" | "simulateTransaction" | "getTransaction" |
-  "getSignatureStatuses" | "getBlockHeight" | "sendRawTransaction"
+  "getSignatureStatuses" | "getBlockHeight" | "getEpochInfo" | "sendRawTransaction"
 >;
 export type LiveOptions = { connection: LiveConnection; now?: () => Date };
 export type VerifyOptions = { connection: LiveConnection; signature?: string; expectedMessageSha256?: string };
@@ -394,24 +394,29 @@ export async function recoverCreatorLaunch(input: LiveLaunchInput, options: Live
   return nft.status === "verified" ? { status: "complete" as const, token, nft } : { status: "token-created-nft-pending" as const, token, nft };
 }
 
+async function expiredMintSnapshot(mint: PublicKey, options: LiveOptions & { lastValidBlockHeight?: number }, label: "NFT" | "token") {
+  await assertMainnet(options.connection);
+  // Epoch info binds finalized block height to its bank slot. The absence read
+  // must use that slot or newer, including when a load-balanced RPC node lags.
+  const epoch = await options.connection.getEpochInfo("finalized");
+  const height = epoch.blockHeight;
+  if (typeof height !== "number" || !Number.isSafeInteger(height) || height < 0 || !Number.isSafeInteger(epoch.absoluteSlot) || epoch.absoluteSlot <= 0) throw new Error("RPC did not return a valid finalized expiry context");
+  if (options.lastValidBlockHeight !== undefined && (!Number.isSafeInteger(options.lastValidBlockHeight) || options.lastValidBlockHeight < 0 || height <= options.lastValidBlockHeight)) throw new Error(`The previous ${label} transaction can still land; wait for its finalized block-height expiry`);
+  const account = await options.connection.getAccountInfoAndContext(mint, { commitment: "finalized", minContextSlot: epoch.absoluteSlot });
+  if (!Number.isSafeInteger(account.context.slot) || account.context.slot < epoch.absoluteSlot) throw new Error("RPC account absence context predates the finalized expiry check");
+  return { height, account };
+}
+
 export async function assertNftMintReplaceable(input: LiveLaunchInput, options: LiveOptions & { lastValidBlockHeight?: number }) {
-  identity(input); await assertMainnet(options.connection);
-  const [height, account] = await Promise.all([
-    options.connection.getBlockHeight("finalized"),
-    options.connection.getAccountInfoAndContext(new PublicKey(input.nftMint), "finalized"),
-  ]);
-  if (options.lastValidBlockHeight !== undefined && (!Number.isSafeInteger(options.lastValidBlockHeight) || height <= options.lastValidBlockHeight)) throw new Error("The previous NFT transaction can still land; wait for its finalized block-height expiry");
+  identity(input);
+  const { height, account } = await expiredMintSnapshot(new PublicKey(input.nftMint), options, "NFT");
   if (account.value) throw new Error("The previous NFT address already exists; recover and verify it instead of minting another");
   return { replaceable: true as const, finalizedBlockHeight: height, slot: account.context.slot, previousNftMint: input.nftMint };
 }
 
 export async function assertTokenMintReplaceable(input: LiveLaunchInput, options: LiveOptions & { lastValidBlockHeight?: number }) {
-  const id = identity(input); await assertMainnet(options.connection);
-  const [height, account] = await Promise.all([
-    options.connection.getBlockHeight("finalized"),
-    options.connection.getAccountInfoAndContext(id.mint, "finalized"),
-  ]);
-  if (options.lastValidBlockHeight !== undefined && (!Number.isSafeInteger(options.lastValidBlockHeight) || height <= options.lastValidBlockHeight)) throw new Error("The previous token transaction can still land; wait for its finalized block-height expiry");
+  const id = identity(input);
+  const { height, account } = await expiredMintSnapshot(id.mint, options, "token");
   if (account.value) throw new Error("The token mint already exists; recover its launch instead of creating another");
   return { replaceable: true as const, finalizedBlockHeight: height, slot: account.context.slot, previousTokenMint: input.mint };
 }

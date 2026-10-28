@@ -65,12 +65,10 @@ function Discover() {
     <PageFrame className="cdx-discover">
       <header className="cdx-archive__head">
         <div>
-          <p className="cdx-eyebrow">Tokens with a collector’s identity</p>
-          <h1 className="mdx-h1">Discover the collection.</h1>
-          <p className="cdx-muted">Trade the token. Collect its story.</p>
+          <h1 className="mdx-h1">The collection.</h1>
         </div>
         <Link to="/launch" className="mdx-link min-h-11 inline-flex items-center">
-          Launch your token ↗
+          Create a card
         </Link>
       </header>
       <div className="cdx-discover__tools">
@@ -131,7 +129,6 @@ function Discover() {
                 <Change v={c.change24h} />
               </div>
             </Link>
-            <p>{getCardDesign(c.cardTemplate).name}</p>
           </article>
         ))}
       </div>

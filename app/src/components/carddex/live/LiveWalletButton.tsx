@@ -3,13 +3,13 @@ import { Button, Modal } from "../../mintdex/ui";
 import { connectLiveWallet, disconnectLiveWallet, useLiveWallet } from "./wallet";
 import "../../../carddex-live.css";
 
-export function LiveWalletButton({ compact = false, buttonRef }: { compact?: boolean; buttonRef?: Ref<HTMLButtonElement> }) {
+export function LiveWalletButton({ compact = false, quiet = false, buttonRef }: { compact?: boolean; quiet?: boolean; buttonRef?: Ref<HTMLButtonElement> }) {
   const wallet = useLiveWallet();
   const [open, setOpen] = useState(false), [error, setError] = useState("");
   const address = wallet.address;
   const short = address ? `${address.slice(0, 4)}…${address.slice(-4)}` : null;
   return <>
-    <Button ref={buttonRef} size={compact ? "sm" : "md"} block={!compact} onClick={() => { setError(""); setOpen(true); }} aria-haspopup="dialog" aria-label={address ? `Mainnet wallet ${short}` : "Connect mainnet wallet"}>
+    <Button ref={buttonRef} variant={quiet ? "outline" : "primary"} size={compact ? "sm" : "md"} block={!compact} onClick={() => { setError(""); setOpen(true); }} aria-haspopup="dialog" aria-label={address ? `Mainnet wallet ${short}` : "Connect mainnet wallet"}>
       {address ? short : compact ? "Connect wallet" : "Connect mainnet wallet"}
     </Button>
     <Modal open={open} onOpenChange={setOpen} title={address ? "Your mainnet wallet" : "Connect a Solana wallet"} description="Connect the creator wallet. This does not authorize a payment or transaction.">

@@ -292,9 +292,9 @@ export function LiveLaunchPanel({ draft, card, pairPending, onInvalid, onLockedC
   const currentTitle = intent?.status === "complete" ? "Your token and card are on mainnet" : intent?.status === "nft_pending" ? "Token verified. Your card is next." : intent?.status === "token_pending" ? "Token transaction submitted" : "Create through your wallet";
   const reviewIntent = intent;
   return <section className="cdx-live-panel" aria-label="Mainnet wallet launch">
-    <h2>{currentTitle}</h2>
-    {!wallet.address ? <LiveWalletButton buttonRef={connectButton} /> : <p className="cdx-live-address">Creator wallet · {brief(wallet.address)}{!wallet.mainnet ? " · Switch to mainnet" : ""}</p>}
-    {readiness.isPending ? <p role="status">Checking mainnet readiness…</p> : readiness.isError ? <div className="cdx-live-panel__status"><p>Launch readiness could not be checked.</p><button type="button" className="mdx-link" onClick={() => void readiness.refetch()}>Check again</button></div> : !available ? <div className="cdx-live-panel__status" role="status"><strong>Mainnet setup required</strong>{readiness.data?.blockers.map(blocker => <p key={blocker}>{blocker}</p>)}<p>No transaction or charge can be requested until these checks pass.</p><button type="button" className="mdx-link" onClick={() => void readiness.refetch()}>Check again</button></div> : null}
+    {intent ? <h2>{currentTitle}</h2> : null}
+    {!wallet.address ? <LiveWalletButton buttonRef={connectButton} quiet /> : <p className="cdx-live-address">Creator wallet · {brief(wallet.address)}{!wallet.mainnet ? " · Switch to mainnet" : ""}</p>}
+    {readiness.isPending ? <p role="status">Checking mainnet readiness…</p> : readiness.isError ? <div className="cdx-live-panel__status"><p>Launch readiness could not be checked.</p><button type="button" className="mdx-link" onClick={() => void readiness.refetch()}>Check again</button></div> : !available ? <details className="cdx-live-readiness"><summary>Mainnet setup required <span aria-hidden>⌄</span></summary><div>{readiness.data?.blockers.map(blocker => <p key={blocker}>{blocker}</p>)}<p>No transaction or charge is requested while setup is incomplete.</p><button type="button" className="mdx-link" onClick={() => void readiness.refetch()}>Check again</button></div></details> : null}
     {intent ? <>
       <dl className="cdx-live-review"><div><dt>Token mint</dt><dd><a href={`https://solscan.io/token/${intent.tokenMint}`} target="_blank" rel="noreferrer">{brief(intent.tokenMint)} ↗</a></dd></div><div><dt>Quote asset</dt><dd>{selected.symbol}</dd></div><div><dt>Permanent finish</dt><dd>{getCardDesign(intent.cardTemplate).name}</dd></div></dl>
       <p>These launch details are locked to this saved request.</p>
@@ -302,9 +302,12 @@ export function LiveLaunchPanel({ draft, card, pairPending, onInvalid, onLockedC
       {intent.status === "complete" ? <div className="cdx-live-links"><a href={`https://pump.fun/coin/${intent.tokenMint}`} target="_blank" rel="noreferrer">Open token on pump.fun ↗</a><a href={`https://solscan.io/account/${intent.nftMint}`} target="_blank" rel="noreferrer">View card NFT ↗</a><a href={intent.nftMetadataUri} target="_blank" rel="noreferrer">Card metadata ↗</a></div> : null}
       {intent.tokenSignature ? <div className="cdx-live-links"><a href={`https://solscan.io/tx/${intent.tokenSignature}`} target="_blank" rel="noreferrer">Token transaction ↗</a>{intent.nftSignature ? <a href={`https://solscan.io/tx/${intent.nftSignature}`} target="_blank" rel="noreferrer">Card transaction ↗</a> : null}</div> : null}
     </> : <>
-      <p>Token creation and card NFT issuance use separate mainnet transactions. Exact costs appear before each wallet approval. The selected quote funds only your optional initial buy.</p>
-      <label className="cdx-live-check"><input ref={termsRef} type="checkbox" checked={terms} onChange={e => setTerms(e.target.checked)} /><span>I have rights to this artwork and understand these are paid mainnet transactions. A stock quote does not make my creator token company shares.</span></label>
-      <label className="cdx-live-check"><span>Initial-buy slippage</span><select className="mdx-input" value={slippageBps} onChange={e => setSlippageBps(Number(e.target.value))}><option value={50}>0.5%</option><option value={100}>1%</option><option value={300}>3%</option></select></label>
+      <label className="cdx-live-check"><input ref={termsRef} type="checkbox" checked={terms} onChange={e => setTerms(e.target.checked)} /><span>I have artwork rights and accept paid mainnet transactions.</span></label>
+      <details className="cdx-live-options"><summary>Transaction details <span aria-hidden>+</span></summary><div>
+        <p>Token creation and card issuance are separate paid mainnet transactions. Exact costs appear before each wallet approval. Your selected quote funds only the optional initial buy.</p>
+        {selected.kind === "stock" ? <p>A tokenized-stock quote does not make your creator token company shares.</p> : null}
+        <label className="cdx-live-check cdx-live-slippage"><span>Initial-buy slippage</span><select className="mdx-input" value={slippageBps} onChange={e => setSlippageBps(Number(e.target.value))}><option value={50}>0.5%</option><option value={100}>1%</option><option value={300}>3%</option></select></label>
+      </div></details>
     </>}
     {pairPending ? <p role="status">Confirm or cancel the quote change before preparing a transaction.</p> : null}
     {busy ? <p role="status" className="cdx-live-panel__status">{BUSY_COPY[busy]}</p> : null}

@@ -35,12 +35,12 @@ export const Route = createFileRoute("/levels")({
   component: Designs,
 });
 const GROUPS = [
-  { key: "all", name: "All designs" },
-  { key: "classic", name: "Trading card classics" },
+  { key: "all", name: "All" },
+  { key: "classic", name: "Classics" },
   { key: "premium", name: "Premium" },
-  { key: "stocks", name: "Tokenized stock pairs" },
-  { key: "memes", name: "Memecoin pairs" },
-  { key: "limited", name: "Limited editions" },
+  { key: "stocks", name: "Stock pairs" },
+  { key: "memes", name: "Meme pairs" },
+  { key: "limited", name: "Limited" },
 ] as const;
 
 function Designs() {
@@ -48,7 +48,9 @@ function Designs() {
   const navigate = useNavigate({ from: "/levels" });
   const key = search.design ?? search.icon ?? search.edition;
   const design = getCardDesign(isCardDesignKey(key) ? key : DEFAULT_CARD_DESIGN);
-  const [category, setCategory] = useState(search.collection === "stocks" || search.collection === "memes" ? search.collection : "all");
+  const collection = search.collection === "icons" ? "limited" : search.collection;
+  const category = GROUPS.some(group => group.key === collection) ? collection! : "all";
+  const setCategory = (collection: string) => void navigate({search: {...search, collection: collection === "all" ? undefined : collection}, replace: true, resetScroll: false});
   const [query, setQuery] = useState("");
   const requestedQuote = isPairAssetKey(search.quote) ? getPairAsset(search.quote) : null;
   const quote = boundQuoteForDesign(design.key) ?? (requestedQuote && allowedQuotesForDesign(design.key).some(a=>a.key===requestedQuote.key) ? requestedQuote : defaultQuoteForDesign(design.key));
@@ -81,7 +83,7 @@ function Designs() {
   };
   const pick = (d: CardDesign) => {
     const nextQuote = boundQuoteForDesign(d.key) ?? quote;
-    void navigate({ search: { design: d.key, quote: nextQuote.key }, replace: true, resetScroll: false }).then(() => {
+    void navigate({ search: { ...search, design: d.key, quote: nextQuote.key }, replace: true, resetScroll: false }).then(() => {
       if (window.innerWidth < 1024)
         document.querySelector(".cdx-archive__vitrine")?.scrollIntoView({
           block: "start",
@@ -95,16 +97,15 @@ function Designs() {
     <PageFrame className="cdx-archive">
       <header className="cdx-archive__head">
         <div>
-          <p className="cdx-eyebrow">The design archive / {CARD_DESIGNS.length} permanent prints</p>
-          <h1 className="mdx-h1">Choose your card design.</h1>
-          <p className="cdx-muted">Your token. Your artwork. One design from day one.</p>
+          <h1 className="mdx-h1">Find your signature.</h1>
+          <p className="cdx-muted">{CARD_DESIGNS.length} designs. Your artwork takes the centre.</p>
         </div>
         <Link
           to="/launch"
           search={{ design: design.key, quote: quote.key }}
           className="mdx-btn mdx-btn--primary cdx-use-design"
         >
-          Launch with this design ↗
+          Use this design
         </Link>
       </header>
       <div className="cdx-archive__body">
@@ -118,23 +119,10 @@ function Designs() {
             <HeroTurntable card={card} />
           </div>
           <div className="cdx-archive__caption">
-            <p className="cdx-eyebrow">
-              {design.category === "limited"
-                ? "Limited edition design"
-                : design.category === "classic"
-                  ? "Trading card classic"
-                  : design.category === "stocks"
-                    ? "Tokenized-stock paired finish"
-                    : "Premium collection"}
-            </p>
             <h2>{design.name}</h2>
-            <p>{design.description}</p>
             <PairBadge quoteAssetKey={quote.key} ticker="GLORB" />
-            <Link to="/launch" search={{ design: design.key, quote: quote.key }} className="cdx-text-action mt-6">
-              Make this your design ↗
-            </Link>
             <span className="cdx-demo-note">
-              Sample token · drag the card to inspect both sides
+              Sample card · drag to inspect
             </span>
           </div>
         </section>
@@ -151,7 +139,7 @@ function Designs() {
               onChange={(e) => setQuery(e.target.value)}
               type="search"
             />
-            <QuoteAssetPicker value={quote.key} designKey={design.key} ticker="GLORB" compact onChange={(nextQuote,nextDesign)=>void navigate({ search:{design:nextDesign,quote:nextQuote},replace:true,resetScroll:false })} />
+            <QuoteAssetPicker value={quote.key} designKey={design.key} ticker="GLORB" compact onChange={(nextQuote,nextDesign)=>void navigate({ search:{...search,design:nextDesign,quote:nextQuote},replace:true,resetScroll:false })} />
             <div className="cdx-filter" aria-label="Filter designs">
               {GROUPS.map((g) => (
                 <button
@@ -192,7 +180,7 @@ function Designs() {
                   <MintCard
                     card={{ ...card, cardTemplate: d.key, level: d.materialLevel, quoteAssetKey: (boundQuoteForDesign(d.key) ?? quote).key, quoteMint: (boundQuoteForDesign(d.key) ?? quote).mint, ...quoteMetrics(initialQuoteReserves((boundQuoteForDesign(d.key) ?? quote).key), (boundQuoteForDesign(d.key) ?? quote).key) }}
                     depth="flat"
-                    sizes="40px"
+                    sizes="(max-width: 1023px) 140px, 120px"
                   />
                 </div>
                 <span className="cdx-design-row__text">
@@ -215,7 +203,7 @@ function Designs() {
             )}
           </div>
           <p className="cdx-library__foot">
-            Paired finishes use their supported pump.fun quote mint. Tokenized-stock quotes are distinct from your creator token and NFT. All launches here are local simulations.
+            Stock pairs use tokenized quote assets; they do not grant equity.
           </p>
         </section>
       </div>

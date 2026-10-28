@@ -1,0 +1,147 @@
+/* The object leads. Collector paper and controls recede around the cards. */
+.cdx-app .mdx-rail { width:176px; padding:20px 14px 16px; border-right:1px solid #76623e; background:#28231d; box-shadow:none; }
+.cdx-app .mdx-rail .mdx-tab { min-height:46px; font-size:13px; }
+.cdx-app .mdx-rail .mdx-tab__tile { width:28px; height:28px; }
+.cdx-app .mdx-rail-pill { border-radius:9px; background:rgb(255 225 112 / .08); box-shadow:none; }
+.cdx-app .mdx-rail .mdx-tab__foil { opacity:.35; }
+.cdx-app .mdx-rail .mdx-input { min-height:36px; height:36px; font-size:12px; background:#40372a; color:#fff8df; border-color:#796740; }
+.cdx-app .mdx-rail .mdx-input::placeholder { color:#dfd0ac; }
+.cdx-app .mdx-card3d__chip { background:#342c20; color:#fff4d8; border-color:#9e8150; box-shadow:none; }
+.cdx-app .mdx-rail .mdx-link, .cdx-app .mdx-rail .mdx-btn { font-size:12px; }
+.cdx-app .mdx-rail .mdx-btn { padding-inline:12px; }
+.cdx-app .mdx-mhead { background:#28231d; border-bottom:1px solid #76623e; }
+.cdx-app .mdx-mobile-tabs { background:#28231d; border-top:1px solid #76623e; box-shadow:none; }
+.cdx-app [data-testid="local-demo-note"], .cdx-app [data-testid="live-launch-note"] { padding-block:3px; background:#f3e9ce; border-color:#dfd0ad; font-size:11px; line-height:18px; }
+.cdx-app .mdx-sky { background:radial-gradient(ellipse at 62% 32%, #fffdf4 0, #f6eed9 65%, #eee1bf 100%); }
+.cdx-app .mdx-sky__engraving { opacity:.16; }
+.cdx-app .mdx-sky::after { opacity:.18; }
+.cdx-app .mdx-sky__a { opacity:.25; }
+.cdx-app .mdx-sky__stars, .cdx-app .mdx-sky__floor { display:none; }
+.cdx-app .mdx-phone-tilt { background:transparent; border:0; }
+.cdx-app .mdx-phone-tilt:empty { display:none; }
+.cdx-app .mdx-h1 { font-size:clamp(26px,2.5vw,34px); line-height:1.14; letter-spacing:-.025em; }
+.cdx-app .cdx-archive__head { gap:16px; align-items:center; }
+.cdx-app .cdx-archive__head > div { min-width:0; }
+.cdx-app .cdx-archive__head h1 { margin:0; }
+.cdx-app .cdx-muted { font-size:13px; margin-top:5px; }
+.cdx-app .mdx-input { min-height:40px; padding-block:8px; background:#fffdf6; border-color:#bca985; box-shadow:none; }
+.cdx-app .mdx-btn--primary { box-shadow:0 2px 7px -4px rgb(83 57 12 / .4); }
+.cdx-app .cdx-use-design { min-height:40px; padding:9px 16px; font-size:12px; }
+.cdx-app .mdx-plinth, .cdx-app .rounded-panel.bg-plinth, .cdx-app .cdx-archive__vitrine, .cdx-app .cdx-coin-market, .cdx-app .cdx-coin-actions { border:1px solid #ded0b2; background:#fffcf2; box-shadow:none; }
+.cdx-app .cdx-hero-turntable__controls { gap:10px; padding-top:12px; }
+.cdx-app .cdx-hero-turntable__controls button { min-height:36px; border:0; border-radius:6px; background:transparent; color:#675a46; padding:5px 10px; }
+.cdx-app .cdx-hero-turntable__controls button:hover { background:rgb(139 89 21 / .07); color:#30271d; }
+
+/* One featured card, one caption, one navigation row. */
+.cdx-app .cdx-home { grid-template-columns:minmax(0,1fr) 236px; gap:32px; height:100%; min-height:0; }
+.cdx-home__intro { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; column-gap:18px; }
+.cdx-home__intro .mdx-display { font-size:clamp(28px,3.5vw,42px); line-height:1.05; letter-spacing:-.03em; }
+.cdx-home__intro .mdx-holo-ink { color:inherit; background:none; -webkit-text-fill-color:currentColor; }
+.cdx-home__copy { grid-row:2; color:var(--color-slate); font-size:13px; line-height:1.4; margin-top:7px; }
+.cdx-home__launch { grid-column:2; grid-row:1 / 3; align-self:center; font-size:13px; }
+.cdx-home__display { margin:0; }
+.cdx-app .cdx-home__lot { --W:min(480px,calc((100dvh - 235px)*.715909),calc((100vw - 600px)*.82)); flex-direction:column; align-items:center; justify-content:center; padding:8px 0 0; gap:0; }
+.cdx-home .mdx-stage { justify-content:center; }
+.cdx-home .mdx-tt { margin-bottom:0; }
+.cdx-home .mdx-vitrine__bokeh, .cdx-home .mdx-vitrine__dust { display:none; }
+.cdx-home .mdx-vitrine__beam { opacity:.25; }
+.cdx-home .mdx-ghost { opacity:.24; }
+.cdx-home__caption { flex:none; width:min(100%,480px); margin-top:18px; }
+.cdx-home__caption .mdx-caption { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:3px 16px; }
+.cdx-home__caption .mdx-name { font-size:23px; margin:0; }
+.cdx-home__caption .mdx-leaders { grid-column:1; margin-top:2px; gap:0; min-height:auto !important; }
+.cdx-home__caption .mdx-leaders dt { font-size:12px; }
+.cdx-home__caption .mdx-caption > div:last-child { grid-column:2; grid-row:1 / 3; margin:0; }
+.cdx-home__touchtools { display:flex; justify-content:center; align-items:center; gap:10px; min-height:22px; margin-top:9px; }
+.cdx-home__touchtools p { font-size:11px; }
+.cdx-home__controls { display:flex; align-items:center; justify-content:center; gap:18px; margin-top:6px; min-height:40px; }
+.cdx-home__stepper { width:auto; }
+.cdx-app .cdx-home__aside { border:0; border-left:1px solid #ded0b2; border-radius:0; background:transparent; box-shadow:none; margin:0; padding:6px 0 0 22px; gap:26px; overflow:auto; }
+.cdx-home__aside h2 { font-size:14px; }
+.cdx-home__aside .mdx-row { min-height:56px; }
+.cdx-home__activity { border-top:1px solid #ded0b2; padding-top:16px; }
+.cdx-home__activity summary { cursor:pointer; min-height:36px; font-size:13px; color:var(--color-slate); }
+.cdx-home__activity[open] > div { max-height:400px; padding-top:10px; }
+
+/* The design library displays artwork rather than rows of settings. */
+.cdx-app .cdx-archive__body { grid-template-columns:minmax(0,1.2fr) minmax(340px,.8fr); gap:28px; }
+.cdx-app .cdx-archive__vitrine { border:0; background:transparent; box-shadow:none; padding:12px 30px 8px; gap:12px; }
+.cdx-app .cdx-archive__card { width:min(440px,calc((100cqh - 142px)*.715909),calc(100cqw - 72px)); max-width:none; }
+.cdx-app .cdx-archive__caption h2 { font-size:21px; margin:0; }
+.cdx-app .cdx-archive__caption { max-width:100%; }
+.cdx-app .cdx-archive__caption .cdx-demo-note { margin-top:4px; }
+.cdx-app .cdx-stock-reference { border:0; background:transparent; padding:3px 0; margin-top:5px; }
+.cdx-app .cdx-library__tools input { height:40px; min-height:40px; }
+.cdx-app .cdx-library, .cdx-app .cdx-library__tools, .cdx-app .cdx-library .cdx-pair-picker { min-width:0; }
+.cdx-app .cdx-filter { flex-wrap:nowrap; overflow-x:auto; margin:8px 0 12px; gap:3px; scrollbar-width:thin; }
+.cdx-app .cdx-filter button { flex:none; min-height:36px; border:0; padding:6px 8px; border-radius:6px; font-size:11px; }
+.cdx-app .cdx-filter button[aria-pressed="true"] { background:#342c20; color:#fff7df; }
+.cdx-app .cdx-library__list { grid-template-columns:repeat(2,minmax(0,1fr)); grid-auto-rows:minmax(244px,max-content); gap:14px 12px; padding:6px 6px 12px; }
+.cdx-app .cdx-design-row { position:relative; flex-direction:column; align-items:center; gap:9px; padding:14px 9px 10px; border:1px solid transparent; border-radius:10px; background:transparent; box-shadow:none; }
+.cdx-app .cdx-design-row:hover { background:rgb(255 252 241 / .6); border-color:#ded0b2; }
+.cdx-app .cdx-design-row[aria-pressed="true"] { background:#eee2c5; border-color:#b69a64; box-shadow:none; }
+.cdx-app .cdx-design-row__preview { width:min(124px,82%); height:auto; aspect-ratio:63 / 88; }
+.cdx-app .cdx-design-row__text { width:100%; text-align:center; }
+.cdx-app .cdx-design-row__text strong { font-size:12px; font-weight:550; }
+.cdx-app .cdx-design-row__text small { margin-top:2px; font-size:10px; }
+.cdx-app .cdx-design-row__arrow { position:absolute; top:7px; right:9px; font-size:13px; }
+.cdx-app .cdx-library__foot { padding-top:8px; font-size:10px; }
+.cdx-app .cdx-token-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:32px 36px; padding:12px 26px 28px; }
+.cdx-app .cdx-token-cell { max-width:310px; }
+.cdx-app .cdx-token-cell__caption { padding-top:12px; }
+.cdx-app .cdx-discover__tools { gap:9px; }
+.cdx-app .cdx-discover__tools input { max-width:360px; }
+@media (min-width:1280px) {
+ .cdx-app .mdx-coin { grid-template-columns:minmax(300px,.9fr) minmax(300px,1fr) 268px; gap:20px; }
+ .cdx-app .mdx-coin .mdx-case-spacer { max-height:18px; }
+ .cdx-app .mdx-coin .cdx-coin-object { height:min(700px,calc(100dvh - 280px)); max-height:min(700px,calc(100dvh - 280px)); flex:0 1 auto; }
+ .cdx-app .mdx-coin .cdx-coin-objectstage > .hidden { width:min(100cqw,calc((100cqh - 94px)*112/173.683)); }
+ .cdx-app .mdx-coin .mdx-case__controls { flex-wrap:nowrap; gap:6px; }
+ .cdx-app .mdx-coin .mdx-case__btn { min-width:0; min-height:40px; padding:6px 9px; background:transparent; color:#675a46; border:0; box-shadow:none; font-size:12px; }
+ .cdx-app .mdx-coin .mdx-case__controls .mdx-card3d__chip { flex:none; padding:0 9px; }
+ .cdx-app .mdx-coin .mdx-input { height:40px; min-height:40px; }
+ .cdx-app .cdx-coin-actions { padding:16px; }
+}
+@media (min-width:1680px) {
+ .cdx-app .mdx-coin { grid-template-columns:minmax(340px,1fr) minmax(360px,1.2fr) 290px; }
+ .cdx-app .cdx-token-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+}
+@media (max-width:1023px) {
+ .cdx-app .mdx-input { min-height:44px; font-size:16px; }
+ .cdx-app .cdx-home { grid-template-columns:1fr; height:auto; gap:38px; }
+ .cdx-home__intro .mdx-display { font-size:30px; }
+ .cdx-home__intro { column-gap:10px; }
+ .cdx-home__launch { min-height:38px; font-size:11px; padding-inline:12px; }
+ .cdx-home__copy { font-size:12px; max-width:25ch; }
+ .cdx-app .cdx-home__lot { --W:min(300px,calc(100vw - 80px),max(220px,calc((100dvh - 310px)*.715909))); padding-top:22px; }
+ .cdx-home__display { min-height:0; }
+ .cdx-home__caption { width:min(100%,360px); margin-top:17px; }
+ .cdx-home__caption .mdx-name { font-size:22px; }
+ .cdx-app .cdx-home__aside { border:0; border-top:1px solid #ded0b2; padding:22px 0 0; margin:0; }
+ .cdx-home__activity[open] > div { max-height:none; }
+ .cdx-app .cdx-archive__body { grid-template-columns:minmax(0,1fr); gap:28px; }
+ .cdx-app .cdx-archive__vitrine { container-type:normal; padding:20px 18px 10px; gap:12px; }
+ .cdx-app .cdx-archive__card { width:min(300px,calc(100vw - 84px)); }
+ .cdx-app .cdx-archive__caption h2 { font-size:20px; }
+ .cdx-app .cdx-library__list { overflow:visible; grid-template-columns:repeat(3,minmax(0,1fr)); }
+ .cdx-app .cdx-library__tools input { height:44px; }
+ .cdx-app .cdx-filter button { min-height:44px; }
+ .cdx-app .cdx-token-grid { grid-template-columns:repeat(2,minmax(0,1fr)); overflow:visible; gap:28px; padding-inline:12px; }
+ .cdx-app .cdx-hero-turntable__controls button { min-height:44px; }
+}
+@media (max-width:560px) {
+ .cdx-app .cdx-archive__head { align-items:start; flex-wrap:nowrap; }
+ .cdx-app .cdx-archive__head > div { flex:1; }
+ .cdx-app .cdx-use-design { flex:none; width:auto; min-height:44px; padding:9px 12px; font-size:11px; }
+ .cdx-app .cdx-archive__head .mdx-h1 { font-size:27px; max-width:9ch; }
+ .cdx-app .cdx-archive__head .cdx-muted { max-width:24ch; font-size:12px; }
+ .cdx-app .cdx-library__list { grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+ .cdx-app .cdx-token-grid { grid-template-columns:1fr; gap:30px; padding:12px 26px 24px; }
+ .cdx-app .cdx-token-cell { max-width:290px; }
+ .cdx-app .cdx-home__intro .mdx-display { max-width:9ch; font-size:30px; }
+}
+@media (max-width:359px) {
+ .cdx-home__launch { font-size:10px; padding-inline:10px; }
+ .cdx-app .cdx-archive__head .mdx-h1 { font-size:24px; }
+ .cdx-app .cdx-archive__card { width:min(260px,calc(100vw - 76px)); }
+}

@@ -40,6 +40,7 @@
 @import "./meme-icons.css";
 @import "./meme-icons-studio.css";
 @import "./carddex-theme.css";
+@import "./carddex-gallery.css";
 
 @custom-variant dark (&:where([data-theme="default-dark"], [data-theme="default-dark"] *));
 

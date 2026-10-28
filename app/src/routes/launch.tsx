@@ -4,7 +4,6 @@ import {
   useCallback,
   useRef,
   useState,
-  type CSSProperties,
   type DragEvent,
   type FormEvent,
 } from "react";
@@ -14,7 +13,6 @@ import { type CardData } from "../components/mintdex/MintCard";
 import { useMe, useRequireMe } from "../components/mintdex/session";
 import {
   Button,
-  CARD_ASPECT,
   Field,
   Input,
   PageFrame,
@@ -22,11 +20,6 @@ import {
   TextLink,
   useToast,
 } from "../components/mintdex/ui";
-import {
-  ArtPrompt,
-  MoreOptions,
-  PhonePreview,
-} from "../components/chain/pages/ChainLaunch";
 import { launch } from "../lib/mintdex/api";
 import { LAUNCH_FEE, TICKER_RE } from "../lib/mintdex/constants";
 import { WORDS } from "../lib/mintdex/copy";
@@ -34,7 +27,7 @@ import { quoteBuy } from "../lib/mintdex/curve";
 import { sol, tokens } from "../lib/mintdex/format";
 import { pageHead, sentences } from "../lib/mintdex/seo";
 import { z } from "zod";
-import { HeroTurntable } from "../components/carddex/HeroTurntable";
+import { LaunchCardPreview } from "../components/carddex/live/LaunchCardPreview";
 import { CardDesignPicker } from "../components/carddex/CardDesignPicker";
 import { DEFAULT_CARD_DESIGN, getCardDesign, isCardDesignKey } from "../lib/carddex/designs";
 import { allowedQuotesForDesign, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, isPairAssetKey, type PairAssetKey } from "../lib/carddex/pairs";
@@ -44,6 +37,7 @@ import { LiveLaunchPanel, type LiveLaunchHandle } from "../components/carddex/li
 import { parseLiveAmount } from "../components/carddex/live/amounts";
 import type { LiveLaunchIntent } from "../lib/carddex/live/types";
 import "../carddex-live.css";
+import "../carddex-launch.css";
 
 export const Route = createFileRoute("/launch")({
   validateSearch: z.object({ design: z.string().optional().catch(undefined), quote: z.string().optional().catch(undefined), mode: z.enum(["live", "demo"]).optional().catch(undefined) }),
@@ -62,23 +56,8 @@ export const Route = createFileRoute("/launch")({
 // ---------------------------------------------------------------- copy
 
 /** What really happens to the coin, per mode (P0-5): in test mode, a simulated curve. */
-const CONTEXT = "Choose your permanent card design and quote asset. Create the token and its card through your wallet.";
+const CONTEXT = "A pump.fun token and your one-of-one card.";
 const ENTER_TO_UPLOAD = "Enter Launch a Card to upload demo card art and launch.";
-
-// ---------------------------------------------------------------- stage geometry
-
-/** Space below the complete card for the selected finish and its stock reference, if any. */
-const CAPTION_H = 206;
-const PREVIEW_CONTROLS_H = 48;
-/**
- * Desktop card width, read by the stage's descendants through --cw: the widest 63/88 card that fits the
- * stage height above its controls and design selector, with 16px of wall either side, never wider than 480px.
- * The stage is a size container, so cqw and cqh measure it.
- */
-const STAGE_VARS = {
-  "--cap": `${CAPTION_H}px`,
-  "--cw-lg": `min(calc(100cqw - 32px), max(180px, calc((100cqh - ${CAPTION_H + PREVIEW_CONTROLS_H}px) * ${CARD_ASPECT.toFixed(6)})), 480px)`,
-} as CSSProperties;
 
 // ---------------------------------------------------------------- helpers
 
@@ -159,22 +138,6 @@ function linkError(value: string, kind: "web" | "x"): string | null {
 }
 
 type FieldKey = "name" | "ticker" | "website" | "x";
-
-/**
- * Desktop row spacer. The spacers share the form's free height evenly (12px minimum, 14px at 1280x720 and
- * up, 56px maximum), so the rows spread like the board instead of leaving one hole above the button; any
- * height left after that goes above the button (mt-auto). At 1280x720 they sit near 20px; the 14px floor
- * only bites when every field shows an error at once, so even then the form does not scroll.
- * Phones use the form's plain 16px gap.
- */
-function Gap() {
-  return (
-    <div
-      aria-hidden
-      className="hidden flex-[1_1_0px] lg:block lg:max-h-14 lg:min-h-3 fit:min-h-3.5"
-    />
-  );
-}
 
 // ---------------------------------------------------------------- view
 
@@ -315,7 +278,7 @@ function Launch() {
   const touch = (key: FieldKey) => () => setTouched((t) => (t[key] ? t : { ...t, [key]: true }));
 
   // "More options" opens itself while one of its fields has a value or an error.
-  const moreNeeded = !!(website || xUrl || devBuy || websiteMsg || xMsg || devError);
+  const moreNeeded = !!(lore || website || xUrl || devBuy || websiteMsg || xMsg || devError);
   useEffect(() => {
     if (moreNeeded) setMoreOpen(true);
   }, [moreNeeded]);
@@ -502,13 +465,13 @@ function Launch() {
   };
 
   return (
-    <PageFrame className="mdx-page">
-      <PageHeader title="Launch a coin" context={live ? CONTEXT : "Test the launch flow with separate demo balances. No real token or NFT is created."} wrapContext />
-
-      <nav className="cdx-launch-mode" aria-label="Launch environment">
-        <Link to="/launch" search={{ design: designKey, quote: quoteKey, mode: "live" }} aria-current={live ? "page" : undefined}>Mainnet wallet launch</Link>
-        <Link to="/launch" search={{ design: designKey, quote: quoteKey, mode: "demo" }} aria-current={!live ? "page" : undefined}>Test demo</Link>
-      </nav>
+    <PageFrame className="mdx-page cdx-launch">
+      <PageHeader title="Create your card" context={live ? CONTEXT : "Demo only · no real token or NFT."} wrapContext right={
+        <nav className="cdx-launch-mode" aria-label="Launch environment">
+          <Link to="/launch" search={{ design: designKey, quote: quoteKey, mode: "live" }} aria-label="Mainnet wallet launch" aria-current={live ? "page" : undefined}>Mainnet</Link>
+          <Link to="/launch" search={{ design: designKey, quote: quoteKey, mode: "demo" }} aria-current={!live ? "page" : undefined}>Test demo</Link>
+        </nav>
+      } />
 
       <div className="cdx-create-layout">
         {/* ------------------------------------------------ the form (plinth) */}
@@ -516,13 +479,10 @@ function Launch() {
           onSubmit={submit}
           noValidate
           aria-label="New coin"
-          className="cdx-create-form mdx-plinth mdx-scroll flex min-w-0 flex-col gap-4 lg:gap-0"
+          className="cdx-create-form mdx-plinth mdx-scroll"
         >
-          <div className="contents">
-          {/* Phones (P1-22): Name over Ticker beside a 112px live preview that opens in 3D, so the card answers
-              every keystroke on the same screen. Desktop: Name | Ticker in one row and the big stage on the right. */}
-          <div className="grid grid-cols-[minmax(0,1fr)_96px] gap-x-4 gap-y-4 sm:grid-cols-[minmax(0,1fr)_112px] lg:grid-cols-[minmax(0,1fr)_180px]">
-            <div className="flex min-w-0 flex-col gap-4 lg:contents">
+          <div className="cdx-launch-fields">
+          <div className="cdx-launch-identity">
               <Field label="Name" htmlFor="name" error={nameMsg} className="min-w-0">
                 <Input
                   disabled={live && liveLocked}
@@ -558,106 +518,40 @@ function Launch() {
                   aria-describedby={tickerMsg ? "ticker-help" : undefined}
                 />
               </Field>
-            </div>
-            <div className="self-start pt-1 lg:hidden">
-              <PhonePreview card={previewCard} />
-            </div>
           </div>
 
-          <QuoteAssetPicker value={quoteKey} designKey={designKey} ticker={ticker || "YOUR TOKEN"} onChange={changePair} onPendingChange={setPairPending} confirmationRef={pairConfirmationRef} live={live} disabled={live && liveLocked} balance={!live && me ? formatQuoteAmount(quoteBalance, quoteKey) : undefined} />
+          <Field label="Card art" htmlFor="art" error={artMsg} className="min-w-0">
+            <button
+              ref={artRef}
+              disabled={live && liveLocked}
+              id="art"
+              type="button"
+              data-over={dragging ? "true" : undefined}
+              aria-label={preview ? "Card art. Click to replace the image" : "Card art. Drop an image or click to upload"}
+              aria-describedby={artMsg ? "art-help" : undefined}
+              aria-busy={uploading || undefined}
+              onClick={() => live || me ? fileRef.current?.click() : require(() => artRef.current?.focus(), ENTER_TO_UPLOAD, "Enter Launch a Card")}
+              onDragOver={(e) => { e.preventDefault(); if (!dragging) setDragging(true); }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={onDrop}
+              className={`mdx-drop cdx-launch-art ${artMsg ? "border-down" : ""}`}
+            >
+              {preview ? <img src={preview} alt="" draggable={false} className="cdx-launch-art__image" /> : <span className="cdx-launch-art__add" aria-hidden>+</span>}
+              <span className="cdx-launch-art__copy"><strong>{uploading ? "Preparing artwork…" : preview ? "Replace artwork" : "Upload artwork"}</strong><span>Square image · drop or browse</span></span>
+            </button>
+            <input disabled={live && liveLocked} ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="sr-only" tabIndex={-1} aria-hidden onChange={(e) => { handleFile(e.target.files?.[0]); e.target.value = ""; }} />
+          </Field>
+
+          <CardDesignPicker value={designKey} onChange={pick} quoteAssetKey={quoteKey} ticker={ticker} disabled={live && liveLocked} compact />
+          <QuoteAssetPicker value={quoteKey} designKey={designKey} ticker={ticker || "YOUR TOKEN"} onChange={changePair} onPendingChange={setPairPending} confirmationRef={pairConfirmationRef} live={live} disabled={live && liveLocked} balance={!live && me ? formatQuoteAmount(quoteBalance, quoteKey) : undefined} compact />
           {pairNotice ? <p className="cdx-pair-notice" role="status">{pairNotice}</p> : null}
 
-          <div className="lg:hidden">
-            <CardDesignPicker value={designKey} onChange={pick} quoteAssetKey={quoteKey} ticker={ticker} disabled={live && liveLocked} />
-          </div>
-
-          <Gap />
-
-          <div className="grid grid-cols-[112px_minmax(0,1fr)] gap-4 sm:grid-cols-[136px_minmax(0,1fr)] short:sm:grid-cols-[112px_minmax(0,1fr)] [@media(min-width:1024px)_and_(min-height:960px)]:grid-cols-[176px_minmax(0,1fr)]">
-            <Field label="Card art" htmlFor="art" error={artMsg} className="min-w-0">
-              <button
-                ref={artRef}
-                disabled={live && liveLocked}
-                id="art"
-                type="button"
-                data-over={dragging ? "true" : undefined}
-                aria-label={
-                  preview
-                    ? "Card art. Click to replace the image"
-                    : "Card art. Drop an image or click to upload"
-                }
-                aria-describedby={artMsg ? "art-help" : undefined}
-                aria-busy={uploading || undefined}
-                onClick={() =>
-                  live || me
-                    ? fileRef.current?.click()
-                    : require(() => artRef.current?.focus(), ENTER_TO_UPLOAD, "Enter Launch a Card")
-                }
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  if (!dragging) setDragging(true);
-                }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={onDrop}
-                className={`mdx-drop aspect-square w-full ${artMsg ? "border-down" : ""}`}
-              >
-                {preview ? (
-                  <img
-                    src={preview}
-                    alt=""
-                    draggable={false}
-                    className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-                  />
-                ) : (
-                  <ArtPrompt />
-                )}
-                {uploading && (
-                  <span className="pointer-events-none absolute inset-0 grid place-items-center bg-plinth/80 text-[13px] text-slate">
-                    Uploading...
-                  </span>
-                )}
-              </button>
-              <input
-                disabled={live && liveLocked}
-                ref={fileRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/gif"
-                className="sr-only"
-                tabIndex={-1}
-                aria-hidden
-                onChange={(e) => {
-                  handleFile(e.target.files?.[0]);
-                  e.target.value = "";
-                }}
-              />
-            </Field>
-            <Field
-              label="Description"
-              htmlFor="lore"
-              className="min-w-0"
-              help={
-                <span className="flex items-baseline justify-between gap-3">
-                  <span>{live ? "Printed permanently on the card. Review before signing." : "Shown on the card. The owner can edit it later."}</span>
-                  <span className="num flex-none text-[12px]">{lore.length}/280</span>
-                </span>
-              }
-            >
-              <textarea
-                disabled={live && liveLocked}
-                id="lore"
-                maxLength={280}
-                value={lore}
-                onChange={(e) => setLore(e.target.value)}
-                placeholder="King of the swamp. Jiggles under pressure, never breaks."
-                aria-describedby="lore-help"
-                className="mdx-input h-[112px] sm:h-[136px] short:sm:h-[112px] [@media(min-width:1024px)_and_(min-height:960px)]:h-[176px]"
-              />
-            </Field>
-          </div>
-
-          <Gap />
-
-          <MoreOptions ref={moreRef} open={moreOpen} onOpenChange={setMoreOpen}>
+          <details ref={moreRef} open={moreOpen} onToggle={e => setMoreOpen(e.currentTarget.open)} className="cdx-launch-options">
+            <summary>Description &amp; options <span aria-hidden>+</span></summary>
+            <div className="cdx-launch-options__body">
+              <Field label="Description" htmlFor="lore" className="min-w-0" help={<span className="flex items-baseline justify-between gap-3"><span>{live ? "Permanent once issued." : "Printed on the card."}</span><span className="num flex-none">{lore.length}/280</span></span>}>
+                <textarea disabled={live && liveLocked} id="lore" maxLength={280} value={lore} onChange={e => setLore(e.target.value)} placeholder="Tell your card’s story." aria-describedby="lore-help" className="mdx-input cdx-launch-description" />
+              </Field>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="Website" htmlFor="website" error={websiteMsg} className="min-w-0">
                 <Input
@@ -692,7 +586,7 @@ function Launch() {
                 />
               </Field>
             </div>
-            <div className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-[180px_minmax(0,1fr)] sm:items-end">
+            <div className="cdx-launch-initial">
               <Field label="Initial buy (optional)" htmlFor="dev">
                 <Input
                   disabled={live && liveLocked}
@@ -731,18 +625,16 @@ function Launch() {
                 </span>
               </p>
             </div>
-          </MoreOptions>
-
-          <Gap />
+            </div>
+          </details>
 
           </div>
-          <div className="mt-auto">
+          <div className="cdx-launch-commit">
             {/* The content rule (P1-28), right where people commit. */}
-            <p className="mb-1 text-[13px] leading-[1.45] text-slate">
+            <p className="cdx-launch-rules">
               <TextLink to="/legal" search={{ tab: "terms" }}>
                 Content rules
               </TextLink>
-              : {WORDS.contentRule}
             </p>
             {live ? <LiveLaunchPanel ref={liveRef} card={previewCard} draft={ready && preparedArt && liveDev !== null ? { name: name.trim(), symbol: ticker, description: lore.trim(), website: website.trim(), xUrl: xUrl.trim(), cardTemplate: designKey, quoteAssetKey: quoteKey, quoteMint: quoteAsset.mint, initialBuyQuoteBaseUnits: liveDev, artwork: preparedArt } : null} pairPending={pairPending} onLockedChange={setLiveLocked} onIntentLoaded={restoreLiveIntent} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /> : <>
             <dl className="cdx-launch-cost" aria-label="Demo launch cost" aria-live="polite">
@@ -782,23 +674,8 @@ function Launch() {
           </div>
         </form>
 
-        {/* The original MintDex arrangement: a full, open card stage to the right of the details. */}
-        <section aria-label="Your card preview" style={STAGE_VARS} className="cdx-create-preview">
-          {/* The one unsleeved card: no pocket, because this card is not minted yet. */}
-          <div className="cdx-create-preview__card">
-            <div className="flex-none" style={{ width: "var(--cw, 300px)" }}>
-              {/* In your hand: it breathes and peeks at its back, a tap (or F) turns it over, a new picture
-                  prints onto it and typing settles it (refs/alive-3d-spec.md 7, Launch). Any edit turns it face up. */}
-              <HeroTurntable card={previewCard} followEdits />
-            </div>
-          </div>
-
-          <div className="cdx-create-preview__picker">
-            {/* Flush with the card's left edge; free to run to the stage's right edge. */}
-            <div className="w-full">
-              <CardDesignPicker value={designKey} onChange={pick} quoteAssetKey={quoteKey} ticker={ticker} disabled={live && liveLocked} />
-            </div>
-          </div>
+        <section aria-label="Your card preview" className="cdx-create-preview">
+          <LaunchCardPreview card={previewCard} />
         </section>
       </div>
     </PageFrame>

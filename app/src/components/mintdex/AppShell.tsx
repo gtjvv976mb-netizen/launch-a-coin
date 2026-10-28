@@ -28,7 +28,6 @@ import { setMe } from "./hooks";
 import { useMe, useSessionUi } from "./session";
 import { Sheet } from "./sheet";
 import { Ticker } from "./Ticker";
-import { RoyalMotion } from "../carddex/RoyalMotion";
 import { LiveWalletButton } from "../carddex/live/LiveWalletButton";
 import { LiveLaunchGuide } from "../carddex/live/LiveLaunchGuide";
 import { useLiveWallet } from "../carddex/live/wallet";
@@ -535,10 +534,10 @@ function WalletBlock() {
     return (
       <div className="flex flex-col gap-2">
         <Button block onClick={() => openEnter()}>
-          Enter Launch a Card
+          Try the demo
         </Button>
         {MODE_COPY.railStart ? (
-          <p className="text-[12px] leading-[1.3] text-slate">{MODE_COPY.railStart}</p>
+          <p className="text-[11px] leading-[1.3] text-slate">Test funds. No wallet needed.</p>
         ) : null}
       </div>
     );
@@ -1029,7 +1028,7 @@ function Sky() {
 }
 
 function LocalDemoNote() {
-  return <p role="note" data-testid="local-demo-note" className="flex-none border-b border-hairline bg-plinth px-4 py-1.5 text-center text-[12px] leading-5 text-slate"><span className="font-semibold text-ink">Demo collection</span><span aria-hidden> · </span>Balances and trading are simulated.</p>;
+  return <p role="note" data-testid="local-demo-note" className="flex-none border-b border-hairline bg-plinth px-4 py-1.5 text-center text-[12px] leading-5 text-slate"><span className="font-semibold text-ink">Demo collection</span><span aria-hidden> · </span>Test balances and trading.</p>;
 }
 
 export function AppShell({ children, devnetSite = false }: { children: ReactNode; devnetSite?: boolean }) {
@@ -1072,7 +1071,6 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
   return (
     // relative isolate: the sky (L9) sits behind every page on the wall, above this root's own background.
     <div className="cdx-app relative isolate flex min-h-dvh bg-wall text-ink lg:h-dvh lg:overflow-hidden">
-      <RoyalMotion />
       <Sky />
       {/* First stop for keyboard users (P1-24): skips the rail's search, six tabs and wallet. */}
       <a
@@ -1094,10 +1092,9 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
         <RouteAnnouncer />
         {/* IS_DEVNET is a literal: the note and its words are not in the mainnet or sim bundle. */}
         {IS_DEVNET && devnetSite ? <DevnetSiteNote /> : null}
-        {liveLaunch ? <p role="note" data-testid="live-launch-note" className="flex-none border-b border-hairline bg-plinth px-4 py-1.5 text-center text-[12px] leading-5 text-slate"><span className="font-semibold text-ink">Solana mainnet</span><span aria-hidden> · </span>Review real costs before approving each wallet transaction.</p> : IS_SIM ? <LocalDemoNote /> : null}
+        {liveLaunch ? <p role="note" data-testid="live-launch-note" className="flex-none border-b border-hairline bg-plinth px-4 py-1.5 text-center text-[12px] leading-5 text-slate"><span className="font-semibold text-ink">Solana mainnet</span><span aria-hidden> · </span>Wallet approval required.</p> : IS_SIM ? <LocalDemoNote /> : null}
         <MobileHeader liveLaunch={liveLaunch} />
         {/* The live trade ticker (hype arcade): the real activity feed, scrolling. */}
-        {!liveLaunch ? <Ticker /> : null}
         {/* Deep-linked card grids need the same explicit permission option as the Home display. */}
         {tableCards ? (
           <div className="mdx-phone-tilt lg:hidden">
