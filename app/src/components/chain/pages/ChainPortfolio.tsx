@@ -24,7 +24,6 @@ import { MintCard } from "../../mintdex/MintCard";
 import {
   Button,
   ButtonLink,
-  EmptyState,
   GridCaption,
   LabelNum,
   Num,
@@ -44,6 +43,7 @@ import {
   usePageKeys,
   useSize,
 } from "../../mintdex/ui";
+import { EmptyState } from "../../mintdex/empty-state";
 import { NetworkNotice } from "../NetworkNotice";
 import { marketRules } from "./ChainCardPanel";
 import { SheetLink } from "./ChainMarket";

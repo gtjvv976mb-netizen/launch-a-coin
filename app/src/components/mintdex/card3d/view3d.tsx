@@ -207,7 +207,21 @@ export function View3DProvider({ children }: { children: ReactNode }) {
     const target = el?.isConnected
       ? el
       : ([...entries.current].find((e) => e.item.id === id && e.el.isConnected)?.el ?? null);
-    if (target) requestAnimationFrame(() => target.focus({ preventScroll: true }));
+    // Focus now (Radix calls this after the dialog unmounted), not on the next frame: a frame may never come in a
+    // background or throttled tab, and focus then fell to <body> (F6). The frame retry covers a list that redraws.
+    if (!target) {
+      // Opened from a deep link with no card of that id left on the page: the page's main region.
+      const main = document.querySelector<HTMLElement>("main");
+      if (main) {
+        if (!main.hasAttribute("tabindex")) main.tabIndex = -1;
+        main.focus({ preventScroll: true });
+      }
+      return;
+    }
+    target.focus({ preventScroll: true });
+    requestAnimationFrame(() => {
+      if (document.activeElement === document.body && target.isConnected) target.focus({ preventScroll: true });
+    });
   };
 
   return (

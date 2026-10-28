@@ -25,7 +25,7 @@ export const EDITION_CATALOG: readonly Edition[] = [
     key: "wildtype",
     name: "Wildtype",
     tagline: "A creature collector's field card.",
-    description: "A vivid creature-battler treatment with an enamel crest and emerald foil around the original MintDex card layout. Your token's own artwork takes the spotlight.",
+    description: "A vivid creature-battler treatment with an enamel crest and emerald foil around the original card layout. Your token's own artwork takes the spotlight.",
     finish: "Emerald foil · enamel details",
     palette: ["#163b25", "#c8e58c", "#f3e9ba"],
     motifs: ["field-card panels", "enamel crest", "emerald foil"],

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type Ref } from "react
 import { getCardDesign, type CardDesign } from "../../lib/carddex/designs";
 import { CanonicalCardFace } from "../carddex/CanonicalCardFace";
 import { canonicalSkinAsset } from "../carddex/CanonicalCardSkin";
-import { generatedCardAssets } from "../../lib/carddex/generated-assets";
+import { generatedCardAssets, generatedSrcSet } from "../../lib/carddex/generated-assets";
 import { marketCapText } from "../../lib/carddex/quote-display";
 import "../../carddex-cards.css";
 
@@ -104,7 +104,7 @@ export function preloadCard(card: CardData, sizes: string, level = card.level): 
   const skin = canonicalSkinAsset(design.key,card.quoteAssetKey);
   const jobs: Promise<unknown>[] = [{source:skin?.path,small:skin?.previewPath},{source:generated.back,small:generated.back320}].filter(asset=>asset.source).map(({source,small}) => {
     const image = new Image();
-    if (small) { image.srcset = `${small} 320w, ${source} 1260w`; image.sizes = sizes; }
+    if (small) { image.srcset = generatedSrcSet(small, source!); image.sizes = sizes; }
     image.src = source!; image.decoding = "async";
     return image.decode().catch(() => undefined);
   });
@@ -168,7 +168,7 @@ type RenderFaceProps = FaceProps & { mode: "flat" | "3d" | "lite"; className?: s
 function Face(input: RenderFaceProps) {
   const card = designedCard(input.card);
   const design = cardDesign(card);
-  return <CanonicalCardFace card={card} design={design} priority={input.priority || input.eager} sizes={input.sizes} compact={input.compact} lite={input.mode === "lite"} className={input.className} style={input.style} label={input.mode === "flat" ? cardLabel(card) : undefined} />;
+  return <CanonicalCardFace card={card} design={design} priority={input.priority} eager={!input.priority && input.eager} sizes={input.sizes} compact={input.compact} lite={input.mode === "lite"} className={input.className} style={input.style} label={input.mode === "flat" ? cardLabel(card) : undefined} />;
 }
 
 /**

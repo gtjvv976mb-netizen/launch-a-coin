@@ -29,6 +29,7 @@ type AppEnv = {
   HF_ENV?: string;
   APP_SLUG?: string;
   CARDDEX_LIVE_LAUNCH_ENABLED?: string;
+  CARDDEX_LIVE_RECOVERY_ENABLED?: string;
   CARDDEX_DEPLOYMENT_ENV?: string;
   CARDDEX_PUBLIC_ORIGIN?: string;
   CARDDEX_MAINNET_RPC_URL?: string;

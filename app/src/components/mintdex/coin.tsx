@@ -6,6 +6,7 @@
  */
 import {
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -61,6 +62,7 @@ import { formatQuoteAmount, parseQuoteAmount, quoteMetrics } from "../../lib/car
 import { aggregateCandles, candleInterval, candleIntervalLabel } from "../../lib/carddex/candles";
 import "../../carddex-chart.css";
 import { PageControls, usePageCapacity } from "../carddex/Viewport";
+import { ViewTabs, tabDomId } from "../carddex/ViewTabs";
 import type { CoinDetail, CoinPage, TradeRow } from "../../lib/mintdex/types";
 import { CardBack, CardCase, View3DButton, useView3DGestures, type Card3DHandle } from "./card3d";
 import { useClaimable } from "./cases";
@@ -71,6 +73,7 @@ import { useKeyboardSafe } from "./sheet";
 import {
   BotTag,
   ShareButton,
+  SimTag,
   coinShare,
 } from "./trust";
 import {
@@ -177,7 +180,7 @@ export function CoinHeader({ coin, className = "" }: { coin: CoinDetail; classNa
           <Num size="hero" unit={coin.mcapUsd == null ? coin.quoteSymbol : undefined} watch={marketCapWatch(coin)} odo className={HERO_FIT}>
             {hero}
           </Num>
-          <span className="mt-0.5 text-[12px] font-medium leading-none text-slate">Market cap</span>
+          <span className="mt-0.5 inline-flex items-center gap-1.5 text-[12px] font-medium leading-none text-slate">Market cap<SimTag /></span>
         </div>
         <div className="flex flex-col items-start pb-px">
           <Change v={coin.change24h} pill className="text-[13px]" />
@@ -210,7 +213,7 @@ export function CoinStats({
     { key: "price", label: `Price (${coin.quoteSymbol ?? "SOL"})`, value: priceSolText(coin.priceQuote ?? coin.priceSol ?? 0), watch: coin.priceQuote ?? coin.priceSol ?? 0, tick: true },
     { key: "volume", label: "Volume", value: quoteAtoms(coin.volumeQuote ?? coin.volume ?? 0, coin.quoteAssetKey, true), unit: coin.quoteSymbol ?? "SOL" },
     { key: "holders", label: "Holders", value: coin.holders.toLocaleString("en-US") },
-    { key: "trades", label: "Token trades", value: coin.trades.toLocaleString("en-US") },
+    { key: "trades", label: "Trades", value: coin.trades.toLocaleString("en-US") },
   ];
   return (
     <div className={cx("@container", className)} data-pane={pane}>
@@ -494,7 +497,7 @@ export function CoinDetails({
       <CaptionTop coin={coin} className="mb-2 hidden lg:block" />
       <DesignProgress coin={coin} className="max-lg:hidden" />
       {/* In test mode the address is a test key that was never deployed (decision C6): the row says so. */}
-      {coin.mintAddress ? <Address address={coin.mintAddress} row label className="mt-3 max-lg:mt-0" /> : <p className="mt-3 text-[12px] leading-5 text-slate max-lg:mt-0">No on-chain address in this local demo.</p>}
+      {coin.mintAddress ? <Address address={coin.mintAddress} row label className="mt-3 max-lg:mt-0" /> : <p className="mt-3 text-[12px] leading-5 text-slate max-lg:mt-0">No on-chain address in the demo.</p>}
       {coin.graduated && (
         <p className="mt-2 text-[13px] font-medium leading-[1.45] text-ink max-lg:mt-0">
           {MODE_COPY.curveComplete}
@@ -516,7 +519,7 @@ export function CoinDetails({
         ) : (
           <TextLink
             className="text-slate"
-            onClick={() => require(() => setReportOpen(true), "Enter Launch a Card to report a card.")}
+            onClick={() => require(() => setReportOpen(true), "Try the demo to report a card.")}
           >
             Report
           </TextLink>
@@ -564,7 +567,7 @@ function ReportDialog({
         <fieldset>
           <legend className="text-[15px] leading-[1.5] text-slate">
             What breaks the{" "}
-            <TextLink to="/legal" search={{ tab: "terms" }} onClick={() => onOpenChange(false)}>
+            <TextLink to="/legal" hash="terms" onClick={() => onOpenChange(false)}>
               content rules
             </TextLink>
             ?
@@ -871,6 +874,7 @@ export function TradesList({
           // No count before the first trade: the empty line below says it.
           total > 0 ? (
             <span className="inline-flex items-baseline gap-4">
+              <SimTag className="self-center" />
               <span className="text-slate">
                 <span className="num">{total.toLocaleString("en-US")}</span>{" "}
                 {total === 1 ? "trade" : "trades"}
@@ -926,7 +930,7 @@ export function TradesList({
                 </div>
             ))}
           </div>
-          <PageControls page={page} pages={pages} onPage={setPageIndex} label={`${rows.length} recent trades`} />
+          <PageControls page={page} pages={pages} onPage={setPageIndex} label={total > rows.length ? `Latest ${rows.length} of ${total.toLocaleString("en-US")} trades` : `${total.toLocaleString("en-US")} ${total === 1 ? "trade" : "trades"}`} />
         </>
       )}
     </section>
@@ -1014,11 +1018,15 @@ export function TradePanel({
   const { run, pending, feedback, errorOf, reset } = useAction();
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [ticketStep,setTicketStep] = useState("amount");
+  const stepsId = useId();
+  const stepPanel = (step: string) => compact ? { id: `${stepsId}-${step}`, role: "tabpanel" as const, "aria-labelledby": tabDomId(stepsId, step) } : {};
   const [input, setInput] = useState("");
   // A blocked submit with nothing typed asks for an amount; typing clears it.
   const [attempted, setAttempted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const msgRef = useRef<HTMLDivElement>(null);
+  // Phones' two-step ticket: the review step's heading takes focus when the step opens (A11Y: never <body>).
+  const reviewRef = useRef<HTMLHeadingElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   // Phones: Buy stays above the on-screen keyboard while the amount has focus (P1-5).
   useKeyboardSafe(formRef);
@@ -1078,7 +1086,7 @@ export function TradePanel({
   } else if (quote?.ok && side === "sell" && amount > holding) {
     const t = holding > 0 ? `More than you hold (${tokens(holding)}).` : `You hold no $${coin.ticker} yet.`;
     blocker = { kind: "error", text: t, plain: t };
-  } else if (!quote && attempted && me) {
+  } else if (!quote && attempted) {
     blocker = { kind: "error", text: "Enter an amount.", plain: "Enter an amount." };
   }
 
@@ -1152,7 +1160,11 @@ export function TradePanel({
     if (res) {
       setInput("");
       setAttempted(false);
-
+      // The toast confirms the fill; the two-step ticket starts over at a clear, empty Amount step.
+      if (compact) {
+        setTicketStep("amount");
+        requestAnimationFrame(() => inputRef.current?.focus());
+      }
     } else {
       // The reason is in the slot right above the button.
       inputRef.current?.focus();
@@ -1160,20 +1172,43 @@ export function TradePanel({
   }
 
   function blocked() {
+    // Enter on the phones' Amount step (the hidden Buy button is disabled): the same check as Review.
+    if (compact && ticketStep === "amount") {
+      goReview();
+      return;
+    }
     setAttempted(true);
     // Move focus to the reason, so it is read and seen (P1-9 step 2).
     requestAnimationFrame(() => msgRef.current?.focus());
   }
 
+  // Amount to Review (phones): only with an amount that can trade. Otherwise the reason shows under the field,
+  // linked to it (aria-describedby, aria-invalid), and focus stays on the field.
+  function goReview(fromTab = false) {
+    if (!quote?.ok || blocker) {
+      setAttempted(true);
+      requestAnimationFrame(() => inputRef.current?.focus());
+      return;
+    }
+    setTicketStep("review");
+    // A tab keeps focus on itself (tab pattern); the button and Enter move it to the step's heading.
+    if (!fromTab) requestAnimationFrame(() => reviewRef.current?.focus());
+  }
+
+  function editAmount() {
+    setTicketStep("amount");
+    requestAnimationFrame(() => inputRef.current?.focus());
+  }
+
   function submit(e: FormEvent) {
     e.preventDefault();
-    if (compact && ticketStep === "amount") {setTicketStep("review");return;}
+    if (compact && ticketStep === "amount") {goReview();return;}
     if (!me) {
       const intent = quote?.ok
         ? side === "buy"
-          ? `Enter and buy ${input} ${asset.symbol} of $${coin.ticker}`
-          : `Enter and sell $${coin.ticker}`
-        : "Enter Launch a Card";
+          ? `Start the demo and buy ${input} ${asset.symbol} of $${coin.ticker}`
+          : `Start the demo and sell $${coin.ticker}`
+        : "Start the demo";
       require(
         quote?.ok ? doTrade : () => inputRef.current?.focus(),
         "Pick a handle to trade.",
@@ -1210,6 +1245,32 @@ export function TradePanel({
   const label = !me ? FLOW.enterToTrade : `${side === "buy" ? "Buy" : "Sell"} $${coin.ticker}`;
   const suffix = side === "buy" ? asset.symbol : `$${coin.ticker}`;
 
+  // The one message slot, mounted once: under the amount on the phones' Amount step, above the button elsewhere.
+  const msgSlot = (
+    <>
+      {/* The one message slot (P1-9): errors (alert) and the impact warning. Empty, it takes no
+          room; the column's collapse ladder absorbs the line when it shows. */}
+      <div
+        id="trade-msg"
+        ref={msgRef}
+        tabIndex={-1}
+        className={cx("outline-none", message && "mt-3")}
+      >
+        {message ? (
+          <p
+            role={message.kind === "error" ? "alert" : "status"}
+            className={cx(
+              "min-h-5 text-[13px] leading-5",
+              message.kind === "error" ? "text-down" : message.kind === "warning" ? "font-medium text-ink" : "text-ink",
+            )}
+          >
+            {message.text}
+          </p>
+        ) : null}
+      </div>
+    </>
+  );
+
   return (
     <form
       ref={formRef}
@@ -1220,8 +1281,8 @@ export function TradePanel({
       data-pane={pane}
       noValidate
     >
-      {compact ? <div className="cdx-view-tabs" aria-label="Trade steps"><button type="button" aria-pressed={ticketStep==="amount"} onClick={()=>setTicketStep("amount")}>Amount</button><button type="button" aria-pressed={ticketStep==="review"} onClick={()=>setTicketStep("review")}>Review trade</button></div> : null}
-      <div className="cdx-trade-ticket__amount">
+      {compact ? <ViewTabs className="cdx-view-tabs" label="Trade steps" idBase={stepsId} tabs={[{id:"amount",label:"Amount",selected:ticketStep==="amount",onSelect:()=>setTicketStep("amount"),panel:`${stepsId}-amount`},{id:"review",label:"Review trade",selected:ticketStep==="review",onSelect:()=>goReview(true),panel:`${stepsId}-review`}]} /> : null}
+      <div className="cdx-trade-ticket__amount" {...stepPanel("amount")}>
       <SideToggle
         side={side}
         onChange={(s) => {
@@ -1251,7 +1312,7 @@ export function TradePanel({
                   className="mdx-link mdx-hit text-[12px]"
                   onClick={() => openEnter("Pick a handle to trade.")}
                 >
-                  Enter for demo {asset.symbol}
+                  Try the demo for test {asset.symbol}
                 </button>
               )
             ) : (
@@ -1307,10 +1368,16 @@ export function TradePanel({
         </div>
       )}
 
-      {compact ? <Button type="button" block className="mt-4" onClick={()=>setTicketStep("review")}>Review {side}</Button> : null}
+      {compact && ticketStep === "amount" ? msgSlot : null}
+      {compact ? <Button type="button" block className="mt-4" onClick={()=>goReview()}>Review {side}</Button> : null}
       </div>
-      <div className="cdx-trade-ticket__review">
-      {compact ? <p className="text-[13px] text-slate">{side==="buy"?"Buy":"Sell"} · {input || "0"} {suffix}</p> : null}
+      <div className="cdx-trade-ticket__review" {...stepPanel("review")}>
+      {compact ? (
+        <div className="flex items-baseline justify-between gap-3">
+          <h3 ref={reviewRef} tabIndex={-1} className="text-[13px] font-normal text-slate outline-none">{side==="buy"?"Buy":"Sell"} · {input || "0"} {suffix}</h3>
+          <button type="button" className="mdx-link mdx-hit text-[13px]" onClick={editAmount}>Edit amount</button>
+        </div>
+      ) : null}
       <dl className="mdx-leaders mt-4">
         <QuoteRow label="You receive">
           {quote?.ok ? (
@@ -1358,26 +1425,7 @@ export function TradePanel({
         {summary}
       </p>
 
-      {/* The one message slot (P1-9): errors (alert) and the impact warning. Empty, it takes no
-          room; the column's collapse ladder absorbs the line when it shows. */}
-      <div
-        id="trade-msg"
-        ref={msgRef}
-        tabIndex={-1}
-        className={cx("outline-none", message && "mt-3")}
-      >
-        {message ? (
-          <p
-            role={message.kind === "error" ? "alert" : "status"}
-            className={cx(
-              "min-h-5 text-[13px] leading-5",
-              message.kind === "error" ? "text-down" : message.kind === "warning" ? "font-medium text-ink" : "text-ink",
-            )}
-          >
-            {message.text}
-          </p>
-        ) : null}
-      </div>
+      {!compact || ticketStep === "review" ? msgSlot : null}
 
       <Button
         type="submit"
@@ -1424,7 +1472,7 @@ export function DeedPanel({
         <div className="flex items-start justify-between gap-3"><dt className="text-slate">Quote mint</dt><dd className="min-w-0 text-right"><a className="mdx-link break-all" href={`https://solscan.io/token/${asset.mint}`} target="_blank" rel="noreferrer" aria-label={`View ${asset.symbol} quote mint on Solscan`}>{asset.mint.slice(0,6)}…{asset.mint.slice(-6)} ↗</a></dd></div>
       </dl>
       <p className="mt-4 border-t border-hairline pt-3 text-pretty text-[13px] leading-[1.5] text-slate">The token trades. Its creator holds a separate collectible card with the design chosen at launch.</p>
-      {asset.kind === "stock" ? <p className="mt-2 text-[12px] leading-[1.5] text-slate">Paired with a tokenized stock asset. Your token does not represent company shares.</p> : null}
+      {asset.kind === "stock" ? <p className="mt-2 text-[12px] leading-[1.5] text-slate">Paired with a tokenized stock asset. Your coin does not represent company shares.</p> : null}
       <p className="mt-2 text-[12px] leading-[1.5] text-slate">{MODE_COPY.guideNote}</p>
     </section>
   );

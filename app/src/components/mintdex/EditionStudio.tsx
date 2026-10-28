@@ -10,6 +10,7 @@ import { EditionCard } from "./EditionCard";
 import { faceSlot, type CardData } from "./MintCard";
 import { Card3D, View3DHost, useMotionLevel, type Card3DHandle } from "./card3d";
 import { editionMaterialStyle } from "./card3d/edition-material";
+import "../../edition-studio.css";
 
 const CARD_SIZES = "(max-width: 640px) 240px, (max-width: 1100px) 260px, 300px";
 const PURCHASE_NOTICE = "Preview only. Purchases will open after funding, pricing and edition limits are confirmed.";

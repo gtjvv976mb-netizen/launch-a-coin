@@ -229,10 +229,13 @@ export default function TurntableStage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    // Pause stops the ambient spin at its current angle. Later deliberate drags can still coast,
-    // and an in-progress manual flip keeps its spring instead of being interrupted.
+    // Pause stops the ambient spin and settles the card on its nearest front face (F7: never frozen edge-on or
+    // showing its back). Later deliberate drags can still coast, and an in-progress manual flip keeps its spring.
     const s = sim.current;
-    if ((paused || calm) && !s.dragging && s.flipTo == null) s.vel = 0;
+    if ((paused || calm) && !s.dragging && s.flipTo == null) {
+      s.vel = 0;
+      if (paused && !calm) s.flipTo = Math.round(s.angle / 360) * 360;
+    }
     kick();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paused, calm]);
@@ -520,6 +523,7 @@ export default function TurntableStage({
     <Dialog.Root open onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
         <Dialog.Content
+          aria-modal="true"
           className="mdx-v3d"
           aria-describedby={hintId}
           data-calm={calm ? "" : undefined}

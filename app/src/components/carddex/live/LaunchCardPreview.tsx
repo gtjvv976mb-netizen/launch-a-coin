@@ -18,8 +18,7 @@ export function LaunchCardPreview({ card }: { card: CardData }) {
     return () => cancelAnimationFrame(frame);
   }, [open]);
   return <div className="cdx-launch-card">
-    <HeroTurntable card={card} followEdits viewportFit />
-    <button ref={opener} type="button" className="cdx-launch-card__inspect" onClick={() => setOpen(true)} aria-haspopup="dialog">Inspect</button>
+    <HeroTurntable card={card} followEdits viewportFit controls={<button ref={opener} type="button" className="cdx-launch-card__inspect" onClick={() => setOpen(true)} aria-haspopup="dialog">Inspect</button>} />
     {open ? <Suspense fallback={null}><InspectStage card={card} open={open} onOpenChange={setOpen} /></Suspense> : null}
   </div>;
 }

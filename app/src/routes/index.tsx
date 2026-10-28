@@ -1,4 +1,3 @@
-import { PageControls, usePageCapacity } from "../components/carddex/Viewport";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
@@ -40,6 +39,7 @@ import {
   usePauseGate,
   useSettled,
 } from "../components/mintdex/ui";
+import { SimTag } from "../components/mintdex/trust";
 import { CHAIN_POLL_MS, chainHome, chainHomeLoader, chainInitial } from "../lib/chain/data";
 import { getHome } from "../lib/mintdex/api";
 import { hasRecentActivity } from "../lib/mintdex/activity-freshness";
@@ -49,12 +49,13 @@ import { marketCapText, marketCapWatch } from "../lib/carddex/quote-display";
 import { EXPLORE_COINS, HOME_COPY, IS_SIM, MODE_COPY, WORDS } from "../lib/mintdex/copy";
 import { sol, usdCompact } from "../lib/mintdex/format";
 import { tierForLevel } from "../lib/mintdex/tiers";
-import { SITE_DESCRIPTION, pageHead } from "../lib/mintdex/seo";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_ORIGIN, pageHead } from "../lib/mintdex/seo";
 import type { CoinSummary } from "../lib/mintdex/types";
 import "../home-motion.css";
 import { Card3DView } from "../components/mintdex/card3d/Card3D";
 import { Engine, motionLevel, type Body } from "../components/mintdex/card3d/motion3d";
 import type { SceneCtl } from "../components/mintdex/card3d/scene";
+import { ViewTabs } from "../components/carddex/ViewTabs";
 
 /**
  * Back keeps your place (P1-14): the featured card on the ledge is mirrored in the URL (/?card=glorb), so
@@ -67,17 +68,42 @@ function validateHomeSearch(raw: Record<string, unknown>): HomeSearch {
   return { card: typeof raw.card === "string" && CARD_PARAM.test(raw.card) ? raw.card : undefined };
 }
 
+const HOME_JSON_LD = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_ORIGIN}/#organization`,
+      name: SITE_NAME,
+      url: `${SITE_ORIGIN}/`,
+      logo: `${SITE_ORIGIN}/assets/brand/carddex-512.png`,
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_ORIGIN}/#website`,
+      name: SITE_NAME,
+      url: `${SITE_ORIGIN}/`,
+      description: SITE_DESCRIPTION,
+      publisher: { "@id": `${SITE_ORIGIN}/#organization` },
+    },
+  ],
+}).replace(/</g, "\\u003c");
+
 export const Route = createFileRoute("/")({
   validateSearch: validateHomeSearch,
   // Stepping the featured card stays on this match: no reload (the polled query keeps the data fresh).
   shouldReload: ({ cause }) => cause !== "stay",
   loader: IS_SIM ? () => getHome() : chainHomeLoader,
-  head: () =>
-    pageHead({
+  head: () => ({
+    ...pageHead({
       path: "/",
       title: "Launch a Card: every coin is a one-of-one card",
       description: SITE_DESCRIPTION,
     }),
+    // SEO-5: who runs the site and what it is, from facts the site already states. No sameAs: the site links
+    // no Launch a Card social account yet ([TO FILL: official X and Telegram URLs]).
+    scripts: [{ type: "application/ld+json", children: HOME_JSON_LD }],
+  }),
   component: Home,
 });
 
@@ -119,13 +145,17 @@ const ADVANCE_MS = 16000;
 const ADVANCE_LITE_MS = 20000;
 /** Let the viewer finish inspecting a card before the carousel resumes, without stopping its ambient motion. */
 const INTERACTION_HOLD_MS = 6000;
-/** The caption fades out and back in around the swap (260 ms in all). */
+/** The caption switches with the selection and fades in (mdx-fade, 160 ms); the class comes off after 260 ms. */
 const CAPTION_HALF_MS = 130;
-/** If a swap is never reported (a card that could not turn), the caption follows the selection after this. */
+/** If a swap is never reported (a card that could not turn), the card's own link follows the selection after this. */
 const CAPTION_FALLBACK_MS = 1800;
 const HINT_KEY = "mdx-hint-drag";
+/** The visitor's Pause on the featured cards, kept for later visits (MOT-7). */
+const PAUSE_KEY = "mdx-featured-paused";
 /** Activity rows in the natural flow (phones, 1024 to 1279); the fitted desktop shows as many as its column holds. */
 const FLOW_ACTIVITY_ROWS = 5;
+/** Recent activity under Trending in the aside: the newest events, with no pager. */
+const ASIDE_ACTIVITY_ROWS = 6;
 
 /**
  * The featured lot: which coin is selected and the step direction. The selection follows the coin (by id)
@@ -306,7 +336,8 @@ function Plinth({ level, paused }: { level: number | null; paused: boolean }) {
 
 /**
  * The previous and next featured coins far behind the card, out of focus (the depth-of-field ghosts). Decorative:
- * hidden from assistive tech and never focusable; a click steps to that coin.
+ * hidden from assistive tech and never focusable; a click steps to that coin. Their art loads now at low priority at
+ * a small size (the 320 px copy), so a blurred ghost never waits on lazy loading or becomes the page's largest paint.
  */
 function Ghosts({
   prev,
@@ -325,7 +356,7 @@ function Ghosts({
         <div className="mdx-tt__ghost mdx-tt__ghost--prev" onClick={() => onStep(-1)}>
           <div className="mdx-tt__float">
             <div className="mdx-tt__lens">
-              <MintCardFace card={featuredCard(prev)} lite />
+              <MintCardFace card={featuredCard(prev)} lite eager sizes="160px" />
             </div>
           </div>
         </div>
@@ -334,7 +365,7 @@ function Ghosts({
         <div className="mdx-tt__ghost mdx-tt__ghost--next" onClick={() => onStep(1)}>
           <div className="mdx-tt__float">
             <div className="mdx-tt__lens">
-              <MintCardFace card={featuredCard(next)} lite />
+              <MintCardFace card={featuredCard(next)} lite eager sizes="160px" />
             </div>
           </div>
         </div>
@@ -378,12 +409,13 @@ function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
                 {marketCapText(c)}
               </Num>
               <Change v={c.change24h} pill hideZero className="text-[13px]" />
+              <SimTag className="self-center" />
             </Figure>
           </dd>
         </div>
       </dl>
       <div className="mt-4 max-lg:col-start-2 max-lg:row-span-2 max-lg:row-start-1 max-lg:mt-0">
-        <ButtonLink to="/coin/$id" params={{ id: c.id }} size="sm">
+        <ButtonLink to="/coin/$id" params={{ id: c.id }} size="sm" variant="outline">
           {HOME_COPY.viewCoin}
         </ButtonLink>
       </div>
@@ -396,7 +428,7 @@ function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
 function HeroActions({ className = "", guide }: { className?: string; guide?: () => void }) {
   return (
     <div className={cx("flex flex-wrap items-center gap-x-2 gap-y-3", className)}>
-      <ButtonLink to="/launch">Launch your token</ButtonLink>
+      <ButtonLink to="/launch">Launch a coin</ButtonLink>
       <ButtonLink to="/discover" variant="ghost">
         {EXPLORE_COINS}
       </ButtonLink>
@@ -416,9 +448,7 @@ function EmptyLine({ children }: { children: ReactNode }) {
 
 function Home() {
   const [homeView,setHomeView]=useState("card");
-  const [sideTab,setSideTab]=useState("trending");
-  const [sideIndex,setSideIndex]=useState(0);
-  const sideGrid=usePageCapacity({rowHeight:60,minWidth:10000,maxColumns:1,maxRows:8});
+  const homeViewsId = useId();
   const initial = Route.useLoaderData();
   const qc = useQueryClient();
   const search = Route.useSearch();
@@ -457,36 +487,26 @@ function Home() {
   const prevCoin = count > 1 ? featured[(lot.index - 1 + count) % count] : null;
   const nextCoin = count > 1 ? featured[(lot.index + 1) % count] : null;
 
-  // What the card shows right now: the swap happens while its back faces the viewer (onSwapped), and the caption,
-  // the aura and the link follow that, not the target.
+  // What the card shows right now: the swap happens while its back faces the viewer (onSwapped), and the aura and
+  // the card's own link follow that. The caption (name, figures, View coin) follows the selection in the same
+  // render as the URL and the dots (F5): a click on View coin always opens the coin the dots point at.
   const [shownId, setShownId] = useState<string | null>(target?.id ?? null);
   const shown = featured.find((c) => c.id === shownId) ?? target;
-  const [capPhase, setCapPhase] = useState<"idle" | "out" | "in">("idle");
-  const [captionId, setCaptionId] = useState<string | null>(target?.id ?? null);
-  const caption = featured.find((c) => c.id === captionId) ?? shown;
-  const capTimers = useRef<Array<ReturnType<typeof setTimeout>>>([]);
+  const [capPhase, setCapPhase] = useState<"idle" | "in">("idle");
+  const caption = target ?? shown;
+  const [captionFor, setCaptionFor] = useState<string | null>(target?.id ?? null);
+  if ((target?.id ?? null) !== captionFor) {
+    // A new selection: the caption's text changes now and fades in (no fade under calm).
+    setCaptionFor(target?.id ?? null);
+    setCapPhase(prefersReducedMotion() ? "idle" : "in");
+  }
   useEffect(() => {
-    const list = capTimers.current;
-    return () => list.forEach(clearTimeout);
-  }, []);
+    if (capPhase !== "in") return;
+    const t = setTimeout(() => setCapPhase("idle"), CAPTION_HALF_MS * 2);
+    return () => clearTimeout(t);
+  }, [capPhase, captionFor]);
   function onSwapped(key: string) {
     setShownId(key);
-    if (key === captionId) return;
-    capTimers.current.forEach(clearTimeout);
-    capTimers.current = [];
-    if (prefersReducedMotion()) {
-      setCaptionId(key);
-      setCapPhase("idle");
-      return;
-    }
-    setCapPhase("out");
-    capTimers.current.push(
-      setTimeout(() => {
-        setCaptionId(key);
-        setCapPhase("in");
-        capTimers.current.push(setTimeout(() => setCapPhase("idle"), CAPTION_HALF_MS * 2));
-      }, CAPTION_HALF_MS),
-    );
   }
   // A swap that is never reported (the card could not turn): the caption follows the selection anyway.
   useEffect(() => {
@@ -523,6 +543,23 @@ function Home() {
   // the pointer is over the stage, focus is inside, the stage is offscreen, the tab is hidden, a dialog is open or
   // Pause was pressed. Calm: never. Auto steps neither write the URL nor announce.
   const [playing, setPlaying] = useState(true);
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(PAUSE_KEY) === "1") setPlaying(false);
+    } catch {
+      /* storage blocked: the carousel starts playing */
+    }
+  }, []);
+  const togglePlay = () => {
+    const next = !playing;
+    setPlaying(next);
+    try {
+      if (next) localStorage.removeItem(PAUSE_KEY);
+      else localStorage.setItem(PAUSE_KEY, "1");
+    } catch {
+      /* storage blocked: the choice holds for this visit */
+    }
+  };
   // The stage's own loops run while the stage is on screen and the viewer has not pressed Pause.
   const [ambientLive, setAmbientLive] = useState(true);
   const still = !playing || !ambientLive;
@@ -568,7 +605,12 @@ function Home() {
   };
   useEffect(() => {
     const body = turntableCtl.current?.body;
-    if (!playing && body) body.flip.snap(body.flip.x);
+    // Pause settles the card on its nearest front face (F7), never frozen edge-on or showing its back.
+    if (!playing && body && !turntableCtl.current?.busy) {
+      const front = Math.round(body.flip.x / 360) * 360;
+      if (motionLevel() === "calm") body.flip.snap(front);
+      else body.flip.t = front;
+    }
     turntableLastFrame.current = 0;
     Engine.kick();
   }, [playing]);
@@ -705,17 +747,16 @@ function Home() {
   // Live activity (P1-17): rows hold still under the pointer, with focus inside, or while paused; the rows
   // that arrived since enter with the sky wash, and screen readers hear "2 new activity events".
   const live = useLiveList(data.activity, (e) => e.id, ["activity event", "activity events"]);
-  const activity = live.shown;
+  // Newest first across every coin (seeded ids are grouped by coin, so the time decides, then the id).
+  const activity = useMemo(
+    () => [...live.shown].sort((a, b) => b.createdAt - a.createdAt || b.id - a.id),
+    [live.shown],
+  );
   // The live dot means "this is happening now": only while the newest event is under an hour old.
   const recent = hasRecentActivity(activity, now);
   const keysHint = useId();
 
-  const captionMotion =
-    capPhase === "out"
-      ? "opacity-0 transition-opacity duration-[130ms] ease-room"
-      : capPhase === "in"
-        ? "mdx-fade"
-        : "";
+  const captionMotion = capPhase === "in" ? "mdx-fade" : "";
 
   // A click on the card opens the coin it shows, writing that coin to the URL first, so Back returns to it.
   function openShown(e: ReactMouseEvent<HTMLAnchorElement>) {
@@ -745,8 +786,9 @@ function Home() {
       announce={lot.announce}
       prevLabel="Previous featured card"
       nextLabel="Next featured card"
+      // Calm never advances the carousel, so there is nothing to pause: no Pause button that says otherwise.
       playing={playing}
-      onTogglePlay={() => setPlaying((p) => !p)}
+      onTogglePlay={level === "calm" ? undefined : togglePlay}
       dotsOnly
       align={align}
       className={cls}
@@ -759,15 +801,18 @@ function Home() {
       data-ambient-paused={still || undefined}
       className="mdx-page mdx-home cdx-home grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_calc(var(--aside)_-_var(--main-pad))] lg:gap-5 lg:max-xl:[--aside:300px] xl:[--aside:340px] wide:[--aside:360px] fit:h-full fit:grid-rows-[minmax(0,1fr)]"
     >
-      <div className="cdx-view-tabs cdx-home-mobile-tabs" aria-label="Home views"><button type="button" aria-pressed={homeView==="card"} onClick={()=>setHomeView("card")}>Featured card</button><button type="button" aria-pressed={homeView==="pulse"} onClick={()=>setHomeView("pulse")}>Collection pulse</button></div>
+      {/* Both views stay mounted (CSS shows one on phones): each tab points at its own element, which keeps its
+          desktop landmark role and name. */}
+      <ViewTabs className="cdx-view-tabs cdx-home-mobile-tabs" label="Home views" idBase={homeViewsId} tabs={[{id:"card",label:"Featured card",selected:homeView==="card",onSelect:()=>setHomeView("card"),panel:`${homeViewsId}-card`},{id:"pulse",label:"Collection pulse",selected:homeView==="pulse",onSelect:()=>setHomeView("pulse"),panel:`${homeViewsId}-pulse`}]} />
       {/* ------------------------------------------------ stage (wall) */}
-      <section className="cdx-home-stage relative isolate flex min-w-0 flex-col fit:min-h-0">
+      <section id={`${homeViewsId}-card`} className="cdx-home-stage relative isolate flex min-w-0 flex-col fit:min-h-0">
         {/* The vitrine's light, bokeh and dust behind the whole stage (the beam falls from the top edge). */}
         <Vitrine hold={!playing} onLive={setAmbientLive} />
         {/* Headline block: Home's header. */}
         <div className="cdx-home__intro flex-none">
-          {/* "card." wears a deep holo ink and catches a white sheen on load (and every 9 s at full motion). */}
-          <h1 className="mdx-display mdx-home-arrival mdx-home-arrival--title">
+          {/* "card." wears a deep holo ink and catches a white sheen once on load. The h1 is the LCP text, so it has
+              no arrival: it paints fully visible and in place on the first frame; only the copy and actions arrive. */}
+          <h1 className="mdx-display">
             Every coin is a <span className={cx("mdx-holo-ink", still && "is-paused")}>card.</span>
           </h1>
           {/* What is real first (P0-5), then why anyone bids (P1-27). On the devnet test site the banner above
@@ -775,11 +820,11 @@ function Home() {
           <p className="cdx-home__copy mdx-home-arrival mdx-home-arrival--copy">
             <span className="sm:block">
               {!IS_SIM && CARD_BIDDING_SUSPENDED
-                ? "Choose one premium design for your token. Keep it from day one."
+                ? "Choose one premium design for your coin. Keep it from day one."
                 : WORDS.heroBid}
             </span>
           </p>
-          <ButtonLink to="/launch" className="cdx-home__launch">Create a card</ButtonLink>
+          <ButtonLink to="/launch" className="cdx-home__launch">Launch a coin</ButtonLink>
         </div>
 
         {/* The featured cards (P1-21): a carousel of one slide at a time that turns to the next coin by itself,
@@ -929,18 +974,48 @@ function Home() {
           screens, floating 12px off them above 820px. The top padding takes the float gutter back, so
           "Trending" keeps its y either way. Like the Market, Levels and Coin asides. */}
       <aside
+        id={`${homeViewsId}-pulse`}
         aria-label="Trending and activity"
         className="cdx-home__aside mdx-plinth mdx-aside flex min-w-0 flex-col gap-6 lg:pt-[calc(2rem_-_var(--gutter))] short:gap-5 short:pt-6 fit:min-h-0 fit:overflow-hidden"
       >
-        <div className="cdx-view-tabs" aria-label="Collection pulse sections"><button type="button" aria-pressed={sideTab==="trending"} onClick={()=>{setSideTab("trending");setSideIndex(0);}}>Trending</button><button type="button" aria-pressed={sideTab==="activity"} onClick={()=>{setSideTab("activity");setSideIndex(0);}}>Activity</button></div>
-        <div className="flex flex-none items-center justify-between gap-2"><p className="text-[12px] leading-4 text-slate">{sideTab==="trending" ? trendingBasis : MODE_COPY.botsNote}</p>{sideTab==="activity" ? <LivePause paused={live.paused} onChange={live.setPaused} /> : <TextLink to="/discover">See all</TextLink>}</div>
-        <div ref={sideGrid.ref} className="cdx-home-pulse-list">
-          {sideTab === "trending" ? trending.slice(Math.min(sideIndex,Math.max(0,Math.ceil(trending.length/sideGrid.count)-1))*sideGrid.count,(Math.min(sideIndex,Math.max(0,Math.ceil(trending.length/sideGrid.count)-1))+1)*sideGrid.count).map((c,i)=><CoinRow key={c.id} coin={c} rank={sideIndex*sideGrid.count+i+1} flipId={c.id} />) : activity.slice(Math.min(sideIndex,Math.max(0,Math.ceil(activity.length/sideGrid.count)-1))*sideGrid.count,(Math.min(sideIndex,Math.max(0,Math.ceil(activity.length/sideGrid.count)-1))+1)*sideGrid.count).map(e=><EventItem key={e.id} e={e} now={now} isNew={live.fresh.has(e.id)} />)}
-          {sideTab==="trending" && !trending.length ? <EmptyLine>No coins in the dex yet.</EmptyLine> : null}
-          {sideTab==="activity" && !activity.length ? <EmptyLine>No activity yet.</EmptyLine> : null}
-        </div>
-        <PageControls page={Math.min(sideIndex,Math.max(0,Math.ceil((sideTab==="trending"?trending.length:activity.length)/sideGrid.count)-1))} pages={Math.max(1,Math.ceil((sideTab==="trending"?trending.length:activity.length)/sideGrid.count))} onPage={setSideIndex} label={sideTab==="trending"?`${trending.length} tokens`:`${activity.length} events`} />
-
+        <section className="flex flex-none flex-col gap-1">
+          <SectionHead title="Trending" right={<TextLink to="/discover">See all</TextLink>} />
+          {trending.length ? (
+            <>
+              <p className="flex min-w-0 items-center gap-1.5 text-[12px] leading-4 text-slate">{trendingBasis}<SimTag /></p>
+              <div ref={trendingRef} className="mdx-stagger" data-settled={trendingSettled || undefined}>
+                {trending.map((c, i) => (
+                  <CoinRow key={c.id} coin={c} rank={i + 1} flipId={c.id} />
+                ))}
+              </div>
+            </>
+          ) : (
+            <EmptyLine>No coins yet.</EmptyLine>
+          )}
+        </section>
+        <section className="flex min-h-0 flex-col gap-1">
+          {/* "Recent activity", not "Live activity": in test mode most rows are demo bots, and the line under the
+              heading says so. */}
+          <SectionHead
+            title="Recent activity"
+            live={recent ? activity[0].id : undefined}
+            livePaused={live.paused}
+            right={activity.length ? <LivePause paused={live.paused} onChange={live.setPaused} /> : undefined}
+          />
+          {MODE_COPY.botsNote ? <p className="text-[12px] leading-4 text-slate">{MODE_COPY.botsNote}</p> : null}
+          <p className="sr-only" role="status" aria-live="polite">
+            {live.said}
+          </p>
+          {activity.length ? (
+            <div {...live.bind} aria-label="Recent activity" className="mdx-stagger">
+              {activity.slice(0, ASIDE_ACTIVITY_ROWS).map((e) => (
+                <EventItem key={e.id} e={e} now={now} isNew={live.fresh.has(e.id)} />
+              ))}
+            </div>
+          ) : (
+            <EmptyLine>No activity yet.</EmptyLine>
+          )}
+        </section>
       </aside>
     </div>
   );

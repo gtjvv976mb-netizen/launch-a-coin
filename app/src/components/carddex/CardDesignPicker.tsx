@@ -137,8 +137,8 @@ export function CardDesignPicker({
       {!compact ? <><p className="mt-2 text-[13px] leading-relaxed text-slate">
         One permanent finish. Paired editions select their matching quote asset.
       </p>
-      <PairBadge quoteAssetKey={quoteKey} ticker={ticker || "YOUR TOKEN"} compact /></> : null}
-      <Modal open={open && !disabled} onOpenChange={setOpen} title="Choose your card design" description="Preview your token in each permanent finish. Choosing a design keeps your token details and artwork." width={860}>
+      <PairBadge quoteAssetKey={quoteKey} ticker={ticker || "YOUR COIN"} compact /></> : null}
+      <Modal open={open && !disabled} onOpenChange={setOpen} title="Choose your card design" description="Preview your coin in each permanent finish. Choosing a design keeps your coin details and artwork." width={860}>
         <div className="cdx-design-browser" data-vaul-no-drag>
           <p className="cdx-design-browser__intro">Your artwork, name and ticker in every finish.</p>
           <div className="cdx-design-browser__filter" data-paired={group === "memes"}>

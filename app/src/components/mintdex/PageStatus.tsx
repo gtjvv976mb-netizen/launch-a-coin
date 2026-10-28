@@ -3,21 +3,27 @@
  * state's card back, one title, one sentence and two actions (a button and a "Go home" link). The title is also an h1
  * for screen readers and the route announcer, which lands focus on a page's h1 after a page change.
  */
-import type { ReactNode } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 
 import { PAGE_NOT_FOUND, ROUTE_ERROR } from "../../lib/mintdex/copy";
-import { Button, ButtonLink, EmptyState, TextLink } from "./ui";
+import { Button, ButtonLink, TextLink } from "./ui";
+
+// The root and the router use these pages, so the card back behind them (the card engine) loads only when one shows.
+// Server HTML hydrates once the chunk is in; a client-side miss shows the h1 until then.
+const EmptyState = lazy(() => import("./empty-state").then((m) => ({ default: m.EmptyState })));
 
 function StatusPage({ title, body, action }: { title: string; body: string; action: ReactNode }) {
   return (
     <>
       <h1 className="sr-only">{title}</h1>
-      <EmptyState
-        className="mdx-page"
-        title={<span aria-hidden>{title}</span>}
-        body={body}
-        action={<div className="flex items-center gap-5">{action}</div>}
-      />
+      <Suspense fallback={null}>
+        <EmptyState
+          className="mdx-page"
+          title={<span aria-hidden>{title}</span>}
+          body={body}
+          action={<div className="flex items-center gap-5">{action}</div>}
+        />
+      </Suspense>
     </>
   );
 }

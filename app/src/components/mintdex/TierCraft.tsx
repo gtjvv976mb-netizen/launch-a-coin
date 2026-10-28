@@ -1,5 +1,6 @@
 import { useId } from "react";
 import type { Box, FrameLayout, Tier, TierKey } from "../../lib/mintdex/tiers";
+import "../../rarity.css";
 
 const W = 630;
 const H = 880;

@@ -124,11 +124,12 @@
  * num and addr; variants short:, wide:, xwide:, fit:. Tokens: rounded-{chip,row,field,pop,panel,aside,pill},
  * shadow-{ring,rest,raise,lift,float,modal}, ease-{room,spring,exit,sheen}, --t-* durations, --stagger.
  */
-import * as Dialog from "@radix-ui/react-dialog";
 import { Link, type LinkProps } from "@tanstack/react-router";
 import {
   Fragment,
+  Suspense,
   createContext,
+  lazy,
   useCallback,
   useContext,
   useEffect,
@@ -147,19 +148,15 @@ import {
 } from "react";
 
 import { thumbSources } from "../../lib/mintdex/art";
-import {
-  CardBack,
-  CardDeck,
-  CardMotionCell,
-  CardMotionProvider,
-  fanVars,
-  gather,
-  motionLevel,
-  prefetchGather,
-  setCalm,
-  useFreshMount,
-  useMotionLevel,
-} from "./card3d";
+// The card sheets stay in the global stylesheet, first, where the card3d barrel import used to put them: every
+// page that shows a card back (the 404 included) needs them, and the cascade keeps its order.
+import "../../themed-card-backs.css";
+import "../../carddex-cards.css";
+// Direct card3d files, never the barrel: this module is in every page's first download, the card engine is not.
+import { CardDeck } from "./card3d/CardBack";
+import { CardMotionCell, CardMotionProvider, gather, prefetchGather } from "./card3d/context";
+import { fanVars } from "./card3d/light";
+import { motionLevel, setCalm, useFreshMount, useMotionLevel } from "./card3d/motion3d";
 import { copyKey, copyText } from "../../lib/mintdex/clipboard";
 import { LAMPORTS } from "../../lib/mintdex/constants";
 import { MODE_COPY } from "../../lib/mintdex/copy";
@@ -167,6 +164,8 @@ import { sol } from "../../lib/mintdex/format";
 import { frameMiniSrc, tierForLevel } from "../../lib/mintdex/tiers";
 import { ancestry, focusNear, focusPageHome } from "./focus";
 import { Sheet, useIsPhone } from "./sheet";
+import { useOpenedOnce } from "./opened-once";
+import { tabDomId, tabKeys, tabPanelDomId } from "../carddex/ViewTabs";
 
 export { ancestry, focusNear, focusPageHome };
 
@@ -195,7 +194,7 @@ export function GenIcon({
     <span
       aria-hidden
       className={`mdx-icon ${className}`}
-      style={{ "--s": `${size}px`, "--src": `url(/assets/icons/${name}.png)` } as CSSProperties}
+      style={{ "--s": `${size}px`, "--src": `url(/assets/icons/mask/${name}.webp)` } as CSSProperties}
     />
   );
 }
@@ -376,6 +375,7 @@ export function TextLink({
   to,
   params,
   search,
+  hash,
   href,
   target,
   rel,
@@ -388,6 +388,7 @@ export function TextLink({
   to?: LinkProps["to"];
   params?: LinkProps["params"];
   search?: LinkProps["search"];
+  hash?: LinkProps["hash"];
   href?: string;
   target?: string;
   rel?: string;
@@ -404,6 +405,7 @@ export function TextLink({
         to={to}
         params={params}
         search={search}
+        hash={hash}
         onClick={onClick}
         className={cls}
         aria-label={ariaLabel}
@@ -505,6 +507,8 @@ export function Tabs<T extends string | number>({
   label,
   size = "md",
   className = "",
+  panels = false,
+  idBase,
 }: {
   value: T;
   options: Array<TabOption<T>>;
@@ -512,10 +516,18 @@ export function Tabs<T extends string | number>({
   label: string;
   size?: "md" | "sm";
   className?: string;
+  /** The options switch the panel below (role="tablist" with arrow keys), not a value such as a chart range. */
+  panels?: boolean;
+  /** With panels: ids for the tabs and their shared panel (tabPanelProps(idBase, value) on the panel). */
+  idBase?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState<{ x: number; w: number } | null>(null);
   const [ready, setReady] = useState(false);
+  // The thumb's laid-out width. A move animates transform only (translateX + scaleX from this width); once it
+  // lands, the width takes the new size with transitions off (data-snap) so the pill's ends are round again.
+  const [base, setBase] = useState<number | null>(null);
+  const [snap, setSnap] = useState(false);
   // Layout effect on the client (measure before paint), plain effect on the server (where it never runs).
   const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
   useIsoLayoutEffect(() => {
@@ -524,7 +536,7 @@ export function Tabs<T extends string | number>({
     let alive = true;
     const measure = () => {
       if (!alive) return;
-      const b = root.querySelector<HTMLElement>('.mdx-tabs__tab[aria-pressed="true"]');
+      const b = root.querySelector<HTMLElement>(".mdx-tabs__tab[data-selected]");
       const next = b ? { x: b.offsetLeft, w: b.offsetWidth } : null;
       setThumb((prev) =>
         prev && next && prev.x === next.x && prev.w === next.w ? prev : next,
@@ -541,6 +553,15 @@ export function Tabs<T extends string | number>({
     };
   }, [value, options.length]);
   useEffect(() => {
+    // Before the first painted measurement nothing animates: the width simply follows.
+    if (thumb && (base == null || !ready) && base !== thumb.w) setBase(thumb.w);
+  }, [thumb, base, ready]);
+  useEffect(() => {
+    if (!snap) return;
+    const id = requestAnimationFrame(() => setSnap(false));
+    return () => cancelAnimationFrame(id);
+  }, [snap]);
+  useEffect(() => {
     if (!thumb || ready) return;
     // Transitions only after the first painted measurement.
     const id = requestAnimationFrame(() => setReady(true));
@@ -549,8 +570,9 @@ export function Tabs<T extends string | number>({
   return (
     <div
       ref={ref}
-      role="group"
+      role={panels ? "tablist" : "group"}
       aria-label={label}
+      onKeyDown={panels ? tabKeys : undefined}
       data-measured={thumb ? "" : undefined}
       data-ready={ready ? "" : undefined}
       className={cx(
@@ -562,7 +584,19 @@ export function Tabs<T extends string | number>({
       <span
         aria-hidden
         className="mdx-tabs__thumb"
-        style={{ "--x": `${thumb?.x ?? 0}px`, "--w": `${thumb?.w ?? 0}px` } as CSSProperties}
+        data-snap={snap || undefined}
+        style={
+          {
+            "--x": `${thumb?.x ?? 0}px`,
+            "--w": `${base ?? thumb?.w ?? 0}px`,
+            "--s": thumb && base ? thumb.w / base : 1,
+          } as CSSProperties
+        }
+        onTransitionEnd={(e) => {
+          if (e.propertyName !== "transform" || !thumb || base === thumb.w) return;
+          setSnap(true);
+          setBase(thumb.w);
+        }}
       />
       {options.map((o) => {
         const content = (
@@ -584,7 +618,13 @@ export function Tabs<T extends string | number>({
             key={String(o.value)}
             type="button"
             className="mdx-tabs__tab"
-            aria-pressed={o.value === value}
+            role={panels ? "tab" : undefined}
+            id={panels && idBase ? tabDomId(idBase, String(o.value)) : undefined}
+            aria-controls={panels && idBase ? tabPanelDomId(idBase) : undefined}
+            aria-pressed={panels ? undefined : o.value === value}
+            aria-selected={panels ? o.value === value : undefined}
+            tabIndex={panels && o.value !== value ? -1 : undefined}
+            data-selected={o.value === value || undefined}
             disabled={o.disabled}
             onClick={() => onChange(o.value)}
           >
@@ -777,6 +817,9 @@ export function Stepper({
         )}
       </svg>
     </button>
+  ) : playing !== undefined ? (
+    // Calm turns the button off after hydration: an empty slot of the same size keeps the row from shifting.
+    <span aria-hidden className="h-8 w-8 flex-none max-lg:h-11 max-lg:w-11" />
   ) : null;
   return (
     <div
@@ -789,11 +832,14 @@ export function Stepper({
       <span className="sr-only" aria-live="polite">
         {announce ?? `${i + 1} of ${count}`}
       </span>
-      {/* Phones: 44px tall dot targets up to 32px wide that share the row's spare width, so any count fits
-          beside the two 44px chevrons. */}
+      {/* Phones: ten 44px dot targets cannot fit beside the two 44px chevrons, so a "3 / 10" count stands in
+          for the dots and the chevrons step (A11Y-2). Desktop: 40px dot targets around the small visible dot. */}
+      <span aria-hidden className="mdx-step-count num hidden max-lg:inline">
+        {i + 1} / {count}
+      </span>
       <div
         className={cx(
-          "flex min-w-0 items-center",
+          "flex min-w-0 items-center max-lg:hidden",
           !cluster && "max-lg:flex-1",
           dotsOnly && (align === "start" ? "-ml-1.5" : "flex-1 justify-center"),
         )}
@@ -808,8 +854,7 @@ export function Stepper({
             aria-label={`Show card ${k + 1} of ${count}`}
             aria-current={k === i || undefined}
             className={cx(
-              "grid h-6 w-6 place-items-center rounded-pill max-lg:h-11 max-lg:w-auto max-lg:min-w-0",
-              dotsOnly ? "max-lg:flex-[0_1_44px]" : "max-lg:flex-[0_1_32px]",
+              "grid h-10 w-10 flex-none place-items-center rounded-pill",
             )}
           >
             <span className="mdx-step-dot" data-active={k === i || undefined} />
@@ -1354,8 +1399,8 @@ export function Thumb({ src, size = 36, alt = "" }: { src: string; size?: number
   );
 }
 
-/** The flat neon stops avatars pick from (never a gradient). The dark initial on each is 9:1 or better. */
-const AVATAR = ["#3dffb5", "#38d9ff", "#b49bff", "#ff8be0", "#ffe45c"] as const;
+/** The flat warm stops avatars pick from (never a gradient; tokens in carddex-theme.css). The dark initial on each is 10:1 or better. */
+const AVATAR = ["var(--avatar-1)", "var(--avatar-2)", "var(--avatar-3)", "var(--avatar-4)", "var(--avatar-5)"] as const;
 
 export function Avatar({
   handle,
@@ -1449,9 +1494,9 @@ export function LivePause({
 /**
  * The Calm motion switch (refs/alive-3d-spec.md 10.2): a role="switch" pill that turns every ambient loop, 3D
  * turn and celebration into the still version (setCalm keeps the choice in this browser and sets
- * html[data-motion] live). It is the only thing that turns motion off: full motion is the default for everyone and
- * the switch is open to every visitor, whatever the device's reduced motion setting (owner, 2026-10-17). Its state
- * renders after mount: the server HTML shows it off and disabled until hydration, same size.
+ * html[data-motion] live). A device that asks for reduced motion starts it on; the switch stays the visitor's
+ * override in either direction. Its state renders after mount: the server HTML shows it off and disabled until
+ * hydration, same size.
  */
 export function CalmSwitch({ className = "", size = "sm" }: { className?: string; size?: "sm" | "md" }) {
   const level = useMotionLevel();
@@ -2105,67 +2150,6 @@ export function Shelf<T>({
   );
 }
 
-/**
- * Centered empty state: the card back in its tray on a ledge, a title, one sentence, one optional action. `hero`
- * (signed-out Portfolio): a larger held back over a slow holo glow, with two more backs fanned behind it that
- * drift (paused offscreen, in a hidden tab and under dialogs; still under calm).
- */
-export function EmptyState({
-  title,
-  body,
-  action,
-  hero = false,
-  className = "",
-}: {
-  title: ReactNode;
-  body?: ReactNode;
-  action?: ReactNode;
-  hero?: boolean;
-  className?: string;
-}) {
-  const fanRef = useRef<HTMLDivElement>(null);
-  usePauseGate(fanRef, { margin: "0px" });
-  return (
-    <div className={cx("grid h-full min-h-[320px] place-items-center px-4 py-8", className)}>
-      <div className="flex max-w-[360px] flex-col items-center text-center">
-        {hero ? (
-          <div ref={fanRef} className="mdx-fan">
-            <div aria-hidden className="mdx-fan__aura">
-              <i />
-            </div>
-            <div aria-hidden className="mdx-fan__card mdx-fan__card--l">
-              <div className="mdx-fan__float">
-                <CardBack />
-              </div>
-            </div>
-            <div aria-hidden className="mdx-fan__card mdx-fan__card--r">
-              <div className="mdx-fan__float">
-                <CardBack />
-              </div>
-            </div>
-            <Pocket className="mdx-fan__hero [--pocket:6px]">
-              <CardBack depth="hand" />
-            </Pocket>
-          </div>
-        ) : (
-          // 6px at every width (delta 4): the phone 4px rule exists for the 12px shelf gap, and this card has no
-          // neighbors and stays 112px wide on phones. The back is a held card: it breathes, peeks and its seal
-          // follows the pointer (calm: still).
-          <Pocket className="w-[112px] [--pocket:6px]">
-            <CardBack depth="hand" />
-          </Pocket>
-        )}
-        <Ledge className={hero ? "w-[260px]" : "w-[200px]"} />
-        <p className="mt-4 text-[17px] font-semibold leading-[1.3] tracking-[-0.01em] text-ink">
-          {title}
-        </p>
-        {body ? <p className="mt-1 text-pretty text-[13px] leading-[1.45] text-slate">{body}</p> : null}
-        {action ? <div className="mt-4">{action}</div> : null}
-      </div>
-    </div>
-  );
-}
-
 /** Skeleton block in the shape of the final row or card, with the one infinite shimmer (static under reduced motion). */
 export function Skeleton({
   className = "",
@@ -2187,7 +2171,7 @@ export function Skeleton({
 
 // ---------------------------------------------------------------- modal
 
-type ModalProps = {
+export type ModalProps = {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   title: string;
@@ -2210,70 +2194,22 @@ export function Modal(props: ModalProps) {
       </Sheet>
     );
   }
-  return <DialogModal {...props} />;
+  return <LazyDialogModal {...props} />;
 }
 
-function DialogModal({ open, onOpenChange, title, description, children, width = 440 }: ModalProps) {
-  // Modals open without a Radix Trigger, so Radix has nothing to refocus on close and focus would fall
-  // to <body>. Remember what had focus when the dialog opened and hand focus back to it on close.
-  const returnTo = useRef<HTMLElement | null>(null);
-  const returnChain = useRef<HTMLElement[]>([]);
+const loadDialogModal = () => import("./dialog-modal");
+const DialogModal = lazy(loadDialogModal);
+
+/** Radix Dialog is a lazy chunk: it mounts on first open (useOpenedOnce), so it stays out of every page's first download. */
+function LazyDialogModal(props: ModalProps) {
+  if (!useOpenedOnce(props.open, loadDialogModal)) return null;
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="mdx-overlay fixed inset-0 z-50 bg-[var(--overlay)]" />
-        <Dialog.Content
-          className="mdx-dialog fixed left-1/2 top-1/2 z-50 flex w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 flex-col rounded-aside bg-plinth p-6 text-ink shadow-modal outline-none max-lg:rounded-panel"
-          style={{ maxWidth: width }}
-          onOpenAutoFocus={() => {
-            const el = document.activeElement;
-            returnTo.current = el instanceof HTMLElement && el !== document.body ? el : null;
-            returnChain.current = ancestry(returnTo.current);
-          }}
-          onCloseAutoFocus={(e) => {
-            const el = returnTo.current;
-            returnTo.current = null;
-            e.preventDefault();
-            if (el?.isConnected) el.focus({ preventScroll: true });
-            // The opener left with the action (an accepted bid's row, a signed-out button that became another):
-            // keep the place next to where it was, with a visible ring, instead of <body> or the ringless main.
-            else focusNear(returnChain.current);
-          }}
-          // No description: drop aria-describedby so screen readers do not read the title twice
-          // (this explicit undefined is also how Radix opts out of its missing-description check).
-          {...(description ? null : { "aria-describedby": undefined })}
-        >
-          <div className="mdx-dialog__head flex flex-none items-start justify-between gap-4">
-            <Dialog.Title className="pt-1 text-[18px] font-semibold leading-[1.3] tracking-[-0.01em] text-ink">
-              {title}
-            </Dialog.Title>
-            {/* 32px circle on desktop, 44px on phones (backlog P1-25); the negative margins keep the glyph put. */}
-            <Dialog.Close
-              className="-mr-2 -mt-1 grid h-8 w-8 flex-none place-items-center rounded-pill text-ink transition-colors duration-(--t-fast) ease-room hover:bg-track max-lg:-mr-3.5 max-lg:-mt-2.5 max-lg:h-11 max-lg:w-11"
-              aria-label="Close"
-            >
-              <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden>
-                <path
-                  d="M2.5 2.5l9 9M11.5 2.5l-9 9"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </Dialog.Close>
-          </div>
-          {description ? (
-            <Dialog.Description className="sr-only">{description}</Dialog.Description>
-          ) : null}
-          {/* Cards inside a dialog lift in after its entrance (M11) and keep moving while it is open. */}
-          <div className="mdx-dialog__body min-h-0 flex-1">
-            <CardMotionProvider enter="liftin">{children}</CardMotionProvider>
-          </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+    <Suspense fallback={null}>
+      <DialogModal {...props} />
+    </Suspense>
   );
 }
+
 
 // ---------------------------------------------------------------- toasts
 
@@ -2721,9 +2657,8 @@ export function usePageKeys(
 
 /**
  * The one reduced motion check for JS motion (false on the server). Every JS-driven moment asks it; CSS
- * motion is switched off by the calm block in mintdex.css. Only the Calm motion switch (html[data-motion="calm"],
- * set by the head script from localStorage or live by setCalm) turns motion off: full motion is the default for
- * everyone, and the device's prefers-reduced-motion setting no longer turns it off by itself (owner, 2026-10-17).
+ * motion is switched off by the calm block in mintdex.css. html[data-motion="calm"] is set by the head script (a
+ * stored Calm choice, or the device's reduced motion setting when nothing is stored) or live by setCalm.
  */
 export function prefersReducedMotion() {
   if (typeof window === "undefined") return false;

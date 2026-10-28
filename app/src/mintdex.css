@@ -556,7 +556,7 @@
    * keep an edge on the canvas and the panel. Round like the card it names. */
   .mdx-mini {
     border-radius: 1.5px;
-    outline: 1px solid rgb(220 235 255 / 0.28);
+    outline: 1px solid var(--image-outline);
     outline-offset: 0;
   }
   /* Card back (.mdx-cardback): moved to card3d.css. */
@@ -660,7 +660,7 @@
     align-items: center;
     justify-content: center;
     gap: 4px;
-    font-size: 11px;
+    font-size: var(--type-min, 12px);
     font-weight: 500;
     line-height: 1;
     color: var(--color-slate);
@@ -748,7 +748,7 @@
       color: var(--color-ink);
     }
   }
-  .mdx-tabs__tab[aria-pressed="true"] {
+  .mdx-tabs__tab[data-selected] {
     color: var(--color-ink);
     font-weight: 600;
   }
@@ -756,7 +756,7 @@
     color: var(--color-slate);
     opacity: 0.6;
   }
-  .mdx-tabs:not([data-measured]) .mdx-tabs__tab[aria-pressed="true"] {
+  .mdx-tabs:not([data-measured]) .mdx-tabs__tab[data-selected] {
     background: var(--color-sheet);
     box-shadow: var(--shadow-raise), 0 0 0 1px rgb(61 255 181 / 0.35);
   }
@@ -767,7 +767,8 @@
     left: 0;
     height: 32px;
     width: var(--w, 0px);
-    transform: translateX(var(--x, 0px));
+    transform: translateX(var(--x, 0px)) scaleX(var(--s, 1));
+    transform-origin: left center;
     border-radius: var(--radius-pill);
     background: var(--color-sheet);
     box-shadow: var(--shadow-raise), 0 0 0 1px rgb(61 255 181 / 0.35), 0 0 14px -4px rgb(61 255 181 / 0.5);
@@ -777,9 +778,11 @@
     display: none;
   }
   .mdx-tabs[data-ready] .mdx-tabs__thumb {
-    transition:
-      transform 280ms var(--ease-spring),
-      width 280ms var(--ease-spring);
+    /* A size and place indicator settles without overshoot. Composite-only: the width change rides on scaleX. */
+    transition: transform 280ms var(--ease-room);
+  }
+  .mdx-tabs[data-ready] .mdx-tabs__thumb[data-snap] {
+    transition: none;
   }
   .mdx-tabs--sm {
     height: 32px;
@@ -983,8 +986,10 @@
 
   /* Press: scale in 100ms, then spring back over 220ms on release. After the hover rules so it wins
    * while the pointer is still over the button. */
-  .mdx-btn:active:not(:disabled, [aria-disabled="true"]) {
-    transform: scale(0.97);
+  /* The :is() matches every button but carries a class's weight, so this ties the 0,4,0 hover lift above and,
+   * coming later, wins on mouse devices too (calm's !important transform: none still overrides it). */
+  .mdx-btn:is(.mdx-btn--primary, .mdx-btn--buy, .mdx-btn--sell, .mdx-btn--outline, *):active:not(:disabled, [aria-disabled="true"]) {
+    transform: scale(0.96);
     transition-duration: var(--t-press);
     transition-timing-function: var(--ease-room);
   }
@@ -1351,7 +1356,10 @@
     border-radius: inherit;
     background: color-mix(in oklab, var(--tier, var(--color-neon)), #fff 40%);
     box-shadow: 0 0 10px color-mix(in oklab, var(--tier, var(--color-neon)), #fff 40%);
-    transition: width var(--t-progress) var(--ease-room);
+    /* The fill is full width and scaled from its left edge (set --fill, 0 to 1): composite-only. */
+    transform: scaleX(var(--fill, 0));
+    transform-origin: left center;
+    transition: transform var(--t-slow) var(--ease-room);
   }
   /* A design unlocked (P1-19): the fill completes in the old target's color, then snaps back to the new
    * progress without sliding backwards. */
@@ -1359,21 +1367,25 @@
     transition: none;
   }
 
-  /* Home stepper dots: the active one widens into an 18x6 foil pill with a 1px ink ring. */
+  /* Home stepper dots: the active one widens into an 18x6 foil pill with a 1px ink ring. Every dot keeps an 18px
+   * box (its button is wider still, so nothing beside it moves); the visible pill is a clip-path inset that opens
+   * without overshoot, so no layout runs while it changes. */
   .mdx-step-dot {
     display: block;
-    width: 6px;
+    width: 18px;
     height: 6px;
     border-radius: var(--radius-pill);
-    background: rgb(220 235 255 / 0.28);
+    background: var(--color-control-border);
+    clip-path: inset(0 6px round 3px);
     transition:
-      width 280ms var(--ease-spring),
+      clip-path 240ms var(--ease-room),
       background-color var(--t-fast) var(--ease-room);
   }
   .mdx-step-dot[data-active] {
-    width: 18px;
+    clip-path: inset(-12px round 15px);
     background: var(--holo);
-    box-shadow: 0 0 10px rgb(61 255 181 / 0.6);
+    outline: 1px solid var(--color-neon);
+    outline-offset: -1px;
   }
 
   /* Skeletons: the shimmer is the only infinite animation, and only while a skeleton is mounted. */
@@ -1415,7 +1427,7 @@
     background-color: var(--color-tint);
   }
   .mdx-thumb {
-    outline: 1px solid rgb(200 225 255 / 0.12);
+    outline: 1px solid var(--image-outline);
     outline-offset: -1px;
   }
   /* The 6px live dot (the one green without a sign). It pings once on mount and on each real event. */
@@ -1664,16 +1676,17 @@
     padding: 0 18px;
     border-radius: var(--radius-pill);
     background: var(--color-neon);
-    color: var(--color-neon-ink);
+    color: var(--color-on-neon, var(--color-neon-ink));
     font-size: 14px;
     font-weight: 600;
-    box-shadow: var(--shadow-float);
+    /* No shadow while parked above the viewport (only on focus): its blur leaked a smudge into the top left (RL-07). */
     transform: translateY(calc(-100% - 24px));
     transition: transform var(--t-base) var(--ease-spring);
   }
   .mdx-skip:focus,
   .mdx-skip:focus-visible {
     transform: none;
+    box-shadow: var(--shadow-float);
     outline-offset: 3px;
   }
   /* The skip target takes focus without a ring around the whole page. */
@@ -2259,11 +2272,11 @@ a:focus-visible .mdx-lift {
 
 /* ---------------------------------------------------------------- accessibility layer (delta 6.16) */
 
-/* The Calm motion switch (refs/alive-3d-spec.md 10.2) is the only thing that stops motion: full motion is the
- * default for everyone, whatever the device's reduced-motion setting. html[data-motion="calm"] is set before first
- * paint (the head script, from localStorage) or live by the switch. Every transition and animation is instant: hard
- * swaps, no lifts, no flashes, no stagger waits. Card CSS (card3d.css) re-enables its own 200ms crossfades with
- * class rules that beat this one. */
+/* Calm motion (refs/alive-3d-spec.md 10.2): html[data-motion="calm"] is set before first paint by the head script
+ * (a stored Calm choice, or the device's reduced-motion setting when nothing is stored) or live by the switch.
+ * Every transition and animation is instant: hard swaps, no lifts, no flashes, no stagger waits. Card CSS
+ * (card3d.css) re-enables its own 200ms crossfades with class rules that beat this one, and buttons keep a short
+ * color and opacity fade below. */
 :root[data-motion="calm"] *,
 :root[data-motion="calm"] *::before,
 :root[data-motion="calm"] *::after {
@@ -2304,6 +2317,27 @@ a:focus-visible .mdx-lift {
 :root[data-motion="calm"] .mdx-skeleton--wall::after {
   display: none;
 }
+/* Button feedback stays under calm: no lift or press scale, but the hover and press colors fade in 150ms and a
+ * press dims the button, so a tap still answers. */
+:root[data-motion="calm"] :is(.mdx-btn, .mdx-case__btn, .cdx-filter button) {
+  transition-property: background-color, color, border-color, opacity !important;
+  transition-duration: 150ms !important;
+  transition-timing-function: ease !important;
+}
+:root[data-motion="calm"] :is(.mdx-btn, .mdx-case__btn, .cdx-filter button):active:not(:disabled, [aria-disabled="true"]) {
+  opacity: 0.82;
+}
+/* Without scripts the head script cannot set calm: the device's reduced-motion setting still ends every loop and
+ * shows finished states, unless the visitor chose full motion (html[data-motion-pref="full"]). */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion-pref="full"]) *,
+  :root:not([data-motion-pref="full"]) *::before,
+  :root:not([data-motion-pref="full"]) *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
+  }
+}
 /* Card-owned calm rules: card3d.css. */
 
 @media (prefers-contrast: more) {
@@ -2319,7 +2353,7 @@ a:focus-visible .mdx-lift {
     opacity: 0;
   }
   .mdx-tabs__thumb,
-  .mdx-tabs:not([data-measured]) .mdx-tabs__tab[aria-pressed="true"] {
+  .mdx-tabs:not([data-measured]) .mdx-tabs__tab[data-selected] {
     box-shadow: 0 0 0 1px var(--color-ink);
   }
   .mdx-plinth,

@@ -16,9 +16,9 @@
 .cdx-design-browser__art { flex:none; width:min(160px,84cqw,calc((100cqh - 74px)*.715909)); }
 .cdx-design-browser__art > .mdx-card { width:100%; }
 .cdx-design-browser__choice > strong { display:block; flex:none; width:100%; min-height:2.7em; color:var(--color-ink); font-size:12px; font-weight:550; line-height:1.35; overflow-wrap:anywhere; text-align:center; }
-.cdx-design-browser__quote { flex:none; display:inline-flex; align-items:center; min-height:23px; padding:2px 7px; border-radius:5px; color:#675a46; background:#f4ecd9; font-size:11px; line-height:1.2; white-space:nowrap; }
+.cdx-design-browser__quote { flex:none; display:inline-flex; align-items:center; min-height:23px; padding:2px 7px; border-radius:5px; color:#675a46; background:#f4ecd9; font-size:var(--type-min); line-height:1.2; white-space:nowrap; }
 .cdx-design-browser__quote[data-bound=true] { color:#4c3820; background:#e4d3ab; font-weight:600; }
-.cdx-design-browser .cdx-page-controls { gap:6px; font-size:11px; }
+.cdx-design-browser .cdx-page-controls { gap:6px; font-size:var(--type-min); }
 @media(max-width:560px) {
   .cdx-design-browser { gap:10px; }
   .cdx-design-browser__filter { gap:8px; }

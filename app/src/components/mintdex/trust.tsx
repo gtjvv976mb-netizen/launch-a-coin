@@ -5,6 +5,7 @@
  *                  (a bottom sheet on phones): what is simulated, the USD rate, and links to a devnet faucet (the
  *                  guide in test mode) and to Terms and risks. Renders nothing when the mode has no badge (mainnet).
  *   BotTag         The small "bot" chip after a demo bot's handle.
+ *   SimTag         The small "Simulated" chip beside demo market figures (test mode only).
  *   ConfirmDialog  open (req), onOpenChange (req), title (req), children (req), confirmLabel (req), cancelLabel,
  *                  pending, pendingLabel, onConfirm (req). A Modal with a secondary cancel and a primary confirm.
  *                  Used by Start over now; the devnet Disconnect and pre-sign reviews reuse it.
@@ -26,6 +27,9 @@ import {
   HOME_COPY,
   IS_SIM,
   MODE_COPY,
+  BOT_HINT,
+  SIM_TAG,
+  SIM_TAG_HINT,
   WORDS,
   shareCoinText,
 } from "../../lib/mintdex/copy";
@@ -87,7 +91,7 @@ export function ModeBadge({ className = "" }: { className?: string }) {
             How Launch a Card works
           </button>
         )}
-        <Link to="/legal" search={{ tab: "risks" }} className="mdx-link mdx-hit" onClick={close}>
+        <Link to="/legal" hash="risks" className="mdx-link mdx-hit" onClick={close}>
           Terms and risks
         </Link>
       </div>
@@ -106,7 +110,7 @@ export function ModeBadge({ className = "" }: { className?: string }) {
             setSheet(true);
           }}
           className={cx(
-            "relative inline-flex h-[22px] flex-none items-center rounded-pill bg-sheet px-[7px] text-[11.5px] font-semibold leading-none text-ink",
+            "relative inline-flex h-[22px] flex-none items-center rounded-pill bg-sheet px-[7px] text-[12px] font-semibold leading-none text-ink",
             "shadow-[0_0_0_1px_rgb(29_27_24/0.16)] transition-[background-color,box-shadow] duration-(--t-fast) ease-room",
             "hover:shadow-[0_0_0_1px_rgb(29_27_24/0.32)] data-[state=open]:shadow-[0_0_0_1px_rgb(29_27_24/0.32)]",
             "max-lg:before:absolute max-lg:before:inset-x-[-4px] max-lg:before:inset-y-[-11px] max-lg:before:content-['']",
@@ -141,53 +145,38 @@ export function ModeBadge({ className = "" }: { className?: string }) {
 export function BotTag({ className = "" }: { className?: string }) {
   return (
     <span
+      title={BOT_HINT}
       className={cx(
-        "inline-flex h-[18px] flex-none items-center rounded-pill bg-track px-1.5 align-[1px] text-[11px] font-semibold leading-none text-slate",
+        "inline-flex h-[18px] flex-none items-center rounded-pill bg-track px-1.5 align-[1px] text-[12px] font-semibold leading-none text-slate",
         className,
       )}
     >
-      bot
+      bot<span className="sr-only">, {BOT_HINT.toLowerCase()}</span>
     </span>
   );
 }
 
-// ---------------------------------------------------------------- confirm dialog
-
-export function ConfirmDialog({
-  open,
-  onOpenChange,
-  title,
-  children,
-  confirmLabel,
-  cancelLabel = "Cancel",
-  pending = false,
-  pendingLabel,
-  onConfirm,
-}: {
-  open: boolean;
-  onOpenChange: (o: boolean) => void;
-  title: string;
-  children: ReactNode;
-  confirmLabel: ReactNode;
-  cancelLabel?: ReactNode;
-  pending?: boolean;
-  pendingLabel?: ReactNode;
-  onConfirm: () => void;
-}) {
+/**
+ * The "Simulated" tag beside demo market figures (CT-06): the same chip as the bot tag, so a screenshot of a market
+ * cap or a 24h change never reads as a live quote. Renders nothing off sim.
+ */
+export function SimTag({ className = "" }: { className?: string }) {
+  if (!SIM_TAG) return null;
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title={title}>
-      <div className="cdx-confirm-copy text-pretty text-[15px] leading-[1.5] text-slate">{children}</div>
-      <div className="cdx-confirm-actions mdx-sheet-foot flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button variant="outline" onClick={() => onOpenChange(false)}>
-          {cancelLabel}
-        </Button>
-        <Button pending={pending} pendingLabel={pendingLabel} onClick={onConfirm}>
-          {confirmLabel}
-        </Button>
-      </div>
-    </Modal>
+    <span
+      title={SIM_TAG_HINT}
+      className={cx(
+        "inline-flex h-[18px] flex-none items-center rounded-pill bg-track px-1.5 align-[1px] text-[12px] font-semibold leading-none text-slate",
+        className,
+      )}
+    >
+      {SIM_TAG}
+    </span>
   );
 }
+
+// The confirm dialog lives in confirm.tsx so the app shell can use it without this file (MintCard).
+export { ConfirmDialog } from "./confirm";
 
 // ---------------------------------------------------------------- sharing
 
@@ -272,7 +261,7 @@ export function ShareButton({
           }}
           className={cx(
             "relative grid h-7 w-7 flex-none place-items-center rounded-pill text-ink transition-colors duration-(--t-fast) ease-room hover:bg-track data-[state=open]:bg-track",
-            "max-lg:before:absolute max-lg:before:-inset-2 max-lg:before:content-['']",
+            "before:absolute before:-inset-1.5 before:content-[''] max-lg:before:-inset-2",
             className,
           )}
         >
@@ -285,6 +274,7 @@ export function ShareButton({
           align="end"
           sideOffset={6}
           collisionPadding={menuCollisionPadding()}
+          aria-label={label}
           className="mdx-menu mdx-pop z-50 flex w-[220px] flex-col outline-none"
         >
           {manual ? (
@@ -386,8 +376,8 @@ export function LaunchedDialog({
       </div>,
       <div key="share" className="cdx-launched-copy cdx-overlay-copy">
         <p className="text-pretty text-[15px] leading-[1.5] text-slate">
-          {dexNo(coin.dexNo)} in the dex. You hold the one-of-one ${coin.ticker} card in your chosen design.
-          {IS_SIM ? " This is a local demo; no real token or NFT has been minted." : ""}
+          {dexNo(coin.dexNo)} in the collection. You hold the one-of-one ${coin.ticker} card in your chosen design.
+          {IS_SIM ? " This is a demo; no real coin or NFT has been minted." : ""}
         </p>
       {/* flex-1 only in the row: in the phone column a zero basis squashed both buttons to 15px bars (QA). */}
       <div className="mdx-sheet-foot flex flex-col gap-2 sm:flex-row-reverse">

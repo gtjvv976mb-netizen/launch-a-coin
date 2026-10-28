@@ -19,6 +19,18 @@
   --color-rule: #dfd2b7;
   --color-neon: #8b5915;
   --color-neon-ink: #30251b;
+  /* Light ink on a --color-neon fill (skip link): 5.58:1 on #8b5915. */
+  --color-on-neon: #fff8df;
+  /* Avatar stops from the warm palette (dark initial 10:1 or better on each). */
+  --avatar-1: #f3d27a;
+  --avatar-2: #e9b48f;
+  --avatar-3: #c9cf9a;
+  --avatar-4: #d8c3a0;
+  --avatar-5: #b9c6c9;
+  /* Readable floor for UI text, and the one page title scale. */
+  --type-min: 0.75rem;
+  --type-page-title: clamp(26px, 2.5vw, 34px);
+  --type-page-title-sm: 25px;
   --color-zap: #9b5d15;
   --color-hype: #b62b2e;
   --color-up: #12654e;
@@ -43,6 +55,15 @@
   --shadow-raise: 0 2px 6px -3px rgb(67 49 22 / .2);
   --shadow-lift: 0 8px 24px -12px rgb(67 49 22 / .3);
   --shadow-modal: 0 24px 90px -24px rgb(43 30 12 / .42);
+  /* Warm ink hairline on thumbnails and frame minis (MIFB image outline, toned to the cream canvas). */
+  --image-outline: rgb(48 39 29 / .14);
+  /* The 3D viewer's fixed night backdrop: its own light-on-dark ink (measured on #16213d to #03040a). */
+  --v3d-ink: #fff8df;
+  --v3d-muted: #dfd0ac;
+  --v3d-accent: #ffe36a;
+  --v3d-control: rgb(255 248 223 / .1);
+  --v3d-control-border: rgb(255 248 223 / .5);
+  --v3d-control-hover: rgb(255 227 106 / .85);
 }
 html, body { background: var(--color-wall); color: var(--color-ink); }
 html { scrollbar-color: #b2955f #eee3c9; }
@@ -80,7 +101,7 @@ input, textarea { caret-color: #8b5915; }
 .mdx-tab[data-active="true"] { color: #ffe36a; text-shadow: none; }
 .mdx-tab__tile::before, .mdx-mtab__icon::before { box-shadow: inset 0 0 0 1px #fff0a1, 0 2px 5px rgb(41 27 11 / .2); }
 .mdx-tab__foil > i { background: conic-gradient(from 30deg, #ffec87, #e9ad26, #fff6bc, #ffce35, #ffec87); }
-.mdx-tabs__thumb, .mdx-tabs:not([data-measured]) .mdx-tabs__tab[aria-pressed="true"] {
+.mdx-tabs__thumb, .mdx-tabs:not([data-measured]) .mdx-tabs__tab[data-selected] {
   box-shadow: 0 0 0 1px #bca16b, 0 2px 4px rgb(99 65 17 / .08);
 }
 [data-testid="local-demo-note"] {

@@ -77,13 +77,8 @@ export function immutable<T>(value: T): T {
  * No transaction, blockhash, signature, initial buy, upload or NFT is submitted.
  * Signing integration must refresh this plan, review costs and verify confirmation.
  */
-export function reviewLaunchInput(input: PrepareLaunchInput) {
-  const asset = PAIR_ASSETS.find((candidate) => candidate.key === input.quoteKey);
-  if (!asset) throw new Error("Choose a verified CardDex pair asset");
-  const creator = publicKey(input.creator, "creator");
-  const mint = publicKey(input.mint, "mint");
-  const quoteMint = new PublicKey(asset.mint);
-  if (mint.equals(creator) || mint.equals(quoteMint)) throw new Error("A distinct new mint public key is required");
+/** The coin's own create_v2 fields: name, symbol and metadata URI. Returns the reviewed URI. */
+export function reviewTokenFields(input: Pick<PrepareLaunchInput, "name" | "symbol" | "tokenMetadataUri">): string {
   if (typeof input.name !== "string" || !input.name.trim() || Buffer.byteLength(input.name, "utf8") > 32 || /[\x00-\x1f]/.test(input.name)) {
     throw new Error("Coin name must contain 1–32 UTF-8 bytes");
   }
@@ -92,6 +87,17 @@ export function reviewLaunchInput(input: PrepareLaunchInput) {
   }
   const tokenMetadataUri = publicUri(input.tokenMetadataUri, "token metadata");
   if (Buffer.byteLength(tokenMetadataUri, "utf8") > 200) throw new Error("Token metadata URI exceeds 200 bytes");
+  return tokenMetadataUri;
+}
+
+export function reviewLaunchInput(input: PrepareLaunchInput) {
+  const asset = PAIR_ASSETS.find((candidate) => candidate.key === input.quoteKey);
+  if (!asset) throw new Error("Choose a verified CardDex pair asset");
+  const creator = publicKey(input.creator, "creator");
+  const mint = publicKey(input.mint, "mint");
+  const quoteMint = new PublicKey(asset.mint);
+  if (mint.equals(creator) || mint.equals(quoteMint)) throw new Error("A distinct new mint public key is required");
+  const tokenMetadataUri = reviewTokenFields(input);
   if (!input.card || !isCardDesignKey(input.card.designKey) || !(input.card.designKey in designAssets)) {
     throw new Error("A reviewed canonical card design key is required");
   }

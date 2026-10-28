@@ -20,13 +20,24 @@ export const SITE_DESCRIPTION = sentences(
   "Choose a premium design. Launch a pump.fun token paired with its own one-of-one NFT trading card",
 );
 
+/**
+ * The default share image (SEO-1): a 1200x630 capture of Home's hero, used wherever a route has no image of its
+ * own. Absolute on launchacard.fun, since link previews need a full URL.
+ */
+export const SITE_OG_IMAGE = "/og/launch-a-card-1200x630.jpg";
+export const SITE_OG_IMAGE_ALT = "Launch a Card: a token's one-of-one trading card under the headline Every coin is a card";
+
 /** Static pages listed in the sitemap. */
 export const STATIC_PATHS = ["/", "/discover", "/launch", "/levels", "/legal"] as const;
 
 /** When the static pages last changed in a way search engines should notice. Bump by hand, never per request. */
 export const STATIC_LASTMOD = "2026-10-28";
 
-/** Coin pages and /portfolio stay out of search while coins are simulated (decision C4). */
+/**
+ * Coin pages and /portfolio stay out of search while coins are simulated (decision C4). SEO-3, checked 2026-10-28:
+ * MODE is "sim" (mode.ts), so every coin page shows demo data, and noindex plus no sitemap entries is intended.
+ * Both follow MODE: a devnet or mainnet build indexes coin pages and lists them in sitemap.xml with their last trade.
+ */
 export const NOINDEX_COINS = IS_SIM;
 export const NOINDEX_PORTFOLIO = IS_SIM;
 
@@ -94,6 +105,9 @@ export type PageHeadInput = {
  * the same name or property as the root's defaults override them (TanStack keeps the deepest match).
  */
 export function pageHead(input: PageHeadInput): { meta: HeadMeta[]; links: HeadLink[] } {
+  if (!input.image) {
+    input = { ...input, image: SITE_OG_IMAGE, imageW: 1200, imageH: 630, imageAlt: SITE_OG_IMAGE_ALT };
+  }
   const url = absoluteUrl(input.path);
   const meta: HeadMeta[] = [
     { title: input.title },

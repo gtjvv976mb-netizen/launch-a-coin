@@ -23,7 +23,7 @@ export function creatorCardSvg(card:CardData,tokenMint:string,_creator:string,ar
   const left=d.x+print.detailsInset*unit,right=d.x+d.w-print.detailsInset*unit;
   const rowHeight=rowSize*print.rowLine,rowGap=print.rowGap*unit;
   const firstRow=d.y+d.h-print.detailsBottom*unit-(3*rowHeight+2*rowGap);
-  const description=lines(card.lore||"A fresh coin in the dex. Its story is still being written.",right-left,loreSize);
+  const description=lines(card.lore||"A fresh coin in the collection. Its story is still being written.",right-left,loreSize);
   const quote=getPairAsset(card.quoteAssetKey||"sol");
   const rows=[["Token address",`${tokenMint.slice(0,5)}...${tokenMint.slice(-4)}`],["Market cap","At creation"],["Holders","0"]];
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1260" height="1760" viewBox="0 0 1260 1760" data-card-layout="${CANONICAL_CARD_TEMPLATE}">

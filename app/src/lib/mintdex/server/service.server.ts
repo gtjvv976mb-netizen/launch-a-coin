@@ -330,7 +330,7 @@ function eventsQuery(limit: number) {
     `SELECT e.id, e.kind, e.coin_id, c.name, c.ticker, c.image, c.quote_asset_key, c.quote_mint, u.handle, u.is_npc AS npc, e.amount, e.level, e.created_at
        FROM events e JOIN coins c ON c.id = e.coin_id LEFT JOIN users u ON u.id = e.user_id
       WHERE e.kind IN ('launch', 'buy', 'sell') AND c.hidden = 0
-      ORDER BY e.id DESC LIMIT ?`,
+      ORDER BY e.created_at DESC, e.id DESC LIMIT ?`,
     limit,
   );
 }

@@ -21,8 +21,8 @@ export async function loadRendererAsset(path: string): Promise<Uint8Array> {
     const source = rendered && reviewedDesigns[rendered.designKey as keyof typeof reviewedDesigns];
     if (!rendered || rendered.rendererVersion !== COMPOSITION_VERSION || rendered.width !== CREATOR_IMAGE_DIMENSIONS.card.width || rendered.height !== CREATOR_IMAGE_DIMENSIONS.card.height || !source || rendered.sourceSha256 !== source.front.sha256) throw new UserError("The card render atlas does not match the current trusted renderer and approved design.");
   }
-  const response = await bindings().ASSETS?.fetch(`${requireLiveConfig().origin}${path}`);
-  const bytes = response?.ok ? new Uint8Array(await response.arrayBuffer()) : await fetchPublicBytes(`${requireLiveConfig().origin}${path}`);
+  const response = await bindings().ASSETS?.fetch(`${requireLiveConfig("launch").origin}${path}`);
+  const bytes = response?.ok ? new Uint8Array(await response.arrayBuffer()) : await fetchPublicBytes(`${requireLiveConfig("launch").origin}${path}`);
   const reviewed = Object.values(reviewedDesigns).flatMap(design => [design.front, design.back]).find(asset => asset.path === path);
   if (path.startsWith("/assets/carddex/higgsfield/") && (!reviewed || await sha256(bytes) !== reviewed.sha256)) throw new UserError("The public card frame differs from the approved premium design.");
   if (path.startsWith("/assets/carddex/render/")) {
@@ -31,7 +31,7 @@ export async function loadRendererAsset(path: string): Promise<Uint8Array> {
   return bytes;
 }
 export async function composeLiveAssets(wallet: string, raw: LiveComposeInput, file: File): Promise<LiveAssets> {
-  requireLiveConfig(); walletBytes(wallet);
+  requireLiveConfig("launch"); walletBytes(wallet);
   const fields = normalizeLiveFields(raw);
   if (fields.tokenMint === wallet) throw new UserError("Generate a separate new token mint address.");
   if (file.size < 30 || file.size > 4 * 1024 * 1024) throw new UserError("Use creator artwork under 4 MB.");

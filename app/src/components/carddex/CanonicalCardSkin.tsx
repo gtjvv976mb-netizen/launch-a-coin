@@ -2,7 +2,7 @@ import { useId, useRef } from "react";
 import { getCardDesign } from "../../lib/carddex/designs";
 import renderAssets from "../../lib/carddex/render-assets.json";
 import { CANONICAL_CARD_LAYOUT, CARD_RENDERER_VERSION } from "../../lib/carddex/card-template";
-import { generatedSkinSource, useReadyImage } from "./GeneratedCardArt";
+import { generatedSkinSource, phoneCopy, useDeferredPlate, useReadyImage } from "./GeneratedCardArt";
 import { defaultQuoteForDesign, getPairAsset } from "../../lib/carddex/pairs";
 
 type Box = { x:number; y:number; w:number; h:number };
@@ -38,16 +38,26 @@ export function canonicalSkinAsset(cardTemplate:string,quoteAssetKey?:string) {
   return candidate?.rendererVersion===CARD_RENDERER_VERSION?candidate:null;
 }
 
-export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,sizes}:{cardTemplate:string;quoteAssetKey?:string;priority?:boolean;sizes?:string}) {
+const stagedIdle=()=>true;
+
+export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,eager=false,lite=false,sizes}:{cardTemplate:string;quoteAssetKey?:string;priority?:boolean;eager?:boolean;lite?:boolean;sizes?:string}) {
   const id=useId().replaceAll(":", "");
   const quote=quoteAssetKey?getPairAsset(quoteAssetKey):defaultQuoteForDesign(cardTemplate);
   const atlas=canonicalSkinAsset(cardTemplate,quoteAssetKey);
+  const box=useRef<HTMLDivElement>(null);
+  // A staged slot (eager: a neighbour the card turns to next) and a lite miniature (the blurred neighbours beside
+  // the Home card) wait for the first touch or turn, or load plus idle (PERF-1), and phones take the 320px preview;
+  // the shown face and other lazy cards load as before.
+  const staged=(eager||lite)&&!priority;
+  const wanted=useDeferredPlate(box,!staged,stagedIdle)||!staged;
+  const small=staged&&!!atlas?.previewPath&&phoneCopy();
+  const src=atlas&&wanted?(small?atlas.previewPath!:atlas.path):null;
   const imageRef=useRef<HTMLImageElement>(null);
-  const image=useReadyImage(imageRef,atlas?.path??null);
-  const ready=!!atlas && image.ready;
-  return <div className="cdx-canonical-skin" data-market-finish={quote.kind} data-card-skin-ready={ready?"":undefined} data-card-skin-source={ready?cardTemplate:undefined} aria-hidden>
+  const image=useReadyImage(imageRef,src);
+  const ready=!!src && image.ready;
+  return <div ref={box} className="cdx-canonical-skin" data-market-finish={quote.kind} data-card-skin-ready={ready?"":undefined} data-card-skin-source={ready?cardTemplate:undefined} aria-hidden>
     <CanonicalSkinSurface cardTemplate={cardTemplate} quoteAssetKey={quoteAssetKey} id={id} />
-    {atlas?<img ref={imageRef} className="cdx-canonical-skin__image" src={atlas.path} srcSet={atlas.previewPath?`${atlas.previewPath} 320w, ${atlas.path} 1260w`:`${atlas.path} 1260w`} sizes={sizes??(priority?"300px":"auto, 300px")} style={{opacity:ready?1:0}} alt="" hidden={image.failed} draggable={false} loading={priority?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":undefined} onLoad={image.onLoad} onError={image.onError} />:null}
+    {atlas&&src?<img ref={imageRef} className="cdx-canonical-skin__image" src={src} srcSet={small?undefined:atlas.previewPath?`${atlas.previewPath} 320w, ${atlas.path} 1260w`:`${atlas.path} 1260w`} sizes={small?undefined:sizes??(priority||eager?"300px":"auto, 300px")} style={{opacity:ready?1:0}} alt="" hidden={image.failed} draggable={false} loading={priority||eager?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":eager?"low":undefined} onLoad={image.onLoad} onError={image.onError} />:null}
   </div>;
 }
 

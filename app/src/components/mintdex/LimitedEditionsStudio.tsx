@@ -13,6 +13,7 @@ import "../../limited-editions-studio.css";
 import { faceSlot, type CardData } from "./MintCard";
 import { Card3D, View3DHost, useMotionLevel, type Card3DHandle } from "./card3d";
 import { memeIconMaterialStyle } from "./card3d/meme-icon-material";
+import "../../meme-icons-studio.css";
 import { LimitedEditionOwnership } from "./LimitedEditionOwnership";
 
 const CARD_SIZES = "(max-width: 640px) 240px, (max-width: 1100px) 260px, 300px";

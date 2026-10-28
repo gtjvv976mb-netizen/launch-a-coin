@@ -33,14 +33,13 @@
 @import "./mintdex.css";
 /* Alive 3D (refs/alive-3d-spec.md): the card (CARD) and the page life (SITE). */
 @import "./card3d.css";
-@import "./rarity.css";
 @import "./alive.css";
-@import "./editions-card.css";
-@import "./edition-studio.css";
 @import "./meme-icons.css";
-@import "./meme-icons-studio.css";
+/* rarity.css, editions-card.css, edition-studio.css and meme-icons-studio.css style components no page renders
+ * (TierCraft, EditionCard, EditionStudio, MemeIconsStudio); each of those imports its own sheet. */
 @import "./carddex-theme.css";
 @import "./carddex-gallery.css";
+@import "./carddex-a11y.css";
 
 @custom-variant dark (&:where([data-theme="default-dark"], [data-theme="default-dark"] *));
 
