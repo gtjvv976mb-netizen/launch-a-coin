@@ -126,7 +126,7 @@ function Collection({ me }: { me: NonNullable<Me> }) {
       <div ref={grid.ref} {...tabPanelProps(tabsId, view)} className="cdx-portfolio__rows" style={{"--page-columns":grid.columns,"--page-rows":grid.rows} as CSSProperties}>
         {!data ? <div className="grid gap-3" aria-busy="true" aria-label="Loading your collection">{[0, 1, 2].map((n) => <Skeleton key={n} className="h-20 w-full rounded-panel" />)}</div> : view === "balances" ? <dl className="cdx-balance-grid" aria-label="Demo quote balances">{balances.slice(from,from+perPage).map(([key,value])=><div key={key}><dt>{getPairAsset(key).symbol}</dt><dd>{quoteAtoms(value,key,true)}</dd><span className="text-[12px] text-slate">Held value: {quoteAtoms(data.totals.holdingsValueByQuote[key]??0,key,true)}</span></div>)}</dl> : view === "cards" ? data.deeds.length ? <Cards rows={data.deeds.slice(from, from + perPage)} /> : <EmptyState title="Your first card awaits" body="Launch a coin and choose the premium design for its one-of-one card." action={<ButtonLink to="/launch">Launch a coin</ButtonLink>} /> : data.holdings.length ? <Holdings rows={data.holdings.slice(from, from + perPage)} /> : <EmptyState title="No coins yet" body="Discover a coin to trade, or launch one of your own." action={<ButtonLink to="/discover">Discover coins</ButtonLink>} />}
       </div>
-      <PageControls page={page} pages={pages} onPage={setPage} label={view==="balances" ? "Separate demo balances" : `${rows?.length ?? 0} ${view==="cards"?"cards":"coins"}`} />
+      <PageControls page={page} pages={pages} onPage={setPage} label={view==="balances" ? "Separate demo balances" : `${rows?.length ?? 0} ${view==="cards"?"card":"coin"}${rows?.length === 1 ? "" : "s"}`} />
     </PageFrame>
   );
 }

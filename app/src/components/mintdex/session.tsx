@@ -338,9 +338,9 @@ function GuideDialog({
   const FEE_ROWS = feeRows(liveOpen);
   return (
     <Modal open={open} onOpenChange={onOpenChange} title="How Launch a Card works" width={560}>
-      <div className="cdx-overlay-deck"><ViewportPages label="How Launch a Card works pages" pages={[
+      <div className="cdx-overlay-deck"><ViewportPages label="How Launch a Card works pages" onDone={() => onOpenChange(false)} pages={[
         ...STEPS.map(s => <section key={s.title} className="cdx-overlay-copy"><h3>{s.title}</h3><p>{s.body}</p>{s.visual}</section>),
-        <section key="fees" className="cdx-overlay-copy"><h3>Costs and risks</h3>{MODE_COPY.guideNote ? <p>{MODE_COPY.guideNote}</p> : null}<dl>{FEE_ROWS.map(r => <div key={r.label}><dt className="font-semibold text-ink">{r.label}</dt><dd>{r.value}</dd></div>)}</dl><TextLink to="/legal" search={{ tab: "fees" }} onClick={() => onOpenChange(false)}>Fees, terms and risks</TextLink></section>,
+        <section key="fees" className="cdx-overlay-copy"><h3>Costs and risks</h3>{MODE_COPY.guideNote ? <p>{MODE_COPY.guideNote}</p> : null}<dl>{FEE_ROWS.map(r => <div key={r.label}><dt className="font-semibold text-ink">{r.label}</dt><dd>{r.value}</dd></div>)}</dl><TextLink to="/legal" hash="fees" onClick={() => onOpenChange(false)}>Fees, terms and risks</TextLink></section>,
         <section key="settings" className="cdx-overlay-copy"><h3>Make it yours</h3><CalmSwitch size="md" />{!me ? <Button block onClick={() => { onOpenChange(false); onEnter(); }}>{IS_SIM ? "Try the demo" : CONNECT_COPY.connect}</Button> : null}</section>,
       ]} /></div>
     </Modal>

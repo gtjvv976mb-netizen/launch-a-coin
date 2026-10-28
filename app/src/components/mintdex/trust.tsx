@@ -91,7 +91,7 @@ export function ModeBadge({ className = "" }: { className?: string }) {
             How Launch a Card works
           </button>
         )}
-        <Link to="/legal" search={{ tab: "risks" }} className="mdx-link mdx-hit" onClick={close}>
+        <Link to="/legal" hash="risks" className="mdx-link mdx-hit" onClick={close}>
           Terms and risks
         </Link>
       </div>

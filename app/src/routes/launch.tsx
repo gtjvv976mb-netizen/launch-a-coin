@@ -207,6 +207,7 @@ function Launch() {
   const [tickerNote, setTickerNote] = useState("");
   const [draftReady, setDraftReady] = useState(false);
   const [mobileView, setMobileView] = useState<"card" | "details">("card");
+  const [confirmReset, setConfirmReset] = useState(false);
   const viewId = useId();
   const steps = ["Coin", "Artwork", "Design", "Pair", "Story", "Links", "Initial buy", "Launch"];
   // A creator's permanent design choice is independent of the token's market data.
@@ -285,6 +286,8 @@ function Launch() {
   const devRef = useRef<HTMLInputElement>(null);
 
   const pairConfirmationRef = useRef<HTMLDivElement>(null);
+  const startOverRef = useRef<HTMLButtonElement>(null);
+  const keepDraftRef = useRef<HTMLButtonElement>(null);
 
   useEffect(
     () => () => {
@@ -452,7 +455,18 @@ function Launch() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftReady]);
 
+  /** Start over asks first, in the page: the safe answer is focused, and Escape or Keep editing returns to the trigger. */
+  function askStartOver() {
+    setConfirmReset(true);
+    requestAnimationFrame(() => keepDraftRef.current?.focus({ preventScroll: true }));
+  }
+  function keepDraft() {
+    setConfirmReset(false);
+    requestAnimationFrame(() => startOverRef.current?.focus({ preventScroll: true }));
+  }
+
   function startOver() {
+    setConfirmReset(false);
     writeDraft(null);
     if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview);
     setName(""); setTicker(""); setLore(""); setWebsite(""); setXUrl(""); setDevBuy("");
@@ -590,9 +604,16 @@ function Launch() {
           <div className="cdx-launch-step-head">
             <label htmlFor="launch-step">{step + 1} / {steps.length}</label>
             <select id="launch-step" aria-label="Launch step" value={step} onChange={e => goTo(Number(e.target.value))}>{steps.map((title, i) => <option key={title} value={i}>{title}</option>)}</select>
-            {dirty && !(live && liveLocked) ? <button type="button" className="mdx-link cdx-launch-start-over" onClick={startOver}>Start over</button> : null}
+            {dirty && !(live && liveLocked) ? <button ref={startOverRef} type="button" className="mdx-link cdx-launch-start-over" aria-expanded={confirmReset} aria-controls={confirmReset ? `${viewId}-reset` : undefined} onClick={() => (confirmReset ? keepDraft() : askStartOver())}>Start over</button> : null}
             <p className="sr-only" aria-live="polite">{`Step ${step + 1} of ${steps.length}: ${steps[step]}`}</p>
           </div>
+          {confirmReset && dirty && !(live && liveLocked) ? (
+            <div id={`${viewId}-reset`} role="group" aria-labelledby={`${viewId}-reset-q`} className="cdx-launch-reset" onKeyDown={e => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); keepDraft(); } }}>
+              <p id={`${viewId}-reset-q`}>Clear every field and the uploaded art?</p>
+              <button ref={keepDraftRef} type="button" className="mdx-btn mdx-btn--outline" onClick={keepDraft}>Keep editing</button>
+              <button type="button" className="mdx-btn mdx-btn--primary" onClick={startOver}>Clear draft</button>
+            </div>
+          ) : null}
           <div className="cdx-launch-content">
           <div className="cdx-launch-fields" hidden={step === 7}>
           <div className="cdx-launch-identity" hidden={step !== 0}>
@@ -760,7 +781,7 @@ function Launch() {
           <div className="cdx-launch-commit" hidden={step !== 7}>
             {/* The content rule (P1-28), right where people commit. */}
             <p className="cdx-launch-rules">
-              <TextLink to="/legal" search={{ tab: "terms" }}>
+              <TextLink to="/legal" hash="terms">
                 Content rules
               </TextLink>
             </p>
@@ -798,8 +819,8 @@ function Launch() {
           </div>
           </div>
           <nav className="cdx-launch-step-footer" aria-label="Launch steps">
-            <button type="button" className="mdx-btn mdx-btn--outline" disabled={step === 0} onClick={() => goTo(Math.max(0, step - 1))}>Back</button>
-            {step < 7 ? <button type="button" className="mdx-btn mdx-btn--primary" onClick={() => goTo(Math.min(7, step + 1))}>Next: {steps[step + 1]}</button> : <button type="button" className="mdx-btn mdx-btn--ghost cdx-launch-show-card" onClick={() => setMobileView("card")}>View card</button>}
+            <button type="button" className="mdx-btn mdx-btn--outline" disabled={step === 0} onClick={() => goTo(Math.max(0, step - 1), true)}>Back</button>
+            {step < 7 ? <button type="button" className="mdx-btn mdx-btn--primary" onClick={() => goTo(Math.min(7, step + 1), true)}>Next: {steps[step + 1]}</button> : <button type="button" className="mdx-btn mdx-btn--ghost cdx-launch-show-card" onClick={() => setMobileView("card")}>View card</button>}
           </nav>
         </form>
 

@@ -91,6 +91,11 @@
 .cdx-launch-step-head select { width:100%; min-width:0; min-height:36px; background:transparent; color:var(--color-ink); font-size:15px; font-weight:600; }
 .cdx-launch-step-head .cdx-launch-start-over { flex:none; min-height:44px; padding-inline:4px; font-size:13px; white-space:nowrap; }
 @media (pointer: fine) { .cdx-launch-step-head .cdx-launch-start-over { min-height:40px; } }
+/* The in-page Start over check: a question and two answers on the form's paper, no extra panel. */
+.cdx-launch-reset { display:flex; flex:none; flex-wrap:wrap; align-items:center; gap:8px; padding-bottom:10px; border-bottom:1px solid var(--color-hairline); }
+.cdx-launch-reset > p { flex:1 1 100%; margin:0; font-size:13px; line-height:1.4; color:var(--color-ink); }
+.cdx-launch-reset > button { min-height:44px; padding-inline:12px; font-size:12px; }
+@media (pointer: fine) { .cdx-launch-reset > button { min-height:40px; } }
 .cdx-launch-content { flex:1; min-height:0; }
 .cdx-launch-fields,.cdx-launch-step,.cdx-launch-links { display:grid; align-content:start; gap:14px; }
 .cdx-launch .cdx-launch-identity { grid-template-columns:1fr; gap:14px; }
