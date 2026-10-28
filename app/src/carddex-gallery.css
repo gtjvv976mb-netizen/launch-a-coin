@@ -7,7 +7,7 @@
 .cdx-app .mdx-rail .mdx-input { min-height:36px; height:36px; font-size:12px; background:#40372a; color:#fff8df; border-color:#796740; }
 .cdx-app .mdx-rail .mdx-input::placeholder { color:#dfd0ac; }
 /* Phone tilt is optional: a quiet outline chip, so it never competes with the page's primary action (VD-05). */
-.cdx-app .mdx-card3d__chip { background:var(--color-sheet); color:var(--color-ink); border:1px solid var(--color-control-border); box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none; }
+.cdx-app .mdx-card3d__chip { background:var(--color-sheet); color:var(--color-ink); border:1px solid var(--color-control-border); box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none; } /* taste-skill-ignore: outline marks a secondary control; backdrop-filter:none removes the old glass */
 .cdx-app .mdx-rail .mdx-link, .cdx-app .mdx-rail .mdx-btn { font-size:12px; }
 .cdx-app .mdx-rail .mdx-btn { padding-inline:12px; }
 .cdx-app .mdx-mhead { background:#28231d; border-bottom:1px solid #76623e; }
