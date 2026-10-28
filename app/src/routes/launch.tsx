@@ -36,7 +36,7 @@ import { allowedQuotesForDesign, boundQuoteForDesign, defaultQuoteForDesign, get
 import { formatQuoteAmount, initialQuoteReserves, maxInitialBuyQuoteAtoms, parseQuoteAmount, quoteMetrics } from "../lib/carddex/quote-simulation";
 import { QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
 import { LiveLaunchPanel, type LiveLaunchHandle } from "../components/carddex/live/LiveLaunchPanel";
-import { liveReadinessQuery, useLiveLaunchOpen } from "../components/carddex/live/readiness";
+import { liveReadinessQuery, useLiveLaunchOpen, useLiveRecoveryOpen } from "../components/carddex/live/readiness";
 import { parseLiveAmount } from "../components/carddex/live/amounts";
 import { PagedMessage } from "../components/carddex/live/PagedMessage";
 import type { LiveLaunchIntent } from "../lib/carddex/live/types";
@@ -71,6 +71,8 @@ const CONTEXT = "A pump.fun coin and your one-of-one card.";
 const ENTER_TO_UPLOAD = "Try the demo to upload card art and launch.";
 /** Shown in place of the Mainnet switch while the owner keeps real launches off. */
 const MAINNET_CLOSED = "Test mode · Real mainnet launches are not open yet.";
+/** Mainnet mode while new launches are off: a creator can still finish a saved launch. */
+const MAINNET_RECOVERY = "New mainnet launches are not open right now. You can still finish a saved launch.";
 const TICKER_HELP = "2 to 8 letters or numbers (A to Z, 0 to 9).";
 
 // ---------------------------------------------------------------- draft
@@ -213,8 +215,11 @@ function Launch() {
   // A creator's permanent design choice is independent of the token's market data.
   const search = Route.useSearch();
   // Test mode is the default. Mainnet needs both an explicit choice and the owner's switch (CARDDEX_LIVE_LAUNCH_ENABLED).
+  // With new launches off, saved-launch recovery (CARDDEX_LIVE_RECOVERY_ENABLED) keeps mainnet mode for finishing one.
   const liveOpen = useLiveLaunchOpen();
-  const live = search.mode === "live" && liveOpen;
+  const recoveryOpen = useLiveRecoveryOpen();
+  const live = search.mode === "live" && (liveOpen || recoveryOpen);
+  const recoveryOnly = live && !liveOpen;
   const liveRef = useRef<LiveLaunchHandle>(null);
   const modeRef = useRef(live);
   modeRef.current = live;
@@ -454,6 +459,8 @@ function Launch() {
     setStep(n);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftReady]);
+  // Recovery-only mainnet mode opens on the wallet panel, where a saved launch is found and finished.
+  useEffect(() => { if (recoveryOnly && draftReady) setStep(7); }, [recoveryOnly, draftReady]);
 
   /** Start over asks first, in the page: the safe answer is focused, and Escape or Keep editing returns to the trigger. */
   function askStartOver() {
@@ -529,7 +536,7 @@ function Launch() {
       return;
     }
     if (live) {
-      if (!ready && !liveLocked) { setShowErrors(true); focusFirstProblem(); return; }
+      if (!ready && !liveLocked && !recoveryOnly) { setShowErrors(true); focusFirstProblem(); return; }
       liveRef.current?.submit();
       return;
     }
@@ -584,9 +591,9 @@ function Launch() {
 
   return (
     <PageFrame className={`mdx-page cdx-launch cdx-launch--${mobileView}`}>
-      <PageHeader title="Launch a coin" context={live ? CONTEXT : liveOpen ? "Demo only · no real coin or NFT." : MAINNET_CLOSED} wrapContext right={liveOpen ? (
+      <PageHeader title="Launch a coin" context={recoveryOnly ? MAINNET_RECOVERY : live ? CONTEXT : liveOpen ? "Demo only · no real coin or NFT." : MAINNET_CLOSED} wrapContext right={liveOpen || recoveryOpen ? (
         <nav className="cdx-launch-mode" aria-label="Launch environment">
-          <Link to="/launch" search={{ design: designKey, quote: quoteKey, mode: "live" }} aria-label="Mainnet wallet launch" aria-current={live ? "page" : undefined}>Mainnet</Link>
+          <Link to="/launch" search={{ design: designKey, quote: quoteKey, mode: "live" }} aria-label={liveOpen ? "Mainnet wallet launch" : "Finish a saved mainnet launch"} aria-current={live ? "page" : undefined}>{liveOpen ? "Mainnet" : "Saved launch"}</Link>
           <Link to="/launch" search={{ design: designKey, quote: quoteKey, mode: "demo" }} aria-current={!live ? "page" : undefined}>Demo</Link>
         </nav>
       ) : undefined} />
@@ -785,7 +792,7 @@ function Launch() {
                 Content rules
               </TextLink>
             </p>
-            {live ? <LiveLaunchPanel ref={liveRef} card={previewCard} draft={ready && preparedArt && liveDev !== null ? { name: name.trim(), symbol: ticker, description: lore.trim(), website: website.trim(), xUrl: xUrl.trim(), cardTemplate: designKey, quoteAssetKey: quoteKey, quoteMint: quoteAsset.mint, initialBuyQuoteBaseUnits: liveDev, artwork: preparedArt } : null} pairPending={pairPending} onLockedChange={setLiveLocked} onIntentLoaded={restoreLiveIntent} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /> : <>
+            {live ? <LiveLaunchPanel ref={liveRef} launchesOpen={liveOpen} card={previewCard} draft={ready && preparedArt && liveDev !== null ? { name: name.trim(), symbol: ticker, description: lore.trim(), website: website.trim(), xUrl: xUrl.trim(), cardTemplate: designKey, quoteAssetKey: quoteKey, quoteMint: quoteAsset.mint, initialBuyQuoteBaseUnits: liveDev, artwork: preparedArt } : null} pairPending={pairPending} onLockedChange={setLiveLocked} onIntentLoaded={restoreLiveIntent} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /> : <>
             <dl className="cdx-launch-cost" aria-label="Demo launch cost" aria-live="polite">
               <div><dt>Demo launch fee</dt><dd>{sol(LAUNCH_FEE, 3)} test SOL</dd></div>
               {devQuote?.ok ? <div><dt>Initial buy</dt><dd>{formatQuoteAmount(devQuote.solIn, quoteKey)} test {quoteAsset.symbol}</dd></div> : null}

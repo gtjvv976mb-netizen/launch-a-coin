@@ -27,7 +27,7 @@ export async function sha256(bytes: Uint8Array | string): Promise<string> {
 }
 function randomToken() { return Array.from(crypto.getRandomValues(new Uint8Array(32)), byte => byte.toString(16).padStart(2, "0")).join(""); }
 export async function createWalletChallenge(wallet: string) {
-  const { origin } = requireLiveConfig(); walletBytes(wallet);
+  const { origin } = requireLiveConfig("recovery"); walletBytes(wallet);
   const now = Date.now(), expiresAt = now + CHALLENGE_MS;
   const recent = await one<{n: number}>("SELECT COUNT(*) AS n FROM live_wallet_challenges WHERE wallet = ? AND created_at > ?", wallet, now - 60_000);
   if ((recent?.n ?? 0) >= 5) throw new UserError("Wait a minute before requesting another wallet challenge.");
@@ -37,7 +37,7 @@ export async function createWalletChallenge(wallet: string) {
   return { challengeId, message, expiresAt };
 }
 export async function verifyWalletChallenge(input: {challengeId: string; wallet: string; signatureBase64: string}) {
-  const { origin } = requireLiveConfig();
+  const { origin } = requireLiveConfig("recovery");
   const challenge = await one<{wallet: string; origin: string; message: string; expires_at: number; consumed_at: number | null}>("SELECT * FROM live_wallet_challenges WHERE id = ?", input.challengeId);
   const now = Date.now();
   if (!challenge || challenge.wallet !== input.wallet || challenge.origin !== origin || challenge.consumed_at !== null || challenge.expires_at <= now) throw new UserError("This wallet challenge expired or was already used. Request a fresh challenge.");
@@ -61,7 +61,7 @@ export async function liveWalletFromToken(token?: string | null): Promise<LiveWa
   return row ? {wallet: row.wallet, expiresAt: row.expires_at} : null;
 }
 export async function requireLiveWallet(token?: string | null) {
-  requireLiveConfig();
+  requireLiveConfig("recovery");
   const wallet = await liveWalletFromToken(token);
   if (!wallet) throw new UserError("Sign in with the creator wallet to continue this real launch.");
   return wallet;

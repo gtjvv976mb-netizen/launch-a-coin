@@ -88,7 +88,7 @@ beforeEach(() => {
 });
 afterAll(() => { globalThis.fetch = nativeFetch; sqlite.close(); });
 function image(width: number, height: number) { const bytes = new Uint8Array(40); bytes.set([0x89, 0x50, 0x4e, 0x47]); new DataView(bytes.buffer).setUint32(16, width); new DataView(bytes.buffer).setUint32(20, height); return bytes; }
-async function input(overrides: Partial<{cardTemplate: string; quoteAssetKey: string; quoteMint: string}> = {}) {
+async function input(overrides: Partial<{cardTemplate: string; quoteAssetKey: string; quoteMint: string; tokenMint: string}> = {}) {
   const fields = {tokenMint: mint, name: "Launch Fixture", symbol: "FIX", description: "Creator token with a separate card.", website: "https://creator.example/", xUrl: "https://x.com/creator", cardTemplate: "spark", quoteAssetKey: "sol", quoteMint: "So11111111111111111111111111111111111111112", ...overrides};
   const refs = {artwork: await assets.putPublicAsset(creator, image(128,128), "image/png"), cardImage: await assets.putPublicAsset(creator, image(1260,1760), "image/png"), caseImage: await assets.putPublicAsset(creator, image(1440,2240), "image/png")};
   await new Prepared("INSERT OR IGNORE INTO live_compositions (wallet, binding_sha256, artwork_sha256, card_sha256, case_sha256, renderer_version, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)", [creator, await compositionBinding(creator, fields), refs.artwork.sha256, refs.cardImage.sha256, refs.caseImage.sha256, COMPOSITION_VERSION, Date.now()]).run();
@@ -108,9 +108,15 @@ describe("isolated real-launch server lifecycle", () => {
     } finally { globalThis.fetch = transport; }
   });
   test("readiness distinguishes missing configuration and keeps local defaults closed", () => {
-    expect(liveReadiness().ready).toBe(true);
-    env.CARDDEX_DEPLOYMENT_ENV = "local"; env.CARDDEX_LIVE_LAUNCH_ENABLED = "false";
-    expect(liveReadiness().implemented).toBe(true); expect(liveReadiness().ready).toBe(false); expect(liveReadiness().configured).toBe(false);
+    expect(liveReadiness()).toMatchObject({ready: true, enabled: true, recoveryEnabled: true, recoveryReady: true});
+    env.CARDDEX_LIVE_LAUNCH_ENABLED = "false";
+    expect(liveReadiness()).toMatchObject({ready: false, enabled: false, recoveryEnabled: true, recoveryReady: true});
+    for (const value of ["false", "true", "", "0"]) {
+      env.CARDDEX_LIVE_LAUNCH_ENABLED = "true"; env.CARDDEX_LIVE_RECOVERY_ENABLED = value;
+      expect(liveReadiness()).toMatchObject({ready: value !== "false", recoveryReady: value !== "false"});
+    }
+    env.CARDDEX_DEPLOYMENT_ENV = "local"; env.CARDDEX_LIVE_LAUNCH_ENABLED = "false"; delete env.CARDDEX_LIVE_RECOVERY_ENABLED;
+    expect(liveReadiness().implemented).toBe(true); expect(liveReadiness().ready).toBe(false); expect(liveReadiness().configured).toBe(false); expect(liveReadiness().recoveryReady).toBe(false);
     for (const origin of ["http://launchacard.fun", "https://localhost", "https://localhost.", "https://127.0.0.1", "https://mintdex.fun", "https://user:pass@launchacard.fun", "https://launchacard.fun/path"]) expect(publicOrigin(origin)).toBeNull();
   });
   test("wallet proof is creator-bound, expires, is single-use and independent from demo sessions", async () => {
@@ -232,6 +238,38 @@ describe("isolated real-launch server lifecycle", () => {
     nftVerified = true;
     expect((await service.confirmLiveCreatorNft(creator, {intentId: first.intent.id, signature: sent.signature, messageSha256: fresh.transaction!.messageSha256})).intent.status).toBe("complete");
     expect(sqlite.query("SELECT signature, signed_transaction_base64 FROM live_launch_transactions WHERE message_sha256 = ?").get(old.messageSha256)).toEqual({signature: oldSent.signature, signed_transaction_base64: `${old.transactionBase64}-signed`});
+  });
+  test("turning off new launches keeps sign-in, saved launches and the card stage working", async () => {
+    const coin = await service.prepareLiveLaunch(creator, await input());
+    const draft = await service.prepareLiveLaunch(creator, {...await input({tokenMint: otherWallet}), idempotencyKey: "second-request", nftMint: replacementNft});
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: coin.intent.id, signature: "s".repeat(88), messageSha256: coin.transaction!.messageSha256});
+    tokenVerified = false;
+    const fresh = await input();
+    env.CARDDEX_LIVE_LAUNCH_ENABLED = "false";
+    await expect(service.prepareLiveLaunch(creator, {...fresh, idempotencyKey: "third-request"})).rejects.toThrow("not open");
+    const {composeLiveAssets} = await import("../../src/lib/carddex/live/composition.server");
+    await expect(composeLiveAssets(creator, fresh, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow("not open");
+    const challenge = await auth.createWalletChallenge(creator);
+    expect(challenge.message).not.toContain("not open");
+    const session = await auth.verifyWalletChallenge({challengeId: challenge.challengeId, wallet: creator, signatureBase64: btoa(String.fromCharCode(...ed25519.sign(new TextEncoder().encode(challenge.message), creatorSeed)))});
+    expect((await auth.requireLiveWallet(session.token)).wallet).toBe(creator);
+    expect((await service.listLiveLaunchIntents(creator)).map(intent => intent.id)).toContain(coin.intent.id);
+    tokenVerified = true;
+    expect((await service.getLiveLaunchIntent(creator, coin.intent.id)).status).toBe("nft_pending");
+    const nft = (await service.prepareLiveCreatorNft(creator, {intentId: coin.intent.id})).transaction!;
+    const sent = await service.submitLiveTransaction(creator, {intentId: coin.intent.id, kind: "nft", messageSha256: nft.messageSha256, transactionBase64: `${nft.transactionBase64}-signed`});
+    nftVerified = true;
+    expect((await service.confirmLiveCreatorNft(creator, {intentId: coin.intent.id, signature: sent.signature, messageSha256: nft.messageSha256})).intent.status).toBe("complete");
+    const tx = draft.transaction!;
+    await expect(service.submitLiveTransaction(creator, {intentId: draft.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: `${tx.transactionBase64}-signed`})).rejects.toThrow("not open");
+    expect((sqlite.query("SELECT status FROM live_launch_intents WHERE id = ?").get(draft.intent.id) as {status: string}).status).toBe("prepared");
+    replaceable = true; tokenVerified = false;
+    expect((await service.abandonLiveLaunchIntent(creator, {intentId: draft.intent.id})).intent.status).toBe("abandoned");
+    env.CARDDEX_LIVE_RECOVERY_ENABLED = "false";
+    await expect(auth.createWalletChallenge(creator)).rejects.toThrow("recovery is paused");
+    await expect(service.listLiveLaunchIntents(creator)).rejects.toThrow("recovery is paused");
+    await expect(service.getLiveLaunchIntent(creator, coin.intent.id)).rejects.toThrow("recovery is paused");
   });
   test("unused drafts can restart only after finalized token absence and all plan expiries", async () => {
     const prepared = await service.prepareLiveLaunch(creator, await input());

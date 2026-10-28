@@ -10,7 +10,11 @@ export type LivePrepareInput = {
 export type LiveComposeInput = Pick<LivePrepareInput, "tokenMint" | "name" | "symbol" | "description" | "website" | "xUrl" | "cardTemplate" | "quoteAssetKey" | "quoteMint">;
 export type { WalletTransactionPlan } from "../../../../../integrations/pumpfun/src/live";
 export type LiveReadiness = {
-  implemented: true; configured: boolean; enabled: boolean; ready: boolean;
+  implemented: true; configured: boolean;
+  /** New launches: the switch, and switched on with everything configured. */
+  enabled: boolean; ready: boolean;
+  /** Existing launches (sign-in, confirmations, the card stage, discards): the switch, and ready to serve. */
+  recoveryEnabled: boolean; recoveryReady: boolean;
   network: "solana-mainnet-beta"; publicOrigin: string | null; blockers: string[];
 };
 export type LiveWallet = { wallet: string; expiresAt: number };

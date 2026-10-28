@@ -94,6 +94,7 @@ export function createLiveHealthHandler(dependencies: Dependencies) {
     return Response.json({
       ok,
       readiness: { configured, enabled: readiness.enabled, ready: readiness.ready && ok,
+        recoveryEnabled: readiness.recoveryEnabled, recoveryReady: readiness.recoveryReady && ok,
         network: readiness.network, publicOrigin: readiness.publicOrigin },
       rpc,
     }, { status: ok ? 200 : 503, headers: { "cache-control": "no-store", "x-content-type-options": "nosniff" } });

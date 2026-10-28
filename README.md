@@ -69,6 +69,8 @@ The owner saved the active app-specific Helius endpoint as the encrypted, server
 
 **The production mainnet launch integration is enabled.** Its healthy readiness response is a backend check, not proof that every public network can reach the canonical artwork/metadata origin. The regional access failure and first creator-operated token/NFT issuance remain unresolved verification items. No real transaction has been signed or sent by the agent. The directory, balances and token trading remain clearly labelled demo. See [the production setup record](reports/launch-a-card-production-setup-2026-10-28.md), [public UI evidence](reports/launch-a-card-public-ui-2026-10-28.md), and the earlier [readiness checklist](reports/launch-a-card-public-readiness-2026-10-28.md).
 
+Two switches in `app/wrangler.production.jsonc` control the live flow. `CARDDEX_LIVE_LAUNCH_ENABLED="true"` opens new launches (card composition, a new launch and its coin transaction). `CARDDEX_LIVE_RECOVERY_ENABLED` stays on unless it is `"false"`; it covers sign-in, saved launches, confirmations, the card stage and discards. To stop new launches, turn off only the first switch: creators with a coin already sent can still finish their card. `/api/live/health` reports both.
+
 Current provider reference, reviewed 28 October 2026: [official pump.fun coin creation](https://github.com/pump-fun/pump-public-docs/blob/main/docs/instructions/COIN_CREATION.md). Historical accounts and fees are not assumed current.
 
 ## Generated assets

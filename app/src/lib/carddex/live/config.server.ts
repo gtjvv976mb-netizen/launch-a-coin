@@ -16,6 +16,13 @@ function rpcConfigured(value?: string) {
   try { const url = new URL(value ?? ""); return url.protocol === "https:" && !url.username && !url.password && !/mintdex/i.test(url.hostname); }
   catch { return false; }
 }
+const LAUNCHES_OFF = "New real wallet launches are not open in this deployment.";
+const RECOVERY_OFF = "Saved launch recovery is paused in this deployment.";
+/**
+ * Two switches. CARDDEX_LIVE_LAUNCH_ENABLED="true" opens new launches (compose, a new intent, the coin transaction
+ * before it is sent). CARDDEX_LIVE_RECOVERY_ENABLED stays on unless it is exactly "false": sign-in, saved launches,
+ * confirmations, the card stage and discards. Turning off new launches never strands a creator mid-launch.
+ */
 export function liveReadiness(): LiveReadiness {
   const env = bindings();
   const origin = publicOrigin(env.CARDDEX_PUBLIC_ORIGIN);
@@ -26,16 +33,21 @@ export function liveReadiness(): LiveReadiness {
   if (!rpcConfigured(env.CARDDEX_MAINNET_RPC_URL)) blockers.push("Configure the server-only mainnet RPC endpoint.");
   if (env.CARDDEX_DEPLOYMENT_ENV !== "production") blockers.push("A separate public Launch a Card production deployment is required; local storage is not durable public hosting.");
   const configured = blockers.length === 0;
-  const enabled = env.CARDDEX_LIVE_LAUNCH_ENABLED === "true";
-  if (!enabled) blockers.push("Real wallet launches are disabled in this deployment.");
-  return { implemented: true, configured, enabled, ready: configured && enabled, network: "solana-mainnet-beta", publicOrigin: origin, blockers };
+  const enabled = env.CARDDEX_LIVE_LAUNCH_ENABLED === "true", recoveryEnabled = env.CARDDEX_LIVE_RECOVERY_ENABLED !== "false";
+  if (!recoveryEnabled) blockers.push(RECOVERY_OFF);
+  if (!enabled) blockers.push(LAUNCHES_OFF);
+  const recoveryReady = configured && recoveryEnabled;
+  // A new launch must also be able to finish, so it needs recovery (sign-in, confirmation, the card) too.
+  return { implemented: true, configured, enabled, ready: recoveryReady && enabled, recoveryEnabled, recoveryReady,
+    network: "solana-mainnet-beta", publicOrigin: origin, blockers };
 }
-export function requireLiveConfig() {
+/** "launch" starts something new; "recovery" serves a creator's existing launch. */
+export function requireLiveConfig(scope: "launch" | "recovery") {
   const readiness = liveReadiness();
-  if (!readiness.ready) throw new UserError(readiness.blockers.join(" "));
+  if (!(scope === "launch" ? readiness.ready : readiness.recoveryReady)) throw new UserError((scope === "launch" ? readiness.blockers : readiness.blockers.filter(blocker => blocker !== LAUNCHES_OFF)).join(" "));
   return { origin: readiness.publicOrigin!, rpcUrl: bindings().CARDDEX_MAINNET_RPC_URL! };
 }
 export function assertLiveOrigin(requestOrigin: string | null) {
-  const { origin } = requireLiveConfig();
+  const { origin } = requireLiveConfig("recovery");
   if (requestOrigin !== origin) throw new UserError("Open the configured Launch a Card site to authorize this wallet action.");
 }

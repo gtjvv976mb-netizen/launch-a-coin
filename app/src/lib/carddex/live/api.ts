@@ -28,7 +28,7 @@ const signature = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{64,90}$/);
 // Readiness is site-wide configuration, not per-user data, and /launch reads it during page SSR: revalidate it on every
 // use (no-cache) rather than no-store, which would also keep the /launch page out of the back/forward cache.
 export const getLiveLaunchReadiness = createServerFn({method: "GET"}).handler(() => { revalidate(); return liveReadiness(); });
-export const getLiveWallet = createServerFn({method: "GET"}).handler(() => { noStore(); return liveReadiness().ready ? liveWalletFromToken(getCookie(LIVE_SESSION_COOKIE)) : null; });
+export const getLiveWallet = createServerFn({method: "GET"}).handler(() => { noStore(); return liveReadiness().recoveryReady ? liveWalletFromToken(getCookie(LIVE_SESSION_COOKIE)) : null; });
 export const createLiveWalletChallenge = createServerFn({method: "POST"}).validator(z.object({wallet: publicKey})).handler(({data}) => attempt(async () => {
   sameOrigin(); return createWalletChallenge(data.wallet);
 }));

@@ -14,7 +14,7 @@ import type { LiveAssets, LiveLaunchIntent, LivePrepareInput, LiveStage } from "
 type Payload = {input: Omit<LiveLaunchInput, "nftMint">; assets: LiveAssets; fields: ReturnType<typeof normalizeLiveFields>};
 type IntentRow = {id: string; creator_wallet: string; token_mint: string; nft_mint: string; quote_key: string; quote_mint: string; design_key: string; payload_sha256: string; payload_json: string; binding_sha256: string; token_metadata_uri: string; nft_metadata_uri: string; status: LiveStage; token_signature: string | null; nft_signature: string | null; token_receipt_json: string | null; nft_receipt_json: string | null; created_at: number; updated_at: number};
 type PlanRow = {id: string; intent_id: string; kind: "token" | "nft"; message_sha256: string; plan_json: string; signature: string | null; signed_transaction_base64: string | null; status: "prepared" | "pending" | "confirmed"};
-const connection = () => sdk.createMainnetConnection(requireLiveConfig().rpcUrl);
+const connection = () => sdk.createMainnetConnection(requireLiveConfig("recovery").rpcUrl);
 function adapterInput(row: IntentRow): LiveLaunchInput { return {...(JSON.parse(row.payload_json) as Payload).input, nftMint: row.nft_mint}; }
 function publicIntent(row: IntentRow): LiveLaunchIntent {
   const payload = JSON.parse(row.payload_json) as Payload;
@@ -31,7 +31,7 @@ async function chain<T>(fn: () => Promise<T>): Promise<T> {
   catch (error) { throw new UserError((error instanceof Error ? error.message : "The mainnet provider could not verify this launch.").replace(/https?:\/\/\S+/g, "[provider]").slice(0, 500)); }
 }
 async function ownedIntent(wallet: string, id: string): Promise<IntentRow> {
-  requireLiveConfig();
+  requireLiveConfig("recovery");
   const row = await one<IntentRow>("SELECT * FROM live_launch_intents WHERE id = ? AND creator_wallet = ?", id, wallet);
   if (!row) throw new UserError("This real launch does not belong to the signed-in creator wallet.");
   return row;
@@ -65,7 +65,7 @@ async function savePlan(row: IntentRow, plan: WalletTransactionPlan) {
 async function sourceAssets(wallet: string, designKey: string) {
   const design = reviewedDesigns[designKey as keyof typeof reviewedDesigns];
   if (!design) throw new UserError("This card design has no approved production asset manifest.");
-  const {origin} = requireLiveConfig();
+  const {origin} = requireLiveConfig("launch");
   const load = async (source: {path: string; sha256: string}) => {
     const bytes = await fetchPublicBytes(`${origin}${source.path}`);
     if (await sha256(bytes) !== source.sha256) throw new UserError("The public premium design differs from the approved frame manifest.");
@@ -106,7 +106,7 @@ async function preparePayload(wallet: string, raw: LivePrepareInput): Promise<Pa
       frontSha256: sources.front.sha256, backSha256: sources.back.sha256, nftMetadataUri: nftMetadata.url}}};
 }
 export async function prepareLiveLaunch(wallet: string, raw: LivePrepareInput) {
-  requireLiveConfig();
+  requireLiveConfig("launch");
   if (!/^[a-zA-Z0-9_-]{8,100}$/.test(raw.idempotencyKey)) throw new UserError("Use a stable launch request identifier.");
   const fields = normalizeLiveFields(raw);
   const requestedHash = await sha256(JSON.stringify({creator: wallet, fields, assets: raw.assets, initialBuyQuoteBaseUnits: raw.initialBuyQuoteBaseUnits, slippageBps: raw.slippageBps}));
@@ -229,7 +229,7 @@ export async function getLiveLaunchIntent(wallet: string, id: string) {
   return publicIntent(row);
 }
 export async function listLiveLaunchIntents(wallet: string) {
-  requireLiveConfig();
+  requireLiveConfig("recovery");
   const [rows] = await readBatch(q<IntentRow>("SELECT * FROM live_launch_intents WHERE creator_wallet = ? ORDER BY created_at DESC LIMIT 50", wallet));
   return rows.map(publicIntent);
 }
@@ -245,6 +245,8 @@ export async function abandonLiveLaunchIntent(wallet: string, input: {intentId: 
 }
 export async function submitLiveTransaction(wallet: string, input: {intentId: string; kind: "token" | "nft"; messageSha256: string; transactionBase64: string}) {
   const row = await ownedIntent(wallet, input.intentId);
+  // Sending the coin transaction starts the coin; re-sending saved bytes and the card stage are recovery.
+  if (input.kind === "token" && row.status === "prepared") requireLiveConfig("launch");
   if (input.kind === "token" && !["prepared", "token_pending"].includes(row.status) || input.kind === "nft" && row.status !== "nft_pending") throw new UserError("This launch has already advanced beyond that wallet transaction.");
   const prepared = await one<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = ? AND message_sha256 = ?", row.id, input.kind, input.messageSha256);
   if (!prepared) throw new UserError("This transaction was not prepared for this launch.");
