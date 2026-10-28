@@ -994,9 +994,9 @@ function DevnetSiteNote() {
 }
 
 /**
- * The sky (L9, hype arcade): a slow neon aurora, a twinkling starfield and a grid floor behind every page, on a
- * fixed layer that moves by transform and opacity only (alive.css). It pauses while the tab is hidden; calm and lite
- * keep the still picture.
+ * Collector paper and engraving sit behind the existing slow light and perspective floor. Only the two
+ * ambient light layers and floor move; the engraving stays crisp. Hidden documents, Calm and reduced motion
+ * keep a still composition.
  */
 function Sky() {
   const ref = useRef<HTMLDivElement>(null);
@@ -1010,6 +1010,7 @@ function Sky() {
   }, []);
   return (
     <div ref={ref} aria-hidden className="mdx-sky">
+      <i className="mdx-sky__engraving" />
       <i className="mdx-sky__stars" />
       <i className="mdx-sky__floor">
         <i>

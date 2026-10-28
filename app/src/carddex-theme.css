@@ -99,27 +99,52 @@ input, textarea { caret-color: #8b5915; }
 .mdx-ticker__item[data-tone="hype"] { --tone: var(--color-hype); }
 .mdx-ticker__tag { text-shadow: none; }
 
-/* Paper, warm engraving and yellow foil recall a premium pack without changing the app layout. */
+/* Collector paper: static engraving and fine fibre, with two restrained existing light layers. */
 .mdx-sky {
   background:
-    radial-gradient(ellipse at 75% 3%, rgb(255 243 192 / .8), transparent 55%),
-    radial-gradient(ellipse at 10% 83%, rgb(255 224 103 / .5), transparent 55%),
-    #f6edcd;
+    radial-gradient(ellipse at 71% 8%, rgb(255 250 219 / .88), transparent 57%),
+    radial-gradient(ellipse at 8% 88%, rgb(225 181 65 / .23), transparent 60%),
+    linear-gradient(118deg, #f9f1d6, #f3e5b7 55%, #fbf4dc);
 }
-.mdx-sky::after { background: repeating-linear-gradient(0deg, rgb(134 112 58 / .018) 0 1px, transparent 1px 4px); }
+.mdx-sky__engraving {
+  inset: 0;
+  background: url('/assets/carddex/collector-engraving.svg') center center / cover no-repeat;
+  opacity: .8;
+}
+.mdx-sky::after {
+  background:
+    repeating-linear-gradient(18deg, rgb(118 87 40 / .027) 0 .6px, transparent .6px 5px),
+    repeating-linear-gradient(103deg, rgb(255 253 230 / .2) 0 .7px, transparent .7px 7px),
+    radial-gradient(1px 1px at 20% 30%, rgb(127 94 45 / .16) 40%, transparent 60%);
+  background-size: auto, auto, 11px 13px;
+  opacity: .58;
+}
 .mdx-sky__a--1 {
-  background: radial-gradient(42% 46% at 18% 14%, rgb(255 211 54 / .28), transparent 75%), radial-gradient(40% 44% at 86% 22%, rgb(195 115 54 / .1), transparent 75%);
+  background: radial-gradient(42% 46% at 18% 14%, rgb(255 221 107 / .23), transparent 75%), radial-gradient(40% 44% at 86% 22%, rgb(171 63 39 / .065), transparent 75%);
 }
-.mdx-sky__a--2 { background: radial-gradient(closest-side, rgb(200 148 53 / .14), transparent 78%); }
+.mdx-sky__a--2 {
+  background:
+    linear-gradient(118deg, transparent 36%, rgb(255 253 228 / .3) 43%, rgb(241 203 101 / .12) 48%, transparent 56%),
+    radial-gradient(closest-side, rgb(202 157 65 / .13), transparent 78%);
+}
 .mdx-sky__stars {
-  opacity: .3;
+  opacity: .24;
   background-image: radial-gradient(1.2px 1.2px at 12% 18%, #9b742d 50%, transparent 52%), radial-gradient(1.2px 1.2px at 68% 42%, #b28a22 50%, transparent 52%), radial-gradient(1px 1px at 32% 76%, #ad8848 50%, transparent 52%);
 }
+.mdx-sky__floor { opacity: .55; }
 .mdx-sky__floor > i > b {
-  background-image: linear-gradient(to right, rgb(139 103 43 / .1) 1px, transparent 1px), linear-gradient(to bottom, rgb(139 103 43 / .1) 1px, transparent 1px);
+  background-image: linear-gradient(135deg, transparent 49.3%, rgb(139 103 43 / .13) 49.7% 50.3%, transparent 50.7%), linear-gradient(45deg, transparent 49.3%, rgb(139 103 43 / .09) 49.7% 50.3%, transparent 50.7%);
 }
+:root:not([data-motion]) .mdx-sky__floor > i > b { animation-duration: 12s; }
 .mdx-sky__floor::after {
-  background: linear-gradient(to bottom, #f6edcd, transparent 50%), linear-gradient(to right, #f6edcd, transparent 24%, transparent 76%, #f6edcd);
+  background: linear-gradient(to bottom, #f6edcd, transparent 58%), linear-gradient(to right, #f6edcd, transparent 24%, transparent 76%, #f6edcd);
+}
+@media (max-width: 1023px) {
+  .mdx-sky__engraving { background-size: auto 100%; background-position: 36% center; opacity: .64; }
+  .mdx-sky::after { opacity: .45; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mdx-sky__a, .mdx-sky__floor > i > b { animation: none !important; }
 }
 .mdx-holo-ink {
   background-image: linear-gradient(100deg, transparent 38%, rgb(255 243 159 / .9) 50%, transparent 62%), linear-gradient(100deg, #8b5915, #9b6617 45%, #503616);
@@ -127,13 +152,12 @@ input, textarea { caret-color: #8b5915; }
 .mdx-vitrine__beam { background: radial-gradient(ellipse 34% 90% at 50% 0%, rgb(255 216 66 / .22), transparent 70%); }
 .mdx-vitrine__dust i { background: radial-gradient(circle, #fff7ce, rgb(255 216 66 / .7) 40%, transparent 72%); }
 .mdx-tt__plinth { display: none; }
-.cdx-app .mdx-plinth, .cdx-app .rounded-panel.bg-plinth, .cdx-app .cdx-archive__vitrine, .cdx-app .cdx-create-preview {
+.cdx-app .mdx-plinth, .cdx-app .rounded-panel.bg-plinth, .cdx-app .cdx-archive__vitrine {
   border: 2px solid #a67d2c;
   background: linear-gradient(155deg, #fffdf1, #fff8de);
   box-shadow: inset 0 0 0 4px #ffdf68, inset 0 0 0 5px rgb(181 136 26 / .3), 0 7px 22px -14px rgb(104 70 24 / .2);
 }
 .cdx-app .cdx-archive__vitrine { padding: 24px 22px 20px; }
-.cdx-app .cdx-create-preview { padding: 24px; }
 .cdx-app .cdx-design-row {
   border-color: #cfbc91;
   background: #fffdf1;
@@ -176,7 +200,6 @@ input, textarea { caret-color: #8b5915; }
 }
 @media (max-width: 580px) {
   .cdx-app .cdx-archive__vitrine { padding: 26px 18px 22px; }
-  .cdx-app .cdx-create-preview { padding: 22px; }
 }
 @media (forced-colors: active) {
   .mdx-rail, .mdx-mhead, .mdx-mobile-tabs, .mdx-sky { background: Canvas; }

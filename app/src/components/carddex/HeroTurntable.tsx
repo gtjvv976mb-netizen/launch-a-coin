@@ -5,8 +5,8 @@ import { Engine, motionLevel, type Body } from "../mintdex/card3d/motion3d";
 import type { Card3DHandle } from "../mintdex/card3d/types";
 
 /** A full revolution in the shared engine, with the same rounded slab, both-face lighting and touch input. */
-export function HeroTurntable({ card, className = "", playing: controlled, onPlayingChange }: {
-  card: CardData; className?: string; playing?: boolean; onPlayingChange?: (playing: boolean) => void;
+export function HeroTurntable({ card, className = "", playing: controlled, onPlayingChange, followEdits = false }: {
+  card: CardData; className?: string; playing?: boolean; onPlayingChange?: (playing: boolean) => void; followEdits?: boolean;
 }) {
   const [localPlaying, setLocalPlaying] = useState(true);
   const playing = controlled ?? localPlaying;
@@ -28,6 +28,16 @@ export function HeroTurntable({ card, className = "", playing: controlled, onPla
     lastFrame.current = 0;
     Engine.kick();
   }, [playing]);
+  useEffect(() => {
+    if (!followEdits) return;
+    const ctl = slots.ctl.current;
+    if (!ctl || ctl.busy) return;
+    lastInput.current = performance.now();
+    ctl.syncSide("face");
+    const body = ctl.body;
+    if (body) body.flip.t = Math.round(body.flip.x / 360) * 360;
+    Engine.kick();
+  }, [followEdits, card.name, card.ticker, card.image, card.lore, card.cardTemplate, card.mcapUsd]);
   const toggle = () => {
     const value = !playing;
     setLocalPlaying(value);

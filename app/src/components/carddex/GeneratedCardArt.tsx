@@ -2,19 +2,22 @@ import { useEffect, useRef, useState, type ReactNode, type RefObject, type CSSPr
 import { generatedCardAssets } from "../../lib/carddex/generated-assets";
 import measuredLayouts from "../../lib/carddex/generated-layouts.json";
 import { useImageFailure } from "../mintdex/image-state";
+import { CANONICAL_CARD_LAYOUT } from "../../lib/carddex/card-template";
 
-function useReadyImage(ref: RefObject<HTMLImageElement | null>, source: string | null) {
+export function useReadyImage(ref: RefObject<HTMLImageElement | null>, source: string | null) {
   const failure = useImageFailure(ref, source, source ?? "");
   const [readySource, setReadySource] = useState<string | null>(null);
+  const [decodedSource, setDecodedSource] = useState<string | null>(null);
   useEffect(() => {
     const image = ref.current;
-    if (source && image?.complete && image.naturalWidth > 0) setReadySource(source);
+    if (source && image?.complete && image.naturalWidth > 0) { setReadySource(source); setDecodedSource(image.currentSrc || source); }
   }, [ref, source]);
   return {
     failed: failure.failed,
     ready: !!source && readySource === source && !failure.failed,
+    decodedSource: source && readySource === source && !failure.failed ? decodedSource : null,
     onError: failure.onError,
-    onLoad: () => { failure.onLoad(); if (source) setReadySource(source); },
+    onLoad: () => { failure.onLoad(); if (source) { setReadySource(source); setDecodedSource(ref.current?.currentSrc || source); } },
   };
 }
 
@@ -30,7 +33,6 @@ export function GeneratedCardFront({ cardTemplate, priority = false }: { cardTem
 
 /** A measured metal-only laminate. It shares the physical engine's light without painting over live ink. */
 export function GeneratedCardFinish({ cardTemplate }: { cardTemplate?: string }) {
-  if (!generatedCardAssets(cardTemplate).front) return null;
   return <div className="cdx-generated-finish" aria-hidden><i className="cdx-generated-finish__spectrum" /><i className="cdx-generated-finish__glint" /></div>;
 }
 
@@ -68,30 +70,33 @@ const PRINT_LAYOUTS: Record<string, Record<string, Box>> = {
   "neon-circuit": { name:{x:.12,y:.045,w:.76,h:.045}, type:{x:.12,y:.529,w:.76,h:.04}, text:{x:.11,y:.615,w:.78,h:.255}, "foot-a":{x:.13,y:.907,w:.30,h:.028}, "foot-b":{x:.57,y:.907,w:.30,h:.028}, footer:{x:.13,y:.907,w:.74,h:.028} },
 };
 
-/** UI masks are measured from the untouched neutral aperture, including curved edges and interior plaques. */
-export function generatedCardStyle(cardTemplate?: string): CSSProperties {
-  if (!cardTemplate || !generatedCardAssets(cardTemplate).front) return {};
-  const measured = (measuredLayouts as Record<string,{art:Box;mask:{width:number;height:number;path:string};prints?:Record<string,Box>}>)[cardTemplate];
-  if (!measured) return {};
-  const vars: Record<string,string> = {};
-  vars["--generated-ink"] = cardTemplate === "neon-circuit" ? "#e2f4f0" : "#30251a";
-  const box = (name:string, value:Box) => { for (const [key,number] of Object.entries(value)) vars[`--generated-${name}-${key}`] = `${number*100}%`; };
-  box("art", measured.art);
-  const mask = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${measured.mask.width} ${measured.mask.height}"><path fill="white" d="${measured.mask.path}"/></svg>`;
-  vars["--generated-art-mask"] = `url("data:image/svg+xml,${encodeURIComponent(mask)}")`;
-  const print = { ...DEFAULT_PRINT_LAYOUT, ...measured.prints, ...PRINT_LAYOUTS[cardTemplate] };
-  // The authoring model can move its lower wells. Keep the live print inside the actual paper.
-  if (measured.prints?.text) {
-    const paper = measured.prints.text;
-    print.text = { x: paper.x + .008, y: paper.y + .005, w: paper.w - .016, h: paper.h - .01 };
+export type GeneratedSkinSource = { art: Box; mask: {width:number;height:number;path:string}; plates: Record<string,Box> };
+
+/** Coordinates below select pixels from immutable artwork. They never position live token content. */
+export function generatedSkinSource(key?: string): GeneratedSkinSource | null {
+  if (!key) return null;
+  const measured = (measuredLayouts as Record<string,{art:Box;mask:{width:number;height:number;path:string};prints?:Record<string,Box>}>)[key];
+  if (!measured) return null;
+  const plates = { ...DEFAULT_PRINT_LAYOUT, ...PRINT_LAYOUTS[key], ...measured.prints };
+  if (key === "duel-masters" || key === "one-piece") {
+    plates.name = measured.prints?.type ?? PRINT_LAYOUTS[key].name;
+    plates.type = PRINT_LAYOUTS[key].type;
   }
-  if (measured.prints?.footer) print.footer = measured.prints.footer;
-  vars["--generated-stock-lore-size"] = print.text.h < .23 ? "3.2cqw" : "3.7cqw";
-  vars["--generated-stock-data-size"] = print.text.h < .23 ? "2.9cqw" : "3.2cqw";
-  const paperHoles = Object.values(print).map(paper => `<rect x="${paper.x*1000}" y="${paper.y*1000}" width="${paper.w*1000}" height="${paper.h*1000}" rx="5" fill="white"/>`).join("");
-  const artHole = `<g transform="translate(${measured.art.x*1000} ${measured.art.y*1000}) scale(${measured.art.w*1000/measured.mask.width} ${measured.art.h*1000/measured.mask.height})"><path fill="white" d="${measured.mask.path}"/></g>`;
-  const finishMask = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="none">${artHole}${paperHoles}</svg>`;
-  vars["--generated-foil-holes"] = `url("data:image/svg+xml,${encodeURIComponent(finishMask)}")`;
-  for (const [name,value] of Object.entries(print)) box(name,value);
-  return vars as CSSProperties;
+  if (key === "relic" && !measured.prints?.name) plates.name = measured.prints?.type ?? DEFAULT_PRINT_LAYOUT.name;
+  return {art:measured.art,mask:measured.mask,plates};
+}
+
+function svgUrl(source:string) { return `url("data:image/svg+xml,${encodeURIComponent(source)}")`; }
+const canonical = CANONICAL_CARD_LAYOUT;
+const PRINT_BOXES = { art:canonical.window,name:canonical.name,type:canonical.type,text:canonical.text,"foot-a":canonical.footer[0],"foot-b":canonical.footer[1],footer:{x:canonical.footer[0].x,y:canonical.footer[0].y,w:canonical.footer[1].x+canonical.footer[1].w-canonical.footer[0].x,h:canonical.footer[0].h} };
+const CANONICAL_GEOMETRY: Record<string,string> = {};
+for (const [name,box] of Object.entries(PRINT_BOXES)) for (const [key,value] of Object.entries(box)) CANONICAL_GEOMETRY[`--generated-${name}-${key}`] = `${value*100}%`;
+CANONICAL_GEOMETRY["--generated-art-mask"] = svgUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><rect width="1000" height="1000" rx="12" fill="white"/></svg>');
+const holes = Object.entries(PRINT_BOXES).filter(([key])=>key!=="footer").map(([,box])=>`<rect x="${box.x*1000}" y="${box.y*1000}" width="${box.w*1000}" height="${box.h*1000}" rx="5" fill="white"/>`).join("");
+CANONICAL_GEOMETRY["--generated-foil-holes"] = svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="none">${holes}</svg>`);
+Object.freeze(CANONICAL_GEOMETRY);
+
+/** Every skin gets the same geometry before decode, after decode and when its artwork fails. */
+export function generatedCardStyle(cardTemplate?: string): CSSProperties {
+  return { ...CANONICAL_GEOMETRY, "--generated-ink":cardTemplate === "neon-circuit" ? "#e2f4f0" : "#30251a" } as CSSProperties;
 }

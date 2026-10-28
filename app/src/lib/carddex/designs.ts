@@ -33,21 +33,38 @@ const STOCKS: readonly CardDesign[] = [
 ];
 
 const CLASSICS: readonly CardDesign[] = [
-  { key: "pokemon-classic", name: "Pokémon Classic", description: "The familiar golden border, broad illustration window and clean collector print, finished in holographic gold.", category: "classic", materialLevel: 14, palette: ["#d9ac21", "#f8db69", "#fcf1c9"], finish: "gold", layout: "pokemon-classic" },
-  { key: "pokemon-full-art", name: "Pokémon Full Art", description: "An edge-to-edge illustration, silver collector rim and luminous prism laminate.", category: "classic", materialLevel: 13, palette: ["#263849", "#c4e5ef", "#f2f8fa"], finish: "prism", layout: "pokemon-full-art" },
-  { key: "yugioh-monster", name: "Yu-Gi-Oh! Monster", description: "Copper marbling, a raised name plaque, eight-star rail, square art and a parchment effect panel.", category: "classic", materialLevel: 10, palette: ["#8d4d23", "#e4b36b", "#f2e0b7"], finish: "foil", layout: "yugioh-monster" },
-  { key: "yugioh-spell", name: "Yu-Gi-Oh! Spell", description: "Deep emerald lacquer with the iconic dueling-card proportions and an engraved silver surround.", category: "classic", materialLevel: 11, palette: ["#185b54", "#90d5bf", "#e5f0d6"], finish: "holo", layout: "yugioh-spell" },
-  { key: "magic-etched", name: "Magic: Etched", description: "A dark collector border, arched illustration, inset type rail and parchment text well with gold foil fittings.", category: "classic", materialLevel: 10, palette: ["#382b27", "#b79a64", "#ede1c5"], finish: "foil", layout: "magic-etched" },
-  { key: "duel-masters", name: "Duel Masters", description: "Sapphire and gold framing, a sculpted corner disc and a sweeping illustration window.", category: "classic", materialLevel: 11, palette: ["#092b5a", "#e5c66c", "#eff5e3"], finish: "holo", layout: "duel-masters" },
-  { key: "one-piece", name: "One Piece", description: "Full-art manga energy, bold red framing and polished collector details around your token identity.", category: "classic", materialLevel: 12, palette: ["#7e1723", "#f2cc86", "#fff0d6"], finish: "holo", layout: "one-piece" },
-  { key: "obsidian-archive", name: "Obsidian Archive", description: "A private-vault treatment: obsidian, inset electrum, engraved corner fittings and a luminous archival seal.", category: "premium", materialLevel: 14, palette: ["#111416", "#d6b874", "#eee4ca"], finish: "gold", layout: "obsidian-archive" },
+  { key: "pokemon-classic", name: "Pokémon Classic", description: "Classic gold, warm enamel and polished collector metalwork around the shared print.", category: "classic", materialLevel: 14, palette: ["#d9ac21", "#f8db69", "#fcf1c9"], finish: "gold", layout: "pokemon-classic" },
+  { key: "pokemon-full-art", name: "Pokémon Prism", description: "Sapphire, silver and opalescent prism laminate with a polished collector frame.", category: "classic", materialLevel: 13, palette: ["#263849", "#c4e5ef", "#f2f8fa"], finish: "prism", layout: "pokemon-full-art" },
+  { key: "yugioh-monster", name: "Yu-Gi-Oh! Monster", description: "Copper marbling, antique gold and warm collector paper with a sculpted vortex reverse.", category: "classic", materialLevel: 10, palette: ["#8d4d23", "#e4b36b", "#f2e0b7"], finish: "foil", layout: "yugioh-monster" },
+  { key: "yugioh-spell", name: "Yu-Gi-Oh! Spell", description: "Deep emerald lacquer, engraved silver and a jade vortex reverse.", category: "classic", materialLevel: 11, palette: ["#185b54", "#90d5bf", "#e5f0d6"], finish: "holo", layout: "yugioh-spell" },
+  { key: "magic-etched", name: "Magic: Etched", description: "Dark bronze, grimoire engraving, warm paper and gem-set gold fittings.", category: "classic", materialLevel: 10, palette: ["#382b27", "#b79a64", "#ede1c5"], finish: "foil", layout: "magic-etched" },
+  { key: "duel-masters", name: "Duel Masters", description: "Sapphire enamel, satin gold and jewel-cut collector metalwork.", category: "classic", materialLevel: 11, palette: ["#092b5a", "#e5c66c", "#eff5e3"], finish: "holo", layout: "duel-masters" },
+  { key: "one-piece", name: "One Piece", description: "Scarlet enamel, gold ropework and polished nautical collector details.", category: "classic", materialLevel: 12, palette: ["#7e1723", "#f2cc86", "#fff0d6"], finish: "holo", layout: "one-piece" },
+  { key: "obsidian-archive", name: "Obsidian Archive", description: "A private-vault treatment in obsidian, electrum inlay and faceted archival metalwork.", category: "premium", materialLevel: 14, palette: ["#111416", "#d6b874", "#eee4ca"], finish: "gold", layout: "obsidian-archive" },
 ];
+
+const PREMIUM_COPY: Record<TierKey,string> = {
+  spark:"Pearl stone, platinum keylines and polished mineral fittings.",
+  surge:"Cobalt enamel, brushed silver and bolt-cut metalwork.",
+  nova:"Lilac pearl, silver stars and opalescent collector metalwork.",
+  tide:"Teal enamel, engraved waves and polished silver fittings.",
+  apex:"Champagne gold, crown engravings and sculpted metal rosettes.",
+  ember:"Vermilion enamel, copper flame engraving and burnished fittings.",
+  bloom:"Rose enamel, pearl embossing and sculpted blossom metalwork.",
+  mythic:"Black crystal, chrome keylines and diamond-cut collector metalwork.",
+  aurora:"Amethyst lacquer, silver crescents and luminous opal fittings.",
+  relic:"Antique bronze, engraved sunbursts and compass-inspired metalwork.",
+  frost:"Ice-blue enamel, crystalline platinum and faceted silver fittings.",
+  regal:"Crimson enamel, raised gold scrollwork and ruby-set metalwork.",
+  celestial:"Cosmic prism, silver constellations and sapphire collector settings.",
+  legend:"Engraved gold leaf, emerald fittings and a polished laurel reverse.",
+};
 
 /** A creator selects one permanent design at launch; every finish is available from the first card. */
 export const CARD_DESIGNS: readonly CardDesign[] = [
   ...CLASSICS,
   ...STOCKS,
-  ...TIERS.map((tier): CardDesign => ({ key: tier.key, name: tier.name, description: tier.blurb.replace(/The first edition: /, ""), category: "premium", materialLevel: tier.level, palette: [tier.ring, tier.sheen[0], "#f3e8cd"], finish: tier.level >= 13 ? tier.finish : tier.level >= 11 ? "holo" : "foil" })),
+  ...TIERS.map((tier): CardDesign => ({ key: tier.key, name: tier.name, description: PREMIUM_COPY[tier.key], category: "premium", materialLevel: tier.level, palette: [tier.ring, tier.sheen[0], "#f3e8cd"], finish: tier.level >= 13 ? tier.finish : tier.level >= 11 ? "holo" : "foil" })),
   ...MEME_ICON_CATALOG.map((icon): CardDesign => ({ key: icon.key, name: icon.name, description: icon.description, category: "limited", materialLevel: 14, palette: icon.palette, finish: "gold", memeIcon: icon.key, ...(icon.key === "gamestop" ? { stock: { ticker: "GME", name: "GameStop", pair: "GME / SOL" } } : icon.key === "blackberry" ? { stock: { ticker: "BB", name: "BlackBerry", pair: "BB / SOL" } } : {}) })),
   ...EDITION_CATALOG.map((edition): CardDesign => ({ key: edition.key, name: edition.name, description: edition.description.replaceAll("MintDex", "CardDex"), category: "limited", materialLevel: edition.key === "astral" ? 13 : 14, palette: edition.palette, finish: edition.key === "astral" ? "prism" : "gold", edition: edition.key })),
 ];

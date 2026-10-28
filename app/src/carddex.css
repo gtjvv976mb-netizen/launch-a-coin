@@ -343,41 +343,50 @@
 }
 .cdx-create-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-  gap: 28px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 20px;
   min-height: 0;
   flex: 1;
 }
 .cdx-create-form {
-  grid-column: 2;
+  grid-column: 1;
   grid-row: 1;
   min-height: 0;
   overflow-y: auto;
 }
-.cdx-create-form > div[aria-hidden] {
-  display: none;
-}
 .cdx-create-preview {
-  --cw: min(300px, 70%);
-  grid-column: 1;
+  --cw: var(--cw-lg);
+  grid-column: 2;
   grid-row: 1;
   display: flex;
   min-width: 0;
   min-height: 0;
   flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  padding: 22px;
-  border: 1px solid var(--color-hairline);
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--color-plinth) 70%, transparent);
+  container-type: size;
+  padding-top: 24px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
-.cdx-create-preview > div:first-child {
+.cdx-create-preview__card {
+  display: flex;
+  flex: 1;
+  min-height: 0;
   width: 100%;
+  align-items: end;
+  justify-content: center;
 }
 .cdx-create-preview__picker {
-  width: 100%;
-  padding-top: 22px;
+  width: min(calc(100% - 32px), 400px);
+  min-height: var(--cap);
+  flex: none;
+  align-self: center;
+  padding-top: 20px;
+}
+.cdx-create-preview .cdx-hero-turntable__controls {
+  gap: 12px;
+  padding-top: 10px;
 }
 .cdx-create-preview .cdx-design-picker p {
   font-size: 11px;
@@ -411,8 +420,7 @@
     font-size: 20px;
   }
   .cdx-create-preview {
-    --cw: 210px;
-    padding: 15px;
+    padding-top: 16px;
   }
   .cdx-create-preview__picker {
     padding-top: 14px;
@@ -458,21 +466,15 @@
   }
   .cdx-create-layout {
     grid-template-columns: 1fr;
+    grid-template-rows: auto;
   }
   .cdx-create-form {
-    grid-row: 2;
+    grid-row: 1;
     grid-column: 1;
     overflow: visible;
   }
   .cdx-create-preview {
-    --cw: 235px;
-    grid-row: 1;
-    grid-column: 1;
-    gap: 20px;
-    padding: 25px;
-  }
-  .cdx-create-preview__picker {
-    padding-top: 0;
+    display: none;
   }
 }
 @media (max-width: 580px) {

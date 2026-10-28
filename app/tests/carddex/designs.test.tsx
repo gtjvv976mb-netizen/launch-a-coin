@@ -7,10 +7,67 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { CARD_GENERATED_ASSETS, generatedCardAssets } from "../../src/lib/carddex/generated-assets";
 import { generatedCardStyle } from "../../src/components/carddex/GeneratedCardArt";
+import { CANONICAL_CARD_LAYOUT, CANONICAL_CARD_TEMPLATE } from "../../src/lib/carddex/card-template";
+import { frameLayout } from "../../src/lib/mintdex/tiers";
 
 const TOKEN: CardData = { name: "Creator's token", ticker: "OWN", image: "/assets/creatures/glorb.webp", dexNo: 25, level: 1, mcapUsd: 10, holders: 17, lore: "The creator's own story.", ownerHandle: "creator" };
 
 describe("permanent creator-selected card designs", () => {
+  test("one immutable physical template retains the original MintDex print grid", () => {
+    const original = frameLayout("spark");
+    expect(CANONICAL_CARD_LAYOUT.aspect).toBe(63 / 88);
+    for (const role of ["window", "name", "type", "text", "footer", "radius"] as const) expect(CANONICAL_CARD_LAYOUT[role]).toEqual(original[role]);
+    expect(Object.isFrozen(CANONICAL_CARD_LAYOUT)).toBe(true);
+    expect(Object.isFrozen(CANONICAL_CARD_LAYOUT.window)).toBe(true);
+    expect(Object.isFrozen(CANONICAL_CARD_LAYOUT.footer)).toBe(true);
+  });
+
+  test("all48 actual full, compact and lite fronts put the same live roles in the same boxes before decode", () => {
+    const roles = ["name", "art", "ticker", "details", "creator", "serial"];
+    const boxes = (html:string) => roles.map(role => {
+      const tag = html.match(new RegExp(`<[^>]+data-card-slot="${role}"[^>]*>`))?.[0];
+      expect(tag).toBeTruthy();
+      const style = tag!.match(/style="([^"]*)"/)?.[1] ?? "";
+      return Object.fromEntries(style.split(";").map(field=>field.split(":")).filter(([key])=>["left","top","width","height"].includes(key)));
+    });
+    const defaultFront = renderToStaticMarkup(<MintCardFace card={{...TOKEN,cardTemplate:DEFAULT_CARD_DESIGN}} />);
+    const baseline = boxes(defaultFront);
+    const sealPath = (html:string) => html.match(/<g[^>]+data-card-decoration="seal"[^>]*><path d="([^"]+)"/)?.[1];
+    const defaultSeal = sealPath(defaultFront)!;
+    const sealNumbers = defaultSeal.match(/-?\d+(?:\.\d+)?/g)!.map(Number);
+    const sealX = sealNumbers.filter((_,i)=>i%2===0);
+    const sealY = sealNumbers.filter((_,i)=>i%2===1);
+    expect(Math.min(...sealX)).toBeGreaterThan((CANONICAL_CARD_LAYOUT.footer[0].x+CANONICAL_CARD_LAYOUT.footer[0].w)*1000);
+    expect(Math.max(...sealX)).toBeLessThan(CANONICAL_CARD_LAYOUT.footer[1].x*1000);
+    expect(Math.min(...sealY)).toBeGreaterThan((CANONICAL_CARD_LAYOUT.text.y+CANONICAL_CARD_LAYOUT.text.h)*1000);
+    const geometry = (key:string) => Object.fromEntries(Object.entries(generatedCardStyle(key)).filter(([key])=>key!=="--generated-ink"));
+    for (const design of CARD_DESIGNS) {
+      expect(geometry(design.key)).toEqual(geometry(DEFAULT_CARD_DESIGN));
+      for (const mode of [{}, {compact:true}, {lite:true}]) {
+        const html = renderToStaticMarkup(<MintCardFace {...mode} card={{...TOKEN,cardTemplate:design.key}} />);
+        expect(html).toContain(`data-card-layout="${CANONICAL_CARD_TEMPLATE}"`);
+        expect(boxes(html)).toEqual(baseline);
+        expect(sealPath(html)).toBe(defaultSeal);
+        expect(html).not.toContain("data-classic-layout=");
+        expect(html).not.toContain("cdx-trading-card__effect");
+        expect(html).not.toContain("mdx-meme-icon__frame");
+        expect(html).not.toContain("data-card-skin-ready");
+        expect(html.indexOf('data-card-slot="address"')).toBeLessThan(html.indexOf('data-card-slot="market-cap"'));
+        expect(html.indexOf('data-card-slot="market-cap"')).toBeLessThan(html.indexOf('data-card-slot="holders"'));
+      }
+    }
+  });
+
+  test("missing art and long creator identity retain the common fallback print", () => {
+    for (const key of [DEFAULT_CARD_DESIGN, "one-piece", "neon-circuit", "stock-tsla"]) {
+      const html = renderToStaticMarkup(<MintCardFace card={{...TOKEN,cardTemplate:key,image:"",name:"A creator token with a long identity",ticker:"CREATOR123"}} />);
+      expect(html).toContain('data-card-layout="mintdex-v1"');
+      expect(html).toContain("Your token art");
+      expect(html).toContain("A creator token with a long identity");
+      expect(html).toContain("CREATOR123");
+      expect(html).not.toContain("data-card-skin-ready");
+    }
+  });
   test("every catalog choice has a distinct identity and a premium finish", () => {
     expect(CARD_DESIGNS).toHaveLength(48);
     expect(new Set(CARD_DESIGNS.map((design) => design.key)).size).toBe(48);

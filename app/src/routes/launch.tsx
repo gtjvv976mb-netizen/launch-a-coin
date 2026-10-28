@@ -8,7 +8,6 @@ import {
   type FormEvent,
 } from "react";
 
-import type { CardSide } from "../components/mintdex/card3d";
 import { useAction } from "../components/mintdex/hooks";
 import { MintCard, type CardData } from "../components/mintdex/MintCard";
 import { useMe, useRequireMe } from "../components/mintdex/session";
@@ -17,7 +16,6 @@ import {
   CARD_ASPECT,
   Field,
   Input,
-  Ledge,
   PageFrame,
   PageHeader,
   TextLink,
@@ -46,9 +44,9 @@ export const Route = createFileRoute("/launch")({
   head: () =>
     pageHead({
       path: "/launch",
-      title: "Launch your token | CardDex",
+      title: "Launch a coin | CardDex",
       description: sentences(
-        "Launch your token with an address ending in mint and receive its one-of-one card",
+        "Choose a permanent card design, add your token details and preview its one-of-one card",
         MODE_COPY.metaSuffix,
       ),
     }),
@@ -56,28 +54,26 @@ export const Route = createFileRoute("/launch")({
   component: Launch,
 });
 
-// ---------------------------------------------------------------- copy (every figure from constants and tiers)
+// ---------------------------------------------------------------- copy
 
 /** What really happens to the coin, per mode (P0-5): in test mode, a simulated curve. */
 const CONTEXT = MODE_COPY.launchContext;
-/** The unlock market cap of each design, for the preview chips. */
-
 const MAX_DEV_SOL = (MAX_DEV_BUY / LAMPORTS).toLocaleString("en-US");
 const ENTER_TO_UPLOAD = "Enter CardDex to upload card art and launch.";
 
 // ---------------------------------------------------------------- stage geometry
 
-/** Under the ledge: 16 space, the design chips, the status line (may wrap once) and the USD note. */
-const CAPTION_H = 190;
-const LEDGE_H = 5;
+/** Space below the complete card for the selected finish and its stock reference, if any. */
+const CAPTION_H = 184;
+const PREVIEW_CONTROLS_H = 48;
 /**
  * Desktop card width, read by the stage's descendants through --cw: the widest 63/88 card that fits the
- * stage height above the ledge and caption, with 24px of wall either side, never wider than 480px.
+ * stage height above its controls and design selector, with 16px of wall either side, never wider than 480px.
  * The stage is a size container, so cqw and cqh measure it.
  */
 const STAGE_VARS = {
   "--cap": `${CAPTION_H}px`,
-  "--cw-lg": `min(calc(100cqw - 48px), calc((100cqh - ${CAPTION_H + LEDGE_H}px) * ${CARD_ASPECT.toFixed(6)}), 480px)`,
+  "--cw-lg": `min(calc(100cqw - 32px), max(180px, calc((100cqh - ${CAPTION_H + PREVIEW_CONTROLS_H}px) * ${CARD_ASPECT.toFixed(6)})), 480px)`,
 } as CSSProperties;
 
 // ---------------------------------------------------------------- helpers
@@ -198,7 +194,7 @@ function Launch() {
   const [touched, setTouched] = useState<Partial<Record<FieldKey, boolean>>>({});
   const [showErrors, setShowErrors] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
-  // The design the preview wears (a chip) and the side it shows: any edit brings back Spark, face up.
+  // A creator's permanent design choice is independent of the token's market data.
   const search = Route.useSearch();
   const [designKey, setDesignKey] = useState(() =>
     isCardDesignKey(search.design) ? search.design : DEFAULT_CARD_DESIGN,
@@ -207,7 +203,6 @@ function Launch() {
   useEffect(() => {
     if (isCardDesignKey(search.design)) setDesignKey(search.design);
   }, [search.design]);
-  const [side, setSide] = useState<CardSide>("face");
 
   const fileRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -224,10 +219,6 @@ function Launch() {
     },
     [preview],
   );
-
-  useEffect(() => {
-    setSide("face");
-  }, [name, ticker, lore, preview, devBuy]);
 
   // Dev buy quote on the fresh curve, and what the launch costs in total.
   const devLamports = devBuy ? parseSol(devBuy) : 0;
@@ -409,7 +400,7 @@ function Launch() {
     image: preview ?? "",
     level: design.materialLevel,
     cardTemplate: designKey,
-    // A rare design shows the market cap it unlocks at, so the card's own figure matches the chip.
+    // The same live quote and identity fields occupy the same card slots in every finish.
     mcapUsd: mcapUsd(after),
     holders: devQuote?.ok ? 1 : 0,
     dexNo: 0,
@@ -419,7 +410,6 @@ function Launch() {
   };
   const pick = (key: string) => {
     if (isCardDesignKey(key)) setDesignKey(key);
-    setSide("face");
   };
   const costItems = [
     ...(devQuote?.ok ? [{ label: "Dev buy", lamports: devQuote.solIn }] : []),
@@ -428,7 +418,7 @@ function Launch() {
 
   return (
     <PageFrame className="mdx-page">
-      <PageHeader title="Launch your token" context={CONTEXT} wrapContext />
+      <PageHeader title="Launch a coin" context={CONTEXT} wrapContext />
 
       <div className="cdx-create-layout">
         {/* ------------------------------------------------ the form (plinth) */}
@@ -436,12 +426,12 @@ function Launch() {
           onSubmit={submit}
           noValidate
           aria-label="New coin"
-          className="cdx-create-form mdx-plinth flex min-w-0 flex-col gap-5"
+          className="cdx-create-form mdx-plinth mdx-scroll flex min-w-0 flex-col gap-4 lg:gap-0"
         >
           {/* Phones (P1-22): Name over Ticker beside a 112px live preview that opens in 3D, so the card answers
               every keystroke on the same screen. Desktop: Name | Ticker in one row and the big stage on the right. */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
-            <div className="contents">
+          <div className="grid grid-cols-[minmax(0,1fr)_96px] gap-x-4 gap-y-4 sm:grid-cols-[minmax(0,1fr)_112px] lg:grid-cols-[minmax(0,1fr)_180px]">
+            <div className="flex min-w-0 flex-col gap-4 lg:contents">
               <Field label="Name" htmlFor="name" error={nameMsg} className="min-w-0">
                 <Input
                   ref={nameRef}
@@ -476,6 +466,13 @@ function Launch() {
                 />
               </Field>
             </div>
+            <div className="self-start pt-1 lg:hidden">
+              <PhonePreview card={previewCard} />
+            </div>
+          </div>
+
+          <div className="lg:hidden">
+            <CardDesignPicker value={designKey} onChange={pick} />
           </div>
 
           <Gap />
@@ -673,14 +670,14 @@ function Launch() {
           </div>
         </form>
 
-        {/* ------------------------------------------------ the stage (wall, lit ledge; the preview is not sleeved until it is minted) */}
+        {/* The original MintDex arrangement: a full, open card stage to the right of the details. */}
         <section aria-label="Your card preview" style={STAGE_VARS} className="cdx-create-preview">
           {/* The one unsleeved card: no pocket, because this card is not minted yet. */}
-          <div className="flex justify-center lg:min-h-0 lg:flex-1 lg:items-end">
+          <div className="cdx-create-preview__card">
             <div className="flex-none" style={{ width: "var(--cw, 300px)" }}>
               {/* In your hand: it breathes and peeks at its back, a tap (or F) turns it over, a new picture
                   prints onto it and typing settles it (refs/alive-3d-spec.md 7, Launch). Any edit turns it face up. */}
-              <HeroTurntable card={previewCard} />
+              <HeroTurntable card={previewCard} followEdits />
             </div>
           </div>
 

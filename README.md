@@ -6,6 +6,7 @@ Independent local project based on MintDex. Creators choose one permanent premiu
 
 - 48 creator-selectable designs: eight trading-card classics, 14 premium material designs, 20 limited editions and six dedicated stock-reference designs.
 - Matching text-free Higgsfield front/back artwork for all 48 designs, with the creator's token image and live card content composed above the frame.
+- One shared MintDex card template: every design uses the same artwork, name, ticker, description, statistics and footer positions. Only frame art, material, foil and matching reverse change.
 - Live token/card preview, artwork upload, token metadata, optional initial buy.
 - Local pump.fun-style token curve, buys/sells, charts, activity, holdings and NFT card collection.
 - Existing rounded 3D slab, both-face 360° shimmer, touch rotation, viewer and case.

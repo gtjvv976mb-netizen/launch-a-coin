@@ -1,31 +1,21 @@
-import { useContext, useEffect, useRef, useState, type CSSProperties, type Ref } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type Ref } from "react";
 import { getCardDesign, type CardDesign } from "../../lib/carddex/designs";
-import { GeneratedCardFront, GeneratedCardFinish, generatedCardStyle } from "../carddex/GeneratedCardArt";
-import { TradingCardFace } from "./TradingCardFace";
+import { CanonicalCardFace } from "../carddex/CanonicalCardFace";
+import { generatedCardAssets } from "../../lib/carddex/generated-assets";
 import "../../carddex-cards.css";
 
 import { usdCompact } from "../../lib/mintdex/format";
 import { cardArtSources } from "../../lib/mintdex/art";
 import {
   MAX_LEVEL,
-  frameLayout,
-  frameLightMapSrc,
-  frameMiniSrc,
   frameSrc,
   frameSrcSet,
   tierForLevel,
-  type Box,
-  type FrameLayout,
   type TierKey,
 } from "../../lib/mintdex/tiers";
 import { Card3DView } from "./card3d/Card3D";
-import { TierCraft } from "./TierCraft";
-import { CardPrint, boxStyle } from "./CardPrint";
-import { EditionCard } from "./EditionCard";
-import { getEdition, type EditionKey } from "../../lib/mintdex/editions";
-import { MemeIconCard } from "./MemeIconCard";
-import { getMemeIcon, type MemeIconKey } from "../../lib/mintdex/meme-icons";
-import { FaceDepth } from "./card3d/faceContext";
+import { type EditionKey } from "../../lib/mintdex/editions";
+import { type MemeIconKey } from "../../lib/mintdex/meme-icons";
 import { motionLevel, notifyRevealed, requestAscend, trackReveal } from "./card3d/motion3d";
 import type { SceneCtl } from "./card3d/scene";
 import type {
@@ -84,20 +74,6 @@ export function cardBackTheme(card: CardData) {
 }
 
 const DECODE_CAP_MS = 600;
-const SPARKLE = new Set<TierKey>(["spark", "surge", "nova", "tide", "apex", "ember", "bloom", "mythic", "aurora", "relic", "frost", "regal", "celestial", "legend"]);
-const ART_HOLO = new Set<TierKey>(["frost", "regal", "celestial", "legend"]);
-const HOLES = new Map<TierKey, string>();
-function foilHoles(key: TierKey, layout: FrameLayout): string {
-  let url = HOLES.get(key);
-  if (!url) {
-    const w = 1000, h = w * 88 / 63;
-    const rect = (b: Box) => `<rect x='${b.x*w}' y='${b.y*h}' width='${b.w*w}' height='${b.h*h}' rx='8'/>`;
-    url = `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${w} ${h}' preserveAspectRatio='none'>${[layout.name, layout.type, layout.text, ...layout.footer].map(rect).join("")}</svg>`)}")`;
-    HOLES.set(key, url);
-  }
-  return url;
-}
-
 /**
  * Fetch a design's frame ahead of time at the copy a card img with these `sizes` would pick: the same srcset
  * and sizes, so the browser makes the same choice and the card later finds it in the cache (never a second copy).
@@ -119,7 +95,13 @@ export function preloadFrame(key: TierKey, sizes: string): Promise<void> {
 export function preloadCard(card: CardData, sizes: string, level = card.level): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   const design = cardDesign(card);
-  const jobs: Promise<unknown>[] = design.layout ? [] : [preloadFrame(tierForLevel(design.materialLevel).key, sizes)];
+  const generated = generatedCardAssets(design.key);
+  const jobs: Promise<unknown>[] = [{source:generated.front,small:generated.front320},{source:generated.back,small:generated.back320}].filter(asset=>asset.source).map(({source,small}) => {
+    const image = new Image();
+    if (small) { image.srcset = `${small} 320w, ${source} 1260w`; image.sizes = sizes; }
+    image.src = source!; image.decoding = "async";
+    return image.decode().catch(() => undefined);
+  });
   if (card.image) {
     const img = new Image();
     img.decoding = "async";
@@ -141,23 +123,6 @@ export function preloadCard(card: CardData, sizes: string, level = card.level): 
 function defaultFrameSizes(priority: boolean, compact: boolean) {
   if (priority) return compact ? "200px" : "(max-width: 1023px) 260px, 400px";
   return `auto, ${compact ? "180px" : "300px"}`;
-}
-
-/**
- * Coin art comes in sized copies (backlog P1-4): uploads at 96, 320 and 800 px, the seeded creatures at 96 and
- * 320 px beside the 800 px original (art.ts). The browser picks the copy that fits the art window (about 82% of
- * the card width): a lazy card reads its laid-out width (sizes="auto"), an eager one uses the card's own sizes
- * (a slight overestimate). Anything else loads as is. Lite faces take the 96 px copy.
- */
-function artSources(src: string, compact: boolean, priority: boolean, cardSizes: string | undefined, lite: boolean) {
-  const set = cardArtSources(src);
-  if (!set) return { src };
-  if (lite) return { src: set.card, srcSet: set.srcSet, sizes: "96px" };
-  return {
-    src: set.card,
-    srcSet: set.srcSet,
-    sizes: priority ? (cardSizes ?? (compact ? "150px" : "300px")) : `auto, ${compact ? "150px" : "300px"}`,
-  };
 }
 
 /** The light a design throws (bursts, the light pool), from tiers.ts. */
@@ -195,159 +160,9 @@ type FaceProps = {
  */
 type RenderFaceProps = FaceProps & { mode: "flat" | "3d" | "lite"; className?: string; style?: CSSProperties };
 function Face(input: RenderFaceProps) {
-  const props = { ...input, card: designedCard(input.card), level: cardDesign(input.card).materialLevel };
-  const design = cardDesign(props.card);
-  if (design.layout) return <TradingCardFace card={props.card} design={design} priority={props.priority || props.eager} sizes={props.sizes} compact={props.compact || props.mode === "lite"} className={props.className} style={props.style} label={props.mode === "flat" ? cardLabel(props.card) : undefined} />;
-  const icon = getMemeIcon(props.card.memeIcon);
-  if (icon) return <MemeIconCard icon={icon} card={props.card} compact={props.compact || props.mode === "lite"} priority={props.priority || props.eager} sizes={props.sizes} className={props.className} />;
-  const edition = getEdition(props.card.edition);
-  if (edition) return <EditionCard edition={edition} card={props.card} compact={props.compact || props.mode === "lite"} priority={props.priority || props.eager} sizes={props.sizes} className={props.className} />;
-  return <StandardFace {...props} />;
-}
-
-function StandardFace({
-  card,
-  level,
-  compact = false,
-  priority = false,
-  sizes,
-  eager = false,
-  mode,
-  className = "",
-  style,
-}: FaceProps & { mode: "flat" | "3d" | "lite"; className?: string; style?: CSSProperties }) {
-  const depth = useContext(FaceDepth);
-  const frameRef = useRef<HTMLImageElement>(null);
+  const card = designedCard(input.card);
   const design = cardDesign(card);
-  const tier = tierForLevel(design.materialLevel);
-  const layout = frameLayout(tier.key);
-  const lite = mode === "lite";
-  const frameSizes = sizes ?? defaultFrameSizes(priority, compact);
-
-  // The finish's light map is the frame copy the browser actually loaded for this card (its srcset pick for this
-  // width and screen density), read back once the frame is in: one download per design, never a second copy
-  // just for the mask. Until then the finish layers stay hidden (data-lit), so they never light an unmasked card.
-  const [lit, setLit] = useState<string | null>(null);
-  useEffect(() => {
-    const img = frameRef.current;
-    if (!img || lite) return;
-    const sync = () => {
-      if (img.complete && img.naturalWidth > 0 && img.currentSrc) setLit(img.currentSrc);
-    };
-    sync();
-    img.addEventListener("load", sync);
-    return () => img.removeEventListener("load", sync);
-  }, [lite]);
-
-  // Card guard: exactly a Pokemon card, 63 x 88 mm with 1/8 in corners. The radius is a
-  // fraction of the width; as an elliptical border-radius that is r% / (r * 63/88)%.
-  const r = (layout.radius ?? 0.0504) * 100;
-  const sheen = cardLight(card).sheen;
-  const holes = foilHoles(tier.key, layout);
-  // The light's map: the frame itself (its luminance is the foil), the very copy the frame img loaded, or the
-  // design's own light map (Legend's gold), which needs no wait.
-  const map = frameLightMapSrc(tier.key);
-  const maskSrc = lite ? null : (map ?? lit);
-  const vars = {
-    ...generatedCardStyle(card.cardTemplate),
-    "--accent": tier.accent,
-    // The finish's light (tiers.ts sheen), repeated to five stops.
-    "--s1": sheen[0],
-    "--s2": sheen[1 % sheen.length],
-    "--s3": sheen[2 % sheen.length],
-    "--s4": sheen[3 % sheen.length],
-    "--s5": sheen[4 % sheen.length],
-    // Every finish layer wears this mask: the frame (or the light map), minus the panel holes.
-    ...(maskSrc ? { "--foil-mask": `url("${maskSrc}"), ${holes}` } : null),
-    // The text panels alone: the full-art holo (card3d.css .mdx-card__poke) covers the card minus these.
-    ...(lite ? null : { "--foil-holes": holes }),
-    // 3D faces carry the design's 1KB miniature as their own background until the frame arrives.
-    ...(mode === "3d" ? { backgroundImage: `url("${frameMiniSrc(tier.key)}")` } : null),
-    ...style,
-    "--card-radius": `${r.toFixed(2)}% / ${((r * 63) / 88).toFixed(2)}%`,
-    aspectRatio: "63 / 88",
-  } as CSSProperties;
-  const art = card.image ? artSources(card.image, compact, priority, sizes, lite) : null;
-  const loading = priority || eager ? "eager" : "lazy";
-  const fetchPriority = priority ? "high" : eager ? "low" : undefined;
-
-  return (
-    <div
-      className={`mdx-card ${compact ? "mdx-card--compact" : ""} ${lite ? "mdx-card--lite" : ""} ${className}`}
-      data-tier={tier.key}
-      data-finish={design.finish}
-      data-card-template={design.key}
-      data-carddex-premium=""
-      data-lit={maskSrc ? "" : undefined}
-      style={vars}
-      role={mode === "flat" ? "img" : undefined}
-      aria-label={mode === "flat" ? cardLabel(card, tier.level) : undefined}
-    >
-      {mode === "flat" ? <div className="mdx-card__shadow" /> : null}
-      {/* The design's 1KB miniature, stretched under the art and the frame: until the frame arrives (a slow
-          phone connection) the card already shows its colors and panels, never a frameless ghost. */}
-      {mode === "flat" ? <div className="mdx-card__ghost" style={{ backgroundImage: `url("${frameMiniSrc(tier.key)}")` }} /> : null}
-      <div className="mdx-card__art" style={boxStyle(layout.window, 0.004)}>
-        {art ? (
-          <img {...art} alt="" draggable={false} loading={loading} fetchPriority={fetchPriority} decoding="async" />
-        ) : (
-          <div className="grid h-full w-full place-items-center bg-[radial-gradient(circle_at_50%_40%,#ece2c8,#d8cba9)] text-center">
-            <span className="px-[8cqw] font-display text-[5.5cqw] leading-tight text-[#6b6455]">Your art here</span>
-          </div>
-        )}
-      </div>
-      {/* The frame at the copy that fits (360, 600 or 900px; sizes="auto" reads the laid-out width of a lazy
-          image, the fallback covers browsers without it). The finish's mask reuses whatever copy this loads. */}
-      {lite ? (
-        <img className="mdx-card__frame" src={frameMiniSrc(tier.key)} alt="" draggable={false} decoding="async" />
-      ) : (
-        <img
-          ref={frameRef}
-          className="mdx-card__frame"
-          src={frameSrc(tier.key)}
-          srcSet={frameSrcSet(tier.key)}
-          sizes={frameSizes}
-          alt=""
-          draggable={false}
-          loading={loading}
-          decoding="async"
-          fetchPriority={fetchPriority}
-        />
-      )}
-
-      <GeneratedCardFront cardTemplate={design.key} priority={priority || eager} />
-      <TierCraft tier={tier} layout={layout} lite={lite} />
-
-      <CardPrint card={card} layout={layout} tier={tier} />
-      {/* The light (spec 4.6, owner override 2026-10-11): every layer in one container on top; the engine writes
-          --px, --py, --lit here (and px, py on the art window) only. Each design's finish (card3d.css, keyed on
-          data-tier) is a holo group (its rainbow, times its foil texture, times a light spot, so the rainbow lives
-          around the light), the metal specular along the keylines, glitter that flares near the light, and the
-          die-cut foil rim. Every layer but the rim and the glare wears the frame minus the text panels, so the
-          parchment and its text never shimmer. Flat faces show the same finish at the still light. */}
-      {lite ? null : (
-        <div className="mdx-card__lights">
-          <GeneratedCardFinish cardTemplate={design.key} />
-          <div className="mdx-card__holo2">
-            <i className="mdx-card__rainbow" />
-            <i className="mdx-card__tex" />
-            <i className="mdx-card__spot" />
-          </div>
-          <div className="mdx-card__shine" />
-          {SPARKLE.has(tier.key) ? <div className="mdx-card__sparkle" /> : null}
-          {/* Holo art (the full-art designs, 3D only): a faint rainbow or glitter over the picture, in the light. */}
-          {mode === "3d" && ART_HOLO.has(tier.key) ? <div className="mdx-card__holo" style={boxStyle(layout.window, 0.004)} /> : null}
-          {/* The Pokemon-style holo (3D only): one element, its ::before the design's holo pattern (color-dodge
-              rainbow, glitter, texture, sliding with the light) and its ::after the glare that follows the
-              pointer. Both read --px, --py, --lit from this container: no extra JS, no extra layer. */}
-          {mode === "3d" ? <i className="mdx-card__poke" /> : null}
-          {mode === "3d" ? <div className="mdx-card__gloss" /> : null}
-          <div className="mdx-card__rim" />
-          {mode === "3d" && depth === "table" ? <div className="mdx-card__glint" /> : null}
-        </div>
-      )}
-    </div>
-  );
+  return <CanonicalCardFace card={card} design={design} priority={input.priority || input.eager} sizes={input.sizes} compact={input.compact} lite={input.mode === "lite"} className={input.className} style={input.style} label={input.mode === "flat" ? cardLabel(card) : undefined} />;
 }
 
 /**

@@ -15,9 +15,18 @@ export function CardDesignPicker({
   const selected = getCardDesign(value);
   return (
     <div className={`cdx-design-picker ${className}`}>
-      <label htmlFor={id} className="mb-2 block text-[13px] font-semibold text-ink">
-        Card design
-      </label>
+      <div className="mb-1 flex items-center justify-between gap-3">
+        <label htmlFor={id} className="block text-[13px] font-semibold text-ink">
+          Card design
+        </label>
+        <Link
+          to="/levels"
+          search={{ design: value }}
+          className="mdx-link inline-flex min-h-11 items-center text-[12px]"
+        >
+          See all {CARD_DESIGNS.length} ↗
+        </Link>
+      </div>
       <select
         id={id}
         value={value}
@@ -42,7 +51,7 @@ export function CardDesignPicker({
         ))}
       </select>
       <p className="mt-2 text-[13px] leading-relaxed text-slate">
-        {selected.name} stays with this card. Market cap never changes its design.
+        One consistent layout. Your chosen finish stays with this card.
       </p>
       {selected.stock && (
         <p className="cdx-stock-reference">
@@ -54,13 +63,6 @@ export function CardDesignPicker({
           </span>
         </p>
       )}
-      <Link
-        to="/levels"
-        search={{ design: value }}
-        className="mdx-link mt-1 inline-flex min-h-11 items-center text-[13px]"
-      >
-        Explore all {CARD_DESIGNS.length} designs ↗
-      </Link>
     </div>
   );
 }
