@@ -1430,7 +1430,7 @@ export function DeedPanel({
         <div className="flex items-start justify-between gap-3"><dt className="text-slate">Quote mint</dt><dd className="min-w-0 text-right"><a className="mdx-link break-all" href={`https://solscan.io/token/${asset.mint}`} target="_blank" rel="noreferrer" aria-label={`View ${asset.symbol} quote mint on Solscan`}>{asset.mint.slice(0,6)}…{asset.mint.slice(-6)} ↗</a></dd></div>
       </dl>
       <p className="mt-4 border-t border-hairline pt-3 text-pretty text-[13px] leading-[1.5] text-slate">The token trades. Its creator holds a separate collectible card with the design chosen at launch.</p>
-      {asset.kind === "stock" ? <p className="mt-2 text-[12px] leading-[1.5] text-slate">Paired with a tokenized stock asset. Your token does not represent company shares.</p> : null}
+      {asset.kind === "stock" ? <p className="mt-2 text-[12px] leading-[1.5] text-slate">Paired with a tokenized stock asset. Your coin does not represent company shares.</p> : null}
       <p className="mt-2 text-[12px] leading-[1.5] text-slate">{MODE_COPY.guideNote}</p>
     </section>
   );

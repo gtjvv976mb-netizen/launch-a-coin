@@ -65,7 +65,7 @@ export function CardDesignPicker({
       {!compact ? <><p className="mt-2 text-[13px] leading-relaxed text-slate">
         One permanent finish. Paired editions select their matching quote asset.
       </p>
-      <PairBadge quoteAssetKey={quoteKey} ticker={ticker || "YOUR TOKEN"} compact /></> : null}
+      <PairBadge quoteAssetKey={quoteKey} ticker={ticker || "YOUR COIN"} compact /></> : null}
     </div>
   );
 }

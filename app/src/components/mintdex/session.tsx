@@ -281,13 +281,13 @@ type GuideStep = { title: string; body: string; visual: ReactNode; phoneVisual?:
 /** While mainnet launches are off, the guide describes the test mode people can actually use, test funds first. */
 const DEMO_STEPS: GuideStep[] = [
   {
-    title: "Launch your token",
+    title: "Launch your coin",
     body: "Launches run in test mode with test SOL. Real mainnet launches are not open yet. Give your token a name, ticker and artwork, and choose its quote asset.",
     visual: null,
   },
   {
     title: "Choose its permanent card",
-    body: "Pick a premium design before launch. Your token launches on a simulated pump.fun curve and its one-of-one card goes into your demo collection.",
+    body: "Pick a premium design before launch. Your coin launches on a simulated pump.fun curve and its one-of-one card goes into your demo collection.",
     visual: null,
   },
   {

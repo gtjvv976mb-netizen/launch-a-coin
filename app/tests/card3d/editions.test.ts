@@ -71,14 +71,14 @@ describe("shared card renderer retains the token identity", () => {
       expect(classText(markup, "mdx-card__ticker")).toBe(`$${TOKEN.ticker}`);
       expect(classText(markup, "mdx-card__lore")).toBe(TOKEN.lore);
       for (const content of ["Token address", "Market cap", "Holders", `>${TOKEN.holders}</b>`, `@${TOKEN.ownerHandle}`]) expect(markup).toContain(content);
-      expect(markup).not.toContain("Your token art");
+      expect(markup).not.toContain("Your coin art");
       expect(markup).not.toContain("Sold out");
     });
   }
 
   test("an empty-art preview stays explicit rather than borrowing another token’s artwork", () => {
     const markup = render({ ...TOKEN, image: "", edition: "wildtype" });
-    expect(markup).toContain("Your token art");
+    expect(markup).toContain("Your coin art");
     expect(markup).not.toContain("<img");
     expect(markup).toContain("Actual Token");
     expect(markup).not.toContain("EDITION PREVIEW");

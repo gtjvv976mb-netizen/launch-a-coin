@@ -27,7 +27,7 @@ export function CanonicalCardFace({ card, design, priority = false, eager = fals
     <CanonicalCardSkin cardTemplate={design.key} quoteAssetKey={card.quoteAssetKey} priority={priority} eager={eager} lite={lite} sizes={sizes} />
     <div className="mdx-card__art" style={boxStyle(CANONICAL_CARD_LAYOUT.window)} data-card-slot="art">
       {card.image ? <img ref={art} src={source?.card ?? card.image} srcSet={source?.srcSet} sizes={source ? sizes ?? (priority || eager ? "300px" : "auto, 300px") : undefined} alt="" hidden={failure.failed} draggable={false} loading={priority || eager ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : eager ? "low" : undefined} onError={failure.onError} onLoad={failure.onLoad} /> : null}
-      {!card.image || failure.failed ? <div className="cdx-canonical-card__art-fallback">{failure.failed ? "Artwork unavailable" : "Your token art"}</div> : null}
+      {!card.image || failure.failed ? <div className="cdx-canonical-card__art-fallback">{failure.failed ? "Artwork unavailable" : "Your coin art"}</div> : null}
     </div>
     <CardPrint card={card} layout={CANONICAL_CARD_LAYOUT} tier={tierForLevel(design.materialLevel)} preview={card.dexNo<=0} />
     {!lite ? <div className="mdx-card__lights" aria-hidden><GeneratedCardFinish cardTemplate={design.key} /><div className="mdx-card__gloss" /><div className="mdx-card__rim" /></div> : null}
