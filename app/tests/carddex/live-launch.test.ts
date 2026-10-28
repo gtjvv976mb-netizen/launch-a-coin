@@ -95,6 +95,18 @@ async function input(overrides: Partial<{cardTemplate: string; quoteAssetKey: st
   return {...fields, idempotencyKey: "fixture-request", nftMint, initialBuyQuoteBaseUnits: "0", slippageBps: 100, termsAcknowledged: true as const, assets: refs};
 }
 describe("isolated real-launch server lifecycle", () => {
+  test("public asset checks reject redirects before a second origin can be fetched", async () => {
+    const transport = globalThis.fetch;
+    const calls: Array<{url: string; redirect?: RequestRedirect}> = [];
+    try {
+      globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+        calls.push({url: String(url), redirect: init?.redirect});
+        return new Response(null, {status: 302, headers: {location: "https://untrusted.example/image.png"}});
+      }) as typeof fetch;
+      await expect(assets.fetchPublicBytes("https://launchacard.fun/api/live/assets/fixture.png")).rejects.toThrow("not reachable");
+      expect(calls).toEqual([{url: "https://launchacard.fun/api/live/assets/fixture.png", redirect: "manual"}]);
+    } finally { globalThis.fetch = transport; }
+  });
   test("readiness distinguishes missing configuration and keeps local defaults closed", () => {
     expect(liveReadiness().ready).toBe(true);
     env.CARDDEX_DEPLOYMENT_ENV = "local"; env.CARDDEX_LIVE_LAUNCH_ENABLED = "false";

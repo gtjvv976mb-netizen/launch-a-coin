@@ -3,6 +3,7 @@ import { useMemo, useState, type CSSProperties } from "react";
 import { z } from "zod";
 import { HeroTurntable } from "../components/carddex/HeroTurntable";
 import { MintCard, type CardData } from "../components/mintdex/MintCard";
+import { PageControls, usePageCapacity } from "../components/carddex/Viewport";
 import { PageFrame } from "../components/mintdex/ui";
 import {
   CARD_DESIGNS,
@@ -50,8 +51,12 @@ function Designs() {
   const design = getCardDesign(isCardDesignKey(key) ? key : DEFAULT_CARD_DESIGN);
   const collection = search.collection === "icons" ? "limited" : search.collection;
   const category = GROUPS.some(group => group.key === collection) ? collection! : "all";
-  const setCategory = (collection: string) => void navigate({search: {...search, collection: collection === "all" ? undefined : collection}, replace: true, resetScroll: false});
+  const setCategory = (collection: string) => { setPageIndex(0); void navigate({search: {...search, collection: collection === "all" ? undefined : collection}, replace: true, resetScroll: false}); };
   const [query, setQuery] = useState("");
+  const [view, setView] = useState("preview");
+  const [libraryTab, setLibraryTab] = useState("designs");
+  const [pageIndex, setPageIndex] = useState(0);
+  const grid = usePageCapacity({rowHeight:185,minWidth:120,maxColumns:3,maxRows:3});
   const requestedQuote = isPairAssetKey(search.quote) ? getPairAsset(search.quote) : null;
   const quote = boundQuoteForDesign(design.key) ?? (requestedQuote && allowedQuotesForDesign(design.key).some(a=>a.key===requestedQuote.key) ? requestedQuote : defaultQuoteForDesign(design.key));
   const sampleMetrics = quoteMetrics(initialQuoteReserves(quote.key), quote.key);
@@ -83,21 +88,17 @@ function Designs() {
   };
   const pick = (d: CardDesign) => {
     const nextQuote = boundQuoteForDesign(d.key) ?? quote;
-    void navigate({ search: { ...search, design: d.key, quote: nextQuote.key }, replace: true, resetScroll: false }).then(() => {
-      if (window.innerWidth < 1024)
-        document.querySelector(".cdx-archive__vitrine")?.scrollIntoView({
-          block: "start",
-          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            ? "instant"
-            : "smooth",
-        });
-    });
+    setView("preview");
+    void navigate({ search: { ...search, design: d.key, quote: nextQuote.key }, replace: true, resetScroll: false });
   };
+  const pages = Math.max(1,Math.ceil(shown.length/grid.count));
+  const page = Math.min(pageIndex,pages-1);
   return (
-    <PageFrame className="cdx-archive">
+    <PageFrame className={`cdx-archive cdx-archive--${view}`}>
+      <div className="sr-only">{view}</div>
       <header className="cdx-archive__head">
         <div>
-          <h1 className="mdx-h1">Find your signature.</h1>
+          <h1 className="mdx-h1">Card designs.</h1>
           <p className="cdx-muted">{CARD_DESIGNS.length} designs. Your artwork takes the centre.</p>
         </div>
         <Link
@@ -108,7 +109,8 @@ function Designs() {
           Use this design
         </Link>
       </header>
-      <div className="cdx-archive__body">
+      <div className="cdx-view-tabs cdx-archive-mobile-tabs" aria-label="Design views"><button type="button" aria-pressed={view==="preview"} onClick={()=>setView("preview")}>Card preview</button><button type="button" aria-pressed={view==="library" && libraryTab==="designs"} onClick={()=>{setView("library");setLibraryTab("designs");}}>Designs</button><button type="button" aria-pressed={view==="library" && libraryTab==="pair"} onClick={()=>{setView("library");setLibraryTab("pair");}}>Pair</button></div>
+      <div className="cdx-archive__body" data-view={view}>
         <section className="cdx-archive__vitrine" aria-label="Selected card design preview">
           <div
             className="cdx-archive__halo"
@@ -116,17 +118,19 @@ function Designs() {
             aria-hidden
           />
           <div className="cdx-archive__card" key={design.key}>
-            <HeroTurntable card={card} />
+            <HeroTurntable card={card} viewportFit />
           </div>
           <div className="cdx-archive__caption">
             <h2>{design.name}</h2>
-            <PairBadge quoteAssetKey={quote.key} ticker="GLORB" />
+            <button type="button" className="cdx-archive__pair-link mdx-link" onClick={()=>{setView("library");setLibraryTab("pair");}}>GLORB / {quote.symbol} · Pair details</button>
             <span className="cdx-demo-note">
               Sample card · drag to inspect
             </span>
           </div>
         </section>
         <section className="cdx-library" aria-label="Card design library">
+          <div className="cdx-view-tabs cdx-library-desktop-tabs" aria-label="Library sections"><button type="button" aria-pressed={libraryTab==="designs"} onClick={()=>setLibraryTab("designs")}>Designs</button><button type="button" aria-pressed={libraryTab==="pair"} onClick={()=>setLibraryTab("pair")}>Trading pair</button></div>
+          {libraryTab === "pair" ? <div className="cdx-fit-region"><QuoteAssetPicker value={quote.key} designKey={design.key} ticker="GLORB" compact viewport onChange={(nextQuote,nextDesign)=>void navigate({ search:{...search,design:nextDesign,quote:nextQuote},replace:true,resetScroll:false })} /></div> : <>
           <div className="cdx-library__tools">
             <label className="sr-only" htmlFor="design-search">
               Search card designs
@@ -136,10 +140,10 @@ function Designs() {
               className="mdx-input"
               placeholder="Find your design…"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {setQuery(e.target.value);setPageIndex(0);}}
               type="search"
             />
-            <QuoteAssetPicker value={quote.key} designKey={design.key} ticker="GLORB" compact onChange={(nextQuote,nextDesign)=>void navigate({ search:{...search,design:nextDesign,quote:nextQuote},replace:true,resetScroll:false })} />
+            <label className="sr-only" htmlFor="design-category">Design category</label><select id="design-category" className="cdx-category-select mdx-input" value={category} onChange={event=>setCategory(event.target.value)}>{GROUPS.map(group=><option key={group.key} value={group.key}>{group.name} · {CARD_DESIGNS.filter(d=>matchesCategory(d,group.key)).length}</option>)}</select>
             <div className="cdx-filter" aria-label="Filter designs">
               {GROUPS.map((g) => (
                 <button
@@ -158,8 +162,8 @@ function Designs() {
               ))}
             </div>
           </div>
-          <div className="cdx-library__list">
-            {shown.map((d, i) => (
+          <div ref={grid.ref} className="cdx-library__list" style={{"--page-columns":grid.columns,"--page-rows":grid.rows} as CSSProperties}>
+            {shown.slice(page*grid.count,(page+1)*grid.count).map((d, i) => (
               <button
                 key={d.key}
                 type="button"
@@ -202,6 +206,8 @@ function Designs() {
               </p>
             )}
           </div>
+          <PageControls page={page} pages={pages} onPage={setPageIndex} label={`${shown.length} designs`} />
+          </>}
           <p className="cdx-library__foot">
             Stock pairs use tokenized quote assets; they do not grant equity.
           </p>

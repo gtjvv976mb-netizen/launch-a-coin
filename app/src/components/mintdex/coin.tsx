@@ -60,6 +60,7 @@ import { marketCapText, marketCapWatch, quoteAtoms, quoteNumber } from "../../li
 import { formatQuoteAmount, parseQuoteAmount, quoteMetrics } from "../../lib/carddex/quote-simulation";
 import { aggregateCandles, candleInterval, candleIntervalLabel } from "../../lib/carddex/candles";
 import "../../carddex-chart.css";
+import { PageControls, usePageCapacity } from "../carddex/Viewport";
 import type { CoinDetail, CoinPage, TradeRow } from "../../lib/mintdex/types";
 import { CardBack, CardCase, View3DButton, useView3DGestures, type Card3DHandle } from "./card3d";
 import { useClaimable } from "./cases";
@@ -852,6 +853,10 @@ export function TradesList({
   // lands with a poll enters with the sky wash, and screen readers hear "1 new trade".
   const live = useLiveList(all, (t) => t.id, ["trade", "trades"]);
   const rows = live.shown;
+  const grid = usePageCapacity({rowHeight:36,minWidth:10000,maxColumns:1,maxRows:20});
+  const [pageIndex,setPageIndex] = useState(0);
+  const pages = Math.max(1,Math.ceil(rows.length/grid.count));
+  const page = Math.min(pageIndex,pages-1);
   const fresh = live.fresh;
   const now = useNow();
   const total = Math.max(count, trades.length);
@@ -894,17 +899,9 @@ export function TradesList({
             <span className="truncate text-right">{rows[0]?.quoteSymbol ?? "SOL"}</span>
             <span className="whitespace-nowrap text-right max-[359px]:hidden">Market cap</span>
           </div>
-          <div
-            className="flex h-[var(--rows-h)] min-h-0 flex-col xl:h-auto xl:flex-1"
-            style={fixedRows}
-          >
-            <FitList
-              {...live.bind}
-              aria-label="Recent trades"
-              rowHeight={34}
-              items={rows}
-              className="mdx-stagger divide-y divide-rule"
-              render={(t) => (
+          <div ref={grid.ref} className="cdx-trades-page">
+            {rows.slice(page*grid.count,(page+1)*grid.count).map(t=>(
+
                 <div
                   key={t.id}
                   data-new={fresh.has(t.id) || undefined}
@@ -927,9 +924,9 @@ export function TradesList({
                     {t.mcapUsd == null ? quoteNumber(t.mcapQuote, true) : marketCapText(t)}
                   </span>
                 </div>
-              )}
-            />
+            ))}
           </div>
+          <PageControls page={page} pages={pages} onPage={setPageIndex} label={`${rows.length} recent trades`} />
         </>
       )}
     </section>
@@ -999,12 +996,14 @@ export function TradePanel({
   page,
   hideQuick = false,
   hideAfter = false,
+  compact = false,
   pane,
   className = "",
 }: {
   page: CoinPage;
   hideQuick?: boolean;
   hideAfter?: boolean;
+  compact?: boolean;
   pane?: string;
   className?: string;
 }) {
@@ -1014,6 +1013,7 @@ export function TradePanel({
   const { openEnter } = useSessionUi();
   const { run, pending, feedback, errorOf, reset } = useAction();
   const [side, setSide] = useState<"buy" | "sell">("buy");
+  const [ticketStep,setTicketStep] = useState("amount");
   const [input, setInput] = useState("");
   // A blocked submit with nothing typed asks for an amount; typing clears it.
   const [attempted, setAttempted] = useState(false);
@@ -1167,6 +1167,7 @@ export function TradePanel({
 
   function submit(e: FormEvent) {
     e.preventDefault();
+    if (compact && ticketStep === "amount") {setTicketStep("review");return;}
     if (!me) {
       const intent = quote?.ok
         ? side === "buy"
@@ -1213,11 +1214,14 @@ export function TradePanel({
     <form
       ref={formRef}
       onSubmit={submit}
-      className={cx("flex flex-col", className)}
+      className={cx("flex flex-col", compact && "cdx-trade-ticket", className)}
+      data-ticket-step={ticketStep}
       aria-label={`Trade $${coin.ticker}`}
       data-pane={pane}
       noValidate
     >
+      {compact ? <div className="cdx-view-tabs" aria-label="Trade steps"><button type="button" aria-pressed={ticketStep==="amount"} onClick={()=>setTicketStep("amount")}>Amount</button><button type="button" aria-pressed={ticketStep==="review"} onClick={()=>setTicketStep("review")}>Review trade</button></div> : null}
+      <div className="cdx-trade-ticket__amount">
       <SideToggle
         side={side}
         onChange={(s) => {
@@ -1303,6 +1307,10 @@ export function TradePanel({
         </div>
       )}
 
+      {compact ? <Button type="button" block className="mt-4" onClick={()=>setTicketStep("review")}>Review {side}</Button> : null}
+      </div>
+      <div className="cdx-trade-ticket__review">
+      {compact ? <p className="text-[13px] text-slate">{side==="buy"?"Buy":"Sell"} · {input || "0"} {suffix}</p> : null}
       <dl className="mdx-leaders mt-4">
         <QuoteRow label="You receive">
           {quote?.ok ? (
@@ -1386,6 +1394,7 @@ export function TradePanel({
       >
         {label}
       </Button>
+      </div>
     </form>
   );
 }

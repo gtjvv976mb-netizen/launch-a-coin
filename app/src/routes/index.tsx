@@ -1,3 +1,4 @@
+import { PageControls, usePageCapacity } from "../components/carddex/Viewport";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
@@ -414,6 +415,10 @@ function EmptyLine({ children }: { children: ReactNode }) {
 }
 
 function Home() {
+  const [homeView,setHomeView]=useState("card");
+  const [sideTab,setSideTab]=useState("trending");
+  const [sideIndex,setSideIndex]=useState(0);
+  const sideGrid=usePageCapacity({rowHeight:60,minWidth:10000,maxColumns:1,maxRows:8});
   const initial = Route.useLoaderData();
   const qc = useQueryClient();
   const search = Route.useSearch();
@@ -527,7 +532,25 @@ function Home() {
   const turntableCtl = useRef<SceneCtl | null>(null);
   const turntableLastFrame = useRef(0);
   const turntableLastInput = useRef(0);
+  const fittedTurntable = useRef(false);
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1280px) and (min-height: 720px)");
+    const sync = () => {
+      fittedTurntable.current = media.matches;
+      const body = turntableCtl.current?.body;
+      if (body) body.turnArcScale = media.matches ? 0.2 : 1;
+      Engine.kick();
+    };
+    sync();
+    media.addEventListener("change", sync);
+    return () => {
+      media.removeEventListener("change", sync);
+      const body = turntableCtl.current?.body;
+      if (body) body.turnArcScale = 1;
+    };
+  }, []);
   const turntableFrame = (body: Body) => {
+    body.turnArcScale = fittedTurntable.current ? 0.2 : 1;
     const now = performance.now();
     const dt = Math.min(0.05, (now - (turntableLastFrame.current || now)) / 1000);
     turntableLastFrame.current = now;
@@ -732,11 +755,13 @@ function Home() {
 
   return (
     <div
+      data-home-view={homeView}
       data-ambient-paused={still || undefined}
       className="mdx-page mdx-home cdx-home grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_calc(var(--aside)_-_var(--main-pad))] lg:gap-5 lg:max-xl:[--aside:300px] xl:[--aside:340px] wide:[--aside:360px] fit:h-full fit:grid-rows-[minmax(0,1fr)]"
     >
+      <div className="cdx-view-tabs cdx-home-mobile-tabs" aria-label="Home views"><button type="button" aria-pressed={homeView==="card"} onClick={()=>setHomeView("card")}>Featured card</button><button type="button" aria-pressed={homeView==="pulse"} onClick={()=>setHomeView("pulse")}>Collection pulse</button></div>
       {/* ------------------------------------------------ stage (wall) */}
-      <section className="relative isolate flex min-w-0 flex-col fit:min-h-0">
+      <section className="cdx-home-stage relative isolate flex min-w-0 flex-col fit:min-h-0">
         {/* The vitrine's light, bokeh and dust behind the whole stage (the beam falls from the top edge). */}
         <Vitrine hold={!playing} onLive={setAmbientLive} />
         {/* Headline block: Home's header. */}
@@ -907,66 +932,15 @@ function Home() {
         aria-label="Trending and activity"
         className="cdx-home__aside mdx-plinth mdx-aside flex min-w-0 flex-col gap-6 lg:pt-[calc(2rem_-_var(--gutter))] short:gap-5 short:pt-6 fit:min-h-0 fit:overflow-hidden"
       >
-        <section className="flex-none">
-          <SectionHead title="Trending" right={<TextLink to="/discover">See all</TextLink>} />
-          {trending.length ? (
-            <>
-              <p className="-mt-1 text-[12px] leading-4 text-slate">{trendingBasis}</p>
-              <div
-                ref={trendingRef}
-                className="mdx-stagger mt-1"
-                data-settled={trendingSettled || undefined}
-              >
-                {trending.map((c, i) => (
-                  <CoinRow key={c.id} coin={c} rank={i + 1} flipId={c.id} />
-                ))}
-              </div>
-            </>
-          ) : (
-            <EmptyLine>No coins in the dex yet.</EmptyLine>
-          )}
-        </section>
+        <div className="cdx-view-tabs" aria-label="Collection pulse sections"><button type="button" aria-pressed={sideTab==="trending"} onClick={()=>{setSideTab("trending");setSideIndex(0);}}>Trending</button><button type="button" aria-pressed={sideTab==="activity"} onClick={()=>{setSideTab("activity");setSideIndex(0);}}>Activity</button></div>
+        <div className="flex flex-none items-center justify-between gap-2"><p className="text-[12px] leading-4 text-slate">{sideTab==="trending" ? trendingBasis : MODE_COPY.botsNote}</p>{sideTab==="activity" ? <LivePause paused={live.paused} onChange={live.setPaused} /> : <TextLink to="/discover">See all</TextLink>}</div>
+        <div ref={sideGrid.ref} className="cdx-home-pulse-list">
+          {sideTab === "trending" ? trending.slice(Math.min(sideIndex,Math.max(0,Math.ceil(trending.length/sideGrid.count)-1))*sideGrid.count,(Math.min(sideIndex,Math.max(0,Math.ceil(trending.length/sideGrid.count)-1))+1)*sideGrid.count).map((c,i)=><CoinRow key={c.id} coin={c} rank={sideIndex*sideGrid.count+i+1} flipId={c.id} />) : activity.slice(Math.min(sideIndex,Math.max(0,Math.ceil(activity.length/sideGrid.count)-1))*sideGrid.count,(Math.min(sideIndex,Math.max(0,Math.ceil(activity.length/sideGrid.count)-1))+1)*sideGrid.count).map(e=><EventItem key={e.id} e={e} now={now} isNew={live.fresh.has(e.id)} />)}
+          {sideTab==="trending" && !trending.length ? <EmptyLine>No coins in the dex yet.</EmptyLine> : null}
+          {sideTab==="activity" && !activity.length ? <EmptyLine>No activity yet.</EmptyLine> : null}
+        </div>
+        <PageControls page={Math.min(sideIndex,Math.max(0,Math.ceil((sideTab==="trending"?trending.length:activity.length)/sideGrid.count)-1))} pages={Math.max(1,Math.ceil((sideTab==="trending"?trending.length:activity.length)/sideGrid.count))} onPage={setSideIndex} label={sideTab==="trending"?`${trending.length} tokens`:`${activity.length} events`} />
 
-        <details className="cdx-home__activity">
-          <summary>Recent activity</summary>
-          <div className="flex min-h-0 flex-1 flex-col">
-          {/* "Activity", not "Live activity": in test mode most rows are demo bots (P0-6, decision C7), and the
-              line under the heading says so. FitList measures the space left, so it shows one row fewer. */}
-          <SectionHead
-            title="Activity"
-            live={recent ? activity[0].id : undefined}
-            livePaused={live.paused}
-            right={<LivePause paused={live.paused} onChange={live.setPaused} />}
-          />
-          {MODE_COPY.botsNote ? (
-            <p className="-mt-1 flex-none text-[12px] leading-4 text-slate">{MODE_COPY.botsNote}</p>
-          ) : null}
-          <p className="sr-only" role="status" aria-live="polite">
-            {live.said}
-          </p>
-          {activity.length ? (
-            <>
-              <div {...live.bind} aria-label="Activity" className="mdx-stagger mt-1 fit:hidden">
-                {activity.slice(0, FLOW_ACTIVITY_ROWS).map((e) => (
-                  <EventItem key={e.id} e={e} now={now} isNew={live.fresh.has(e.id)} />
-                ))}
-              </div>
-              <FitList
-                {...live.bind}
-                aria-label="Activity"
-                className="mdx-stagger -mx-2 mt-1 hidden px-2 fit:flex"
-                rowHeight={44}
-                items={activity}
-                render={(e) => (
-                  <EventItem key={e.id} e={e} now={now} isNew={live.fresh.has(e.id)} />
-                )}
-              />
-            </>
-          ) : (
-            <EmptyLine>No activity yet.</EmptyLine>
-          )}
-          </div>
-        </details>
       </aside>
     </div>
   );

@@ -32,7 +32,9 @@ export async function fetchPublicBytes(url: string, maxBytes = MAX_BYTES): Promi
   const {origin} = requireLiveConfig();
   const parsed = new URL(url);
   if (parsed.origin !== origin || parsed.search || parsed.hash || parsed.username || parsed.password) throw new UserError("Public launch assets must use the configured Launch a Card origin.");
-  const response = await fetch(url, {redirect: "error", signal: AbortSignal.timeout(15_000), headers: {accept: "image/png,image/webp,image/jpeg,application/json"}});
+  // Workers rejects redirect:"error" before sending a request. Manual mode keeps
+  // this same-origin check intact; every 3xx fails the !ok check below.
+  const response = await fetch(url, {redirect: "manual", signal: AbortSignal.timeout(15_000), headers: {accept: "image/png,image/webp,image/jpeg,application/json"}});
   if (!response.ok || Number(response.headers.get("content-length") ?? 0) > maxBytes) throw new UserError("A public launch asset is not reachable or exceeds the size limit.");
   const bytes = new Uint8Array(await response.arrayBuffer());
   if (bytes.length > maxBytes) throw new UserError("A public launch asset exceeds the size limit.");

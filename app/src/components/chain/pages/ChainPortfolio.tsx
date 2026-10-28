@@ -469,7 +469,7 @@ function Binder({ address }: { address: string }) {
   const desktop = useIsDesktop();
   const search = routeApi.useSearch();
   const navigate = routeApi.useNavigate();
-  const view: View = TAB_VIEW[search.tab ?? "coins"];
+  const view: View = TAB_VIEW[search.tab === "balances" ? "coins" : search.tab ?? "coins"];
   const page = (search.page ?? 1) - 1;
   const setPage = (p: number) =>
     void navigate({ search: (s) => ({ ...s, page: p > 0 ? p + 1 : undefined }), replace: true, resetScroll: false });

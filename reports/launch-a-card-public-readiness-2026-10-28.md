@@ -1,5 +1,7 @@
 # Launch a Card — public domain readiness
 
+**Later update:** The owner authorized production setup. Dedicated resources, remote migrations and a disabled Worker deployment now exist. The shared Solana public RPC was found to block Cloudflare; a provider secret is required. Follow the [current production setup record](launch-a-card-production-setup-2026-10-28.md). The inventory below is the original pre-authorization baseline.
+
 The owner selected **Launch a Card**, at **https://launchacard.fun**, on 28 October 2026. The recoverable project folder, Git branch and technical carddex asset/session identifiers remain stable. This is an independent application; MintDex is unchanged.
 
 Public DNS checked on 28 October 2026: `launchacard.fun` resolves to `192.64.119.61`, with `dns1.registrar-servers.com` and `dns2.registrar-servers.com`. It is still on the registrar's parking setup. Domain ownership was supplied by the owner; no DNS account changes were performed.

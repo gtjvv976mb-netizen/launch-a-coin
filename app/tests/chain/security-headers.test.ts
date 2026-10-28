@@ -4,31 +4,29 @@ import { applySecurityHeaders } from "../../src/lib/security-headers.server";
 describe("public-site framing protection", () => {
   test("protects the public sites and direct Cloudflare origins without dropping existing response headers", async () => {
     for (const origin of [
-      "https://mintdex.fun",
-      "https://www.mintdex.fun",
-      "https://devnet.mintdex.fun",
-      "https://mintdex-site.gtjvv976mb.workers.dev",
-      "https://mintdex-site-mainnet.gtjvv976mb.workers.dev",
+      "https://launchacard.fun",
+      "https://www.launchacard.fun",
+      "https://launch-a-card.gtjvv976mb.workers.dev",
     ]) {
       const result = applySecurityHeaders(
-        new Response("MintDex", { headers: { "cache-control": "private, no-store", "content-type": "text/html" } }),
+        new Response("Launch a Card", { headers: { "cache-control": "private, no-store", "content-type": "text/html" } }),
         new URL(`${origin}/levels`),
       );
       expect(result.headers.get("content-security-policy")).toContain("frame-ancestors 'self'");
       expect(result.headers.get("x-frame-options")).toBe("SAMEORIGIN");
       expect(result.headers.get("cache-control")).toBe("private, no-store");
       expect(result.headers.get("x-content-type-options")).toBe("nosniff");
-      expect(await result.text()).toBe("MintDex");
+      expect(await result.text()).toBe("Launch a Card");
     }
   });
 
   test("preserves the platform-managed design preview and does not match lookalike hosts", () => {
     for (const origin of [
-      "https://mintdex.higgsfield.app",
-      "https://mintdex.higgsfield-dev.app",
+      "https://carddex.higgsfield.app",
+      "https://carddex.higgsfield-dev.app",
       "http://127.0.0.1:5296",
-      "https://mintdex.fun.example.com",
-      "https://notmintdex.fun",
+      "https://launchacard.fun.example.com",
+      "https://notlaunchacard.fun",
     ]) {
       const result = applySecurityHeaders(new Response("preview"), new URL(origin));
       expect(result.headers.get("content-security-policy")).not.toContain("frame-ancestors");
@@ -38,7 +36,7 @@ describe("public-site framing protection", () => {
   });
 
   test("protects error responses and redirects while preserving their semantics", async () => {
-    const origin = new URL("https://mintdex.fun/levels");
+    const origin = new URL("https://launchacard.fun/levels");
     const error = applySecurityHeaders(new Response("Try again", { status: 500 }), origin);
     expect(error.status).toBe(500);
     expect(error.headers.get("content-security-policy")).toContain("frame-ancestors 'self'");

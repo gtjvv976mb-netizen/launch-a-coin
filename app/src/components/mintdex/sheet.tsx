@@ -4,7 +4,7 @@
  *
  *   Sheet          open (req), onOpenChange (req), title (req), description (sr-only), children (req). A bottom
  *                  sheet: panel fill, 24px top corners, a grip, swipe down (or tap outside, Escape, the 44px
- *                  close) to dismiss, up to 90% of the screen tall with its own scroll, safe-area padding. It
+ *                  close) to dismiss, with viewport-bounded pages and safe-area padding. It
  *                  slides up on open and back down on close (instant under reduced motion). vaul keeps a
  *                  focused field above the on-screen keyboard (it watches visualViewport and lifts the sheet).
  *                  Wrap a dialog's call to action in .mdx-sheet-foot to pin it to the sheet's bottom edge when
@@ -22,6 +22,7 @@ import { Drawer } from "vaul";
 
 import { CardMotionProvider } from "./card3d";
 import { ancestry, focusNear } from "./focus";
+import "../../carddex-overlays.css";
 
 export const PHONE_MQ = "(max-width: 1023.98px)";
 
@@ -125,7 +126,7 @@ export function Sheet({
       <Drawer.Portal>
         <Drawer.Overlay className="mdx-sheet-overlay fixed inset-0 z-50 bg-[var(--overlay)]" />
         <Drawer.Content
-          className="mdx-sheet fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[90dvh] w-full max-w-[600px] flex-col rounded-t-panel bg-plinth text-ink shadow-modal outline-none"
+          className="mdx-sheet fixed inset-x-0 bottom-0 z-50 mx-auto flex w-full max-w-[600px] flex-col rounded-t-panel bg-plinth text-ink shadow-modal outline-none"
           onOpenAutoFocus={() => {
             const el = document.activeElement;
             // Never hand focus back to a text field on a touch screen: that would raise the keyboard again.
@@ -160,7 +161,7 @@ export function Sheet({
             </Drawer.Close>
           </div>
           {description ? <Drawer.Description className="sr-only">{description}</Drawer.Description> : null}
-          <div className="mdx-sheet__body mdx-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div className="mdx-sheet__body min-h-0 flex-1">
             {/* Cards inside a sheet lift in after it slides up (M11). */}
             <CardMotionProvider enter="liftin">{children}</CardMotionProvider>
           </div>

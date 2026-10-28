@@ -1,4 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { PageControls, PagedText } from "../components/carddex/Viewport";
 import { z } from "zod";
 import { PageFrame, PageHeader } from "../components/mintdex/ui";
 import { pageHead } from "../lib/mintdex/seo";
@@ -70,8 +72,10 @@ const CONTENT = {
 function Legal() {
   const tab = Route.useSearch().tab ?? "terms",
     content = CONTENT[tab];
+  const [sectionIndex,setSectionIndex] = useState(0);
+  const section = Math.min(sectionIndex,content.sections.length-1);
   return (
-    <PageFrame className="mdx-scroll overflow-y-auto pb-10">
+    <PageFrame className="cdx-legal">
       <PageHeader title={content.title} context="Launch a Card · Updated 28 October 2026" />
       <nav className="flex gap-5">
         {(["terms", "privacy", "risks"] as const).map((t) => (
@@ -79,6 +83,7 @@ function Legal() {
             key={t}
             to="/legal"
             search={{ tab: t }}
+            onClick={()=>setSectionIndex(0)}
             aria-current={tab === t ? "page" : undefined}
             className="mdx-link min-h-11 inline-flex items-center"
           >
@@ -86,14 +91,11 @@ function Legal() {
           </Link>
         ))}
       </nav>
-      <div className="max-w-[68ch] space-y-8">
-        {content.sections.map(([title, body]) => (
-          <section key={title}>
-            <h2 className="mb-2 text-lg font-semibold">{title}</h2>
-            <p className="leading-relaxed text-slate">{body}</p>
-          </section>
-        ))}
-      </div>
+      <section className="cdx-legal__section" key={`${tab}-${section}`}>
+        <h2>{content.sections[section][0]}</h2>
+        <PagedText text={content.sections[section][1]} label="Read this section" />
+      </section>
+      <PageControls page={section} pages={content.sections.length} onPage={setSectionIndex} label={`${content.title} sections`} />
     </PageFrame>
   );
 }

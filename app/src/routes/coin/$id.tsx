@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
 import {
-  ActionColumn,
+  CoinCase,
+  DeedPanel,
+  TradePanel,
   CoinCardPane,
   CoinObject,
   CoinDetails,
@@ -32,16 +34,18 @@ import {
   sentences,
   shareArt,
 } from "../../lib/mintdex/seo";
+import { PageControls, PagedText } from "../../components/carddex/Viewport";
 import { getCardDesign } from "../../lib/carddex/designs";
 import type { CoinDetail } from "../../lib/mintdex/types";
 
 /** Phone sections (P1-5): one at a time under the hero, kept in ?tab= so a notification can link to the card. */
-type CoinTab = "trade" | "card" | "chart" | "trades";
+type CoinTab = "trade" | "card" | "chart" | "trades" | "details";
 const TAB_OPTIONS: Array<{ value: CoinTab; label: string }> = [
   { value: "card", label: "Card" },
   { value: "chart", label: "Chart" },
   { value: "trade", label: "Trade" },
   { value: "trades", label: "Trades" },
+  { value: "details", label: "Details" },
 ];
 
 /**
@@ -50,7 +54,7 @@ const TAB_OPTIONS: Array<{ value: CoinTab; label: string }> = [
  */
 const coinSearch = z.object({
   minted: z.number().int().optional().catch(undefined),
-  tab: z.enum(["trade", "card", "chart", "trades"]).optional().catch(undefined),
+  tab: z.enum(["trade", "card", "chart", "trades", "details"]).optional().catch(undefined),
 });
 
 export const Route = createFileRoute("/coin/$id")({
@@ -129,23 +133,9 @@ function CoinView() {
   const { minted, tab: tabParam } = Route.useSearch();
   const tab: CoinTab = tabParam ?? "card";
   const navigate = Route.useNavigate();
-  const heroRef = useRef<HTMLElement>(null);
-  const setTab = (next: CoinTab) => {
-    void navigate({
-      search: (p) => ({ ...p, tab: next === "card" ? undefined : next }),
-      replace: true,
-      resetScroll: false,
-    });
-    // When the tabs are stuck under the header (scrolled into a long section), bring the new section's top
-    // just under them instead of leaving the reader halfway down a shorter one.
-    const tabs = heroRef.current?.nextElementSibling as HTMLElement | null | undefined;
-    if (!tabs) return;
-    const stuck = tabs.getBoundingClientRect().top <= parseFloat(getComputedStyle(tabs).top || "0") + 1;
-    if (stuck && heroRef.current) {
-      const top = heroRef.current.getBoundingClientRect().bottom + window.scrollY - (parseFloat(getComputedStyle(tabs).top) || 0);
-      window.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
-    }
-  };
+  const [detailTab,setDetailTab] = useState("token");
+  const [ownershipPage,setOwnershipPage] = useState(0);
+  const setTab = (next: CoinTab) => void navigate({search:p=>({...p,tab:next==="card"?undefined:next}),replace:true,resetScroll:false});
   // "Your card is live" opens after mount (never in the server HTML) and only for the coin's launcher, so a
   // pasted ?minted=1 link shows nothing to anyone else. Closing it drops ?minted from the URL.
   const isLauncher = !!initial?.viewer?.isCreator;
@@ -184,89 +174,30 @@ function CoinView() {
   // The newest trade (trades run oldest first): each new one jolts the case.
   const latestTradeId = trades.length ? trades[trades.length - 1].id : null;
 
+  const ownershipRows = [
+    ["Owner",`@${coin.ownerHandle}${page.viewer?.isOwner ? " (you)" : ""}`],
+    ["Design",getCardDesign(coin.cardTemplate).name],
+    ["Edition","One of one"],
+    ["Trading pair",coin.tradingPair],
+    ["Quote asset",coin.quoteSymbol],
+    ["Collection","Separate creator-owned NFT card"],
+  ];
   return (
-    // Keyed on the coin: going from one coin to another remounts the page, so the entrance plays and no
-    // typed amount or open dialog carries over to the next coin.
-    <div
-      key={coin.id}
-      data-tab={tab}
-      className={[
-        // Tablets in portrait keep the phone sections in a centered 600px column.
-        "mdx-page mdx-coin grid grid-cols-[minmax(0,1fr)] gap-3 md:max-lg:mx-auto md:max-lg:w-full md:max-lg:max-w-[600px]",
-        "lg:grid-cols-[96px_minmax(0,1fr)_320px] lg:grid-rows-[auto_auto_auto_1fr] lg:gap-x-5 lg:gap-y-4",
-        "xl:h-full xl:min-h-[600px] xl:grid-cols-[264px_minmax(0,1fr)_320px] xl:grid-rows-[minmax(0,1fr)] xl:gap-5",
-        "wide:grid-cols-[300px_minmax(0,1fr)_360px] xwide:grid-cols-[340px_minmax(0,1fr)_380px]",
-      ].join(" ")}
-    >
-      {/* The object: the sleeved card on the ledge, then its caption. The pocket (12px; 6px for the 96px
-          card at 1024 to 1279) bleeds into the content padding and the gutter, so the card keeps its width. */}
-      {/* Phones: the compact hero and the section tabs (sticky under the header). */}
-      <CoinPhoneHero ref={heroRef} coin={coin} onCard={() => setTab("card")} className="order-1 lg:hidden" />
-      <div className="mdx-coin__tabs sticky z-20 order-2 -mx-4 bg-wall px-4 py-1.5 lg:hidden">
-        <Tabs
-          value={tab}
-          options={TAB_OPTIONS}
-          onChange={setTab}
-          label="Coin sections"
-          className="mdx-tabs--fill"
-        />
+    <div key={coin.id} data-tab={tab} className="cdx-coin-screen">
+      <header className="cdx-coin-screen__head"><CoinHeader coin={coin} /><span className="text-[12px] text-slate">Demo token · {coin.tradingPair}</span></header>
+      <div className="cdx-coin-screen__tabs"><Tabs value={tab} options={TAB_OPTIONS} onChange={setTab} label="Coin sections" className="mdx-tabs--fill" /></div>
+      <div className="cdx-coin-screen__body">
+        <section className="cdx-coin-screen__object" aria-label={`${coin.name} collectible card`}>
+          <div className="cdx-coin-screen__case"><CoinCase coin={coin} latestTradeId={latestTradeId} priority /></div>
+        </section>
+        <section className="cdx-coin-screen__pane" aria-label={TAB_OPTIONS.find(option=>option.value===tab)?.label}>
+          {tab==="card" ? <><h2 className="text-lg font-semibold">The creator’s card</h2><div className="cdx-coin-screen__ownership"><dl>{ownershipRows.slice(ownershipPage*3,ownershipPage*3+3).map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><PageControls page={ownershipPage} pages={2} onPage={setOwnershipPage} label="Card details" /></div><p className="text-[12px] text-slate">Fixed design. Its token trades separately.</p></> : null}
+          {tab==="chart" ? <><CoinStats coin={coin} /><McapChart trades={trades} tradeCount={coin.trades} currentUsd={coin.mcapUsd} currentQuote={coin.mcapQuote} quoteAssetKey={coin.quoteAssetKey} createdAt={coin.createdAt} level={coin.level} className="cdx-coin-screen__chart" /></> : null}
+          {tab==="trade" ? <TradePanel page={page} compact hideQuick hideAfter className="cdx-coin-screen__trade" /> : null}
+          {tab==="trades" ? <TradesList trades={trades} count={coin.trades} className="cdx-coin-screen__trades" /> : null}
+          {tab==="details" ? <><div className="cdx-view-tabs" aria-label="Token details"><button type="button" aria-pressed={detailTab==="token"} onClick={()=>setDetailTab("token")}>Token</button><button type="button" aria-pressed={detailTab==="story"} onClick={()=>setDetailTab("story")}>Story</button><button type="button" aria-pressed={detailTab==="owner"} onClick={()=>setDetailTab("owner")}>Ownership</button></div>{detailTab==="token" ? <CoinDetails coin={coin} isOwner={isOwner} onEdit={()=>setLoreOpen(true)} /> : detailTab==="story" ? <PagedText text={coin.lore || "The creator has not added a description."} label="Token story" /> : <div className="cdx-coin-screen__ownership"><dl>{ownershipRows.slice(ownershipPage*3,ownershipPage*3+3).map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><PageControls page={ownershipPage} pages={2} onPage={setOwnershipPage} label="Creator card" /></div>}</> : null}
+        </section>
       </div>
-      <CoinCardPane coin={coin} latestTradeId={latestTradeId} className="order-4 lg:hidden" />
-
-      {/* Fit the complete 112 × 173.683 collector case and its external controls in the column.
-          A small flexible spacer aligns it with the stats on taller screens. */}
-      <div className="contents xl:flex xl:min-h-0 xl:flex-col xl:[grid-area:1/1/2/2]">
-        <div aria-hidden className="mdx-case-spacer hidden xl:block xl:min-h-0 xl:flex-[1_1_0%] xl:max-h-[72px]" />
-        <div className="cdx-coin-object order-1 flex flex-col max-lg:hidden lg:order-none lg:self-end lg:[grid-area:1/1/3/2] xl:min-h-0 xl:max-h-[calc(264px*173.683/112+65px)] xl:flex-[1000_1_0%] xl:self-stretch wide:max-h-[calc(300px*173.683/112+65px)] xwide:max-h-[calc(340px*173.683/112+65px)]">
-          <div className="cdx-coin-objectstage relative flex justify-center pt-6 lg:pt-0 xl:min-h-0 xl:flex-1 xl:items-end xl:justify-start xl:[container-type:size]">
-            <CoinObject coin={coin} latestTradeId={latestTradeId} />
-          </div>
-          <Ledge />
-        </div>
-        <CoinDetails
-          coin={coin}
-          isOwner={isOwner}
-          onEdit={() => setLoreOpen(true)}
-          pane="card"
-          className="order-6 lg:order-none lg:[grid-area:3/1/4/3] xl:mt-4 xl:flex-none"
-        />
-      </div>
-
-      {/* The market: header row, stats, chart and recent trades. */}
-      <div className="contents xl:flex xl:min-h-0 xl:flex-col xl:gap-4 xl:[grid-area:1/2/2/3]">
-        <CoinHeader
-          coin={coin}
-          className="max-lg:hidden lg:order-none lg:self-end lg:[grid-area:1/2/2/3] xl:h-14 xl:flex-none xl:flex-nowrap xl:self-stretch"
-        />
-        <CoinStats
-          coin={coin}
-          pane="chart"
-          className="order-7 max-lg:pt-1 lg:order-none lg:[grid-area:2/2/3/3] xl:flex-none"
-        />
-        <div className="cdx-coin-market contents lg:flex lg:flex-col lg:rounded-panel lg:bg-plinth lg:p-4 lg:shadow-ring lg:[grid-area:4/1/5/3] xl:min-h-0 xl:flex-1">
-          <McapChart
-            trades={trades}
-            tradeCount={coin.trades}
-            currentUsd={coin.mcapUsd}
-            currentQuote={coin.mcapQuote}
-            quoteAssetKey={coin.quoteAssetKey}
-            createdAt={coin.createdAt}
-            level={coin.level}
-            pane="chart"
-            className="order-8 rounded-panel bg-plinth p-4 lg:order-none lg:rounded-none lg:bg-transparent lg:p-0 xl:min-h-0 xl:flex-[1.15]"
-          />
-          <TradesList
-            trades={trades}
-            count={coin.trades}
-            pane="trades"
-            className="order-9 rounded-panel bg-plinth p-4 lg:order-none lg:mt-4 lg:rounded-none lg:bg-transparent lg:p-0 xl:min-h-0 xl:flex-1"
-          />
-        </div>
-      </div>
-
-      {/* The actions: trade ticket, then the card. */}
-      <ActionColumn page={page} className="lg:[grid-area:1/3/5/4] xl:[grid-area:1/3/2/4]" />
-
       <Modal open={loreOpen} onOpenChange={setLoreOpen} title="Edit description">
         <LoreEditor coinId={coin.id} lore={coin.lore} onDone={() => setLoreOpen(false)} />
       </Modal>

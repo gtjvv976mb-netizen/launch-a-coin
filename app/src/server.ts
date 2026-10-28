@@ -3,6 +3,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { applySecurityHeaders } from "./lib/security-headers.server";
+import { canonicalRedirect } from "./lib/canonical-url";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -40,11 +41,11 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
-    // Canonical URLs: /market/ -> /market
+    // One canonical hop also keeps www wallet pages on the configured origin.
     const url = new URL(request.url);
-    if (url.pathname.length > 1 && url.pathname.endsWith("/")) {
-      url.pathname = url.pathname.replace(/\/+$/, "");
-      return applySecurityHeaders(Response.redirect(url.toString(), 301), url);
+    const redirect = canonicalRedirect(url);
+    if (redirect) {
+      return applySecurityHeaders(Response.redirect(redirect.location, redirect.status), url);
     }
     // Devnet: a ticker typed with its "$" (/coin/$HONK) reaches the router without it, so the coin loader's single
     // 301 goes straight to /coin/{mint} (the router's own "$" rewrite in router.tsx would answer a 307 first).

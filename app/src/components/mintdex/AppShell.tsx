@@ -32,6 +32,7 @@ import { LiveWalletButton } from "../carddex/live/LiveWalletButton";
 import { LiveLaunchGuide } from "../carddex/live/LiveLaunchGuide";
 import { useLiveWallet } from "../carddex/live/wallet";
 import "../../royal-motion.css";
+import "../../carddex-viewport.css";
 import { GyroChip } from "./card3d/GyroChip";
 import { ConfirmDialog } from "./trust";
 import {
@@ -748,6 +749,7 @@ function AccountSheet({
   onOpenChange: (o: boolean) => void;
 }) {
   const { openGuide } = useSessionUi();
+  const [accountTab,setAccountTab] = useState("account");
   const [confirm, setConfirm] = useState(false);
   const close = () => onOpenChange(false);
   const { faucet, leave, busy, leaving } = useWalletActions(close);
@@ -755,6 +757,8 @@ function AccountSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange} title="Your account">
+        <div className="cdx-view-tabs" aria-label="Account sections"><button type="button" aria-pressed={accountTab==="account"} onClick={()=>setAccountTab("account")}>Account</button><button type="button" aria-pressed={accountTab==="help"} onClick={()=>setAccountTab("help")}>Help & settings</button></div>
+        {accountTab === "account" ? <>
         <div className="flex items-center gap-3 rounded-pop bg-sheet p-3 shadow-raise">
           <Avatar handle={me.handle} size={40} />
           <div className="min-w-0">
@@ -790,6 +794,7 @@ function AccountSheet({
           >
             {busy ? "Claiming..." : faucetLabelOf(me)}
           </button>
+        </nav></> : <><nav aria-label="Help and settings" className="mt-3 flex flex-col">
           <button
             type="button"
             className="mdx-menu-item text-[15px]"
@@ -814,7 +819,7 @@ function AccountSheet({
             Start over
           </button>
         </nav>
-        <CalmSwitch size="md" className="mt-2 border-t border-rule pt-3" />
+        <CalmSwitch size="md" className="mt-2 border-t border-rule pt-3" /></>}
       </Sheet>
       <StartOverDialog
         handle={me.handle}
@@ -1037,7 +1042,17 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
   const pending = useRoutePending();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const liveLaunch = useRouterState({ select: s => s.location.pathname === "/launch" && (s.location.search as { mode?: string }).mode !== "demo" });
-  const tableCards = /^\/(discover|market|levels|portfolio)(\/|$)/.test(path);
+
+  // Dynamic browser chrome and software keyboards resize the actual usable canvas.
+  useEffect(() => {
+    const root=document.documentElement;
+    const vv=window.visualViewport;
+    const sync=()=>{if(!vv || vv.scale===1)root.style.setProperty("--cdx-app-height",`${Math.min(window.innerHeight,vv?.height??window.innerHeight)}px`);};
+    sync();
+    vv?.addEventListener("resize",sync);
+    window.addEventListener("resize",sync);
+    return()=>{vv?.removeEventListener("resize",sync);window.removeEventListener("resize",sync);root.style.removeProperty("--cdx-app-height");};
+  },[]);
 
   // The viewport cookie (P1-20): the next server render lays out fitted grids for this screen.
   useEffect(() => {
@@ -1070,7 +1085,7 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
 
   return (
     // relative isolate: the sky (L9) sits behind every page on the wall, above this root's own background.
-    <div className="cdx-app relative isolate flex min-h-dvh bg-wall text-ink lg:h-dvh lg:overflow-hidden">
+    <div data-screen={path === "/" ? "home" : path.split("/")[1]} className="cdx-app cdx-viewport relative isolate flex min-h-dvh bg-wall text-ink lg:h-dvh lg:overflow-hidden">
       <Sky />
       {/* First stop for keyboard users (P1-24): skips the rail's search, six tabs and wallet. */}
       <a
@@ -1087,7 +1102,7 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
         Skip to content
       </a>
       <Rail searchRef={searchRef} pending={pending} liveLaunch={liveLaunch} />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="cdx-shell-content flex min-w-0 flex-1 flex-col">
         <RouteProgress loading={pending} />
         <RouteAnnouncer />
         {/* IS_DEVNET is a literal: the note and its words are not in the mainnet or sim bundle. */}
@@ -1096,11 +1111,6 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
         <MobileHeader liveLaunch={liveLaunch} />
         {/* The live trade ticker (hype arcade): the real activity feed, scrolling. */}
         {/* Deep-linked card grids need the same explicit permission option as the Home display. */}
-        {tableCards ? (
-          <div className="mdx-phone-tilt lg:hidden">
-            <GyroChip />
-          </div>
-        ) : null}
         {/* --main-pad mirrors the padding so full-height asides can bleed to the content edges with
             calc(var(--main-pad) * -1) instead of copying 24px / 16px.
             Phones clip sideways (clip, not hidden: no scroll container, sticky still works): before
@@ -1110,7 +1120,7 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
           id="content"
           tabIndex={-1}
           aria-busy={pending || undefined}
-          className="mdx-main mdx-scroll min-h-0 flex-1 p-4 pb-[calc(80px_+_env(safe-area-inset-bottom))] [--main-pad:16px] max-lg:overflow-x-clip lg:overflow-x-hidden lg:overflow-y-auto lg:p-6 lg:[--main-pad:24px] short:p-4 short:[--main-pad:16px] fit:overflow-clip">
+          className="cdx-viewport-main mdx-main mdx-scroll min-h-0 flex-1 p-4 pb-[calc(80px_+_env(safe-area-inset-bottom))] [--main-pad:16px] max-lg:overflow-x-clip lg:overflow-x-hidden lg:overflow-y-auto lg:p-6 lg:[--main-pad:24px] short:p-4 short:[--main-pad:16px] fit:overflow-clip">
           {children}
         </main>
         <MobileTabs pending={pending} />

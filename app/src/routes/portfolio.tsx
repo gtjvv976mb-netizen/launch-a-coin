@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+import { PageControls, usePageCapacity } from "../components/carddex/Viewport";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 
@@ -19,10 +21,10 @@ import { NOINDEX_PORTFOLIO, pageHead } from "../lib/mintdex/seo";
 import type { Me, PortfolioData } from "../lib/mintdex/types";
 
 // Older saved offer links are accepted and folded into Cards; there is no NFT marketplace.
-type PortfolioSearch = { tab?: "coins" | "cards" | "bids" | "offers"; page?: number };
+type PortfolioSearch = { tab?: "coins" | "cards" | "balances" | "bids" | "offers"; page?: number };
 export const Route = createFileRoute("/portfolio")({
   validateSearch: (raw: Record<string, unknown>): PortfolioSearch => ({
-    tab: raw.tab === "cards" || raw.tab === "bids" || raw.tab === "offers" ? "cards" : undefined,
+    tab: raw.tab === "balances" ? "balances" : raw.tab === "cards" || raw.tab === "bids" || raw.tab === "offers" ? "cards" : undefined,
     page: Number.isInteger(Number(raw.page)) && Number(raw.page) >= 2 && Number(raw.page) <= 999 ? Number(raw.page) : undefined,
   }),
   loader: () => IS_SIM ? getPortfolio() : null,
@@ -57,7 +59,7 @@ function Holdings({ rows }: { rows: PortfolioData["holdings"] }) {
 
 function Cards({ rows }: { rows: PortfolioData["deeds"] }) {
   return (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <div className="cdx-portfolio__cards">
       {rows.map(({ coin }) => (
         <View3DHost key={coin.id} item={{ id: coin.id, card: coin }}>
           <Link to="/coin/$id" params={{ id: coin.id }} search={{ tab: "card" }} className="group block min-w-0">
@@ -73,9 +75,9 @@ function Cards({ rows }: { rows: PortfolioData["deeds"] }) {
 function SignedOut() {
   const { openEnter } = useSessionUi();
   return (
-    <PageFrame className="mdx-page">
+    <PageFrame className="mdx-page cdx-portfolio">
       <PageHeader title="Your collection" context="Your tokens. Your cards." />
-      <EmptyState hero className="flex-1" title="Start your collection" body="Enter the local demo to launch a token, choose its permanent card design and keep both in your portfolio." action={<div className="flex flex-col items-center gap-3"><Button onClick={() => openEnter()}>Enter Launch a Card</Button><TextLink to="/discover">Explore the tokens</TextLink></div>} />
+      <EmptyState hero className="cdx-portfolio-empty flex-1" title="Start your collection" body="Enter the local demo to launch a token, choose its permanent card design and keep both in your portfolio." action={<div className="flex flex-col items-center gap-3"><Button onClick={() => openEnter()}>Enter Launch a Card</Button><TextLink to="/discover">Explore the tokens</TextLink></div>} />
     </PageFrame>
   );
 }
@@ -93,37 +95,31 @@ function Collection({ me }: { me: NonNullable<Me> }) {
   const { run, pending } = useAction();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
-  const view = search.tab === "cards" ? "cards" : "coins";
-  const rows = view === "cards" ? data?.deeds : data?.holdings;
-  const perPage = view === "cards" ? 10 : 12;
+  const view = search.tab === "cards" ? "cards" : search.tab === "balances" ? "balances" : "coins";
+  const balances = Object.entries(me.quoteBalances ?? {sol:me.balance});
+  const rows = view === "cards" ? data?.deeds : view === "balances" ? balances : data?.holdings;
+  const grid = usePageCapacity({rowHeight:view==="cards"?270:view==="balances"?76:84,minWidth:view==="coins"?10000:180,maxColumns:view==="coins"?1:4,maxRows:view==="cards"?2:8});
+  const perPage = grid.count;
   const pages = Math.max(1, Math.ceil((rows?.length ?? 0) / perPage));
   const page = Math.min((search.page ?? 1) - 1, pages - 1);
   const from = page * perPage;
   const setPage = (next: number) => void navigate({ search: (s) => ({ ...s, page: next > 0 ? next + 1 : undefined }), replace: true, resetScroll: false });
   return (
-    <PageFrame className="mdx-page">
+    <PageFrame className="mdx-page cdx-portfolio">
       <PageHeader title={`@${me.handle}`} context="Your tokens. Your one-of-one cards." right={me.canFaucet ? <Button variant="outline" pending={pending === "faucet"} pendingLabel="Claiming..." onClick={() => void run("faucet", () => claimFaucet(), FLOW.faucetSent, { keys: [["portfolio"]] })}>{FLOW.claimFaucet}</Button> : undefined} />
-      <dl className="grid flex-none grid-cols-3 gap-3 rounded-panel border border-hairline bg-plinth p-4 sm:gap-6">
+      <dl className="cdx-portfolio__summary grid flex-none grid-cols-3 gap-3 rounded-panel border border-hairline bg-plinth p-4 sm:gap-6">
         <div className="min-w-0"><dt className="mdx-micro truncate">Demo wallet</dt><dd className="mt-1"><Num size="lg" unit="SOL" watch={me.balance}>{sol(me.balance, 2)}</Num></dd></div>
         <div className="min-w-0"><dt className="mdx-micro truncate">Token value</dt><dd className="mt-1">{data?.totals.holdingsValue === null ? <span className="text-[20px] font-semibold text-ink">By quote</span> : <Num size="lg" unit="SOL" watch={data?.totals.holdingsValue ?? undefined}>{sol(data?.totals.holdingsValue ?? 0)}</Num>}</dd></div>
         <div className="min-w-0"><dt className="mdx-micro truncate">NFT cards</dt><dd className="mt-1"><Num size="lg">{data?.deeds.length ?? 0}</Num></dd></div>
       </dl>
-      {Object.keys(data?.totals.holdingsValueByQuote ?? {}).length > 0 ? <dl className="grid flex-none grid-cols-2 gap-3 rounded-panel border border-hairline bg-plinth p-4 sm:grid-cols-3" aria-label="Token values by quote asset">
-        {Object.entries(data?.totals.holdingsValueByQuote ?? {}).map(([key,value])=><div key={key} className="min-w-0"><dt className="mdx-micro">{getPairAsset(key).symbol} holdings</dt><dd className="mt-1 truncate text-[15px] font-semibold text-ink">{quoteAtoms(value,key,true)} {getPairAsset(key).symbol}</dd></div>)}
-      </dl> : null}
-      <details className="flex-none rounded-panel border border-hairline bg-plinth px-4 py-3 text-[13px] text-slate">
-        <summary className="cursor-pointer font-semibold text-ink">Demo quote balances</summary>
-        <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">{Object.entries(me.quoteBalances ?? {sol:me.balance}).map(([key,value])=><div key={key} className="min-w-0"><dt>{getPairAsset(key).symbol}</dt><dd className="mt-0.5 break-words font-medium text-ink">{quoteAtoms(value,key,true)}</dd></div>)}</dl>
-        <p className="mt-3">Separate test balances. Stock and memecoin quantities are not added to SOL.</p>
-      </details>
       <div className="flex flex-none items-center justify-between gap-4">
-        <Tabs label="Portfolio sections" value={view} onChange={(next) => void navigate({ search: { tab: next === "cards" ? "cards" : undefined }, replace: true, resetScroll: false })} options={[{ value: "coins", label: "Tokens", count: data?.holdings.length }, { value: "cards", label: "NFT cards", count: data?.deeds.length }]} />
-        <Pager page={page} pages={pages} onPage={setPage} />
+        <Tabs label="Portfolio sections" value={view} onChange={(next) => void navigate({ search: { tab: next === "cards" ? "cards" : next === "balances" ? "balances" : undefined }, replace: true, resetScroll: false })} options={[{ value: "coins", label: "Tokens", count: data?.holdings.length }, { value: "cards", label: "NFT cards", count: data?.deeds.length }, {value:"balances",label:"Balances"}]} />
+
       </div>
-      <div className="min-h-0 flex-1">
-        {!data ? <div className="grid gap-3" aria-busy="true" aria-label="Loading your collection">{[0, 1, 2].map((n) => <Skeleton key={n} className="h-20 w-full rounded-panel" />)}</div> : view === "cards" ? data.deeds.length ? <Cards rows={data.deeds.slice(from, from + perPage)} /> : <EmptyState title="Your first card awaits" body="Launch a token and choose the premium design for its one-of-one card." action={<ButtonLink to="/launch">Launch a token</ButtonLink>} /> : data.holdings.length ? <Holdings rows={data.holdings.slice(from, from + perPage)} /> : <EmptyState title="No tokens yet" body="Discover a token to trade, or launch one of your own." action={<ButtonLink to="/discover">Discover tokens</ButtonLink>} />}
+      <div ref={grid.ref} className="cdx-portfolio__rows" style={{"--page-columns":grid.columns,"--page-rows":grid.rows} as CSSProperties}>
+        {!data ? <div className="grid gap-3" aria-busy="true" aria-label="Loading your collection">{[0, 1, 2].map((n) => <Skeleton key={n} className="h-20 w-full rounded-panel" />)}</div> : view === "balances" ? <dl className="cdx-balance-grid" aria-label="Demo quote balances">{balances.slice(from,from+perPage).map(([key,value])=><div key={key}><dt>{getPairAsset(key).symbol}</dt><dd>{quoteAtoms(value,key,true)}</dd><span className="text-[11px] text-slate">Held value: {quoteAtoms(data.totals.holdingsValueByQuote[key]??0,key,true)}</span></div>)}</dl> : view === "cards" ? data.deeds.length ? <Cards rows={data.deeds.slice(from, from + perPage)} /> : <EmptyState title="Your first card awaits" body="Launch a token and choose the premium design for its one-of-one card." action={<ButtonLink to="/launch">Launch a token</ButtonLink>} /> : data.holdings.length ? <Holdings rows={data.holdings.slice(from, from + perPage)} /> : <EmptyState title="No tokens yet" body="Discover a token to trade, or launch one of your own." action={<ButtonLink to="/discover">Discover tokens</ButtonLink>} />}
       </div>
-      <p className="flex-none text-[12px] leading-5 text-slate">{MODE_COPY.guideNote}</p>
+      <PageControls page={page} pages={pages} onPage={setPage} label={view==="balances" ? "Separate demo balances" : `${rows?.length ?? 0} ${view==="cards"?"cards":"tokens"}`} />
     </PageFrame>
   );
 }

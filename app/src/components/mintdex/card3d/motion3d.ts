@@ -296,6 +296,8 @@ export function hasStateToken(el: HTMLElement, t: StateToken) {
 export class Body {
   readonly cfg: KindCfg;
   W = 0;
+  /** Per-scene turn lift/lean; a fitted showcase can turn in place without changing shared kind defaults. */
+  turnArcScale = 1;
   lights: HTMLElement[] = [];
   /**
    * The rest pose CSS already draws above the pose (the scene's --rest-rx / --rest-ry as a static `rotate` on
@@ -574,7 +576,7 @@ export class Body {
     // included), which the light and the ground follow.
     // A list turntable turns in place: only a trace of the hand's arc (lift and lean edge-on), so it stays on its
     // pedestal and inside its tray.
-    const arcK = spinning || (this.spinRate > 0 && this.kind === "table") ? 0.2 : 1;
+    const arcK = (spinning || (this.spinRate > 0 && this.kind === "table") ? 0.2 : 1) * this.turnArcScale;
     const P = lightFromPose(this.rx.x, this.ry.x, f, cfg.arcTilt * arcK);
     const L = lightFromPose(this.rx.x + this.cssRest.rx, this.ry.x + this.cssRest.ry, f, cfg.arcTilt * arcK);
     const z = this.lift.x + e * cfg.arcLift * arcK * this.W;

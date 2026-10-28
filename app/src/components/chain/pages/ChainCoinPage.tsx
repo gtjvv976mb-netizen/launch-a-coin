@@ -428,7 +428,7 @@ export function ChainCoinView() {
   const initial = routeApi.useLoaderData() as unknown as ChainCoinRoute;
   const { id } = routeApi.useParams();
   const { minted, tab: tabParam } = routeApi.useSearch();
-  const tab: CoinTab = tabParam === "trades" ? "chart" : (tabParam ?? "trade");
+  const tab: CoinTab = tabParam === "trades" ? "chart" : tabParam === "details" ? "card" : (tabParam ?? "trade");
   const navigate = routeApi.useNavigate();
   const heroRef = useRef<HTMLElement>(null);
   const qc = useQueryClient();

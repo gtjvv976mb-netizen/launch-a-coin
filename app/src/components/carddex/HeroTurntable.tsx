@@ -5,12 +5,19 @@ import { Engine, motionLevel, type Body } from "../mintdex/card3d/motion3d";
 import type { Card3DHandle } from "../mintdex/card3d/types";
 
 /** A full revolution in the shared engine, with the same rounded slab, both-face lighting and touch input. */
-export function HeroTurntable({ card, className = "", playing: controlled, onPlayingChange, followEdits = false }: {
-  card: CardData; className?: string; playing?: boolean; onPlayingChange?: (playing: boolean) => void; followEdits?: boolean;
+export function HeroTurntable({ card, className = "", playing: controlled, onPlayingChange, followEdits = false, viewportFit = false }: {
+  card: CardData; className?: string; playing?: boolean; onPlayingChange?: (playing: boolean) => void; followEdits?: boolean; viewportFit?: boolean;
 }) {
   const [localPlaying, setLocalPlaying] = useState(true);
   const playing = controlled ?? localPlaying;
   const slots = useCardSlots(card, { ascend: "ascend", art: "fade", priority: true, sizes: "(max-width: 767px) 72vw, 400px", hand: true });
+  useEffect(() => {
+    const body = slots.ctl.current?.body;
+    if (!body || !viewportFit) return;
+    body.turnArcScale = .2;
+    Engine.kick();
+    return () => { body.turnArcScale = 1; };
+  }, [viewportFit]);
   const latestPlaying = useRef(playing);
   latestPlaying.current = playing;
   const lastFrame = useRef(0);
@@ -44,7 +51,7 @@ export function HeroTurntable({ card, className = "", playing: controlled, onPla
     onPlayingChange?.(value);
   };
   const setRef = (handle: Card3DHandle | null) => { slots.handle.current = handle; };
-  return <div className={`cdx-hero-turntable ${className}`}>
+  return <div className={`cdx-hero-turntable ${viewportFit ? "cdx-hero-turntable--viewport" : ""} ${className}`}>
     <Card3DView depth="hand" label={cardLabel(card)} faces={slots.faces} front={slots.front} swap={slots.swap} flippable tapTurns drag="turn" idle={playing ? "breathe" : "none"} ground="shadow" gyro focusable arrowsTurn seed={card.dexNo} backSizes="(max-width: 767px) 72vw, 400px" ctlRef={slots.ctl} ref={setRef} frame={frame} onInteract={() => { lastInput.current = performance.now(); }} onSwapped={slots.onSwapped} onSettled={slots.onSettled} />
     <div className="cdx-hero-turntable__controls">
       <button type="button" onClick={() => { lastInput.current = performance.now(); slots.handle.current?.turnOver(); }} aria-label="Turn card over">Turn over</button>

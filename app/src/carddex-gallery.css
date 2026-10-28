@@ -91,6 +91,13 @@
 .cdx-app .cdx-token-cell__caption { padding-top:12px; }
 .cdx-app .cdx-discover__tools { gap:9px; }
 .cdx-app .cdx-discover__tools input { max-width:360px; }
+/* Fit the whole rotating object: 88/63 card height, 0.24W motion padding, and
+   176px for caption, hint, navigation and stage clearance. Keep mobile unchanged. */
+@media (min-width:1280px) and (min-height:720px) {
+ .cdx-app .cdx-home__lot { --W:min(480px,calc((100cqh - 176px)/1.636825),calc((100cqw - 64px)/1.26)); }
+ .cdx-home__lot .mdx-tt { padding-block:calc(var(--W)*.12); }
+ .cdx-home__lot .mdx-tt__card .mdx-card3d { perspective:4000px; }
+}
 @media (min-width:1280px) {
  .cdx-app .mdx-coin { grid-template-columns:minmax(300px,.9fr) minmax(300px,1fr) 268px; gap:20px; }
  .cdx-app .mdx-coin .mdx-case-spacer { max-height:18px; }

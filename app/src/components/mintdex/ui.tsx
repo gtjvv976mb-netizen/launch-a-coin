@@ -2223,7 +2223,7 @@ function DialogModal({ open, onOpenChange, title, description, children, width =
       <Dialog.Portal>
         <Dialog.Overlay className="mdx-overlay fixed inset-0 z-50 bg-[var(--overlay)]" />
         <Dialog.Content
-          className="mdx-dialog mdx-scroll fixed left-1/2 top-1/2 z-50 max-h-[88dvh] w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-aside bg-plinth p-6 text-ink shadow-modal outline-none max-lg:rounded-panel"
+          className="mdx-dialog fixed left-1/2 top-1/2 z-50 flex w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 flex-col rounded-aside bg-plinth p-6 text-ink shadow-modal outline-none max-lg:rounded-panel"
           style={{ maxWidth: width }}
           onOpenAutoFocus={() => {
             const el = document.activeElement;
@@ -2243,7 +2243,7 @@ function DialogModal({ open, onOpenChange, title, description, children, width =
           // (this explicit undefined is also how Radix opts out of its missing-description check).
           {...(description ? null : { "aria-describedby": undefined })}
         >
-          <div className="mb-4 flex items-start justify-between gap-4">
+          <div className="mdx-dialog__head flex flex-none items-start justify-between gap-4">
             <Dialog.Title className="pt-1 text-[18px] font-semibold leading-[1.3] tracking-[-0.01em] text-ink">
               {title}
             </Dialog.Title>
@@ -2266,7 +2266,9 @@ function DialogModal({ open, onOpenChange, title, description, children, width =
             <Dialog.Description className="sr-only">{description}</Dialog.Description>
           ) : null}
           {/* Cards inside a dialog lift in after its entrance (M11) and keep moving while it is open. */}
-          <CardMotionProvider enter="liftin">{children}</CardMotionProvider>
+          <div className="mdx-dialog__body min-h-0 flex-1">
+            <CardMotionProvider enter="liftin">{children}</CardMotionProvider>
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

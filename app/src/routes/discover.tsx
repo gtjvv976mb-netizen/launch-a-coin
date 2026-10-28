@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, type CSSProperties } from "react";
+import { PageControls, usePageCapacity } from "../components/carddex/Viewport";
 import { z } from "zod";
 import { MintCard } from "../components/mintdex/MintCard";
 import { View3DHost } from "../components/mintdex/card3d";
@@ -60,6 +61,10 @@ function Discover() {
         ),
     [data, query, search.sort],
   );
+  const grid = usePageCapacity({ rowHeight:300, minWidth:190, maxColumns:4, maxRows:2 });
+  const pages = Math.max(1, Math.ceil(coins.length / grid.count));
+  const page = Math.min(Math.max(0, (search.page ?? 1) - 1), pages - 1);
+  const visible = coins.slice(page * grid.count, (page + 1) * grid.count);
   const items = coins.map((c) => ({ id: c.id, card: c }));
   return (
     <PageFrame className="cdx-discover">
@@ -107,8 +112,8 @@ function Discover() {
           <option value="new">Newest</option>
         </select>
       </div>
-      <div className="cdx-token-grid">
-        {coins.map((c) => (
+      <div ref={grid.ref} className="cdx-token-grid" style={{"--page-columns":grid.columns,"--page-rows":grid.rows} as CSSProperties}>
+        {visible.map((c) => (
           <article key={c.id} className="cdx-token-cell">
             <View3DHost item={{ id: c.id, card: c }} list={items}>
               <Link
@@ -132,6 +137,7 @@ function Discover() {
           </article>
         ))}
       </div>
+      <PageControls page={page} pages={pages} onPage={next=>void navigate({search:s=>({...s,page:next ? next+1 : undefined}),replace:true,resetScroll:false})} label={`${coins.length} tokens`} />
       {coins.length === 0 && (
         <div className="cdx-empty" role="status">
           No tokens found. Try another search, or{" "}

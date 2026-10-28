@@ -21,6 +21,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as MDigestRouteImport } from './routes/m/$digest'
 import { Route as CoinIdRouteImport } from './routes/coin/$id'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
+import { Route as ApiLiveHealthRouteImport } from './routes/api/live/health'
 import { Route as ApiLiveComposeRouteImport } from './routes/api/live/compose'
 import { Route as ApiImgSplatRouteImport } from './routes/api/img/$'
 import { Route as ApiLiveAssetsSplatRouteImport } from './routes/api/live/assets/$'
@@ -85,6 +86,11 @@ const ApiUploadRoute = ApiUploadRouteImport.update({
   path: '/api/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiLiveHealthRoute = ApiLiveHealthRouteImport.update({
+  id: '/api/live/health',
+  path: '/api/live/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiLiveComposeRoute = ApiLiveComposeRouteImport.update({
   id: '/api/live/compose',
   path: '/api/live/compose',
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/m/$digest': typeof MDigestRoute
   '/api/img/$': typeof ApiImgSplatRoute
   '/api/live/compose': typeof ApiLiveComposeRoute
+  '/api/live/health': typeof ApiLiveHealthRoute
   '/api/live/assets/$': typeof ApiLiveAssetsSplatRoute
 }
 export interface FileRoutesByTo {
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/m/$digest': typeof MDigestRoute
   '/api/img/$': typeof ApiImgSplatRoute
   '/api/live/compose': typeof ApiLiveComposeRoute
+  '/api/live/health': typeof ApiLiveHealthRoute
   '/api/live/assets/$': typeof ApiLiveAssetsSplatRoute
 }
 export interface FileRoutesById {
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/m/$digest': typeof MDigestRoute
   '/api/img/$': typeof ApiImgSplatRoute
   '/api/live/compose': typeof ApiLiveComposeRoute
+  '/api/live/health': typeof ApiLiveHealthRoute
   '/api/live/assets/$': typeof ApiLiveAssetsSplatRoute
 }
 export interface FileRouteTypes {
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/m/$digest'
     | '/api/img/$'
     | '/api/live/compose'
+    | '/api/live/health'
     | '/api/live/assets/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/m/$digest'
     | '/api/img/$'
     | '/api/live/compose'
+    | '/api/live/health'
     | '/api/live/assets/$'
   id:
     | '__root__'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/m/$digest'
     | '/api/img/$'
     | '/api/live/compose'
+    | '/api/live/health'
     | '/api/live/assets/$'
   fileRoutesById: FileRoutesById
 }
@@ -222,6 +234,7 @@ export interface RootRouteChildren {
   MDigestRoute: typeof MDigestRoute
   ApiImgSplatRoute: typeof ApiImgSplatRoute
   ApiLiveComposeRoute: typeof ApiLiveComposeRoute
+  ApiLiveHealthRoute: typeof ApiLiveHealthRoute
   ApiLiveAssetsSplatRoute: typeof ApiLiveAssetsSplatRoute
 }
 
@@ -311,6 +324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/live/health': {
+      id: '/api/live/health'
+      path: '/api/live/health'
+      fullPath: '/api/live/health'
+      preLoaderRoute: typeof ApiLiveHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/live/compose': {
       id: '/api/live/compose'
       path: '/api/live/compose'
@@ -350,6 +370,7 @@ const rootRouteChildren: RootRouteChildren = {
   MDigestRoute: MDigestRoute,
   ApiImgSplatRoute: ApiImgSplatRoute,
   ApiLiveComposeRoute: ApiLiveComposeRoute,
+  ApiLiveHealthRoute: ApiLiveHealthRoute,
   ApiLiveAssetsSplatRoute: ApiLiveAssetsSplatRoute,
 }
 export const routeTree = rootRouteImport

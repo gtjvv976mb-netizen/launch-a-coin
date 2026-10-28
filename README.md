@@ -16,7 +16,9 @@ Independent project based on MintDex, publicly branded **Launch a Card** at **ht
 - Exact quote mint, decimals and token program persist with the permanent design. Local launches, buys/sells, balances, fees, charts and portfolio values use the selected asset's units; stock/memecoin quantities are not treated as SOL or given an invented USD price.
 - No NFT sales, listings, bids or royalties. Removed endpoints reject before database writes; SQL triggers provide another boundary.
 
-The interface retains MintDex's original composition, desktop navigation rail and compact phone navigation. Launch has token details on the left and a full preview on the right. The current Launch a Card chrome uses a Pokémon-card-inspired gold, cream, charcoal and scarlet palette, with no blue chrome. Individual card artworks retain their own themed colors. Stock quotes add wordless market engraving while retaining the common print grid. The current brand mark is a wordless gold-foil trading card and crown, without a letter or CD monogram.
+The interface retains MintDex's original composition, desktop navigation rail and compact phone navigation. Launch has token details on the left and a full preview on the right. The current Launch a Card chrome uses a Pokémon-card-inspired gold, cream, charcoal and scarlet palette, with no blue chrome. Individual card artworks retain their own themed colors. Stock quotes add wordless market engraving while retaining the common print grid. The wordless brand mark is a fan of jade, garnet and plum card backs, with champagne foil engraving and a separate jeweled crown.
+
+Pages fit the available viewport, including phone layouts. Collections and long text use measured pages; coin sections and account actions use tabs. Launch uses eight compact field steps and a full card preview, with separate phone Card/Details views. Exact transaction reviews, errors and secondary dialogs retain their content through explicit pages. Rounded cards, full 360° motion, both-face shimmer and touch controls remain.
 
 ## Run locally
 
@@ -43,7 +45,7 @@ See `HANDOFF.md` and the dated reports for the latest build/test counts and brow
 
 ## Current status and real pump.fun launches
 
-The default `/launch` route is the **real creator-wallet flow**, with an explicit **Test demo** option. Real actions fail closed locally until this platform has durable public storage, a mainnet RPC, wallet authentication and an enabled production deployment. The directory, portfolio and token trading catalogue remain clearly marked demo; they do not invent on-chain balances. Both inherited `VITE_MINTDEX_MODE` and `VITE_CARDDEX_MODE` activation remain rejected. The new wallet integration is separate from the inherited MintDex program.
+The public `/launch` route is enabled for the **real mainnet creator-wallet flow**, with an explicit **Test demo** option. Local configuration remains disabled and isolated. The directory, portfolio and token trading catalogue remain clearly marked demo; they do not invent on-chain balances. Both inherited `VITE_MINTDEX_MODE` and `VITE_CARDDEX_MODE` activation remain rejected. The new wallet integration is separate from the inherited MintDex program.
 
 `integrations/pumpfun` uses the pinned official pump.fun SDK to prepare a complete create_v2 transaction with the selected admitted quote and optional exact-amount initial buy. It revalidates mainnet genesis, quote admission, mint/program/decimals, balances, rent and fresh transaction simulation. Native SOL and 15 custom quote assets are supported subject to current on-chain admission and packet limits. A requested initial buy is never silently dropped.
 
@@ -53,7 +55,15 @@ The trusted server image composer uses the same canonical card layout and prefla
 
 No real transaction was signed or submitted. Public-mainnet read-only simulations verified create_v2 and Core creation against the actual programs. These are simulations, not completed token/NFT issuance. A first owner-approved launch is still required after public deployment.
 
-The domain currently remains on registrar parking DNS. No production resources, DNS updates or deployment occurred. Follow [the public readiness checklist](reports/launch-a-card-public-readiness-2026-10-28.md) and review `app/wrangler.production.example.jsonc`; it is disabled with an intentionally invalid D1 placeholder. Create this platform's own D1/R2 resources, never MintDex resources.
+Production setup is authorized. This platform has its own `launch-a-card` Worker, D1 and R2, with all 11 migrations applied remotely. The dedicated Worker is **https://launch-a-card.gtjvv976mb.workers.dev**. Both **launchacard.fun** and **www.launchacard.fun** are bound, with `www` configured to redirect to the canonical apex. The current final deployment is `0bc12834`.
+
+Actual configuration is `app/wrangler.production.jsonc`. Local `app/wrangler.jsonc` stays isolated, and no MintDex resources are reused. The Cloudflare Free zone is `e91d78f85ca3a48e61b7a894e1285f4a`. Namecheap Custom DNS was saved with `aaron.ns.cloudflare.com` and `addyson.ns.cloudflare.com`, and public nameserver delegation now points to Cloudflare. Only the approved parking apex A and `www` CNAME records were removed; existing email DNS was preserved. The Worker accepted a 30,000 ms CPU limit without a Cloudflare subscription change.
+
+An independent Cloudflare Worker probe verified canonical HTTPS on 28 October: the root page, public image and metadata each returned HTTP 200 with normal certificate validation. The same UI bundle passed desktop and phone checks at the dedicated Worker URL. Canonical browser navigation remains unverified from the local QA host because its connections to port 443 time out; this local limitation does not negate the independent HTTPS result. Evidence is in `output/launch-a-card-2026-10-28/connectivity-probe-result.json` and the [public UI report](reports/launch-a-card-public-ui-2026-10-28.md).
+
+The owner saved the active app-specific Helius endpoint as the encrypted, server-only `CARDDEX_MAINNET_RPC_URL` Worker secret. Workers' unsupported `redirect:"error"` fetch mode was replaced with manual redirect rejection in RPC health and public asset verification. The deployed check now verifies mainnet genesis and healthy finalized slot/height observations. Endpoint and key values stay out of chat, source and Git.
+
+**Public mainnet wallet launches are enabled.** Canonical HTTPS, `www` redirect, logo, immutable image/metadata and healthy mainnet RPC passed final remote checks. No real transaction has been signed or sent by the agent; the first creator-operated token and NFT issuance remains unverified. The directory, balances and token trading remain clearly labelled demo. See [the production setup record](reports/launch-a-card-production-setup-2026-10-28.md), [public UI evidence](reports/launch-a-card-public-ui-2026-10-28.md), and the earlier [readiness checklist](reports/launch-a-card-public-readiness-2026-10-28.md).
 
 Current provider reference, reviewed 28 October 2026: [official pump.fun coin creation](https://github.com/pump-fun/pump-public-docs/blob/main/docs/instructions/COIN_CREATION.md). Historical accounts and fees are not assumed current.
 

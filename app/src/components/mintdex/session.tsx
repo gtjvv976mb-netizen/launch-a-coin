@@ -20,6 +20,7 @@ import { FLOW, MODE_COPY } from "../../lib/mintdex/copy";
 import type { Me } from "../../lib/mintdex/types";
 import { setMe } from "./hooks";
 import { isCoarsePointer } from "./sheet";
+import { ViewportPages } from "../carddex/live/ViewportPages";
 import {
   Button,
   CalmSwitch,
@@ -165,6 +166,7 @@ function EnterDialog({
   const [handle, setHandle] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [page, setPage] = useState(0);
   const qc = useQueryClient();
   const toast = useToast();
 
@@ -179,6 +181,7 @@ function EnterDialog({
     if (open) {
       setHandle("");
       setError(null);
+      setPage(0);
     }
   }, [open]);
 
@@ -222,11 +225,13 @@ function EnterDialog({
 
   return (
     <Modal open={open} onOpenChange={onOpenChange} title="Enter Launch a Card">
-      <form onSubmit={submit} className="flex flex-col gap-5" noValidate>
-        <p className="text-[15px] leading-[1.5] text-slate">
-          {reason ?? "Pick a handle to launch tokens and build your collection."}
-          {MODE_COPY.enterGift ? ` ${MODE_COPY.enterGift}` : null}
-        </p>
+      {page === 0 ? <div className="cdx-enter-intro cdx-overlay-deck">
+        <div className="cdx-overlay-copy">
+          <p>{reason ?? "Pick a handle to launch tokens and build your collection."}{MODE_COPY.enterGift ? ` ${MODE_COPY.enterGift}` : null}</p>
+          {MODE_COPY.accountNote ? <p>{MODE_COPY.accountNote}</p> : null}
+        </div>
+        <div className="cdx-overlay-actions"><span aria-live="polite">1 / 2</span><Button onClick={() => setPage(1)}>Choose a handle</Button></div>
+      </div> : <form onSubmit={submit} className="cdx-enter-form cdx-overlay-deck" noValidate>
         <Field
           label="Handle"
           htmlFor="handle"
@@ -252,10 +257,10 @@ function EnterDialog({
             aria-describedby="handle-help"
           />
         </Field>
-        <div className="mdx-sheet-foot">
+        <div className="cdx-enter-submit mdx-sheet-foot">
+          <Button variant="outline" onClick={() => setPage(0)}>Back</Button>
           <Button
             type="submit"
-            block
             disabled={!valid}
             onBlocked={() => setError(invalidReason)}
             pending={busy}
@@ -264,11 +269,7 @@ function EnterDialog({
             {intent ? intent.label : "Enter Launch a Card"}
           </Button>
         </div>
-        {/* Sign out would strand the account (P0-7): say where it lives, up front. */}
-        {MODE_COPY.accountNote ? (
-          <p className="-mt-2 text-[13px] leading-[1.45] text-slate">{MODE_COPY.accountNote}</p>
-        ) : null}
-      </form>
+      </form>}
     </Modal>
   );
 }
@@ -298,9 +299,8 @@ const FEE_ROWS: Array<{ label: string; value: string }> = IS_SIM
   : [{ label: "Token trading", value: "Review the fee and price impact shown before confirming a trade." }];
 
 /**
- * How Launch a Card works (P1-7): the three steps stacked, so all of it can be scanned at once, then the fees and the
- * Terms link. Desktop: a 560px dialog that fits a 1280x720 screen with no inner scroll. Phones: a bottom sheet with
- * the same column, the site-wide motion switch and Connect pinned to the bottom. Linkable with ?guide=1.
+ * The guide keeps all three steps, fees, legal links and motion settings on explicit pages.
+ * The same bounded deck is used in desktop dialogs and phone sheets. Linkable with ?guide=1.
  */
 function GuideDialog({
   open,
@@ -314,56 +314,11 @@ function GuideDialog({
   const me = useMe();
   return (
     <Modal open={open} onOpenChange={onOpenChange} title="How Launch a Card works" width={560}>
-      <ol className="flex flex-col gap-5 short:gap-4">
-        {STEPS.map((s, i) => (
-          <li key={s.title} className="grid grid-cols-[28px_minmax(0,1fr)] gap-3">
-            <span className="mdx-plate text-[20px] leading-[1.2] text-slate" aria-hidden>
-              {i + 1}
-            </span>
-            <div className="min-w-0">
-              <h3 className="text-[16px] font-semibold leading-[1.3] tracking-[-0.01em] text-ink">{s.title}</h3>
-              <p className="mt-1 text-pretty text-[15px] leading-[1.45] text-slate short:text-[14px]">{s.body}</p>
-              <div className={s.phoneVisual ? "mt-2.5 short:mt-2" : "mt-2.5 max-lg:hidden short:mt-2"}>
-                {s.visual}
-              </div>
-            </div>
-          </li>
-        ))}
-      </ol>
-      <div className="mt-5 border-t border-hairline pt-4 text-[13px] leading-[1.45] text-slate short:mt-4 short:pt-3">
-        {/* What the money is (devnet) and the Terms link on one row, then the fees as label and value rows. */}
-        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          {MODE_COPY.guideNote ? <p className="font-medium text-ink">{MODE_COPY.guideNote}</p> : null}
-          <TextLink to="/legal" onClick={() => onOpenChange(false)}>
-            Terms, privacy and risks
-          </TextLink>
-        </div>
-        <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1">
-          {FEE_ROWS.map((r) => (
-            <div key={r.label} className="contents">
-              <dt className="font-medium text-ink">{r.label}</dt>
-              <dd>{r.value}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-      {/* Phones: the site-wide Calm motion switch, reachable signed out from the header's guide button (desktop
-          has it in the rail). WCAG 2.2.2: a way to stop the ambient motion on every page. The whole row toggles;
-          pb-2.5 with -mb-2.5 makes it a 44px tap target without moving anything. */}
-      <CalmSwitch size="md" className="mt-4 -mb-2.5 border-t border-hairline pb-2.5 pt-3 lg:hidden" />
-      {!me && (
-        <div className="mdx-sheet-foot mt-5 short:mt-4">
-          <Button
-            block
-            onClick={() => {
-              onOpenChange(false);
-              onEnter();
-            }}
-          >
-            {IS_SIM ? "Enter Launch a Card" : CONNECT_COPY.connect}
-          </Button>
-        </div>
-      )}
+      <div className="cdx-overlay-deck"><ViewportPages label="How Launch a Card works pages" pages={[
+        ...STEPS.map(s => <section key={s.title} className="cdx-overlay-copy"><h3>{s.title}</h3><p>{s.body}</p>{s.visual}</section>),
+        <section key="fees" className="cdx-overlay-copy"><h3>Costs and risks</h3>{MODE_COPY.guideNote ? <p>{MODE_COPY.guideNote}</p> : null}<dl>{FEE_ROWS.map(r => <div key={r.label}><dt className="font-semibold text-ink">{r.label}</dt><dd>{r.value}</dd></div>)}</dl><TextLink to="/legal" onClick={() => onOpenChange(false)}>Terms, privacy and risks</TextLink></section>,
+        <section key="settings" className="cdx-overlay-copy"><h3>Make it yours</h3><CalmSwitch size="md" />{!me ? <Button block onClick={() => { onOpenChange(false); onEnter(); }}>{IS_SIM ? "Enter Launch a Card" : CONNECT_COPY.connect}</Button> : null}</section>,
+      ]} /></div>
     </Modal>
   );
 }

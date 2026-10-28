@@ -32,15 +32,12 @@ function devnetConnectSrc(): string {
 }
 const CONNECT_SRC = IS_CHAIN ? devnetConnectSrc() : `'self' https:${EXTRA_DEV_SRC}`;
 
-// These production hosts are served directly by the owner's Cloudflare Workers. They do not receive the
-// historical Higgsfield platform framing policy. Keep that platform's cross-origin design preview intact on its
-// own hosts, while disallowing foreign frames around the public MintDex site and its direct Worker origins.
+// Direct Launch a Card hosts require framing protection around wallet actions.
+// Keep the separately hosted design preview's framing policy intact.
 const OWNED_SITE_HOSTS = new Set([
-  'mintdex.fun',
-  'www.mintdex.fun',
-  'devnet.mintdex.fun',
-  'mintdex-site.gtjvv976mb.workers.dev',
-  'mintdex-site-mainnet.gtjvv976mb.workers.dev',
+  'launchacard.fun',
+  'www.launchacard.fun',
+  'launch-a-card.gtjvv976mb.workers.dev',
 ]);
 
 export function applySecurityHeaders(response: Response, requestUrl?: URL): Response {
@@ -49,7 +46,7 @@ export function applySecurityHeaders(response: Response, requestUrl?: URL): Resp
   headers.set(
     'Content-Security-Policy',
     "default-src 'self'; " +
-      // Cloudflare Web Analytics beacon, injected at the edge for mintdex.fun.
+      // Optional Cloudflare Web Analytics beacon injected at the edge.
       "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; " +
       "style-src 'self' 'unsafe-inline'; " +
       "font-src 'self' data:; " +

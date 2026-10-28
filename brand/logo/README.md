@@ -1,13 +1,23 @@
-# CardDex symbol
+# Launch a Card symbol
 
-The current identity is a premium gold-foil trading card with a sculpted crown and ruby settings. It has no lettering, monogram or blue. The portrait frame, illustration window and inset paper wells echo a rare Pokémon-style collectible card. The visible brand mark remains symbol-only in the desktop rail, mobile header, favicon and app icons.
+The current identity is a **fanned hand of three card backs with a separate floating crown**. Jade, garnet and plum enamel distinguish the cards; champagne foil edges, engraved back patterns and ruby/emerald crown settings make the mark recognizable without lettering. All three cards face backward. There is no literal hand, front artwork window, monogram or theme name.
 
-- `carddex-master.svg`: editable vector source.
-- `carddex.svg`: installed color mark.
+The installed symbol remains transparent and wordless in the desktop rail, phone header and SVG favicon. Existing asset filenames are retained to keep every consumer consistent. The app icons use a charcoal canvas with an 8% inset so the crown and fan stay clear of icon crops.
+
+- `carddex-master.svg`: editable vector source, original geometric artwork.
+- `carddex.svg`: installed multicolor mark, identical to the master.
 - `carddex-ink.svg` and `carddex-white.svg`: single-color reproduction variants.
 - `carddex-transparent.png`: 1024px transparent export.
-- `carddex-gold.png`: large presentation preview.
+- `carddex-gold.png`: 1024px charcoal presentation preview; legacy filename retained.
+- `app/public/assets/brand/carddex-{180,192,512}.png`: app and touch icons.
 
-Run `python3 build.py` from this folder to copy the SVG masters into the app. PNG/app-icon exports were rendered from that same vector in Chromium, at 180, 192, 512 and 1024px. Inspect each size after changing the master. No fonts, raster tracing or external requests are required by the installed SVG.
+From the project root, run:
 
-The rejected paid Higgsfield concept is retained only in `archive/`. The replacement vector was authored locally without additional image-generation spend.
+```sh
+python3 brand/logo/build.py
+node brand/logo/export.mjs
+```
+
+The exporter uses the installed `playwright-cli` and Chromium. Set `PLAYWRIGHT_CLI` and `PLAYWRIGHT_CONFIG` to override the executable and browser configuration when needed. It renders the native SVG directly and produces a light/dark proof at 32, 48, 64, 96 and 180px in `output/playwright/logo-fan-2026-10-28/logo-size-proof.png`. Inspect the proof after a master edit. No fonts, raster tracing, external requests or image-generation credits are required.
+
+The rejected paid Higgsfield concept remains in `archive/`. This replacement was authored as repository-native vector artwork without additional generation spend.

@@ -36,6 +36,7 @@ import { MintCard } from "./MintCard";
 import { useSessionUi } from "./session";
 import { Button, Modal, Pocket, menuCollisionPadding, useToast } from "./ui";
 import { Sheet, isPhoneNow } from "./sheet";
+import { ViewportPages } from "../carddex/live/ViewportPages";
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -175,8 +176,8 @@ export function ConfirmDialog({
 }) {
   return (
     <Modal open={open} onOpenChange={onOpenChange} title={title}>
-      <div className="text-pretty text-[15px] leading-[1.5] text-slate">{children}</div>
-      <div className="mdx-sheet-foot mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <div className="cdx-confirm-copy text-pretty text-[15px] leading-[1.5] text-slate">{children}</div>
+      <div className="cdx-confirm-actions mdx-sheet-foot flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button variant="outline" onClick={() => onOpenChange(false)}>
           {cancelLabel}
         </Button>
@@ -366,27 +367,30 @@ export function LaunchedDialog({
   useEffect(() => {
     if (!open) return;
     const t = window.setTimeout(() => {
+      if (!cardRef.current) return;
       void import("./arcade").then((m) => m.launchBurst(m.centerOf(cardRef.current)));
     }, 1500);
     return () => window.clearTimeout(t);
   }, [open]);
   return (
     <Modal open={open} onOpenChange={onOpenChange} title={IS_SIM ? "Your demo card is ready" : "Your card is ready"}>
-      <div className="flex flex-col items-center">
-        <div ref={cardRef} className="w-[176px] max-w-full">
+      <div className="cdx-launched-deck cdx-overlay-deck"><ViewportPages label="Your new card pages" pages={[
+      <div key="card" className="cdx-launched-art">
+        <div ref={cardRef} className="cdx-launched-art__card">
           <Pocket featured className="w-full">
             {/* The reveal (M14): the card starts face down and turns one and a half times into a burst and
                 confetti once the dialog is open (under calm: the face at once, no confetti). */}
             <MintCard card={coin} depth="hand" />
           </Pocket>
         </div>
-        <p className="mt-6 text-pretty text-center text-[15px] leading-[1.5] text-slate">
+      </div>,
+      <div key="share" className="cdx-launched-copy cdx-overlay-copy">
+        <p className="text-pretty text-[15px] leading-[1.5] text-slate">
           {dexNo(coin.dexNo)} in the dex. You hold the one-of-one ${coin.ticker} card in your chosen design.
           {IS_SIM ? " This is a local demo; no real token or NFT has been minted." : ""}
         </p>
-      </div>
       {/* flex-1 only in the row: in the phone column a zero basis squashed both buttons to 15px bars (QA). */}
-      <div className="mdx-sheet-foot mt-6 flex flex-col gap-2 sm:flex-row-reverse">
+      <div className="mdx-sheet-foot flex flex-col gap-2 sm:flex-row-reverse">
         <a
           className="mdx-btn mdx-btn--primary flex-none sm:flex-1"
           href={xIntent(share.text, url)}
@@ -399,6 +403,8 @@ export function LaunchedDialog({
           Copy link
         </Button>
       </div>
+      </div>,
+      ]} /></div>
     </Modal>
   );
 }

@@ -1,47 +1,56 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="CardDex card and crown">
- <defs>
-  <linearGradient id="metal" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#fff4c5"/><stop offset=".18" stop-color="#edc768"/><stop offset=".42" stop-color="#916025"/><stop offset=".47" stop-color="#fff2b5"/><stop offset=".68" stop-color="#d7aa4f"/><stop offset=".84" stop-color="#fff8d8"/><stop offset="1" stop-color="#987035"/></linearGradient>
-  <linearGradient id="edge" x1="0" y1="0" x2="1" y2=".7"><stop stop-color="#9b763e"/><stop offset=".25" stop-color="#fff2bd"/><stop offset=".5" stop-color="#d8b36a"/><stop offset=".7" stop-color="#66471e"/><stop offset="1" stop-color="#fff0b3"/></linearGradient>
-  <linearGradient id="gold" x1="0" y1="0" x2=".85" y2="1"><stop stop-color="#fff4ba"/><stop offset=".24" stop-color="#f8dc79"/><stop offset=".42" stop-color="#b27c21"/><stop offset=".49" stop-color="#fff1ad"/><stop offset=".67" stop-color="#d8ac46"/><stop offset=".87" stop-color="#fff2b8"/><stop offset="1" stop-color="#b48329"/></linearGradient>
-  <linearGradient id="enamel" x1="0" y1="0" x2=".9" y2="1"><stop stop-color="#684330"/><stop offset=".3" stop-color="#2c1d1b"/><stop offset=".64" stop-color="#171410"/><stop offset="1" stop-color="#583a20"/></linearGradient>
-  <linearGradient id="ruby" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0cc"/><stop offset=".22" stop-color="#ff8c66"/><stop offset=".48" stop-color="#c12a26"/><stop offset=".72" stop-color="#ffbe86"/><stop offset="1" stop-color="#781b27"/></linearGradient>
-  <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff4c9"/><stop offset=".5" stop-color="#e2bd76"/><stop offset="1" stop-color="#fff2c1"/></linearGradient>
- </defs>
- <g stroke-linejoin="round">
-  <!-- A second card edge gives the crest a real collector-card silhouette. -->
-  <path d="m31 33-11 5-5 75 8 8 9-86Z" fill="#34271c" stroke="url(#edge)" stroke-width="1.8"/>
-  <path d="m23 41-5 70 6 6" fill="none" stroke="#e4c382" stroke-width=".7" opacity=".7"/>
-  <!-- Cut platinum slab and inset enamel card, with crisp bevel highlights. -->
-  <path d="M37 29h54l9 9v76l-9 9H37l-9-9V38Z" fill="#1c160e" stroke="#1c160e" stroke-width="1.6" transform="translate(.8 1.3)"/>
-  <path d="M37 29h54l9 9v76l-9 9H37l-9-9V38Z" fill="url(#metal)"/>
-  <path d="M39 33h50l7 7v72l-7 7H39l-7-7V40Z" fill="url(#enamel)" stroke="#fff1be" stroke-width=".8"/>
-  <path d="M41 37h46l5 5v68l-5 5H41l-5-5V42Z" fill="none" stroke="url(#gold)" stroke-width=".8"/>
-  <path d="M42 42h44v5H42Z" fill="url(#paper)"/>
-  <path d="M41 51h46v43H41Z" fill="#2b1817" stroke="url(#edge)" stroke-width=".7"/>
-  <path d="M42 99h44v12H42Z" fill="url(#paper)"/>
-  <path d="M45 114h38" fill="none" stroke="url(#gold)" stroke-width=".7"/>
-  <path d="m28 38 9-9h54l9 9M28 114l9 9h54l9-9" fill="none" stroke="#fff" stroke-width=".7" opacity=".65"/>
-  <!-- Engraved guilloche belongs to the card surface, with no lettering. -->
-  <g fill="none" stroke="#e5c17b" stroke-width=".45" opacity=".56">
-   <ellipse cx="64" cy="73" rx="18" ry="18"/>
-   <ellipse cx="64" cy="73" rx="11" ry="18" transform="rotate(30 64 73)"/>
-   <ellipse cx="64" cy="73" rx="11" ry="18" transform="rotate(-30 64 73)"/>
-   <ellipse cx="64" cy="73" rx="11" ry="18" transform="rotate(60 64 73)"/>
-   <ellipse cx="64" cy="73" rx="11" ry="18" transform="rotate(-60 64 73)"/>
-   <ellipse cx="64" cy="73" rx="6" ry="18"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Launch a Card crowned hand of cards">
+  <defs>
+    <linearGradient id="lac-gold" x1="0" y1="0" x2=".8" y2="1">
+      <stop stop-color="#fff5cd"/><stop offset=".23" stop-color="#e8bd62"/><stop offset=".42" stop-color="#ac722d"/><stop offset=".49" stop-color="#fff1bb"/><stop offset=".72" stop-color="#d09a40"/><stop offset="1" stop-color="#f8dfa0"/>
+    </linearGradient>
+    <linearGradient id="lac-edge" x1="0" y1="0" x2="1" y2=".8">
+      <stop stop-color="#fff4d4"/><stop offset=".35" stop-color="#c3934e"/><stop offset=".65" stop-color="#6e431d"/><stop offset="1" stop-color="#fff0bd"/>
+    </linearGradient>
+    <linearGradient id="lac-jade" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#65d4aa"/><stop offset=".27" stop-color="#16765e"/><stop offset=".6" stop-color="#084c41"/><stop offset="1" stop-color="#249b79"/>
+    </linearGradient>
+    <linearGradient id="lac-plum" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#d1a1da"/><stop offset=".3" stop-color="#8b428c"/><stop offset=".66" stop-color="#482749"/><stop offset="1" stop-color="#a562a0"/>
+    </linearGradient>
+    <linearGradient id="lac-ruby" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#f4a48e"/><stop offset=".24" stop-color="#c64545"/><stop offset=".6" stop-color="#771f36"/><stop offset="1" stop-color="#bc4251"/>
+    </linearGradient>
+    <linearGradient id="lac-pearl" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#fff9e5"/><stop offset=".35" stop-color="#f0ddb4"/><stop offset=".63" stop-color="#fff6da"/><stop offset="1" stop-color="#d8b376"/>
+    </linearGradient>
+    <!-- Identical backs make a deck, rather than three miniature card fronts. -->
+    <g id="lac-back" stroke-linejoin="round">
+      <rect x="-24" y="-38" width="48" height="76" rx="5.2" fill="#221b19" stroke="#221b19" stroke-width="2.2" transform="translate(.2 1.4)"/>
+      <rect x="-24" y="-38" width="48" height="76" rx="5.2" fill="url(#lac-gold)" stroke="url(#lac-edge)" stroke-width="1.2"/>
+      <rect x="-21.1" y="-35.1" width="42.2" height="70.2" rx="3.2" fill="inherit" stroke="#fff2c9" stroke-width=".65"/>
+      <path d="M-13-32h26l5 5v54l-5 5h-26l-5-5v-54Z" fill="none" stroke="#f6dc9f" stroke-width=".7"/>
+      <path d="M-9-28H9m-18 56H9M-15-21v-2l3-3m27 5v-2l-3-3M-15 21v2l3 3m27-5v2l-3 3" fill="none" stroke="#f6dc9f" stroke-width=".55"/>
+      <g fill="none" stroke="#f8e7bc" stroke-width=".42" opacity=".7">
+        <ellipse rx="15.2" ry="22.7"/><ellipse rx="15.2" ry="22.7" transform="rotate(30)"/><ellipse rx="15.2" ry="22.7" transform="rotate(-30)"/>
+        <ellipse rx="11.2" ry="18.5" transform="rotate(60)"/><ellipse rx="11.2" ry="18.5" transform="rotate(-60)"/>
+      </g>
+      <path d="m0-18 13 18L0 18-13 0Z" fill="url(#lac-pearl)" stroke="#fff1c6" stroke-width=".7"/>
+      <path d="m0-13 9.2 13L0 13-9.2 0Z" fill="inherit" stroke="url(#lac-edge)" stroke-width=".7"/>
+      <path d="m0-7.5 5.3 7.5L0 7.5-5.3 0Z" fill="url(#lac-gold)"/>
+      <path d="M0-7.5V0h-5.3Zm0 7.5h5.3L0 7.5Z" fill="#fff1c3"/>
+      <path d="m0-31 2.3 3L0-25l-2.3-3Zm0 56 2.3 3L0 31l-2.3-3Z" fill="#fce6b3"/>
+      <path d="M-23-31v-2a4 4 0 0 1 4-4h34M23 31v2a4 4 0 0 1-4 4h-34" fill="none" stroke="#fff6d7" stroke-width=".65" opacity=".85"/>
+    </g>
+  </defs>
+  <!-- A collector's hand: three distinct jewel-toned backs, warm foil edges. -->
+  <g transform="translate(39.5 82.5) rotate(-24)" fill="url(#lac-jade)"><use href="#lac-back"/></g>
+  <g transform="translate(88.5 82.5) rotate(24)" fill="url(#lac-plum)"><use href="#lac-back"/></g>
+  <g transform="translate(64 85)" fill="url(#lac-ruby)"><use href="#lac-back"/></g>
+  <!-- The crown floats above the deck; the open gap is part of the silhouette. -->
+  <g stroke-linejoin="round">
+    <path d="m32 10 15 10L64 4l17 16 15-10-5.8 18.5H37.8Z" fill="#69411e" stroke="#382619" stroke-width="2.1" transform="translate(0 1.7)"/>
+    <path d="m32 10 15 10L64 4l17 16 15-10-5.8 18.5H37.8Z" fill="url(#lac-gold)" stroke="#fff1be" stroke-width=".8"/>
+    <path d="m32 10 15 10-7 4Zm32-6v20l-17-4Zm0 0 17 16-17 4Zm32 6-8 14-7-4Z" fill="#fff4ca" opacity=".5"/>
+    <path d="M38 26.5h52l-1.5 6H39.5Z" fill="url(#lac-gold)" stroke="#fff0bb" stroke-width=".7"/>
+    <path d="M41 30h46" fill="none" stroke="#7e4c21" stroke-width=".7"/>
+    <path d="m64 19 5.5 7L64 33l-5.5-7Z" fill="url(#lac-ruby)" stroke="#ffedbd" stroke-width=".8"/>
+    <path d="m64 20 0 6h-4.5Zm0 6h4.5L64 32Z" fill="#f7a99d" opacity=".9"/>
+    <path d="m45 25 2.8 3-2.8 3-2.8-3Zm38 0 2.8 3-2.8 3-2.8-3Z" fill="url(#lac-jade)" stroke="#fff0be" stroke-width=".6"/>
+    <path d="m64 3.8 0 2M32 9.8l1 1M96 9.8l-1 1" fill="none" stroke="#fff8da" stroke-width="1.3" stroke-linecap="round"/>
   </g>
-  <path d="m64 54 14 19-14 19-14-19Z" fill="#261b14" stroke="url(#gold)" stroke-width="1"/>
-  <path d="m64 58 10 15-10 15-10-15Z" fill="url(#gold)" stroke="#fff1bb" stroke-width=".7"/>
-  <path d="m64 58 0 15-10 0Zm0 15 10 0-10 15Z" fill="#fff2bb" opacity=".65"/>
-  <path d="m64 58 10 15-10-4Z" fill="#b78429" opacity=".7"/>
-  <path d="m54 73 10 15-4-15Z" fill="#805221" opacity=".68"/>
-  <!-- Sculpted crown with three ruby settings. -->
-  <path d="m26 14 20 12L64 5l18 21 20-12-8 21H34Z" fill="#765024" stroke="#e6c66f" stroke-width=".65"/>
-  <path d="m26 11 20 12L64 2l18 21 20-12-8 21H34Z" fill="url(#gold)" stroke="#fff3c4" stroke-width=".65"/>
-  <path d="m26 11 20 12-9 5Zm38-9 0 26-18-5Zm0 0 18 21-18 5Zm38 9-11 17-9-5Z" fill="#fff7d2" opacity=".4"/>
-  <path d="M34 31h60l-2 7H36Z" fill="url(#gold)" stroke="#ffefb5" stroke-width=".6"/>
-  <path d="m64 25 7 8-7 8-7-8Z" fill="url(#ruby)" stroke="#ffe3af" stroke-width=".65"/>
-  <path d="m64 25 0 8-7 0Zm0 8 7 0-7 8Z" fill="#ffe1b4" opacity=".65"/>
-  <path d="m43 31 3 3-3 3-3-3Zm42 0 3 3-3 3-3-3Z" fill="url(#ruby)" stroke="#ffe5af" stroke-width=".5"/>
- </g>
 </svg>

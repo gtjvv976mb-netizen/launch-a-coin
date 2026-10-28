@@ -59,6 +59,27 @@ function fakeEl(child: Fake | null = null): {
 const DIR = path.resolve(import.meta.dir, "../../src/components/mintdex/card3d");
 
 describe("the inline spin (Body)", () => {
+  test("a showcase can bound its turn arc without changing angles or other cards", () => {
+    const normalPose = fakeEl(), fittedPose = fakeEl();
+    const normal = new Body(fakeEl() as never, normalPose as never, "hand");
+    const fitted = new Body(fakeEl() as never, fittedPose as never, "hand");
+    expect(normal.turnArcScale).toBe(1);
+    fitted.turnArcScale = 0.2;
+    normal.dragging = fitted.dragging = true;
+    for (const angle of [0, 45, 90, 135, 180, 225, 270, 315, 360]) {
+      normal.flip.snap(angle); fitted.flip.snap(angle);
+      normal.step(1 / 60, 1000 + angle, "full", false);
+      fitted.step(1 / 60, 1000 + angle, "full", false);
+      const normalZ = Number(normalPose.style.transform.match(/translate3d\(0, [^,]+, ([\d.-]+)px\)/)?.[1] ?? 0);
+      const fittedZ = Number(fittedPose.style.transform.match(/translate3d\(0, [^,]+, ([\d.-]+)px\)/)?.[1] ?? 0);
+      expect(fittedZ).toBeCloseTo(normalZ * 0.2, 1);
+      expect(fittedPose.style.transform.match(/rotateY\(([^)]+)\)/)?.[1]).toBe(normalPose.style.transform.match(/rotateY\(([^)]+)\)/)?.[1]);
+      expect(fitted.side()).toBe(normal.side());
+    }
+    expect(normal.cfg.arcLift).toBe(0.16);
+    expect(normal.cfg.arcTilt).toBe(7);
+    expect(new Body(fakeEl() as never, fakeEl() as never, "hand").turnArcScale).toBe(1);
+  });
   test("the metallic edge follows the pose even when rounded foil values match", () => {
     const edge = fakeEl();
     const foil = fakeEl();

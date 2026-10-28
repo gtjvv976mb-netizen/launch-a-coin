@@ -1,0 +1,23 @@
+{
+  // Launch a Card only. Public HTTPS and the mainnet RPC passed release checks.
+  "name": "launch-a-card",
+  "account_id": "985281cb00d5f7379896b62a03e0edb7",
+  "main": "dist/server/server.js",
+  "compatibility_date": "2025-05-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  // Require an existing compatible CPU allowance; never purchase or upgrade a plan.
+  "limits": {"cpu_ms": 30000},
+  "assets": {"directory": "./dist/client", "binding": "ASSETS", "not_found_handling": "none"},
+  "routes": [{"pattern": "launchacard.fun", "custom_domain": true}, {"pattern": "www.launchacard.fun", "custom_domain": true}],
+  "vars": {
+    "HF_ENV": "production", "APP_SLUG": "launch-a-card",
+    "CARDDEX_PUBLIC_ORIGIN": "https://launchacard.fun",
+    "CARDDEX_DEPLOYMENT_ENV": "production",
+    // Configure CARDDEX_MAINNET_RPC_URL as a Worker secret with a provider endpoint.
+    "CARDDEX_LIVE_LAUNCH_ENABLED": "true"
+  },
+  "d1_databases": [{"binding": "DB", "database_name": "launch-a-card", "database_id": "ffc8ba69-4d9d-404c-9c3d-e4a7f187cb3a", "migrations_dir": "migrations"}],
+  "r2_buckets": [{"binding": "STORAGE", "bucket_name": "launch-a-card"}]
+}
