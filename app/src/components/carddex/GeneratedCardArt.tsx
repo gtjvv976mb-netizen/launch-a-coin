@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode, type RefObject, type CSSProperties } from "react";
-import { generatedCardAssets } from "../../lib/carddex/generated-assets";
+import { generatedCardAssets, generatedSrcSet } from "../../lib/carddex/generated-assets";
 import measuredLayouts from "../../lib/carddex/generated-layouts.json";
 import { useImageFailure } from "../mintdex/image-state";
 import { CANONICAL_CARD_LAYOUT } from "../../lib/carddex/card-template";
@@ -28,7 +28,7 @@ export function GeneratedCardFront({ cardTemplate, priority = false }: { cardTem
   const ref = useRef<HTMLImageElement>(null);
   const image = useReadyImage(ref, source);
   if (!source) return null;
-  return <img ref={ref} className="cdx-generated-front" data-generated-front-ready={image.ready ? "" : undefined} src={source} srcSet={assets.front320 ? `${assets.front320} 320w, ${source} 1260w` : undefined} sizes={assets.front320 ? `${priority ? "" : "auto, "}(max-width: 767px) 72vw, 400px` : undefined} alt="" hidden={image.failed} draggable={false} loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : undefined} onLoad={image.onLoad} onError={image.onError} />;
+  return <img ref={ref} className="cdx-generated-front" data-generated-front-ready={image.ready ? "" : undefined} src={source} srcSet={assets.front320 ? generatedSrcSet(assets.front320, source) : undefined} sizes={assets.front320 ? `${priority ? "" : "auto, "}(max-width: 767px) 72vw, 400px` : undefined} alt="" hidden={image.failed} draggable={false} loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : undefined} onLoad={image.onLoad} onError={image.onError} />;
 }
 
 /** A measured metal-only laminate. It shares the physical engine's light without painting over live ink. */
@@ -106,7 +106,7 @@ export function GeneratedCardReverse({ cardTemplate, eager = false, sizes, child
     {!wanted ? null : <>{/* A hidden back loads lazily at its laid-out width (sizes "auto"), so it is never preloaded
         or fetched at full size ahead of the faces; phones take the 320px copy outright. A back shown face up
         (eager) takes the card's own sizes, since "auto" is only valid on a lazy image. */}
-    <img ref={ref} src={small ? assets.back320 : source} srcSet={assets.back320 && !small ? `${assets.back320} 320w, ${source} 1260w` : undefined} sizes={assets.back320 && !small ? (eager ? sizes ?? "(max-width: 767px) 72vw, 400px" : "auto, (max-width: 767px) 72vw, 400px") : undefined} alt="" hidden={image.failed} draggable={false} loading={eager ? "eager" : "lazy"} decoding="async" fetchPriority={eager ? undefined : "low"} onLoad={image.onLoad} onError={image.onError} /></>}
+    <img ref={ref} src={small ? assets.back320 : source} srcSet={assets.back320 && !small ? generatedSrcSet(assets.back320, source) : undefined} sizes={assets.back320 && !small ? (eager ? sizes ?? "(max-width: 767px) 72vw, 400px" : "auto, (max-width: 767px) 72vw, 400px") : undefined} alt="" hidden={image.failed} draggable={false} loading={eager ? "eager" : "lazy"} decoding="async" fetchPriority={eager ? undefined : "low"} onLoad={image.onLoad} onError={image.onError} /></>}
   </div>;
 }
 

@@ -14,7 +14,7 @@ export const CREATURE_ART_VERSION = 1;
 const UPLOAD = /^\/api\/img\/art\/[^?#]+$/;
 const CREATURE = /^\/assets\/creatures\/([a-z0-9_-]+)\.webp$/;
 
-export type ArtCopies = { w96: string; w320: string; w800: string };
+export type ArtCopies = { w96: string; w320: string; w640?: string; w800: string };
 
 /** The 96, 320 and 800 px copies of a coin's art, or null for art without copies (anything else loads as is). */
 export function artCopies(src: string): ArtCopies | null {
@@ -25,6 +25,7 @@ export function artCopies(src: string): ArtCopies | null {
   return {
     w96: `/assets/creatures/w96/${m[1]}.v${v}.webp`,
     w320: `/assets/creatures/w320/${m[1]}.v${v}.webp`,
+    w640: `/assets/creatures/w640/${m[1]}.v${v}.webp`,
     w800: src,
   };
 }
@@ -35,8 +36,9 @@ export function thumbSources(src: string, size: number) {
   return c ? { src: c.w96, srcSet: `${c.w96} 96w, ${c.w320} 320w`, sizes: `${size}px` } : { src };
 }
 
-/** A card's art window: the 320 px copy, and the 800 px one for large cards and sharp screens (null: as is). */
+/** A card's art window: the 320 px copy, the 640 px one (seeded art) for 2x phones and the 800 px one for large cards
+ * and sharp screens (null: as is). */
 export function cardArtSources(src: string): { card: string; srcSet: string } | null {
   const c = artCopies(src);
-  return c ? { card: c.w320, srcSet: `${c.w320} 320w, ${c.w800} 800w` } : null;
+  return c ? { card: c.w320, srcSet: `${c.w320} 320w, ${c.w640 ? `${c.w640} 640w, ` : ""}${c.w800} 800w` } : null;
 }

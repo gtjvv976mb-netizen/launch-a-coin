@@ -138,7 +138,7 @@ function Discover() {
                   <Link
                     to="/coin/$id"
                     params={{ id: c.id }}
-                    aria-label={`Open ${c.name}, $${c.ticker}, ${getCardDesign(c.cardTemplate).name} design`}
+                    aria-label={`${c.name} $${c.ticker}, open coin, ${getCardDesign(c.cardTemplate).name} design`}
                   >
                     {/* The first row loads at once and at high priority; the rest when they near the screen. The sizes match the
                         laid-out card (two columns below 1024, about 200px above), so sharp screens get the 320px copies. */}
