@@ -8,8 +8,11 @@
  * .mdx-pop, .mdx-toast and the vaul sheet timing): opacity and a short rise, instant under reduced motion. */
 
 /* ---------------------------------------------------------------- the panel: desktop dialog and phone sheet
- * Components: dialog-modal.tsx (from 1024px) and sheet-drawer.tsx (phones). Height follows the content up to the
- * window; past that the body scrolls inside and a .mdx-sheet-foot stays on the bottom edge. */
+ * Components: dialog-modal.tsx (from 1024px) and sheet-drawer.tsx (phones). The compact anatomy (density R6): the
+ * title and a quiet Close on one row, the body (one or two sentences, or the dialog's own content), then the actions
+ * on the right with one primary. 16px padding in desktop dialogs, 12px in phone sheets (16px from 768px), both from
+ * --pad-panel; 12px between head and body, 16px before the actions. Height follows the content up to the window;
+ * only past that does the body scroll inside, a .mdx-sheet-foot staying on the bottom edge. */
 .cdx-overlay-backdrop {
   position: fixed;
   inset: 0;
@@ -33,13 +36,14 @@
   translate: -50% -50%;
   width: calc(100vw - 32px);
   max-height: calc(var(--cdx-app-height, 100dvh) - 48px);
-  gap: 16px;
-  padding: var(--pad-overlay);
+  gap: 12px;
+  /* Dialogs render only from 1024px, where --pad-panel is 16px. */
+  padding: var(--pad-panel);
   border-radius: var(--radius-aside);
 }
 .cdx-overlay--sheet {
-  --sheet-pad: max(16px, env(safe-area-inset-left), env(safe-area-inset-right));
-  --sheet-pad-b: max(16px, env(safe-area-inset-bottom));
+  --sheet-pad: max(var(--pad-panel), env(safe-area-inset-left), env(safe-area-inset-right));
+  --sheet-pad-b: max(var(--pad-panel), env(safe-area-inset-bottom));
   position: fixed;
   inset-inline: 0;
   bottom: 0;
@@ -80,8 +84,9 @@
   font-weight: 600;
   text-wrap: balance;
 }
+/* Flush with the padding: the ring sits 16/16 from a dialog's corner and 12px from a sheet's edge. */
 .cdx-overlay__close {
-  margin-right: -6px;
+  margin-right: 0;
 }
 .cdx-overlay__body {
   display: flex;
@@ -98,7 +103,7 @@
 }
 .cdx-overlay--sheet .cdx-overlay__body {
   margin: 0;
-  padding: 16px var(--sheet-pad) var(--sheet-pad-b);
+  padding: 12px var(--sheet-pad) var(--sheet-pad-b);
 }
 /* The call to action stays on the panel's bottom edge while the body scrolls (sticky bottom 0 is the body's
  * content edge, above its padding). Its own top padding is the opaque band above the buttons; a flat
@@ -122,7 +127,7 @@
 
 /* ---------------------------------------------------------------- dialog content
  * Body copy is one or two sentences of 14px slate; a heading inside a dialog is never larger than its title.
- * Actions sit on the right, [secondary] [primary], with one primary; a caption (Step 2 of 5) on the left. */
+ * Actions sit on the right, [secondary] [primary], with one primary, 16px below the content. */
 .cdx-overlay-copy {
   display: flex;
   min-width: 0;
@@ -152,15 +157,6 @@
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  padding-top: 24px;
-}
-.cdx-overlay-actions__note {
-  margin-right: auto;
-  color: var(--color-placeholder);
-  font-size: var(--text-caption);
-  line-height: var(--text-caption--line-height);
-}
-.cdx-overlay--sheet .cdx-overlay-actions {
   padding-top: 16px;
 }
 /* Narrow phones: the buttons share the row and wrap to full width when they do not fit, the primary last (nearest
@@ -175,7 +171,7 @@
 .cdx-enter {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 .cdx-enter__intro {
   color: var(--color-slate);
@@ -191,23 +187,80 @@
   text-wrap: pretty;
 }
 .cdx-enter .cdx-overlay-actions {
-  padding-top: 8px;
+  padding-top: 4px; /* 16px below the field with the 12px gap */
 }
 
 /* ---------------------------------------------------------------- How Launch a Card works (session.tsx GuideDialog)
- * Every step in one grid cell: the panel keeps the tallest step's height, so Next never moves the buttons. */
+ * One page (density R4): the three steps, then costs and risks beside Calm motion, then the one primary. Dialogs
+ * (720px): the steps as three nested wells in a row (elevation by lightness only; no border, no lift, no gold), then
+ * the two secondary blocks in two columns. Sheets: the steps as a numbered list, each block under the last. */
 .cdx-guide {
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 .cdx-guide__steps {
   display: grid;
+  gap: 12px;
+  list-style: none;
 }
 .cdx-guide__step {
-  grid-area: 1 / 1;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  column-gap: 8px;
+  row-gap: 4px;
+  align-content: start;
 }
-.cdx-guide__step:not([data-current]) {
-  visibility: hidden;
+.cdx-guide__step > .cdx-guide__n {
+  grid-row: 1 / span 2;
+}
+.cdx-guide__step > :not(.cdx-guide__n) {
+  grid-column: 2;
+}
+.cdx-guide__n {
+  padding-top: 4px; /* the 16px number sits on the 24px heading line */
+  color: var(--color-placeholder);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+/* The house dialog heading (.cdx-overlay-copy h3): all five headings in the guide share one style. */
+.cdx-guide__step h3 {
+  color: var(--color-ink);
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  font-weight: 600;
+  text-wrap: balance;
+}
+.cdx-guide__step p {
+  overflow-wrap: anywhere;
+  color: var(--color-slate);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  text-wrap: pretty;
+}
+.cdx-overlay--dialog .cdx-guide__steps {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.cdx-overlay--dialog .cdx-guide__step {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border-radius: var(--radius-row);
+  background: var(--color-nested);
+}
+.cdx-overlay--dialog .cdx-guide__n {
+  padding-top: 0;
+}
+.cdx-guide__more {
+  display: grid;
+  gap: 16px;
+}
+.cdx-overlay--dialog .cdx-guide__more {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
 }
 .cdx-guide__facts {
   display: grid;
@@ -217,8 +270,19 @@
   color: var(--color-ink);
   font-weight: 600;
 }
-.cdx-guide__step .mdx-calm {
-  margin-top: 8px;
+/* The sentence and the switch (its own "Calm motion" label) on one row. */
+.cdx-guide__calm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cdx-guide__calm > p {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.cdx-guide__calm > .mdx-calm {
+  flex: none;
 }
 
 /* ---------------------------------------------------------------- confirm (confirm.tsx) */
@@ -228,11 +292,12 @@
 }
 
 /* ---------------------------------------------------------------- your card is ready (trust.tsx LaunchedDialog)
- * The card sized to the room the window leaves (about 300px of title, copy and buttons), 120 to 220px wide. */
+ * The card sized to the room the window leaves (about 300px of title, copy and buttons), 120 to 220px wide. The art
+ * keeps 8px above and below: the reveal turns the card one and a half times inside the body's scroll box. */
 .cdx-launched {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 .cdx-launched-art {
   display: flex;
@@ -249,7 +314,36 @@
   text-wrap: pretty;
 }
 .cdx-launched .cdx-overlay-actions {
-  padding-top: 8px;
+  padding-top: 4px;
+}
+/* Short landscape phones: the card beside its sentence and buttons, so the sheet needs no inner scroll. */
+@media (max-height: 499.98px) {
+  .cdx-launched {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "art copy"
+      "art actions";
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 12px;
+  }
+  .cdx-launched-art {
+    grid-area: art;
+  }
+  .cdx-launched-art__card {
+    width: min(180px, calc((var(--cdx-app-height, 100dvh) - 156px) * 0.71));
+  }
+  .cdx-launched-copy {
+    grid-area: copy;
+    align-self: end;
+  }
+  .cdx-launched .cdx-overlay-actions {
+    grid-area: actions;
+    align-self: start;
+    justify-content: flex-start;
+    padding-top: 0;
+  }
 }
 
 /* ---------------------------------------------------------------- the wallet menu (wallet-menu.tsx)
@@ -301,12 +395,13 @@
 }
 
 /* ---------------------------------------------------------------- connect a Solana wallet (wallet-connect.tsx)
- * Installed wallets as nested rows (one press each), then where to get one. Two skeleton rows while the browser's
- * wallets are read; errors in the negative pill pair, the not-on-mainnet note in the warning pair. */
+ * Installed wallets first as nested rows (one press each), then the one plain line on what connecting does; the
+ * official download links only when this browser has none. Two skeleton rows (the rows' own height) while the
+ * browser's wallets are read; errors in the negative pill pair, the not-on-mainnet note in the warning pair. */
 .cdx-wallet-connect {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 .cdx-wallet-connect__line {
   color: var(--color-slate);
@@ -325,6 +420,10 @@
   line-height: var(--text-caption--line-height);
   font-weight: 500;
 }
+/* "Get a wallet" under the install sentence: a little more room than the group's 8px, so the links read as a set. */
+.cdx-wallet-connect__label:not(:first-child) {
+  margin-top: 4px;
+}
 .cdx-wallet-connect__list {
   display: flex;
   flex-direction: column;
@@ -334,7 +433,7 @@
 .cdx-wallet-connect__row {
   display: flex;
   width: 100%;
-  min-height: 52px;
+  min-height: 48px;
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
@@ -396,7 +495,7 @@
 }
 .cdx-wallet-connect__skeleton {
   display: block;
-  height: 52px;
+  height: 48px;
   border-radius: var(--radius-row);
   background: var(--color-nested);
 }
@@ -508,11 +607,89 @@
 }
 
 /* ---------------------------------------------------------------- 404 and error pages (PageStatus.tsx)
- * The card back on its ledge without its glow: the page is quiet, the card is the only colour. */
-.cdx-status .mdx-card3d__halo {
-  display: none;
+ * One compact block centred in what main shows (the view root grows to main's height; no 320px floor): the card
+ * back on its ledge without its glow (the page is quiet, the card is the only colour), the title (the page's one
+ * h1), one sentence, then one button and a "Go home" link. Short landscape phones: the card beside the words, so
+ * the way back stays on the first screen. */
+.cdx-status {
+  display: grid;
+  place-content: center;
+  padding-block: var(--gap-section);
 }
-.cdx-status .mdx-empty__action {
+.cdx-status__block {
+  --status-card: 112px;
+  display: flex;
+  max-width: 360px;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.cdx-status__art {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+}
+.cdx-status__card {
+  width: var(--status-card);
+}
+.cdx-status__slot {
+  aspect-ratio: 63 / 88;
+}
+.cdx-status__ledge {
+  width: calc(var(--status-card) * 1.8);
+}
+.cdx-status__title {
+  margin-top: 16px;
+  color: var(--color-ink);
+  font-size: var(--text-title);
+  line-height: var(--text-title--line-height);
+  font-weight: 600;
+  text-wrap: balance;
+}
+.cdx-status__title:focus {
+  outline: none; /* the route announcer lands here; the page change is the visible answer */
+}
+.cdx-status__body {
+  margin-top: 4px;
+  color: var(--color-slate);
   font-size: var(--text-body);
   line-height: var(--text-body--line-height);
+  text-wrap: pretty;
+}
+.cdx-status__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px 20px;
+  margin-top: 16px;
+}
+@media (min-width: 1024px) {
+  .cdx-status__title {
+    font-size: var(--text-heading);
+    line-height: var(--text-heading--line-height);
+  }
+}
+@media (max-height: 499.98px) {
+  .cdx-status__block {
+    --status-card: 88px;
+    max-width: 520px;
+    flex-direction: row;
+    align-items: center;
+    gap: 24px;
+    text-align: left;
+  }
+  .cdx-status__ledge {
+    width: var(--status-card);
+  }
+  .cdx-status__title {
+    margin-top: 0;
+  }
+  .cdx-status__actions {
+    justify-content: flex-start;
+  }
+}
+.cdx-status .mdx-card3d__halo {
+  display: none;
 }

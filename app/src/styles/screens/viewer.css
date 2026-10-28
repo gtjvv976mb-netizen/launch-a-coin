@@ -77,8 +77,16 @@
   height: 30px;
 }
 
-/* ---------------------------------------------------------------- the 3D viewer */
+/* ---------------------------------------------------------------- the 3D viewer
+ * The card as large as the window allows (density R8): --W is the card's width, --W-room the width of what the
+ * viewer shows (the card, or its collector case, 1.12 times as wide). The desktop height reserves 240px for the bar,
+ * the controls row and the spin's perspective growth; the cased formula's 1.73683 is the case's height over its
+ * width (collector-case-viewer.css, whose own 360px cap the [data-cased] rule below overrides). The caps (560 and
+ * 460px) keep a card turned edge-on (it grows about 20% in the 1500px perspective) clear of the screen's top edge
+ * and the controls row at 1920x1080. */
 .mdx-v3d {
+  --W: min(60vw, 560px, calc((100dvh - 240px) * 63 / 88));
+  --W-room: var(--W);
   position: fixed;
   inset: 0;
   z-index: var(--z-stage);
@@ -89,6 +97,13 @@
   outline: none;
   overflow: clip;
   overscroll-behavior: contain;
+}
+.mdx-v3d:has(.mdx-v3d__zoom[data-cased]) {
+  --W: min(calc(60vw / 1.12), 460px, calc((100dvh - 240px) / 1.73683));
+  --W-room: calc(var(--W) * 1.12);
+}
+.mdx-v3d .mdx-v3d__zoom[data-cased] {
+  --W: inherit;
 }
 .mdx-v3d__bar {
   position: relative;
@@ -152,8 +167,16 @@
 .mdx-inspect__btn > svg {
   flex: none;
 }
-.mdx-v3d__go {
-  padding: 0 14px 0 18px;
+.mdx-v3d__controls .mdx-v3d__go {
+  height: var(--btn-h-lg);
+  margin-left: 8px;
+  padding: 0 16px;
+}
+/* One row height with the 36px icon pills under a fine pointer (CardControls, carddex.css). */
+@media (pointer: fine) and (min-width: 1024px) {
+  .mdx-v3d__controls .mdx-v3d__go {
+    height: var(--btn-h);
+  }
 }
 @media (hover: hover) and (pointer: fine) {
   .mdx-v3d__btn:hover,
@@ -187,7 +210,6 @@
   cursor: grabbing;
 }
 .mdx-v3d__zoom {
-  --W: min(70vw, 360px, calc((100dvh - 260px) * 63 / 88));
   position: relative;
   width: var(--W);
   margin-bottom: calc(var(--W) * 0.06);
@@ -196,18 +218,6 @@
 .mdx-v3d__card {
   perspective: 1500px;
   cursor: inherit;
-}
-.mdx-v3d__step {
-  position: absolute;
-  z-index: 2;
-  top: 50%;
-  translate: 0 -50%;
-}
-.mdx-v3d__step--prev {
-  left: max(16px, env(safe-area-inset-left));
-}
-.mdx-v3d__step--next {
-  right: max(16px, env(safe-area-inset-right));
 }
 .mdx-v3d__cap {
   position: relative;
@@ -242,27 +252,52 @@
   }
 }
 @media (max-width: 767px) {
-  .mdx-v3d__zoom {
-    --W: min(64vw, 300px, calc((100dvh - 290px) * 63 / 88));
+  .mdx-v3d {
+    --W: min(100vw - 64px, calc((100dvh - 200px) * 63 / 88));
   }
-  .mdx-v3d__step {
-    top: auto;
-    bottom: 6px;
-    translate: none;
+  .mdx-v3d:has(.mdx-v3d__zoom[data-cased]) {
+    --W: min(calc((100vw - 64px) / 1.12), calc((100dvh - 200px) / 1.73683));
   }
 }
-/* Short landscape phones: the hint goes, the card keeps the room. */
+/* Short landscape phones: the card takes the full height in the middle; the name and Close float at the top, the
+ * controls at the bottom right, each beside the card (--W-room), never over it. The hint goes. */
 @media (max-height: 499.98px) {
+  .mdx-v3d {
+    --W: min(40vw, calc((100dvh - 40px) * 63 / 88 / 1.06));
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .mdx-v3d:has(.mdx-v3d__zoom[data-cased]) {
+    --W: min(calc(40vw / 1.12), calc((100dvh - 48px) / 1.73683));
+  }
+  .mdx-v3d__bar {
+    position: absolute;
+    inset: 0 0 auto 0;
+  }
+  .mdx-v3d__title {
+    max-width: calc(50vw - var(--W-room) / 2 - 32px);
+  }
+  .mdx-v3d__cap {
+    position: absolute;
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(16px, env(safe-area-inset-bottom));
+    max-width: calc(50vw - var(--W-room) / 2 - 32px);
+    align-items: flex-end;
+    padding: 0;
+  }
+  .mdx-v3d__controls {
+    justify-content: flex-end;
+  }
   .mdx-v3d__hint {
     display: none;
-  }
-  .mdx-v3d__zoom {
-    --W: min(40vw, calc((100dvh - 172px) * 63 / 88));
   }
 }
 
 /* ---------------------------------------------------------------- Inspect: the same shell (card3d.css holds its
- * layout; these replace its warm gradient, spotlight and white-alpha buttons). */
+ * layout; these replace its warm gradient, spotlight and white-alpha buttons). The case as large as the window
+ * allows: --iw is its width; at rest it is 1.551 times as tall, and its unbox lift and turntable lean reach 1.7.
+ * Phones: the case takes the width and the bar sits centred under it. From 768px the bar moves to the bottom right
+ * (mirroring Close at the top right), so the case takes the full height between 16px margins and stays clear of
+ * both corners. Turn over is the compact icon pill (CardControls), at its own 36/44px. */
 .mdx-inspect {
   z-index: var(--z-stage);
   background: var(--color-ground);
@@ -272,9 +307,31 @@
   top: max(16px, env(safe-area-inset-top));
   right: max(16px, env(safe-area-inset-right));
 }
+.mdx-inspect__stage {
+  --iw: min(calc((100dvh - 152px) / 1.551), calc(100vw - 48px), 640px);
+}
 .mdx-inspect__bar {
   bottom: max(16px, env(safe-area-inset-bottom));
   gap: 8px;
+  padding-top: 0;
+}
+@media (min-width: 768px) {
+  .mdx-inspect__stage {
+    --iw: min(calc((100dvh - 32px) / 1.7), calc((100vw - 240px) / 1.06), 640px);
+  }
+  .mdx-inspect__bar {
+    left: auto;
+    right: max(16px, env(safe-area-inset-right));
+  }
+}
+@media (max-height: 499.98px) {
+  .mdx-inspect__stage {
+    --iw: min(calc((100dvh - 32px) / 1.551), 40vw);
+  }
+  .mdx-inspect__bar {
+    left: auto;
+    right: max(16px, env(safe-area-inset-right));
+  }
 }
 
 /* No travel or press scale under Calm or reduced motion: the colour still answers. */

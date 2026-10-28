@@ -5,7 +5,7 @@
  *   Sheet          open (req), onOpenChange (req), title (req), description (sr-only), children (req). A bottom
  *                  sheet: surface fill, 20px top corners, a grab handle, swipe down (or tap outside, Escape, the
  *                  quiet Close) to dismiss. As tall as its content up to near the top of the screen, then the
- *                  body scrolls inside; safe-area padding. It
+ *                  body scrolls inside; 12px padding (16px from 768px) or the safe-area insets. It
  *                  slides up on open and back down on close (instant under reduced motion). vaul keeps a
  *                  focused field above the on-screen keyboard (it watches visualViewport and lifts the sheet).
  *                  Wrap a dialog's call to action in .mdx-sheet-foot to pin it to the sheet's bottom edge when

@@ -1,11 +1,11 @@
 /**
  * The mainnet wallet dialog (LiveWalletButton opens it; styles/screens/overlays.css .cdx-wallet-connect). One page
- * for a first-time creator:
+ * for a first-time creator, the choice first:
  *
- *   signed out   what connecting does (the public address only: no transaction, no funds move), the wallets this
- *                browser has, each one press, then where to get one. While the registry loads: two skeleton rows.
- *   no wallet    the same line, then what to do: install Phantom, Solflare or Backpack from its own site and
- *                reload, or open this page in the wallet app's browser on a phone.
+ *   signed out   the wallets this browser has, each one press, then one plain line on what connecting does (the
+ *                public address only: no transaction, no funds move). While the registry loads: two skeleton rows.
+ *   no wallet    what to do (install Phantom, Solflare or Backpack from its own site and reload, or open this page in
+ *                the wallet app's browser on a phone), the official links, then the same line.
  *   connected    the wallet, its full address, whether the account is on mainnet, then [Disconnect] [Done].
  *
  * Errors stay on the page in one alert line that says what happened and what to try next. Connecting and
@@ -24,7 +24,7 @@ const GET_WALLETS = [
 ] as const;
 
 const WHAT_CONNECTING_DOES =
-  "Connecting shares your public wallet address with Launch a Card. It sends no transaction and moves no funds. Each launch step opens in your wallet for your approval.";
+  "Connecting shares only your public wallet address. It sends no transaction and moves no funds.";
 
 /** A wallet's own message plus the next step, unless it already names one. */
 function withNextStep(message: string) {
@@ -37,7 +37,7 @@ export function WalletConnectDialog({ open, onOpenChange }: { open: boolean; onO
   const [error, setError] = useState("");
   const id = useId();
   const address = wallet.address;
-  // Where to get a wallet: the ones this browser does not have yet.
+  // Where to get a wallet (shown only when this browser has none): the official pages.
   const getable = GET_WALLETS.filter((g) => !wallet.wallets.some((w) => w.name.toLowerCase().startsWith(g.name.toLowerCase())));
   const close = () => onOpenChange(false);
   const change = (o: boolean) => {
@@ -89,7 +89,6 @@ export function WalletConnectDialog({ open, onOpenChange }: { open: boolean; onO
           </>
         ) : (
           <>
-            <p className="cdx-wallet-connect__line">{WHAT_CONNECTING_DOES}</p>
             {!wallet.ready ? (
               <div className="cdx-wallet-connect__group" aria-busy="true">
                 <p className="cdx-wallet-connect__label" role="status">
@@ -144,6 +143,24 @@ export function WalletConnectDialog({ open, onOpenChange }: { open: boolean; onO
                   Install one from its own site, then reload this page. On a phone, open Launch a Card in your wallet
                   app’s browser.
                 </p>
+                {getable.length ? (
+                  <>
+                    <p className="cdx-wallet-connect__label" id={`${id}-get`}>
+                      Get a wallet
+                    </p>
+                    <ul className="cdx-wallet-connect__get" aria-labelledby={`${id}-get`}>
+                      {getable.map((g) => (
+                        <li key={g.name}>
+                          <a className="mdx-link mdx-hit" href={g.href} target="_blank" rel="noopener noreferrer">
+                            {g.name}
+                            <span className="sr-only"> (opens in a new tab)</span>
+                            <Icon name="external" />
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
               </div>
             )}
             {error ? (
@@ -152,24 +169,7 @@ export function WalletConnectDialog({ open, onOpenChange }: { open: boolean; onO
                 <span>{error}</span>
               </p>
             ) : null}
-            {wallet.ready && getable.length ? (
-              <div className="cdx-wallet-connect__group">
-                <p className="cdx-wallet-connect__label" id={`${id}-get`}>
-                  {wallet.wallets.length ? "Get another wallet" : "Get a wallet"}
-                </p>
-                <ul className="cdx-wallet-connect__get" aria-labelledby={`${id}-get`}>
-                  {getable.map((g) => (
-                    <li key={g.name}>
-                      <a className="mdx-link mdx-hit" href={g.href} target="_blank" rel="noopener noreferrer">
-                        {g.name}
-                        <span className="sr-only"> (opens in a new tab)</span>
-                        <Icon name="external" />
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
+            <p className="cdx-wallet-connect__line">{WHAT_CONNECTING_DOES}</p>
           </>
         )}
       </div>

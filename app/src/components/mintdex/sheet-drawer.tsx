@@ -8,9 +8,9 @@ import { isCoarsePointer, isTextField } from "./sheet";
 import { IconButton } from "./ui";
 
 /**
- * The phone panel (styles/screens/overlays.css .cdx-overlay--sheet): a grab handle, the title and a quiet Close,
- * then the body, as tall as its content up to near the top of the screen, scrolling inside past that, with the
- * safe-area insets as padding. A `.mdx-sheet-foot` in the body stays above the home indicator while the body
+ * The phone panel (styles/screens/overlays.css .cdx-overlay--sheet), the compact anatomy with 12px padding (16px from
+ * 768px): a grab handle, the title and a quiet Close, then the body, as tall as its content up to near the top of the
+ * screen, scrolling inside past that, with the safe-area insets as padding when they are larger. A `.mdx-sheet-foot` in the body stays above the home indicator while the body
  * scrolls. A control marked data-autofocus takes focus on open.
  */
 export default function SheetDrawer({
