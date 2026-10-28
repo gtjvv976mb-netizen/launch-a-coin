@@ -21,6 +21,7 @@ import type { Me } from "../../lib/mintdex/types";
 import { setMe } from "./hooks";
 import { isCoarsePointer } from "./sheet";
 import { ViewportPages } from "../carddex/live/ViewportPages";
+import { useLiveLaunchOpen } from "../carddex/live/readiness";
 import {
   Button,
   CalmSwitch,
@@ -276,7 +277,27 @@ function EnterDialog({
 
 // ---------------------------------------------------------------- guide (every figure from copy.ts and tiers.ts)
 
-const STEPS: Array<{ title: string; body: string; visual: ReactNode; phoneVisual?: boolean }> = [
+type GuideStep = { title: string; body: string; visual: ReactNode; phoneVisual?: boolean };
+/** While mainnet launches are off, the guide describes the test mode people can actually use, test funds first. */
+const DEMO_STEPS: GuideStep[] = [
+  {
+    title: "Launch your token",
+    body: "Launches run in test mode with test SOL. Real mainnet launches are not open yet. Give your token a name, ticker and artwork, and choose its quote asset.",
+    visual: null,
+  },
+  {
+    title: "Choose its permanent card",
+    body: "Pick a premium design before launch. Your token launches on a simulated pump.fun curve and its one-of-one card goes into your demo collection.",
+    visual: null,
+  },
+  {
+    title: "Trade the token. Keep the card.",
+    body: "Trade your test token with test funds and keep its card in your collection. No real token or NFT is minted.",
+    visual: null,
+  },
+];
+/** The wallet-launch guide, used only once the owner turns mainnet launches on. */
+const LIVE_STEPS: GuideStep[] = [
   {
     title: "Launch your token",
     body: "Give your token a name, ticker and artwork. Choose its supported quote asset, then review the pump.fun launch in your wallet.",
@@ -294,8 +315,8 @@ const STEPS: Array<{ title: string; body: string; visual: ReactNode; phoneVisual
   },
 ];
 
-const FEE_ROWS: Array<{ label: string; value: string }> = IS_SIM
-  ? [{ label: "Demo collection", value: "Demo balances and trades are simulated. Wallet launches show real network costs separately before you sign." }]
+const feeRows = (liveOpen: boolean): Array<{ label: string; value: string }> => IS_SIM
+  ? [{ label: "Demo collection", value: liveOpen ? "Demo balances and trades are simulated. Wallet launches show real network costs separately before you sign." : "Demo balances and trades are simulated with test funds." }]
   : [{ label: "Token trading", value: "Review the fee and price impact shown before confirming a trade." }];
 
 /**
@@ -312,6 +333,9 @@ function GuideDialog({
   onEnter: () => void;
 }) {
   const me = useMe();
+  const liveOpen = useLiveLaunchOpen(open);
+  const STEPS = liveOpen || !IS_SIM ? LIVE_STEPS : DEMO_STEPS;
+  const FEE_ROWS = feeRows(liveOpen);
   return (
     <Modal open={open} onOpenChange={onOpenChange} title="How Launch a Card works" width={560}>
       <div className="cdx-overlay-deck"><ViewportPages label="How Launch a Card works pages" pages={[

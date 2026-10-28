@@ -16,7 +16,8 @@
     "CARDDEX_PUBLIC_ORIGIN": "https://launchacard.fun",
     "CARDDEX_DEPLOYMENT_ENV": "production",
     // Configure CARDDEX_MAINNET_RPC_URL as a Worker secret with a provider endpoint.
-    "CARDDEX_LIVE_LAUNCH_ENABLED": "true"
+    // Mainnet launches stay off until the owner turns them on; /launch runs in test mode meanwhile.
+    "CARDDEX_LIVE_LAUNCH_ENABLED": "false"
   },
   "d1_databases": [{"binding": "DB", "database_name": "launch-a-card", "database_id": "ffc8ba69-4d9d-404c-9c3d-e4a7f187cb3a", "migrations_dir": "migrations"}],
   "r2_buckets": [{"binding": "STORAGE", "bucket_name": "launch-a-card"}]

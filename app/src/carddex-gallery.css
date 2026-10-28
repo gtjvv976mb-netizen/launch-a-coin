@@ -24,7 +24,7 @@
 .cdx-app .cdx-archive__head > div { min-width:0; }
 .cdx-app .cdx-archive__head h1 { margin:0; }
 .cdx-app .cdx-muted { font-size:13px; margin-top:5px; }
-.cdx-app .mdx-input { min-height:40px; padding-block:8px; background:#fffdf6; border-color:#bca985; box-shadow:none; }
+.cdx-app .mdx-input { min-height:40px; padding-block:8px; background:#fffdf6; border-color:var(--color-control-border); box-shadow:none; }
 .cdx-app .mdx-btn--primary { box-shadow:0 2px 7px -4px rgb(83 57 12 / .4); }
 .cdx-app .cdx-use-design { min-height:40px; padding:9px 16px; font-size:12px; }
 .cdx-app .mdx-plinth, .cdx-app .rounded-panel.bg-plinth, .cdx-app .cdx-archive__vitrine, .cdx-app .cdx-coin-market, .cdx-app .cdx-coin-actions { border:1px solid #ded0b2; background:#fffcf2; box-shadow:none; }

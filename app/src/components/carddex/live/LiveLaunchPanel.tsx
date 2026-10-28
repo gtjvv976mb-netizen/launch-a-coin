@@ -320,6 +320,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, onInvalid, onLockedC
     </div>
     <div className="cdx-live-pane" hidden={pane !== "terms"}>
       <p>Token creation and card issuance are separate paid mainnet transactions. Exact costs appear before each wallet approval. Your selected quote funds only the optional initial buy.</p>
+      <dl className="cdx-live-review"><div><dt>Platform fee per launch</dt><dd>[TO FILL: platform fee per launch]</dd></div></dl>
       {selected.kind === "stock" ? <p>A tokenized-stock quote does not make your creator token company shares.</p> : null}
       <label className="cdx-live-check cdx-live-slippage"><span>Initial-buy slippage</span><select className="mdx-input" value={slippageBps} disabled={!!intent} onChange={e => setSlippageBps(Number(e.target.value))}><option value={50}>0.5%</option><option value={100}>1%</option><option value={300}>3%</option></select></label>
       <button type="button" className="mdx-link cdx-live-back" onClick={() => setPane("launch")}>Back to launch</button>
