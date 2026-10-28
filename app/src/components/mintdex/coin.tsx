@@ -61,6 +61,7 @@ import { formatQuoteAmount, parseQuoteAmount, quoteMetrics } from "../../lib/car
 import { aggregateCandles, candleInterval, candleIntervalLabel } from "../../lib/carddex/candles";
 import "../../carddex-chart.css";
 import { PageControls, usePageCapacity } from "../carddex/Viewport";
+import { ViewTabs } from "../carddex/ViewTabs";
 import type { CoinDetail, CoinPage, TradeRow } from "../../lib/mintdex/types";
 import { CardBack, CardCase, View3DButton, useView3DGestures, type Card3DHandle } from "./card3d";
 import { useClaimable } from "./cases";
@@ -1222,7 +1223,7 @@ export function TradePanel({
       data-pane={pane}
       noValidate
     >
-      {compact ? <div className="cdx-view-tabs" aria-label="Trade steps"><button type="button" aria-pressed={ticketStep==="amount"} onClick={()=>setTicketStep("amount")}>Amount</button><button type="button" aria-pressed={ticketStep==="review"} onClick={()=>setTicketStep("review")}>Review trade</button></div> : null}
+      {compact ? <ViewTabs className="cdx-view-tabs" label="Trade steps" tabs={[{id:"amount",label:"Amount",selected:ticketStep==="amount",onSelect:()=>setTicketStep("amount")},{id:"review",label:"Review trade",selected:ticketStep==="review",onSelect:()=>setTicketStep("review")}]} /> : null}
       <div className="cdx-trade-ticket__amount">
       <SideToggle
         side={side}

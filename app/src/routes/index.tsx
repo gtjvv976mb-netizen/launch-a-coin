@@ -55,6 +55,7 @@ import "../home-motion.css";
 import { Card3DView } from "../components/mintdex/card3d/Card3D";
 import { Engine, motionLevel, type Body } from "../components/mintdex/card3d/motion3d";
 import type { SceneCtl } from "../components/mintdex/card3d/scene";
+import { ViewTabs } from "../components/carddex/ViewTabs";
 
 /**
  * Back keeps your place (P1-14): the featured card on the ledge is mirrored in the URL (/?card=glorb), so
@@ -413,7 +414,7 @@ function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
         </div>
       </dl>
       <div className="mt-4 max-lg:col-start-2 max-lg:row-span-2 max-lg:row-start-1 max-lg:mt-0">
-        <ButtonLink to="/coin/$id" params={{ id: c.id }} size="sm">
+        <ButtonLink to="/coin/$id" params={{ id: c.id }} size="sm" variant="outline">
           {HOME_COPY.viewCoin}
         </ButtonLink>
       </div>
@@ -798,7 +799,7 @@ function Home() {
       data-ambient-paused={still || undefined}
       className="mdx-page mdx-home cdx-home grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_calc(var(--aside)_-_var(--main-pad))] lg:gap-5 lg:max-xl:[--aside:300px] xl:[--aside:340px] wide:[--aside:360px] fit:h-full fit:grid-rows-[minmax(0,1fr)]"
     >
-      <div className="cdx-view-tabs cdx-home-mobile-tabs" aria-label="Home views"><button type="button" aria-pressed={homeView==="card"} onClick={()=>setHomeView("card")}>Featured card</button><button type="button" aria-pressed={homeView==="pulse"} onClick={()=>setHomeView("pulse")}>Collection pulse</button></div>
+      <ViewTabs className="cdx-view-tabs cdx-home-mobile-tabs" label="Home views" tabs={[{id:"card",label:"Featured card",selected:homeView==="card",onSelect:()=>setHomeView("card")},{id:"pulse",label:"Collection pulse",selected:homeView==="pulse",onSelect:()=>setHomeView("pulse")}]} />
       {/* ------------------------------------------------ stage (wall) */}
       <section className="cdx-home-stage relative isolate flex min-w-0 flex-col fit:min-h-0">
         {/* The vitrine's light, bokeh and dust behind the whole stage (the beam falls from the top edge). */}

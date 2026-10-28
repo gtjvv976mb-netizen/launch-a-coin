@@ -40,6 +40,7 @@ import { parseLiveAmount } from "../components/carddex/live/amounts";
 import { PagedMessage } from "../components/carddex/live/PagedMessage";
 import type { LiveLaunchIntent } from "../lib/carddex/live/types";
 import "../carddex-live.css";
+import { ViewTabs } from "../components/carddex/ViewTabs";
 import "../carddex-launch.css";
 
 export const Route = createFileRoute("/launch")({
@@ -548,10 +549,7 @@ function Launch() {
         </nav>
       ) : undefined} />
 
-      <nav className="cdx-launch-mobile-tabs" aria-label="Create view">
-        <button type="button" aria-pressed={mobileView === "card"} onClick={() => setMobileView("card")}>Your card</button>
-        <button type="button" aria-pressed={mobileView === "details"} onClick={() => setMobileView("details")}>Token details</button>
-      </nav>
+      <ViewTabs className="cdx-launch-mobile-tabs" label="Create view" tabs={[{ id: "card", label: "Your card", selected: mobileView === "card", onSelect: () => setMobileView("card") }, { id: "details", label: "Token details", selected: mobileView === "details", onSelect: () => setMobileView("details") }]} />
       <div className="cdx-create-layout">
         {/* ------------------------------------------------ the form (plinth) */}
         <form

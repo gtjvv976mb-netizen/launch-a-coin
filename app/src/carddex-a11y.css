@@ -1,0 +1,136 @@
+/* Accessibility and visual polish (audit A11Y-2..12, VD-05..13, RL-06..10). Loaded after every other sheet, so a
+ * rule here only has to match the specificity of the rule it corrects. Tokens: carddex-theme.css. */
+
+/* ------------------------------------------------ focus (A11Y-4)
+ * `.cdx-app .mdx-input` drops the layered focus halo, so text fields had no focus indicator at all. The ring
+ * uses --color-zap: gold on the dark rail (12:1), bronze on paper (5:1). */
+.cdx-app .mdx-input:focus-visible,
+.cdx-app .mdx-rail .mdx-input:focus-visible {
+  border-color: var(--color-zap);
+  outline: 2px solid var(--color-zap);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------ card type (VD-07). UI text floor and page titles: tokens in carddex-theme.css. */
+/* Card micro-type (VD-07): at hero size the footer plates ("Launch a Card", "No. 008") keep a 10px floor; the
+ * plates keep their place and width, only the type grows into them. Thumbnails keep the shared geometry (their
+ * figures repeat in the label row under each card). */
+@container (min-width: 280px) {
+  .mdx-card__foot { font-size: max(10px, 2.3cqw); }
+}
+
+/* ------------------------------------------------ hit areas (A11Y-2, A11Y-3, RL-10)
+ * Touch: 44px. Desktop pointer: 40px in this dense UI. The visible control keeps its size where a pseudo
+ * element can carry the extra target. */
+.mdx-step-count {
+  min-width: 52px;
+  color: var(--color-slate);
+  font-size: 14px;
+  text-align: center;
+}
+@media (pointer: fine) {
+  .cdx-app .mdx-btn--icon { width: 40px; height: 40px; }
+  .cdx-app .mdx-btn--sm { min-height: 40px; }
+  .cdx-app .mdx-playbtn { width: 40px; height: 40px; }
+  .cdx-app .mdx-rail .mdx-input { min-height: 40px; }
+  .cdx-app .mdx-rail .mdx-link.min-h-6 { min-height: 40px; }
+  .cdx-app .cdx-hero-turntable__controls button { min-height: 40px; }
+  .cdx-app .cdx-launch .cdx-launch-mode a,
+  .cdx-app .cdx-launch-step-head select { min-height: 40px; }
+  .mdx-hit { position: relative; }
+  .mdx-hit::before {
+    content: "";
+    position: absolute;
+    top: min(-6px, calc((100% - 40px) / 2));
+    bottom: min(-6px, calc((100% - 40px) / 2));
+    left: -6px;
+    right: -6px;
+  }
+  /* Segmented options: the 32px option plus the track's 4px padding is a 40px target. */
+  .mdx-tabs:not(.mdx-tabs--sm) .mdx-tabs__tab::before {
+    content: "";
+    position: absolute;
+    inset: -4px 0;
+  }
+  .mdx-v3dbtn::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: inherit;
+  }
+}
+.cdx-archive__pair-link { position: relative; }
+.cdx-archive__pair-link::before {
+  content: "";
+  position: absolute;
+  inset: min(-4px, calc((100% - 40px) / 2)) -4px;
+}
+nav > a.mdx-link.min-h-11 { min-width: 40px; justify-content: center; }
+@media (pointer: coarse) {
+  .cdx-app .cdx-view-tabs button,
+  .cdx-launch-mobile-tabs > button,
+  .cdx-app .cdx-launch .cdx-launch-mode a,
+  .cdx-launch-subtabs button,
+  html .cdx-app .cdx-filter button { min-height: 44px; }
+  .cdx-archive__pair-link::before { inset: min(-6px, calc((100% - 44px) / 2)) -4px; }
+  nav > a.mdx-link.min-h-11 { min-width: 44px; }
+}
+
+/* ------------------------------------------------ one selected style per control kind (VD-09)
+ * View tabs: a paper segment on the tint track. Filter chips: every chip a tint pill, ink fill when selected. */
+.cdx-app .cdx-view-tabs {
+  gap: 2px;
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--color-track);
+}
+.cdx-app .cdx-view-tabs button[aria-selected="true"] {
+  color: var(--color-ink);
+  background: var(--color-sheet);
+  outline: 1px solid var(--color-hairline);
+  outline-offset: -1px;
+  font-weight: 600;
+}
+
+html .cdx-app .cdx-filter,
+html .cdx-viewport .cdx-filter {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  margin: 8px 0 12px;
+  padding-bottom: 2px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+html .cdx-app .cdx-filter button,
+html .cdx-viewport .cdx-filter button {
+  flex: none;
+  min-width: 0;
+  min-height: 40px;
+  gap: 6px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-track);
+  color: var(--color-ink);
+  font-size: 13px;
+  justify-content: center;
+}
+html .cdx-app .cdx-filter button span {
+  color: var(--color-slate);
+  font-size: var(--type-min);
+  font-variant-numeric: tabular-nums;
+  opacity: 1;
+}
+html .cdx-app .cdx-filter button[aria-pressed="true"] {
+  background: var(--color-ink);
+  color: var(--color-sheet);
+}
+html .cdx-app .cdx-filter button[aria-pressed="true"] span { color: var(--color-tint); }
+@media (hover: hover) and (pointer: fine) {
+  html .cdx-app .cdx-filter button:hover:not([aria-pressed="true"]) { background: var(--color-tint); }
+}
+@media (pointer: coarse) {
+  html .cdx-app .cdx-filter button,
+  html .cdx-viewport .cdx-filter button { min-height: 44px; }
+}

@@ -36,6 +36,7 @@ import "../../royal-motion.css";
 import "../../carddex-viewport.css";
 import { GyroChip } from "./card3d/GyroChip";
 import { ConfirmDialog } from "./trust";
+import { ViewTabs } from "../carddex/ViewTabs";
 import {
   Avatar,
   Button,
@@ -535,11 +536,11 @@ function WalletBlock() {
   if (!me) {
     return (
       <div className="flex flex-col gap-2">
-        <Button block onClick={() => openEnter()}>
+        <Button block variant="outline" onClick={() => openEnter()}>
           Try the demo
         </Button>
         {MODE_COPY.railStart ? (
-          <p className="text-[11px] leading-[1.3] text-slate">Test funds. No wallet needed.</p>
+          <p className="text-[12px] leading-[1.3] text-slate">Test funds. No wallet needed.</p>
         ) : null}
       </div>
     );
@@ -758,7 +759,7 @@ function AccountSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange} title="Your account">
-        <div className="cdx-view-tabs" aria-label="Account sections"><button type="button" aria-pressed={accountTab==="account"} onClick={()=>setAccountTab("account")}>Account</button><button type="button" aria-pressed={accountTab==="help"} onClick={()=>setAccountTab("help")}>Help & settings</button></div>
+        <ViewTabs className="cdx-view-tabs" label="Account sections" tabs={[{id:"account",label:"Account",selected:accountTab==="account",onSelect:()=>setAccountTab("account")},{id:"help",label:"Help & settings",selected:accountTab==="help",onSelect:()=>setAccountTab("help")}]} />
         {accountTab === "account" ? <>
         <div className="flex items-center gap-3 rounded-pop bg-sheet p-3 shadow-raise">
           <Avatar handle={me.handle} size={40} />
@@ -886,7 +887,7 @@ function MobileHeader({ liveLaunch = false }: { liveLaunch?: boolean }) {
             >
               <GuideGlyph />
             </button>
-            <Button size="sm" className="ml-1" onClick={() => openEnter()}>
+            <Button size="sm" variant="outline" className="ml-1" onClick={() => openEnter()}>
               <span className="max-[359px]:hidden">Try the demo</span>
               <span className="hidden max-[359px]:inline">Demo</span>
             </Button>

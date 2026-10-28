@@ -167,6 +167,7 @@ import { sol } from "../../lib/mintdex/format";
 import { frameMiniSrc, tierForLevel } from "../../lib/mintdex/tiers";
 import { ancestry, focusNear, focusPageHome } from "./focus";
 import { Sheet, useIsPhone } from "./sheet";
+import { tabKeys } from "../carddex/ViewTabs";
 
 export { ancestry, focusNear, focusPageHome };
 
@@ -505,6 +506,7 @@ export function Tabs<T extends string | number>({
   label,
   size = "md",
   className = "",
+  panels = false,
 }: {
   value: T;
   options: Array<TabOption<T>>;
@@ -512,6 +514,8 @@ export function Tabs<T extends string | number>({
   label: string;
   size?: "md" | "sm";
   className?: string;
+  /** The options switch the panel below (role="tablist" with arrow keys), not a value such as a chart range. */
+  panels?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState<{ x: number; w: number } | null>(null);
@@ -524,7 +528,7 @@ export function Tabs<T extends string | number>({
     let alive = true;
     const measure = () => {
       if (!alive) return;
-      const b = root.querySelector<HTMLElement>('.mdx-tabs__tab[aria-pressed="true"]');
+      const b = root.querySelector<HTMLElement>(".mdx-tabs__tab[data-selected]");
       const next = b ? { x: b.offsetLeft, w: b.offsetWidth } : null;
       setThumb((prev) =>
         prev && next && prev.x === next.x && prev.w === next.w ? prev : next,
@@ -549,8 +553,9 @@ export function Tabs<T extends string | number>({
   return (
     <div
       ref={ref}
-      role="group"
+      role={panels ? "tablist" : "group"}
       aria-label={label}
+      onKeyDown={panels ? tabKeys : undefined}
       data-measured={thumb ? "" : undefined}
       data-ready={ready ? "" : undefined}
       className={cx(
@@ -584,7 +589,11 @@ export function Tabs<T extends string | number>({
             key={String(o.value)}
             type="button"
             className="mdx-tabs__tab"
-            aria-pressed={o.value === value}
+            role={panels ? "tab" : undefined}
+            aria-pressed={panels ? undefined : o.value === value}
+            aria-selected={panels ? o.value === value : undefined}
+            tabIndex={panels && o.value !== value ? -1 : undefined}
+            data-selected={o.value === value || undefined}
             disabled={o.disabled}
             onClick={() => onChange(o.value)}
           >
@@ -789,11 +798,14 @@ export function Stepper({
       <span className="sr-only" aria-live="polite">
         {announce ?? `${i + 1} of ${count}`}
       </span>
-      {/* Phones: 44px tall dot targets up to 32px wide that share the row's spare width, so any count fits
-          beside the two 44px chevrons. */}
+      {/* Phones: ten 44px dot targets cannot fit beside the two 44px chevrons, so a "3 / 10" count stands in
+          for the dots and the chevrons step (A11Y-2). Desktop: 40px dot targets around the small visible dot. */}
+      <span aria-hidden className="mdx-step-count num hidden max-lg:inline">
+        {i + 1} / {count}
+      </span>
       <div
         className={cx(
-          "flex min-w-0 items-center",
+          "flex min-w-0 items-center max-lg:hidden",
           !cluster && "max-lg:flex-1",
           dotsOnly && (align === "start" ? "-ml-1.5" : "flex-1 justify-center"),
         )}
@@ -808,8 +820,7 @@ export function Stepper({
             aria-label={`Show card ${k + 1} of ${count}`}
             aria-current={k === i || undefined}
             className={cx(
-              "grid h-6 w-6 place-items-center rounded-pill max-lg:h-11 max-lg:w-auto max-lg:min-w-0",
-              dotsOnly ? "max-lg:flex-[0_1_44px]" : "max-lg:flex-[0_1_32px]",
+              "grid h-10 w-10 flex-none place-items-center rounded-pill",
             )}
           >
             <span className="mdx-step-dot" data-active={k === i || undefined} />
@@ -1354,8 +1365,8 @@ export function Thumb({ src, size = 36, alt = "" }: { src: string; size?: number
   );
 }
 
-/** The flat neon stops avatars pick from (never a gradient). The dark initial on each is 9:1 or better. */
-const AVATAR = ["#3dffb5", "#38d9ff", "#b49bff", "#ff8be0", "#ffe45c"] as const;
+/** The flat warm stops avatars pick from (never a gradient; tokens in carddex-theme.css). The dark initial on each is 10:1 or better. */
+const AVATAR = ["var(--avatar-1)", "var(--avatar-2)", "var(--avatar-3)", "var(--avatar-4)", "var(--avatar-5)"] as const;
 
 export function Avatar({
   handle,

@@ -110,7 +110,7 @@ export function ModeBadge({ className = "" }: { className?: string }) {
             setSheet(true);
           }}
           className={cx(
-            "relative inline-flex h-[22px] flex-none items-center rounded-pill bg-sheet px-[7px] text-[11.5px] font-semibold leading-none text-ink",
+            "relative inline-flex h-[22px] flex-none items-center rounded-pill bg-sheet px-[7px] text-[12px] font-semibold leading-none text-ink",
             "shadow-[0_0_0_1px_rgb(29_27_24/0.16)] transition-[background-color,box-shadow] duration-(--t-fast) ease-room",
             "hover:shadow-[0_0_0_1px_rgb(29_27_24/0.32)] data-[state=open]:shadow-[0_0_0_1px_rgb(29_27_24/0.32)]",
             "max-lg:before:absolute max-lg:before:inset-x-[-4px] max-lg:before:inset-y-[-11px] max-lg:before:content-['']",
@@ -147,7 +147,7 @@ export function BotTag({ className = "" }: { className?: string }) {
     <span
       title={BOT_HINT}
       className={cx(
-        "inline-flex h-[18px] flex-none items-center rounded-pill bg-track px-1.5 align-[1px] text-[11px] font-semibold leading-none text-slate",
+        "inline-flex h-[18px] flex-none items-center rounded-pill bg-track px-1.5 align-[1px] text-[12px] font-semibold leading-none text-slate",
         className,
       )}
     >
@@ -296,7 +296,7 @@ export function ShareButton({
           }}
           className={cx(
             "relative grid h-7 w-7 flex-none place-items-center rounded-pill text-ink transition-colors duration-(--t-fast) ease-room hover:bg-track data-[state=open]:bg-track",
-            "max-lg:before:absolute max-lg:before:-inset-2 max-lg:before:content-['']",
+            "before:absolute before:-inset-1.5 before:content-[''] max-lg:before:-inset-2",
             className,
           )}
         >

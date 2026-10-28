@@ -16,6 +16,7 @@ import { pageHead } from "../lib/mintdex/seo";
 import { allowedQuotesForDesign, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, isPairAssetKey } from "../lib/carddex/pairs";
 import { initialQuoteReserves, quoteMetrics } from "../lib/carddex/quote-simulation";
 import { PairBadge, QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
+import { ViewTabs } from "../components/carddex/ViewTabs";
 import "../carddex.css";
 
 export const Route = createFileRoute("/levels")({
@@ -109,7 +110,7 @@ function Designs() {
           Use this design
         </Link>
       </header>
-      <div className="cdx-view-tabs cdx-archive-mobile-tabs" aria-label="Design views"><button type="button" aria-pressed={view==="preview"} onClick={()=>setView("preview")}>Card preview</button><button type="button" aria-pressed={view==="library" && libraryTab==="designs"} onClick={()=>{setView("library");setLibraryTab("designs");}}>Designs</button><button type="button" aria-pressed={view==="library" && libraryTab==="pair"} onClick={()=>{setView("library");setLibraryTab("pair");}}>Pair</button></div>
+      <ViewTabs className="cdx-view-tabs cdx-archive-mobile-tabs" label="Design views" tabs={[{id:"preview",label:"Card preview",selected:view==="preview",onSelect:()=>setView("preview")},{id:"designs",label:"Designs",selected:view==="library" && libraryTab==="designs",onSelect:()=>{setView("library");setLibraryTab("designs");}},{id:"pair",label:"Pair",selected:view==="library" && libraryTab==="pair",onSelect:()=>{setView("library");setLibraryTab("pair");}}]} />
       <div className="cdx-archive__body" data-view={view}>
         <section className="cdx-archive__vitrine" aria-label="Selected card design preview">
           <div
@@ -129,7 +130,7 @@ function Designs() {
           </div>
         </section>
         <section className="cdx-library" aria-label="Card design library">
-          <div className="cdx-view-tabs cdx-library-desktop-tabs" aria-label="Library sections"><button type="button" aria-pressed={libraryTab==="designs"} onClick={()=>setLibraryTab("designs")}>Designs</button><button type="button" aria-pressed={libraryTab==="pair"} onClick={()=>setLibraryTab("pair")}>Trading pair</button></div>
+          <ViewTabs className="cdx-view-tabs cdx-library-desktop-tabs" label="Library sections" tabs={[{id:"designs",label:"Designs",selected:libraryTab==="designs",onSelect:()=>setLibraryTab("designs")},{id:"pair",label:"Trading pair",selected:libraryTab==="pair",onSelect:()=>setLibraryTab("pair")}]} />
           {libraryTab === "pair" ? <div className="cdx-fit-region"><QuoteAssetPicker value={quote.key} designKey={design.key} ticker="GLORB" compact viewport onChange={(nextQuote,nextDesign)=>void navigate({ search:{...search,design:nextDesign,quote:nextQuote},replace:true,resetScroll:false })} /></div> : <>
           <div className="cdx-library__tools">
             <label className="sr-only" htmlFor="design-search">
@@ -144,7 +145,7 @@ function Designs() {
               type="search"
             />
             <label className="sr-only" htmlFor="design-category">Design category</label><select id="design-category" className="cdx-category-select mdx-input" value={category} onChange={event=>setCategory(event.target.value)}>{GROUPS.map(group=><option key={group.key} value={group.key}>{group.name} · {CARD_DESIGNS.filter(d=>matchesCategory(d,group.key)).length}</option>)}</select>
-            <div className="cdx-filter" aria-label="Filter designs">
+            <div className="cdx-filter" role="group" aria-label="Filter designs">
               {GROUPS.map((g) => (
                 <button
                   key={g.key}
