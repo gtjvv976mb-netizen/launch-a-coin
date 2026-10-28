@@ -137,6 +137,9 @@ body { overflow:clip; }
  .cdx-viewport .cdx-home-stage,.cdx-viewport .cdx-home__aside { flex:1; min-height:0; }
  .cdx-home[data-home-view=card] .cdx-home__aside,.cdx-home[data-home-view=pulse] .cdx-home-stage { display:none; }
  .cdx-viewport .cdx-home__aside { padding:8px; margin:0; border:0; }
+ /* Collection pulse flows in <main> (the page scroller) instead of scrolling inside it. */
+ .cdx-viewport .cdx-home[data-home-view=pulse] { height:auto; min-height:100%; }
+ .cdx-app.cdx-viewport .cdx-home[data-home-view=pulse] .cdx-home__aside { flex:none; overflow:visible; }
  .cdx-viewport .cdx-home__lot { --W:min(340px,calc((100cqh - 156px)/1.636825),calc((100cqw - 44px)/1.26)); }
  .cdx-viewport .cdx-home__intro .mdx-display { max-width:none; font-size:26px; }
  .cdx-viewport .cdx-home__copy { max-width:none; margin-top:4px; font-size:var(--type-min); }

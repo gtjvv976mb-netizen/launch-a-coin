@@ -767,7 +767,8 @@
     left: 0;
     height: 32px;
     width: var(--w, 0px);
-    transform: translateX(var(--x, 0px));
+    transform: translateX(var(--x, 0px)) scaleX(var(--s, 1));
+    transform-origin: left center;
     border-radius: var(--radius-pill);
     background: var(--color-sheet);
     box-shadow: var(--shadow-raise), 0 0 0 1px rgb(61 255 181 / 0.35), 0 0 14px -4px rgb(61 255 181 / 0.5);
@@ -777,10 +778,11 @@
     display: none;
   }
   .mdx-tabs[data-ready] .mdx-tabs__thumb {
-    /* A size and place indicator settles without overshoot. */
-    transition:
-      transform 280ms var(--ease-room),
-      width 280ms var(--ease-room);
+    /* A size and place indicator settles without overshoot. Composite-only: the width change rides on scaleX. */
+    transition: transform 280ms var(--ease-room);
+  }
+  .mdx-tabs[data-ready] .mdx-tabs__thumb[data-snap] {
+    transition: none;
   }
   .mdx-tabs--sm {
     height: 32px;
@@ -1352,7 +1354,10 @@
     border-radius: inherit;
     background: color-mix(in oklab, var(--tier, var(--color-neon)), #fff 40%);
     box-shadow: 0 0 10px color-mix(in oklab, var(--tier, var(--color-neon)), #fff 40%);
-    transition: width var(--t-progress) var(--ease-room);
+    /* The fill is full width and scaled from its left edge (set --fill, 0 to 1): composite-only. */
+    transform: scaleX(var(--fill, 0));
+    transform-origin: left center;
+    transition: transform var(--t-slow) var(--ease-room);
   }
   /* A design unlocked (P1-19): the fill completes in the old target's color, then snaps back to the new
    * progress without sliding backwards. */

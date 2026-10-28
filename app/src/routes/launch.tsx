@@ -2,6 +2,7 @@ import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   useEffect,
   useCallback,
+  useId,
   useRef,
   useState,
   type DragEvent,
@@ -200,6 +201,7 @@ function Launch() {
   const [tickerNote, setTickerNote] = useState("");
   const [draftReady, setDraftReady] = useState(false);
   const [mobileView, setMobileView] = useState<"card" | "details">("card");
+  const viewId = useId();
   const steps = ["Token", "Artwork", "Design", "Pair", "Story", "Links", "Initial buy", "Launch"];
   // A creator's permanent design choice is independent of the token's market data.
   const search = Route.useSearch();
@@ -549,10 +551,11 @@ function Launch() {
         </nav>
       ) : undefined} />
 
-      <ViewTabs className="cdx-launch-mobile-tabs" label="Create view" tabs={[{ id: "card", label: "Your card", selected: mobileView === "card", onSelect: () => setMobileView("card") }, { id: "details", label: "Token details", selected: mobileView === "details", onSelect: () => setMobileView("details") }]} />
+      <ViewTabs className="cdx-launch-mobile-tabs" label="Create view" idBase={viewId} tabs={[{ id: "card", label: "Your card", selected: mobileView === "card", onSelect: () => setMobileView("card"), panel: `${viewId}-card` }, { id: "details", label: "Token details", selected: mobileView === "details", onSelect: () => setMobileView("details"), panel: `${viewId}-details` }]} />
       <div className="cdx-create-layout">
         {/* ------------------------------------------------ the form (plinth) */}
         <form
+          id={`${viewId}-details`}
           onSubmit={submit}
           noValidate
           aria-label="New coin"
@@ -774,7 +777,7 @@ function Launch() {
           </nav>
         </form>
 
-        <section aria-label="Your card preview" className="cdx-create-preview">
+        <section id={`${viewId}-card`} aria-label="Your card preview" className="cdx-create-preview">
           <LaunchCardPreview card={previewCard} />
         </section>
       </div>

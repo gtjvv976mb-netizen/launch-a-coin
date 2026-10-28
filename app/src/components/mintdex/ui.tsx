@@ -167,7 +167,7 @@ import { sol } from "../../lib/mintdex/format";
 import { frameMiniSrc, tierForLevel } from "../../lib/mintdex/tiers";
 import { ancestry, focusNear, focusPageHome } from "./focus";
 import { Sheet, useIsPhone } from "./sheet";
-import { tabKeys } from "../carddex/ViewTabs";
+import { tabDomId, tabKeys, tabPanelDomId } from "../carddex/ViewTabs";
 
 export { ancestry, focusNear, focusPageHome };
 
@@ -507,6 +507,7 @@ export function Tabs<T extends string | number>({
   size = "md",
   className = "",
   panels = false,
+  idBase,
 }: {
   value: T;
   options: Array<TabOption<T>>;
@@ -516,10 +517,16 @@ export function Tabs<T extends string | number>({
   className?: string;
   /** The options switch the panel below (role="tablist" with arrow keys), not a value such as a chart range. */
   panels?: boolean;
+  /** With panels: ids for the tabs and their shared panel (tabPanelProps(idBase, value) on the panel). */
+  idBase?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState<{ x: number; w: number } | null>(null);
   const [ready, setReady] = useState(false);
+  // The thumb's laid-out width. A move animates transform only (translateX + scaleX from this width); once it
+  // lands, the width takes the new size with transitions off (data-snap) so the pill's ends are round again.
+  const [base, setBase] = useState<number | null>(null);
+  const [snap, setSnap] = useState(false);
   // Layout effect on the client (measure before paint), plain effect on the server (where it never runs).
   const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
   useIsoLayoutEffect(() => {
@@ -545,6 +552,15 @@ export function Tabs<T extends string | number>({
     };
   }, [value, options.length]);
   useEffect(() => {
+    // Before the first painted measurement nothing animates: the width simply follows.
+    if (thumb && (base == null || !ready) && base !== thumb.w) setBase(thumb.w);
+  }, [thumb, base, ready]);
+  useEffect(() => {
+    if (!snap) return;
+    const id = requestAnimationFrame(() => setSnap(false));
+    return () => cancelAnimationFrame(id);
+  }, [snap]);
+  useEffect(() => {
     if (!thumb || ready) return;
     // Transitions only after the first painted measurement.
     const id = requestAnimationFrame(() => setReady(true));
@@ -567,7 +583,19 @@ export function Tabs<T extends string | number>({
       <span
         aria-hidden
         className="mdx-tabs__thumb"
-        style={{ "--x": `${thumb?.x ?? 0}px`, "--w": `${thumb?.w ?? 0}px` } as CSSProperties}
+        data-snap={snap || undefined}
+        style={
+          {
+            "--x": `${thumb?.x ?? 0}px`,
+            "--w": `${base ?? thumb?.w ?? 0}px`,
+            "--s": thumb && base ? thumb.w / base : 1,
+          } as CSSProperties
+        }
+        onTransitionEnd={(e) => {
+          if (e.propertyName !== "transform" || !thumb || base === thumb.w) return;
+          setSnap(true);
+          setBase(thumb.w);
+        }}
       />
       {options.map((o) => {
         const content = (
@@ -590,6 +618,8 @@ export function Tabs<T extends string | number>({
             type="button"
             className="mdx-tabs__tab"
             role={panels ? "tab" : undefined}
+            id={panels && idBase ? tabDomId(idBase, String(o.value)) : undefined}
+            aria-controls={panels && idBase ? tabPanelDomId(idBase) : undefined}
             aria-pressed={panels ? undefined : o.value === value}
             aria-selected={panels ? o.value === value : undefined}
             tabIndex={panels && o.value !== value ? -1 : undefined}
@@ -786,6 +816,9 @@ export function Stepper({
         )}
       </svg>
     </button>
+  ) : playing !== undefined ? (
+    // Calm turns the button off after hydration: an empty slot of the same size keeps the row from shifting.
+    <span aria-hidden className="h-8 w-8 flex-none max-lg:h-11 max-lg:w-11" />
   ) : null;
   return (
     <div

@@ -50,7 +50,7 @@
 .cdx-live-review-nav { display:flex; justify-content:space-between; gap:12px; }
 .cdx-live-review-nav > button { min-height:40px; }
 .cdx-live-review-page .cdx-live-address { font-size:var(--type-min); }
-@media(pointer:coarse) { .cdx-live-pane-label > select { font-size:16px; } .cdx-launch-subtabs button { min-height:40px; } }
+@media(pointer:coarse) { .cdx-live-pane-label > select { font-size:16px; } .cdx-launch-subtabs button { min-height:44px; min-width:44px; } }
 @media(max-width:580px) { .cdx-live-pane-label { grid-template-columns:auto minmax(0,1fr); gap:7px; } .cdx-live-review-page { min-height:220px; gap:10px; } .cdx-live-review-modal { gap:8px; } }
 .cdx-viewport-pages { display:flex; flex:1; min-height:0; flex-direction:column; gap:12px; }
 .cdx-viewport-pages__body { flex:1; min-height:0; display:grid; align-content:start; gap:12px; overflow-wrap:anywhere; }

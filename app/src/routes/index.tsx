@@ -447,6 +447,7 @@ function EmptyLine({ children }: { children: ReactNode }) {
 
 function Home() {
   const [homeView,setHomeView]=useState("card");
+  const homeViewsId = useId();
   const initial = Route.useLoaderData();
   const qc = useQueryClient();
   const search = Route.useSearch();
@@ -799,9 +800,11 @@ function Home() {
       data-ambient-paused={still || undefined}
       className="mdx-page mdx-home cdx-home grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_calc(var(--aside)_-_var(--main-pad))] lg:gap-5 lg:max-xl:[--aside:300px] xl:[--aside:340px] wide:[--aside:360px] fit:h-full fit:grid-rows-[minmax(0,1fr)]"
     >
-      <ViewTabs className="cdx-view-tabs cdx-home-mobile-tabs" label="Home views" tabs={[{id:"card",label:"Featured card",selected:homeView==="card",onSelect:()=>setHomeView("card")},{id:"pulse",label:"Collection pulse",selected:homeView==="pulse",onSelect:()=>setHomeView("pulse")}]} />
+      {/* Both views stay mounted (CSS shows one on phones): each tab points at its own element, which keeps its
+          desktop landmark role and name. */}
+      <ViewTabs className="cdx-view-tabs cdx-home-mobile-tabs" label="Home views" idBase={homeViewsId} tabs={[{id:"card",label:"Featured card",selected:homeView==="card",onSelect:()=>setHomeView("card"),panel:`${homeViewsId}-card`},{id:"pulse",label:"Collection pulse",selected:homeView==="pulse",onSelect:()=>setHomeView("pulse"),panel:`${homeViewsId}-pulse`}]} />
       {/* ------------------------------------------------ stage (wall) */}
-      <section className="cdx-home-stage relative isolate flex min-w-0 flex-col fit:min-h-0">
+      <section id={`${homeViewsId}-card`} className="cdx-home-stage relative isolate flex min-w-0 flex-col fit:min-h-0">
         {/* The vitrine's light, bokeh and dust behind the whole stage (the beam falls from the top edge). */}
         <Vitrine hold={!playing} onLive={setAmbientLive} />
         {/* Headline block: Home's header. */}
@@ -969,6 +972,7 @@ function Home() {
           screens, floating 12px off them above 820px. The top padding takes the float gutter back, so
           "Trending" keeps its y either way. Like the Market, Levels and Coin asides. */}
       <aside
+        id={`${homeViewsId}-pulse`}
         aria-label="Trending and activity"
         className="cdx-home__aside mdx-plinth mdx-aside flex min-w-0 flex-col gap-6 lg:pt-[calc(2rem_-_var(--gutter))] short:gap-5 short:pt-6 fit:min-h-0 fit:overflow-hidden"
       >
