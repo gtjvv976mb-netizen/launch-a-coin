@@ -139,9 +139,16 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
   const first = compile(1_400_000);
   // The final guard. measureTokenTransaction lets the app refuse a non-fitting buy before anything is uploaded.
   const packetBytes = transactionBytes(first.message);
-  if (packetBytes > PACKET_LIMIT) throw new Error(kind === "token"
-    ? `Launch transaction is ${packetBytes} bytes and exceeds Solana's ${PACKET_LIMIT}-byte packet limit; launch without an initial buy, or use a shorter name or symbol`
-    : `Card transaction is ${packetBytes} bytes and exceeds Solana's ${PACKET_LIMIT}-byte packet limit`);
+  if (packetBytes > PACKET_LIMIT) {
+    if (kind !== "token") throw new Error(`Card transaction is ${packetBytes} bytes and exceeds Solana's ${PACKET_LIMIT}-byte packet limit`);
+    // Advice only where it can work: the coin alone (the create is the first instruction), or this transaction with
+    // the shortest name and symbol (1 byte each).
+    const advice = [
+      ...(id.buy > 0n && transactionBytes(compileWalletTransaction(id.creator, latest.blockhash, 1_400_000, microLamports, instructions.slice(0, 1)).message) <= PACKET_LIMIT ? ["launch without an initial buy"] : []),
+      ...(packetBytes - (Buffer.byteLength(input.name, "utf8") - 1) - (input.symbol.length - 1) <= PACKET_LIMIT ? ["use a shorter name or symbol"] : []),
+    ];
+    throw new Error(`Launch transaction is ${packetBytes} bytes and exceeds Solana's ${PACKET_LIMIT}-byte packet limit${advice.length ? `; ${advice.join(", or ")}` : ""}`);
+  }
   const firstSimulation = await connection.simulateTransaction(first, {
     sigVerify: false, replaceRecentBlockhash: false, commitment: "confirmed",
     accounts: { encoding: "base64", addresses: [input.creator] },

@@ -27,4 +27,5 @@ export type LiveLaunchIntent = {
   tokenSignature: string | null; nftSignature: string | null;
   createdAt: number; updatedAt: number;
 };
-export type LiveResult<T extends object = object> = ({ok: true} & T) | {ok: false; error: string};
+/** `unsendable`: the server did not send this signed transaction and never will, so its stage is prepared again. */
+export type LiveResult<T extends object = object> = ({ok: true} & T) | {ok: false; error: string; unsendable?: true};

@@ -13,7 +13,7 @@ async function attempt<T extends object>(fn: () => Promise<T>): Promise<LiveResu
   try { return {ok: true, ...await fn()}; }
   catch (error) {
     if (!(error instanceof UserError)) console.error("Live launch operation failed", error);
-    return {ok: false, error: error instanceof UserError ? error.message : "The real launch could not proceed. Your demo balances were not used."};
+    return service.liveFailure(error);
   }
 }
 function noStore() { try { setResponseHeader("Cache-Control", "no-store"); } catch { /* No request context in isolated tests. */ } }

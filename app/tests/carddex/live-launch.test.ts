@@ -35,7 +35,7 @@ let env: Record<string, unknown>;
 mock.module("../../src/lib/bindings.server", () => ({bindings: () => env}));
 let tokenVerified = false, nftVerified = false, replaceable = false, uncertain = false, prepareCalls = 0, nftPrepareCalls = 0, sendCalls = 0, receiptCreator: string | null = null;
 let sizes = {createBytes: 950, buyBytes: 1200}, measured: any[] = [];
-let preSend: "ready" | "landed" | "expired" | "simulation" = "ready", savedAtCheck: (string | null)[] = [];
+let preSend: "ready" | "landed" | "expired" | "simulation" | "error" = "ready", savedAtCheck: (string | null)[] = [];
 class SignedTransactionNotSent extends Error { constructor(readonly reason: string, message: string) { super(message); } }
 let tokenVerifyHook: (() => Promise<void>) | undefined, nftVerifyHook: (() => Promise<void>) | undefined, nftPrepareHook: (() => Promise<void>) | undefined, nftReplaceHook: (() => Promise<void>) | undefined;
 const binding = "b".repeat(64);
@@ -65,6 +65,7 @@ mock.module("../../../integrations/pumpfun/src/live", () => ({
     savedAtCheck.push((sqlite.query("SELECT signature FROM live_launch_transactions WHERE message_sha256 = ?").get(prepared.messageSha256) as {signature: string | null}).signature);
     if (preSend === "expired") throw new SignedTransactionNotSent("expired", "The signed transaction blockhash expired before it was sent; prepare a fresh transaction");
     if (preSend === "simulation") throw new SignedTransactionNotSent("simulation", 'Signed transaction simulation failed: {"InstructionError":[2,"InsufficientFunds"]}');
+    if (preSend === "error") throw new Error("429 Too Many Requests from https://rpc.example.test");
     return preSend === "landed" ? {status: "landed", signature: signedSignature(prepared), err: null} : {status: "ready", signature: signedSignature(prepared), blocksLeft: 50};
   },
   broadcastSignedWalletTransaction: async ({plan: prepared, transactionBase64}: any) => {
@@ -220,6 +221,7 @@ describe("isolated real-launch server lifecycle", () => {
   test("an expired approval is refused before anything is saved and the same coin can be prepared again", async () => {
     const original = await input(), first = await service.prepareLiveLaunch(creator, original), tx = first.transaction!;
     preSend = "expired";
+    await expect(service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: `${tx.transactionBase64}-signed`})).rejects.toBeInstanceOf(service.UnsendableTransaction);
     await expect(service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: `${tx.transactionBase64}-signed`})).rejects.toThrow("Your wallet approval expired before it could be sent. Nothing was sent or charged. Prepare again");
     expect(sqlite.query("SELECT status, token_signature FROM live_launch_intents WHERE id = ?").get(first.intent.id)).toEqual({status: "prepared", token_signature: null});
     expect(sqlite.query("SELECT signature, signed_transaction_base64, status FROM live_launch_transactions WHERE message_sha256 = ?").get(tx.messageSha256)).toEqual({signature: null, signed_transaction_base64: null, status: "prepared"});
@@ -229,12 +231,44 @@ describe("isolated real-launch server lifecycle", () => {
     expect(again.intent.id).toBe(first.intent.id); expect(again.intent.tokenMint).toBe(mint); expect(fresh.messageSha256).not.toBe(tx.messageSha256);
     const sent = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: fresh.messageSha256, transactionBase64: `${fresh.transactionBase64}-signed`});
     expect(sent.submission).toBe("submitted"); expect(sent.intent.status).toBe("token_pending");
-    expect(savedAtCheck).toEqual([null, null]); expect(sendCalls).toBe(1);
+    expect(savedAtCheck).toEqual([null, null, null]); expect(sendCalls).toBe(1);
+  });
+  test("a final check that cannot finish keeps the same signed bytes for another send", async () => {
+    const first = await service.prepareLiveLaunch(creator, await input()), tx = first.transaction!;
+    const submit = () => service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: `${tx.transactionBase64}-signed`});
+    preSend = "error";
+    const refused = await submit().then(() => null, (error: Error) => error);
+    expect(refused?.message).toBe("The final mainnet check could not finish, so this transaction was not sent yet. Send again to retry with the same wallet approval.");
+    expect(service.liveFailure(refused)).toEqual({ok: false, error: refused!.message});
+    expect(sqlite.query("SELECT status, token_signature FROM live_launch_intents WHERE id = ?").get(first.intent.id)).toEqual({status: "prepared", token_signature: null});
+    expect(sendCalls).toBe(0);
+    preSend = "expired";
+    const expired = await submit().then(() => null, (error: Error) => error);
+    expect(service.liveFailure(expired)).toEqual({ok: false, error: expired!.message, unsendable: true});
+    expect(service.liveFailure(new Error("provider detail"))).toEqual({ok: false, error: "The real launch could not proceed. Your demo balances were not used."});
+    preSend = "ready";
+    const sent = await submit();
+    expect(sent.submission).toBe("submitted"); expect(sent.intent.status).toBe("token_pending"); expect(sendCalls).toBe(1);
+  });
+  test("a re-send of saved bytes says only that the retry was not sent", async () => {
+    const first = await service.prepareLiveLaunch(creator, await input()), tx = first.transaction!;
+    const submit = () => service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: `${tx.transactionBase64}-signed`});
+    uncertain = true;
+    expect((await submit()).intent.status).toBe("token_pending");
+    for (const [mode, cause] of [["expired", "its wallet approval expired"], ["simulation", "Solana's final check rejected it ({\"InstructionError\":[2,\"InsufficientFunds\"]})"], ["error", "the final mainnet check could not finish"]] as const) {
+      preSend = mode;
+      const refused = await submit().then(() => null, (error: Error) => error);
+      expect(refused?.message).toBe(`This retry was not sent because ${cause}. Check this launch's saved transaction before preparing another.`);
+      expect(refused).not.toBeInstanceOf(service.UnsendableTransaction);
+    }
+    expect(sendCalls).toBe(1);
+    expect(sqlite.query("SELECT status, token_signature FROM live_launch_intents WHERE id = ?").get(first.intent.id)).toEqual({status: "token_pending", token_signature: "s".repeat(88)});
   });
   test("a failed signed simulation is refused before anything is saved, for the coin and for the card", async () => {
     const first = await service.prepareLiveLaunch(creator, await input()), tx = first.transaction!;
     preSend = "simulation";
     await expect(service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: `${tx.transactionBase64}-signed`})).rejects.toThrow("final check rejected this transaction, so it was not sent");
+    await expect(service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: "modified"})).rejects.toBeInstanceOf(service.UnsendableTransaction);
     expect(sqlite.query("SELECT status, token_signature FROM live_launch_intents WHERE id = ?").get(first.intent.id)).toEqual({status: "prepared", token_signature: null});
     preSend = "ready"; tokenVerified = true;
     await service.confirmLiveToken(creator, {intentId: first.intent.id, signature: "s".repeat(88), messageSha256: tx.messageSha256});
@@ -317,6 +351,12 @@ describe("isolated real-launch server lifecycle", () => {
     expect((await service.prepareLiveLaunch(creator, original)).intent.status).toBe("prepared");
     expect(measured).toHaveLength(0);
   });
+  test("prepare checks the composition before it spends an RPC read on the size", async () => {
+    const original = await input();
+    sqlite.exec("DELETE FROM live_compositions");
+    await expect(service.prepareLiveLaunch(creator, {...original, initialBuyQuoteBaseUnits: "1000"})).rejects.toThrow("Compose the canonical");
+    expect(measured).toHaveLength(0);
+  });
   test("turning off new launches keeps sign-in, saved launches and the card stage working", async () => {
     const coin = await service.prepareLiveLaunch(creator, await input());
     const draft = await service.prepareLiveLaunch(creator, {...await input({tokenMint: otherWallet}), idempotencyKey: "second-request", nftMint: replacementNft});
@@ -340,14 +380,27 @@ describe("isolated real-launch server lifecycle", () => {
     nftVerified = true;
     expect((await service.confirmLiveCreatorNft(creator, {intentId: coin.intent.id, signature: sent.signature, messageSha256: nft.messageSha256})).intent.status).toBe("complete");
     const tx = draft.transaction!;
+    savedAtCheck = [];
     await expect(service.submitLiveTransaction(creator, {intentId: draft.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: `${tx.transactionBase64}-signed`})).rejects.toThrow("not open");
-    expect((sqlite.query("SELECT status FROM live_launch_intents WHERE id = ?").get(draft.intent.id) as {status: string}).status).toBe("prepared");
+    expect(savedAtCheck).toEqual([null]);
+    expect((sqlite.query("SELECT status, token_signature FROM live_launch_intents WHERE id = ?").get(draft.intent.id) as {status: string}).status).toBe("prepared");
     replaceable = true; tokenVerified = false;
     expect((await service.abandonLiveLaunchIntent(creator, {intentId: draft.intent.id})).intent.status).toBe("abandoned");
     env.CARDDEX_LIVE_RECOVERY_ENABLED = "false";
     await expect(auth.createWalletChallenge(creator)).rejects.toThrow("recovery is paused");
     await expect(service.listLiveLaunchIntents(creator)).rejects.toThrow("recovery is paused");
     await expect(service.getLiveLaunchIntent(creator, coin.intent.id)).rejects.toThrow("recovery is paused");
+  });
+  test("with new launches off, a coin the chain already has is still recorded and its card can follow", async () => {
+    const draft = await service.prepareLiveLaunch(creator, await input()), tx = draft.transaction!;
+    env.CARDDEX_LIVE_LAUNCH_ENABLED = "false"; preSend = "landed";
+    const landed = await service.submitLiveTransaction(creator, {intentId: draft.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: `${tx.transactionBase64}-signed`});
+    expect(landed.intent.status).toBe("token_pending"); expect(landed.intent.tokenSignature).toBe(landed.signature);
+    expect(sqlite.query("SELECT signed_transaction_base64 FROM live_launch_transactions WHERE message_sha256 = ?").get(tx.messageSha256)).toEqual({signed_transaction_base64: `${tx.transactionBase64}-signed`});
+    expect(sendCalls).toBe(0);
+    tokenVerified = true;
+    expect((await service.getLiveLaunchIntent(creator, draft.intent.id)).status).toBe("nft_pending");
+    expect((await service.prepareLiveCreatorNft(creator, {intentId: draft.intent.id})).transaction?.kind).toBe("nft");
   });
   test("unused drafts can restart only after finalized token absence and all plan expiries", async () => {
     const prepared = await service.prepareLiveLaunch(creator, await input());

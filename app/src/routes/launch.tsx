@@ -38,7 +38,7 @@ import { QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
 import { LiveLaunchPanel, type LiveLaunchHandle } from "../components/carddex/live/LiveLaunchPanel";
 import { liveReadinessQuery, useLiveLaunchOpen, useLiveRecoveryOpen } from "../components/carddex/live/readiness";
 import { parseLiveAmount } from "../components/carddex/live/amounts";
-import { BUY_DOES_NOT_FIT, useLiveBuyFit } from "../components/carddex/live/buy-fit";
+import { BUY_DOES_NOT_FIT, BUY_FIT_AFTER_SIGN_IN, useLiveBuyFit } from "../components/carddex/live/buy-fit";
 import { PagedMessage } from "../components/carddex/live/PagedMessage";
 import type { LiveLaunchIntent } from "../lib/carddex/live/types";
 import "../carddex-live.css";
@@ -335,7 +335,12 @@ function Launch() {
   // this pair and name is turned off here, and the panel checks again before any artwork is uploaded.
   const buyFits = useLiveBuyFit(live && liveOpen && !liveLocked && step >= 6 && nameOk && tickerOk, name, ticker, quoteKey);
   const buyBlocked = live && buyFits === false;
-  useEffect(() => { if (buyBlocked) setDevBuy(""); }, [buyBlocked]);
+  // A buy cleared here is also named on the Launch step: the answer can arrive after the creator has moved on.
+  const [buyDropped, setBuyDropped] = useState(false);
+  useEffect(() => {
+    if (!buyBlocked) setBuyDropped(false);
+    else if (devBuy) { if (/[1-9]/.test(devBuy)) setBuyDropped(true); setDevBuy(""); }
+  }, [buyBlocked, devBuy]);
   const websiteError = linkError(website, "web");
   const xError = linkError(xUrl, "x");
   const ready =
@@ -775,7 +780,7 @@ function Launch() {
                 ) : buyBlocked ? (
                   <span role="status" className="block text-ink">{BUY_DOES_NOT_FIT}</span>
                 ) : !devQuote?.ok ? (
-                  <span className="block">{live ? `Optional real ${quoteAsset.symbol} buy with coin creation. Exact amounts and slippage appear before wallet review.` : `Optional test-asset buy. Maximum ${formatQuoteAmount(maxDev, quoteKey)} ${quoteAsset.symbol}.`}</span>
+                  <span className="block">{live ? `Optional real ${quoteAsset.symbol} buy with coin creation.${buyFits === null ? ` ${BUY_FIT_AFTER_SIGN_IN}` : ""} Exact amounts and slippage appear before wallet review.` : `Optional test-asset buy. Maximum ${formatQuoteAmount(maxDev, quoteKey)} ${quoteAsset.symbol}.`}</span>
                 ) : null}
                 <span aria-live="polite" className="block empty:hidden">
                   {devQuote?.ok && !devError ? (
@@ -800,7 +805,7 @@ function Launch() {
                 Content rules
               </TextLink>
             </p>
-            {live ? <LiveLaunchPanel ref={liveRef} launchesOpen={liveOpen} card={previewCard} draft={ready && preparedArt && liveDev !== null ? { name: name.trim(), symbol: ticker, description: lore.trim(), website: website.trim(), xUrl: xUrl.trim(), cardTemplate: designKey, quoteAssetKey: quoteKey, quoteMint: quoteAsset.mint, initialBuyQuoteBaseUnits: liveDev, artwork: preparedArt } : null} pairPending={pairPending} onLockedChange={setLiveLocked} onIntentLoaded={restoreLiveIntent} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /> : <>
+            {live ? <LiveLaunchPanel ref={liveRef} launchesOpen={liveOpen} notice={buyDropped ? BUY_DOES_NOT_FIT : null} card={previewCard} draft={ready && preparedArt && liveDev !== null ? { name: name.trim(), symbol: ticker, description: lore.trim(), website: website.trim(), xUrl: xUrl.trim(), cardTemplate: designKey, quoteAssetKey: quoteKey, quoteMint: quoteAsset.mint, initialBuyQuoteBaseUnits: liveDev, artwork: preparedArt } : null} pairPending={pairPending} onLockedChange={setLiveLocked} onIntentLoaded={restoreLiveIntent} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /> : <>
             <dl className="cdx-launch-cost" aria-label="Demo launch cost" aria-live="polite">
               <div><dt>Demo launch fee</dt><dd>{sol(LAUNCH_FEE, 3)} test SOL</dd></div>
               {devQuote?.ok ? <div><dt>Initial buy</dt><dd>{formatQuoteAmount(devQuote.solIn, quoteKey)} test {quoteAsset.symbol}</dd></div> : null}

@@ -2,6 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useMatch } from "@tanstack/react-router";
 import { getLiveLaunchReadiness } from "../../../lib/carddex/live/api";
 import type { LiveReadiness } from "../../../lib/carddex/live/types";
+import { liveModeOpen } from "./mode";
+
+export { liveModeOpen };
 
 /**
  * The one readiness query (F17): every reader shares this key and freshness, so a /launch load asks the server
@@ -27,8 +30,8 @@ export function useLiveReadiness(active = true) {
 }
 
 /**
- * True only when mainnet launches can actually finish (readiness.ready: configured and switched on by
- * CARDDEX_LIVE_LAUNCH_ENABLED). Stays false while loading, on error and when `active` is false.
+ * True only when mainnet launches can actually finish (readiness.ready: configured, switched on by
+ * CARDDEX_LIVE_LAUNCH_ENABLED, and recovery on too). Stays false while loading, on error and when `active` is false.
  */
 export function useLiveLaunchOpen(active = true): boolean {
   const readiness = useLiveReadiness(active);
@@ -41,5 +44,5 @@ export function useLiveLaunchOpen(active = true): boolean {
  */
 export function useLiveRecoveryOpen(active = true): boolean {
   const readiness = useLiveReadiness(active);
-  return active && (readiness.data?.recoveryReady === true || readiness.data?.ready === true);
+  return active && liveModeOpen(readiness.data);
 }

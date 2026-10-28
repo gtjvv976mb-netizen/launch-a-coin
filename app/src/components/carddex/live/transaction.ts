@@ -202,3 +202,12 @@ export function validateWalletResult(before: Uint8Array, signed: Uint8Array, cre
   if (!result.signatures.every((sig, i) => ed25519.verify(sig, result.message, fromBase58(result.signers[i])))) throw new Error("The wallet returned invalid or incomplete transaction signatures. Nothing was submitted.");
   return signed;
 }
+/**
+ * The next step for a signed transaction the server did not broadcast, from the stage read back afterwards: "prepare"
+ * when nothing is saved and the server will never send those bytes, "resend" when nothing is saved and the same
+ * signed bytes can go again, null when the stage holds a saved signature (recover that instead).
+ */
+export function unsentStageNext(stage: { status: string; nftSignature: string | null }, kind: "token" | "nft", unsendable: boolean): "prepare" | "resend" | null {
+  const unsaved = kind === "token" ? stage.status === "prepared" : stage.status === "nft_pending" && !stage.nftSignature;
+  return !unsaved ? null : unsendable ? "prepare" : "resend";
+}

@@ -217,14 +217,17 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     test("SOL with a 32-byte name and 13-character symbol: the buy does not fit, the coin alone does", async () => {
       const input = sized("sol", "N".repeat(32), "S".repeat(13)), size = await measure(input);
       expect(size.buyBytes).toBeGreaterThan(PACKET_LIMIT); expect(size.createBytes).toBeLessThanOrEqual(PACKET_LIMIT);
-      await expect(prepareTokenTransaction(input, { connection: mockRpc().connection })).rejects.toThrow(`${size.buyBytes} bytes and exceeds Solana's 1232-byte packet limit`);
+      // Both ways out work here: the coin alone fits, and so does this buy with a shorter name.
+      await expect(prepareTokenTransaction(input, { connection: mockRpc().connection })).rejects.toThrow(`${size.buyBytes} bytes and exceeds Solana's 1232-byte packet limit; launch without an initial buy, or use a shorter name or symbol`);
       expect(wire(await prepareTokenTransaction({ ...input, initialBuyQuoteBaseUnits: "0" }, { connection: mockRpc().connection }))).toBe(size.createBytes);
     });
     test("USDC with a buy does not fit even with a short name; the coin alone does", async () => {
       const input = sized("usdc"), rpc = mockRpc(); rpc.addQuoteBalance(input, 1_000_000n);
       const size = await measure(input, rpc);
       expect(size.buyBytes).toBeGreaterThan(PACKET_LIMIT); expect(size.createBytes).toBeLessThanOrEqual(PACKET_LIMIT);
-      await expect(prepareTokenTransaction(input, { connection: rpc.connection })).rejects.toThrow(`${size.buyBytes} bytes`);
+      // No name is short enough for this buy, so the error only offers launching without it.
+      const error = await prepareTokenTransaction(input, { connection: rpc.connection }).then(() => null, (caught: Error) => caught.message);
+      expect(error).toEndWith(`${size.buyBytes} bytes and exceeds Solana's 1232-byte packet limit; launch without an initial buy`);
     });
     test("an existing buyback account is left out exactly as prepare leaves it out", async () => {
       const input = sized("tslax"), rpc = mockRpc(); rpc.addQuoteBalance(input, 1_000_000n);

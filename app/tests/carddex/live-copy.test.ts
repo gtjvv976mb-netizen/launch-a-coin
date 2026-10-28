@@ -15,12 +15,19 @@ describe("live launch fee disclosure", () => {
   test("the transaction terms say there is no platform fee and name what the creator pays", () => {
     const panel = read("src/components/carddex/live/LiveLaunchPanel.tsx");
     expect(panel).toContain("Launch a Card charges no platform fee.");
-    expect(panel).toContain("Solana network and priority fees, account rent for the new coin and card, and pump.fun's protocol and creator fees inside any initial buy");
+    // The same costs the legal card-issuance row names, including the buyback account rent on token quotes.
+    expect(panel).toContain("Solana network and priority fees, account rent for the new accounts, the Metaplex NFT fee for the card, and pump.fun's protocol and creator fees inside any initial buy");
+    expect(read("src/routes/legal.tsx")).toContain("the Metaplex NFT fee");
   });
   test("legal changes only the platform-fee row and keeps every other fill slot", () => {
     const legal = read("src/routes/legal.tsx");
     expect(legal).toContain("Launch a Card currently adds no fee to launch or card transactions.");
     expect(legal).not.toContain("<Fill>platform fee per launch</Fill>");
     for (const slot of ["operator legal name", "contact email", "governing law", "minimum age", "platform share of trading fees, or none", "typical total in SOL", "link to pump.fun fee schedule"]) expect(legal).toContain(`<Fill>${slot}</Fill>`);
+  });
+  test("the initial-buy notes are plain and name when the size is checked", async () => {
+    const copy = await import("../../src/lib/carddex/live/copy");
+    expect(copy.BUY_FIT_AFTER_SIGN_IN).toContain("after wallet sign-in, before anything is uploaded");
+    for (const text of Object.values(copy)) expect(text).not.toMatch(/[\u2013\u2014]/);
   });
 });

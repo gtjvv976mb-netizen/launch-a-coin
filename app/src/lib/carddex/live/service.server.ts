@@ -81,6 +81,9 @@ async function preparePayload(wallet: string, raw: LivePrepareInput): Promise<Pa
   if (!raw.termsAcknowledged || !/^(0|[1-9][0-9]{0,19})$/.test(raw.initialBuyQuoteBaseUnits) || BigInt(raw.initialBuyQuoteBaseUnits) > 0xffffffffffffffffn || !Number.isInteger(raw.slippageBps) || raw.slippageBps < 0 || raw.slippageBps > 1000) throw new UserError("Review the quote terms, initial-buy atoms and slippage before preparing a real launch.");
   await requireTrustedComposition(wallet, fields, raw.assets);
   for (const role of ["artwork", "cardImage", "caseImage"] as const) await validateOwnedAsset(wallet, raw.assets[role], role);
+  // After the composition and asset reads, before the first write (the design copies and metadata). Prepare still
+  // re-checks the final bytes.
+  if (BigInt(raw.initialBuyQuoteBaseUnits) > 0n && !(await checkLiveLaunchSize(wallet, {...fields, initialBuyQuoteBaseUnits: raw.initialBuyQuoteBaseUnits})).fits) throw new UserError(BUY_DOES_NOT_FIT);
   const sources = await sourceAssets(wallet, fields.cardTemplate), quote = getPairAsset(fields.quoteAssetKey), design = getCardDesign(fields.cardTemplate);
   const common = {version: 1, rendererVersion: COMPOSITION_VERSION, creatorWallet: wallet, tokenMint: fields.tokenMint, quoteAssetKey: quote.key, quoteMint: quote.mint,
     cardTemplate: fields.cardTemplate, sourceFrontSha256: sources.front.sha256, sourceBackSha256: sources.back.sha256,
@@ -132,8 +135,6 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareInput) {
     const transaction = await chain(() => sdk.prepareTokenTransaction(adapterInput(existing), {connection: connection()}));
     await savePlan(existing, transaction); return {intent: publicIntent(existing), transaction};
   }
-  // A buy that cannot fit fails here, before the token and card metadata are written. Prepare still re-checks the bytes.
-  if (/^[1-9][0-9]{0,19}$/.test(raw.initialBuyQuoteBaseUnits) && !(await checkLiveLaunchSize(wallet, {...fields, initialBuyQuoteBaseUnits: raw.initialBuyQuoteBaseUnits})).fits) throw new UserError(BUY_DOES_NOT_FIT);
   const payload = await preparePayload(wallet, raw);
   const transaction = await chain(() => sdk.prepareTokenTransaction({...payload.input, nftMint: raw.nftMint}, {connection: connection()}));
   const id = crypto.randomUUID(), now = Date.now();
@@ -256,23 +257,30 @@ export async function abandonLiveLaunchIntent(wallet: string, input: {intentId: 
   await guardedBatch([snapshotGuard(row), clearGuard(), planSetGuard(row.id, "token", plans), clearGuard(), stmt("UPDATE live_launch_intents SET status = 'abandoned', updated_at = ? WHERE id = ? AND status IN ('prepared','token_pending')", Date.now(), row.id)]);
   return {intent: publicIntent(await ownedIntent(wallet, row.id))};
 }
-// Copy for a transaction that was definitely not broadcast: this stage keeps its state and can be prepared again.
-function notSent(reason: string, saved: boolean) {
-  return `${reason} ${saved ? "Check this launch's saved transaction before preparing another." : "Prepare again for a fresh transaction."}`;
+/** Not sent, and never sendable as signed (expired, rejected by the signed simulation, or not the reviewed message). */
+export class UnsendableTransaction extends UserError {}
+/** What the client sees of a failed live operation: only a UserError's message, and whether the stage is prepared again. */
+export function liveFailure(error: unknown) {
+  return {ok: false as const, error: error instanceof UserError ? error.message : "The real launch could not proceed. Your demo balances were not used.",
+    ...(error instanceof UnsendableTransaction ? {unsendable: true as const} : {})};
+}
+// A refusal before any broadcast. With nothing saved, an unsendable stage is prepared again and any other refusal
+// keeps the same signed bytes for another send. A re-send of saved bytes says only that this retry was not sent.
+function notSent(saved: boolean, unsaved: string, retry: string, unsendable = true) {
+  if (saved) return new UserError(`This retry was not sent because ${retry}. Check this launch's saved transaction before preparing another.`);
+  return unsendable ? new UnsendableTransaction(`${unsaved} Prepare again for a fresh transaction.`) : new UserError(`${unsaved} Send again to retry with the same wallet approval.`);
 }
 async function checkBeforeSend(plan: WalletTransactionPlan, transactionBase64: string, saved: boolean) {
   try { return await sdk.checkSignedWalletTransaction({plan, transactionBase64}, {connection: connection()}); }
   catch (error) {
-    if (error instanceof sdk.SignedTransactionNotSent) throw new UserError(notSent(error.reason === "expired"
-      ? "Your wallet approval expired before it could be sent. Nothing was sent or charged."
-      : `Solana's final check rejected this transaction, so it was not sent and nothing was charged (${error.message.replace(/^Signed transaction simulation failed: /, "").slice(0, 200)}).`, saved));
-    throw new UserError(notSent("The final mainnet check could not finish, so this transaction was not sent.", saved));
+    if (!(error instanceof sdk.SignedTransactionNotSent)) throw notSent(saved, "The final mainnet check could not finish, so this transaction was not sent yet.", "the final mainnet check could not finish", false);
+    if (error.reason === "expired") throw notSent(saved, "Your wallet approval expired before it could be sent. Nothing was sent or charged.", "its wallet approval expired");
+    const detail = error.message.replace(/^Signed transaction simulation failed: /, "").slice(0, 200);
+    throw notSent(saved, `Solana's final check rejected this transaction, so it was not sent and nothing was charged (${detail}).`, `Solana's final check rejected it (${detail})`);
   }
 }
 export async function submitLiveTransaction(wallet: string, input: {intentId: string; kind: "token" | "nft"; messageSha256: string; transactionBase64: string}) {
   const row = await ownedIntent(wallet, input.intentId);
-  // Sending the coin transaction starts the coin; re-sending saved bytes and the card stage are recovery.
-  if (input.kind === "token" && row.status === "prepared") requireLiveConfig("launch");
   if (input.kind === "token" && !["prepared", "token_pending"].includes(row.status) || input.kind === "nft" && row.status !== "nft_pending") throw new UserError("This launch has already advanced beyond that wallet transaction.");
   const prepared = await one<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = ? AND message_sha256 = ?", row.id, input.kind, input.messageSha256);
   if (!prepared) throw new UserError("This transaction was not prepared for this launch.");
@@ -280,12 +288,18 @@ export async function submitLiveTransaction(wallet: string, input: {intentId: st
   const submittedSignature = input.kind === "token" ? row.token_signature : row.nft_signature;
   let signed: ReturnType<typeof sdk.validateSignedWalletTransaction>;
   try { signed = sdk.validateSignedWalletTransaction(plan, input.transactionBase64); }
-  catch (error) { throw new UserError(notSent(`The signed transaction differs from the one you reviewed, so it was not sent (${error instanceof Error ? error.message.slice(0, 200) : "invalid signature"}).`, !!submittedSignature)); }
+  catch (error) {
+    const detail = error instanceof Error ? error.message.slice(0, 200) : "invalid signature";
+    throw notSent(!!submittedSignature, `The signed transaction differs from the one you reviewed, so it was not sent (${detail}).`, `it differs from the transaction you reviewed (${detail})`);
+  }
   if (submittedSignature && submittedSignature !== signed.signature) throw new UserError("A different transaction for this stage is already pending. Recover it before authorizing another.");
   if (prepared.signature && (prepared.signature !== signed.signature || prepared.signed_transaction_base64 !== signed.transactionBase64)) throw new UserError("This prepared transaction already has different submitted bytes.");
   // Read-only checks run before anything is saved. A definite failure (expired approval, failed signed simulation)
   // leaves this stage as it was, so the creator can prepare it again with the same keys.
   const checked = await checkBeforeSend(plan, signed.transactionBase64, !!submittedSignature);
+  // Only broadcasting a 'prepared' coin starts it. A coin the chain already has is recorded under recovery, so
+  // turning off new launches never leaves a landed coin unrecorded.
+  if (input.kind === "token" && row.status === "prepared" && checked.status === "ready") requireLiveConfig("launch");
   const now = Date.now();
   // Store the deterministic signature and exact signed bytes immediately before broadcast (or once the chain already
   // has them). An uncertain network answer can only retry those bytes or recover that signature, never spend again.

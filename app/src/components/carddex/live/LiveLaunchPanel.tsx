@@ -12,13 +12,13 @@ import { getPairAsset, getTradingPair } from "../../../lib/carddex/pairs";
 import type { CardData } from "../../mintdex/MintCard";
 import { Button, Modal } from "../../mintdex/ui";
 import { LiveWalletButton } from "./LiveWalletButton";
-import { BUY_DOES_NOT_FIT, checkLiveBuyFit, liveBuyFitKey } from "./buy-fit";
+import { BUY_DOES_NOT_FIT, checkLiveBuyFit, LIVE_BUY_FIT, liveBuyFitKey } from "./buy-fit";
 import { formatLiveAmount } from "./amounts";
 import { PagedMessage } from "./PagedMessage";
 import { useLiveReadiness } from "./readiness";
 import { getLiveWalletSnapshot, signLiveMessage, signLiveTransaction, useLiveWallet } from "./wallet";
 import {
-  createEphemeralSigner, destroyEphemeralSigner, partiallySignPlan, toBase64, validateLivePlan,
+  createEphemeralSigner, destroyEphemeralSigner, partiallySignPlan, toBase64, unsentStageNext, validateLivePlan,
   type EphemeralSigner, type ExpectedPlan, type TransactionPlan,
 } from "./transaction";
 
@@ -54,8 +54,8 @@ function unwrap<T extends object>(result: LiveResult<T>): T {
 }
 const brief = (value: string) => `${value.slice(0, 5)}…${value.slice(-5)}`;
 
-export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, onInvalid, onLockedChange, onIntentLoaded, ref }: {
-  draft: LiveLaunchDraft | null; card: CardData; pairPending: boolean; launchesOpen: boolean; onInvalid(): void;
+export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, notice, onInvalid, onLockedChange, onIntentLoaded, ref }: {
+  draft: LiveLaunchDraft | null; card: CardData; pairPending: boolean; launchesOpen: boolean; notice?: string | null; onInvalid(): void;
   onLockedChange(locked: boolean): void;
   onIntentLoaded(intent: LiveLaunchIntent | null): void;
   ref?: Ref<LiveLaunchHandle>;
@@ -71,6 +71,10 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, onInva
   const [uncertain, setUncertain] = useState(false);
   // A stage whose signed transaction the server definitely did not send: it can be prepared again with the same keys.
   const [notSent, setNotSent] = useState<"token" | "nft" | null>(null);
+  // A stage whose signed transaction the server did not send for another reason (a check that could not finish):
+  // the same signed bytes, held below, can be sent again without a new wallet approval.
+  const [resend, setResend] = useState<"token" | "nft" | null>(null);
+  const held = useRef<{ intentId: string; kind: "token" | "nft"; messageSha256: string; transactionBase64: string } | null>(null);
   const [clock, setClock] = useState(0), planAt = useRef(0);
   const [pane, setPane] = useState("launch"), [termsSeen, setTermsSeen] = useState(false);
   const [reviewPage, setReviewPage] = useState(0), [reviewSeen, setReviewSeen] = useState(0);
@@ -87,7 +91,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, onInva
     const timer = setInterval(() => setClock(Date.now()), 1000);
     return () => clearInterval(timer);
   }, [reviewOpen]);
-  const showPlan = (next: TransactionPlan) => { planAt.current = Date.now(); setNotSent(null); setUncertain(false); setPlan(next); setReviewOpen(true); };
+  const showPlan = (next: TransactionPlan) => { planAt.current = Date.now(); held.current = null; setNotSent(null); setResend(null); setUncertain(false); setPlan(next); setReviewOpen(true); };
   const tokenKey = useRef<EphemeralSigner | null>(null), nftKey = useRef<EphemeralSigner | null>(null);
   const idempotencyKey = useRef<string | null>(null), creator = useRef<string | null>(null);
   const running = useRef(false), generation = useRef(0), mounted = useRef(true);
@@ -119,8 +123,8 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, onInva
       rememberIntent(next.creatorWallet, null); pendingIntent.current = null;
       destroyEphemeralSigner(tokenKey.current); destroyEphemeralSigner(nftKey.current);
       tokenKey.current = null; nftKey.current = null; preparedInput.current = null;
-      idempotencyKey.current = null; creator.current = null; draftAtPrepare.current = null;
-      if (mounted.current) { setIntent(null); setPlan(null); setUncertain(false); setNotSent(null); setTerms(false); }
+      idempotencyKey.current = null; creator.current = null; draftAtPrepare.current = null; held.current = null;
+      if (mounted.current) { setIntent(null); setPlan(null); setUncertain(false); setNotSent(null); setResend(null); setTerms(false); }
       return;
     }
     pendingIntent.current = next;
@@ -141,6 +145,8 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, onInva
     const signature = await signLiveMessage(new TextEncoder().encode(challenge.message), address);
     assertCurrent(version, address);
     unwrap(await verifyLiveWallet({ data: { challengeId: challenge.challengeId, wallet: address, signatureBase64: toBase64(signature) } }));
+    // The initial-buy size check answers only a signed-in creator: ask it again now.
+    void queryClient.invalidateQueries({ queryKey: [LIVE_BUY_FIT] });
     assertCurrent(version, address);
   }
   async function operate(action: (address: string, version: number) => Promise<void>) {
@@ -277,7 +283,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, onInva
       const data = { intentId: current.id, signature, messageSha256 };
       const response = unwrap(await (kind === "token" ? confirmLiveToken({ data }) : confirmLiveCreatorNft({ data })));
       assertCurrent(version, address); retain(response.intent);
-      if (kind === "token" ? response.intent.status === "nft_pending" || response.intent.status === "complete" : response.intent.status === "complete") { setUncertain(false); setPlan(null); return; }
+      if (kind === "token" ? response.intent.status === "nft_pending" || response.intent.status === "complete" : response.intent.status === "complete") { held.current = null; setUncertain(false); setPlan(null); return; }
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
     setError("The transaction is still being verified. Your saved launch can be checked again without creating another coin.");
@@ -293,24 +299,42 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, onInva
       const partial = partiallySignPlan(currentPlan, expectedFor(current, currentPlan.kind), key);
       assertCurrent(version, address); setBusy("wallet");
       const signed = await signLiveTransaction(partial, address);
-      assertCurrent(version, address); setReviewOpen(false); setBusy("submitting");
-      // From this point the outcome may be uncertain after a network interruption. Recover before rebuilding.
-      setUncertain(true);
-      const result = await submitLiveTransaction({ data: { intentId: current.id, kind: currentPlan.kind, messageSha256: currentPlan.messageSha256, transactionBase64: toBase64(signed) } });
-      if (!result.ok) {
-        // The server answered without broadcasting (an expired approval, a failed final check). Confirm the saved
-        // stage, then offer a fresh preparation instead of polling an unsent signature.
-        const found = await getLiveLaunchIntent({ data: { intentId: current.id } }).catch(() => null);
-        assertCurrent(version, address);
-        if (found?.ok) {
-          retain(found.intent);
-          if (currentPlan.kind === "token" ? found.intent.status === "prepared" : found.intent.status === "nft_pending" && !found.intent.nftSignature) { setUncertain(false); setPlan(null); setNotSent(currentPlan.kind); }
-        }
-        throw new Error(result.error);
+      assertCurrent(version, address); setReviewOpen(false);
+      held.current = { intentId: current.id, kind: currentPlan.kind, messageSha256: currentPlan.messageSha256, transactionBase64: toBase64(signed) };
+      await submitHeld(current, address, version);
+    });
+  }
+  async function submitHeld(current: LiveLaunchIntent, address: string, version: number) {
+    const signed = held.current;
+    if (!signed || signed.intentId !== current.id) return;
+    // From this point the outcome may be uncertain after a network interruption. Recover before rebuilding.
+    setBusy("submitting"); setResend(null); setUncertain(true);
+    const result = await submitLiveTransaction({ data: { intentId: signed.intentId, kind: signed.kind, messageSha256: signed.messageSha256, transactionBase64: signed.transactionBase64 } });
+    if (!result.ok) {
+      // The server did not broadcast it. Read the stage back: prepare an unsendable stage again, keep the same signed
+      // bytes for another send after any other refusal, and recover a saved signature instead of polling this one.
+      const found = await getLiveLaunchIntent({ data: { intentId: signed.intentId } }).catch(() => null);
+      assertCurrent(version, address);
+      if (found?.ok) {
+        retain(found.intent);
+        const next = unsentStageNext(found.intent, signed.kind, result.unsendable === true);
+        if (next) setUncertain(false);
+        if (next === "prepare") { held.current = null; setPlan(null); setNotSent(signed.kind); }
+        else if (next === "resend") setResend(signed.kind);
       }
-      const response = result;
-      assertCurrent(version, address); retain(response.intent);
-      await confirmCurrent(currentPlan.kind, response.signature, address, version, currentPlan.messageSha256);
+      throw new Error(result.error);
+    }
+    held.current = null;
+    assertCurrent(version, address); retain(result.intent);
+    await confirmCurrent(signed.kind, result.signature, address, version, signed.messageSha256);
+  }
+  async function sendAgain() {
+    const current = pendingIntent.current;
+    if (!current || held.current?.intentId !== current.id) return;
+    await operate(async (address, version) => {
+      if (current.creatorWallet !== address) throw new Error("Reconnect the creator wallet before sending.");
+      await authenticate(address, version);
+      await submitHeld(current, address, version);
     });
   }
   async function checkConfirmation() {
@@ -323,7 +347,12 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, onInva
       const kind = found.status === "token_pending" ? "token" : found.status === "nft_pending" && found.nftSignature ? "nft" : null;
       const signature = kind === "token" ? found.tokenSignature : kind === "nft" ? found.nftSignature : null;
       if (kind && signature) await confirmCurrent(kind, signature, address, version);
-      else setUncertain(false);
+      else {
+        // Nothing is saved for this stage, so the server never sent it: signed bytes this page holds can go again.
+        setUncertain(false);
+        const signed = held.current;
+        if (signed?.intentId === found.id && unsentStageNext(found, signed.kind, false) === "resend") setResend(signed.kind);
+      }
     });
   }
   async function discardExpiredDraft() {
@@ -335,7 +364,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, onInva
       assertCurrent(version, address); retain(response.intent);
     });
   }
-  useImperativeHandle(ref, () => ({ submit: () => { if (intent?.status === "nft_pending") void prepareNft(); else if (intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current) void checkConfirmation(); else if (!intent && !canLaunch && canRecover) void recover(wallet.address ? savedIntent(wallet.address) ?? undefined : undefined); else if (intent?.status !== "complete") void prepareDraft(); } }));
+  useImperativeHandle(ref, () => ({ submit: () => { if (resend) void sendAgain(); else if (intent?.status === "nft_pending") void prepareNft(); else if (intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current) void checkConfirmation(); else if (!intent && !canLaunch && canRecover) void recover(wallet.address ? savedIntent(wallet.address) ?? undefined : undefined); else if (intent?.status !== "complete") void prepareDraft(); } }));
   const selected = intent ? getPairAsset(intent.quoteAssetKey) : getPairAsset(card.quoteAssetKey);
   const currentTitle = intent?.status === "complete" ? "Your coin and card are on mainnet" : intent?.status === "nft_pending" ? "Coin verified. Your card is next." : intent?.status === "token_pending" ? "Coin transaction submitted" : "Create through your wallet";
   const reviewIntent = intent;
@@ -353,15 +382,16 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, onInva
       {!intent && canLaunch ? <><button type="button" className="mdx-link" onClick={() => setPane("terms")}>Read transaction terms</button><label className="cdx-live-check"><input ref={termsRef} type="checkbox" disabled={!termsSeen} checked={terms} onChange={e => setTerms(e.target.checked)} /><span>I have artwork rights and accept paid mainnet transactions.{!termsSeen ? " Read the terms first." : ""}</span></label></> : null}
       {intent?.status === "nft_pending" ? <p>The coin is verified. Issue its separate one-of-one card to the same creator wallet.</p> : null}
       {pairPending ? <p role="status">Confirm or cancel the quote change before preparing a transaction.</p> : null}
+      {notice && !intent ? <p role="status">{notice}</p> : null}
       {busy ? <PagedMessage text={BUSY_COPY[busy]} /> : null}
       <div className="cdx-live-actions">
-        {intent?.status === "complete" ? <Button variant="outline" block onClick={() => { rememberIntent(intent.creatorWallet, null); pendingIntent.current = null; setIntent(null); setPlan(null); preparedInput.current = null; draftAtPrepare.current = null; idempotencyKey.current = null; creator.current = null; setTerms(false); }}>Start another launch</Button> : intent?.status === "nft_pending" ? <Button block pending={!!busy} disabled={!canRecover} onClick={() => void prepareNft()}>{notSent === "nft" ? "Prepare again" : "Review card NFT issuance"}</Button> : intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current ? <Button block pending={!!busy} disabled={!canRecover} onClick={() => void checkConfirmation()}>Check confirmation</Button> : !intent && !canLaunch && canRecover ? <Button block pending={!!busy} onClick={() => void recover(wallet.address ? savedIntent(wallet.address) ?? undefined : undefined)}>Find saved launch</Button> : <Button type="submit" block size="lg" pending={!!busy} disabled={!canLaunch || pairPending} onBlocked={pairPending ? onInvalid : undefined}>{notSent === "token" ? "Prepare again" : "Review mainnet launch"}</Button>}
+        {intent?.status === "complete" ? <Button variant="outline" block onClick={() => { rememberIntent(intent.creatorWallet, null); pendingIntent.current = null; setIntent(null); setPlan(null); preparedInput.current = null; draftAtPrepare.current = null; idempotencyKey.current = null; creator.current = null; setTerms(false); }}>Start another launch</Button> : resend ? <Button block pending={!!busy} disabled={!canRecover} onClick={() => void sendAgain()}>Send again</Button> : intent?.status === "nft_pending" ? <Button block pending={!!busy} disabled={!canRecover} onClick={() => void prepareNft()}>{notSent === "nft" ? "Prepare again" : "Review card NFT issuance"}</Button> : intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current ? <Button block pending={!!busy} disabled={!canRecover} onClick={() => void checkConfirmation()}>Check confirmation</Button> : !intent && !canLaunch && canRecover ? <Button block pending={!!busy} onClick={() => void recover(wallet.address ? savedIntent(wallet.address) ?? undefined : undefined)}>Find saved launch</Button> : <Button type="submit" block size="lg" pending={!!busy} disabled={!canLaunch || pairPending} onBlocked={pairPending ? onInvalid : undefined}>{notSent === "token" ? "Prepare again" : "Review mainnet launch"}</Button>}
         {intent?.status === "nft_pending" && (intent.nftSignature || uncertain) ? <Button variant="outline" block pending={!!busy} disabled={!canRecover} onClick={() => void checkConfirmation()}>Check card confirmation</Button> : null}
       </div>
     </div>
     <div className="cdx-live-pane" hidden={pane !== "terms"}>
       <p>Coin creation and card issuance are separate paid mainnet transactions. Exact costs appear before each wallet approval. Your selected quote funds only the optional initial buy.</p>
-      <dl className="cdx-live-review"><div><dt>Platform fee</dt><dd>None. Launch a Card charges no platform fee. You pay Solana network and priority fees, account rent for the new coin and card, and pump.fun's protocol and creator fees inside any initial buy.</dd></div></dl>
+      <dl className="cdx-live-review"><div><dt>Platform fee</dt><dd>None. Launch a Card charges no platform fee. You pay Solana network and priority fees, account rent for the new accounts, the Metaplex NFT fee for the card, and pump.fun's protocol and creator fees inside any initial buy.</dd></div></dl>
       {selected.kind === "stock" ? <p>A tokenized-stock quote does not make your creator coin company shares.</p> : null}
       <label className="cdx-live-check cdx-live-slippage"><span>Initial-buy slippage</span><select className="mdx-input" value={slippageBps} disabled={!!intent} onChange={e => setSlippageBps(Number(e.target.value))}><option value={50}>0.5%</option><option value={100}>1%</option><option value={300}>3%</option></select></label>
       <button type="button" className="mdx-link cdx-live-back" onClick={() => setPane("launch")}>Back to launch</button>
@@ -375,7 +405,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, onInva
     </div>
     <div className="cdx-live-pane" hidden={pane !== "status"}>
       {error ? <PagedMessage text={error} alert /> : busy ? <PagedMessage text={BUSY_COPY[busy]} /> : readiness.isPending ? <p role="status">Checking mainnet readiness…</p> : readiness.isError ? <p>Launch readiness could not be checked.</p> : !canRecover ? <PagedMessage text={[...(readiness.data?.blockers ?? []), "No transaction or charge is requested while setup is incomplete."].join(" ")} /> : !canLaunch ? <PagedMessage text={RECOVERY_ONLY} /> : <p>Mainnet setup is ready. Each transaction still needs your wallet approval.</p>}
-      <div className="cdx-live-actions">{notSent && !busy ? <Button block onClick={() => void (notSent === "token" ? prepareDraft() : prepareNft())}>Prepare again</Button> : null}<button type="button" className="mdx-btn mdx-btn--outline" onClick={() => void readiness.refetch()}>Check readiness</button><button type="button" className="mdx-btn mdx-btn--ghost" onClick={() => setPane("launch")}>Back to launch</button></div>
+      <div className="cdx-live-actions">{notSent && !busy ? <Button block onClick={() => void (notSent === "token" ? prepareDraft() : prepareNft())}>Prepare again</Button> : resend && !busy ? <Button block disabled={!canRecover} onClick={() => void sendAgain()}>Send again</Button> : null}<button type="button" className="mdx-btn mdx-btn--outline" onClick={() => void readiness.refetch()}>Check readiness</button><button type="button" className="mdx-btn mdx-btn--ghost" onClick={() => setPane("launch")}>Back to launch</button></div>
     </div>
     <Modal open={reviewOpen} onOpenChange={value => { if (!busy) setReviewOpen(value); }} title={plan?.kind === "nft" ? "Review your card NFT" : "Review your coin launch"} description="Review exact mainnet costs and asset identities before opening your wallet.">
       {plan && reviewIntent ? <div className="cdx-live-review-modal">
