@@ -2,12 +2,14 @@
  * true-black-flat: tiles and panes sit on the ground, elevation by lightness alone (ground, surface, nested), no borders
  * or shadows at rest. The cards are the only colour; gold appears only as the curve fill (CurveTrack). Operate screen:
  * state feedback only (hover and press on colour or background, 120-160ms), no entrances. Tokens: carddex-theme.css.
+ * Density (.taste-skill/density/rules.md): one header row from 1024px, every coin and design on the page (main is the
+ * one scroller), auto-fill grids sized from the screen height so two full rows sit above the fold.
  * Markup: routes/discover.tsx, routes/levels.tsx, components/carddex/GalleryTile.tsx. */
 
 /* ---------------------------------------------------------------- shared by both screens */
 
 /* Search fields: the input recipe with a search glyph on the left and a quiet clear button (×) inside the right
- * padding (the native cancel button is hidden by the primitive). */
+ * padding (the native cancel button is hidden by the primitive). Both sit in the page header's toolbar. */
 .cdx-discover__search,
 .cdx-library__search {
   position: relative;
@@ -16,6 +18,11 @@
 .cdx-discover__search .mdx-input,
 .cdx-library__search .mdx-input {
   padding-inline: 40px 44px;
+}
+/* Empty: no clear button yet, so the placeholder may use that room (a narrow phone field keeps "Search designs"). */
+.cdx-discover__search .mdx-input:placeholder-shown,
+.cdx-library__search .mdx-input:placeholder-shown {
+  padding-right: 12px;
 }
 .cdx-discover__search-glyph,
 .cdx-library__search-glyph {
@@ -37,33 +44,64 @@
 /* Controls that are tapped, not read: no grey tap flash and no text selection on a long press (the 3D host already
  * stops the long-press callout); each has its own pressed state instead. */
 .cdx-token-cell__link,
-.cdx-design-tile,
-.cdx-library__chips .mdx-chip,
-.cdx-archive .cdx-view-tabs button {
+.cdx-design-tile__pick,
+.cdx-library__chips .mdx-chip {
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
   user-select: none;
 }
-/* The Designs tab is locked while a pair change waits for its confirmation (QuoteAssetPicker). */
-.cdx-archive .cdx-view-tabs button:disabled {
-  color: var(--color-placeholder);
-  cursor: not-allowed;
-}
 
 /* ---------------------------------------------------------------- Discover: "Which coin should I open?"
- * Header (count, sort, the page's one Simulated label), one tools row (search grows, sort hugs its label), then the
- * card grid. The page grows with its list (carddex-viewport.css); "Show more coins" appends whole rows. */
+ * One header row from 1024px (title and its line with the page's one Simulated label, then search, sort and Launch),
+ * then every coin as a card tile in an auto-fill grid. Tile = card + a 68px caption: name and MC (20), 2, ticker and
+ * 24h (16), 2 + 4, the curve label and track on one line (16), plus the link's 8px gap. */
 .cdx-discover {
-  gap: 16px;
+  gap: var(--gap-page);
+  --coin-cap: 68px;
+  --coin-min: var(--tile-min);
+}
+/* Tablets: four columns in the 720px column at 768 (the 176px token would leave three). */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .cdx-discover {
+    --coin-min: 160px;
+  }
+}
+@media (min-width: 1024px) {
+  .cdx-discover {
+    /* The widest card that lets two tile rows fit under the header (R7): the room under the top bar, main's 32px of
+     * padding, the header row and the gaps, less two captions and the row gap, halved, at the card's 63:88. */
+    --coin-fit: calc((100svh - var(--topbar-h) - 32px - var(--pagehead-h) - var(--gap-page) - var(--gap-section) - 2 * var(--coin-cap)) * 63 / 176);
+    /* auto-fill stretches a track by up to ~1/6 at 6+ columns, so the minimum sits 17% under the fit. */
+    --coin-min: clamp(150px, calc(var(--coin-fit) / 1.17), var(--tile-min));
+  }
+  /* The line keeps one row: only the count phrase ellipsizes, so Simulated stays whatever is typed. */
+  .cdx-discover .mdx-pagehead__context {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+  .cdx-discover__ctx {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* 240px minimum: a long query ellipsizes the line beside it instead of squeezing the field it is typed in. */
+  .cdx-discover__search {
+    flex: 1 1 320px;
+    min-width: 240px;
+    max-width: 480px;
+  }
 }
 .cdx-discover__sim {
   margin-left: 4px;
 }
-.cdx-discover__tools {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 8px 16px;
+.cdx-discover__body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--gap-section);
 }
 .cdx-discover__stale {
   display: flex;
@@ -78,27 +116,38 @@
 .cdx-discover__stale-glyph {
   color: var(--color-down);
 }
+/* Tablets: title and line, then search, sort and Launch on one row. */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .cdx-discover__search {
+    flex: 1 1 320px;
+    min-width: 160px;
+    max-width: 480px;
+  }
+  .cdx-discover .mdx-pagehead__tools {
+    width: auto;
+    flex: 1 1 auto;
+  }
+}
+/* Phones: search and sort share one row; Launch is the tab bar's middle item, on screen below 1024px. */
+@media (max-width: 767.98px) {
+  .cdx-discover__launch {
+    display: none;
+  }
+  .cdx-discover__search {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .cdx-discover .mdx-pagehead__tools {
+    flex-wrap: nowrap;
+  }
+}
 
-/* The grid: as many 190px columns as fit from 1024 (5 in the 1152 column, 4 at 1024), 3 from 600, 2 on phones. */
+/* The grid: AutoGrid's auto-fill tracks of --coin-min (8 columns at 1920, 7 at 1440 and 1280, 6 at 1024, 4 on tablets,
+ * 2 on phones); the column gap is the grid token, rows sit a section gap apart. */
 .cdx-token-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 32px 24px;
-  margin: 8px 0 0;
+  row-gap: var(--gap-section);
+  margin: 0;
   padding: 0;
-  list-style: none;
-}
-@media (max-width: 1023.98px) {
-  .cdx-token-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 28px 16px;
-  }
-}
-@media (max-width: 599.98px) {
-  .cdx-token-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 24px 12px;
-  }
 }
 .cdx-token-item {
   min-width: 0;
@@ -112,7 +161,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   color: inherit;
   text-decoration: none;
 }
@@ -147,6 +196,7 @@
   min-width: 0;
   flex-direction: column;
   gap: 2px;
+  container: coin-caption / inline-size;
 }
 .cdx-token-cell__row {
   display: flex;
@@ -192,10 +242,19 @@
   color: var(--color-ink);
   white-space: nowrap;
 }
+/* line-height 1: the smaller unit would otherwise grow the 20px line to 21. */
 .cdx-token-cell__unit {
   font-size: var(--text-caption);
+  line-height: 1;
   font-weight: 500;
   color: var(--color-slate);
+}
+/* The narrowest tiles (1024 and 1280 desktops, 360 phones, phones held sideways): the figure drops its "MC" so the
+ * name keeps its room; the link's accessible name still says "market cap". */
+@container coin-caption (max-width: 163.98px) {
+  .cdx-token-cell__unit {
+    display: none;
+  }
 }
 .cdx-token-cell__row--meta {
   font-size: var(--text-caption);
@@ -212,31 +271,29 @@
   flex: none;
   font-weight: 500;
 }
-.cdx-token-cell__curve {
-  margin-top: 8px;
+/* The curve on one 16px line: "Curve 91%" then the track. The label keeps a fixed slot (tabular figures), so the
+ * tracks of a row start on one edge. Scoped to the tile: other curves keep their two-line layout. */
+.cdx-token-cell__curve.mdx-curve {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.cdx-token-cell__curve .mdx-curve__head {
+  flex: none;
+  min-width: 64px;
+}
+.cdx-token-cell__curve .mdx-curve__track {
+  flex: 1 1 auto;
 }
 
-/* No results and no coins: the grid's frame stays, as one dashed slot with a sentence and the way back. */
-.cdx-discover__empty.mdx-empty--inline {
-  margin-top: 8px;
-  padding: 40px 16px;
-  border: 1px dashed var(--color-hairline);
-  border-radius: var(--radius-panel);
-}
-.cdx-discover__empty-actions,
-.cdx-library__empty-actions {
+/* More than 48 coins: one quiet row, the count and "Show all N coins", which expands the grid in place. */
+.cdx-discover__more {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 16px 20px;
-}
-.cdx-discover__more {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 0;
+  gap: 8px 12px;
 }
 .cdx-discover__shown {
   font-size: var(--text-caption);
@@ -263,6 +320,12 @@
 .cdx-skel--select {
   width: 136px;
   height: var(--control-h);
+  flex: none;
+}
+.cdx-token-cell--skel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 .cdx-skel--card {
   width: 100%;
@@ -271,121 +334,242 @@
   border-radius: 5.04% / 3.61%;
   background: var(--color-surface);
 }
+/* The caption's three lines at their real heights: name 14 in 20, ticker 12 in 16, the 4px track in its 16px line. */
 .cdx-skel--name {
   width: 62%;
   height: 14px;
-  margin-block: 15px 3px;
+  margin-block: 3px;
 }
 .cdx-skel--ticker {
   width: 40%;
   height: 12px;
-  margin-block: 4px 2px;
+  margin-block: 2px;
 }
 .cdx-skel--track {
   height: 4px;
-  margin-top: 28px;
+  margin-block: 10px 6px;
 }
 
-/* ---------------------------------------------------------------- Designs: "Which card design do I want my coin to wear?"
- * A fitted view: the header (with the one primary, Use this design) stays in view while the library scrolls in its
- * pane. From 768px the preview (45%) sits beside the library (55%), whose tabs read Designs and Pair; on phones one
- * pane shows at a time under the Preview, Designs and Pair tabs, and a pick keeps you on Designs. */
+/* Phones held sideways: the header becomes a sticky left column beside the grid, so a whole tile row is on screen.
+ * DOM order (header, then the coins) is the visual order. */
+@media (max-width: 1023.98px) and (max-height: 500px) and (orientation: landscape) {
+  .cdx-discover {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr);
+    align-items: start;
+    gap: var(--gap-section);
+  }
+  .cdx-discover > .mdx-pagehead {
+    position: sticky;
+    top: 0;
+  }
+  /* A tile may be as tall as main's visible height: the screen less the top bar, the 44px sideways tab bar and its
+   * 1px rule, the safe area under it, main's 16px top padding and 4px of slack, less the caption. */
+  .cdx-token-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, calc((100svh - var(--topbar-h) - 45px - env(safe-area-inset-bottom, 0px) - 20px - var(--coin-cap)) * 63 / 88)));
+    /* Tiles end on the column's right edge; what the fixed tracks leave over widens the gap beside the header. */
+    justify-content: end;
+  }
+}
+
+/* ---------------------------------------------------------------- Designs: "Which card design will my coin wear?"
+ * One header row from 1024px (title, the count and the selected design, search, Use this design). Then the preview
+ * column (the selected design turning on the sample coin, its name and the pair picker), sticky beside the library:
+ * collection chips that wrap and every design in an auto-fill grid, each tile with its own one-click Use. Below
+ * 1024px the preview is a compact row (small card beside its name and the picker) above the library, and the
+ * primary sits in the sticky action bar. Nothing scrolls inside the page; no tabs. */
 .cdx-archive {
-  gap: 16px;
+  gap: var(--gap-page);
+  /* The preview card's width: phones, tablets; from 1024 it follows the screen height (below). */
+  --preview-cw: 150px;
+}
+@media (min-width: 768px) {
+  .cdx-archive {
+    --preview-cw: 200px;
+  }
+}
+.cdx-archive__main {
+  display: flex;
+  min-width: 0;
+  flex: 1 0 auto;
+  flex-direction: column;
+  gap: var(--gap-page);
 }
 .cdx-archive__selected {
   color: var(--color-ink);
 }
-.cdx-archive__tabs {
-  display: none;
-}
-.cdx-archive__body {
-  display: grid;
-  flex: 1;
-  min-height: 0;
-  grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
-  grid-template-rows: minmax(0, 1fr);
-  gap: 24px;
-}
-
-/* The preview: the selected design on the sample coin, turning on the ground. The card fits the pane's height and
- * width (its control row 48px and the caption 52px under it). */
-.cdx-archive__vitrine {
-  display: flex;
-  min-width: 0;
-  /* The library grows with its designs (main scrolls the page); the preview keeps one screen's height and, beside
-   * the library, sticks at the top while the list scrolls past (a sticky column, not a scroller). */
-  height: max(420px, calc(var(--cdx-app-height, 100dvh) - var(--topbar-h) - 32px - var(--pagehead-h) - var(--gap-page)));
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  container-type: size;
-}
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
+  .cdx-archive {
+    /* The card's width from the screen height: of it, 408px is not card (top bar 48, main's 32 of padding, the
+     * controls row 44, 8, the name 24, 12 and ~240 for the compact pair picker), at the card's 63:88. */
+    --preview-cw: clamp(240px, calc((100svh - 408px) * 63 / 88), 320px);
+    /* What a sticky column can use: the screen under the top bar, less main's 16px top and bottom padding. */
+    --vitrine-room: calc(100svh - var(--topbar-h) - 32px);
+  }
+  /* The line keeps one row: the filter phrase ellipsizes first, "Selected: <name>" stays whole. */
+  .cdx-archive .mdx-pagehead__context {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+  .cdx-archive__ctx {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cdx-archive__ctx-sel {
+    flex: none;
+    white-space: pre;
+  }
+  .cdx-library__search {
+    flex: 1 1 280px;
+    min-width: 240px;
+    max-width: 360px;
+  }
+  .cdx-archive__body {
+    display: grid;
+    grid-template-columns: clamp(280px, 24vw, 340px) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--gap-section);
+  }
+  /* Always sticky. A column that fits sticks by its top; one that grew past the room (an open disclosure, a waiting
+   * pair change) sticks by its bottom on main's bottom edge, so what just opened stays on screen. --vitrine-h is
+   * the column's height, written by levels.tsx; before it is measured the column sticks at the top. */
   .cdx-archive__vitrine {
     position: sticky;
-    top: 0;
-    align-self: start;
+    top: min(0px, calc(var(--vitrine-room) - var(--vitrine-h, 0px)));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .cdx-archive__info {
+    display: grid;
+    align-self: stretch;
+    gap: 12px;
+  }
+  /* Six chips on one line in the 669px library at 1024. */
+  .cdx-library__chips .mdx-chip {
+    padding-inline: 12px;
   }
 }
 @media (max-width: 1023.98px) {
+  .cdx-library__search {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .cdx-archive__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section);
+  }
   .cdx-archive__vitrine {
-    height: max(420px, calc(var(--cdx-app-height, 100dvh) - var(--topbar-h) - var(--tabbar-h) - 32px - 160px));
+    display: grid;
+    grid-template-columns: var(--preview-cw) minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+  }
+  .cdx-archive__info {
+    display: grid;
+    max-width: 480px;
+    gap: 8px;
+  }
+  /* A waiting pair change (a prompt, a select and two buttons) gets the full width under the card. */
+  .cdx-archive__vitrine:has(.cdx-pair-change) > .cdx-archive__info {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
+  /* The action bar carries the primary. */
+  .cdx-archive__use {
+    display: none;
+  }
+  /* Whatever is scrolled into view (a focused tile, the waiting pair change) stops above the sticky action bar. */
+  .cdx-archive__main :is(a, button, input, select, summary, [tabindex]) {
+    scroll-margin-bottom: calc(var(--actionbar-h) + 8px);
   }
 }
+.cdx-archive__collection {
+  display: none;
+}
+/* Phones: the collection select sits beside the search; the chip row (three lines at this width) hides, and the
+ * filters row shows only when Meme pairs adds its Pair asset select. */
+@media (max-width: 767.98px) {
+  .cdx-archive__collection {
+    display: flex;
+    flex: none;
+  }
+  .cdx-archive .mdx-pagehead__tools {
+    flex-wrap: nowrap;
+  }
+  .cdx-library__chips {
+    display: none;
+  }
+  .cdx-library__filters:not(:has(.cdx-library__pair-filter)) {
+    display: none;
+  }
+}
+.cdx-archive__collection .mdx-select:disabled {
+  color: var(--color-placeholder);
+  cursor: not-allowed;
+}
+
+/* The preview: the card wrapper takes the width (card3d.css sets the card to 100% of its stage). */
 .cdx-archive__card {
-  width: min(380px, calc((100cqh - 132px) * 63 / 88), calc(100cqw - 48px));
+  width: min(100%, var(--preview-cw));
   flex: none;
 }
+.cdx-archive .cdx-card-controls {
+  padding-top: 8px;
+}
+.cdx-archive__info {
+  min-width: 0;
+}
 .cdx-archive__caption {
-  flex: none;
-  max-width: 100%;
-  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 12px;
 }
 .cdx-archive__name {
   margin: 0;
-  font-size: var(--text-title);
-  line-height: var(--text-title--line-height);
+  overflow-wrap: anywhere;
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
   font-weight: 600;
   color: var(--color-ink);
 }
 .cdx-archive__meta {
-  margin-top: 4px;
-  font-size: var(--text-body);
-  line-height: var(--text-body--line-height);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
   color: var(--color-slate);
 }
+/* Placement only: the picker's own look is launch.css. */
+.cdx-archive__pair,
+.cdx-archive__pair .cdx-pair-picker {
+  min-width: 0;
+}
 
-/* The library pane: tabs, then the tools and the scrolling list (or the pair picker), then one footnote. */
+/* The library: the filters row, the grid, one footnote. Locked (inert, dimmed) while a pair change waits. */
 .cdx-library {
   display: flex;
   min-width: 0;
-  min-height: 0;
   flex-direction: column;
   gap: 12px;
 }
-.cdx-library__designs,
-.cdx-library__pair {
+.cdx-library[inert] {
+  opacity: 0.4;
+}
+.cdx-library__filters {
   display: flex;
-  min-height: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap-head) var(--gap-section);
 }
-/* The pair pane keeps its own height, so the footnote sits under the picker instead of at the pane's foot. */
-.cdx-library__pair {
-  flex: 0 1 auto;
-}
-.cdx-library__tools {
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  gap: 8px;
-}
-/* The chip row wraps (the primitive, density R2). */
 .cdx-library__pair-filter {
   display: flex;
+  min-width: 0;
   align-items: center;
   gap: 12px;
 }
@@ -402,61 +586,55 @@
   color: var(--color-placeholder);
   cursor: not-allowed;
 }
-.cdx-library__count {
-  flex: none;
-  margin: 0;
-  font-size: var(--text-caption);
-  line-height: var(--text-caption--line-height);
-  color: var(--color-slate);
-}
 .cdx-library__list {
-  display: grid;
-  flex: 1;
-  min-height: 0;
-  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
-  align-content: start;
-  gap: 8px;
-  list-style: none;
-}
-.cdx-library__list > li {
-  min-width: 0;
-}
-.cdx-library__empty.mdx-empty--inline {
-  flex: none;
-  padding: 40px 16px;
-  border: 1px dashed var(--color-hairline);
-  border-radius: var(--radius-panel);
+  margin: 0;
+  padding: 0;
 }
 .cdx-library__foot {
-  flex: none;
   margin: 0;
   font-size: var(--text-caption);
   line-height: var(--text-caption--line-height);
   color: var(--color-placeholder);
 }
 
-/* A design tile: the flat print, its name and one meta line on the surface step; hover lifts it one lightness
- * step, selected is the nested step with a 2px ink ring and a check (no gold). 8px padding in a 12px corner. */
+/* A design tile: the flat print, its name and one meta line on the surface step; hover lifts it one lightness step,
+ * selected is the nested step with a 2px inset ink ring and a check (no gold). 8px padding in a 12px corner. Height =
+ * the print + 62 (8 padding, 6, the name 20, 2, the meta 16, 10). "Use" is a small pill on the print's top right,
+ * outside the flow, so it never changes a row's height. */
 .cdx-design-tile {
   position: relative;
+  height: 100%;
+  border-radius: var(--radius-row);
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+.cdx-design-tile[data-selected] {
+  background: var(--color-nested);
+  outline: 2px solid var(--color-ink);
+  outline-offset: -2px;
+}
+.cdx-design-tile__pick {
   display: flex;
   width: 100%;
   height: 100%;
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 8px 8px 12px;
-  border: 2px solid transparent;
-  border-radius: var(--radius-row);
-  background: var(--color-surface);
-  color: var(--color-ink);
+  padding: 8px 8px 10px;
+  border-radius: inherit;
+  color: inherit;
   text-align: center;
+}
+.cdx-design-tile__pick:focus-visible {
+  outline: 2px solid var(--color-zap);
+  outline-offset: 2px;
 }
 .cdx-design-tile__art {
   display: block;
   width: 100%;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
+/* A design name may wrap, never truncate. */
 .cdx-design-tile__name {
   max-width: 100%;
   font-size: var(--text-body);
@@ -464,12 +642,24 @@
   font-weight: 600;
   overflow-wrap: anywhere;
 }
-/* The selected check sits on the print's top right corner, out of the text flow, so selecting never re-wraps a name
+/* One line, allowed into the tile's side padding ("Premium · MOODENG pair" fits a 158px tile); past that it
+ * ellipsizes, and the full text stays in the button's accessible name. */
+.cdx-design-tile__meta {
+  max-width: calc(100% + 8px);
+  margin-inline: -4px;
+  overflow: hidden;
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  color: var(--color-slate);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The selected check sits on the print's top left corner, out of the text flow, so selecting never re-wraps a name
  * or changes a row's height. A 2px ring of the tile's own fill separates it from the art. */
 .cdx-design-tile__check {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 4px;
+  left: 4px;
   display: grid;
   width: 24px;
   height: 24px;
@@ -478,64 +668,102 @@
   border-radius: var(--radius-pill);
   background: var(--color-ink);
   color: var(--color-on-cta);
+  pointer-events: none;
 }
-.cdx-design-tile__meta {
-  font-size: var(--text-caption);
-  line-height: var(--text-caption--line-height);
-  color: var(--color-slate);
+/* Use: the secondary pill on the nested step with the control boundary, so it reads over any print. Touch: 32px tall
+ * with the 44px hit; a fine pointer: 28px with the 40px hit (the primitive's ::after). Press and reduced motion come
+ * from .mdx-btn. */
+.cdx-design-tile__use.mdx-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 1;
+  border: 1px solid var(--color-control-border); /* taste-skill-ignore: the 3:1 boundary of a control over card art */
 }
-.cdx-design-tile[aria-pressed="true"] {
-  border-color: var(--color-ink);
-  background: var(--color-nested);
+@media (pointer: fine) {
+  .cdx-design-tile__use.mdx-btn {
+    height: 28px;
+    padding-inline: 10px;
+    font-size: var(--text-caption);
+  }
 }
 /* Only the mouse hover eases (120ms colour); a pick, by click, tap or key, shows its ring and check at once. */
 @media (hover: hover) and (pointer: fine) {
   .cdx-design-tile {
     transition: background-color var(--t-hover) ease;
   }
-  .cdx-design-tile:hover:not([aria-pressed="true"]) {
+  .cdx-design-tile:not([data-selected]):hover {
     background: var(--color-nested);
   }
 }
-.cdx-design-tile:active {
+.cdx-design-tile__pick:active {
   background: var(--color-raised);
 }
 
-/* Phones and small tablets: one pane at a time, under the Preview, Designs and Pair tabs (the library's own tabs
- * hide); two tiles a row so each print stays at least 112px wide. */
-@media (max-width: 767.98px) {
-  .cdx-archive__tabs {
-    display: flex;
+/* Phones held sideways: the header and the preview stack in a 240px left column, the library fills the right one from
+ * the top of the page; nothing sticks but the action bar. DOM order (header, preview, library) is the visual order. */
+@media (max-width: 1023.98px) and (max-height: 500px) and (orientation: landscape) {
+  .cdx-archive {
+    --preview-cw: 150px;
   }
-  .cdx-library__tabs {
-    display: none;
+  .cdx-archive__main {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    /* The library spans both rows; the flexible second row takes its extra height, so the preview stays under the
+     * header. */
+    grid-template-rows: auto 1fr;
+    align-content: start;
+    align-items: start;
+    gap: var(--gap-section);
+  }
+  .cdx-archive__main > .mdx-pagehead {
+    grid-column: 1;
+    grid-row: 1;
   }
   .cdx-archive__body {
-    grid-template-columns: minmax(0, 1fr);
+    display: contents;
   }
-  .cdx-archive--preview .cdx-library,
-  .cdx-archive:not(.cdx-archive--preview) .cdx-archive__vitrine {
-    display: none;
+  .cdx-archive__vitrine {
+    display: flex;
+    grid-column: 1;
+    grid-row: 2;
+    flex-direction: column;
+    align-items: center;
   }
-  .cdx-archive__card {
-    width: min(320px, calc((100cqh - 124px) * 63 / 88), calc(100cqw - 32px));
+  .cdx-archive__info {
+    align-self: stretch;
+    max-width: none;
   }
-  .cdx-library__list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-/* The preview's control row sits 8px under the card below 1024px (carddex-viewport.css). */
-@media (min-width: 768px) and (max-width: 1023.98px) {
-  .cdx-archive__card {
-    width: min(380px, calc((100cqh - 124px) * 63 / 88), calc(100cqw - 32px));
+  .cdx-library {
+    grid-column: 2;
+    grid-row: 1 / span 2;
   }
 }
 
-/* Landscape phones: the shell's 520px fit floor keeps the preview and the library usable (main scrolls the view).
- * launch.css zeroes the floor variable for .cdx-archive at this size, a leftover of the old paged library; the floor
- * is set directly here so that variable no longer applies. */
-@media (min-width: 560px) and (max-width: 1023.98px) and (max-height: 440px) {
-  .cdx-app.cdx-viewport .cdx-viewport-main > .cdx-archive {
-    min-height: 520px;
-  }
+/* The action bar (below 1024px): the selected design's name over its pair, then the primary. */
+.cdx-archive__bar-text {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  margin: 0;
+}
+.cdx-archive__bar-text > strong {
+  overflow: hidden;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  font-weight: 600;
+  color: var(--color-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cdx-archive__bar-text > span {
+  overflow: hidden;
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  color: var(--color-slate);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cdx-archive__bar .mdx-btn {
+  flex: none;
 }
