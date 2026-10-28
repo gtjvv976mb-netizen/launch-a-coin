@@ -25,3 +25,9 @@ The rejected paid Higgsfield concept remains in `archive/`. This replacement was
 ## Downloadable logo using actual site designs
 
 The subsequent requested export is in [`site-backs/`](site-backs/README.md): the same fan/crown concept now uses the site's exact emerald vortex, crimson ruby and amethyst crescent reverse artwork. It includes a 2048px transparent PNG, a charcoal preview and a self-contained SVG with embedded original card images. The installed public logo assets above are separate. Reproduce this export with `node brand/logo/export-site-backs.mjs`.
+
+## Doge, Pokémon and Pepe profile downloads
+
+The latest requested logo set is in [`social-doge-pokemon-pepe/`](social-doge-pokemon-pepe/README.md). It uses the site's original Doge, Pokémon Classic and Pepe **card backs** in a fan with a separate jeweled crown and no lettering. The download set contains a [1024px pump.fun PNG](social-doge-pokemon-pepe/launch-a-card-pumpfun.png), a [400px X profile PNG](social-doge-pokemon-pepe/launch-a-card-x.png), a [2048px transparent master](social-doge-pokemon-pepe/launch-a-card-transparent.png) and a [self-contained SVG](social-doge-pokemon-pepe/launch-a-card-logo.svg). Both upload PNGs meet the official platform image requirements checked on 28 October 2026; the full mark also passes circular-crop and small-size visual QA. Source hashes and verification details are recorded with the set.
+
+Reproduce the exports with `node brand/logo/export-meme-social.mjs`. These are delivery files; this exporter does not update the installed website logo or publish to any external account.
