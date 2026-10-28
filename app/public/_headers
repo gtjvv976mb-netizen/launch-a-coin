@@ -17,11 +17,13 @@
   Cache-Control: public, max-age=31536000, immutable
 /assets/creatures/w96/*
   Cache-Control: public, max-age=31536000, immutable
+/assets/creatures/w480/*
+  Cache-Control: public, max-age=31536000, immutable
 /assets/creatures/w640/*
   Cache-Control: public, max-age=31536000, immutable
 
 # Unversioned images keep their names when re-exported: cache for a day, then revalidate in the background.
-# :file matches one path segment only, so the versioned w96/w320/w640 copies above keep their single rule.
+# :file matches one path segment only, so the versioned w96/w320/w480/w640 copies above keep their single rule.
 /assets/creatures/:file
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 /assets/carddex/*
