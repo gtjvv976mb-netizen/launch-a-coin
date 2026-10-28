@@ -488,6 +488,7 @@ export function StartOverDialog({
       title="Start over with a new handle?"
       confirmLabel={`Leave @${handle}`}
       cancelLabel="Keep playing"
+      tone="danger"
       pending={leaving}
       pendingLabel="Leaving..."
       onConfirm={async () => {

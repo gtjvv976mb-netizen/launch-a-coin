@@ -5,7 +5,9 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
+  useRef,
   useState,
   type FormEvent,
   type ReactNode,
@@ -20,7 +22,6 @@ import { FLOW, MODE_COPY } from "../../lib/mintdex/copy";
 import type { Me } from "../../lib/mintdex/types";
 import { setMe } from "./hooks";
 import { isCoarsePointer } from "./sheet";
-import { ViewportPages } from "../carddex/live/ViewportPages";
 import { useLiveLaunchOpen } from "../carddex/live/readiness";
 import {
   Button,
@@ -167,7 +168,6 @@ function EnterDialog({
   const [handle, setHandle] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [page, setPage] = useState(0);
   const qc = useQueryClient();
   const toast = useToast();
 
@@ -182,7 +182,6 @@ function EnterDialog({
     if (open) {
       setHandle("");
       setError(null);
-      setPage(0);
     }
   }, [open]);
 
@@ -224,15 +223,14 @@ function EnterDialog({
     if (then) setTimeout(then.run, 0);
   }
 
+  // One page (coin-26): what the demo is, the handle, then Cancel and the one primary.
   return (
     <Modal open={open} onOpenChange={onOpenChange} title="Try the demo">
-      {page === 0 ? <div className="cdx-enter-intro cdx-overlay-deck">
-        <div className="cdx-overlay-copy">
-          <p>{reason ?? "Pick a handle to launch coins and build your collection."}{MODE_COPY.enterGift ? ` ${MODE_COPY.enterGift}` : null}</p>
-          {MODE_COPY.accountNote ? <p>{MODE_COPY.accountNote}</p> : null}
-        </div>
-        <div className="cdx-overlay-actions"><span aria-live="polite">1 / 2</span><Button onClick={() => setPage(1)}>Choose a handle</Button></div>
-      </div> : <form onSubmit={submit} className="cdx-enter-form cdx-overlay-deck" noValidate>
+      <form onSubmit={submit} className="cdx-enter" noValidate>
+        <p className="cdx-enter__intro">
+          {reason ?? "Pick a handle to launch coins and build your collection."}
+          {MODE_COPY.enterGift ? ` ${MODE_COPY.enterGift}` : null}
+        </p>
         <Field
           label="Handle"
           htmlFor="handle"
@@ -258,8 +256,11 @@ function EnterDialog({
             aria-describedby="handle-help"
           />
         </Field>
-        <div className="cdx-enter-submit mdx-sheet-foot">
-          <Button variant="outline" onClick={() => setPage(0)}>Back</Button>
+        {MODE_COPY.accountNote ? <p className="cdx-enter__note">{MODE_COPY.accountNote}</p> : null}
+        <div className="cdx-overlay-actions mdx-sheet-foot">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
           <Button
             type="submit"
             disabled={!valid}
@@ -270,7 +271,7 @@ function EnterDialog({
             {intent ? intent.label : "Start the demo"}
           </Button>
         </div>
-      </form>}
+      </form>
     </Modal>
   );
 }
@@ -320,8 +321,10 @@ const feeRows = (liveOpen: boolean): Array<{ label: string; value: string }> => 
   : [{ label: "Coin trading", value: "Review the fee and price impact shown before confirming a trade." }];
 
 /**
- * The guide keeps all three steps, fees, legal links and motion settings on explicit pages.
- * The same bounded deck is used in desktop dialogs and phone sheets. Linkable with ?guide=1.
+ * The guide: the three steps, then costs and risks, then Calm motion, one step at a time. Every step sits in the
+ * same grid cell (the hidden ones invisible and inert), so the dialog keeps the tallest step's height and never
+ * jumps. "Step 2 of 5" on the left; Previous from step 2; Next, then Done (or Try the demo, signed out) as the one
+ * primary. The same deck in desktop dialogs and phone sheets. Linkable with ?guide=1.
  */
 function GuideDialog({
   open,
@@ -336,13 +339,93 @@ function GuideDialog({
   const liveOpen = useLiveLaunchOpen(open);
   const STEPS = liveOpen || !IS_SIM ? LIVE_STEPS : DEMO_STEPS;
   const FEE_ROWS = feeRows(liveOpen);
+  const [step, setStep] = useState(0);
+  const forward = useRef<HTMLButtonElement>(null);
+  const idBase = useId();
+  useEffect(() => {
+    if (open) setStep(0);
+  }, [open]);
+  const close = () => onOpenChange(false);
+  const pages: Array<{ key: string; title: string; body: ReactNode }> = [
+    ...STEPS.map((s) => ({ key: s.title, title: s.title, body: <p>{s.body}</p> })),
+    {
+      key: "fees",
+      title: "Costs and risks",
+      body: (
+        <>
+          {MODE_COPY.guideNote ? <p>{MODE_COPY.guideNote}</p> : null}
+          <dl className="cdx-guide__facts">
+            {FEE_ROWS.map((r) => (
+              <div key={r.label}>
+                <dt>{r.label}</dt>
+                <dd>{r.value}</dd>
+              </div>
+            ))}
+          </dl>
+          <TextLink to="/legal" hash="fees" onClick={close}>
+            Fees, terms and risks
+          </TextLink>
+        </>
+      ),
+    },
+    {
+      key: "settings",
+      title: "Make it yours",
+      body: (
+        <>
+          <p>Calm motion holds the cards still. Buttons and menus still respond.</p>
+          <CalmSwitch size="md" />
+        </>
+      ),
+    },
+  ];
+  const last = step === pages.length - 1;
+  const invite = last && !me;
+  const back = () => {
+    const next = step - 1;
+    setStep(next);
+    // Previous leaves with the first step: keep focus on the forward button, never <body>.
+    if (next === 0) requestAnimationFrame(() => forward.current?.focus({ preventScroll: true }));
+  };
+  const next = () => {
+    if (!last) return setStep(step + 1);
+    close();
+    // The demo dialog rises once the guide has left and handed focus back to its opener (so Escape returns there).
+    if (invite) window.setTimeout(onEnter, 260);
+  };
   return (
     <Modal open={open} onOpenChange={onOpenChange} title="How Launch a Card works" width={560}>
-      <div className="cdx-overlay-deck"><ViewportPages label="How Launch a Card works pages" onDone={() => onOpenChange(false)} pages={[
-        ...STEPS.map(s => <section key={s.title} className="cdx-overlay-copy"><h3>{s.title}</h3><p>{s.body}</p>{s.visual}</section>),
-        <section key="fees" className="cdx-overlay-copy"><h3>Costs and risks</h3>{MODE_COPY.guideNote ? <p>{MODE_COPY.guideNote}</p> : null}<dl>{FEE_ROWS.map(r => <div key={r.label}><dt className="font-semibold text-ink">{r.label}</dt><dd>{r.value}</dd></div>)}</dl><TextLink to="/legal" hash="fees" onClick={() => onOpenChange(false)}>Fees, terms and risks</TextLink></section>,
-        <section key="settings" className="cdx-overlay-copy"><h3>Make it yours</h3><CalmSwitch size="md" />{!me ? <Button block onClick={() => { onOpenChange(false); onEnter(); }}>{IS_SIM ? "Try the demo" : CONNECT_COPY.connect}</Button> : null}</section>,
-      ]} /></div>
+      <div className="cdx-guide">
+        <div className="cdx-guide__steps">
+          {pages.map((p, i) => (
+            <section
+              key={p.key}
+              className="cdx-guide__step cdx-overlay-copy"
+              aria-labelledby={`${idBase}-${i}`}
+              aria-hidden={i !== step || undefined}
+              inert={i !== step}
+              data-current={i === step || undefined}
+            >
+              <h3 id={`${idBase}-${i}`}>{p.title}</h3>
+              {p.body}
+            </section>
+          ))}
+        </div>
+        <div className="cdx-overlay-actions mdx-sheet-foot">
+          <p className="cdx-overlay-actions__note num" aria-live="polite">
+            Step {step + 1} of {pages.length}
+            <span className="sr-only">: {pages[step].title}</span>
+          </p>
+          {step > 0 ? (
+            <Button variant="outline" onClick={back}>
+              Previous
+            </Button>
+          ) : null}
+          <Button ref={forward} onClick={next}>
+            {invite ? (IS_SIM ? "Try the demo" : CONNECT_COPY.connect) : last ? "Done" : "Next"}
+          </Button>
+        </div>
+      </div>
     </Modal>
   );
 }

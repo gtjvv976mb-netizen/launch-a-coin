@@ -139,9 +139,9 @@ export function tierBurst(level: number, at?: { x: number; y: number }) {
   bigBurst(tierColors(level), at, { confetti: level >= 7, label: `${t.name} unlocked` });
 }
 
-/** After a successful launch: neon confetti and the burst. */
+/** After a successful launch: confetti and the burst in the card's own foil (gold and the holo stops, carddex-theme.css). */
 export function launchBurst(at?: { x: number; y: number }) {
-  bigBurst(["#3dffb5", "#38d9ff", "#ff3dce", "#ffe45c"], at, { confetti: true });
+  bigBurst(["#e8bd62", "#f6c6dd", "#f7eac2", "#c8f0de", "#dccdf5"], at, { confetti: true });
 }
 
 /** The center of an element on screen (for a burst from a card). */

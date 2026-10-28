@@ -1,13 +1,14 @@
 /**
- * The velvet stage (spec 4.10, 5.3), a lazy chunk: a night vitrine with a static spotlight, a warm floor glow and a
- * tier-tinted floor pool (never a reflection). The labeled case unboxes on open, breathes and turns slowly (25
- * deg/s) until someone touches it; Turn over and Close; Esc closes and focus returns to the opener (Radix). Built on
- * Radix Dialog, so isDialogOpen() sees it and the page's bodies sleep underneath.
+ * The Inspect stage (spec 4.10, 5.3), a lazy chunk, in the same shell as the 3D viewer (styles/screens/viewer.css):
+ * the flat ground, Close at the top right, Turn over (and Tilt to shine) in the bottom row. The labeled case unboxes
+ * on open, breathes and turns slowly (25 deg/s) until someone touches it; Esc closes and focus returns to the opener
+ * (Radix). Built on Radix Dialog, so isDialogOpen() sees it and the page's bodies sleep underneath.
  */
 import * as Dialog from "@radix-ui/react-dialog";
 import { useRef, type CSSProperties } from "react";
 
 import { tierForLevel } from "../../../lib/mintdex/tiers";
+import { Icon } from "../icons";
 import { cardDesign, type CardData } from "../MintCard";
 import { CaseScene } from "./CardCase";
 import { GyroChip } from "./GyroChip";
@@ -41,9 +42,8 @@ export default function InspectStage({
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
           <Dialog.Title className="sr-only">Inspect the {card.name} card</Dialog.Title>
-          <i className="mdx-inspect__spot" aria-hidden />
-          <i className="mdx-inspect__floor" aria-hidden />
           <Dialog.Close ref={close} className="mdx-inspect__btn mdx-inspect__close">
+            <Icon name="close" strokeWidth={2} />
             Close
           </Dialog.Close>
           <div className="mdx-inspect__stage" style={{ "--pool": pool } as CSSProperties}>
@@ -62,6 +62,7 @@ export default function InspectStage({
           </div>
           <div className="mdx-inspect__bar">
             <button type="button" className="mdx-inspect__btn" onClick={() => handle.current?.turnOver(1)}>
+              <Icon name="turn-over" strokeWidth={2} />
               Turn over
             </button>
             {/* "Tilt to shine" (iOS) in the bar, beside Turn over: never over the case or the bar. */}
