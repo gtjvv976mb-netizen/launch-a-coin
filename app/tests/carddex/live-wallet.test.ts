@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { ed25519 } from "@noble/curves/ed25519.js";
 import { parseLiveAmount, formatLiveAmount } from "../../src/components/carddex/live/amounts";
-import { base58, fromBase58, hexHash, LIVE_PROGRAMS, parseLiveTransaction, partiallySignPlan, toBase64, validateLivePlan, validateWalletResult, destroyEphemeralSigner, type ExpectedPlan, type TransactionPlan } from "../../src/components/carddex/live/transaction";
+import { base58, fromBase58, hexHash, LIVE_PROGRAMS, parseLiveTransaction, partiallySignPlan, toBase64, unsentStageNext, validateLivePlan, validateWalletResult, destroyEphemeralSigner, type ExpectedPlan, type TransactionPlan } from "../../src/components/carddex/live/transaction";
+import { liveModeOpen } from "../../src/components/carddex/live/mode";
 
 // Deterministic, unfunded test-only signers. No wallet, RPC or network is used.
 const creatorSeed = new Uint8Array(32).fill(3), assetSeed = new Uint8Array(32).fill(4);
@@ -109,5 +110,27 @@ describe("creator-wallet transaction commitments", () => {
     const signer = { address: mint, seed: assetSeed.slice() };
     destroyEphemeralSigner(signer);
     expect(signer.seed.every(value => value === 0)).toBe(true);
+  });
+});
+describe("after a signed transaction the server did not send", () => {
+  test("only an unsendable, unsaved stage is prepared again; any other refusal keeps the signed bytes to send again", () => {
+    expect(unsentStageNext({status: "prepared", nftSignature: null}, "token", true)).toBe("prepare");
+    expect(unsentStageNext({status: "prepared", nftSignature: null}, "token", false)).toBe("resend");
+    expect(unsentStageNext({status: "nft_pending", nftSignature: null}, "nft", true)).toBe("prepare");
+    expect(unsentStageNext({status: "nft_pending", nftSignature: null}, "nft", false)).toBe("resend");
+    // A saved signature is recovered, never replaced.
+    for (const unsendable of [true, false]) {
+      expect(unsentStageNext({status: "token_pending", nftSignature: null}, "token", unsendable)).toBeNull();
+      expect(unsentStageNext({status: "nft_pending", nftSignature: "s".repeat(88)}, "nft", unsendable)).toBeNull();
+      expect(unsentStageNext({status: "nft_pending", nftSignature: null}, "token", unsendable)).toBeNull();
+    }
+  });
+});
+describe("mainnet mode", () => {
+  test("opens for new launches or for saved-launch recovery alone, and stays closed while unknown", () => {
+    expect(liveModeOpen({ready: true, recoveryReady: true})).toBe(true);
+    expect(liveModeOpen({ready: false, recoveryReady: true})).toBe(true);
+    expect(liveModeOpen({ready: false, recoveryReady: false})).toBe(false);
+    expect(liveModeOpen(null)).toBe(false); expect(liveModeOpen(undefined)).toBe(false);
   });
 });

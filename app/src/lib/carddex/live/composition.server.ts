@@ -14,8 +14,8 @@ import type { LiveAssets, LiveComposeInput } from "./types";
 export const COMPOSITION_VERSION = "launchacard-canonical-v1";
 export async function loadRendererAsset(path: string): Promise<Uint8Array> {
   if (!/^\/(assets|fonts)\/[a-zA-Z0-9_./-]+$/.test(path) || path.includes("..") || path.includes("//")) throw new UserError("The card renderer requested an unsupported asset.");
-  const response = await bindings().ASSETS?.fetch(`${requireLiveConfig().origin}${path}`);
-  const bytes = response?.ok ? new Uint8Array(await response.arrayBuffer()) : await fetchPublicBytes(`${requireLiveConfig().origin}${path}`);
+  const response = await bindings().ASSETS?.fetch(`${requireLiveConfig("launch").origin}${path}`);
+  const bytes = response?.ok ? new Uint8Array(await response.arrayBuffer()) : await fetchPublicBytes(`${requireLiveConfig("launch").origin}${path}`);
   const reviewed = Object.values(reviewedDesigns).flatMap(design => [design.front, design.back]).find(asset => asset.path === path);
   if (path.startsWith("/assets/carddex/higgsfield/") && (!reviewed || await sha256(bytes) !== reviewed.sha256)) throw new UserError("The public card frame differs from the approved premium design.");
   if (path.startsWith("/assets/carddex/render/")) {
@@ -25,7 +25,7 @@ export async function loadRendererAsset(path: string): Promise<Uint8Array> {
   return bytes;
 }
 export async function composeLiveAssets(wallet: string, raw: LiveComposeInput, file: File): Promise<LiveAssets> {
-  requireLiveConfig(); walletBytes(wallet);
+  requireLiveConfig("launch"); walletBytes(wallet);
   const fields = normalizeLiveFields(raw);
   if (fields.tokenMint === wallet) throw new UserError("Generate a separate new token mint address.");
   if (file.size < 30 || file.size > 4 * 1024 * 1024) throw new UserError("Use creator artwork under 4 MB.");

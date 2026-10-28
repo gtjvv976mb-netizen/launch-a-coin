@@ -9,7 +9,9 @@ const EXT: Record<string, string> = {"image/png": "png", "image/jpeg": "jpg", "i
 const IMMUTABLE = "public, max-age=31536000, immutable";
 const MAX_BYTES = 12 * 1024 * 1024;
 function metadataDigest(sha: string) { return btoa(String.fromCharCode(...sha.match(/../g)!.map(byte => parseInt(byte, 16)))).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, ""); }
-export function assetUrl(sha: string, mime: string) { return mime === "application/json" ? `${requireLiveConfig().origin}/m/${metadataDigest(sha)}` : `${requireLiveConfig().origin}/api/live/assets/${sha}.${EXT[mime]}`; }
+export function assetUrl(sha: string, mime: string) { return mime === "application/json" ? `${requireLiveConfig("launch").origin}/m/${metadataDigest(sha)}` : `${requireLiveConfig("launch").origin}/api/live/assets/${sha}.${EXT[mime]}`; }
+/** Same length as every real token metadata URI: the origin, /m/ and a 43-character digest. */
+export function metadataUriPlaceholder() { return assetUrl("0".repeat(64), "application/json"); }
 export function sniffLiveImage(bytes: Uint8Array): string | null {
   if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return "image/png";
   if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image/jpeg";
@@ -17,7 +19,7 @@ export function sniffLiveImage(bytes: Uint8Array): string | null {
   return null;
 }
 export async function putPublicAsset(wallet: string, bytes: Uint8Array, mimeType: string): Promise<LiveAsset> {
-  requireLiveConfig();
+  requireLiveConfig("launch");
   if (!EXT[mimeType] || bytes.length === 0 || bytes.length > MAX_BYTES) throw new UserError("The public asset has an unsupported format or size.");
   const hash = await sha256(bytes), key = `live/${hash}.${EXT[mimeType]}`;
   const size = mimeType === "application/json" ? null : imageSize(bytes);
@@ -29,7 +31,7 @@ export async function putPublicAsset(wallet: string, bytes: Uint8Array, mimeType
   return {sha256: hash, url: assetUrl(hash, mimeType), mimeType, bytes: bytes.length};
 }
 export async function fetchPublicBytes(url: string, maxBytes = MAX_BYTES): Promise<Uint8Array> {
-  const {origin} = requireLiveConfig();
+  const {origin} = requireLiveConfig("launch");
   const parsed = new URL(url);
   if (parsed.origin !== origin || parsed.search || parsed.hash || parsed.username || parsed.password) throw new UserError("Public launch assets must use the configured Launch a Card origin.");
   // Workers rejects redirect:"error" before sending a request. Manual mode keeps

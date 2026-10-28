@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { composeLiveAssets } from "../../../lib/carddex/live/composition.server";
 import { liveTokenFromRequest, requireLiveWallet } from "../../../lib/carddex/live/auth.server";
-import { assertLiveOrigin } from "../../../lib/carddex/live/config.server";
+import { assertLiveOrigin, requireLiveConfig } from "../../../lib/carddex/live/config.server";
 import { UserError } from "../../../lib/mintdex/server/db.server";
 
 export const Route = createFileRoute("/api/live/compose")({server: {handlers: {POST: async ({request}) => {
   try {
-    assertLiveOrigin(request.headers.get("origin"));
+    assertLiveOrigin(request.headers.get("origin")); requireLiveConfig("launch");
     const wallet = await requireLiveWallet(liveTokenFromRequest(request));
     if (Number(request.headers.get("content-length") ?? 0) > 5 * 1024 * 1024) throw new UserError("The creator artwork exceeds the upload limit.");
     const form = await request.formData(), input = form.get("input"), artwork = form.get("artwork");

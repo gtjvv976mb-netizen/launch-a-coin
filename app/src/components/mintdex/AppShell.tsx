@@ -33,7 +33,7 @@ import { afterLoadIdle } from "./opened-once";
 import { Ticker } from "./Ticker";
 // The live launch sheet stays here (lazy chrome below) so the global CSS keeps its order.
 import "../../carddex-live.css";
-import { useLiveLaunchOpen } from "../carddex/live/readiness";
+import { useLiveRecoveryOpen } from "../carddex/live/readiness";
 import "../../royal-motion.css";
 import "../../carddex-viewport.css";
 import { GyroChip } from "./card3d/GyroChip";
@@ -1033,8 +1033,9 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
   const searchRef = useRef<HTMLInputElement>(null);
   const pending = useRoutePending();
   const path = useRouterState({ select: (s) => s.location.pathname });
-  // The mainnet banner and wallet chrome show only for an explicit mainnet choice while the owner has launches on.
-  const liveLaunch = useLiveLaunchOpen(useRouterState({ select: s => s.location.pathname === "/launch" && (s.location.search as { mode?: string }).mode === "live" }));
+  // The mainnet banner and wallet chrome show only for an explicit mainnet choice while the owner has launches, or
+  // at least saved-launch recovery, on.
+  const liveLaunch = useLiveRecoveryOpen(useRouterState({ select: s => s.location.pathname === "/launch" && (s.location.search as { mode?: string }).mode === "live" }));
 
   // Dynamic browser chrome and software keyboards resize the actual usable canvas.
   useEffect(() => {
