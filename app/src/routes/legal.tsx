@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Fragment, useCallback, useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
-import { z } from "zod";
+import { oneOf, searchSchema } from "../lib/mintdex/search";
 import { PageFrame, PageHeader, prefersReducedMotion } from "../components/mintdex/ui";
 import { LAMPORTS, LAUNCH_FEE, TRADE_FEE_BPS } from "../lib/mintdex/constants";
 import { pct } from "../lib/mintdex/copy";
@@ -8,8 +8,8 @@ import { pageHead } from "../lib/mintdex/seo";
 
 export const Route = createFileRoute("/legal")({
   // Old links (?tab=privacy) still land on their section of the one document.
-  validateSearch: z.object({
-    tab: z.enum(["terms", "fees", "privacy", "risks"]).optional().catch(undefined),
+  validateSearch: searchSchema({
+    tab: oneOf(["terms", "fees", "privacy", "risks"]),
   }),
   head: () => pageHead({
     path: "/legal",

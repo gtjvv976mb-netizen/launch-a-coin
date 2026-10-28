@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef } from "react";
-import { z } from "zod";
+import { num, oneOf, searchSchema, text } from "../lib/mintdex/search";
 import { MintCard } from "../components/mintdex/MintCard";
 import { View3DHost } from "../components/mintdex/card3d";
 import { Button, ButtonLink, PageFrame, Change } from "../components/mintdex/ui";
@@ -13,12 +13,12 @@ import { pageHead } from "../lib/mintdex/seo";
 import "../carddex.css";
 
 export const Route = createFileRoute("/discover")({
-  validateSearch: z.object({
-    q: z.string().max(40).optional().catch(undefined),
-    sort: z.enum(["trending", "mcap", "new", "next"]).optional().catch(undefined),
-    focus: z.number().optional().catch(undefined),
-    tier: z.number().optional().catch(undefined),
-    page: z.number().optional().catch(undefined),
+  validateSearch: searchSchema({
+    q: text(40),
+    sort: oneOf(["trending", "mcap", "new", "next"]),
+    focus: num(),
+    tier: num(),
+    page: num(),
   }),
   loader: () => listCoins({ data: {} }),
   shouldReload: ({ cause }) => cause !== "stay",

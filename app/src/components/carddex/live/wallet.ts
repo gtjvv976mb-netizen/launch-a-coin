@@ -37,7 +37,8 @@ function setActive(next: Active | null) {
   }
   publish();
 }
-function mountRegistry() {
+/** Holds the wallet registry open (AppShell keeps it mounted across pages); returns the release. */
+export function mountRegistry() {
   hostUsers++;
   if (!registry) {
     registry = getWallets();

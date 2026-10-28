@@ -23,7 +23,6 @@ import { CardBack, View3DHost, type Card3DHandle } from "../../mintdex/card3d";
 import { useClaimable } from "../../mintdex/cases";
 import { MintCard } from "../../mintdex/MintCard";
 import {
-  EmptyState,
   GridCaption,
   LabelNum,
   Modal,
@@ -33,6 +32,7 @@ import {
   TextLink,
   solFigure,
 } from "../../mintdex/ui";
+import { EmptyState } from "../../mintdex/empty-state";
 import { ChainCardPanel, unlockText } from "./ChainCardPanel";
 import { useViewer } from "./tx";
 import { APP_CLUSTER, NET_NAME } from "../../../lib/chain/env";

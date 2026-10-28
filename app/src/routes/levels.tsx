@@ -1,6 +1,6 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useId, useMemo, useState, type CSSProperties } from "react";
-import { z } from "zod";
+import { searchSchema, text } from "../lib/mintdex/search";
 import { HeroTurntable } from "../components/carddex/HeroTurntable";
 import { MintCard, type CardData } from "../components/mintdex/MintCard";
 import { PageControls, usePageCapacity } from "../components/carddex/Viewport";
@@ -20,13 +20,13 @@ import { ViewTabs, tabPanelProps } from "../components/carddex/ViewTabs";
 import "../carddex.css";
 
 export const Route = createFileRoute("/levels")({
-  validateSearch: z.object({
-    design: z.string().optional().catch(undefined),
-    quote: z.string().optional().catch(undefined),
-    collection: z.string().optional().catch(undefined),
-    icon: z.string().optional().catch(undefined),
-    edition: z.string().optional().catch(undefined),
-    view3d: z.string().optional().catch(undefined),
+  validateSearch: searchSchema({
+    design: text(),
+    quote: text(),
+    collection: text(),
+    icon: text(),
+    edition: text(),
+    view3d: text(),
   }),
   head: () =>
     pageHead({

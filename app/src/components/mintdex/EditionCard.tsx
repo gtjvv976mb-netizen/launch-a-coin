@@ -7,6 +7,7 @@ import { frameLayout, tierForLevel } from "../../lib/mintdex/tiers";
 import { CardPrint, boxStyle } from "./CardPrint";
 import { GeneratedCardFront, generatedCardStyle } from "../carddex/GeneratedCardArt";
 import { useImageFailure } from "./image-state";
+import "../../editions-card.css";
 
 export type EditionCardProps = {
   edition: Edition | EditionKey;

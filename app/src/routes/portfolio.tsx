@@ -9,9 +9,10 @@ import { revPoll, useAction } from "../components/mintdex/hooks";
 import { MintCard } from "../components/mintdex/MintCard";
 import { useMe, useSessionUi } from "../components/mintdex/session";
 import {
-  Button, ButtonLink, Change, EmptyState, Num, PageFrame, PageHeader,
+  Button, ButtonLink, Change, Num, PageFrame, PageHeader,
   Pager, Skeleton, Tabs, TextLink, Thumb,
 } from "../components/mintdex/ui";
+import { EmptyState } from "../components/mintdex/empty-state";
 import { getCardDesign } from "../lib/carddex/designs";
 import { getPairAsset } from "../lib/carddex/pairs";
 import { quoteAtoms } from "../lib/carddex/quote-display";

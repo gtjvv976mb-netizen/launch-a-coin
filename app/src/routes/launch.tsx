@@ -1,5 +1,7 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
+  lazy,
+  Suspense,
   useEffect,
   useCallback,
   useId,
@@ -28,14 +30,14 @@ import { WORDS } from "../lib/mintdex/copy";
 import { quoteBuy } from "../lib/mintdex/curve";
 import { sol, tokens } from "../lib/mintdex/format";
 import { pageHead, sentences } from "../lib/mintdex/seo";
-import { z } from "zod";
+import { oneOf, searchSchema, text } from "../lib/mintdex/search";
 import { LaunchCardPreview } from "../components/carddex/live/LaunchCardPreview";
 import { CardDesignPicker } from "../components/carddex/CardDesignPicker";
 import { DEFAULT_CARD_DESIGN, getCardDesign, isCardDesignKey } from "../lib/carddex/designs";
 import { allowedQuotesForDesign, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, isPairAssetKey, type PairAssetKey } from "../lib/carddex/pairs";
 import { formatQuoteAmount, initialQuoteReserves, maxInitialBuyQuoteAtoms, parseQuoteAmount, quoteMetrics } from "../lib/carddex/quote-simulation";
 import { QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
-import { LiveLaunchPanel, type LiveLaunchHandle } from "../components/carddex/live/LiveLaunchPanel";
+import type { LiveLaunchHandle } from "../components/carddex/live/LiveLaunchPanel";
 import { liveReadinessQuery, useLiveLaunchOpen } from "../components/carddex/live/readiness";
 import { parseLiveAmount } from "../components/carddex/live/amounts";
 import { PagedMessage } from "../components/carddex/live/PagedMessage";
@@ -44,8 +46,11 @@ import "../carddex-live.css";
 import { ViewTabs } from "../components/carddex/ViewTabs";
 import "../carddex-launch.css";
 
+// The mainnet launch panel (wallet signing, ed25519) loads only in live mode, so the test-mode studio skips it.
+const LiveLaunchPanel = lazy(() => import("../components/carddex/live/LiveLaunchPanel").then((m) => ({ default: m.LiveLaunchPanel })));
+
 export const Route = createFileRoute("/launch")({
-  validateSearch: z.object({ design: z.string().optional().catch(undefined), quote: z.string().optional().catch(undefined), mode: z.enum(["live", "demo"]).optional().catch(undefined) }),
+  validateSearch: searchSchema({ design: text(), quote: text(), mode: oneOf(["live", "demo"]) }),
   // Readiness is read on the server, so the HTML is drawn in the mode the page will keep (no test-then-mainnet
   // swap after hydration). It is shared with every readiness reader through the query cache, and switching
   // between Mainnet and Demo (a search change) reuses it instead of asking again.
@@ -785,7 +790,7 @@ function Launch() {
                 Content rules
               </TextLink>
             </p>
-            {live ? <LiveLaunchPanel ref={liveRef} card={previewCard} draft={ready && preparedArt && liveDev !== null ? { name: name.trim(), symbol: ticker, description: lore.trim(), website: website.trim(), xUrl: xUrl.trim(), cardTemplate: designKey, quoteAssetKey: quoteKey, quoteMint: quoteAsset.mint, initialBuyQuoteBaseUnits: liveDev, artwork: preparedArt } : null} pairPending={pairPending} onLockedChange={setLiveLocked} onIntentLoaded={restoreLiveIntent} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /> : <>
+            {live ? <Suspense fallback={null}><LiveLaunchPanel ref={liveRef} card={previewCard} draft={ready && preparedArt && liveDev !== null ? { name: name.trim(), symbol: ticker, description: lore.trim(), website: website.trim(), xUrl: xUrl.trim(), cardTemplate: designKey, quoteAssetKey: quoteKey, quoteMint: quoteAsset.mint, initialBuyQuoteBaseUnits: liveDev, artwork: preparedArt } : null} pairPending={pairPending} onLockedChange={setLiveLocked} onIntentLoaded={restoreLiveIntent} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /></Suspense> : <>
             <dl className="cdx-launch-cost" aria-label="Demo launch cost" aria-live="polite">
               <div><dt>Demo launch fee</dt><dd>{sol(LAUNCH_FEE, 3)} test SOL</dd></div>
               {devQuote?.ok ? <div><dt>Initial buy</dt><dd>{formatQuoteAmount(devQuote.solIn, quoteKey)} test {quoteAsset.symbol}</dd></div> : null}

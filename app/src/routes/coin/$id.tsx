@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState } from "react";
-import { z } from "zod";
+import { num, oneOf, searchSchema } from "../../lib/mintdex/search";
 
 import {
   CoinCase,
@@ -19,7 +19,8 @@ import {
 } from "../../components/mintdex/coin";
 import { revPoll } from "../../components/mintdex/hooks";
 import { LaunchedDialog } from "../../components/mintdex/trust";
-import { EmptyState, Ledge, Modal, Tabs, TextLink, prefersReducedMotion } from "../../components/mintdex/ui";
+import { Ledge, Modal, Tabs, TextLink, prefersReducedMotion } from "../../components/mintdex/ui";
+import { EmptyState } from "../../components/mintdex/empty-state";
 import { ChainCoinNotFound } from "../../components/chain/pages/ChainCoinNotFound";
 import { ChainCoinView } from "../../components/chain/pages/ChainCoinPage";
 import { chainCoinHead, chainCoinLoader, type ChainCoinRoute } from "../../lib/chain/data";
@@ -52,9 +53,9 @@ const TAB_OPTIONS: Array<{ value: CoinTab; label: string }> = [
  * ?minted=1: the launcher just minted this card, so the page opens "Your card is live" once (P1-12).
  * ?tab=card|chart|trades: the phone section that shows (Trade when absent). Desktop shows everything.
  */
-const coinSearch = z.object({
-  minted: z.number().int().optional().catch(undefined),
-  tab: z.enum(["trade", "card", "chart", "trades", "details"]).optional().catch(undefined),
+const coinSearch = searchSchema({
+  minted: num(true),
+  tab: oneOf(["trade", "card", "chart", "trades", "details"]),
 });
 
 export const Route = createFileRoute("/coin/$id")({

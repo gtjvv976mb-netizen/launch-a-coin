@@ -23,7 +23,9 @@ import { manifestFileName } from "../lib/mintdex/manifest";
 import { isDevnetTestSite } from "../lib/mintdex/site-host";
 import { PageNotFound } from "../components/mintdex/PageStatus";
 import { Button, ToastProvider } from "../components/mintdex/ui";
-import { markHydrated, View3DProvider } from "../components/mintdex/card3d";
+// Direct files, not the card3d barrel, so the card engine stays in the route chunks that draw cards.
+import { markHydrated } from "../components/mintdex/card3d/motion3d";
+import { View3DProvider } from "../components/mintdex/card3d/view3d";
 import { ROUTE_ERROR } from "../lib/mintdex/copy";
 import { SITE_DESCRIPTION, SITE_OG_IMAGE, SITE_OG_IMAGE_ALT, absoluteUrl } from "../lib/mintdex/seo";
 import { readViewport } from "../lib/mintdex/viewport";

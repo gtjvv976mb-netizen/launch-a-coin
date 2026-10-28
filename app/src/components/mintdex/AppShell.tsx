@@ -1,12 +1,14 @@
-import * as Popover from "@radix-ui/react-popover";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import {
+  lazy,
+  Suspense,
   useEffect,
   useId,
   useMemo,
   useRef,
   useState,
+  type ComponentProps,
   type CSSProperties,
   type FormEvent,
   type KeyboardEvent as ReactKeyboardEvent,
@@ -27,15 +29,15 @@ import { writeViewport } from "../../lib/mintdex/viewport";
 import { setMe } from "./hooks";
 import { useMe, useSessionUi } from "./session";
 import { Sheet } from "./sheet";
+import { afterLoadIdle } from "./opened-once";
 import { Ticker } from "./Ticker";
-import { LiveWalletButton } from "../carddex/live/LiveWalletButton";
-import { LiveLaunchGuide } from "../carddex/live/LiveLaunchGuide";
-import { useLiveWallet } from "../carddex/live/wallet";
+// The live launch sheet stays here (lazy chrome below) so the global CSS keeps its order.
+import "../../carddex-live.css";
 import { useLiveLaunchOpen } from "../carddex/live/readiness";
 import "../../royal-motion.css";
 import "../../carddex-viewport.css";
 import { GyroChip } from "./card3d/GyroChip";
-import { ConfirmDialog } from "./trust";
+import { ConfirmDialog } from "./confirm";
 import { ViewTabs, tabPanelProps } from "../carddex/ViewTabs";
 import {
   Avatar,
@@ -50,6 +52,11 @@ import {
   useToast,
   type GenIconName,
 } from "./ui";
+
+// Live launch chrome shows only on /launch?mode=live. Its wallet code (wallet-standard, ed25519) loads on demand so
+// it stays out of every page's first download.
+const LiveWalletButton = lazy(() => import("../carddex/live/LiveWalletButton").then((m) => ({ default: m.LiveWalletButton })));
+const LiveLaunchGuide = lazy(() => import("../carddex/live/LiveLaunchGuide").then((m) => ({ default: m.LiveLaunchGuide })));
 
 type TabPath = "/" | "/discover" | "/launch" | "/market" | "/levels" | "/portfolio";
 
@@ -431,7 +438,7 @@ function UnreadBadge({ count, dot = false }: { count: number; dot?: boolean }) {
   );
 }
 
-function useWalletActions(close: () => void) {
+export function useWalletActions(close: () => void) {
   const toast = useToast();
   const qc = useQueryClient();
   const { openEnter } = useSessionUi();
@@ -483,7 +490,7 @@ function useWalletActions(close: () => void) {
 }
 
 /** The faucet row's words: claim now, when it opens again, or the balance it opens under. */
-function faucetLabelOf(me: NonNullable<Me>) {
+export function faucetLabelOf(me: NonNullable<Me>) {
   return me.canFaucet
     ? FLOW.claimFaucet
     : me.balance < FAUCET_BELOW && me.faucetReadyAt
@@ -492,7 +499,7 @@ function faucetLabelOf(me: NonNullable<Me>) {
 }
 
 /** Start over (P0-7): leaving a test account for good, behind a dialog that says exactly what is lost. */
-function StartOverDialog({
+export function StartOverDialog({
   handle,
   open,
   onOpenChange,
@@ -526,12 +533,36 @@ function StartOverDialog({
   );
 }
 
+const loadWalletMenu = () => import("./wallet-menu");
+const WalletMenu = lazy(loadWalletMenu);
+
+/** The signed-in rail wallet's face. The Radix menu around it (wallet-menu.tsx) is a lazy chunk. */
+export function WalletButton({ me, ...rest }: { me: NonNullable<Me> } & ComponentProps<"button">) {
+  return (
+    <button
+      type="button"
+      {...rest}
+      className="flex h-[52px] items-center gap-3 rounded-pop bg-sheet px-3 text-left shadow-raise transition-[box-shadow,translate] duration-(--t-base) ease-room hover:-translate-y-px hover:shadow-lift data-[state=open]:shadow-lift"
+    >
+      <Avatar handle={me.handle} />
+      <span className="min-w-0">
+        <span className="block truncate text-[13px] leading-[1.3] text-slate">
+          @{me.handle}
+        </span>
+        <span className="block leading-[1.2]">
+          <Num size="md" watch={me.balance} tick>
+            {sol(me.balance, 2)}
+          </Num>
+          <span className="text-[13px] font-medium text-slate"> SOL</span>
+        </span>
+      </span>
+    </button>
+  );
+}
+
 function WalletBlock() {
   const me = useMe();
   const { openEnter } = useSessionUi();
-  const [open, setOpen] = useState(false);
-  const [confirm, setConfirm] = useState(false);
-  const { faucet, leave, busy, leaving } = useWalletActions(() => setOpen(false));
 
   if (!me) {
     return (
@@ -546,67 +577,11 @@ function WalletBlock() {
     );
   }
 
-  const faucetLabel = faucetLabelOf(me);
-
+  // Server HTML keeps its menu markup while the chunk loads; a fresh sign-in shows the plain button meanwhile.
   return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger asChild>
-        <button
-          type="button"
-          className="flex h-[52px] items-center gap-3 rounded-pop bg-sheet px-3 text-left shadow-raise transition-[box-shadow,translate] duration-(--t-base) ease-room hover:-translate-y-px hover:shadow-lift data-[state=open]:shadow-lift"
-        >
-          <Avatar handle={me.handle} />
-          <span className="min-w-0">
-            <span className="block truncate text-[13px] leading-[1.3] text-slate">
-              @{me.handle}
-            </span>
-            <span className="block leading-[1.2]">
-              <Num size="md" watch={me.balance} tick>
-                {sol(me.balance, 2)}
-              </Num>
-              <span className="text-[13px] font-medium text-slate"> SOL</span>
-            </span>
-          </span>
-        </button>
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Content
-          side="top"
-          align="start"
-          sideOffset={8}
-          className="mdx-menu mdx-pop z-50 flex w-[var(--radix-popover-trigger-width)] min-w-[200px] flex-col outline-none"
-        >
-          <Link to="/portfolio" className="mdx-menu-item" onClick={() => setOpen(false)}>
-            Open portfolio
-          </Link>
-          <button
-            type="button"
-            className="mdx-menu-item"
-            onClick={faucet}
-            disabled={!me.canFaucet || busy}
-          >
-            {busy ? "Claiming..." : faucetLabel}
-          </button>
-          <button
-            type="button"
-            className="mdx-menu-item"
-            onClick={() => {
-              setOpen(false);
-              setConfirm(true);
-            }}
-          >
-            Start over
-          </button>
-        </Popover.Content>
-      </Popover.Portal>
-      <StartOverDialog
-        handle={me.handle}
-        open={confirm}
-        onOpenChange={setConfirm}
-        leaving={leaving}
-        leave={leave}
-      />
-    </Popover.Root>
+    <Suspense fallback={<WalletButton me={me} />}>
+      <WalletMenu me={me} />
+    </Suspense>
   );
 }
 
@@ -636,7 +611,7 @@ function Rail({
       <div className="mt-auto flex flex-col gap-3 pt-6">
         {/* Two quiet links, each at least 24px tall (WCAG 2.5.8 target size). */}
         <div className="flex flex-col items-start gap-0.5">
-          {liveLaunch ? <LiveLaunchGuide /> : <button
+          {liveLaunch ? <Suspense fallback={null}><LiveLaunchGuide /></Suspense> : <button
             type="button"
             onClick={openGuide}
             className="mdx-link inline-flex min-h-6 items-center text-[14px]"
@@ -650,7 +625,7 @@ function Rail({
             Terms, privacy and risks
           </Link>
         </div>
-        {liveLaunch ? <LiveWalletButton /> : IS_SIM ? <WalletBlock /> : <ChainRailWallet />}
+        {liveLaunch ? <Suspense fallback={null}><LiveWalletButton /></Suspense> : IS_SIM ? <WalletBlock /> : <ChainRailWallet />}
         {!liveLaunch && me && MODE_COPY.walletNote ? (
           <p className="text-[12px] leading-[1.3] text-slate">{MODE_COPY.walletNote}</p>
         ) : null}
@@ -852,7 +827,7 @@ function MobileHeader({ liveLaunch = false }: { liveLaunch?: boolean }) {
       </Link>
       <div className="-mr-1.5 ml-auto flex items-center gap-1">
         <SearchButton />
-        {liveLaunch ? <><LiveLaunchGuide compact /><LiveWalletButton compact quiet /></> : !IS_SIM ? (
+        {liveLaunch ? <Suspense fallback={null}><LiveLaunchGuide compact /><LiveWalletButton compact quiet /></Suspense> : !IS_SIM ? (
           <ChainHeaderAccount />
         ) : me ? (
           <button
@@ -1039,8 +1014,22 @@ function LocalDemoNote() {
   return <p role="note" data-testid="local-demo-note" className="flex-none border-b border-hairline bg-plinth px-4 py-1.5 text-center text-[12px] leading-5 text-slate"><span className="font-semibold text-ink">Demo</span><span aria-hidden> · </span>Test SOL and simulated trading.</p>;
 }
 
+/** Keeps the live wallet registry open across pages, loaded once the page has loaded and is idle. */
+function useLiveWalletRegistry() {
+  useEffect(() => {
+    let release: (() => void) | undefined;
+    let gone = false;
+    const cancel = afterLoadIdle(() => void import("../carddex/live/wallet").then((m) => { if (!gone) release = m.mountRegistry(); }));
+    return () => {
+      gone = true;
+      cancel();
+      release?.();
+    };
+  }, []);
+}
+
 export function AppShell({ children, devnetSite = false }: { children: ReactNode; devnetSite?: boolean }) {
-  useLiveWallet();
+  useLiveWalletRegistry();
   const searchRef = useRef<HTMLInputElement>(null);
   const pending = useRoutePending();
   const path = useRouterState({ select: (s) => s.location.pathname });
