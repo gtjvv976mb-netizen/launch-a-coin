@@ -1,19 +1,15 @@
 /* Portfolio (/portfolio) screen sheet. Owned by the "coin" screen group (.taste-skill/restyle/ownership.md). Layer: cdx
- * (styles.css). Tokens: carddex-theme.css. A list page: it grows with its content and main scrolls (no viewport pager).
- * From 1024 the coins and the cards sit side by side with the balances under the coins; below, one ?tab= section. */
-
-/* The page grows with its lists instead of fitting the viewport (browse-02). */
-.cdx-app.cdx-viewport .cdx-viewport-main > .cdx-portfolio { height: auto; min-height: 100%; }
+ * (styles.css). Tokens: carddex-theme.css. A list page with no tabs (density R4): it grows with its content and main
+ * scrolls once; nothing here scrolls on its own. The KPI strip, then Coins, Cards and Test balances side by side from
+ * 1280 (coins and cards beside each other, the balances under them, from 768; one column on phones). Each list shows
+ * its first rows, then one "Show all" that expands in place. */
 .cdx-portfolio { gap: var(--gap-page); }
 .cdx-portfolio .mdx-pagehead__right { gap: 12px; }
 
-/* ---- the figures: total value leads (30px) with its 24h move; test SOL, coins and cards beside it */
+/* ---- the figures: one strip. Total value leads (30px) with its 24h move; test SOL, coins and cards beside it */
 .cdx-portfolio__kpis { flex: none; grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr)); }
-.cdx-portfolio__kpis .mdx-kpi { padding: 12px 20px; }
-.cdx-portfolio__kpis .mdx-kpi:not([data-lead]) .mdx-kpi__value .num { font-size: var(--text-title); line-height: 26px; }
+.cdx-portfolio__kpis .mdx-kpi:not([data-lead]) .mdx-kpi__value > .num { font-size: var(--text-title); line-height: 26px; }
 .cdx-portfolio__chg { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-caption); color: var(--color-slate); }
-.cdx-portfolio__count { color: var(--color-slate); }
-.cdx-portfolio .mdx-tabs__tab[data-selected] .cdx-portfolio__count { color: var(--color-ink); }
 
 /* Loading: each value a flat bar at its real size (no layout shift when the data lands). */
 .cdx-bar { display: inline-block; vertical-align: middle; border-radius: var(--radius-chip); }
@@ -25,40 +21,40 @@
 .cdx-portfolio .mdx-skeleton::after { content: none; }
 
 /* ---- sections */
-.cdx-portfolio__tabs { flex: none; }
-.cdx-portfolio__grid { display: flex; min-width: 0; flex-direction: column; gap: 16px; }
+.cdx-portfolio__grid { display: grid; min-width: 0; grid-template-columns: minmax(0, 1fr); align-items: start; gap: var(--gap-section); }
 .cdx-portfolio__panel {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--gap-head);
   padding: var(--pad-panel);
   border-radius: var(--radius-panel);
   background: var(--color-surface);
 }
-.cdx-portfolio__more { display: flex; flex-direction: column; align-items: center; gap: 8px; padding-top: 16px; }
-.cdx-portfolio__line { padding-block: 16px 8px; font-size: var(--text-body); color: var(--color-slate); }
+/* Show all / Show fewer: a quiet text button on the list's left edge (its label aligned with the rows). */
+.cdx-portfolio__more { display: flex; min-height: var(--hit); align-items: center; margin-left: -12px; }
+.cdx-portfolio__caption { padding-top: 8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-placeholder); }
 
-/* ---- holdings: whole-row links, two lines in narrow panes, four columns in wide ones (container query) */
+/* ---- holdings: whole-row links, two lines in narrow panes, one line of four columns in wide ones (container query) */
 .cdx-holdings { container-type: inline-size; min-width: 0; }
 .cdx-holdings__head { display: none; }
 .cdx-holding {
   position: relative;
   isolation: isolate;
   display: grid;
-  min-height: 64px;
-  grid-template-columns: 40px minmax(0, 1fr) auto;
+  min-height: 52px;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  padding-block: 12px;
+  padding-block: 8px;
   color: var(--color-ink);
 }
 /* Rules sit between square rows; the hover tint is a rounded layer behind the row, so the rules never bend (browse-17). */
-.cdx-holding + .cdx-holding { border-top: 1px solid var(--color-rule); }
+.cdx-holding + .cdx-holding { border-top: 1px solid var(--color-rule); } /* taste-skill-ignore: the rules between holdings rows (a table drawn as links) */
 .cdx-holding::before {
   content: "";
   position: absolute;
-  inset: 4px -8px;
+  inset: 2px -8px;
   z-index: -1;
   border-radius: var(--radius-row);
   background: var(--color-raised);
@@ -71,7 +67,7 @@
 }
 .cdx-holding:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; border-radius: var(--radius-row); }
 .cdx-holding:active::before { opacity: 1; }
-.cdx-holding__thumb { display: block; width: 40px; height: 40px; border-radius: 11px; }
+.cdx-holding__thumb { display: block; width: 32px; height: 32px; border-radius: 9px; }
 .cdx-holding__id { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
 .cdx-holding__name { overflow: hidden; font-size: var(--text-body); font-weight: 600; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
 .cdx-holding__sub { overflow: hidden; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); text-overflow: ellipsis; white-space: nowrap; }
@@ -84,14 +80,21 @@
 @container (min-width: 480px) {
   .cdx-holdings__head,
   .cdx-holding {
-    grid-template-columns: 40px minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 72px;
-    gap: 16px;
+    grid-template-columns: 24px minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 64px;
+    gap: 12px;
   }
+  .cdx-holding { min-height: var(--row-h); padding-block: 4px; }
+  /* !important: Thumb sizes itself inline (its 32px narrow-row size); a one-line row takes the 24px thumb. */
+  .cdx-holding .mdx-thumb,
+  .cdx-holding__thumb { width: 24px !important; height: 24px !important; border-radius: 7px !important; }
+  .cdx-holding__id { flex-direction: row; align-items: baseline; gap: 8px; }
+  .cdx-holding__name { flex: 0 1 auto; }
+  .cdx-holding__sub { flex: 1 1 0; min-width: 0; }
   .cdx-holdings__head {
     display: grid;
     height: 32px;
     align-items: center;
-    border-bottom: 1px solid var(--color-hairline);
+    border-bottom: 1px solid var(--color-hairline); /* taste-skill-ignore: the holdings table's head rule */
     font-size: var(--text-caption);
     font-weight: 500;
     color: var(--color-slate);
@@ -102,18 +105,14 @@
   .cdx-holding__chg { display: block; text-align: right; }
   .cdx-holding__design { display: inline; }
   .cdx-holding__held { font-size: var(--text-body); }
+  .cdx-holding__value { flex-direction: row; justify-content: flex-end; }
   .cdx-holding__held-sub,
   .cdx-holding__chg-sub { display: none; }
   .cdx-holding__chg { font-size: var(--text-body); }
 }
 
-/* ---- cards: tiles on the card's own width, so the View in 3D chip sits on the card's corner (browse-05) */
-.cdx-portfolio__cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(144px, 1fr));
-  gap: 24px 16px;
-  padding: 12px 4px 4px;
-}
+/* ---- cards: an auto-fill grid of tiles at least --tile-min-design wide, the View in 3D chip on the card's corner */
+.cdx-portfolio__cards { row-gap: 20px; padding: 8px 4px 4px; }
 .cdx-portfolio__tile { min-width: 0; }
 .cdx-portfolio__card { display: flex; min-width: 0; flex-direction: column; gap: 12px; color: var(--color-ink); }
 .cdx-portfolio__cap { display: flex; min-width: 0; flex-direction: column; gap: 2px; padding-inline: 2px; }
@@ -127,52 +126,59 @@
  * card itself is the colour. */
 .cdx-portfolio .mdx-card3d__halo { display: none !important; }
 
-/* ---- test balances: a table of rules and alignment */
+/* ---- test balances: a table of rules and alignment at the list row height, numbers right-aligned and tabular */
 .cdx-balances { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: var(--text-body); }
 .cdx-balances th,
-.cdx-balances td { height: 44px; padding: 0; border-bottom: 1px solid var(--color-rule); }
+.cdx-balances td { height: var(--row-h); padding: 0; border-bottom: 1px solid var(--color-rule); }
 .cdx-balances thead th { height: 32px; border-bottom-color: var(--color-hairline); font-size: var(--text-caption); font-weight: 500; text-align: left; color: var(--color-slate); }
+.cdx-balances thead th:first-child { width: 46%; }
 .cdx-balances tbody tr:last-child > * { border-bottom: 0; }
-.cdx-balances tbody th { font-weight: 400; text-align: left; }
-.cdx-balances .cdx-balances__n { width: 28%; text-align: right; }
+.cdx-balances .cdx-balances__n { width: 27%; padding-left: 8px; text-align: right; font-variant-numeric: tabular-nums; }
+.cdx-balances tbody th { max-width: 0; overflow: hidden; font-weight: 400; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.cdx-balances tbody th:focus { outline: none; }
+.cdx-balances tbody th:focus-visible { outline: 2px solid var(--color-zap); outline-offset: -2px; }
 .cdx-balances__sym { font-weight: 600; color: var(--color-ink); }
-.cdx-balances tbody th { max-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cdx-balances__name { margin-left: 8px; color: var(--color-slate); }
 
 /* ---- signed out: the coins frame (its header row) holds the collection invitation */
 .cdx-portfolio--out .cdx-portfolio-empty { min-height: 0; padding-block: 0 16px; }
 
 /* ================================================================ arrangements */
-@media (max-width: 1023.98px) {
-  .cdx-portfolio[data-tab] [data-section] { display: none; }
-  .cdx-portfolio[data-tab="coins"] [data-section="coins"],
-  .cdx-portfolio[data-tab="cards"] [data-section="cards"],
-  .cdx-portfolio[data-tab="balances"] [data-section="balances"] { display: flex; }
-}
 @media (max-width: 767.98px) {
-  .cdx-portfolio { gap: 16px; }
   .cdx-portfolio__kpis--out { display: none; }
-  /* The total takes the first row; test SOL, coins and cards share the second, split by hairlines. */
+  /* The total takes the first row; test SOL, coins and cards share the second, split by hairlines, without subs. */
   .cdx-portfolio__kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .cdx-portfolio__kpis .mdx-kpi { padding: 12px 16px; }
-  .cdx-portfolio__kpis .mdx-kpi:nth-child(n) { grid-column: auto; box-shadow: none; border-top: 1px solid var(--color-hairline); } /* taste-skill-ignore: clears the primitive's two-column hairlines */
-  .cdx-portfolio__kpis .mdx-kpi[data-lead] { grid-column: 1 / -1; border-top: 0; }
-  .cdx-portfolio__kpis .mdx-kpi:nth-child(n + 3) { border-left: 1px solid var(--color-hairline); }
-  .cdx-portfolio__kpis .mdx-kpi:not([data-lead]) .mdx-kpi__value .num { font-size: var(--text-lead); line-height: 24px; }
-  .cdx-portfolio__panel { padding: 8px 16px; }
-  .cdx-portfolio__cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 16px; padding-top: 16px; }
+  .cdx-portfolio__kpis .mdx-kpi[data-lead] { grid-column: 1 / -1; }
+  .cdx-portfolio__kpis .mdx-kpi:nth-child(2) { box-shadow: inset 0 1px 0 var(--color-hairline); } /* taste-skill-ignore: the strip's row hairline */
+  .cdx-portfolio__kpis .mdx-kpi:nth-child(n + 3) { box-shadow: inset 1px 1px 0 var(--color-hairline); } /* taste-skill-ignore: the strip's cell hairlines */
+  .cdx-portfolio__kpis .mdx-kpi:not([data-lead]) .mdx-kpi__value > .num { font-size: var(--text-lead); line-height: 24px; }
+  .cdx-portfolio__kpis .mdx-kpi:not([data-lead]) .mdx-kpi__sub { display: none; }
+  /* A third of the phone's width: the loading bar keeps inside its cell. */
+  .cdx-portfolio__kpis .mdx-kpi:not([data-lead]) .cdx-bar--kpi { width: 64px; height: 20px; }
 }
-@media (min-width: 1024px) {
-  .cdx-portfolio__tabs { display: none; }
+/* 768 to 1279: coins beside cards, the balances under both at full width. */
+@media (min-width: 768px) {
   .cdx-portfolio__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) clamp(320px, 34%, 392px);
-    grid-template-areas: "coins cards" "balances cards";
-    grid-template-rows: auto 1fr;
-    align-items: start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas: "coins cards" "balances balances";
   }
   .cdx-portfolio__coins { grid-area: coins; }
   .cdx-portfolio__deck { grid-area: cards; }
   .cdx-portfolio__balances { grid-area: balances; }
-
+}
+/* 1280 up: three columns, coins | cards | balances. */
+@media (min-width: 1280px) {
+  .cdx-portfolio__grid {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) clamp(340px, 28%, 420px);
+    grid-template-areas: "coins cards balances";
+  }
+}
+/* A new account (no coins, no cards) from 1024: the two one-line empty states stack beside the balances. */
+@media (min-width: 1024px) {
+  .cdx-portfolio__grid:has(> [data-section="coins"][data-empty]):has(> [data-section="cards"][data-empty]) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    /* The second row takes the balances' extra height, so the cards panel sits right under the coins panel. */
+    grid-template-rows: auto 1fr;
+    grid-template-areas: "coins balances" "cards balances";
+  }
 }
