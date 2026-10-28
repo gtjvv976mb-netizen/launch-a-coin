@@ -10,6 +10,8 @@ import { listCoins } from "../lib/mintdex/api";
 import { getCardDesign } from "../lib/carddex/designs";
 import { marketCapText } from "../lib/carddex/quote-display";
 import { pageHead } from "../lib/mintdex/seo";
+import { discoverGrid } from "../lib/mintdex/viewport";
+import { useLoaderViewport } from "../components/mintdex/hooks";
 import "../carddex.css";
 
 export const Route = createFileRoute("/discover")({
@@ -61,7 +63,7 @@ function Discover() {
         ),
     [data, query, search.sort],
   );
-  const grid = usePageCapacity({ rowHeight:300, minWidth:190, maxColumns:4, maxRows:2 });
+  const grid = usePageCapacity({ rowHeight:300, minWidth:190, maxColumns:4, maxRows:2, initial: discoverGrid(useLoaderViewport()) });
   const pages = Math.max(1, Math.ceil(coins.length / grid.count));
   const page = Math.min(Math.max(0, (search.page ?? 1) - 1), pages - 1);
   const visible = coins.slice(page * grid.count, (page + 1) * grid.count);
@@ -113,7 +115,7 @@ function Discover() {
         </select>
       </div>
       <div ref={grid.ref} className="cdx-token-grid" style={{"--page-columns":grid.columns,"--page-rows":grid.rows} as CSSProperties}>
-        {visible.map((c) => (
+        {visible.map((c, i) => (
           <article key={c.id} className="cdx-token-cell">
             <View3DHost item={{ id: c.id, card: c }} list={items}>
               <Link
@@ -121,7 +123,10 @@ function Discover() {
                 params={{ id: c.id }}
                 aria-label={`Open ${c.name}, $${c.ticker}, ${getCardDesign(c.cardTemplate).name} design`}
               >
-                <MintCard card={c} depth="table" idle="turntable" />
+                {/* The first row loads at once and at high priority; the rest when they near the screen. The sizes
+                    match the laid-out card (about 146px from 1024 up, 260px or less below), so sharp screens get
+                    the 320px copies rather than the full frames. */}
+                <MintCard card={c} depth="table" idle="turntable" priority={i < grid.columns} sizes="(max-width: 1023px) 260px, 150px" />
               </Link>
             </View3DHost>
             <Link to="/coin/$id" params={{ id: c.id }} className="cdx-token-cell__caption">

@@ -29,7 +29,12 @@ export const Route = createFileRoute("/portfolio")({
   }),
   loader: () => IS_SIM ? getPortfolio() : null,
   shouldReload: ({ cause }) => cause !== "stay",
-  head: () => pageHead({ path: "/portfolio", title: "Your collection | Launch a Card", noindex: NOINDEX_PORTFOLIO }),
+  head: () => pageHead({
+    path: "/portfolio",
+    title: "Your collection | Launch a Card",
+    description: "Your tokens, your one-of-one NFT cards and your quote balances on Launch a Card.",
+    noindex: NOINDEX_PORTFOLIO,
+  }),
   component: Portfolio,
 });
 

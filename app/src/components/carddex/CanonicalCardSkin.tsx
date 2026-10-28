@@ -24,7 +24,7 @@ function BorderSlice({source,from,to,sourceInset,targetInset}:{source:string;fro
 }
 
 /** Untouched Higgsfield pixels decorate the same permanent print grid in browser and exported NFTs. */
-export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,sizes}:{cardTemplate:string;quoteAssetKey?:string;priority?:boolean;sizes?:string}) {
+export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,eager=false,sizes}:{cardTemplate:string;quoteAssetKey?:string;priority?:boolean;eager?:boolean;sizes?:string}) {
   const id=useId().replaceAll(":", "");
   const assets=generatedCardAssets(cardTemplate);
   const imageRef=useRef<HTMLImageElement>(null);
@@ -32,7 +32,7 @@ export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,siz
   const ready=image.ready && !!image.decodedSource && !!generatedSkinSource(cardTemplate);
   const quote=quoteAssetKey?getPairAsset(quoteAssetKey):defaultQuoteForDesign(cardTemplate);
   return <div className="cdx-canonical-skin" data-market-finish={quote.kind} data-card-skin-ready={ready?"":undefined} data-card-skin-source={ready?cardTemplate:undefined} aria-hidden>
-    {assets.front?<img ref={imageRef} className="cdx-canonical-skin__loader" src={assets.front} srcSet={assets.front320?`${assets.front320} 320w, ${assets.front} 1260w`:undefined} sizes={sizes??(priority?"300px":"auto, 300px")} alt="" draggable={false} loading={priority?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":undefined} onLoad={image.onLoad} onError={image.onError} />:null}
+    {assets.front?<img ref={imageRef} className="cdx-canonical-skin__loader" src={assets.front} srcSet={assets.front320?`${assets.front320} 320w, ${assets.front} 1260w`:undefined} sizes={sizes??(priority||eager?"300px":"auto, 300px")} alt="" draggable={false} loading={priority||eager?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":eager?"low":undefined} onLoad={image.onLoad} onError={image.onError} />:null}
     <CanonicalSkinSurface cardTemplate={cardTemplate} quoteAssetKey={quoteAssetKey} sourceUri={ready?image.decodedSource:undefined} id={id} />
   </div>;
 }

@@ -2,10 +2,17 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Pager } from "../mintdex/ui";
 
 /** Page capacity follows the available pane, including text zoom and keyboard resizing. */
-export function usePageCapacity({ rowHeight = 300, minWidth = 190, maxColumns = 4, maxRows = 3 } = {}) {
+export function usePageCapacity({ rowHeight = 300, minWidth = 190, maxColumns = 4, maxRows = 3, initial = null as { width: number; height: number } | null } = {}) {
   const [element, setElement] = useState<HTMLDivElement | null>(null);
   const ref = setElement;
-  const [capacity, setCapacity] = useState({ count: 1, columns: 1, rows: 1 });
+  // `initial`: the pane's size estimated from the viewport cookie (viewport.ts), so the server HTML already holds
+  // the page's cards and their images start loading before hydration. The measured size wins once it is known.
+  const [capacity, setCapacity] = useState(() => {
+    if (!initial) return { count: 1, columns: 1, rows: 1 };
+    const columns = Math.max(1, Math.min(maxColumns, Math.floor((initial.width + 12) / (minWidth + 12))));
+    const rows = Math.max(1, Math.min(maxRows, Math.floor((initial.height + 12) / (rowHeight + 12))));
+    return { count: columns * rows, columns, rows };
+  });
   useEffect(() => {
     const el = element;
     if (!el) return;

@@ -97,6 +97,17 @@ export function discoverBody(vp: Viewport | null) {
   return { width: Math.max(200, m.w), height: Math.max(200, m.h - HEADER - m.gap) };
 }
 
+/**
+ * Discover's card grid (.cdx-token-grid) and Home's Trending list (.cdx-home-pulse-list) from 1024 up, measured
+ * at 1024x768, 1280x720 and 1440x900. Smaller screens keep the one-card fallback until measured.
+ */
+export function discoverGrid(vp: Viewport | null) {
+  return vp && vp.w >= 1024 ? { width: vp.w - 200, height: vp.h - 213 } : null;
+}
+export function homePulseList(vp: Viewport | null) {
+  return vp && vp.w >= 1024 ? { width: 200, height: vp.h - 191 } : null;
+}
+
 /** Market's shelf body: the content width less the aside and the column gap, under the header row. */
 export function marketBody(vp: Viewport | null) {
   if (!vp) return null;

@@ -8,7 +8,11 @@ export const Route = createFileRoute("/legal")({
   validateSearch: z.object({
     tab: z.enum(["terms", "privacy", "risks"]).optional().catch(undefined),
   }),
-  head: () => pageHead({ path: "/legal", title: "Terms and privacy | Launch a Card" }),
+  head: () => pageHead({
+    path: "/legal",
+    title: "Terms and privacy | Launch a Card",
+    description: "Terms of use, privacy policy and risk disclosures for Launch a Card token launches, cards and demo trading.",
+  }),
   component: Legal,
 });
 const CONTENT = {

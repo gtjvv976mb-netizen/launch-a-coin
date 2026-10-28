@@ -28,7 +28,7 @@ export function GeneratedCardFront({ cardTemplate, priority = false }: { cardTem
   const ref = useRef<HTMLImageElement>(null);
   const image = useReadyImage(ref, source);
   if (!source) return null;
-  return <img ref={ref} className="cdx-generated-front" data-generated-front-ready={image.ready ? "" : undefined} src={source} srcSet={assets.front320 ? `${assets.front320} 320w, ${source} 1260w` : undefined} sizes={assets.front320 ? "auto, (max-width: 767px) 72vw, 400px" : undefined} alt="" hidden={image.failed} draggable={false} loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : undefined} onLoad={image.onLoad} onError={image.onError} />;
+  return <img ref={ref} className="cdx-generated-front" data-generated-front-ready={image.ready ? "" : undefined} src={source} srcSet={assets.front320 ? `${assets.front320} 320w, ${source} 1260w` : undefined} sizes={assets.front320 ? `${priority ? "" : "auto, "}(max-width: 767px) 72vw, 400px` : undefined} alt="" hidden={image.failed} draggable={false} loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : undefined} onLoad={image.onLoad} onError={image.onError} />;
 }
 
 /** A measured metal-only laminate. It shares the physical engine's light without painting over live ink. */
@@ -37,15 +37,35 @@ export function GeneratedCardFinish({ cardTemplate }: { cardTemplate?: string })
 }
 
 /** A verified wordless reverse replaces the native engraving after decode; errors retain the native back. */
-export function GeneratedCardReverse({ cardTemplate, children }: { cardTemplate?: string; children: ReactNode }) {
+export function GeneratedCardReverse({ cardTemplate, eager = false, sizes, children }: { cardTemplate?: string; eager?: boolean; sizes?: string; children: ReactNode }) {
   const assets = generatedCardAssets(cardTemplate);
   const source = assets.back ?? null;
   const ref = useRef<HTMLImageElement>(null);
   const image = useReadyImage(ref, source);
+  // A back that starts face down waits for the page to load and go idle (PERF-1): the native back shows until then,
+  // so the faces, CSS and scripts never queue behind it.
+  const [wanted, setWanted] = useState(eager);
+  useEffect(() => {
+    if (wanted || !source) return;
+    const ric = typeof window.requestIdleCallback === "function";
+    let idle: number | undefined;
+    const go = () => {
+      idle = ric ? window.requestIdleCallback(() => setWanted(true), { timeout: 3000 }) : globalThis.setTimeout(() => setWanted(true), 600) as unknown as number;
+    };
+    if (document.readyState === "complete") go();
+    else window.addEventListener("load", go, { once: true });
+    return () => {
+      window.removeEventListener("load", go);
+      if (idle !== undefined) { if (ric) window.cancelIdleCallback(idle); else clearTimeout(idle); }
+    };
+  }, [wanted, source]);
   if (!source) return <>{children}</>;
   return <div className="cdx-generated-reverse" data-generated-back-ready={image.ready ? "" : undefined}>
     {!image.ready ? children : null}
-    <img ref={ref} src={source} srcSet={assets.back320 ? `${assets.back320} 320w, ${source} 1260w` : undefined} sizes={assets.back320 ? "auto, (max-width: 767px) 72vw, 400px" : undefined} alt="" hidden={image.failed} draggable={false} loading="eager" decoding="async" onLoad={image.onLoad} onError={image.onError} />
+    {!wanted ? null : <>{/* A hidden back loads lazily at its laid-out width (sizes "auto": the 320px copy for a small card), so it is
+        never preloaded or fetched at full size ahead of the faces. A back shown face up (eager) takes the
+        card's own sizes, since "auto" is only valid on a lazy image. */}
+    <img ref={ref} src={source} srcSet={assets.back320 ? `${assets.back320} 320w, ${source} 1260w` : undefined} sizes={assets.back320 ? (eager ? sizes ?? "(max-width: 767px) 72vw, 400px" : "auto, (max-width: 767px) 72vw, 400px") : undefined} alt="" hidden={image.failed} draggable={false} loading={eager ? "eager" : "lazy"} decoding="async" fetchPriority={eager ? undefined : "low"} onLoad={image.onLoad} onError={image.onError} /></>}
   </div>;
 }
 
