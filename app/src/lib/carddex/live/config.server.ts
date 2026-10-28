@@ -19,6 +19,17 @@ function rpcConfigured(value?: string) {
 const LAUNCHES_OFF = "New real wallet launches are not open in this deployment.";
 const RECOVERY_OFF = "Saved launch recovery is paused in this deployment.";
 /**
+ * Wallets that sign the unsigned transaction before this page adds the new coin or card signature, the order Phantom
+ * asks for. CARDDEX_LIVE_WALLET_FIRST is a comma list of Wallet Standard names, "*" for every wallet or "none"; unset
+ * means Phantom only. Every other wallet keeps the earlier order (the page signs first) until it is tested.
+ */
+export const DEFAULT_WALLET_FIRST = ["Phantom"];
+export function walletFirstWallets(value: string | undefined): string[] {
+  if (value === undefined) return DEFAULT_WALLET_FIRST;
+  const names = value.split(",").map(name => name.trim()).filter(name => name && name.length <= 64);
+  return names.some(name => name.toLowerCase() === "none") ? [] : names.includes("*") ? ["*"] : names;
+}
+/**
  * Two switches. CARDDEX_LIVE_LAUNCH_ENABLED="true" opens new launches (compose, a new intent, the coin transaction
  * before it is sent). CARDDEX_LIVE_RECOVERY_ENABLED stays on unless it is exactly "false": sign-in, saved launches,
  * confirmations, the card stage and discards. Turning off new launches never strands a creator mid-launch.
@@ -39,7 +50,7 @@ export function liveReadiness(): LiveReadiness {
   const recoveryReady = configured && recoveryEnabled;
   // A new launch must also be able to finish, so it needs recovery (sign-in, confirmation, the card) too.
   return { implemented: true, configured, enabled, ready: recoveryReady && enabled, recoveryEnabled, recoveryReady,
-    network: "solana-mainnet-beta", publicOrigin: origin, blockers };
+    network: "solana-mainnet-beta", publicOrigin: origin, blockers, walletFirst: walletFirstWallets(env.CARDDEX_LIVE_WALLET_FIRST) };
 }
 /** "launch" starts something new; "recovery" serves a creator's existing launch. */
 export function requireLiveConfig(scope: "launch" | "recovery") {

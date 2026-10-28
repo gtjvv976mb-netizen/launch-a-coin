@@ -3,7 +3,7 @@ import { getWallets } from "@wallet-standard/app";
 import { StandardConnect, StandardDisconnect, StandardEvents, type StandardConnectFeature, type StandardDisconnectFeature, type StandardEventsFeature } from "@wallet-standard/features";
 import { SolanaSignMessage, SolanaSignTransaction, type SolanaSignMessageFeature, type SolanaSignTransactionFeature } from "@solana/wallet-standard-features";
 import { ed25519 } from "@noble/curves/ed25519.js";
-import { MAINNET_CHAIN, fromBase58, sameBytes, validateWalletResult } from "./transaction";
+import { MAINNET_CHAIN, fromBase58, sameBytes } from "./transaction";
 
 type Registry = ReturnType<typeof getWallets>;
 type Wallet = ReturnType<Registry["get"]>[number];
@@ -101,6 +101,12 @@ export async function signLiveMessage(message: Uint8Array, expectedAddress: stri
   if (!out || !sameBytes(out.signedMessage, message) || !ed25519.verify(out.signature, message, fromBase58(expectedAddress))) throw new Error("The wallet did not sign the exact ownership message. No transaction was requested.");
   return out.signature;
 }
+/**
+ * One solana:signTransaction prompt (never sign-and-send: the page adds its signature and the server checks and saves
+ * the bytes before anything is broadcast). Returns the wallet's bytes as they are; signPlanWithWallet checks them.
+ * No minContextSlot: the plan's slot is the newest the server saw, and a wallet RPC a slot behind would fail its
+ * simulation and warn.
+ */
 export async function signLiveTransaction(transaction: Uint8Array, expectedAddress: string) {
   const current = needWallet(expectedAddress);
   if (current.account.features.length && !current.account.features.includes(SolanaSignTransaction)) throw new Error("This wallet account does not support transaction signing.");
@@ -109,5 +115,5 @@ export async function signLiveTransaction(transaction: Uint8Array, expectedAddre
   const [out] = await feature.signTransaction({ account: current.account, transaction, chain: MAINNET_CHAIN, options: { preflightCommitment: "confirmed" } });
   needWallet(expectedAddress);
   if (!out?.signedTransaction?.length) throw new Error("The wallet returned no signed transaction. Nothing was submitted.");
-  return validateWalletResult(transaction, new Uint8Array(out.signedTransaction), expectedAddress);
+  return new Uint8Array(out.signedTransaction);
 }

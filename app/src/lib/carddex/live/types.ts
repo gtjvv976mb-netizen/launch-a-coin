@@ -16,6 +16,8 @@ export type LiveReadiness = {
   /** Existing launches (sign-in, confirmations, the card stage, discards): the switch, and ready to serve. */
   recoveryEnabled: boolean; recoveryReady: boolean;
   network: "solana-mainnet-beta"; publicOrigin: string | null; blockers: string[];
+  /** Wallet names (Wallet Standard `name`, any case) that sign before this page co-signs; "*" is every wallet. */
+  walletFirst: string[];
 };
 export type LiveWallet = { wallet: string; expiresAt: number };
 export type LiveLaunchIntent = {
@@ -27,5 +29,10 @@ export type LiveLaunchIntent = {
   tokenSignature: string | null; nftSignature: string | null;
   createdAt: number; updatedAt: number;
 };
-/** `unsendable`: the server did not send this signed transaction and never will, so its stage is prepared again. */
-export type LiveResult<T extends object = object> = ({ok: true} & T) | {ok: false; error: string; unsendable?: true};
+/**
+ * `unsendable`: the server did not send this signed transaction and never will, so its stage is prepared again.
+ * `expired`: that refusal was the wallet approval's blockhash running out, so the page can prepare and ask once more.
+ */
+export type LiveResult<T extends object = object> = ({ok: true} & T) | {ok: false; error: string; unsendable?: true; expired?: true};
+/** Solana's packet limit for one signed transaction. Launch transactions use no lookup tables. */
+export const LIVE_PACKET_LIMIT = 1232;

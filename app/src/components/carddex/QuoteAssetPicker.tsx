@@ -4,7 +4,7 @@ import {
   PAIR_ASSETS, PAIR_ASSETS_SOURCE, allowedQuotesForDesign, boundQuoteForDesign,
   getPairAsset, getTradingPair, matchingDesignsForQuote, preferredDesignForQuote, type PairAsset, type PairAssetKey,
 } from "../../lib/carddex/pairs";
-import { ViewTabs, tabPanelProps } from "./ViewTabs";
+import { Icon } from "../mintdex/ui";
 
 export const pairKindLabel = (asset: Readonly<PairAsset>) => ({ native: "Native quote", stable: "Stablecoin quote", stock: "Tokenized stock quote", meme: "Memecoin quote", collector: "Collector token quote" })[asset.kind];
 
@@ -23,23 +23,28 @@ export function PairBadge({ quoteAssetKey, ticker = "YOUR COIN", compact = false
 export function QuoteAssetDetails({ quoteAssetKey, live = false }: { quoteAssetKey: string; live?: boolean }) {
   const asset = getPairAsset(quoteAssetKey);
   return <div className="cdx-pair-details">
-    <p>{asset.name}{asset.issuer ? <> · <span>Issuer: {asset.issuer}</span></> : null}</p>
-    {asset.kind === "stock" ? <p className="cdx-pair-details__qualification">The quote is a tokenized-stock asset with its own issuer terms; your creator token is not company shares.</p> : null}
-    <details>
-      <summary>Asset details &amp; terms <span aria-hidden>⌄</span></summary>
-      <div className="cdx-pair-details__body">
-        <p>{asset.name}{asset.issuer ? ` · Issuer: ${asset.issuer}` : ""}</p>
-        <span>{asset.kind === "native" ? "Wrapped SOL mint" : "Quote asset mint"}</span>
-        <a className="cdx-pair-mint" href={`https://solscan.io/token/${asset.mint}`} target="_blank" rel="noreferrer">{asset.mint}</a>
-        <div className="cdx-pair-details__links">
-          {asset.issuerTerms ? <a href={asset.issuerTerms} target="_blank" rel="noreferrer">Issuer terms ↗</a> : null}
-          {asset.listingProviderTerms ? <a href={asset.listingProviderTerms} target="_blank" rel="noreferrer">{asset.listingProvider ?? "Listing"} terms ↗</a> : null}
-          <a href={PAIR_ASSETS_SOURCE} target="_blank" rel="noreferrer">Pump.fun pairs ↗</a>
-        </div>
-        <p>Mint reviewed {asset.verifiedAt}. {live ? "The exact mainnet mint is rechecked before wallet review." : "Demo; no on-chain launch."}</p>
-      </div>
-    </details>
+    <AssetDisclosure asset={asset} live={live} />
   </div>;
+}
+
+/** The mint and every terms link behind one disclosure; external links say so with the external glyph. */
+function AssetDisclosure({ asset, live }: { asset: Readonly<PairAsset>; live: boolean }) {
+  const external = (href: string, label: string) => <a className="mdx-link mdx-hit" href={href} target="_blank" rel="noreferrer">{label}<Icon name="external" size={12} /></a>;
+  return <details className="cdx-pair-disclosure">
+    <summary>Asset details and terms<Icon name="chevron-down" /></summary>
+    <div className="cdx-pair-details__body">
+      <p>{asset.name}{asset.issuer ? ` · Issuer: ${asset.issuer}` : ""}</p>
+      {asset.kind === "stock" ? <p>This quote is a tokenized-stock asset with its own issuer terms. Your creator token is not company shares.</p> : <p>This asset funds the optional initial buy. SOL is also needed for network and account costs.</p>}
+      <p className="cdx-pair-details__label">{asset.kind === "native" ? "Wrapped SOL mint" : "Quote asset mint"}</p>
+      <a className="cdx-pair-mint mdx-link" href={`https://solscan.io/token/${asset.mint}`} target="_blank" rel="noreferrer"><span>{asset.mint}</span><Icon name="external" size={12} /></a>
+      <div className="cdx-pair-details__links">
+        {asset.issuerTerms ? external(asset.issuerTerms, "Issuer terms") : null}
+        {asset.listingProviderTerms ? external(asset.listingProviderTerms, `${asset.listingProvider ?? "Listing"} terms`) : null}
+        {external(PAIR_ASSETS_SOURCE, "Pump.fun pairs")}
+      </div>
+      <p>Mint reviewed {asset.verifiedAt}. {live ? "The exact mainnet mint is checked again before wallet review." : "Demo only; no on-chain launch."}</p>
+    </div>
+  </details>;
 }
 
 /** Changing a bound finish's quote requires an explicit compatible finish, never a hidden mismatch. */
@@ -51,7 +56,6 @@ export function QuoteAssetPicker({ value, designKey, ticker, onChange, onPending
   balance?: string; compact?: boolean; live?: boolean; disabled?: boolean; viewport?: boolean;
 }) {
   const id = useId();
-  const [pane, setPane] = useState("pair");
   const asset = getPairAsset(value);
   const bound = boundQuoteForDesign(designKey);
   const recommendedDesigns = matchingDesignsForQuote(asset.key);
@@ -106,15 +110,15 @@ export function QuoteAssetPicker({ value, designKey, ticker, onChange, onPending
   const matchingCardDesigns = matchingDesigns.length ? <div className="cdx-pair-matching">
     <button type="button" className="cdx-pair-matching__toggle" aria-expanded={matchingOpen} aria-controls={`${id}-matching`} disabled={disabled} onClick={() => setMatchingOpen(open => !open)}>
       Matching {matchingFamily} designs
-      <svg aria-hidden="true" viewBox="0 0 16 16" width="14" height="14"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      <Icon name="chevron-down" />
     </button>
     {matchingOpen ? <div id={`${id}-matching`} className="cdx-pair-matching__body">
       <p>{asset.symbol} quote · {getCardDesign(designKey).name} stays selected until you apply.</p>
-      <label className="sr-only" htmlFor={`${id}-matching-finish`}>Matching card finish</label>
-      <select id={`${id}-matching-finish`} className="mdx-input" value={matchingDesign} disabled={disabled} onChange={event => setMatchingDesign(event.target.value)}>
+      <label className="sr-only" htmlFor={`${id}-matching-finish`}>Matching card design</label>
+      <select id={`${id}-matching-finish`} className="mdx-select mdx-select--field" value={matchingDesign} disabled={disabled} onChange={event => setMatchingDesign(event.target.value)}>
         {matchingDesigns.map(design => <option key={design.key} value={design.key}>{design.name}{design.category === "limited" ? " · Limited" : design.category === "classic" ? " · Classic" : " · Premium"}</option>)}
       </select>
-      <button type="button" className="mdx-btn mdx-btn--primary mdx-btn--sm" disabled={disabled} onClick={() => {
+      <button type="button" className="mdx-btn mdx-btn--outline mdx-btn--sm" disabled={disabled} onClick={() => {
         if (disabled || !matchingDesigns.some(design => design.key === matchingDesign)) return;
         restorePairFocus.current = true;
         setMatchingOpen(false);
@@ -123,8 +127,8 @@ export function QuoteAssetPicker({ value, designKey, ticker, onChange, onPending
     </div> : null}
   </div> : null;
   const pairControls = <>
-    <div className="cdx-pair-picker__head"><label htmlFor={id}>Quote asset</label><span>{pairKindLabel(asset)}</span></div>
-    <select ref={quoteSelectRef} id={id} className="mdx-input" value={asset.key} disabled={disabled} onChange={e => choose(e.target.value as PairAssetKey)} aria-describedby={`${id}-help`}>
+    <div className="cdx-pair-picker__head"><label htmlFor={id} className="mdx-label">Pair asset</label><span>{pairKindLabel(asset)}</span></div>
+    <select ref={quoteSelectRef} id={id} className="mdx-select mdx-select--field" value={asset.key} disabled={disabled} onChange={e => choose(e.target.value as PairAssetKey)} aria-describedby={`${id}-help`}>
       {([ ["native", "Native"], ["stable", "Stablecoin"], ["stock", "Tokenized stocks"], ["meme", "Memecoins"], ["collector", "Collector tokens"] ] as const).map(([kind,label]) =>
         <optgroup key={kind} label={label}>{PAIR_ASSETS.filter(a => a.kind === kind).map(a => <option key={a.key} value={a.key}>{a.symbol} · {a.name}</option>)}</optgroup>
       )}
@@ -133,34 +137,32 @@ export function QuoteAssetPicker({ value, designKey, ticker, onChange, onPending
       <strong>{getTradingPair(ticker ?? "YOUR COIN", asset.key)}</strong>
       <span>{balance ? `${balance} ${asset.symbol} ${live ? "wallet balance" : "test balance"}` : live ? "Solana mainnet · real assets" : "Demo · no real assets"}</span>
     </div>
-    {designMatch ?? (bound ? <p className="cdx-pair-picker__binding">This finish is paired with {bound.symbol}. Choosing another quote offers a compatible finish.</p> : null)}
+    {designMatch ?? (bound ? <p className="cdx-pair-picker__binding">This design is paired with {bound.symbol}. Choosing another quote offers a compatible design.</p> : null)}
   </>;
+  const confirmChange = pending ? <div ref={confirmationRef} tabIndex={-1} className="cdx-pair-change" role="group" aria-label="Change quote and design">
+      <p role="status"><strong>Switch to {pending.symbol}?</strong> {getCardDesign(designKey).name} uses {bound?.symbol}. Choose a compatible design.</p>
+      <label htmlFor={`${id}-finish`} className="mdx-label">Compatible card design</label>
+      <select id={`${id}-finish`} className="mdx-select mdx-select--field" value={pendingDesign} disabled={disabled} onChange={e=>setPendingDesign(e.target.value)}>
+        {CARD_DESIGNS.filter(d=>allowedQuotesForDesign(d.key).some(a=>a.key===pending.key)).map(d=><option key={d.key} value={d.key}>{d.name}</option>)}
+      </select>
+      <div className="cdx-pair-change__actions">
+        <button type="button" disabled={disabled} className="mdx-btn mdx-btn--outline mdx-btn--sm" onClick={()=>{onChange(pending.key,pendingDesign);clearPending();}}>Use pair and design</button>
+        <button type="button" disabled={disabled} className="mdx-btn mdx-btn--ghost mdx-btn--sm" onClick={clearPending}>Keep {asset.symbol}</button>
+      </div>
+    </div> : null;
+  // The viewport picker (Launch's Pair step, the Designs pair tab): one panel, no sub-tabs. The quote, its pair line,
+  // matching designs, then the mint and terms behind one disclosure (LAUNCH-04, browse-16).
   if (viewport) return <div className="cdx-pair-picker cdx-pair-picker--viewport">
-    {!pending ? <ViewTabs className="cdx-launch-subtabs" label="Quote information" idBase={id} tabs={[["pair", "Pair"], ["mint", "Mint"], ["terms", "Terms"]].map(([key,label]) => ({ id: key, label, selected: pane === key, onSelect: () => { setPane(key); setMatchingOpen(false); } }))} /> : null}
-    {pending ? <div ref={confirmationRef} tabIndex={-1} className="cdx-pair-change" role="group" aria-label="Change quote and finish">
-      <p role="status"><strong>Switch to {pending.symbol}?</strong> {getCardDesign(designKey).name} uses {bound?.symbol}. Choose a compatible finish.</p>
-      <label htmlFor={`${id}-finish`}>Compatible card finish</label>
-      <select id={`${id}-finish`} className="mdx-input" value={pendingDesign} disabled={disabled} onChange={e=>setPendingDesign(e.target.value)}>{CARD_DESIGNS.filter(d=>allowedQuotesForDesign(d.key).some(a=>a.key===pending.key)).map(d=><option key={d.key} value={d.key}>{d.name}</option>)}</select>
-      <div className="cdx-pair-change__actions"><button type="button" disabled={disabled} className="mdx-btn mdx-btn--primary mdx-btn--sm" onClick={()=>{onChange(pending.key,pendingDesign);clearPending();}}>Use pair and finish</button><button type="button" disabled={disabled} className="mdx-btn mdx-btn--ghost mdx-btn--sm" onClick={clearPending}>Keep {asset.symbol}</button></div>
-    </div> : pane === "pair" ? <div className="contents" {...tabPanelProps(id, pane)}>
+    {pending ? confirmChange : <>
       {!matchingOpen ? pairControls : null}
       {matchingCardDesigns}
-    </div> : pane === "mint" ? <div className="cdx-pair-details__body" {...tabPanelProps(id, pane)}><p><strong>{asset.name}</strong>{asset.issuer ? ` · ${asset.issuer}` : ""}</p><span>{asset.kind === "native" ? "Wrapped SOL mint" : "Quote asset mint"}</span><a className="cdx-pair-mint" href={`https://solscan.io/token/${asset.mint}`} target="_blank" rel="noreferrer">{asset.mint}</a><p>Reviewed {asset.verifiedAt}. {live ? "The exact mainnet mint is checked again before wallet review." : "Demo only; no on-chain launch."}</p></div> : <div className="cdx-pair-details__body" {...tabPanelProps(id, pane)}><p>{asset.kind === "stock" ? "This quote is a tokenized-stock asset with its own issuer terms. Your creator token is not company shares." : "This asset funds the optional initial buy. SOL is also needed for network and account costs."}</p><div className="cdx-pair-details__links">{asset.issuerTerms ? <a href={asset.issuerTerms} target="_blank" rel="noreferrer">Issuer terms</a> : null}{asset.listingProviderTerms ? <a href={asset.listingProviderTerms} target="_blank" rel="noreferrer">{asset.listingProvider ?? "Listing"} terms</a> : null}<a href={PAIR_ASSETS_SOURCE} target="_blank" rel="noreferrer">Pump.fun pairs</a></div></div>}
+      <AssetDisclosure asset={asset} live={live} />
+    </>}
   </div>;
   return <div className={`cdx-pair-picker ${compact ? "cdx-pair-picker--compact" : ""}`}>
     {pairControls}
     {!pending ? matchingCardDesigns : null}
-    {pending ? <div ref={confirmationRef} tabIndex={-1} className="cdx-pair-change" role="group" aria-label="Change quote and finish">
-      <p role="status"><strong>Switch to {pending.symbol}?</strong> {getCardDesign(designKey).name} uses {bound?.symbol}. Choose a compatible finish.</p>
-      <label htmlFor={`${id}-finish`}>Compatible card finish</label>
-      <select id={`${id}-finish`} className="mdx-input" value={pendingDesign} disabled={disabled} onChange={e=>setPendingDesign(e.target.value)}>
-        {CARD_DESIGNS.filter(d=>allowedQuotesForDesign(d.key).some(a=>a.key===pending.key)).map(d=><option key={d.key} value={d.key}>{d.name}</option>)}
-      </select>
-      <div className="cdx-pair-change__actions">
-        <button type="button" disabled={disabled} className="mdx-btn mdx-btn--primary mdx-btn--sm" onClick={()=>{onChange(pending.key,pendingDesign);clearPending();}}>Use pair and finish</button>
-        <button type="button" disabled={disabled} className="mdx-btn mdx-btn--ghost mdx-btn--sm" onClick={clearPending}>Keep {asset.symbol}</button>
-      </div>
-    </div> : null}
+    {confirmChange}
     <QuoteAssetDetails quoteAssetKey={asset.key} live={live} />
   </div>;
 }

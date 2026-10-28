@@ -15,6 +15,7 @@
     // New launches open only on "true"; saved-launch recovery stays on unless "false".
     "CARDDEX_LIVE_LAUNCH_ENABLED": "false",
     "CARDDEX_LIVE_RECOVERY_ENABLED": "true"
+    // Optional CARDDEX_LIVE_WALLET_FIRST: wallets that sign before the page co-signs. Unset is Phantom only; "none" restores page-first.
   },
   "d1_databases": [{"binding": "DB", "database_name": "launch-a-card", "database_id": "REPLACE_WITH_OWN_D1_ID", "migrations_dir": "migrations"}],
   "r2_buckets": [{"binding": "STORAGE", "bucket_name": "launch-a-card"}]
