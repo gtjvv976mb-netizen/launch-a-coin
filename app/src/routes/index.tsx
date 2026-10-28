@@ -1,4 +1,3 @@
-import { PageControls, usePageCapacity } from "../components/carddex/Viewport";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
@@ -128,6 +127,8 @@ const HINT_KEY = "mdx-hint-drag";
 const PAUSE_KEY = "mdx-featured-paused";
 /** Activity rows in the natural flow (phones, 1024 to 1279); the fitted desktop shows as many as its column holds. */
 const FLOW_ACTIVITY_ROWS = 5;
+/** Recent activity under Trending in the aside: the newest events, with no pager. */
+const ASIDE_ACTIVITY_ROWS = 6;
 
 /**
  * The featured lot: which coin is selected and the step direction. The selection follows the coin (by id)
@@ -418,9 +419,6 @@ function EmptyLine({ children }: { children: ReactNode }) {
 
 function Home() {
   const [homeView,setHomeView]=useState("card");
-  const [sideTab,setSideTab]=useState("trending");
-  const [sideIndex,setSideIndex]=useState(0);
-  const sideGrid=usePageCapacity({rowHeight:60,minWidth:10000,maxColumns:1,maxRows:8});
   const initial = Route.useLoaderData();
   const qc = useQueryClient();
   const search = Route.useSearch();
@@ -942,15 +940,44 @@ function Home() {
         aria-label="Trending and activity"
         className="cdx-home__aside mdx-plinth mdx-aside flex min-w-0 flex-col gap-6 lg:pt-[calc(2rem_-_var(--gutter))] short:gap-5 short:pt-6 fit:min-h-0 fit:overflow-hidden"
       >
-        <div className="cdx-view-tabs" aria-label="Collection pulse sections"><button type="button" aria-pressed={sideTab==="trending"} onClick={()=>{setSideTab("trending");setSideIndex(0);}}>Trending</button><button type="button" aria-pressed={sideTab==="activity"} onClick={()=>{setSideTab("activity");setSideIndex(0);}}>Activity</button></div>
-        <div className="flex flex-none items-center justify-between gap-2"><p className="text-[12px] leading-4 text-slate">{sideTab==="trending" ? trendingBasis : MODE_COPY.botsNote}</p>{sideTab==="activity" ? <LivePause paused={live.paused} onChange={live.setPaused} /> : <TextLink to="/discover">See all</TextLink>}</div>
-        <div ref={sideGrid.ref} className="cdx-home-pulse-list">
-          {sideTab === "trending" ? trending.slice(Math.min(sideIndex,Math.max(0,Math.ceil(trending.length/sideGrid.count)-1))*sideGrid.count,(Math.min(sideIndex,Math.max(0,Math.ceil(trending.length/sideGrid.count)-1))+1)*sideGrid.count).map((c,i)=><CoinRow key={c.id} coin={c} rank={sideIndex*sideGrid.count+i+1} flipId={c.id} />) : activity.slice(Math.min(sideIndex,Math.max(0,Math.ceil(activity.length/sideGrid.count)-1))*sideGrid.count,(Math.min(sideIndex,Math.max(0,Math.ceil(activity.length/sideGrid.count)-1))+1)*sideGrid.count).map(e=><EventItem key={e.id} e={e} now={now} isNew={live.fresh.has(e.id)} />)}
-          {sideTab==="trending" && !trending.length ? <EmptyLine>No coins in the dex yet.</EmptyLine> : null}
-          {sideTab==="activity" && !activity.length ? <EmptyLine>No activity yet.</EmptyLine> : null}
-        </div>
-        <PageControls page={Math.min(sideIndex,Math.max(0,Math.ceil((sideTab==="trending"?trending.length:activity.length)/sideGrid.count)-1))} pages={Math.max(1,Math.ceil((sideTab==="trending"?trending.length:activity.length)/sideGrid.count))} onPage={setSideIndex} label={sideTab==="trending"?`${trending.length} tokens`:`${activity.length} events`} />
-
+        <section className="flex flex-none flex-col gap-1">
+          <SectionHead title="Trending" right={<TextLink to="/discover">See all</TextLink>} />
+          {trending.length ? (
+            <>
+              <p className="text-[12px] leading-4 text-slate">{trendingBasis}</p>
+              <div ref={trendingRef} className="mdx-stagger" data-settled={trendingSettled || undefined}>
+                {trending.map((c, i) => (
+                  <CoinRow key={c.id} coin={c} rank={i + 1} flipId={c.id} />
+                ))}
+              </div>
+            </>
+          ) : (
+            <EmptyLine>No coins in the dex yet.</EmptyLine>
+          )}
+        </section>
+        <section className="flex min-h-0 flex-col gap-1">
+          {/* "Recent activity", not "Live activity": in test mode most rows are demo bots, and the line under the
+              heading says so. */}
+          <SectionHead
+            title="Recent activity"
+            live={recent ? activity[0].id : undefined}
+            livePaused={live.paused}
+            right={activity.length ? <LivePause paused={live.paused} onChange={live.setPaused} /> : undefined}
+          />
+          {MODE_COPY.botsNote ? <p className="text-[12px] leading-4 text-slate">{MODE_COPY.botsNote}</p> : null}
+          <p className="sr-only" role="status" aria-live="polite">
+            {live.said}
+          </p>
+          {activity.length ? (
+            <div {...live.bind} aria-label="Recent activity" className="mdx-stagger">
+              {activity.slice(0, ASIDE_ACTIVITY_ROWS).map((e) => (
+                <EventItem key={e.id} e={e} now={now} isNew={live.fresh.has(e.id)} />
+              ))}
+            </div>
+          ) : (
+            <EmptyLine>No activity yet.</EmptyLine>
+          )}
+        </section>
       </aside>
     </div>
   );

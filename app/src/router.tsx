@@ -33,6 +33,8 @@ export const getRouter = () => {
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
+    // <main> is the page scroller (the shell keeps the rail and tab bar in view): a new page starts at its top.
+    scrollToTopSelectors: ["#content"],
     // Page changes feel instant (backlog P0-2, step 1): links start loading on hover or touch, and a load
     // that just happened is reused for 10 s instead of being fetched again on click.
     defaultPreload: "intent",

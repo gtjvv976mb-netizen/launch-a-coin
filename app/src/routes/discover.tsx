@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, type CSSProperties } from "react";
-import { PageControls, usePageCapacity } from "../components/carddex/Viewport";
+import { useEffect, useMemo, useRef } from "react";
 import { z } from "zod";
 import { MintCard } from "../components/mintdex/MintCard";
 import { View3DHost } from "../components/mintdex/card3d";
-import { PageFrame, Change } from "../components/mintdex/ui";
+import { Button, ButtonLink, PageFrame, Change } from "../components/mintdex/ui";
 import { listCoins } from "../lib/mintdex/api";
 import { getCardDesign } from "../lib/carddex/designs";
 import { marketCapText } from "../lib/carddex/quote-display";
@@ -31,6 +30,8 @@ export const Route = createFileRoute("/discover")({
     }),
   component: Discover,
 });
+/** Tokens shown per batch; "Show more tokens" adds another batch (kept in ?page= so Back returns to it). */
+const BATCH = 12;
 function Discover() {
   const initial = Route.useLoaderData(),
     search = Route.useSearch();
@@ -61,10 +62,18 @@ function Discover() {
         ),
     [data, query, search.sort],
   );
-  const grid = usePageCapacity({ rowHeight:300, minWidth:190, maxColumns:4, maxRows:2 });
-  const pages = Math.max(1, Math.ceil(coins.length / grid.count));
-  const page = Math.min(Math.max(0, (search.page ?? 1) - 1), pages - 1);
-  const visible = coins.slice(page * grid.count, (page + 1) * grid.count);
+  const batches = Math.max(1, Math.ceil(coins.length / BATCH));
+  const shownBatches = Math.min(Math.max(1, search.page ?? 1), batches);
+  const visible = coins.slice(0, shownBatches * BATCH);
+  // "Show more tokens" moves focus to the first token it added, so keyboard users carry on from there.
+  const gridRef = useRef<HTMLUListElement>(null);
+  const focusFrom = useRef<number | null>(null);
+  useEffect(() => {
+    const from = focusFrom.current;
+    if (from == null || visible.length <= from) return;
+    focusFrom.current = null;
+    gridRef.current?.children[from]?.querySelector<HTMLElement>(".cdx-token-cell__caption")?.focus();
+  }, [visible.length]);
   const items = coins.map((c) => ({ id: c.id, card: c }));
   return (
     <PageFrame className="cdx-discover">
@@ -112,41 +121,72 @@ function Discover() {
           <option value="new">Newest</option>
         </select>
       </div>
-      <div ref={grid.ref} className="cdx-token-grid" style={{"--page-columns":grid.columns,"--page-rows":grid.rows} as CSSProperties}>
-        {visible.map((c) => (
-          <article key={c.id} className="cdx-token-cell">
-            <View3DHost item={{ id: c.id, card: c }} list={items}>
-              <Link
-                to="/coin/$id"
-                params={{ id: c.id }}
-                aria-label={`Open ${c.name}, $${c.ticker}, ${getCardDesign(c.cardTemplate).name} design`}
-              >
-                <MintCard card={c} depth="table" idle="turntable" />
-              </Link>
-            </View3DHost>
-            <Link to="/coin/$id" params={{ id: c.id }} className="cdx-token-cell__caption">
-              <div>
-                <strong>{c.name}</strong>
-                <span>${c.ticker}</span>
-              </div>
-              <div>
-                <span>{marketCapText(c)}</span>
-                <Change v={c.change24h} />
-              </div>
-            </Link>
-          </article>
-        ))}
-      </div>
-      <PageControls page={page} pages={pages} onPage={next=>void navigate({search:s=>({...s,page:next ? next+1 : undefined}),replace:true,resetScroll:false})} label={`${coins.length} tokens`} />
-      {coins.length === 0 && (
+      <p className="cdx-discover__count" aria-live="polite">
+        {coins.length === 1 ? "1 token" : `${coins.length} tokens`}
+      </p>
+      {coins.length > 0 ? (
+        <ul ref={gridRef} role="list" className="cdx-token-grid">
+          {visible.map((c) => (
+            <li key={c.id} className="cdx-token-item">
+              <article className="cdx-token-cell">
+                <View3DHost item={{ id: c.id, card: c }} list={items}>
+                  <Link
+                    to="/coin/$id"
+                    params={{ id: c.id }}
+                    aria-label={`Open ${c.name}, $${c.ticker}, ${getCardDesign(c.cardTemplate).name} design`}
+                  >
+                    <MintCard card={c} depth="table" idle="turntable" />
+                  </Link>
+                </View3DHost>
+                <Link to="/coin/$id" params={{ id: c.id }} className="cdx-token-cell__caption">
+                  <div>
+                    <h2 className="cdx-token-cell__name">
+                      <strong>{c.name}</strong>
+                    </h2>
+                    <span>${c.ticker}</span>
+                  </div>
+                  <div>
+                    <span>{marketCapText(c)}</span>
+                    <Change v={c.change24h} />
+                  </div>
+                </Link>
+              </article>
+            </li>
+          ))}
+        </ul>
+      ) : (
         <div className="cdx-empty" role="status">
-          No tokens found. Try another search, or{" "}
-          <Link to="/launch" className="mdx-link">
-            launch the first one
-          </Link>
-          .
+          <p>{query ? `No tokens match “${query}”.` : "No tokens yet."}</p>
+          <div className="cdx-empty__actions">
+            {query ? (
+              <Button variant="outline" onClick={() => setQuery("")}>
+                Clear search
+              </Button>
+            ) : null}
+            <ButtonLink to="/launch">Launch a card</ButtonLink>
+          </div>
         </div>
       )}
+      {shownBatches < batches ? (
+        <div className="cdx-discover__more">
+          <Button
+            variant="outline"
+            onClick={() => {
+              focusFrom.current = visible.length;
+              void navigate({
+                search: (s) => ({ ...s, page: shownBatches + 1 }),
+                replace: true,
+                resetScroll: false,
+              });
+            }}
+          >
+            Show more tokens
+          </Button>
+          <span>
+            Showing {visible.length} of {coins.length}
+          </span>
+        </div>
+      ) : null}
     </PageFrame>
   );
 }
