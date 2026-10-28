@@ -1,134 +1,404 @@
-/* Coin (/coin/$id): header, case, chart, trade ticket, trades, details screen sheet. Owned by the "coin" screen group (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css).
- * The blocks below were moved here unchanged from the shared sheets, in their old cascade order; tokens: carddex-theme.css. */
+/* Coin (/coin/$id): the market strip, chart, trade ticket, activity, details and the card's surroundings. Owned by
+ * the "coin" screen group (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css). Tokens: carddex-theme.css.
+ * Elevation is lightness alone (ground, surface panels, nested controls); the only data hue is gold, on the chart
+ * line and the curve fill. No raw colours below. */
 
-/* ---- moved from alive.css (same order as there) */
-/* ---------------------------------------------------------------- coin page: the case (5.2)
- * The case rests turned a little toward the page (it stands in the left column), lit from that side (light.ts
- * restLight of rx 5, ry 8). With the case label on screens 860px tall and up, the spacer above it grows to the
- * label's height. */
+/* ---------------------------------------------------------------- the case's lean (light.ts restLight of rx 5, ry 8)
+ * tests/card3d/pose.test.ts reads these four values. */
 .mdx-casehost {
   --hand-ry: 8;
   --hand-a: 9.434;
   --hand-px: 0.723;
   --hand-lit: 0.657;
 }
+
+/* ---------------------------------------------------------------- inherited chain page (ChainCoinPage.tsx, never
+ * enabled in this product): its grid and the spacer over its case. */
 @media (min-width: 1280px) and (min-height: 860px) {
-  .mdx-case-spacer {
-    max-height: calc(264px * 0.22 + 8px);
-  }
+  .mdx-case-spacer { max-height: calc(264px * 0.22 + 8px); }
 }
 @media (min-width: 1440px) and (min-height: 860px) {
-  .mdx-case-spacer {
-    max-height: calc(300px * 0.22 + 8px);
-  }
+  .mdx-case-spacer { max-height: calc(300px * 0.22 + 8px); }
 }
 @media (min-width: 1680px) and (min-height: 860px) {
-  .mdx-case-spacer {
-    max-height: calc(340px * 0.22 + 8px);
-  }
+  .mdx-case-spacer { max-height: calc(340px * 0.22 + 8px); }
+}
+@media (min-width: 1280px) {
+  .cdx-app .mdx-coin { grid-template-columns: minmax(300px, .9fr) minmax(300px, 1fr) 268px; gap: 20px; }
+  .cdx-app .mdx-coin .mdx-case-spacer { max-height: 18px; }
+}
+@media (min-width: 1680px) {
+  .cdx-app .mdx-coin { grid-template-columns: minmax(340px, 1fr) minmax(360px, 1.2fr) 290px; }
 }
 
-/* ---- moved from carddex-theme.css (same order as there) */
-@media (min-width: 1024px) {
-  .cdx-app .cdx-coin-market, .cdx-app .cdx-coin-actions {
-    border: 2px solid var(--color-control-border);
-    background: linear-gradient(155deg, var(--color-surface), var(--color-surface));
-    box-shadow: inset 0 0 0 4px var(--color-raised), inset 0 0 0 5px rgb(181 136 26 / .3), 0 7px 22px -14px rgb(104 70 24 / .2);
-  }
-  .cdx-app .mdx-coin [data-pane].rounded-panel.bg-plinth {
-    border: 0;
-    background: transparent;
-    box-shadow: none;
-  }
+/* ================================================================ the coin screen
+ * Grid arithmetic at 1440 (column 1152): card 300 + 16 + market and chart 484 + 16 + ticket 336 = 1152. At 1024 the
+ * column is 976: 254 + 16 + 390 + 16 + 300. The frame fills main (fit to the viewport, floor 520px); the activity
+ * and the right column scroll inside their panes. */
+.cdx-coin-screen { gap: var(--gap-page); }
+.cdx-coin-screen__grid { display: flex; flex: 1; min-height: 0; flex-direction: column; gap: 12px; }
+
+/* ---- header: one line of title at every width, so the tabs never move from coin to coin (coin-11) */
+.cdx-coin-screen .mdx-pagehead__title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cdx-coin-screen .mdx-pagehead__context { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cdx-coin-screen .mdx-pagehead__right { gap: 12px; }
+.cdx-coin-screen__utils { display: inline-flex; align-items: center; gap: 12px; }
+.cdx-coin-back { display: inline-flex; align-items: center; gap: 4px; font-size: var(--text-body); }
+@media (max-width: 1023.98px) {
+  .cdx-coin-screen .mdx-pagehead { gap: 4px; }
+  .cdx-coin-screen .mdx-pagehead__back { justify-content: space-between; min-height: 40px; }
+  .cdx-coin-screen .mdx-pagehead__right { display: none; }
 }
 
-/* ---- moved from carddex-gallery.css (same order as there) */
-.cdx-app .cdx-coin-market, .cdx-app .cdx-coin-actions { border:1px solid var(--color-rule); background:var(--color-surface); box-shadow:none; }
-@media (min-width:1280px) {
- .cdx-app .mdx-coin { grid-template-columns:minmax(300px,.9fr) minmax(300px,1fr) 268px; gap:20px; }
- .cdx-app .mdx-coin .mdx-case-spacer { max-height:18px; }
- .cdx-app .mdx-coin .cdx-coin-object { height:min(700px,calc(100dvh - 280px)); max-height:min(700px,calc(100dvh - 280px)); flex:0 1 auto; }
- .cdx-app .mdx-coin .cdx-coin-objectstage > .hidden { width:min(100cqw,calc((100cqh - 94px)*112/173.683)); }
- .cdx-app .mdx-coin .mdx-case__controls { flex-wrap:nowrap; gap:6px; }
- .cdx-app .mdx-coin .mdx-case__btn { min-width:0; min-height:40px; padding:6px 9px; background:transparent; color:var(--color-slate); border:0; box-shadow:none; font-size:12px; }
- .cdx-app .mdx-coin .mdx-case__controls .mdx-card3d__chip { flex:none; padding:0 9px; }
- .cdx-app .mdx-coin .mdx-input { height:40px; min-height:40px; }
- .cdx-app .cdx-coin-actions { padding:16px; }
+/* ---- the market strip: one surface, cells split by hairlines; the market cap leads at 30px */
+.cdx-coin-screen__market {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(176px, 24%);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
 }
-@media (min-width:1680px) {
- .cdx-app .mdx-coin { grid-template-columns:minmax(340px,1fr) minmax(360px,1.2fr) 290px; }
+.cdx-coin-screen__market .mdx-kpis {
+  grid-template-columns: minmax(0, 1.45fr) repeat(3, minmax(0, 1fr));
+  background: transparent;
+}
+.cdx-coin-screen__market .mdx-kpi { padding: 12px 20px; }
+.cdx-coin-screen__market .mdx-kpi:not([data-lead]) .mdx-kpi__value .num { font-size: var(--text-title); line-height: 26px; }
+.cdx-coin-screen__chg { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-caption); color: var(--color-slate); }
+.cdx-coin-screen__curve {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 12px 20px;
+  border-left: 1px solid var(--color-hairline);
+}
+.cdx-coin-screen__curve .mdx-kpi__value .num { font-size: var(--text-title); line-height: 26px; }
+.cdx-coin-screen__curvenote { font-size: var(--text-caption); color: var(--color-slate); }
+/* The cell's label and figure stand in for the track's own head (the progressbar keeps its words). */
+.cdx-coin-screen__curve .mdx-curve { margin-top: 10px; }
+.cdx-coin-screen__curve .mdx-curve__head { display: none; }
+/* A tiny price with its zeros counted (PriceFigure): the count sits low and small, on the line. */
+.cdx-price sub { position: relative; top: 0.3em; margin-inline: 0.06em; font-size: max(12px, 0.7em); font-weight: 600; line-height: 0; vertical-align: baseline; }
+
+/* ---- the section tabs (phones and tablets): the segmented primitive at full width, each option as wide as it needs */
+.cdx-coin-screen__tabs { flex: none; }
+.cdx-coin-screen__tabs .mdx-tabs { display: flex; width: 100%; }
+.cdx-coin-screen__tabs .mdx-tabs__tab { flex: 1 1 auto; padding-inline: 10px; }
+
+/* ---- the panels */
+.cdx-chart,
+.cdx-trades,
+.cdx-trade-ticket,
+.cdx-coin-about {
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  padding: var(--pad-panel);
 }
 
-/* ---- moved from carddex-viewport.css (same order as there) */
-/* Coin sections are real screen tabs, with a permanent desktop case beside them. */
-.cdx-coin-screen { display:flex; flex-direction:column; gap:10px; height:100%; min-height:0; }
-.cdx-coin-screen__head { display:flex; flex:none; align-items:center; justify-content:space-between; gap:12px; min-width:0; }
-.cdx-coin-screen__head > :first-child { min-width:0; }
-.cdx-coin-screen__head h1 { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.cdx-coin-screen__tabs { flex:none; }
-.cdx-coin-screen__tabs .mdx-tabs { width:100%; overflow:visible; }
-.cdx-coin-screen__tabs .mdx-tabs button { min-width:0; padding-inline:10px; }
-.cdx-coin-screen__body { display:grid; grid-template-columns:minmax(0,1.12fr) minmax(300px,.88fr); gap:28px; flex:1; min-height:0; }
-.cdx-coin-screen__object { min-height:0; container-type:size; display:flex; align-items:center; justify-content:center; }
-.cdx-coin-screen__case { width:min(440px,calc((100cqh - 100px)*112/173.683),calc(100cqw - 60px)); }
-.cdx-coin-screen__pane { min-height:0; display:flex; flex-direction:column; gap:12px; padding:12px; }
-.cdx-coin-screen[data-tab=card] .cdx-coin-screen__pane, .cdx-coin-screen[data-tab=details] .cdx-coin-screen__pane { overflow-y:auto; }
-.cdx-coin-screen__story { font-size:15px; line-height:1.55; max-width:68ch; overflow-wrap:anywhere; white-space:pre-line; }
-.cdx-coin-screen__chart { flex:1; min-height:0; }
-.cdx-coin-screen__chart .cdx-candles { min-height:0; }
-.cdx-coin-screen__trades { flex:1; min-height:0; }
-.cdx-trades-page { flex:1; min-height:0; }
-.cdx-coin-screen__ownership { flex:none; display:flex; flex-direction:column; }
-.cdx-coin-screen__ownership dl > div { padding-block:12px; border-bottom:1px solid var(--color-rule); font-size:14px; }
-.cdx-coin-screen__ownership dt { color:var(--color-slate); font-size:12px; }
-.cdx-coin-screen__ownership dd { margin-top:4px; overflow-wrap:anywhere; }
-.cdx-trade-ticket { min-height:0; gap:12px; }
-.cdx-trade-ticket[data-ticket-step=amount] .cdx-trade-ticket__review,.cdx-trade-ticket[data-ticket-step=review] .cdx-trade-ticket__amount { display:none; }
-.cdx-trade-ticket .mdx-leaders { margin-top:14px; }
-.cdx-trade-ticket #trade-msg { overflow-wrap:anywhere; }
-.cdx-trade-ticket .cdx-trade-ticket__review { min-height:0; }
-@media(max-width:1023px) {
- .cdx-coin-screen__head { align-items:center; }
- .cdx-coin-screen__head > span { display:none; }
- .cdx-coin-screen__head .mdx-h1 { font-size:var(--type-page-title-sm); }
- .cdx-coin-screen__tabs .mdx-tabs button { padding-inline:7px; font-size:var(--type-min); }
- .cdx-coin-screen__body { display:flex; flex-direction:column; gap:0; }
- .cdx-coin-screen__pane { flex:1; padding:6px; }
- .cdx-coin-screen[data-tab=card] .cdx-coin-screen__pane { display:none; }
- .cdx-coin-screen:not([data-tab=card]) .cdx-coin-screen__object { display:none; }
- .cdx-coin-screen__object { flex:1; }
- .cdx-coin-screen__case { width:min(360px,calc((100cqh - 100px)*112/173.683),calc(100cqw - 48px)); }
- .cdx-coin-screen__ownership dl > div { padding-block:10px; }
+/* ---- the card column: the case on the ground, its controls, then the card's owner and edition */
+.cdx-coin-screen__object {
+  /* Below the case: its control row (about 64px) and, from 768, the facts (about 132px) and two gaps. */
+  --case-below: 72px;
+  container-type: size;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
 }
-.cdx-coin-screen__chart .cdx-candles__plot { flex:1; height:auto; min-height:100px; }
-.cdx-coin-screen__chart > .flex:has(.mdx-tabs) { flex-wrap:wrap; }
-/* A size-contained header needs an explicit flex basis; otherwise its intrinsic width is zero. */
-.cdx-coin-screen__head > header { width:100%; flex:1; }
-
-/* ---- moved from carddex-chart.css (whole file, same order) */
-/* Candles keep their values still; only new observations receive a brief opacity cue. */
-.cdx-candles__plot { min-height: 180px; }
-.cdx-candles__svg { border-radius: 5px; outline-offset: 3px; }
-.cdx-candles__svg:focus-visible { outline: 2px solid var(--color-neon); }
-.cdx-candles__tooltip {
+/* The case is 112 x 173.7 units (1.551 x its width). Turning edge-on, perspective (1400px) brings its near edge
+ * forward: sampled over a full turn it rises up to 0.19 x its width above its box and stays inside the control row's
+ * margin below. The top keeps 0.15 x the width clear (the page gap takes the rest, 12px or more stays), so the case
+ * never paints over the header or the tabs (coin-03). Width = (height - below) / (1.551 + 0.15). */
+.cdx-coin-screen__case {
+  --case-w: min(100cqw - 8px, (100cqh - var(--case-below)) * 0.588);
+  width: var(--case-w);
+  flex: none;
+  box-sizing: content-box;
+  padding-top: calc(var(--case-w) * 0.15);
+}
+.cdx-coin-screen__facts { width: 100%; flex: none; }
+/* The case's control row: the secondary pills from CardCase.tsx, centred, and the 3D button as a matching circle.
+ * It may run into the column's spare width beside a height-limited case, so it stays one row. */
+.cdx-coin-screen .mdx-case__controls { gap: 8px; margin-inline: -24px; }
+/* !important: the 3D button's size and paint come from the unlayered card3d.css and viewer.css case rules. */
+.cdx-coin-screen .mdx-case .mdx-v3dbtn--case {
+  flex: none !important;
+  width: var(--btn-h-sm) !important;
+  height: var(--btn-h-sm) !important;
+  border: 0 !important;
+  background: var(--color-nested) !important;
+}
+.cdx-coin-screen .mdx-case .mdx-v3dbtn--case::after {
+  content: "";
   position: absolute;
-  top: 0;
-  left: 4px;
-  z-index: 1;
-  pointer-events: none;
-  width: min(294px, calc(100% - 8px));
-  padding: 7px 10px 8px;
-  border: 1px solid var(--color-hairline);
-  border-radius: 7px;
-  color: var(--color-ink);
-  background: var(--color-sheet);
-  box-shadow: var(--shadow-raise);
+  inset: calc((var(--btn-h-sm) - var(--hit)) / 2);
+  border-radius: inherit;
 }
-.cdx-candles__time { display: block; margin-bottom: 4px; color: var(--color-slate); font-size: var(--type-min); line-height: 1.2; }
-.cdx-candles__values { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
-.cdx-candles__values span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.cdx-candles__values small { font-size: var(--type-min); line-height: 1; color: var(--color-slate); }
-.cdx-candles__values b { font-size: var(--type-min); font-weight: 500; line-height: 1; }
-.cdx-candles__new { animation: cdx-candle-observed 300ms ease-out both; }
-@keyframes cdx-candle-observed { from { opacity: .35; } to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .cdx-candles__new { animation: none; } }
+@media (hover: hover) and (pointer: fine) {
+  /* !important: beats the unlayered resting paint above it in card3d.css. */
+  .cdx-coin-screen .mdx-case .mdx-v3dbtn--case:hover { background: var(--color-raised) !important; }
+}
+/* !important: the phone tilt chip's 13px label is set in the unlayered card3d.css. */
+.cdx-coin-screen .mdx-case__controls .mdx-card3d__chip { font-size: var(--text-body) !important; }
+/* !important: the halo is the card's coloured glow (unlayered card3d.css); on this flat ground the case and its
+ * own contact darkening carry the depth, and the card stays the page's only colour. */
+.cdx-coin-screen .mdx-card3d__halo { display: none !important; }
+
+/* ---- facts (the card's, under the case; the coin's, in About): label left, value right, rules between rows */
+.cdx-coin-facts { display: flex; flex-direction: column; }
+.cdx-coin-facts > div {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 8px;
+  border-bottom: 1px solid var(--color-rule);
+  font-size: var(--text-body);
+  line-height: 20px;
+}
+.cdx-coin-facts > div:last-child { border-bottom: 0; }
+.cdx-coin-facts dt { flex: none; color: var(--color-slate); }
+.cdx-coin-facts dd { min-width: 0; text-align: right; color: var(--color-ink); overflow-wrap: anywhere; }
+
+/* ---- chart */
+.cdx-coin-screen__chart { display: flex; min-width: 0; min-height: 0; flex-direction: column; gap: 12px; }
+.cdx-chart { display: flex; flex: 1; min-height: 0; flex-direction: column; }
+.cdx-chart__plot { position: relative; flex: 1; min-height: 160px; margin-top: 12px; }
+.cdx-chart__svg { position: absolute; inset: 0; display: block; overflow: visible; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.cdx-chart__svg:focus:not(:focus-visible) { outline: none; }
+.cdx-chart__svg:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 4px; border-radius: var(--radius-chip); }
+.cdx-chart__grid { stroke: var(--color-hairline); stroke-width: 1; }
+.cdx-chart__base { stroke: var(--color-field); stroke-width: 1; }
+.cdx-chart__label { fill: var(--color-placeholder); font-family: var(--font-sans); font-size: 12px; font-variant-numeric: tabular-nums; }
+.cdx-chart__line { fill: none; stroke: var(--color-gold); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.cdx-chart__cross { stroke: var(--color-slate); stroke-opacity: 0.5; stroke-width: 1; }
+.cdx-chart__dot { fill: var(--color-gold); stroke: var(--color-surface); stroke-width: 2; }
+/* A trade that lands while the page is open: the end dot answers once (opacity only). */
+.cdx-chart__dot--new { animation: cdx-chart-observed 300ms var(--ease-out) both; }
+@keyframes cdx-chart-observed { from { opacity: 0.35; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .cdx-chart__dot--new { animation: none; } }
+:root[data-motion="calm"] .cdx-chart__dot--new { animation: none; }
+.cdx-chart__tip {
+  position: absolute;
+  top: 4px;
+  left: var(--tip-x);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  border-radius: var(--radius-row);
+  background: var(--color-float);
+  box-shadow: var(--shadow-pop); /* taste-skill-ignore: the readout floats over the plot, like a popover */
+  pointer-events: none;
+  transform: translateX(12px);
+  white-space: nowrap;
+}
+.cdx-chart__tip[data-side="left"] { transform: translateX(calc(-100% - 12px)); }
+.cdx-chart__tip b { font-size: var(--text-body); font-weight: 600; color: var(--color-ink); }
+.cdx-chart__tip span { font-size: var(--text-caption); color: var(--color-slate); }
+/* An empty range keeps the plot's frame and baseline, with one sentence in it. */
+.cdx-chart__empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--color-field);
+  text-align: center;
+}
+.cdx-chart__empty p { max-width: 32ch; font-size: var(--text-body); color: var(--color-slate); text-wrap: pretty; }
+.cdx-chart .mdx-tabs--sm .mdx-tabs__tab { min-width: 40px; }
+.cdx-chart__note { margin-top: 8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+
+/* ---- activity: a table of rules and alignment in a pane that scrolls, its header row sticky */
+.cdx-coin-screen__activity { display: flex; min-width: 0; min-height: 0; flex-direction: column; }
+.cdx-trades { display: flex; flex: 1; min-height: 0; flex-direction: column; }
+.cdx-trades__meta { display: inline-flex; align-items: center; gap: 8px; }
+.cdx-trades__scroll {
+  flex: 1;
+  min-height: 0;
+  margin: 8px calc(var(--pad-panel) * -1) calc(var(--pad-panel) * -1);
+  padding: 0 var(--pad-panel) var(--pad-panel);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-hairline) transparent;
+}
+.cdx-trades__table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: var(--text-body); }
+.cdx-trades__table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 32px;
+  padding: 0;
+  background: var(--color-surface);
+  box-shadow: inset 0 -1px 0 var(--color-hairline); /* taste-skill-ignore: a sticky cell's border does not stick; this hairline does */
+  font-size: var(--text-caption);
+  font-weight: 500;
+  text-align: left;
+  color: var(--color-slate);
+}
+.cdx-trades__table th:nth-child(1) { width: 44px; }
+.cdx-trades__table th:nth-child(3) { width: 84px; }
+.cdx-trades__table th:nth-child(4) { width: 84px; }
+.cdx-trades__table td { height: 40px; padding: 0; border-bottom: 1px solid var(--color-rule); white-space: nowrap; }
+.cdx-trades__table td:nth-child(2) { max-width: 0; padding-right: 8px; }
+.cdx-trades__table .cdx-trades__n { text-align: right; }
+.cdx-trades__table tr:focus-visible { outline: 2px solid var(--color-zap); outline-offset: -2px; }
+.cdx-trades__more { display: flex; justify-content: center; padding-top: 16px; }
+.cdx-trades__foot,
+.cdx-trades__empty { padding-top: 12px; font-size: var(--text-body); color: var(--color-slate); }
+@media (max-width: 767.98px) {
+  .cdx-trades__table th:nth-child(1) { width: 36px; }
+  .cdx-trades__table th:nth-child(3) { width: 64px; }
+  .cdx-trades__table th:nth-child(4) { width: 72px; }
+}
+@media (max-width: 359.98px) {
+  .cdx-trades__mcap { display: none; }
+}
+
+/* ---- trade ticket */
+.cdx-trade-ticket { display: flex; flex: none; flex-direction: column; gap: 16px; }
+.cdx-trade-ticket__input { height: var(--btn-h-lg); font-size: var(--text-title); }
+.cdx-trade-ticket__unit {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  font-size: var(--text-body);
+  color: var(--color-slate);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+.cdx-trade-ticket__quick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: -8px; }
+.cdx-trade-ticket__quick .mdx-btn { padding-inline: 0; }
+.cdx-trade-ticket__quote > div { min-height: 24px; font-size: var(--text-body); line-height: 24px; }
+.cdx-trade-ticket__quote dt { color: var(--color-slate); }
+.cdx-trade-ticket__msg { outline: none; overflow-wrap: anywhere; }
+.cdx-trade-ticket__msg:empty { display: none; }
+.cdx-trade-ticket__msg p { display: flex; align-items: flex-start; gap: 8px; font-size: var(--text-body); line-height: 20px; color: var(--color-down-hover); }
+.cdx-trade-ticket__msg p[data-kind="info"] { color: var(--color-ink); }
+.cdx-trade-ticket__msg .mdx-glyph { margin-top: 2px; }
+.cdx-trade-ticket__note { margin-top: -8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-placeholder); text-align: center; }
+
+/* ---- details: About, the coin's facts and links */
+.cdx-coin-screen__details { display: flex; min-width: 0; min-height: 0; flex-direction: column; gap: 16px; }
+.cdx-coin-about { display: flex; flex-direction: column; gap: 12px; }
+.cdx-coin-about__lore { max-width: 65ch; font-size: var(--text-body); line-height: 20px; overflow-wrap: anywhere; white-space: pre-line; }
+.cdx-coin-about__addr { min-width: 0; }
+.cdx-coin-about__note { font-size: var(--text-body); line-height: 20px; color: var(--color-slate); text-wrap: pretty; }
+.cdx-coin-about__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.cdx-coin-about__actions .mdx-link { display: inline-flex; align-items: center; gap: 4px; }
+.cdx-coin-about__foot { font-size: var(--text-caption); line-height: 16px; color: var(--color-placeholder); }
+/* Addresses in the chrome use the UI face (Courier Prime stays inside the cards). */
+.cdx-coin-screen .addr { font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
+
+/* ================================================================ arrangements */
+
+/* Phones and tablets: one section at a time (the ?tab= value on the root). */
+@media (max-width: 1023.98px) {
+  .cdx-coin-screen [data-section] { display: none; }
+  .cdx-coin-screen__side { display: contents; }
+}
+
+/* Phones: the market cap and the curve on the ground above the tabs, then the shown section fills the rest. */
+@media (max-width: 767.98px) {
+  .cdx-coin-screen { gap: 12px; }
+  .cdx-coin-screen__market { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; border-radius: 0; background: none; }
+  .cdx-coin-screen__market .mdx-kpis { grid-template-columns: minmax(0, 1fr); }
+  .cdx-coin-screen__market .mdx-kpi { padding: 0; }
+  .cdx-coin-screen__market .mdx-kpi:not([data-lead]) { display: none; }
+  .cdx-coin-screen__curve { padding: 0 0 0 16px; }
+  .cdx-coin-screen:is([data-tab="card"], [data-tab="chart"], [data-tab="trade"], [data-tab="trades"], [data-tab="details"]) [data-section] { flex: 1; min-height: 0; }
+  .cdx-coin-screen[data-tab="card"] [data-section="card"] { display: flex; }
+  .cdx-coin-screen[data-tab="chart"] [data-section="chart"],
+  .cdx-coin-screen[data-tab="trades"] [data-section="trades"] { display: flex; }
+  .cdx-coin-screen[data-tab="trade"] [data-section="trade"],
+  .cdx-coin-screen[data-tab="details"] [data-section="details"] { display: flex; overflow-y: auto; overscroll-behavior: contain; }
+  .cdx-coin-screen__ticket { flex-direction: column; }
+  .cdx-coin-screen__facts { display: none; }
+  .cdx-coin-screen__object { --case-below: 64px; }
+  .cdx-coin-screen .mdx-case__controls { margin-inline: -40px; }
+  /* Price, 24h volume and holders head the Chart section: three narrow columns, one row. */
+  .cdx-coin-screen__figures { flex: none; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cdx-coin-screen__figures .mdx-kpi:nth-child(n) { grid-column: auto; box-shadow: none; padding: 12px; } /* taste-skill-ignore: clears the primitive's two-column hairlines */
+  .cdx-coin-screen__figures .mdx-kpi + .mdx-kpi { border-left: 1px solid var(--color-hairline); }
+  .cdx-chart__plot { min-height: 180px; }
+}
+
+/* Tablets: the card column beside one tabbed pane, the market strip above both. */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .cdx-coin-screen__grid {
+    display: grid;
+    grid-template-columns: clamp(240px, 38%, 320px) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas: "market market" "card tabs" "card pane";
+    gap: 16px;
+  }
+  .cdx-coin-screen__market { grid-area: market; }
+  .cdx-coin-screen__market .mdx-kpis { grid-template-columns: minmax(0, 1.45fr) repeat(3, minmax(0, 1fr)); }
+  .cdx-coin-screen__market .mdx-kpi { padding: 12px 16px; }
+  .cdx-coin-screen__curve { padding: 12px 16px; }
+  .cdx-coin-screen__tabs { grid-area: tabs; }
+  .cdx-coin-screen__object { --case-below: 212px; grid-area: card; }
+  .cdx-coin-screen [data-section="card"] { display: flex; }
+  .cdx-coin-screen [data-section]:not([data-section="card"]) { grid-area: pane; }
+  .cdx-coin-screen:is([data-tab="card"], [data-tab="trade"]) [data-section="trade"],
+  .cdx-coin-screen[data-tab="details"] [data-section="details"] { display: flex; flex-direction: column; overflow-y: auto; overscroll-behavior: contain; }
+  .cdx-coin-screen[data-tab="chart"] [data-section="chart"],
+  .cdx-coin-screen[data-tab="trades"] [data-section="trades"] { display: flex; }
+  .cdx-coin-screen__figures,
+  .cdx-coin-facts.cdx-coin-screen__facts--phone { display: none; }
+}
+
+/* Desktop: everything at once. Card column | market strip over chart and activity | ticket and details. */
+@media (min-width: 1024px) {
+  .cdx-coin-screen__grid {
+    display: grid;
+    grid-template-columns: clamp(240px, 26%, 300px) minmax(0, 1fr) clamp(300px, 29%, 336px);
+    grid-template-rows: auto minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-areas: "card market market" "card chart side" "card activity side";
+    gap: 16px;
+  }
+  .cdx-coin-screen__market { grid-area: market; }
+  .cdx-coin-screen__tabs,
+  .cdx-coin-screen__figures,
+  .cdx-coin-facts.cdx-coin-screen__facts--phone { display: none; }
+  .cdx-coin-screen__object { --case-below: 212px; grid-area: card; }
+  .cdx-coin-screen__chart { grid-area: chart; }
+  .cdx-coin-screen__activity { grid-area: activity; }
+  /* The ticket and the details share one panel that runs the full height and scrolls inside, so the column ends
+   * level with the chart and activity beside it (one block each). */
+  .cdx-coin-screen__side {
+    grid-area: side;
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: var(--radius-panel);
+    background: var(--color-surface);
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-hairline) transparent;
+  }
+  .cdx-coin-screen__ticket { display: flex; flex: none; flex-direction: column; }
+  .cdx-coin-screen__side .cdx-trade-ticket,
+  .cdx-coin-screen__side .cdx-coin-about { border-radius: 0; background: none; }
+  .cdx-coin-screen__details { flex: none; gap: 0; border-top: 1px solid var(--color-hairline); }
+  .cdx-coin-screen__details > .cdx-coin-facts { padding: 8px var(--pad-panel) 0; }
+}
+
+/* Short screens from 768 (1280x720, 1440x520, a phone held sideways): the card's facts move into the details, so the
+ * case keeps its size. */
+@media (min-width: 768px) and (max-height: 760px) {
+  .cdx-coin-screen__object { --case-below: 64px; }
+  .cdx-coin-facts.cdx-coin-screen__facts { display: none; }
+  .cdx-coin-facts.cdx-coin-screen__facts--phone { display: flex; }
+}
+/* A phone held sideways: the page grows and scrolls in main, the pane a fixed 460px beside a full-size case. */
+@media (min-width: 768px) and (max-width: 1023.98px) and (max-height: 600px) {
+  .cdx-app.cdx-viewport .cdx-viewport-main > .cdx-coin-screen { height: auto; }
+  .cdx-coin-screen__grid { grid-template-rows: auto auto 460px; }
+}

@@ -1,28 +1,29 @@
-import { useId, type CSSProperties } from "react";
-import { PageControls, usePageCapacity } from "../components/carddex/Viewport";
+import { useId, useState } from "react";
 import { tabPanelProps } from "../components/carddex/ViewTabs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 
-import { View3DHost } from "../components/mintdex/card3d";
+import { View3DHost, type View3DItem } from "../components/mintdex/card3d";
+import { quoteFixed, useCoinBand } from "../components/mintdex/coin";
 import { revPoll, useAction } from "../components/mintdex/hooks";
 import { MintCard } from "../components/mintdex/MintCard";
 import { useMe, useSessionUi } from "../components/mintdex/session";
+import { SimTag } from "../components/mintdex/trust";
 import {
-  Button, ButtonLink, Change, Num, PageFrame, PageHeader,
-  Pager, Skeleton, Tabs, TextLink, Thumb,
+  Button, ButtonLink, Change, KpiGroup, Num, PageHeader, SectionHead, Tabs, TextLink, Thumb, type StatItem,
 } from "../components/mintdex/ui";
 import { EmptyState } from "../components/mintdex/empty-state";
 import { getCardDesign } from "../lib/carddex/designs";
 import { getPairAsset } from "../lib/carddex/pairs";
-import { quoteAtoms } from "../lib/carddex/quote-display";
 import { claimFaucet, getPortfolio } from "../lib/mintdex/api";
 import { FLOW, IS_SIM, MODE_COPY } from "../lib/mintdex/copy";
 import { sol, tokens } from "../lib/mintdex/format";
 import { NOINDEX_PORTFOLIO, pageHead } from "../lib/mintdex/seo";
 import type { Me, PortfolioData } from "../lib/mintdex/types";
 
-// Older saved offer links are accepted and folded into Cards; there is no NFT marketplace.
+// Older saved offer links are accepted and folded into Cards; there is no NFT marketplace. `page` is kept for the
+// inherited chain portfolio (ChainPortfolio.tsx); this page's lists scroll and ignore it.
+type PortfolioView = "coins" | "cards" | "balances";
 type PortfolioSearch = { tab?: "coins" | "cards" | "balances" | "bids" | "offers"; page?: number };
 export const Route = createFileRoute("/portfolio")({
   validateSearch: (raw: Record<string, unknown>): PortfolioSearch => ({
@@ -33,66 +34,189 @@ export const Route = createFileRoute("/portfolio")({
   shouldReload: ({ cause }) => cause !== "stay",
   head: () => pageHead({
     path: "/portfolio",
-    title: "Your collection | Launch a Card",
+    title: "Portfolio | Launch a Card",
     description: "Your coins, your one-of-one NFT cards and your quote balances on Launch a Card.",
     noindex: NOINDEX_PORTFOLIO,
   }),
   component: Portfolio,
 });
 
-function Holdings({ rows }: { rows: PortfolioData["holdings"] }) {
-  return (
-    <div className="overflow-hidden rounded-panel bg-plinth p-2 shadow-ring">
-      <div className="mdx-micro hidden grid-cols-[minmax(0,1.7fr)_1fr_1fr_80px_minmax(0,1fr)] gap-5 border-b border-hairline px-3 py-3 lg:grid">
-        <span>Coin</span><span className="text-right">Held</span><span className="text-right">Value</span><span className="text-right">24h</span><span>Card design</span>
-      </div>
-      <div className="mdx-stagger divide-y divide-hairline">
-        {rows.map(({ coin, amount, valueQuote }) => (
-          <Link key={coin.id} to="/coin/$id" params={{ id: coin.id }} className="group grid min-h-20 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-row px-3 py-3 transition-colors hover:bg-tint lg:min-h-16 lg:grid-cols-[minmax(0,1.7fr)_1fr_1fr_80px_minmax(0,1fr)] lg:gap-5">
-            <span className="flex min-w-0 items-center gap-3">
-              <Thumb src={coin.image} size={40} />
-              <span className="min-w-0"><span className="block truncate text-[15px] font-semibold text-ink group-hover:underline">{coin.name}</span><span className="block truncate text-[12px] text-slate">${coin.ticker}<span className="lg:hidden"> · {tokens(amount)} held</span></span></span>
-            </span>
-            <span className="num hidden text-right text-[14px] text-ink lg:block">{tokens(amount)}</span>
-            <span className="text-right"><span className="num block text-[15px] text-ink">{quoteAtoms(valueQuote, coin.quoteAssetKey, true)} <span className="text-[12px] text-slate">{coin.quoteSymbol}</span></span><Change v={coin.change24h} className="text-[12px] lg:hidden" /></span>
-            <span className="hidden text-right lg:block"><Change v={coin.change24h} className="text-[13px]" /></span>
-            <span className="hidden truncate text-[12px] text-slate lg:block">{getCardDesign(coin.cardTemplate).name}</span>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
+/** Rows shown before "Show more": holdings past 50 and cards past 24 (natural lists, no viewport pager). */
+const HOLDINGS_BATCH = 50;
+const CARDS_BATCH = 24;
+
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(" ");
 }
 
-function Cards({ rows }: { rows: PortfolioData["deeds"] }) {
+/** A tab label with its count after it in slate ("Coins 10"). */
+function counted(label: string, n: number | undefined) {
+  return n == null ? label : <>{label} <span className="cdx-portfolio__count num">{n}</span></>;
+}
+
+/** The sections' loading rows: the final layout with each value a flat bar at its real size. */
+function LoadingRows({ label }: { label: string }) {
   return (
-    <div className="cdx-portfolio__cards">
-      {rows.map(({ coin }) => (
-        <View3DHost key={coin.id} item={{ id: coin.id, card: coin }}>
-          <Link to="/coin/$id" params={{ id: coin.id }} search={{ tab: "card" }} className="group block min-w-0">
-            <MintCard card={coin} compact depth="table" idle="float" />
-            <div className="mt-3 min-w-0 px-1"><p className="truncate text-[14px] font-semibold text-ink group-hover:underline">{coin.name}</p><p className="mt-0.5 truncate text-[12px] text-slate">{getCardDesign(coin.cardTemplate).name}</p><p className="mt-1 text-[12px] font-medium uppercase tracking-[0.12em] text-slate">Creator's edition · 1 / 1</p></div>
-          </Link>
-        </View3DHost>
+    <div className="cdx-holdings__rows" aria-busy="true" aria-label={label}>
+      {[0, 1, 2].map((n) => (
+        <div key={n} className="cdx-holding cdx-holding--loading" aria-hidden="true">
+          <span className="mdx-skeleton cdx-holding__thumb" />
+          <span className="cdx-holding__id"><span className="mdx-skeleton cdx-bar cdx-bar--name" /><span className="mdx-skeleton cdx-bar cdx-bar--sub" /></span>
+          <span className="mdx-skeleton cdx-bar cdx-bar--fig cdx-holding__value" />
+        </div>
       ))}
     </div>
   );
 }
 
+/**
+ * Holdings: one whole-row link per coin. Wide panes read Coin · Held · Value · 24h under a header row; narrow ones
+ * two lines (name and value, then ticker and amount held, and the 24h change). Rules sit between rows, square.
+ */
+function Holdings({ rows }: { rows: PortfolioData["holdings"] }) {
+  const [limit, setLimit] = useState(HOLDINGS_BATCH);
+  return (
+    <div className="cdx-holdings">
+      <div className="cdx-holdings__head" aria-hidden="true">
+        <span>Coin</span><span>Held</span><span>Value</span><span>24h</span>
+      </div>
+      <div className="cdx-holdings__rows">
+        {rows.slice(0, limit).map(({ coin, amount, valueQuote }) => (
+          <Link key={coin.id} to="/coin/$id" params={{ id: coin.id }} className="cdx-holding">
+            <Thumb src={coin.image} size={40} />
+            <span className="cdx-holding__id">
+              <span className="cdx-holding__name">{coin.name}</span>
+              <span className="cdx-holding__sub">
+                ${coin.ticker}
+                <span className="cdx-holding__design"> · {getCardDesign(coin.cardTemplate).name}</span>
+                <span className="cdx-holding__held-sub"> · <span className="num">{tokens(amount)}</span> held</span>
+              </span>
+            </span>
+            <span className="cdx-holding__held num">{tokens(amount)}</span>
+            <span className="cdx-holding__value">
+              <Num size="sm" unit={coin.quoteSymbol}>{quoteFixed(valueQuote, coin.quoteAssetKey)}</Num>
+              <Change v={coin.change24h} className="cdx-holding__chg-sub" />
+            </span>
+            <span className="cdx-holding__chg"><Change v={coin.change24h} /></span>
+          </Link>
+        ))}
+      </div>
+      {rows.length > limit ? (
+        <div className="cdx-portfolio__more">
+          <span className="text-caption text-slate">Showing <span className="num">{limit}</span> of <span className="num">{rows.length}</span></span>
+          <Button variant="outline" onClick={() => setLimit((n) => n + HOLDINGS_BATCH)}>Show more coins</Button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/** The cards: one tile per one-of-one card, the View in 3D chip on the card's own corner (the host is the card). */
+function Cards({ rows }: { rows: PortfolioData["deeds"] }) {
+  const [limit, setLimit] = useState(CARDS_BATCH);
+  const list: View3DItem[] = rows.map(({ coin }) => ({ id: coin.id, card: coin }));
+  return (
+    <>
+      <div className="cdx-portfolio__cards">
+        {rows.slice(0, limit).map(({ coin }, i) => (
+          <View3DHost key={coin.id} item={list[i]} list={list} className="cdx-portfolio__tile">
+            <Link to="/coin/$id" params={{ id: coin.id }} search={{ tab: "card" }} className="cdx-portfolio__card">
+              <MintCard card={coin} compact depth="table" idle="float" sizes="(max-width: 767px) 50vw, 200px" />
+              <span className="cdx-portfolio__cap">
+                <span className="cdx-portfolio__capname">{coin.name}</span>
+                <span className="cdx-portfolio__capsub">${coin.ticker} · {getCardDesign(coin.cardTemplate).name}</span>
+              </span>
+            </Link>
+          </View3DHost>
+        ))}
+      </div>
+      {rows.length > limit ? (
+        <div className="cdx-portfolio__more">
+          <span className="text-caption text-slate">Showing <span className="num">{limit}</span> of <span className="num">{rows.length}</span></span>
+          <Button variant="outline" onClick={() => setLimit((n) => n + CARDS_BATCH)}>Show more cards</Button>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+/** Test balances by quote asset: SOL first, then the quotes you hold or trade in, then the zeros. */
+function Balances({ me, byQuote }: { me: NonNullable<Me>; byQuote: Record<string, string> }) {
+  const entries = Object.entries(me.quoteBalances ?? { sol: me.balance });
+  const rank = ([key, value]: [string, number]) => (key === "sol" ? 0 : value > 0 || Number(byQuote[key] ?? 0) > 0 ? 1 : 2);
+  const rows = [...entries].sort((a, b) => rank(a) - rank(b) || getPairAsset(a[0]).symbol.localeCompare(getPairAsset(b[0]).symbol));
+  return (
+    <table className="cdx-balances">
+      <caption className="sr-only">Test balances by quote asset</caption>
+      <thead>
+        <tr><th scope="col">Asset</th><th scope="col" className="cdx-balances__n">Balance</th><th scope="col" className="cdx-balances__n">In coins</th></tr>
+      </thead>
+      <tbody>
+        {rows.map(([key, value]) => {
+          const asset = getPairAsset(key);
+          return (
+            <tr key={key}>
+              <th scope="row"><span className="cdx-balances__sym">{asset.symbol}</span><span className="cdx-balances__name">{asset.name}</span></th>
+              <td className="cdx-balances__n num">{quoteFixed(value, key)}</td>
+              <td className="cdx-balances__n num">{quoteFixed(byQuote[key] ?? 0, key)}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+}
+
+/** The signed-out first run: the page's frame (figures as dashes, the coins table's header) holding the invitation. */
 function SignedOut() {
   const { openEnter } = useSessionUi();
+  const dashes: StatItem[] = [
+    { label: "Total value", value: null, sub: MODE_COPY.enterGift },
+    { label: "Test SOL", value: null },
+    { label: "Coins", value: null },
+    { label: "Cards", value: null },
+  ];
   return (
-    <PageFrame className="mdx-page cdx-portfolio">
-      <PageHeader title="Your collection" context="Your coins. Your cards." />
-      <EmptyState hero className="cdx-portfolio-empty flex-1" title="Start your collection" body="Try the demo to launch a coin, choose its permanent card design and keep both in your portfolio." action={<div className="flex flex-col items-center gap-3"><Button onClick={() => openEnter()}>Try the demo</Button><TextLink to="/discover">Explore coins</TextLink></div>} />
-    </PageFrame>
+    <div className="mdx-frame cdx-portfolio cdx-portfolio--out">
+      <PageHeader title="Portfolio" context="Your coins, your one-of-one cards and what they are worth." />
+      <KpiGroup items={dashes} lead className="cdx-portfolio__kpis cdx-portfolio__kpis--out" />
+      <section className="cdx-portfolio__panel cdx-portfolio__invite" aria-label="Coins">
+        <SectionHead title="Coins" />
+        <div className="cdx-holdings">
+          <div className="cdx-holdings__head" aria-hidden="true">
+            <span>Coin</span><span>Held</span><span>Value</span><span>24h</span>
+          </div>
+        </div>
+        <EmptyState
+          hero
+          className="cdx-portfolio-empty"
+          title="Start your collection"
+          body="Try the demo to trade a coin or launch your own. Each coin you launch comes with its one-of-one card."
+          action={<><Button onClick={() => openEnter()}>Try the demo</Button><TextLink to="/discover">Explore coins</TextLink></>}
+        />
+      </section>
+    </div>
   );
+}
+
+/** The figures, from the rows as shown: total value = test SOL + the coins valued in SOL. */
+function totalsOf(me: NonNullable<Me>, data: PortfolioData | undefined) {
+  if (!data) return null;
+  const priced = data.holdings.filter((h) => h.valueSol != null);
+  const coins = priced.reduce((s, h) => s + (h.valueSol ?? 0), 0);
+  const unpriced = data.holdings.length - priced.length;
+  // The 24h move of what you hold now: today's value against the same amounts at prices 24 hours ago.
+  const moving = priced.filter((h) => (h.valueSol ?? 0) > 0 && 1 + h.coin.change24h > 0);
+  const before = moving.reduce((s, h) => s + (h.valueSol ?? 0) / (1 + h.coin.change24h), 0);
+  const now = moving.reduce((s, h) => s + (h.valueSol ?? 0), 0);
+  const change = moving.length ? (now - before) / (me.balance + (coins - now) + before) : null;
+  return { coins, unpriced, total: me.balance + coins, change };
 }
 
 function Collection({ me }: { me: NonNullable<Me> }) {
   const initial = Route.useLoaderData();
   const qc = useQueryClient();
-  const { data } = useQuery({
+  const { data, isError, refetch, isFetching } = useQuery({
     queryKey: ["portfolio", me.id],
     queryFn: revPoll(qc, ["portfolio", me.id], () => getPortfolio()),
     initialData: initial ?? undefined,
@@ -102,33 +226,109 @@ function Collection({ me }: { me: NonNullable<Me> }) {
   const { run, pending } = useAction();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
-  const view = search.tab === "cards" ? "cards" : search.tab === "balances" ? "balances" : "coins";
-  const balances = Object.entries(me.quoteBalances ?? {sol:me.balance});
-  const rows = view === "cards" ? data?.deeds : view === "balances" ? balances : data?.holdings;
+  const band = useCoinBand();
+  const view: PortfolioView = search.tab === "cards" || search.tab === "balances" ? search.tab : "coins";
   const tabsId = useId();
-  const grid = usePageCapacity({rowHeight:view==="cards"?270:view==="balances"?76:84,minWidth:view==="coins"?10000:180,maxColumns:view==="coins"?1:4,maxRows:view==="cards"?2:8});
-  const perPage = grid.count;
-  const pages = Math.max(1, Math.ceil((rows?.length ?? 0) / perPage));
-  const page = Math.min((search.page ?? 1) - 1, pages - 1);
-  const from = page * perPage;
-  const setPage = (next: number) => void navigate({ search: (s) => ({ ...s, page: next > 0 ? next + 1 : undefined }), replace: true, resetScroll: false });
+  const totals = totalsOf(me, data ?? undefined);
+  // No data yet: a flat bar while it loads; if the read failed, a grey dash and one line with Retry in each list.
+  const failed = !data && isError;
+  const loading = failed ? null : <span className="mdx-skeleton cdx-bar cdx-bar--kpi" aria-label="Loading" />;
+  const retry = (what: string) => (
+    <EmptyState
+      inline
+      title={`Couldn't load your ${what}.`}
+      body="Check your connection, then try again. Your test balances are safe in this browser."
+      action={<Button variant="outline" pending={isFetching} pendingLabel="Retrying..." onClick={() => void refetch()}>Retry</Button>}
+    />
+  );
+  const items: StatItem[] = [
+    {
+      label: "Total value",
+      value: totals ? sol(totals.total, 2) : loading,
+      unit: totals ? "SOL" : undefined,
+      watch: totals?.total,
+      change: totals ? (
+        totals.change == null ? (
+          <span className="mdx-dash" aria-label="No 24h change: you hold no coins">{"—"}</span>
+        ) : (
+          <span className="cdx-portfolio__chg"><Change v={totals.change} pill period="in 24 hours, at the coins you hold now" /><span aria-hidden="true">24h</span></span>
+        )
+      ) : undefined,
+      sub: "Test SOL plus your coins; 24h is their price move",
+    },
+    { label: "Test SOL", value: sol(me.balance, 2), unit: "SOL", watch: me.balance },
+    {
+      label: "Coins",
+      value: totals ? sol(totals.coins, 2) : loading,
+      unit: totals ? "SOL" : undefined,
+      sub: !data ? undefined : totals?.unpriced ? `Plus ${totals.unpriced} in other quotes (Balances)` : `${data.holdings.length} held`,
+    },
+    { label: "Cards", value: data ? String(data.deeds.length) : loading, sub: "One of one each" },
+  ];
+  // Phones and tablets: the shown section is the tab panel; from 1024 every section shows and the tabs go.
+  const panel = (section: PortfolioView) => (band !== "wide" && section === view ? tabPanelProps(tabsId, view) : {});
   return (
-    <PageFrame className="mdx-page cdx-portfolio">
-      <PageHeader title={`@${me.handle}`} context="Your coins. Your one-of-one cards." right={me.canFaucet ? <Button variant="outline" pending={pending === "faucet"} pendingLabel="Claiming..." onClick={() => void run("faucet", () => claimFaucet(), FLOW.faucetSent, { keys: [["portfolio"]] })}>{FLOW.claimFaucet}</Button> : undefined} />
-      <dl className="cdx-portfolio__summary grid flex-none grid-cols-3 gap-3 rounded-panel border border-hairline bg-plinth p-4 sm:gap-6">
-        <div className="min-w-0"><dt className="mdx-micro truncate">Demo wallet</dt><dd className="mt-1"><Num size="lg" unit="SOL" watch={me.balance}>{sol(me.balance, 2)}</Num></dd></div>
-        <div className="min-w-0"><dt className="mdx-micro truncate">Coin value</dt><dd className="mt-1">{data?.totals.holdingsValue === null ? <span className="text-[20px] font-semibold text-ink">By quote</span> : <Num size="lg" unit="SOL" watch={data?.totals.holdingsValue ?? undefined}>{sol(data?.totals.holdingsValue ?? 0)}</Num>}</dd></div>
-        <div className="min-w-0"><dt className="mdx-micro truncate">NFT cards</dt><dd className="mt-1"><Num size="lg">{data?.deeds.length ?? 0}</Num></dd></div>
-      </dl>
-      <div className="flex flex-none items-center justify-between gap-4">
-        <Tabs panels idBase={tabsId} label="Portfolio sections" value={view} onChange={(next) => void navigate({ search: { tab: next === "cards" ? "cards" : next === "balances" ? "balances" : undefined }, replace: true, resetScroll: false })} options={[{ value: "coins", label: "Coins", count: data?.holdings.length }, { value: "cards", label: "NFT cards", count: data?.deeds.length }, {value:"balances",label:"Balances"}]} />
-
+    <div className="mdx-frame cdx-portfolio" data-tab={view}>
+      <PageHeader
+        title="Portfolio"
+        context={<>@{me.handle} · test wallet</>}
+        right={
+          <>
+            <SimTag />
+            {me.canFaucet ? (
+              <Button variant="outline" pending={pending === "faucet"} pendingLabel="Claiming..." onClick={() => void run("faucet", () => claimFaucet(), FLOW.faucetSent, { keys: [["portfolio"]] })}>
+                {FLOW.claimFaucet}
+              </Button>
+            ) : null}
+          </>
+        }
+      />
+      <KpiGroup items={items} lead className="cdx-portfolio__kpis" />
+      <div className="cdx-portfolio__tabs">
+        <Tabs
+          panels
+          idBase={tabsId}
+          label="Portfolio sections"
+          value={view}
+          onChange={(next) => void navigate({ search: { tab: next === "coins" ? undefined : next }, replace: true, resetScroll: false })}
+          options={[
+            { value: "coins", label: counted("Coins", data?.holdings.length) },
+            { value: "cards", label: counted("Cards", data?.deeds.length) },
+            { value: "balances", label: counted("Balances", Object.keys(me.quoteBalances ?? { sol: 0 }).length) },
+          ]}
+        />
       </div>
-      <div ref={grid.ref} {...tabPanelProps(tabsId, view)} className="cdx-portfolio__rows" style={{"--page-columns":grid.columns,"--page-rows":grid.rows} as CSSProperties}>
-        {!data ? <div className="grid gap-3" aria-busy="true" aria-label="Loading your collection">{[0, 1, 2].map((n) => <Skeleton key={n} className="h-20 w-full rounded-panel" />)}</div> : view === "balances" ? <dl className="cdx-balance-grid" aria-label="Demo quote balances">{balances.slice(from,from+perPage).map(([key,value])=><div key={key}><dt>{getPairAsset(key).symbol}</dt><dd>{quoteAtoms(value,key,true)}</dd><span className="text-[12px] text-slate">Held value: {quoteAtoms(data.totals.holdingsValueByQuote[key]??0,key,true)}</span></div>)}</dl> : view === "cards" ? data.deeds.length ? <Cards rows={data.deeds.slice(from, from + perPage)} /> : <EmptyState title="Your first card awaits" body="Launch a coin and choose the premium design for its one-of-one card." action={<ButtonLink to="/launch">Launch a coin</ButtonLink>} /> : data.holdings.length ? <Holdings rows={data.holdings.slice(from, from + perPage)} /> : <EmptyState title="No coins yet" body="Discover a coin to trade, or launch one of your own." action={<ButtonLink to="/discover">Discover coins</ButtonLink>} />}
+      <div className="cdx-portfolio__grid">
+        <section data-section="coins" className="cdx-portfolio__panel cdx-portfolio__coins" aria-label="Coins" {...panel("coins")}>
+          <SectionHead title="Coins" right={data ? <span className="num">{data.holdings.length} held</span> : undefined} />
+          {failed ? (
+            retry("coins")
+          ) : !data ? (
+            <LoadingRows label="Loading your coins" />
+          ) : data.holdings.length ? (
+            <Holdings rows={data.holdings} />
+          ) : (
+            <EmptyState inline title="No coins yet" body="Buy a coin on its page, or launch one of your own." action={<><ButtonLink to="/discover">Discover coins</ButtonLink><TextLink to="/launch">Launch a coin</TextLink></>} />
+          )}
+        </section>
+        <section data-section="cards" className="cdx-portfolio__panel cdx-portfolio__deck" aria-label="Cards" {...panel("cards")}>
+          <SectionHead title="Cards" right={data ? <span className="num">{data.deeds.length} owned</span> : undefined} />
+          {failed ? (
+            retry("cards")
+          ) : !data ? (
+            <LoadingRows label="Loading your cards" />
+          ) : data.deeds.length ? (
+            <Cards rows={data.deeds} />
+          ) : (
+            <EmptyState inline title="No cards yet" body="Launch a coin to get its one-of-one card, with the design you choose." action={<TextLink to="/launch">Launch a coin</TextLink>} />
+          )}
+        </section>
+        <section data-section="balances" className={cx("cdx-portfolio__panel cdx-portfolio__balances")} aria-label="Test balances" {...panel("balances")}>
+          <SectionHead title="Test balances" right={<span className="text-caption text-slate">Separate demo balance per quote</span>} />
+          <Balances me={me} byQuote={data?.totals.holdingsValueByQuote ?? {}} />
+        </section>
       </div>
-      <PageControls page={page} pages={pages} onPage={setPage} label={view==="balances" ? "Separate demo balances" : `${rows?.length ?? 0} ${view==="cards"?"card":"coin"}${rows?.length === 1 ? "" : "s"}`} />
-    </PageFrame>
+    </div>
   );
 }
 

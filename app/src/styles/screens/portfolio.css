@@ -1,21 +1,180 @@
-/* Portfolio (/portfolio) screen sheet. Owned by the "coin" screen group (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css).
- * The blocks below were moved here unchanged from the shared sheets, in their old cascade order; tokens: carddex-theme.css. */
+/* Portfolio (/portfolio) screen sheet. Owned by the "coin" screen group (.taste-skill/restyle/ownership.md). Layer: cdx
+ * (styles.css). Tokens: carddex-theme.css. A list page: it grows with its content and main scrolls (no viewport pager).
+ * From 1024 the coins and the cards sit side by side with the balances under the coins; below, one ?tab= section. */
 
-/* ---- moved from carddex-viewport.css (same order as there) */
-.cdx-portfolio { gap:10px; }
-.cdx-portfolio > header { height:auto; min-height:40px; }
-.cdx-portfolio__summary { flex:none; padding:10px; }
-.cdx-portfolio__rows { flex:1; min-height:0; }
-.cdx-portfolio__cards { height:100%; min-height:0; display:grid; grid-template-columns:repeat(var(--page-columns,1),minmax(0,1fr)); grid-template-rows:repeat(var(--page-rows,1),minmax(0,1fr)); gap:14px; }
-.cdx-portfolio__cards > div { min-height:0; container-type:size; display:flex; align-items:center; justify-content:center; }
-.cdx-portfolio__cards a { width:min(78cqw,calc((100cqh - 70px)*.57)); }
-.cdx-balance-grid { height:100%; display:grid; grid-template-columns:repeat(var(--page-columns,1),minmax(0,1fr)); grid-template-rows:repeat(var(--page-rows,1),minmax(0,1fr)); gap:8px; }
-.cdx-balance-grid > div { min-width:0; padding:10px; background:var(--color-surface); border-radius:8px; display:flex; flex-direction:column; justify-content:center; font-size:13px; }
-.cdx-balance-grid dd { overflow-wrap:anywhere; }@media(max-width:1023px) {
- .cdx-portfolio__summary .mdx-num { font-size:21px; }
-}@media(max-width:1023px) {
- .cdx-portfolio > header > div > p { display:none; }
+/* The page grows with its lists instead of fitting the viewport (browse-02). */
+.cdx-app.cdx-viewport .cdx-viewport-main > .cdx-portfolio { height: auto; min-height: 100%; }
+.cdx-portfolio { gap: var(--gap-page); }
+.cdx-portfolio .mdx-pagehead__right { gap: 12px; }
+
+/* ---- the figures: total value leads (30px) with its 24h move; test SOL, coins and cards beside it */
+.cdx-portfolio__kpis { flex: none; grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr)); }
+.cdx-portfolio__kpis .mdx-kpi { padding: 12px 20px; }
+.cdx-portfolio__kpis .mdx-kpi:not([data-lead]) .mdx-kpi__value .num { font-size: var(--text-title); line-height: 26px; }
+.cdx-portfolio__chg { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-caption); color: var(--color-slate); }
+.cdx-portfolio__count { color: var(--color-slate); }
+.cdx-portfolio .mdx-tabs__tab[data-selected] .cdx-portfolio__count { color: var(--color-ink); }
+
+/* Loading: each value a flat bar at its real size (no layout shift when the data lands). */
+.cdx-bar { display: inline-block; vertical-align: middle; border-radius: var(--radius-chip); }
+.cdx-bar--kpi { width: 120px; height: 24px; }
+.cdx-bar--name { width: 120px; height: 14px; }
+.cdx-bar--sub { width: 80px; height: 12px; }
+.cdx-bar--fig { width: 72px; height: 14px; }
+/* No travelling shine on these bars (app screens load flat). */
+.cdx-portfolio .mdx-skeleton::after { content: none; }
+
+/* ---- sections */
+.cdx-portfolio__tabs { flex: none; }
+.cdx-portfolio__grid { display: flex; min-width: 0; flex-direction: column; gap: 16px; }
+.cdx-portfolio__panel {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+  padding: var(--pad-panel);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
 }
-.cdx-viewport .cdx-portfolio-empty { min-height:0; padding-block:12px; }
-.cdx-portfolio .mdx-tabs { width:100%; min-width:0; overflow:visible; }
-.cdx-portfolio .mdx-tabs__tab { flex:1; min-width:0; padding-inline:8px; font-size:12px; }
+.cdx-portfolio__more { display: flex; flex-direction: column; align-items: center; gap: 8px; padding-top: 16px; }
+.cdx-portfolio__line { padding-block: 16px 8px; font-size: var(--text-body); color: var(--color-slate); }
+
+/* ---- holdings: whole-row links, two lines in narrow panes, four columns in wide ones (container query) */
+.cdx-holdings { container-type: inline-size; min-width: 0; }
+.cdx-holdings__head { display: none; }
+.cdx-holding {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  min-height: 64px;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding-block: 12px;
+  color: var(--color-ink);
+}
+/* Rules sit between square rows; the hover tint is a rounded layer behind the row, so the rules never bend (browse-17). */
+.cdx-holding + .cdx-holding { border-top: 1px solid var(--color-rule); }
+.cdx-holding::before {
+  content: "";
+  position: absolute;
+  inset: 4px -8px;
+  z-index: -1;
+  border-radius: var(--radius-row);
+  background: var(--color-raised);
+  opacity: 0;
+  transition: opacity var(--t-hover) ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cdx-holding:hover::before { opacity: 1; }
+  .cdx-holding:hover .cdx-holding__name { text-decoration-line: underline; text-decoration-color: var(--color-control-border); text-underline-offset: 3px; }
+}
+.cdx-holding:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; border-radius: var(--radius-row); }
+.cdx-holding:active::before { opacity: 1; }
+.cdx-holding__thumb { display: block; width: 40px; height: 40px; border-radius: 11px; }
+.cdx-holding__id { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.cdx-holding__name { overflow: hidden; font-size: var(--text-body); font-weight: 600; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
+.cdx-holding__sub { overflow: hidden; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); text-overflow: ellipsis; white-space: nowrap; }
+.cdx-holding__value { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
+.cdx-holding__chg-sub { font-size: var(--text-caption); }
+.cdx-holding__held,
+.cdx-holding__chg,
+.cdx-holding__design { display: none; }
+.cdx-holding--loading { pointer-events: none; }
+@container (min-width: 480px) {
+  .cdx-holdings__head,
+  .cdx-holding {
+    grid-template-columns: 40px minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 72px;
+    gap: 16px;
+  }
+  .cdx-holdings__head {
+    display: grid;
+    height: 32px;
+    align-items: center;
+    border-bottom: 1px solid var(--color-hairline);
+    font-size: var(--text-caption);
+    font-weight: 500;
+    color: var(--color-slate);
+  }
+  .cdx-holdings__head span:first-child { grid-column: 1 / 3; }
+  .cdx-holdings__head span:not(:first-child) { text-align: right; }
+  .cdx-holding__held,
+  .cdx-holding__chg { display: block; text-align: right; }
+  .cdx-holding__design { display: inline; }
+  .cdx-holding__held { font-size: var(--text-body); }
+  .cdx-holding__held-sub,
+  .cdx-holding__chg-sub { display: none; }
+  .cdx-holding__chg { font-size: var(--text-body); }
+}
+
+/* ---- cards: tiles on the card's own width, so the View in 3D chip sits on the card's corner (browse-05) */
+.cdx-portfolio__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(144px, 1fr));
+  gap: 24px 16px;
+  padding: 12px 4px 4px;
+}
+.cdx-portfolio__tile { min-width: 0; }
+.cdx-portfolio__card { display: flex; min-width: 0; flex-direction: column; gap: 12px; color: var(--color-ink); }
+.cdx-portfolio__cap { display: flex; min-width: 0; flex-direction: column; gap: 2px; padding-inline: 2px; }
+.cdx-portfolio__capname { overflow: hidden; font-size: var(--text-body); font-weight: 600; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
+.cdx-portfolio__capsub { overflow: hidden; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); text-overflow: ellipsis; white-space: nowrap; }
+@media (hover: hover) and (pointer: fine) {
+  .cdx-portfolio__card:hover .cdx-portfolio__capname { text-decoration-line: underline; text-decoration-color: var(--color-control-border); text-underline-offset: 3px; }
+}
+.cdx-portfolio__card:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 4px; border-radius: var(--radius-row); }
+/* !important: viewer.css (unlayered) hides the 3D chip until hover; one card per tile, so it shows at rest. */
+.cdx-portfolio .mdx-v3dbtn { opacity: 1 !important; }
+/* !important: the card's coloured glow and prism ring come from the unlayered card3d.css; on this flat ground the
+ * card itself is the colour. */
+.cdx-portfolio .mdx-card3d__halo { display: none !important; }
+
+/* ---- test balances: a table of rules and alignment */
+.cdx-balances { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: var(--text-body); }
+.cdx-balances th,
+.cdx-balances td { height: 44px; padding: 0; border-bottom: 1px solid var(--color-rule); }
+.cdx-balances thead th { height: 32px; border-bottom-color: var(--color-hairline); font-size: var(--text-caption); font-weight: 500; text-align: left; color: var(--color-slate); }
+.cdx-balances tbody tr:last-child > * { border-bottom: 0; }
+.cdx-balances tbody th { font-weight: 400; text-align: left; }
+.cdx-balances .cdx-balances__n { width: 28%; text-align: right; }
+.cdx-balances__sym { font-weight: 600; color: var(--color-ink); }
+.cdx-balances tbody th { max-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cdx-balances__name { margin-left: 8px; color: var(--color-slate); }
+
+/* ---- signed out: the coins frame (its header row) holds the collection invitation */
+.cdx-portfolio--out .cdx-portfolio-empty { min-height: 0; padding-block: 0 16px; }
+
+/* ================================================================ arrangements */
+@media (max-width: 1023.98px) {
+  .cdx-portfolio[data-tab] [data-section] { display: none; }
+  .cdx-portfolio[data-tab="coins"] [data-section="coins"],
+  .cdx-portfolio[data-tab="cards"] [data-section="cards"],
+  .cdx-portfolio[data-tab="balances"] [data-section="balances"] { display: flex; }
+}
+@media (max-width: 767.98px) {
+  .cdx-portfolio { gap: 16px; }
+  .cdx-portfolio__kpis--out { display: none; }
+  /* The total takes the first row; test SOL, coins and cards share the second, split by hairlines. */
+  .cdx-portfolio__kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cdx-portfolio__kpis .mdx-kpi { padding: 12px 16px; }
+  .cdx-portfolio__kpis .mdx-kpi:nth-child(n) { grid-column: auto; box-shadow: none; border-top: 1px solid var(--color-hairline); } /* taste-skill-ignore: clears the primitive's two-column hairlines */
+  .cdx-portfolio__kpis .mdx-kpi[data-lead] { grid-column: 1 / -1; border-top: 0; }
+  .cdx-portfolio__kpis .mdx-kpi:nth-child(n + 3) { border-left: 1px solid var(--color-hairline); }
+  .cdx-portfolio__kpis .mdx-kpi:not([data-lead]) .mdx-kpi__value .num { font-size: var(--text-lead); line-height: 24px; }
+  .cdx-portfolio__panel { padding: 8px 16px; }
+  .cdx-portfolio__cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 16px; padding-top: 16px; }
+}
+@media (min-width: 1024px) {
+  .cdx-portfolio__tabs { display: none; }
+  .cdx-portfolio__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(320px, 34%, 392px);
+    grid-template-areas: "coins cards" "balances cards";
+    grid-template-rows: auto 1fr;
+    align-items: start;
+  }
+  .cdx-portfolio__coins { grid-area: coins; }
+  .cdx-portfolio__deck { grid-area: cards; }
+  .cdx-portfolio__balances { grid-area: balances; }
+
+}

@@ -14,7 +14,8 @@ import { paintAcrylic } from "./extrude";
 import { CasePlate, caseBox } from "./case-chrome";
 import { GyroChip } from "./GyroChip";
 import { InspectDialog, prefetchInspect } from "./InspectDialog";
-import { motionLevel, type Body } from "./motion3d";
+import { motionLevel, useMotionLevel, type Body } from "./motion3d";
+import { Icon } from "../icons";
 import type { Card3DHandle, Card3DProps } from "./types";
 
 export type CardCaseProps = {
@@ -90,6 +91,7 @@ export function CaseScene({
   const tier = tierForLevel(slots.level);
   const [said, setSaid] = useState("");
   const [paused, setPaused] = useState(false);
+  const level = useMotionLevel();
   const [labeled, setLabeled] = useState(variant === "labeled");
   const edgesHost = useRef<HTMLDivElement>(null);
   const lastInput = useRef(0);
@@ -207,26 +209,35 @@ export function CaseScene({
         <div className="mdx-case__controls">
           {controls !== "none" ? (
             <>
+              {/* The case row uses the secondary pill (Button outline sm): a glyph and its word, never icon-only. */}
               <button
                 type="button"
-                className="mdx-case__btn"
-                aria-label="Turn over"
+                className="mdx-btn mdx-btn--outline mdx-btn--sm mdx-case__act"
                 onClick={() => {
                   touched();
                   slots.ctl.current?.turnOver(1, true);
                 }}
               >
-                <svg aria-hidden viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12.8 5.1a5.2 5.2 0 1 0 .2 5.6M12.8 1.9v3.6H9.2" />
-                </svg>
-                <span className="mdx-case__btn-label">Turn over</span>
+                <Icon name="turn-over" />
+                Turn over
               </button>
-              {/* One pattern: a fixed "Pause" name whose pressed state says it is held (calm hides it: nothing turns). */}
-              {turntable ? <button type="button" className="mdx-case__btn mdx-case__btn--pause" aria-pressed={paused} onClick={() => {
-                const body = slots.ctl.current?.body;
-                if (!paused && body) body.flip.snap(body.flip.x);
-                setPaused((value) => !value);
-              }}>Pause</button> : null}
+              {/* Pause spin / Resume spin: the word and glyph swap. Only full motion turns the case, so calm and
+                  reduced motion leave the button out and the row closes up. */}
+              {turntable && level === "full" ? (
+                <button
+                  type="button"
+                  className="mdx-btn mdx-btn--outline mdx-btn--sm mdx-case__act"
+                  aria-label={paused ? "Resume spin" : "Pause spin"}
+                  onClick={() => {
+                    const body = slots.ctl.current?.body;
+                    if (!paused && body) body.flip.snap(body.flip.x);
+                    setPaused((value) => !value);
+                  }}
+                >
+                  <Icon name={paused ? "play" : "pause"} />
+                  {paused ? "Resume" : "Pause"}
+                </button>
+              ) : null}
               {onInspect ? inspectBtn(onInspect) : null}
             </>
           ) : null}
