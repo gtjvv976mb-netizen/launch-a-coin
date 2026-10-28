@@ -182,7 +182,7 @@ function CoinView() {
   ];
   return (
     <div key={coin.id} data-tab={tab} className="cdx-coin-screen">
-      <header className="cdx-coin-screen__head"><CoinHeader coin={coin} /><span className="text-[12px] text-slate">Demo token · {coin.tradingPair}</span></header>
+      <header className="cdx-coin-screen__head"><CoinHeader coin={coin} /><span className="text-[12px] text-slate">Demo coin · {coin.tradingPair}</span></header>
       <div className="cdx-coin-screen__tabs"><Tabs value={tab} options={TAB_OPTIONS} onChange={setTab} label="Coin sections" className="mdx-tabs--fill" /></div>
       <div className="cdx-coin-screen__body">
         <section className="cdx-coin-screen__object" aria-label={`${coin.name} collectible card`}>
@@ -193,7 +193,7 @@ function CoinView() {
           {tab==="chart" ? <><CoinStats coin={coin} /><McapChart trades={trades} tradeCount={coin.trades} currentUsd={coin.mcapUsd} currentQuote={coin.mcapQuote} quoteAssetKey={coin.quoteAssetKey} createdAt={coin.createdAt} level={coin.level} className="cdx-coin-screen__chart" /></> : null}
           {tab==="trade" ? <TradePanel page={page} compact hideQuick hideAfter className="cdx-coin-screen__trade" /> : null}
           {tab==="trades" ? <TradesList trades={trades} count={coin.trades} className="cdx-coin-screen__trades" /> : null}
-          {tab==="details" ? <><div className="cdx-view-tabs" aria-label="Token details"><button type="button" aria-pressed={detailTab==="token"} onClick={()=>setDetailTab("token")}>Token</button><button type="button" aria-pressed={detailTab==="story"} onClick={()=>setDetailTab("story")}>Story</button><button type="button" aria-pressed={detailTab==="owner"} onClick={()=>setDetailTab("owner")}>Ownership</button></div>{detailTab==="token" ? <CoinDetails coin={coin} isOwner={isOwner} onEdit={()=>setLoreOpen(true)} /> : detailTab==="story" ? <p className="cdx-coin-screen__story">{coin.lore || "The creator has not added a description."}</p> : <div className="cdx-coin-screen__ownership"><dl>{ownershipRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div>}</> : null}
+          {tab==="details" ? <><div className="cdx-view-tabs" aria-label="Token details"><button type="button" aria-pressed={detailTab==="token"} onClick={()=>setDetailTab("token")}>Coin</button><button type="button" aria-pressed={detailTab==="story"} onClick={()=>setDetailTab("story")}>Story</button><button type="button" aria-pressed={detailTab==="owner"} onClick={()=>setDetailTab("owner")}>Ownership</button></div>{detailTab==="token" ? <CoinDetails coin={coin} isOwner={isOwner} onEdit={()=>setLoreOpen(true)} /> : detailTab==="story" ? <p className="cdx-coin-screen__story">{coin.lore || "The creator has not added a description."}</p> : <div className="cdx-coin-screen__ownership"><dl>{ownershipRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div>}</> : null}
         </section>
       </div>
       <Modal open={loreOpen} onOpenChange={setLoreOpen} title="Edit description">

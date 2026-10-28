@@ -887,8 +887,8 @@ function MobileHeader({ liveLaunch = false }: { liveLaunch?: boolean }) {
               <GuideGlyph />
             </button>
             <Button size="sm" className="ml-1" onClick={() => openEnter()}>
-              <span className="max-[359px]:hidden">Enter Launch a Card</span>
-              <span className="hidden max-[359px]:inline">Enter</span>
+              <span className="max-[359px]:hidden">Try the demo</span>
+              <span className="hidden max-[359px]:inline">Demo</span>
             </Button>
           </>
         )}
@@ -1034,7 +1034,7 @@ function Sky() {
 }
 
 function LocalDemoNote() {
-  return <p role="note" data-testid="local-demo-note" className="flex-none border-b border-hairline bg-plinth px-4 py-1.5 text-center text-[12px] leading-5 text-slate"><span className="font-semibold text-ink">Demo collection</span><span aria-hidden> · </span>Test balances and trading.</p>;
+  return <p role="note" data-testid="local-demo-note" className="flex-none border-b border-hairline bg-plinth px-4 py-1.5 text-center text-[12px] leading-5 text-slate"><span className="font-semibold text-ink">Demo</span><span aria-hidden> · </span>Test SOL and simulated trading.</p>;
 }
 
 export function AppShell({ children, devnetSite = false }: { children: ReactNode; devnetSite?: boolean }) {

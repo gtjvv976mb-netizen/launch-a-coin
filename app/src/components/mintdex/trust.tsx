@@ -5,6 +5,7 @@
  *                  (a bottom sheet on phones): what is simulated, the USD rate, and links to a devnet faucet (the
  *                  guide in test mode) and to Terms and risks. Renders nothing when the mode has no badge (mainnet).
  *   BotTag         The small "bot" chip after a demo bot's handle.
+ *   SimTag         The small "Simulated" chip beside demo market figures (test mode only).
  *   ConfirmDialog  open (req), onOpenChange (req), title (req), children (req), confirmLabel (req), cancelLabel,
  *                  pending, pendingLabel, onConfirm (req). A Modal with a secondary cancel and a primary confirm.
  *                  Used by Start over now; the devnet Disconnect and pre-sign reviews reuse it.
@@ -26,6 +27,9 @@ import {
   HOME_COPY,
   IS_SIM,
   MODE_COPY,
+  BOT_HINT,
+  SIM_TAG,
+  SIM_TAG_HINT,
   WORDS,
   shareCoinText,
 } from "../../lib/mintdex/copy";
@@ -141,12 +145,32 @@ export function ModeBadge({ className = "" }: { className?: string }) {
 export function BotTag({ className = "" }: { className?: string }) {
   return (
     <span
+      title={BOT_HINT}
       className={cx(
         "inline-flex h-[18px] flex-none items-center rounded-pill bg-track px-1.5 align-[1px] text-[11px] font-semibold leading-none text-slate",
         className,
       )}
     >
-      bot
+      bot<span className="sr-only">, {BOT_HINT.toLowerCase()}</span>
+    </span>
+  );
+}
+
+/**
+ * The "Simulated" tag beside demo market figures (CT-06): the same chip as the bot tag, so a screenshot of a market
+ * cap or a 24h change never reads as a live quote. Renders nothing off sim.
+ */
+export function SimTag({ className = "" }: { className?: string }) {
+  if (!SIM_TAG) return null;
+  return (
+    <span
+      title={SIM_TAG_HINT}
+      className={cx(
+        "inline-flex h-[18px] flex-none items-center rounded-pill bg-track px-1.5 align-[1px] text-[11px] font-semibold leading-none text-slate",
+        className,
+      )}
+    >
+      {SIM_TAG}
     </span>
   );
 }
@@ -386,8 +410,8 @@ export function LaunchedDialog({
       </div>,
       <div key="share" className="cdx-launched-copy cdx-overlay-copy">
         <p className="text-pretty text-[15px] leading-[1.5] text-slate">
-          {dexNo(coin.dexNo)} in the dex. You hold the one-of-one ${coin.ticker} card in your chosen design.
-          {IS_SIM ? " This is a local demo; no real token or NFT has been minted." : ""}
+          {dexNo(coin.dexNo)} in the collection. You hold the one-of-one ${coin.ticker} card in your chosen design.
+          {IS_SIM ? " This is a demo; no real coin or NFT has been minted." : ""}
         </p>
       {/* flex-1 only in the row: in the phone column a zero basis squashed both buttons to 15px bars (QA). */}
       <div className="mdx-sheet-foot flex flex-col gap-2 sm:flex-row-reverse">

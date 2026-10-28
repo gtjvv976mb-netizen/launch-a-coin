@@ -225,10 +225,10 @@ function EnterDialog({
   }
 
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="Enter Launch a Card">
+    <Modal open={open} onOpenChange={onOpenChange} title="Try the demo">
       {page === 0 ? <div className="cdx-enter-intro cdx-overlay-deck">
         <div className="cdx-overlay-copy">
-          <p>{reason ?? "Pick a handle to launch tokens and build your collection."}{MODE_COPY.enterGift ? ` ${MODE_COPY.enterGift}` : null}</p>
+          <p>{reason ?? "Pick a handle to launch coins and build your collection."}{MODE_COPY.enterGift ? ` ${MODE_COPY.enterGift}` : null}</p>
           {MODE_COPY.accountNote ? <p>{MODE_COPY.accountNote}</p> : null}
         </div>
         <div className="cdx-overlay-actions"><span aria-live="polite">1 / 2</span><Button onClick={() => setPage(1)}>Choose a handle</Button></div>
@@ -265,9 +265,9 @@ function EnterDialog({
             disabled={!valid}
             onBlocked={() => setError(invalidReason)}
             pending={busy}
-            pendingLabel="Entering..."
+            pendingLabel="Starting..."
           >
-            {intent ? intent.label : "Enter Launch a Card"}
+            {intent ? intent.label : "Start the demo"}
           </Button>
         </div>
       </form>}
@@ -299,25 +299,25 @@ const DEMO_STEPS: GuideStep[] = [
 /** The wallet-launch guide, used only once the owner turns mainnet launches on. */
 const LIVE_STEPS: GuideStep[] = [
   {
-    title: "Launch your token",
-    body: "Give your token a name, ticker and artwork. Choose its supported quote asset, then review the pump.fun launch in your wallet.",
+    title: "Launch your coin",
+    body: "Give your coin a name, ticker and artwork. Choose its supported quote asset, then review the pump.fun launch in your wallet.",
     visual: null,
   },
   {
     title: "Choose its permanent card",
-    body: "Pick a premium design before launch. After the token is verified, approve the separate one-of-one NFT card delivery to your creator wallet.",
+    body: "Pick a premium design before launch. After the coin is verified, approve the separate one-of-one NFT card delivery to your creator wallet.",
     visual: null,
   },
   {
-    title: "Trade the token. Keep the card.",
-    body: "Open your real token on pump.fun and keep the separate card NFT in your wallet. The demo collection lets you explore with test funds.",
+    title: "Trade the coin. Keep the card.",
+    body: "Open your real coin on pump.fun and keep the separate card NFT in your wallet. The demo lets you explore with test SOL.",
     visual: null,
   },
 ];
 
 const feeRows = (liveOpen: boolean): Array<{ label: string; value: string }> => IS_SIM
-  ? [{ label: "Demo collection", value: liveOpen ? "Demo balances and trades are simulated. Wallet launches show real network costs separately before you sign." : "Demo balances and trades are simulated with test funds." }]
-  : [{ label: "Token trading", value: "Review the fee and price impact shown before confirming a trade." }];
+  ? [{ label: "Demo", value: liveOpen ? "Demo balances and trades are simulated. Wallet launches show real network costs separately before you sign." : "Demo balances and trades are simulated with test funds." }]
+  : [{ label: "Coin trading", value: "Review the fee and price impact shown before confirming a trade." }];
 
 /**
  * The guide keeps all three steps, fees, legal links and motion settings on explicit pages.
@@ -340,8 +340,8 @@ function GuideDialog({
     <Modal open={open} onOpenChange={onOpenChange} title="How Launch a Card works" width={560}>
       <div className="cdx-overlay-deck"><ViewportPages label="How Launch a Card works pages" pages={[
         ...STEPS.map(s => <section key={s.title} className="cdx-overlay-copy"><h3>{s.title}</h3><p>{s.body}</p>{s.visual}</section>),
-        <section key="fees" className="cdx-overlay-copy"><h3>Costs and risks</h3>{MODE_COPY.guideNote ? <p>{MODE_COPY.guideNote}</p> : null}<dl>{FEE_ROWS.map(r => <div key={r.label}><dt className="font-semibold text-ink">{r.label}</dt><dd>{r.value}</dd></div>)}</dl><TextLink to="/legal" onClick={() => onOpenChange(false)}>Terms, privacy and risks</TextLink></section>,
-        <section key="settings" className="cdx-overlay-copy"><h3>Make it yours</h3><CalmSwitch size="md" />{!me ? <Button block onClick={() => { onOpenChange(false); onEnter(); }}>{IS_SIM ? "Enter Launch a Card" : CONNECT_COPY.connect}</Button> : null}</section>,
+        <section key="fees" className="cdx-overlay-copy"><h3>Costs and risks</h3>{MODE_COPY.guideNote ? <p>{MODE_COPY.guideNote}</p> : null}<dl>{FEE_ROWS.map(r => <div key={r.label}><dt className="font-semibold text-ink">{r.label}</dt><dd>{r.value}</dd></div>)}</dl><TextLink to="/legal" search={{ tab: "fees" }} onClick={() => onOpenChange(false)}>Fees, terms and risks</TextLink></section>,
+        <section key="settings" className="cdx-overlay-copy"><h3>Make it yours</h3><CalmSwitch size="md" />{!me ? <Button block onClick={() => { onOpenChange(false); onEnter(); }}>{IS_SIM ? "Try the demo" : CONNECT_COPY.connect}</Button> : null}</section>,
       ]} /></div>
     </Modal>
   );

@@ -71,6 +71,7 @@ import { useKeyboardSafe } from "./sheet";
 import {
   BotTag,
   ShareButton,
+  SimTag,
   coinShare,
 } from "./trust";
 import {
@@ -177,7 +178,7 @@ export function CoinHeader({ coin, className = "" }: { coin: CoinDetail; classNa
           <Num size="hero" unit={coin.mcapUsd == null ? coin.quoteSymbol : undefined} watch={marketCapWatch(coin)} odo className={HERO_FIT}>
             {hero}
           </Num>
-          <span className="mt-0.5 text-[12px] font-medium leading-none text-slate">Market cap</span>
+          <span className="mt-0.5 inline-flex items-center gap-1.5 text-[12px] font-medium leading-none text-slate">Market cap<SimTag /></span>
         </div>
         <div className="flex flex-col items-start pb-px">
           <Change v={coin.change24h} pill className="text-[13px]" />
@@ -210,7 +211,7 @@ export function CoinStats({
     { key: "price", label: `Price (${coin.quoteSymbol ?? "SOL"})`, value: priceSolText(coin.priceQuote ?? coin.priceSol ?? 0), watch: coin.priceQuote ?? coin.priceSol ?? 0, tick: true },
     { key: "volume", label: "Volume", value: quoteAtoms(coin.volumeQuote ?? coin.volume ?? 0, coin.quoteAssetKey, true), unit: coin.quoteSymbol ?? "SOL" },
     { key: "holders", label: "Holders", value: coin.holders.toLocaleString("en-US") },
-    { key: "trades", label: "Token trades", value: coin.trades.toLocaleString("en-US") },
+    { key: "trades", label: "Trades", value: coin.trades.toLocaleString("en-US") },
   ];
   return (
     <div className={cx("@container", className)} data-pane={pane}>
@@ -516,7 +517,7 @@ export function CoinDetails({
         ) : (
           <TextLink
             className="text-slate"
-            onClick={() => require(() => setReportOpen(true), "Enter Launch a Card to report a card.")}
+            onClick={() => require(() => setReportOpen(true), "Try the demo to report a card.")}
           >
             Report
           </TextLink>
@@ -871,6 +872,7 @@ export function TradesList({
           // No count before the first trade: the empty line below says it.
           total > 0 ? (
             <span className="inline-flex items-baseline gap-4">
+              <SimTag className="self-center" />
               <span className="text-slate">
                 <span className="num">{total.toLocaleString("en-US")}</span>{" "}
                 {total === 1 ? "trade" : "trades"}
@@ -926,7 +928,7 @@ export function TradesList({
                 </div>
             ))}
           </div>
-          <PageControls page={page} pages={pages} onPage={setPageIndex} label={`${rows.length} recent trades`} />
+          <PageControls page={page} pages={pages} onPage={setPageIndex} label={total > rows.length ? `Latest ${rows.length} of ${total.toLocaleString("en-US")} trades` : `${total.toLocaleString("en-US")} ${total === 1 ? "trade" : "trades"}`} />
         </>
       )}
     </section>
@@ -1171,9 +1173,9 @@ export function TradePanel({
     if (!me) {
       const intent = quote?.ok
         ? side === "buy"
-          ? `Enter and buy ${input} ${asset.symbol} of $${coin.ticker}`
-          : `Enter and sell $${coin.ticker}`
-        : "Enter Launch a Card";
+          ? `Start the demo and buy ${input} ${asset.symbol} of $${coin.ticker}`
+          : `Start the demo and sell $${coin.ticker}`
+        : "Start the demo";
       require(
         quote?.ok ? doTrade : () => inputRef.current?.focus(),
         "Pick a handle to trade.",
@@ -1251,7 +1253,7 @@ export function TradePanel({
                   className="mdx-link mdx-hit text-[12px]"
                   onClick={() => openEnter("Pick a handle to trade.")}
                 >
-                  Enter for demo {asset.symbol}
+                  Try the demo for test {asset.symbol}
                 </button>
               )
             ) : (

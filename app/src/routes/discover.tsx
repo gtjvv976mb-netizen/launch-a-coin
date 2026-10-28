@@ -5,6 +5,7 @@ import { z } from "zod";
 import { MintCard } from "../components/mintdex/MintCard";
 import { View3DHost } from "../components/mintdex/card3d";
 import { Button, ButtonLink, PageFrame, Change } from "../components/mintdex/ui";
+import { SimTag } from "../components/mintdex/trust";
 import { listCoins } from "../lib/mintdex/api";
 import { getCardDesign } from "../lib/carddex/designs";
 import { marketCapText } from "../lib/carddex/quote-display";
@@ -24,9 +25,9 @@ export const Route = createFileRoute("/discover")({
   head: () =>
     pageHead({
       path: "/discover",
-      title: "Discover tokens | Launch a Card",
+      title: "Discover coins | Launch a Card",
       description:
-        "Explore tokens and their creator-selected NFT trading cards. Local demo with simulated pump.fun trading.",
+        "Explore coins and their creator-selected NFT trading cards. A demo with simulated pump.fun trading.",
     }),
   component: Discover,
 });
@@ -78,16 +79,17 @@ function Discover() {
   return (
     <PageFrame className="cdx-discover">
       <header className="cdx-archive__head">
-        <div>
+        <div className="flex items-center gap-2">
           <h1 className="mdx-h1">The collection.</h1>
+          <SimTag className="mt-1.5" />
         </div>
         <Link to="/launch" className="mdx-link min-h-11 inline-flex items-center">
-          Create a card
+          Launch a coin
         </Link>
       </header>
       <div className="cdx-discover__tools">
         <label className="sr-only" htmlFor="token-search">
-          Search tokens
+          Search coins
         </label>
         <input
           id="token-search"
@@ -95,12 +97,12 @@ function Discover() {
           type="search"
           value={query}
           maxLength={40}
-          placeholder="Search a token or ticker…"
+          placeholder="Search a coin or ticker…"
           onChange={(e) => setQuery(e.target.value)}
           autoFocus={search.focus === 1}
         />
         <label className="sr-only" htmlFor="token-sort">
-          Sort tokens
+          Sort coins
         </label>
         <select
           id="token-sort"
@@ -122,7 +124,7 @@ function Discover() {
         </select>
       </div>
       <p className="cdx-discover__count" aria-live="polite">
-        {coins.length === 1 ? "1 token" : `${coins.length} tokens`}
+        {coins.length === 1 ? "1 coin" : `${coins.length} coins`}
       </p>
       {coins.length > 0 ? (
         <ul ref={gridRef} role="list" className="cdx-token-grid">
@@ -156,7 +158,7 @@ function Discover() {
         </ul>
       ) : (
         <div className="cdx-empty" role="status">
-          <p>{query ? `No tokens match “${query}”.` : "No tokens yet."}</p>
+          <p>{query ? `No coins match “${query}”.` : "No coins yet."}</p>
           <div className="cdx-empty__actions">
             {query ? (
               <Button variant="outline" onClick={() => setQuery("")}>
