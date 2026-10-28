@@ -184,14 +184,14 @@ function CoinView() {
   ];
   return (
     <div key={coin.id} data-tab={tab} className="cdx-coin-screen">
-      <header className="cdx-coin-screen__head"><CoinHeader coin={coin} /><span className="text-[12px] text-slate">Demo token · {coin.tradingPair}</span></header>
+      <header className="cdx-coin-screen__head"><CoinHeader coin={coin} /><span className="text-[12px] text-slate">Demo coin · {coin.tradingPair}</span></header>
       <div className="cdx-coin-screen__tabs"><Tabs value={tab} options={TAB_OPTIONS} onChange={setTab} label="Coin sections" className="mdx-tabs--fill" /></div>
       <div className="cdx-coin-screen__body">
         <section className="cdx-coin-screen__object" aria-label={`${coin.name} collectible card`}>
           <div className="cdx-coin-screen__case"><CoinCase coin={coin} latestTradeId={latestTradeId} priority /></div>
         </section>
         <section className="cdx-coin-screen__pane" aria-label={TAB_OPTIONS.find(option=>option.value===tab)?.label}>
-          {tab==="card" ? <><h2 className="text-lg font-semibold">The creator’s card</h2><div className="cdx-coin-screen__ownership"><dl>{ownershipRows.slice(ownershipPage*3,ownershipPage*3+3).map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><PageControls page={ownershipPage} pages={2} onPage={setOwnershipPage} label="Card details" /></div><p className="text-[12px] text-slate">Fixed design. Its token trades separately.</p></> : null}
+          {tab==="card" ? <><h2 className="text-lg font-semibold">The creator’s card</h2><div className="cdx-coin-screen__ownership"><dl>{ownershipRows.slice(ownershipPage*3,ownershipPage*3+3).map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><PageControls page={ownershipPage} pages={2} onPage={setOwnershipPage} label="Card details" /></div><p className="text-[12px] text-slate">Fixed design. Its coin trades separately.</p></> : null}
           {tab==="chart" ? <><CoinStats coin={coin} /><McapChart trades={trades} tradeCount={coin.trades} currentUsd={coin.mcapUsd} currentQuote={coin.mcapQuote} quoteAssetKey={coin.quoteAssetKey} createdAt={coin.createdAt} level={coin.level} className="cdx-coin-screen__chart" /></> : null}
           {tab==="trade" ? <TradePanel page={page} compact hideQuick hideAfter className="cdx-coin-screen__trade" /> : null}
           {tab==="trades" ? <TradesList trades={trades} count={coin.trades} className="cdx-coin-screen__trades" /> : null}

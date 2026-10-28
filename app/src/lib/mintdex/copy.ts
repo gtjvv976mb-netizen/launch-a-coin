@@ -86,34 +86,34 @@ export type ModeCopy = {
 // One top-level constant per mode, picked by MODE below: Vite makes MODE a literal, so the minifier drops the
 // other modes' strings from each build (C9: the devnet client bundle carries no simulation words).
 const SIM_COPY: ModeCopy = {
-  badge: "Test mode",
-  explainer: "Local demo: simulated pump.fun trading and NFT cards. No real tokens or funds.",
-  metaSuffix: "Live in test mode with test SOL.",
-  coinQualifier: "Test mode: simulated market.",
+  badge: "Demo",
+  explainer: "Demo: simulated pump.fun trading and NFT cards with test SOL. No real coins or funds.",
+  metaSuffix: "A demo with test SOL.",
+  coinQualifier: "Demo: simulated market.",
   usdNote: `USD at a fixed $${SOL_USD} per SOL (test rate)`,
   addressLabel: "Test address, not on chain",
   copyAddress: "Copy test address",
   addressCopied: "Test address copied.",
   addressNotFound:
-    "Launch a Card runs in test mode for now, so coins on Solana devnet or mainnet do not have cards here yet. Only demo tokens live in this local collection.",
+    "Launch a Card runs as a demo for now, so coins on Solana devnet or mainnet do not have cards here yet. Only demo coins live in this collection.",
   hero: "Try it with test SOL on a simulated pump.fun curve.",
   launchContext:
     "Choose a permanent card design, add your token, and try the pump.fun launch flow with test SOL.",
   guideLaunch:
     "Choose a design, add your token art and launch. The demo creates a simulated token and one-of-one card in your collection.",
-  guideNote: "Local demo: separate test-asset balances and a simulated bonding curve. No real token or NFT is minted.",
+  guideNote: "Demo: separate test balances and a simulated bonding curve. No real coin or NFT is minted.",
   curveComplete: "Curve complete (simulated)",
-  botsNote: "Includes demo bots in test mode.",
+  botsNote: "Includes demo bots.",
   walletUnit: "test SOL",
-  enterForSol: `Enter Launch a Card for ${START_SOL} test SOL`,
+  enterForSol: `Try the demo for ${START_SOL} test SOL`,
   accountNote: "Your test account lives in this browser. Clearing site data ends access to it.",
-  enterGift: `You get ${START_SOL} test SOL. Test mode uses no real funds.`,
+  enterGift: `You get ${START_SOL} test SOL. The demo uses no real funds.`,
   enterWelcome: `${START_SOL} test SOL is in your wallet.`,
   walletContext: "Test wallet",
-  portfolioSignedOut: `Enter the demo to get a test wallet with ${START_SOL} test SOL. Your tokens and cards will live here.`,
+  portfolioSignedOut: `Try the demo to get a test wallet with ${START_SOL} test SOL. Your coins and cards will live here.`,
   walletNote: "Test SOL only",
   railStart: `Get ${START_SOL} test SOL to start. No real funds.`,
-  shareSuffix: " (test mode)",
+  shareSuffix: " (demo)",
 };
 const DEVNET_COPY: ModeCopy = {
   badge: "Devnet",
@@ -178,6 +178,14 @@ const MAINNET_COPY: ModeCopy = {
 export const MODE_COPY: ModeCopy =
   MODE === "devnet" ? DEVNET_COPY : MODE === "mainnet" ? MAINNET_COPY : SIM_COPY;
 
+/**
+ * The small tag beside simulated market figures (market cap, 24h change, trades) in test mode, and what the bot chip
+ * means. Empty off sim: real figures carry no tag.
+ */
+export const SIM_TAG = IS_SIM ? "Simulated" : "";
+export const SIM_TAG_HINT = "Simulated market data in the demo, not live quotes";
+export const BOT_HINT = "Simulated trader in the demo";
+
 /** The one label for "go and look at the coins" (Home hero, not-found pages, empty states): links to /discover. */
 export const EXPLORE_COINS = "Explore coins";
 
@@ -195,7 +203,7 @@ export const HOME_COPY = {
 
 /** Coin not-found page (P0-10): one title, a body per reason. */
 export const COIN_NOT_FOUND = {
-  title: "This coin is not in the dex",
+  title: "This coin does not exist",
   unknown: "No coin goes by that name or ticker. Check the spelling.",
   address: MODE_COPY.addressNotFound,
   action: EXPLORE_COINS,
@@ -221,8 +229,8 @@ export const COIN_COPY = {
 
 /** Any other unknown page. */
 export const PAGE_NOT_FOUND = {
-  title: "This page is not in the dex",
-  body: "It was never minted, or it moved.",
+  title: "This page does not exist",
+  body: "The link may be wrong, or the page moved.",
   action: EXPLORE_COINS,
   home: HOME_COPY.goHome,
 } as const;
@@ -299,7 +307,7 @@ export const WORDS = {
   /** Launch, under Mint and launch. */
   launcherLine: "Your selected design belongs to your token from the first card.",
   /** Home, the second line under the headline (P1-27). */
-  heroBid: "Launch a pump.fun token. Give it a card worth collecting.",
+  heroBid: "Launch a coin on pump.fun. Give it a card worth collecting.",
   /** Trade ticket fee row. */
   tradeFeeLabel: `Demo trading fee ${FEES.trade}`,
   cardIncome: IS_MAINNET
@@ -411,8 +419,8 @@ export const FLOW = {
   highImpact: (side: "buy" | "sell", pctText: string) =>
     `High price impact: this ${side} moves the price ${pctText}.`,
   /** Signed-out CTAs (P1-11 step 3). On devnet the wallet is the identity. */
-  enterToTrade: IS_SIM ? "Enter Launch a Card to trade" : "Connect a wallet to trade",
-  enterToLaunch: IS_SIM ? "Enter Launch a Card to launch" : "Connect a wallet to launch",
+  enterToTrade: IS_SIM ? "Try the demo to trade" : "Connect a wallet to trade",
+  enterToLaunch: IS_SIM ? "Try the demo to launch" : "Connect a wallet to launch",
 } as const;
 
 /**
@@ -494,7 +502,7 @@ export function inboxSummary(counts: {
 export const PORTFOLIO_COPY = {
   signedOutTitle: "See your cards here",
   /** Chain builds; the sim build keeps MODE_COPY.portfolioSignedOut (Enter Launch a Card). */
-  signedOutBody: "Connect a wallet to see your tokens and cards.",
+  signedOutBody: "Connect a wallet to see your coins and cards.",
   explore: "Explore coins",
   tabCoins: "Coins",
   tabCards: "Cards",

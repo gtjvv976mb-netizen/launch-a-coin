@@ -37,7 +37,7 @@ function Holdings({ rows }: { rows: PortfolioData["holdings"] }) {
   return (
     <div className="overflow-hidden rounded-panel bg-plinth p-2 shadow-ring">
       <div className="mdx-micro hidden grid-cols-[minmax(0,1.7fr)_1fr_1fr_80px_minmax(0,1fr)] gap-5 border-b border-hairline px-3 py-3 lg:grid">
-        <span>Token</span><span className="text-right">Held</span><span className="text-right">Value</span><span className="text-right">24h</span><span>Card design</span>
+        <span>Coin</span><span className="text-right">Held</span><span className="text-right">Value</span><span className="text-right">24h</span><span>Card design</span>
       </div>
       <div className="mdx-stagger divide-y divide-hairline">
         {rows.map(({ coin, amount, valueQuote }) => (
@@ -76,8 +76,8 @@ function SignedOut() {
   const { openEnter } = useSessionUi();
   return (
     <PageFrame className="mdx-page cdx-portfolio">
-      <PageHeader title="Your collection" context="Your tokens. Your cards." />
-      <EmptyState hero className="cdx-portfolio-empty flex-1" title="Start your collection" body="Enter the local demo to launch a token, choose its permanent card design and keep both in your portfolio." action={<div className="flex flex-col items-center gap-3"><Button onClick={() => openEnter()}>Enter Launch a Card</Button><TextLink to="/discover">Explore the tokens</TextLink></div>} />
+      <PageHeader title="Your collection" context="Your coins. Your cards." />
+      <EmptyState hero className="cdx-portfolio-empty flex-1" title="Start your collection" body="Try the demo to launch a coin, choose its permanent card design and keep both in your portfolio." action={<div className="flex flex-col items-center gap-3"><Button onClick={() => openEnter()}>Try the demo</Button><TextLink to="/discover">Explore coins</TextLink></div>} />
     </PageFrame>
   );
 }
@@ -106,10 +106,10 @@ function Collection({ me }: { me: NonNullable<Me> }) {
   const setPage = (next: number) => void navigate({ search: (s) => ({ ...s, page: next > 0 ? next + 1 : undefined }), replace: true, resetScroll: false });
   return (
     <PageFrame className="mdx-page cdx-portfolio">
-      <PageHeader title={`@${me.handle}`} context="Your tokens. Your one-of-one cards." right={me.canFaucet ? <Button variant="outline" pending={pending === "faucet"} pendingLabel="Claiming..." onClick={() => void run("faucet", () => claimFaucet(), FLOW.faucetSent, { keys: [["portfolio"]] })}>{FLOW.claimFaucet}</Button> : undefined} />
+      <PageHeader title={`@${me.handle}`} context="Your coins. Your one-of-one cards." right={me.canFaucet ? <Button variant="outline" pending={pending === "faucet"} pendingLabel="Claiming..." onClick={() => void run("faucet", () => claimFaucet(), FLOW.faucetSent, { keys: [["portfolio"]] })}>{FLOW.claimFaucet}</Button> : undefined} />
       <dl className="cdx-portfolio__summary grid flex-none grid-cols-3 gap-3 rounded-panel border border-hairline bg-plinth p-4 sm:gap-6">
         <div className="min-w-0"><dt className="mdx-micro truncate">Demo wallet</dt><dd className="mt-1"><Num size="lg" unit="SOL" watch={me.balance}>{sol(me.balance, 2)}</Num></dd></div>
-        <div className="min-w-0"><dt className="mdx-micro truncate">Token value</dt><dd className="mt-1">{data?.totals.holdingsValue === null ? <span className="text-[20px] font-semibold text-ink">By quote</span> : <Num size="lg" unit="SOL" watch={data?.totals.holdingsValue ?? undefined}>{sol(data?.totals.holdingsValue ?? 0)}</Num>}</dd></div>
+        <div className="min-w-0"><dt className="mdx-micro truncate">Coin value</dt><dd className="mt-1">{data?.totals.holdingsValue === null ? <span className="text-[20px] font-semibold text-ink">By quote</span> : <Num size="lg" unit="SOL" watch={data?.totals.holdingsValue ?? undefined}>{sol(data?.totals.holdingsValue ?? 0)}</Num>}</dd></div>
         <div className="min-w-0"><dt className="mdx-micro truncate">NFT cards</dt><dd className="mt-1"><Num size="lg">{data?.deeds.length ?? 0}</Num></dd></div>
       </dl>
       <div className="flex flex-none items-center justify-between gap-4">
@@ -119,7 +119,7 @@ function Collection({ me }: { me: NonNullable<Me> }) {
       <div ref={grid.ref} className="cdx-portfolio__rows" style={{"--page-columns":grid.columns,"--page-rows":grid.rows} as CSSProperties}>
         {!data ? <div className="grid gap-3" aria-busy="true" aria-label="Loading your collection">{[0, 1, 2].map((n) => <Skeleton key={n} className="h-20 w-full rounded-panel" />)}</div> : view === "balances" ? <dl className="cdx-balance-grid" aria-label="Demo quote balances">{balances.slice(from,from+perPage).map(([key,value])=><div key={key}><dt>{getPairAsset(key).symbol}</dt><dd>{quoteAtoms(value,key,true)}</dd><span className="text-[11px] text-slate">Held value: {quoteAtoms(data.totals.holdingsValueByQuote[key]??0,key,true)}</span></div>)}</dl> : view === "cards" ? data.deeds.length ? <Cards rows={data.deeds.slice(from, from + perPage)} /> : <EmptyState title="Your first card awaits" body="Launch a token and choose the premium design for its one-of-one card." action={<ButtonLink to="/launch">Launch a token</ButtonLink>} /> : data.holdings.length ? <Holdings rows={data.holdings.slice(from, from + perPage)} /> : <EmptyState title="No tokens yet" body="Discover a token to trade, or launch one of your own." action={<ButtonLink to="/discover">Discover tokens</ButtonLink>} />}
       </div>
-      <PageControls page={page} pages={pages} onPage={setPage} label={view==="balances" ? "Separate demo balances" : `${rows?.length ?? 0} ${view==="cards"?"cards":"tokens"}`} />
+      <PageControls page={page} pages={pages} onPage={setPage} label={view==="balances" ? "Separate demo balances" : `${rows?.length ?? 0} ${view==="cards"?"cards":"coins"}`} />
     </PageFrame>
   );
 }

@@ -58,7 +58,7 @@ export const Route = createFileRoute("/launch")({
 
 /** What really happens to the coin, per mode (P0-5): in test mode, a simulated curve. */
 const CONTEXT = "A pump.fun token and your one-of-one card.";
-const ENTER_TO_UPLOAD = "Enter Launch a Card to upload demo card art and launch.";
+const ENTER_TO_UPLOAD = "Try the demo to upload card art and launch.";
 
 // ---------------------------------------------------------------- helpers
 
@@ -287,7 +287,7 @@ function Launch() {
     const selectedMode = modeRef.current;
     if (!live && !me) {
       // After Enter, focus comes back to the dropzone (a file picker cannot reopen without a click).
-      require(() => artRef.current?.focus(), ENTER_TO_UPLOAD, "Enter Launch a Card");
+      require(() => artRef.current?.focus(), ENTER_TO_UPLOAD, "Start the demo");
       return;
     }
     if (!/^image\/(png|jpe?g|webp|gif)$/.test(file.type)) {
@@ -398,9 +398,9 @@ function Launch() {
     }
     // Signed out: the Enter dialog names the launch, then finishes it (P1-11). Without art yet, that means
     // pointing at the art field, the one thing left to do.
-    require(() => void attempt(), "Enter Launch a Card to launch your demo coin.", ticker && imageUrl
-      ? `Enter and launch $${ticker}`
-      : "Enter Launch a Card");
+    require(() => void attempt(), "Try the demo to launch a coin.", ticker && imageUrl
+      ? `Start the demo and launch $${ticker}`
+      : "Start the demo");
   }
 
   const tickerText = ticker ? `$${ticker}` : "coins";
@@ -447,10 +447,10 @@ function Launch() {
 
   return (
     <PageFrame className={`mdx-page cdx-launch cdx-launch--${mobileView}`}>
-      <PageHeader title="Create your card" context={live ? CONTEXT : "Demo only · no real token or NFT."} wrapContext right={
+      <PageHeader title="Launch a coin" context={live ? CONTEXT : "Demo only · no real coin or NFT."} wrapContext right={
         <nav className="cdx-launch-mode" aria-label="Launch environment">
           <Link to="/launch" search={{ design: designKey, quote: quoteKey, mode: "live" }} aria-label="Mainnet wallet launch" aria-current={live ? "page" : undefined}>Mainnet</Link>
-          <Link to="/launch" search={{ design: designKey, quote: quoteKey, mode: "demo" }} aria-current={!live ? "page" : undefined}>Test demo</Link>
+          <Link to="/launch" search={{ design: designKey, quote: quoteKey, mode: "demo" }} aria-current={!live ? "page" : undefined}>Demo</Link>
         </nav>
       } />
 
@@ -521,7 +521,7 @@ function Launch() {
               aria-label={preview ? "Card art. Click to replace the image" : "Card art. Drop an image or click to upload"}
               aria-describedby={artMsg ? "art-help" : undefined}
               aria-busy={uploading || undefined}
-              onClick={() => live || me ? fileRef.current?.click() : require(() => artRef.current?.focus(), ENTER_TO_UPLOAD, "Enter Launch a Card")}
+              onClick={() => live || me ? fileRef.current?.click() : require(() => artRef.current?.focus(), ENTER_TO_UPLOAD, "Start the demo")}
               onDragOver={(e) => { e.preventDefault(); if (!dragging) setDragging(true); }}
               onDragLeave={() => setDragging(false)}
               onDrop={onDrop}
@@ -653,7 +653,7 @@ function Launch() {
               feedback={feedback("launch")}
               successLabel="Minted"
             >
-              {!me ? "Enter to test launch" : uploading ? "Uploading art..." : "Create demo token and card"}
+              {!me ? "Try the demo to launch" : uploading ? "Uploading art..." : "Create demo token and card"}
             </Button>
             {/* The server's reason for a failed launch takes the launcher line's place (no new row, P1-8). */}
             {launchError ? (

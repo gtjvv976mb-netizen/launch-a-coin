@@ -40,6 +40,7 @@ import {
   usePauseGate,
   useSettled,
 } from "../components/mintdex/ui";
+import { SimTag } from "../components/mintdex/trust";
 import { CHAIN_POLL_MS, chainHome, chainHomeLoader, chainInitial } from "../lib/chain/data";
 import { getHome } from "../lib/mintdex/api";
 import { hasRecentActivity } from "../lib/mintdex/activity-freshness";
@@ -380,6 +381,7 @@ function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
                 {marketCapText(c)}
               </Num>
               <Change v={c.change24h} pill hideZero className="text-[13px]" />
+              <SimTag className="self-center" />
             </Figure>
           </dd>
         </div>
@@ -398,7 +400,7 @@ function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
 function HeroActions({ className = "", guide }: { className?: string; guide?: () => void }) {
   return (
     <div className={cx("flex flex-wrap items-center gap-x-2 gap-y-3", className)}>
-      <ButtonLink to="/launch">Launch your token</ButtonLink>
+      <ButtonLink to="/launch">Launch a coin</ButtonLink>
       <ButtonLink to="/discover" variant="ghost">
         {EXPLORE_COINS}
       </ButtonLink>
@@ -719,7 +721,11 @@ function Home() {
   // Live activity (P1-17): rows hold still under the pointer, with focus inside, or while paused; the rows
   // that arrived since enter with the sky wash, and screen readers hear "2 new activity events".
   const live = useLiveList(data.activity, (e) => e.id, ["activity event", "activity events"]);
-  const activity = live.shown;
+  // Newest first across every coin (seeded ids are grouped by coin, so the time decides, then the id).
+  const activity = useMemo(
+    () => [...live.shown].sort((a, b) => b.createdAt - a.createdAt || b.id - a.id),
+    [live.shown],
+  );
   // The live dot means "this is happening now": only while the newest event is under an hour old.
   const recent = hasRecentActivity(activity, now);
   const keysHint = useId();
@@ -785,11 +791,11 @@ function Home() {
           <p className="cdx-home__copy mdx-home-arrival mdx-home-arrival--copy">
             <span className="sm:block">
               {!IS_SIM && CARD_BIDDING_SUSPENDED
-                ? "Choose one premium design for your token. Keep it from day one."
+                ? "Choose one premium design for your coin. Keep it from day one."
                 : WORDS.heroBid}
             </span>
           </p>
-          <ButtonLink to="/launch" className="cdx-home__launch">Create a card</ButtonLink>
+          <ButtonLink to="/launch" className="cdx-home__launch">Launch a coin</ButtonLink>
         </div>
 
         {/* The featured cards (P1-21): a carousel of one slide at a time that turns to the next coin by itself,
@@ -943,13 +949,13 @@ function Home() {
         className="cdx-home__aside mdx-plinth mdx-aside flex min-w-0 flex-col gap-6 lg:pt-[calc(2rem_-_var(--gutter))] short:gap-5 short:pt-6 fit:min-h-0 fit:overflow-hidden"
       >
         <div className="cdx-view-tabs" aria-label="Collection pulse sections"><button type="button" aria-pressed={sideTab==="trending"} onClick={()=>{setSideTab("trending");setSideIndex(0);}}>Trending</button><button type="button" aria-pressed={sideTab==="activity"} onClick={()=>{setSideTab("activity");setSideIndex(0);}}>Activity</button></div>
-        <div className="flex flex-none items-center justify-between gap-2"><p className="text-[12px] leading-4 text-slate">{sideTab==="trending" ? trendingBasis : MODE_COPY.botsNote}</p>{sideTab==="activity" ? <LivePause paused={live.paused} onChange={live.setPaused} /> : <TextLink to="/discover">See all</TextLink>}</div>
+        <div className="flex flex-none items-center justify-between gap-2"><p className="flex min-w-0 items-center gap-1.5 text-[12px] leading-4 text-slate">{sideTab==="trending" ? <>{trendingBasis}<SimTag /></> : MODE_COPY.botsNote}</p>{sideTab==="activity" ? <LivePause paused={live.paused} onChange={live.setPaused} /> : <TextLink to="/discover">See all</TextLink>}</div>
         <div ref={sideGrid.ref} className="cdx-home-pulse-list">
           {sideTab === "trending" ? trending.slice(Math.min(sideIndex,Math.max(0,Math.ceil(trending.length/sideGrid.count)-1))*sideGrid.count,(Math.min(sideIndex,Math.max(0,Math.ceil(trending.length/sideGrid.count)-1))+1)*sideGrid.count).map((c,i)=><CoinRow key={c.id} coin={c} rank={sideIndex*sideGrid.count+i+1} flipId={c.id} />) : activity.slice(Math.min(sideIndex,Math.max(0,Math.ceil(activity.length/sideGrid.count)-1))*sideGrid.count,(Math.min(sideIndex,Math.max(0,Math.ceil(activity.length/sideGrid.count)-1))+1)*sideGrid.count).map(e=><EventItem key={e.id} e={e} now={now} isNew={live.fresh.has(e.id)} />)}
-          {sideTab==="trending" && !trending.length ? <EmptyLine>No coins in the dex yet.</EmptyLine> : null}
+          {sideTab==="trending" && !trending.length ? <EmptyLine>No coins yet.</EmptyLine> : null}
           {sideTab==="activity" && !activity.length ? <EmptyLine>No activity yet.</EmptyLine> : null}
         </div>
-        <PageControls page={Math.min(sideIndex,Math.max(0,Math.ceil((sideTab==="trending"?trending.length:activity.length)/sideGrid.count)-1))} pages={Math.max(1,Math.ceil((sideTab==="trending"?trending.length:activity.length)/sideGrid.count))} onPage={setSideIndex} label={sideTab==="trending"?`${trending.length} tokens`:`${activity.length} events`} />
+        <PageControls page={Math.min(sideIndex,Math.max(0,Math.ceil((sideTab==="trending"?trending.length:activity.length)/sideGrid.count)-1))} pages={Math.max(1,Math.ceil((sideTab==="trending"?trending.length:activity.length)/sideGrid.count))} onPage={setSideIndex} label={sideTab==="trending"?`${trending.length} coins`:`${activity.length} events`} />
 
       </aside>
     </div>

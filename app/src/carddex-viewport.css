@@ -52,9 +52,26 @@ body { overflow:clip; }
 .cdx-balance-grid > div { min-width:0; padding:10px; background:#fffaf0; border-radius:8px; display:flex; flex-direction:column; justify-content:center; font-size:13px; }
 .cdx-balance-grid dd { overflow-wrap:anywhere; }
 .cdx-legal { gap:12px; }
-.cdx-legal nav { flex:none; }
-.cdx-legal__section { flex:1; min-height:0; display:flex; flex-direction:column; gap:10px; max-width:68ch; }
-.cdx-legal__section h2 { flex:none; font-size:19px; }
+/* One scrolling document under a jump nav that stays in view; the current section is underlined. */
+.cdx-legal__nav { flex:none; display:flex; flex-wrap:wrap; column-gap:20px; }
+.cdx-legal__nav a { display:inline-flex; align-items:center; min-height:44px; border-bottom:2px solid transparent; font-size:15px; font-weight:500; color:var(--color-slate); text-decoration:none; transition:color 160ms cubic-bezier(.22,1,.36,1), border-color 160ms cubic-bezier(.22,1,.36,1); }
+.cdx-legal__nav a:hover { color:var(--color-ink); }
+.cdx-legal__nav a[aria-current] { color:var(--color-ink); font-weight:600; border-bottom-color:var(--color-neon); }
+.cdx-legal__doc { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:4px 8px 32px 2px; border-radius:var(--radius-row); }
+.cdx-legal__doc > section { max-width:65ch; }
+.cdx-legal__doc h2 { margin-top:32px; font-size:21px; font-weight:600; line-height:1.3; color:var(--color-ink); scroll-margin-top:8px; }
+.cdx-legal__doc h2:focus { outline:none; }
+.cdx-legal__doc h3 { margin-top:20px; font-size:16px; font-weight:600; line-height:1.35; color:var(--color-ink); scroll-margin-top:8px; }
+.cdx-legal__doc p, .cdx-legal__doc li { margin-top:6px; font-size:15px; line-height:1.6; color:var(--color-ink); }
+.cdx-legal__summary { padding:4px 16px 16px; border-radius:var(--radius-row); background:var(--color-plinth); }
+.cdx-legal__doc .cdx-legal__summary h2 { margin-top:12px; font-size:17px; }
+.cdx-legal__summary ul { margin-top:4px; padding-left:20px; list-style:disc; }
+.cdx-legal__fill { padding:0 4px; border:1px dashed var(--color-hype); border-radius:var(--radius-chip); background:var(--color-tint); color:var(--color-ink); font-weight:600; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+.cdx-legal__fees { width:100%; margin-top:12px; border-collapse:collapse; font-size:14px; line-height:1.5; }
+.cdx-legal__fees th, .cdx-legal__fees td { padding:8px 12px 8px 0; border-bottom:1px solid var(--color-rule); text-align:left; vertical-align:top; }
+.cdx-legal__fees thead th { font-size:12px; font-weight:600; color:var(--color-slate); border-bottom-color:var(--color-hairline); }
+.cdx-legal__fees tbody th { width:40%; font-weight:600; color:var(--color-ink); }
+@media(max-width:639px) { .cdx-legal__fees tbody th { width:44%; } .cdx-legal__nav { column-gap:16px; } }
 @media(max-width:1023px) {
  .cdx-viewport .cdx-viewport-main { padding:10px; --main-pad:10px; }
  .cdx-viewport .mdx-h1 { font-size:25px; }
@@ -73,7 +90,6 @@ body { overflow:clip; }
  .cdx-viewport .cdx-hero-turntable__controls button { padding:5px 8px; }
  .cdx-portfolio__summary .mdx-num { font-size:21px; }
  .cdx-page-controls { min-height:44px; }
- .cdx-legal > header p { display:none; }
 }
 @media(max-height:700px) {
  .cdx-viewport .mdx-rail { padding-block:10px; }
