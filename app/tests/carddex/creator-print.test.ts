@@ -4,6 +4,8 @@ import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { creatorCardSvg, creatorCaseSvg, imageDataUri, CREATOR_CARD_RENDERER_VERSION, CREATOR_IMAGE_DIMENSIONS } from "../../src/lib/carddex/live/creator-print";
 import renderAssets from "../../src/lib/carddex/render-assets.json";
+import renderVariants from "../../src/lib/carddex/render-variants.json";
+import { canonicalSkinSrcSet } from "../../src/components/carddex/CanonicalCardSkin";
 import reviewedDesigns from "../../../integrations/pumpfun/src/design-assets.json";
 import { CANONICAL_CARD_LAYOUT, CARD_RENDERER_VERSION } from "../../src/lib/carddex/card-template";
 import { CARD_DESIGNS } from "../../src/lib/carddex/designs";
@@ -47,6 +49,26 @@ describe("trusted creator card composition",()=>{
    expect(svg).not.toContain("<Test>");
    expect(svg).toContain("At creation");
    expect(svg).toContain(`${quote.symbol} pair`);
+  }
+ });
+ test("every flattened skin has fresh 480 and 640 px WebP copies in its srcset",async()=>{
+  expect(Object.keys(renderVariants).sort()).toEqual(Object.keys(renderAssets).sort());
+  for(const [key,asset]of Object.entries(renderAssets)){
+   const variant=renderVariants[key as keyof typeof renderVariants];
+   // Made from the current atlas: a re-rendered skin needs new copies (bun scripts/card-skin-variants.ts).
+   expect(variant.atlasSha256).toBe(asset.sha256);
+   for(const [width,copy]of [[480,variant.w480],[640,variant.w640]] as const){
+    expect(copy.path).toBe(`/assets/carddex/render/preview/${key}-${width}.webp`);
+    const bytes=await readFile(`public${copy.path}`);
+    expect(createHash("sha256").update(bytes).digest("hex")).toBe(copy.sha256);
+    expect(new TextDecoder().decode(bytes.subarray(0,4))).toBe("RIFF");
+    expect(new TextDecoder().decode(bytes.subarray(8,16))).toBe("WEBPVP8X");
+    expect(bytes[20]&0x10).toBe(0x10); // alpha keeps the rounded transparent edge
+    const canvasWidth=1+(bytes[24]|bytes[25]<<8|bytes[26]<<16),canvasHeight=1+(bytes[27]|bytes[28]<<8|bytes[29]<<16);
+    expect([canvasWidth,canvasHeight]).toEqual([width,Math.round(width*asset.height/asset.width)]);
+    expect([copy.width,copy.height]).toEqual([canvasWidth,canvasHeight]);
+   }
+   expect(canonicalSkinSrcSet(asset)).toBe(`${asset.previewPath} 320w, ${variant.w480.path} 480w, ${variant.w640.path} 640w, ${asset.path} 1260w`);
   }
  });
  test("all 48 exported fronts omit bottom identity and serial labels while retaining one top edition",()=>{

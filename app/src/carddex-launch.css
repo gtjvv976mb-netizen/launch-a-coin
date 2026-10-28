@@ -165,10 +165,15 @@
  .cdx-launch > header h1 { font-size:22px; white-space:nowrap; }
  .cdx-launch-mobile-tabs { position:absolute; top:0; left:150px; right:150px; }
  .cdx-launch-mobile-tabs > button { min-height:44px; }
- .cdx-launch .cdx-create-form { display:grid; grid-template-columns:140px minmax(0,1fr); grid-template-rows:44px minmax(0,1fr); padding:8px; gap:6px 12px; }
- .cdx-launch-step-head { grid-column:1; grid-row:1; min-width:0; gap:6px; padding:0; border:0; }
- .cdx-launch-step-head select { min-height:44px; }
+ .cdx-launch .cdx-create-form { display:grid; grid-template-columns:140px minmax(0,1fr); grid-template-rows:auto minmax(0,1fr); padding:8px; gap:6px 12px; }
+ .cdx-launch-step-head { grid-column:1; grid-row:1; min-width:0; flex-wrap:wrap; gap:4px 6px; padding:0; border:0; }
+ .cdx-launch-step-head select { flex:1 1 0; width:auto; min-height:44px; }
+ /* Start over takes its own line under the step menu, so the step name keeps the column's width. */
+ .cdx-launch-step-head .cdx-launch-start-over { flex:1 1 100%; text-align:left; }
  .cdx-launch-content { grid-column:2; grid-row:1 / -1; }
+ /* The reset question takes the content column's place until it is answered. */
+ .cdx-launch .cdx-launch-reset { grid-column:2; grid-row:1 / -1; align-self:start; position:relative; z-index:1; }
+ .cdx-launch .cdx-create-form:has(> .cdx-launch-reset) > .cdx-launch-content { visibility:hidden; }
  .cdx-launch-step-footer { grid-column:1; grid-row:2; flex-direction:column; justify-content:flex-end; padding:0; border:0; }
  .cdx-launch-step-footer > button { flex:none; width:100%; min-height:44px; padding-inline:8px; }
  .cdx-launch .cdx-launch-identity,.cdx-launch .cdx-launch-links { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
@@ -182,11 +187,12 @@
  .cdx-launch .cdx-pair-picker--viewport { grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:4px 8px; padding:0; }
  .cdx-launch .cdx-pair-picker--viewport > .cdx-launch-subtabs { grid-column:1 / -1; }
  .cdx-launch .cdx-pair-picker--viewport > .cdx-launch-subtabs button { min-height:44px; }
- .cdx-launch .cdx-pair-picker--viewport > .cdx-pair-picker__head { grid-column:1; margin:0; }
- .cdx-launch .cdx-pair-picker--viewport > select { grid-column:1; }
- .cdx-launch .cdx-pair-picker--viewport > .cdx-pair-picker__hint { grid-column:2; grid-row:2 / 4; align-content:center; }
- .cdx-launch .cdx-pair-picker--viewport > .cdx-pair-design-match { grid-column:1 / -1; }
- .cdx-launch .cdx-pair-picker--viewport > .cdx-pair-matching,.cdx-launch .cdx-pair-picker--viewport > .cdx-pair-details__body,.cdx-launch .cdx-pair-picker--viewport > .cdx-pair-change { grid-column:1 / -1; }
+ /* The Pair pane's controls sit in a display:contents tabpanel, so they are grid items of the picker too. */
+ .cdx-launch :is(.cdx-pair-picker--viewport,.cdx-pair-picker--viewport > [role=tabpanel]) > .cdx-pair-picker__head { grid-column:1; margin:0; }
+ .cdx-launch :is(.cdx-pair-picker--viewport,.cdx-pair-picker--viewport > [role=tabpanel]) > select { grid-column:1; }
+ .cdx-launch :is(.cdx-pair-picker--viewport,.cdx-pair-picker--viewport > [role=tabpanel]) > .cdx-pair-picker__hint { grid-column:2; grid-row:2 / 4; align-content:center; }
+ .cdx-launch :is(.cdx-pair-picker--viewport,.cdx-pair-picker--viewport > [role=tabpanel]) > .cdx-pair-design-match { grid-column:1 / -1; }
+ .cdx-launch :is(.cdx-pair-picker--viewport,.cdx-pair-picker--viewport > [role=tabpanel]) > .cdx-pair-matching,.cdx-launch .cdx-pair-picker--viewport > .cdx-pair-details__body,.cdx-launch .cdx-pair-picker--viewport > .cdx-pair-change { grid-column:1 / -1; }
  .cdx-launch .cdx-pair-picker--viewport .cdx-pair-change { padding:6px; gap:4px; font-size:var(--type-min); }
  .cdx-launch .cdx-pair-picker--viewport .cdx-pair-change > label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
  .cdx-launch .cdx-pair-picker--viewport .cdx-pair-change > select,.cdx-launch .cdx-pair-picker--viewport .cdx-pair-change__actions { margin:0; }
@@ -197,4 +203,9 @@
  .cdx-launch .cdx-design-picker--compact > select { grid-column:1; grid-row:1; min-height:44px; }
  .cdx-launch .cdx-design-picker--compact .cdx-design-picker__browse { grid-column:2; grid-row:1; min-height:44px; }
  .cdx-launch-step-copy { display:none; }
+}
+/* Below 360px of height the step column cannot stack Start over and both step buttons, so Back and Next share a row. */
+@media(min-width:560px) and (max-width:1023px) and (max-height:359px) {
+ .cdx-launch .cdx-create-form:has(.cdx-launch-start-over) .cdx-launch-step-footer { flex-direction:row; align-items:flex-end; gap:4px; }
+ .cdx-launch .cdx-create-form:has(.cdx-launch-start-over) .cdx-launch-step-footer > button { flex:1; width:0; min-width:0; white-space:normal; line-height:1.25; font-size:var(--type-min); }
 }

@@ -234,6 +234,9 @@ html .cdx-viewport .cdx-library__tools .cdx-filter { flex-wrap:wrap; overflow-x:
 .cdx-portfolio .mdx-tabs__tab { flex:1; min-width:0; padding-inline:8px; font-size:12px; }
 /* Landscape phones keep filters in one row so card choices and paging remain usable. */
 @media(min-width:560px) and (max-width:1023px) and (max-height:440px) {
+ /* The library and the creation desk have their own landscape layouts below; the 520px floor would push their
+    pager and step buttons under the tab bar. */
+ .cdx-app.cdx-viewport .cdx-viewport-main > :first-child:is(.cdx-archive,.cdx-launch) { --cdx-fit-floor:0px; }
  .cdx-viewport .cdx-archive { position:relative; }
  .cdx-viewport .cdx-archive__head { align-items:center; flex-wrap:nowrap; }
  .cdx-viewport .cdx-archive__head .cdx-use-design { flex:none; width:auto; }

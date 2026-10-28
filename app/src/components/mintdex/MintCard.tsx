@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type Ref } from "react";
 import { getCardDesign, type CardDesign } from "../../lib/carddex/designs";
 import { CanonicalCardFace } from "../carddex/CanonicalCardFace";
-import { canonicalSkinAsset } from "../carddex/CanonicalCardSkin";
+import { canonicalSkinAsset, canonicalSkinSrcSet } from "../carddex/CanonicalCardSkin";
 import { generatedCardAssets, generatedSrcSet } from "../../lib/carddex/generated-assets";
 import { marketCapText } from "../../lib/carddex/quote-display";
 import "../../carddex-cards.css";
@@ -102,9 +102,10 @@ export function preloadCard(card: CardData, sizes: string, level = card.level): 
   const design = cardDesign(card);
   const generated = generatedCardAssets(design.key);
   const skin = canonicalSkinAsset(design.key,card.quoteAssetKey);
-  const jobs: Promise<unknown>[] = [{source:skin?.path,small:skin?.previewPath},{source:generated.back,small:generated.back320}].filter(asset=>asset.source).map(({source,small}) => {
+  const back = generated.back;
+  const jobs: Promise<unknown>[] = [{source:skin?.path,srcset:skin?canonicalSkinSrcSet(skin):undefined},{source:back,srcset:back&&generated.back320?generatedSrcSet(generated.back320,back):undefined}].filter(asset=>asset.source).map(({source,srcset}) => {
     const image = new Image();
-    if (small) { image.srcset = generatedSrcSet(small, source!); image.sizes = sizes; }
+    if (srcset) { image.srcset = srcset; image.sizes = sizes; }
     image.src = source!; image.decoding = "async";
     return image.decode().catch(() => undefined);
   });

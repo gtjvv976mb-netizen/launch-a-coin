@@ -3,7 +3,8 @@
 .cdx-pair-picker__head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px 12px; margin-bottom:7px; }
 .cdx-pair-picker__head label { font-size:13px; font-weight:600; }
 .cdx-pair-picker__head > span { font-size:var(--type-min); text-transform:uppercase; letter-spacing:.055em; color:var(--color-slate); }
-.cdx-pair-picker > select { width:100%; min-height:44px; font-size:16px; text-overflow:ellipsis; }
+/* The viewport picker's Pair pane wraps its select in a display:contents tabpanel. */
+.cdx-pair-picker > select,.cdx-pair-picker > [role=tabpanel] > select { width:100%; min-height:44px; font-size:16px; text-overflow:ellipsis; }
 .cdx-pair-picker__hint { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:4px 12px; margin-top:8px; font-size:var(--type-min); line-height:1.5; }
 .cdx-pair-picker__hint strong { color:var(--color-ink); font-size:12px; }
 .cdx-pair-picker__hint > span,.cdx-pair-picker__binding { color:var(--color-slate); }
@@ -11,7 +12,7 @@
 .cdx-pair-design-match { display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 10px; margin-top:5px; font-size:var(--type-min); line-height:1.5; color:var(--color-slate); }
 .cdx-pair-design-match strong { min-width:0; overflow-wrap:anywhere; color:var(--color-ink); font-weight:600; }
 .cdx-pair-matching { min-width:0; margin-top:6px; }
-.cdx-pair-matching__toggle { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; min-height:40px; padding:5px 0; border-top:1px solid var(--color-hairline); color:var(--color-neon); font-size:12px; text-align:left; cursor:pointer; }
+.cdx-pair-matching__toggle { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; min-height:44px; padding:5px 0; border-top:1px solid var(--color-hairline); color:var(--color-neon); font-size:12px; text-align:left; cursor:pointer; }
 .cdx-pair-matching__toggle svg { flex:none; }
 .cdx-pair-matching__toggle:hover:not(:disabled) { color:var(--color-ink); }
 .cdx-pair-matching__toggle:active:not(:disabled) { color:var(--color-slate); }
@@ -21,7 +22,9 @@
 .cdx-pair-matching__body { display:grid; gap:8px; padding-bottom:4px; }
 .cdx-pair-matching__body p { color:var(--color-slate); font-size:var(--type-min); line-height:1.5; }
 .cdx-pair-matching__body select { width:100%; min-width:0; min-height:44px; font-size:16px; }
-.cdx-pair-matching__body > button { justify-self:start; max-width:100%; min-height:40px; font-size:12px; white-space:normal; text-align:left; }
+.cdx-pair-matching__body > button { justify-self:start; max-width:100%; min-height:44px; font-size:12px; white-space:normal; text-align:left; }
+/* Touch keeps 44px targets; a desktop pointer gets 40px in this dense panel (phone widths stay 44px below). */
+@media (pointer: fine) { .cdx-pair-matching__toggle,.cdx-pair-matching__body > button { min-height:40px; } }
 .cdx-pair-picker--viewport .cdx-pair-design-match,.cdx-pair-picker--viewport .cdx-pair-matching { margin:0; }
 .cdx-pair-details { min-width:0; margin-top:6px; font-size:var(--type-min); line-height:1.5; color:var(--color-slate); }
 .cdx-pair-details__qualification { margin-top:4px; }

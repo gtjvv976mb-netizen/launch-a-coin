@@ -38,6 +38,15 @@ export function canonicalSkinAsset(cardTemplate:string,quoteAssetKey?:string) {
   return candidate?.rendererVersion===CARD_RENDERER_VERSION?candidate:null;
 }
 
+/** A skin's srcset: the 320 px preview, the 480 and 640 px WebP copies written beside it (preview/<key>-480.webp and
+ * preview/<key>-640.webp, by scripts/card-skin-variants.ts) and the 1260 px atlas, so a 2x phone takes 640 px. */
+export function canonicalSkinSrcSet(atlas:RenderAsset) {
+  if(!atlas.previewPath) return `${atlas.path} 1260w`;
+  const base=atlas.previewPath.replace(/\.png$/,"");
+  const mid=base!==atlas.previewPath?`${base}-480.webp 480w, ${base}-640.webp 640w, `:"";
+  return `${atlas.previewPath} 320w, ${mid}${atlas.path} 1260w`;
+}
+
 const stagedIdle=()=>true;
 
 export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,eager=false,lite=false,sizes}:{cardTemplate:string;quoteAssetKey?:string;priority?:boolean;eager?:boolean;lite?:boolean;sizes?:string}) {
@@ -57,7 +66,7 @@ export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,eag
   const ready=!!src && image.ready;
   return <div ref={box} className="cdx-canonical-skin" data-market-finish={quote.kind} data-card-skin-ready={ready?"":undefined} data-card-skin-source={ready?cardTemplate:undefined} aria-hidden>
     <CanonicalSkinSurface cardTemplate={cardTemplate} quoteAssetKey={quoteAssetKey} id={id} />
-    {atlas&&src?<img ref={imageRef} className="cdx-canonical-skin__image" src={src} srcSet={small?undefined:atlas.previewPath?`${atlas.previewPath} 320w, ${atlas.path} 1260w`:`${atlas.path} 1260w`} sizes={small?undefined:sizes??(priority||eager?"300px":"auto, 300px")} style={{opacity:ready?1:0}} alt="" hidden={image.failed} draggable={false} loading={priority||eager?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":eager?"low":undefined} onLoad={image.onLoad} onError={image.onError} />:null}
+    {atlas&&src?<img ref={imageRef} className="cdx-canonical-skin__image" src={src} srcSet={small?undefined:canonicalSkinSrcSet(atlas)} sizes={small?undefined:sizes??(priority||eager?"300px":"auto, 300px")} style={{opacity:ready?1:0}} alt="" hidden={image.failed} draggable={false} loading={priority||eager?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":eager?"low":undefined} onLoad={image.onLoad} onError={image.onError} />:null}
   </div>;
 }
 

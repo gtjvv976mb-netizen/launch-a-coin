@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 
+import { isMirrorHost } from '../lib/canonical-url'
 import { SITE_ORIGIN } from '../lib/mintdex/seo'
 
 // Crawlers always hear about mintdex.fun (backlog P0-11), even when this answers on the origin host behind the
@@ -8,8 +9,9 @@ export const Route = createFileRoute('/robots.txt')({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        // The workers.dev mirror (SEO-4): crawl nothing there, so search only lists launchacard.fun.
-        if (new URL(request.url).hostname.endsWith('.workers.dev')) {
+        // Mirrors (SEO-4: workers.dev, the launchacard.com zone's own hosts, local dev): crawl nothing there, so
+        // search only lists launchacard.fun.
+        if (isMirrorHost(new URL(request.url).hostname)) {
           return new Response('User-agent: *\nDisallow: /\n', {
             headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=86400' },
           })

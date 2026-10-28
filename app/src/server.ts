@@ -3,7 +3,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { applySecurityHeaders } from "./lib/security-headers.server";
-import { canonicalRedirect } from "./lib/canonical-url";
+import { canonicalRedirect, isMirrorHost } from "./lib/canonical-url";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -41,12 +41,12 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 
 /**
  * Caching and indexing for what the Worker answers (static files take theirs from public/_headers): pages are
- * revalidated on every visit unless a route set its own Cache-Control, and the workers.dev mirror is never indexed,
- * so search keeps launchacard.fun.
+ * revalidated on every visit unless a route set its own Cache-Control, and mirrors (workers.dev, the launchacard.com
+ * zone's own hosts, local dev) are never indexed, so search keeps launchacard.fun.
  */
 function applySiteHeaders(response: Response, url: URL): Response {
   const html = (response.headers.get("content-type") ?? "").includes("text/html");
-  const mirror = url.hostname.endsWith(".workers.dev");
+  const mirror = isMirrorHost(url.hostname);
   if (!(html && !response.headers.has("cache-control")) && !mirror) return response;
   const headers = new Headers(response.headers);
   if (html && !headers.has("cache-control")) headers.set("Cache-Control", "no-cache");

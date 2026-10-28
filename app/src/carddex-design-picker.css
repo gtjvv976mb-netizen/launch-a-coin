@@ -29,10 +29,11 @@
 @media(max-height:440px) {
   .cdx-design-browser { gap:6px; }
   .cdx-design-browser__intro { display:none; }
-  .cdx-design-browser__filter select { min-height:40px; }
   .cdx-design-browser__choice { gap:4px; padding:4px; }
   .cdx-design-browser__art { width:min(100px,70cqw,calc((100cqh - 68px)*.715909)); }
 }
+/* Short screens: a desktop pointer gets 40px filters; touch keeps 44px. */
+@media(max-height:440px) and (pointer: fine) { .cdx-design-browser__filter select { min-height:40px; } }
 @media(min-width:560px) and (max-height:440px) {
   .cdx-design-browser__choice { display:grid; grid-template-columns:auto minmax(0,1fr); grid-template-rows:1fr 1fr; align-items:center; gap:4px 8px; padding:6px; }
   .cdx-design-browser__choice:only-child { grid-template-columns:auto auto; justify-content:center; }

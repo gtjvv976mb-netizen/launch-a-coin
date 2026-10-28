@@ -1,5 +1,5 @@
 /** Release utility: regenerate trusted flattened skins and compact browser PNGs without changing the original Higgsfield assets.
- * Requires Python/Pillow and installed Playwright CLI; optional PLAYWRIGHT_CONFIG points at a browser config.
+ * Then writes the 480/640 px WebP copies (card-skin-variants.ts). Requires Python/Pillow with WebP and installed Playwright CLI; optional PLAYWRIGHT_CONFIG points at a browser config.
  * Run from app/: bun scripts/prepare-card-skins.ts. This does not spend generation credits or touch a wallet.
  */
 import {renderToStaticMarkup} from 'react-dom/server';
@@ -30,3 +30,4 @@ const cli=process.env.PLAYWRIGHT_CLI||'playwright-cli';const config=process.env.
 await run([cli,'--session','creator-skins','open','about:blank',...config]);
 try{await run([cli,'--session','creator-skins','run-code','--filename',`${directory}/render.js`]);}finally{await run([cli,'--session','creator-skins','close']);}
 await run(['python3','-c',`from pathlib import Path\nfrom PIL import Image\nimport json,hashlib\nbase=Path(${JSON.stringify(directory)});dest=Path('public/assets/carddex/render');dest.mkdir(exist_ok=True);previews=dest/'preview';previews.mkdir(exist_ok=True);manifest={}\nfor item in json.loads((base/'inputs.json').read_text()):\n out=dest/item['output'];image=Image.open(base/item['output']).convert('RGBA');image.save(out,optimize=True)\n preview=previews/item['output'];image.resize((320,447),Image.Resampling.LANCZOS).save(preview,optimize=True)\n original=Path('public/assets/carddex/higgsfield')/(item['designKey']+'-front.webp')\n manifest[item['key']]={'path':'/'+str(out.relative_to('public')),'sha256':hashlib.sha256(out.read_bytes()).hexdigest(),'previewPath':'/'+str(preview.relative_to('public')),'previewSha256':hashlib.sha256(preview.read_bytes()).hexdigest(),'sourceSha256':hashlib.sha256(original.read_bytes()).hexdigest(),'designKey':item['designKey'],'kind':item['kind'],'width':1260,'height':1760,'rendererVersion':${JSON.stringify(CARD_RENDERER_VERSION)}}\nPath('src/lib/carddex/render-assets.json').write_text(json.dumps(manifest,indent=2)+'\\n')\nprint({'count':len(manifest)})`]);
+await run(['bun','scripts/card-skin-variants.ts']);
