@@ -15,7 +15,7 @@ import { CasePlate, caseBox } from "./case-chrome";
 import { GyroChip } from "./GyroChip";
 import { InspectDialog, prefetchInspect } from "./InspectDialog";
 import { motionLevel, useMotionLevel, type Body } from "./motion3d";
-import { Icon } from "../icons";
+import { CardControlButton } from "../../carddex/CardControls";
 import type { Card3DHandle, Card3DProps } from "./types";
 
 export type CardCaseProps = {
@@ -206,37 +206,31 @@ export function CaseScene({
         poseFront={<CasePlate card={card} side="front" />}
       />
       {controls !== "none" || extraControl ? (
-        <div className="mdx-case__controls">
+        // The compact card-controls row (density R6): icon pills that carry their names (a tooltip on hover and
+        // focus), 36px under a fine pointer and 44px on touch, so the case keeps its room.
+        <div className="mdx-case__controls cdx-card-controls" role="group" aria-label="Card controls">
           {controls !== "none" ? (
             <>
-              {/* The case row uses the secondary pill (Button outline sm): a glyph and its word, never icon-only. */}
-              <button
-                type="button"
-                className="mdx-btn mdx-btn--outline mdx-btn--sm mdx-case__act"
+              <CardControlButton
+                icon="turn-over"
+                label="Turn over"
                 onClick={() => {
                   touched();
                   slots.ctl.current?.turnOver(1, true);
                 }}
-              >
-                <Icon name="turn-over" />
-                Turn over
-              </button>
-              {/* Pause spin / Resume spin: the word and glyph swap. Only full motion turns the case, so calm and
+              />
+              {/* Pause spin / Resume spin: the glyph and name swap. Only full motion turns the case, so calm and
                   reduced motion leave the button out and the row closes up. */}
               {turntable && level === "full" ? (
-                <button
-                  type="button"
-                  className="mdx-btn mdx-btn--outline mdx-btn--sm mdx-case__act"
-                  aria-label={paused ? "Resume spin" : "Pause spin"}
+                <CardControlButton
+                  icon={paused ? "play" : "pause"}
+                  label={paused ? "Resume spin" : "Pause spin"}
                   onClick={() => {
                     const body = slots.ctl.current?.body;
                     if (!paused && body) body.flip.snap(body.flip.x);
                     setPaused((value) => !value);
                   }}
-                >
-                  <Icon name={paused ? "play" : "pause"} />
-                  {paused ? "Resume" : "Pause"}
-                </button>
+                />
               ) : null}
               {onInspect ? inspectBtn(onInspect) : null}
             </>

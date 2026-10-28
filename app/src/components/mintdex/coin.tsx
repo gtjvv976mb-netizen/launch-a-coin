@@ -1,9 +1,9 @@
 /**
- * Coin page pieces (/coin/$id): the market strip (market cap, price, 24h volume, holders and the bonding curve),
- * the market-cap chart, the trade ticket, the activity table, the card's facts and the coin's details.
- * Layout lives in routes/coin/$id.tsx and styles/screens/coin.css: from 1024px everything shows at once (card |
- * market and chart and activity | ticket and details); 768 to 1023 keeps the card beside one tabbed pane; phones
- * show one ?tab= section at a time.
+ * Coin page pieces (/coin/$id): the market strip (market cap, bonding curve, price, 24h volume, holders), the
+ * market-cap chart, the trade ticket (useTradeTicket, TradePanel and the phone TradeActionBar), the activity table,
+ * the card's facts, the token's facts and About.
+ * Layout lives in routes/coin/$id.tsx and styles/screens/coin.css: one page that scrolls once, one DOM order at every
+ * width (no tabs); grid areas place the sections. useSectionParam scrolls an old ?tab= link to its section.
  * CoinHeader, CoinObject, CaptionTop, DesignProgress and PhoneHeroDesign serve the inherited chain page only.
  */
 import {
@@ -14,10 +14,11 @@ import {
   useState,
   type CSSProperties,
   type FormEvent,
+  type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
 } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 
 import {
   claimFaucet,
@@ -63,11 +64,11 @@ import { getPairAsset } from "../../lib/carddex/pairs";
 import { marketCapText, marketCapWatch, quoteNumber } from "../../lib/carddex/quote-display";
 import { formatQuoteAmount, parseQuoteAmount, quoteMetrics } from "../../lib/carddex/quote-simulation";
 import type { CoinDetail, CoinPage, TradeRow } from "../../lib/mintdex/types";
-import { CardBack, CardCase, View3DButton, useView3DGestures, type Card3DHandle } from "./card3d";
+import { CardBack, CardCase, GyroChip, View3DButton, useView3DGestures, type Card3DHandle } from "./card3d";
 import { useClaimable } from "./cases";
 import { prefersReducedMotion, useAction, useLoaderViewport, useNow } from "./hooks";
 import { useMe, useRequireMe } from "./session";
-import { useKeyboardSafe } from "./sheet";
+import { isCoarsePointer, isPhoneNow, useKeyboardSafe } from "./sheet";
 import {
   BotTag,
   ShareButton,
@@ -75,6 +76,7 @@ import {
   coinShare,
 } from "./trust";
 import {
+  ActionBar,
   Address,
   Badge,
   Button,
@@ -99,36 +101,51 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-// ---------------------------------------------------------------- layout band
-
-/** The coin page's three arrangements: phone tabs (under 768), the card beside one tabbed pane, everything (1024+). */
-export type CoinBand = "phone" | "tablet" | "wide";
-
-function bandOf(width: number): CoinBand {
-  return width >= 1024 ? "wide" : width >= 768 ? "tablet" : "phone";
-}
+// ---------------------------------------------------------------- old ?tab= links
 
 /**
- * Which arrangement the window is in. The first frame uses the root loader's viewport (the same value on the
- * server and the hydrating client, so no mismatch); the media queries take over after mount. Layout itself is
- * CSS: this only decides the tab options and where the tab panel role goes.
+ * Old section links (?tab=trades from a notification, ?tab=card from Portfolio) still land on their section: the
+ * page has no tabs any more, so the section with data-section={tab} is scrolled to the top of main (instantly) when
+ * it is not already on screen, then `clear` drops ?tab from the URL (replace, no scroll reset). Keyed on the value,
+ * not on mount, so a link to the coin already open works too. It waits for the router's render (its own scroll
+ * reset runs then), with a double frame as the fallback when that render already happened (a hard load).
  */
-export function useCoinBand(): CoinBand {
-  const vp = useLoaderViewport();
-  const [band, setBand] = useState<CoinBand>(() => (vp ? bandOf(vp.w) : "wide"));
+export function useSectionParam(tab: string | undefined, clear: () => void) {
+  const router = useRouter();
+  const clearRef = useRef(clear);
+  clearRef.current = clear;
   useEffect(() => {
-    const wide = window.matchMedia("(min-width: 1024px)");
-    const tablet = window.matchMedia("(min-width: 768px)");
-    const sync = () => setBand(wide.matches ? "wide" : tablet.matches ? "tablet" : "phone");
-    sync();
-    wide.addEventListener("change", sync);
-    tablet.addEventListener("change", sync);
-    return () => {
-      wide.removeEventListener("change", sync);
-      tablet.removeEventListener("change", sync);
+    if (!tab) return;
+    let done = false;
+    let f1 = 0;
+    let f2 = 0;
+    const stop = () => {
+      unsubscribe();
+      cancelAnimationFrame(f1);
+      cancelAnimationFrame(f2);
     };
-  }, []);
-  return band;
+    const go = () => {
+      if (done) return;
+      done = true;
+      stop();
+      const main = document.querySelector<HTMLElement>('[data-scroll-restoration-id="content"]');
+      const el = main?.querySelector<HTMLElement>(`[data-section="${CSS.escape(tab)}"]`);
+      if (main && el && el.getClientRects().length) {
+        const box = main.getBoundingClientRect();
+        const top = el.getBoundingClientRect().top;
+        if (top < box.top || top > box.bottom - 48) el.scrollIntoView({ block: "start", behavior: "auto" });
+      }
+      clearRef.current();
+    };
+    const unsubscribe = router.subscribe("onRendered", go);
+    f1 = requestAnimationFrame(() => {
+      f2 = requestAnimationFrame(go);
+    });
+    return () => {
+      done = true;
+      stop();
+    };
+  }, [tab, router]);
 }
 
 // ---------------------------------------------------------------- formatting
@@ -208,23 +225,21 @@ function curveSentence(coin: CoinDetail) {
     : "The price follows the pump.fun bonding curve. When it sells out, the coin graduates to a PumpSwap pool.";
 }
 
-/** The coin's figures, as type in one divided container: the market cap leads (30px) with its 24h change. */
-function marketItems(coin: CoinDetail, lead: boolean): StatItem[] {
+/** A USD market cap of $100K and up reads compact ($853K, $1.23M) at every width, so the lead cell never overflows. */
+const LEAD_COMPACT_FROM = 100_000;
+
+/**
+ * The coin's figures, as type in one divided container, in reading order: the market cap leads (30px) with its 24h
+ * change, then the bonding curve (the signature track), price, 24h volume and holders. Missing is null (grey dash).
+ */
+function marketItems(coin: CoinDetail): StatItem[] {
   const native = coin.mcapUsd == null;
-  const items: StatItem[] = [
-    {
-      label: "Price",
-      value: <PriceFigure value={coin.priceQuote ?? coin.priceSol ?? 0} />,
-      unit: coin.quoteSymbol,
-    },
-    { label: "Volume 24h", value: quoteFixed(coin.volume24hQuote, coin.quoteAssetKey), unit: coin.quoteSymbol },
-    { label: "Holders", value: coin.holders.toLocaleString("en-US") },
-  ];
-  if (!lead) return items;
+  const compact = (coin.mcapUsd ?? 0) >= LEAD_COMPACT_FROM;
+  const known = coin.curveProgress != null && Number.isFinite(coin.curveProgress);
   return [
     {
       label: "Market cap",
-      value: native ? quoteNumber(coin.mcapQuote, true) : marketCapText(coin, false),
+      value: native ? quoteNumber(coin.mcapQuote, true) : marketCapText(coin, compact),
       unit: native ? coin.quoteSymbol : undefined,
       watch: marketCapWatch(coin),
       change: (
@@ -234,44 +249,39 @@ function marketItems(coin: CoinDetail, lead: boolean): StatItem[] {
         </span>
       ),
     },
-    ...items,
+    {
+      // The figure and its note are hidden from screen readers: the track's progressbar says the same words.
+      label: "Bonding curve",
+      value: coin.graduated ? (
+        <span aria-hidden="true">Graduated</span>
+      ) : known ? (
+        <span aria-hidden="true">{Math.round(Math.min(1, Math.max(0, coin.curveProgress)) * 100)}%</span>
+      ) : null,
+      change: !coin.graduated && known ? <span className="cdx-coin-screen__curvenote" aria-hidden="true">to graduation</span> : undefined,
+      sub: <CurveTrack label="Bonding curve" progress={coin.curveProgress} graduated={coin.graduated} />,
+    },
+    {
+      label: "Price",
+      value: <PriceFigure value={coin.priceQuote ?? coin.priceSol ?? 0} />,
+      unit: coin.quoteSymbol,
+    },
+    { label: "Volume 24h", value: quoteFixed(coin.volume24hQuote, coin.quoteAssetKey), unit: coin.quoteSymbol },
+    { label: "Holders", value: coin.holders.toLocaleString("en-US") },
   ];
 }
 
 /**
- * The market strip under the title: market cap (the page's one lead figure), price, 24h volume, holders and the
- * bonding curve, in one surface split by hairlines. Phones keep the market cap and the curve here; the other
- * three move into the Chart section (CoinFigures).
+ * The market strip: market cap (the page's one lead figure), bonding curve, price, 24h volume and holders in one
+ * divided surface. Desktop and tablets read it as one row over the chart; phones stack it beside the card. Phones
+ * also take the "Enable phone tilt" chip here, in the hero's spare room, instead of a second row under the case.
  */
 export function CoinMarket({ coin, className = "" }: { coin: CoinDetail; className?: string }) {
   return (
     <section className={cx("cdx-coin-screen__market", className)} aria-label={`${coin.name} market`}>
-      <KpiGroup items={marketItems(coin, true)} lead />
-      {/* The curve cell reads like its neighbours (label, figure, note) over the gold track; the track's own
-          progressbar carries the same words for screen readers, so the visible copy is hidden from them. */}
-      <div className="cdx-coin-screen__curve">
-        <p className="mdx-kpi__label" aria-hidden="true">Bonding curve</p>
-        <p className="mdx-kpi__value" aria-hidden="true">
-          {coin.graduated ? (
-            <span className="num">Graduated</span>
-          ) : Number.isFinite(coin.curveProgress) ? (
-            <>
-              <span className="num">{Math.round(Math.min(1, Math.max(0, coin.curveProgress)) * 100)}%</span>
-              <span className="cdx-coin-screen__curvenote">to graduation</span>
-            </>
-          ) : (
-            <span className="mdx-dash">{"—"}</span>
-          )}
-        </p>
-        <CurveTrack progress={coin.curveProgress} graduated={coin.graduated} />
-      </div>
+      <KpiGroup items={marketItems(coin)} lead />
+      <GyroChip className="cdx-coin-screen__tilt" />
     </section>
   );
-}
-
-/** Phones: price, 24h volume and holders at the top of the Chart section. */
-export function CoinFigures({ coin, className = "" }: { coin: CoinDetail; className?: string }) {
-  return <KpiGroup items={marketItems(coin, false)} className={cx("cdx-coin-screen__figures", className)} />;
 }
 
 // ---------------------------------------------------------------- the card's facts and the coin's details
@@ -298,16 +308,66 @@ export function CardFacts({ page, className = "" }: { page: CoinPage; className?
 }
 
 /**
- * About the coin: its description, the facts people look up (pair, quote asset, address, quote mint), what the
- * bonding curve means, the coin's own links and the owner's Edit description (or Report for everyone else).
+ * The token's facts people look up: trading pair, quote asset, quote mint (Solscan) and the coin's own address (in
+ * test mode a test key that was never deployed, decision C6: the label says so). Label left, value right. The page
+ * renders it twice (under the ticket on tall desktop windows, in About everywhere else); CSS shows one.
+ */
+export function TokenFacts({ page, className = "" }: { page: CoinPage; className?: string }) {
+  const { coin } = page;
+  const asset = getPairAsset(coin.quoteAssetKey);
+  return (
+    <dl className={cx("cdx-coin-facts", className)} aria-label={`$${coin.ticker} token`}>
+      <div>
+        <dt>Trading pair</dt>
+        <dd>{coin.tradingPair ?? `${coin.ticker} / ${asset.symbol}`}</dd>
+      </div>
+      <div>
+        <dt>Quote asset</dt>
+        <dd>{asset.name}{asset.issuer ? <span className="text-slate"> · {asset.issuer}</span> : null}</dd>
+      </div>
+      <div>
+        <dt>Quote mint</dt>
+        <dd>
+          <a
+            className="mdx-link mdx-hit cdx-coin-facts__link"
+            href={`https://solscan.io/token/${asset.mint}`}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`${asset.symbol} quote mint on Solscan (opens in a new tab)`}
+          >
+            <span className="num">{asset.mint.slice(0, 4)}…{asset.mint.slice(-4)}</span> <Icon name="external" size={12} />
+          </a>
+        </dd>
+      </div>
+      <div>
+        <dt>{coin.mintAddress && IS_SIM ? "Test address" : "Token address"}</dt>
+        <dd>
+          {coin.mintAddress ? (
+            <Address address={coin.mintAddress} compact className="cdx-coin-facts__addr" />
+          ) : (
+            <span className="text-slate">{IS_SIM ? "None in the demo" : "Assigned at launch"}</span>
+          )}
+        </dd>
+      </div>
+    </dl>
+  );
+}
+
+/**
+ * About the coin: its description and what the bonding curve means (at most 65ch), with the facts beside it from
+ * 640px of panel width (TokenFacts, and CardFacts when the card column does not show them), then the coin's own
+ * links and the owner's Edit description (or Report for everyone else). One column in a narrow panel.
  */
 export function CoinAbout({
   page,
   onEdit,
+  cardFacts,
   className = "",
 }: {
   page: CoinPage;
   onEdit: () => void;
+  /** The card's facts, for the arrangements whose card column does not show them. */
+  cardFacts?: ReactNode;
   className?: string;
 }) {
   const { coin } = page;
@@ -319,64 +379,44 @@ export function CoinAbout({
   return (
     <section className={cx("cdx-coin-about", className)} aria-labelledby={headingId}>
       <SectionHead title={<span id={headingId}>About ${coin.ticker}</span>} />
-      <p className={cx("cdx-coin-about__lore", !coin.lore && "text-slate")}>
-        {coin.lore || "The creator has not added a description."}
-      </p>
-      <dl className="cdx-coin-facts">
-        <div>
-          <dt>Trading pair</dt>
-          <dd>{coin.tradingPair ?? `${coin.ticker} / ${asset.symbol}`}</dd>
+      <div className="cdx-coin-about__body">
+        <div className="cdx-coin-about__text">
+          <p className={cx("cdx-coin-about__lore", !coin.lore && "text-slate")}>
+            {coin.lore || "The creator has not added a description."}
+          </p>
+          <p className="cdx-coin-about__note">{curveSentence(coin)}</p>
+          {asset.kind === "stock" ? <p className="cdx-coin-about__note">Paired with a tokenized stock asset. Your coin does not represent company shares.</p> : null}
+          <div className="cdx-coin-about__actions">
+            {coin.website ? (
+              <TextLink href={coin.website} target="_blank" rel="noopener noreferrer nofollow">
+                Website <Icon name="external" size={12} />
+              </TextLink>
+            ) : null}
+            {coin.xUrl ? (
+              <TextLink href={coin.xUrl} target="_blank" rel="noopener noreferrer nofollow">
+                X profile <Icon name="external" size={12} />
+              </TextLink>
+            ) : null}
+            {isOwner ? (
+              <Button variant="outline" size="sm" onClick={onEdit}>Edit description</Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                aria-haspopup="dialog"
+                onClick={() => require(() => setReportOpen(true), "Try the demo to report a card.")}
+              >
+                Report
+              </Button>
+            )}
+          </div>
+          {MODE_COPY.guideNote ? <p className="cdx-coin-about__foot">{MODE_COPY.guideNote}</p> : null}
         </div>
-        <div>
-          <dt>Quote asset</dt>
-          <dd>{asset.name}{asset.issuer ? <span className="text-slate"> · {asset.issuer}</span> : null}</dd>
+        <div className="cdx-coin-about__facts">
+          <TokenFacts page={page} className="cdx-coin-about__token" />
+          {cardFacts}
         </div>
-        <div>
-          <dt>Quote mint</dt>
-          <dd>
-            <a
-              className="mdx-link mdx-hit"
-              href={`https://solscan.io/token/${asset.mint}`}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={`${asset.symbol} quote mint on Solscan (opens in a new tab)`}
-            >
-              <span className="num">{asset.mint.slice(0, 4)}…{asset.mint.slice(-4)}</span> <Icon name="external" size={12} />
-            </a>
-          </dd>
-        </div>
-      </dl>
-      <div className="cdx-coin-about__addr">
-        {/* In test mode the address is a test key that was never deployed (decision C6): the row says so. */}
-        {coin.mintAddress ? <Address address={coin.mintAddress} row label /> : <p className="text-body text-slate">No on-chain address in the demo.</p>}
       </div>
-      <p className="cdx-coin-about__note">{curveSentence(coin)}</p>
-      {asset.kind === "stock" ? <p className="cdx-coin-about__note">Paired with a tokenized stock asset. Your coin does not represent company shares.</p> : null}
-      <div className="cdx-coin-about__actions">
-        {coin.website ? (
-          <TextLink href={coin.website} target="_blank" rel="noopener noreferrer nofollow">
-            Website <Icon name="external" size={12} />
-          </TextLink>
-        ) : null}
-        {coin.xUrl ? (
-          <TextLink href={coin.xUrl} target="_blank" rel="noopener noreferrer nofollow">
-            X profile <Icon name="external" size={12} />
-          </TextLink>
-        ) : null}
-        {isOwner ? (
-          <Button variant="outline" size="sm" onClick={onEdit}>Edit description</Button>
-        ) : (
-          <Button
-            variant="outline"
-            size="sm"
-            aria-haspopup="dialog"
-            onClick={() => require(() => setReportOpen(true), "Try the demo to report a card.")}
-          >
-            Report
-          </Button>
-        )}
-      </div>
-      {MODE_COPY.guideNote ? <p className="cdx-coin-about__foot">{MODE_COPY.guideNote}</p> : null}
       <ReportDialog coin={coin} open={reportOpen} onOpenChange={setReportOpen} />
     </section>
   );
@@ -697,6 +737,19 @@ function timeTicks(t0: number, t1: number, room: number) {
 
 type ChartPoint = { t: number; v: number; id: number; side: "buy" | "sell" };
 
+/** The plot's first-frame size by window: the same bands as --chart-plot-h in coin.css. */
+function plotFallback(vp: { w: number; h?: number } | null): { width: number; height: number } {
+  if (!vp) return { width: 640, height: 260 };
+  const h = vp.h ?? 900;
+  if (vp.w < 768) return { width: Math.max(240, vp.w - 56), height: 180 };
+  if (vp.w < 1024) return { width: Math.max(240, vp.w - 80), height: 200 };
+  const height = h >= 1040 ? 300 : h >= 860 ? 260 : vp.w < 1280 && h < 800 ? 164 : 200;
+  // The centre column: the column less the card and ticket tracks and the gaps.
+  const column = Math.min(vp.w - (vp.w >= 1280 ? 64 : 48), 1600);
+  const width = vp.w >= 1280 ? column - Math.min(320, Math.max(280, column * 0.22)) - Math.min(360, Math.max(320, column * 0.25)) - 32 : column - 280 - 288 - 32;
+  return { width: Math.max(240, Math.round(width - 32)), height };
+}
+
 /**
  * Market cap after each observed trade, drawn as a 2px gold line in steps: on a bonding curve the market cap only
  * moves when a trade fills, so the line holds level between trades and steps at each one (no smoothing, nothing
@@ -739,10 +792,10 @@ export function McapChart({
     const timer = setInterval(() => setClock(Date.now()), 15_000);
     return () => clearInterval(timer);
   }, []);
+  // The first frame's plot size (server and hydrating client alike), from the root loader's viewport and the plot
+  // heights in coin.css (--chart-plot-h); the measured size takes over after mount.
   const vp = useLoaderViewport();
-  const [ref, size] = useSize<HTMLDivElement>(
-    vp && vp.w < 1024 ? { width: Math.max(240, vp.w - 64), height: 200 } : { width: 480, height: 260 },
-  );
+  const [ref, size] = useSize<HTMLDivElement>(plotFallback(vp));
   const headingId = useId();
 
   const samples = useMemo<ChartPoint[]>(
@@ -906,41 +959,49 @@ export function McapChart({
 
 // ---------------------------------------------------------------- activity
 
-/** How many trades the list shows at first and adds with each "Show older trades". */
-const TRADE_BATCH = 40;
-
 /**
- * Activity: the latest trades as a table (Time · Trader · amount · Market cap), newest first, in a pane that
- * scrolls with a sticky header row. Buys read "+0.30" in green and sells "−0.30" in red (the sign carries it).
- * Rows hold still under the pointer, with focus inside, or while paused; a trade that lands with a poll washes in
- * once and screen readers hear "1 new trade". "Show older trades" adds the next 40 and moves focus to the first.
+ * Activity: the latest trades as a table (Time · Trader · amount · Market cap), newest first, in the page (it never
+ * scrolls on its own), its header row sticky. Buys read "+0.30" in green and sells "−0.30" in red (the sign carries
+ * it). Rows hold still under the pointer, with focus inside, or while paused; a trade that lands with a poll washes
+ * in once and screen readers hear "1 new trade". It shows the latest `initial` (12) at every width, then one toggle
+ * expands every loaded trade in place (focus moves to the first new row) and collapses back to the latest 12.
  */
 export function TradesList({
   trades,
   count,
+  initial = 12,
   pane,
   className = "",
 }: {
   trades: TradeRow[];
   count: number;
+  /** Rows shown before "Show all": the same at every width. */
+  initial?: number;
   pane?: string;
   className?: string;
 }) {
   const me = useMe();
   const all = useMemo(() => [...trades].reverse(), [trades]);
   const live = useLiveList(all, (t) => t.id, ["trade", "trades"]);
-  const [limit, setLimit] = useState(TRADE_BATCH);
-  const rows = live.shown.slice(0, limit);
+  const [open, setOpen] = useState(false);
+  const rows = open ? live.shown : live.shown.slice(0, initial);
   const now = useNow();
   const total = Math.max(count, trades.length);
+  const loaded = live.shown.length;
   const symbol = rows[0]?.quoteSymbol ?? trades[0]?.quoteSymbol ?? "SOL";
   const native = rows[0]?.mcapUsd == null && rows.length > 0;
   const bodyRef = useRef<HTMLTableSectionElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
   const headingId = useId();
-  function more() {
-    const first = limit;
-    setLimit((n) => n + TRADE_BATCH);
-    requestAnimationFrame(() => bodyRef.current?.querySelector<HTMLElement>(`[data-row="${first}"]`)?.focus());
+  function toggle() {
+    if (open) {
+      setOpen(false);
+      // The list closes up above the toggle: bring the toggle back to where the pointer or focus is.
+      requestAnimationFrame(() => toggleRef.current?.scrollIntoView({ block: "nearest", behavior: "auto" }));
+      return;
+    }
+    setOpen(true);
+    requestAnimationFrame(() => bodyRef.current?.querySelector<HTMLElement>(`[data-row="${initial}"]`)?.focus());
   }
   return (
     <section className={cx("cdx-trades", className)} aria-labelledby={headingId} data-pane={pane}>
@@ -987,7 +1048,7 @@ export function TradesList({
                 <tr
                   key={t.id}
                   data-row={i}
-                  tabIndex={i === limit - TRADE_BATCH && i > 0 ? -1 : undefined}
+                  tabIndex={open && i === initial ? -1 : undefined}
                   data-new={live.fresh.has(t.id) || undefined}
                   className="mdx-row"
                 >
@@ -1005,11 +1066,14 @@ export function TradesList({
               ))}
             </tbody>
           </table>
-          {rows.length < live.shown.length ? (
+          {loaded > initial ? (
             <div className="cdx-trades__more">
-              <Button variant="outline" onClick={more}>Show older trades</Button>
+              <Button ref={toggleRef} variant="ghost" size="sm" onClick={toggle}>
+                {open ? `Show latest ${initial}` : loaded >= total ? `Show all ${loaded} trades` : `Show the latest ${loaded} trades`}
+              </Button>
             </div>
-          ) : total > all.length ? (
+          ) : null}
+          {(open || loaded <= initial) && total > all.length ? (
             <p className="cdx-trades__foot">Showing the latest <span className="num">{all.length}</span> of <span className="num">{total.toLocaleString("en-US")}</span> trades.</p>
           ) : null}
         </div>
@@ -1051,23 +1115,12 @@ function useDebounced<T>(value: T, ms: number) {
 }
 
 /**
- * The trade ticket: Buy | Sell, the amount with its unit, quick amounts (0.1 / 0.5 / 1 / 5, or 25% / 50% / 75% /
- * Max of what you hold), the live quote (you receive, price impact, the trading fee, max slippage, market cap
- * after), one message line and one primary button. Signed out, the button opens the demo and then places this
- * trade. `hideQuick`, `hideAfter` and `compact` are kept for older callers and no longer change the ticket.
+ * The trade ticket's state, lifted out of the form so the phone action bar can carry the same submit: Buy | Sell,
+ * the amount, the live quote (you receive, price impact, the trading fee, max slippage, market cap after), the one
+ * message slot, the label and the submit path. Signed out, the submit opens the demo and then places this trade.
+ * The route calls it once and hands the result to TradePanel and TradeActionBar.
  */
-export function TradePanel({
-  page,
-  pane,
-  className = "",
-}: {
-  page: CoinPage;
-  hideQuick?: boolean;
-  hideAfter?: boolean;
-  compact?: boolean;
-  pane?: string;
-  className?: string;
-}) {
+export function useTradeTicket(page: CoinPage) {
   const { coin, viewer } = page;
   const me = useMe();
   const require = useRequireMe();
@@ -1079,9 +1132,10 @@ export function TradePanel({
   const inputRef = useRef<HTMLInputElement>(null);
   const msgRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const headingId = useId();
-  // Phones: the button stays above the on-screen keyboard while the amount has focus (P1-5).
-  useKeyboardSafe(formRef);
+  // The two submits: the ticket's own (from 1024px) and the phone action bar's (below). Enter clicks the shown one.
+  const inlineRef = useRef<HTMLButtonElement>(null);
+  const barRef = useRef<HTMLButtonElement>(null);
+  const formId = useId();
   const now = useNow(60_000);
 
   const asset = getPairAsset(coin.quoteAssetKey);
@@ -1173,6 +1227,11 @@ export function TradePanel({
     reset("trade");
   }
 
+  function changeSide(s: "buy" | "sell") {
+    setSide(s);
+    edit("");
+  }
+
   async function doTrade() {
     if (!quote?.ok) {
       inputRef.current?.focus();
@@ -1213,8 +1272,10 @@ export function TradePanel({
       setInput("");
       setAttempted(false);
     }
-    // The toast confirms the fill; on a failure the reason is in the slot right above the button.
-    requestAnimationFrame(() => inputRef.current?.focus());
+    // The toast confirms the fill; on a failure the reason is in the slot right above the button. A fine pointer
+    // goes back to the amount for the next trade; touch keeps focus on the pressed button (focusing the field
+    // would raise the keyboard and scroll the page).
+    if (!isCoarsePointer()) requestAnimationFrame(() => inputRef.current?.focus());
   }
 
   function blocked() {
@@ -1241,6 +1302,14 @@ export function TradePanel({
     void doTrade();
   }
 
+  /** Enter in the amount presses the submit that is on screen (the bar's below 1024px), through its own blocked,
+   * pending and signed-out handling, instead of an implicit submit through a hidden default button. */
+  function onAmountKey(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== "Enter" || e.nativeEvent.isComposing) return;
+    e.preventDefault();
+    (isPhoneNow() ? barRef : inlineRef).current?.click();
+  }
+
   const quick =
     side === "buy"
       ? [0.1, 0.5, 1, 5].map((v) => ({ label: String(v), aria: `${v} ${asset.symbol}`, value: String(v) }))
@@ -1262,24 +1331,98 @@ export function TradePanel({
   // A stable label (P1-9 step 2): the reason lives in the message slot, never in the button.
   const label = !me ? FLOW.enterToTrade : `${side === "buy" ? "Buy" : "Sell"} $${coin.ticker}`;
   const suffix = side === "buy" ? asset.symbol : `$${coin.ticker}`;
+  // The phone bar's one line: what this trade spends, once there is an amount.
+  const spend = quote?.ok
+    ? side === "buy"
+      ? `You pay ${input} ${asset.symbol}`
+      : `You sell ${tokens(amount)} $${coin.ticker}`
+    : null;
+  const submitProps = {
+    type: "submit" as const,
+    form: formId,
+    disabled: !!me && !ready,
+    pending: pending === "trade",
+    pendingLabel: "Filling...",
+    feedback: feedback("trade"),
+    successLabel: side === "buy" ? "Bought" : "Sold",
+    onBlocked: blocked,
+  };
+
+  return {
+    coin,
+    me,
+    asset,
+    fmt,
+    side,
+    changeSide,
+    input,
+    edit,
+    quote,
+    afterMetrics,
+    impact,
+    highImpact,
+    message,
+    invalid,
+    summary,
+    walletQuote,
+    holding,
+    quick,
+    label,
+    suffix,
+    spend,
+    submit,
+    submitProps,
+    onAmountKey,
+    formId,
+    formRef,
+    inputRef,
+    msgRef,
+    inlineRef,
+    barRef,
+  };
+}
+
+export type TradeTicket = ReturnType<typeof useTradeTicket>;
+
+/**
+ * The trade ticket: Buy | Sell, the amount with its unit, quick amounts (0.1 / 0.5 / 1 / 5, or 25% / 50% / 75% /
+ * Max of what you hold), the live quote, one message line and the submit. Below 1024px the submit is the phone
+ * action bar's (TradeActionBar), so this one is hidden there (CSS). `hideQuick`, `hideAfter` and `compact` are kept
+ * for older callers and no longer change the ticket.
+ */
+export function TradePanel({
+  page,
+  ticket,
+  pane,
+  className = "",
+}: {
+  page: CoinPage;
+  ticket: TradeTicket;
+  hideQuick?: boolean;
+  hideAfter?: boolean;
+  compact?: boolean;
+  pane?: string;
+  className?: string;
+}) {
+  const { coin } = page;
+  const t = ticket;
+  const { me, asset, side, quote } = t;
+  const headingId = useId();
+  // Phones: the button stays above the on-screen keyboard while the amount has focus (P1-5).
+  useKeyboardSafe(t.formRef);
 
   return (
     <form
-      ref={formRef}
-      onSubmit={submit}
+      ref={t.formRef}
+      id={t.formId}
+      onSubmit={t.submit}
       className={cx("cdx-trade-ticket", className)}
       aria-labelledby={headingId}
       data-pane={pane}
       noValidate
     >
       <h2 id={headingId} className="sr-only">Trade ${coin.ticker}</h2>
-      <SideToggle
-        side={side}
-        onChange={(s) => {
-          setSide(s);
-          edit("");
-        }}
-      />
+      <SideToggle side={side} onChange={t.changeSide} />
 
       {/* The input is named by its visible label and unit ("You pay SOL", "You sell $GLORB") and described by the
           balance beside the label and the message slot, by id, so the placeholder never stands in. */}
@@ -1291,39 +1434,40 @@ export function TradePanel({
           <span id="trade-amt-balance">
             {/* Signed out there is no wallet yet: the button below is the one way in (coin-26), so no balance. */}
             {!me ? null : side === "buy" ? (
-              <>Test balance <span className="num text-ink">{quoteFixed(walletQuote, asset.key)}</span> {asset.symbol}</>
+              <>Test balance <span className="num text-ink">{quoteFixed(t.walletQuote, asset.key)}</span> {asset.symbol}</>
             ) : (
-              <>Held <span className="num text-ink">{tokens(holding)}</span></>
+              <>Held <span className="num text-ink">{tokens(t.holding)}</span></>
             )}
           </span>
         }
       >
         <div className="relative">
           <input
-            ref={inputRef}
+            ref={t.inputRef}
             id="trade-amt"
             // Where focus lands when a ticket control leaves with its action (quick chips that hide): focusNear.
             data-focus-home
             aria-labelledby="trade-amt-label trade-amt-unit"
             aria-describedby="trade-amt-balance trade-msg"
-            aria-invalid={invalid || undefined}
+            aria-invalid={t.invalid || undefined}
             inputMode="decimal"
             enterKeyHint="go"
             autoComplete="off"
-            value={input}
-            onChange={(e) => edit(cleanAmount(e.target.value, side === "buy" ? asset.decimals : 6))}
+            value={t.input}
+            onChange={(e) => t.edit(cleanAmount(e.target.value, side === "buy" ? asset.decimals : 6))}
+            onKeyDown={t.onAmountKey}
             placeholder="0.00"
             className="mdx-input num cdx-trade-ticket__input"
-            style={{ paddingRight: suffix.length > 4 ? 104 : 64 }}
+            style={{ paddingRight: t.suffix.length > 4 ? 104 : 64 }}
           />
           <span id="trade-amt-unit" className="cdx-trade-ticket__unit">
-            {suffix}
+            {t.suffix}
           </span>
         </div>
       </Field>
 
       <div className="cdx-trade-ticket__quick" role="group" aria-label="Quick amounts">
-        {quick.map((q) => (
+        {t.quick.map((q) => (
           <Button
             key={q.label}
             variant="chip"
@@ -1331,7 +1475,7 @@ export function TradePanel({
             className="num"
             disabled={!q.value}
             aria-label={q.aria}
-            onClick={() => edit(q.value)}
+            onClick={() => t.edit(q.value)}
           >
             {q.label}
           </Button>
@@ -1344,7 +1488,7 @@ export function TradePanel({
             side === "buy" ? (
               <Num size="sm" unit={`$${coin.ticker}`}>{tokens((quote as BuyQuote).tokensOut)}</Num>
             ) : (
-              <Num size="sm" unit={asset.symbol}>{fmt((quote as SellQuote).solOut)}</Num>
+              <Num size="sm" unit={asset.symbol}>{t.fmt((quote as SellQuote).solOut)}</Num>
             )
           ) : (
             EMPTY
@@ -1353,7 +1497,7 @@ export function TradePanel({
         <QuoteRow label="Price impact">
           {quote?.ok ? (
             // A size, never signed: a sell moves the price down, but the impact reads the same way.
-            <span className={cx("num text-body", highImpact ? "text-down" : "text-ink")}>{pctText(impact)}</span>
+            <span className={cx("num text-body", t.highImpact ? "text-down" : "text-ink")}>{pctText(t.impact)}</span>
           ) : (
             EMPTY
           )}
@@ -1361,7 +1505,7 @@ export function TradePanel({
         {TRADE_FEE_LINES.map((line) => (
           <QuoteRow key={line.key} label={`Trading fee ${pct(line.bps)}`}>
             {quote?.ok ? (
-              <Num size="sm" unit={asset.symbol}>{fmt(Math.round((quote.fee * line.bps) / TRADE_FEE_BPS))}</Num>
+              <Num size="sm" unit={asset.symbol}>{t.fmt(Math.round((quote.fee * line.bps) / TRADE_FEE_BPS))}</Num>
             ) : (
               EMPTY
             )}
@@ -1371,49 +1515,59 @@ export function TradePanel({
           <span className="num text-body text-ink">{pct(MAX_SLIPPAGE_BPS)}</span>
         </QuoteRow>
         <QuoteRow label="Market cap after">
-          {quote?.ok ? <Num size="sm">{marketCapText({ ...afterMetrics, quoteAssetKey: asset.key })}</Num> : EMPTY}
+          {quote?.ok ? <Num size="sm">{marketCapText({ ...t.afterMetrics, quoteAssetKey: asset.key })}</Num> : EMPTY}
         </QuoteRow>
       </dl>
-      <p className="sr-only" role="status">{summary}</p>
+      <p className="sr-only" role="status">{t.summary}</p>
 
       {/* The one message slot (P1-9): errors (alert) and the impact warning. Empty, it takes no room. */}
-      <div id="trade-msg" ref={msgRef} tabIndex={-1} className="cdx-trade-ticket__msg">
-        {message ? (
-          <p role={message.kind === "error" ? "alert" : "status"} data-kind={message.kind}>
-            {message.kind === "warning" ? <Icon name="warning" /> : null}
-            <span>{message.text}</span>
+      <div id="trade-msg" ref={t.msgRef} tabIndex={-1} className="cdx-trade-ticket__msg">
+        {t.message ? (
+          <p role={t.message.kind === "error" ? "alert" : "status"} data-kind={t.message.kind}>
+            {t.message.kind === "warning" ? <Icon name="warning" /> : null}
+            <span>{t.message.text}</span>
           </p>
         ) : null}
       </div>
 
-      <Button
-        type="submit"
-        block
-        disabled={!!me && !ready}
-        pending={pending === "trade"}
-        pendingLabel="Filling..."
-        feedback={feedback("trade")}
-        successLabel={side === "buy" ? "Bought" : "Sold"}
-        onBlocked={blocked}
-      >
-        {label}
+      <Button ref={t.inlineRef} {...t.submitProps} block className="cdx-trade-ticket__submit">
+        {t.label}
       </Button>
       {TICKET_NOTE ? <p className="cdx-trade-ticket__note">{TICKET_NOTE}</p> : null}
     </form>
   );
 }
 
+/**
+ * The phone and tablet action bar (density R7): the ticket's submit, kept on screen while the page scrolls, with
+ * one line of what the trade spends once there is an amount. It submits the ticket's form by id, so blocked,
+ * pending and signed-out behave exactly like the ticket's own button. From 1024px it is hidden (the ticket shows
+ * its submit). The route renders it as the view root's last child.
+ */
+export function TradeActionBar({ ticket }: { ticket: TradeTicket }) {
+  const t = ticket;
+  return (
+    <ActionBar phoneOnly label={`Buy or sell $${t.coin.ticker}`} className="cdx-trade-bar">
+      <p className="cdx-trade-bar__spend num">{t.spend}</p>
+      <Button ref={t.barRef} {...t.submitProps} className="cdx-trade-bar__submit">
+        {t.label}
+      </Button>
+    </ActionBar>
+  );
+}
+
 // ---------------------------------------------------------------- back to the list
 
 /**
- * Phones and tablets: "‹ Discover" above the title. When the page was opened from Discover in this tab, it goes
- * back in history (Discover keeps its search and place); otherwise it is a plain link.
+ * Phones and tablets: "‹ Discover" before the title. When the page was opened from Discover in this tab, it goes
+ * back in history (Discover keeps its search and place); otherwise it is a plain link. `compact` is the 44px
+ * chevron alone on the title's row (its name, "Back to Discover", for screen readers).
  */
-export function BackToDiscover() {
+export function BackToDiscover({ compact = false }: { compact?: boolean } = {}) {
   return (
     <Link
       to="/discover"
-      className="mdx-link mdx-hit cdx-coin-back"
+      className={cx("mdx-link mdx-hit cdx-coin-back", compact && "cdx-coin-back--compact")}
       onClick={(e: MouseEvent<HTMLAnchorElement>) => {
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
         const nav = (window as unknown as { navigation?: { currentEntry?: { index: number }; entries?: () => Array<{ url: string | null }> } }).navigation;
@@ -1426,7 +1580,7 @@ export function BackToDiscover() {
       }}
     >
       <Icon name="chevron-left" />
-      Discover
+      {compact ? <span className="sr-only">Back to Discover</span> : "Discover"}
     </Link>
   );
 }
