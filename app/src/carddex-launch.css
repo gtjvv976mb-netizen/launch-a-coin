@@ -77,7 +77,7 @@
   .cdx-launch .cdx-create-form { padding:14px; }
   .cdx-launch > header { gap:10px; }
   .cdx-launch > header h1 { font-size:27px; }
-  .cdx-launch .cdx-pair-picker__head > span { font-size:11px; }
+  .cdx-launch .cdx-pair-picker__head > span { font-size:var(--type-min); }
   .cdx-launch-art__copy > span { font-size:var(--type-min); }
 }
 

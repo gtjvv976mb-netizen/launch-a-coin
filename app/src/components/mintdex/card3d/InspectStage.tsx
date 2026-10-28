@@ -30,6 +30,7 @@ export default function InspectStage({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Content
+          aria-modal="true"
           className="mdx-inspect"
           aria-describedby={undefined}
           onOpenAutoFocus={(e) => {

@@ -154,6 +154,7 @@ export function CaseScene({
       data-controls={controls}
       data-kind={kind}
       data-near={nearNext ? "" : undefined}
+      data-paused={turntable && paused ? "" : undefined}
       style={style}
     >
       <Card3DView
@@ -220,11 +221,12 @@ export function CaseScene({
                 </svg>
                 <span className="mdx-case__btn-label">Turn over</span>
               </button>
-              {turntable ? <button type="button" className="mdx-case__btn" aria-pressed={paused} onClick={() => {
+              {/* One pattern: a fixed "Pause" name whose pressed state says it is held (calm hides it: nothing turns). */}
+              {turntable ? <button type="button" className="mdx-case__btn mdx-case__btn--pause" aria-pressed={paused} onClick={() => {
                 const body = slots.ctl.current?.body;
                 if (!paused && body) body.flip.snap(body.flip.x);
                 setPaused((value) => !value);
-              }}>{paused ? "Resume" : "Pause"}</button> : null}
+              }}>Pause</button> : null}
               {onInspect ? inspectBtn(onInspect) : null}
             </>
           ) : null}

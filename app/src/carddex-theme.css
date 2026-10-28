@@ -55,6 +55,15 @@
   --shadow-raise: 0 2px 6px -3px rgb(67 49 22 / .2);
   --shadow-lift: 0 8px 24px -12px rgb(67 49 22 / .3);
   --shadow-modal: 0 24px 90px -24px rgb(43 30 12 / .42);
+  /* Warm ink hairline on thumbnails and frame minis (MIFB image outline, toned to the cream canvas). */
+  --image-outline: rgb(48 39 29 / .14);
+  /* The 3D viewer's fixed night backdrop: its own light-on-dark ink (measured on #16213d to #03040a). */
+  --v3d-ink: #fff8df;
+  --v3d-muted: #dfd0ac;
+  --v3d-accent: #ffe36a;
+  --v3d-control: rgb(255 248 223 / .1);
+  --v3d-control-border: rgb(255 248 223 / .5);
+  --v3d-control-hover: rgb(255 227 106 / .85);
 }
 html, body { background: var(--color-wall); color: var(--color-ink); }
 html { scrollbar-color: #b2955f #eee3c9; }

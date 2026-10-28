@@ -1025,6 +1025,8 @@ export function TradePanel({
   const [attempted, setAttempted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const msgRef = useRef<HTMLDivElement>(null);
+  // Phones' two-step ticket: the review step's heading takes focus when the step opens (A11Y: never <body>).
+  const reviewRef = useRef<HTMLHeadingElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   // Phones: Buy stays above the on-screen keyboard while the amount has focus (P1-5).
   useKeyboardSafe(formRef);
@@ -1084,7 +1086,7 @@ export function TradePanel({
   } else if (quote?.ok && side === "sell" && amount > holding) {
     const t = holding > 0 ? `More than you hold (${tokens(holding)}).` : `You hold no $${coin.ticker} yet.`;
     blocker = { kind: "error", text: t, plain: t };
-  } else if (!quote && attempted && me) {
+  } else if (!quote && attempted) {
     blocker = { kind: "error", text: "Enter an amount.", plain: "Enter an amount." };
   }
 
@@ -1158,7 +1160,11 @@ export function TradePanel({
     if (res) {
       setInput("");
       setAttempted(false);
-
+      // The toast confirms the fill; the two-step ticket starts over at a clear, empty Amount step.
+      if (compact) {
+        setTicketStep("amount");
+        requestAnimationFrame(() => inputRef.current?.focus());
+      }
     } else {
       // The reason is in the slot right above the button.
       inputRef.current?.focus();
@@ -1166,14 +1172,37 @@ export function TradePanel({
   }
 
   function blocked() {
+    // Enter on the phones' Amount step (the hidden Buy button is disabled): the same check as Review.
+    if (compact && ticketStep === "amount") {
+      goReview();
+      return;
+    }
     setAttempted(true);
     // Move focus to the reason, so it is read and seen (P1-9 step 2).
     requestAnimationFrame(() => msgRef.current?.focus());
   }
 
+  // Amount to Review (phones): only with an amount that can trade. Otherwise the reason shows under the field,
+  // linked to it (aria-describedby, aria-invalid), and focus stays on the field.
+  function goReview(fromTab = false) {
+    if (!quote?.ok || blocker) {
+      setAttempted(true);
+      requestAnimationFrame(() => inputRef.current?.focus());
+      return;
+    }
+    setTicketStep("review");
+    // A tab keeps focus on itself (tab pattern); the button and Enter move it to the step's heading.
+    if (!fromTab) requestAnimationFrame(() => reviewRef.current?.focus());
+  }
+
+  function editAmount() {
+    setTicketStep("amount");
+    requestAnimationFrame(() => inputRef.current?.focus());
+  }
+
   function submit(e: FormEvent) {
     e.preventDefault();
-    if (compact && ticketStep === "amount") {setTicketStep("review");return;}
+    if (compact && ticketStep === "amount") {goReview();return;}
     if (!me) {
       const intent = quote?.ok
         ? side === "buy"
@@ -1216,6 +1245,32 @@ export function TradePanel({
   const label = !me ? FLOW.enterToTrade : `${side === "buy" ? "Buy" : "Sell"} $${coin.ticker}`;
   const suffix = side === "buy" ? asset.symbol : `$${coin.ticker}`;
 
+  // The one message slot, mounted once: under the amount on the phones' Amount step, above the button elsewhere.
+  const msgSlot = (
+    <>
+      {/* The one message slot (P1-9): errors (alert) and the impact warning. Empty, it takes no
+          room; the column's collapse ladder absorbs the line when it shows. */}
+      <div
+        id="trade-msg"
+        ref={msgRef}
+        tabIndex={-1}
+        className={cx("outline-none", message && "mt-3")}
+      >
+        {message ? (
+          <p
+            role={message.kind === "error" ? "alert" : "status"}
+            className={cx(
+              "min-h-5 text-[13px] leading-5",
+              message.kind === "error" ? "text-down" : message.kind === "warning" ? "font-medium text-ink" : "text-ink",
+            )}
+          >
+            {message.text}
+          </p>
+        ) : null}
+      </div>
+    </>
+  );
+
   return (
     <form
       ref={formRef}
@@ -1226,7 +1281,7 @@ export function TradePanel({
       data-pane={pane}
       noValidate
     >
-      {compact ? <ViewTabs className="cdx-view-tabs" label="Trade steps" idBase={stepsId} tabs={[{id:"amount",label:"Amount",selected:ticketStep==="amount",onSelect:()=>setTicketStep("amount"),panel:`${stepsId}-amount`},{id:"review",label:"Review trade",selected:ticketStep==="review",onSelect:()=>setTicketStep("review"),panel:`${stepsId}-review`}]} /> : null}
+      {compact ? <ViewTabs className="cdx-view-tabs" label="Trade steps" idBase={stepsId} tabs={[{id:"amount",label:"Amount",selected:ticketStep==="amount",onSelect:()=>setTicketStep("amount"),panel:`${stepsId}-amount`},{id:"review",label:"Review trade",selected:ticketStep==="review",onSelect:()=>goReview(true),panel:`${stepsId}-review`}]} /> : null}
       <div className="cdx-trade-ticket__amount" {...stepPanel("amount")}>
       <SideToggle
         side={side}
@@ -1313,10 +1368,16 @@ export function TradePanel({
         </div>
       )}
 
-      {compact ? <Button type="button" block className="mt-4" onClick={()=>setTicketStep("review")}>Review {side}</Button> : null}
+      {compact && ticketStep === "amount" ? msgSlot : null}
+      {compact ? <Button type="button" block className="mt-4" onClick={()=>goReview()}>Review {side}</Button> : null}
       </div>
       <div className="cdx-trade-ticket__review" {...stepPanel("review")}>
-      {compact ? <p className="text-[13px] text-slate">{side==="buy"?"Buy":"Sell"} · {input || "0"} {suffix}</p> : null}
+      {compact ? (
+        <div className="flex items-baseline justify-between gap-3">
+          <h3 ref={reviewRef} tabIndex={-1} className="text-[13px] font-normal text-slate outline-none">{side==="buy"?"Buy":"Sell"} · {input || "0"} {suffix}</h3>
+          <button type="button" className="mdx-link mdx-hit text-[13px]" onClick={editAmount}>Edit amount</button>
+        </div>
+      ) : null}
       <dl className="mdx-leaders mt-4">
         <QuoteRow label="You receive">
           {quote?.ok ? (
@@ -1364,26 +1425,7 @@ export function TradePanel({
         {summary}
       </p>
 
-      {/* The one message slot (P1-9): errors (alert) and the impact warning. Empty, it takes no
-          room; the column's collapse ladder absorbs the line when it shows. */}
-      <div
-        id="trade-msg"
-        ref={msgRef}
-        tabIndex={-1}
-        className={cx("outline-none", message && "mt-3")}
-      >
-        {message ? (
-          <p
-            role={message.kind === "error" ? "alert" : "status"}
-            className={cx(
-              "min-h-5 text-[13px] leading-5",
-              message.kind === "error" ? "text-down" : message.kind === "warning" ? "font-medium text-ink" : "text-ink",
-            )}
-          >
-            {message.text}
-          </p>
-        ) : null}
-      </div>
+      {!compact || ticketStep === "review" ? msgSlot : null}
 
       <Button
         type="submit"

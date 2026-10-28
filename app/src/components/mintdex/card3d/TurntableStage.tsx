@@ -523,6 +523,7 @@ export default function TurntableStage({
     <Dialog.Root open onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
         <Dialog.Content
+          aria-modal="true"
           className="mdx-v3d"
           aria-describedby={hintId}
           data-calm={calm ? "" : undefined}
