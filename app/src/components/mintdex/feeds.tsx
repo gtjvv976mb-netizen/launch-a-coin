@@ -26,9 +26,11 @@ import {
 } from "./ui";
 
 /**
- * Coin row (Home's Trending), two lines on a 56px pitch: rank, 36px thumb, the name with its $TICKER, the bonding
- * curve as a small track (`curve`), then the market cap over the signed 24h change, right-aligned and tabular. No
- * dividers; hover and focus tint the rounded row. The caller puts it in a list item (the FLIP order lives there).
+ * Coin row (Home's Trending): rank, 28px thumb, the name with its $TICKER, the bonding curve as a small track
+ * (`curve`), then the market cap and the signed 24h change, right-aligned and tabular. Two lines on a 52px pitch in a
+ * narrow panel (the name over the curve, the cap over the change); one --row-h line (40px, 44px on touch) where the
+ * panel is at least 500px wide, the curve taking the spare width (home.css container queries). No dividers; hover and
+ * focus tint the rounded row. The caller puts it in a list item (the FLIP order lives there).
  */
 export function CoinRow({
   coin,
@@ -59,7 +61,7 @@ export function CoinRow({
           </span>
         </span>
       )}
-      <Thumb src={coin.image} size={36} />
+      <Thumb src={coin.image} size={28} />
       <span className="cdx-feed-coin__id">
         <span className="cdx-feed-coin__name">
           <span className="truncate">{coin.name}</span>
@@ -173,10 +175,11 @@ function eventParts(e: EventRow): { who: ReactNode; what: ReactNode } {
 }
 
 /**
- * Activity row, two lines on a 48px pitch: the 28px coin thumb, then who did it (handle 600, " · bot") with the time
- * ago at the right, over what they did in slate, which gets the full width and wraps rather than cut an amount or a
- * ticker. In the DOM the time comes last, so it reads as one sentence: "@handle bought 1.03 SOL of $HONK, 2m ago".
- * `isNew` (from useLiveList) marks a row that arrived with the latest poll: it gets the wash once.
+ * Activity row: the 28px coin thumb, then who did it (handle 600, " · bot"), what they did in slate (it wraps rather
+ * than cut an amount or a ticker) and the time ago at the right. Two lines on a 52px pitch in a narrow panel (who and
+ * the time over what); one --row-h line where the panel is at least 500px wide (home.css container queries). In the
+ * DOM the time comes last, so it reads as one sentence: "@handle bought 1.03 SOL of $HONK, 2m ago". `isNew` (from
+ * useLiveList) marks a row that arrived with the latest poll: it gets the wash once.
  */
 export function EventItem({
   e,
@@ -209,64 +212,70 @@ export function EventItem({
 }
 
 /**
- * A finished mainnet launch (Home's "Launched on pump.fun"): the card as the NFT shows it (the coin art if the
- * receipt has no card image, a card-shaped blank if neither loads), the name, $TICKER, design and time, and two
- * links out: the coin on pump.fun and the token on Solscan. Real data only; there is no in-app page for it.
+ * A finished mainnet launch (Home's "Launched on pump.fun"), as a nested tile in an auto-fill grid: the card as the
+ * NFT shows it (the coin art if the receipt has no card image, a card-shaped blank if neither loads), the name,
+ * $TICKER, design and time, and two links out: the coin on pump.fun and the token on Solscan. The tile is a size
+ * container; its body puts the links under the name in a narrow tile and stacks them at the right in a wide one.
+ * Real data only; there is no in-app page for it.
  */
 export function LaunchedItem({ launch: l, now }: { launch: PublicLiveLaunch; now: number }) {
   const [broken, setBroken] = useState(false);
   const src = broken ? null : (l.cardImage ?? l.image);
   return (
     <li className="cdx-feed-launch">
-      <span className="cdx-feed-launch__card" data-art={!l.cardImage || undefined}>
-        {src ? (
-          <img
-            src={src}
-            alt=""
-            width={40}
-            height={56}
-            loading="lazy"
-            decoding="async"
-            onError={() => setBroken(true)}
-          />
-        ) : null}
-      </span>
-      <span className="cdx-feed-launch__id">
-        <span className="cdx-feed-launch__name">{l.name}</span>
-        <span className="cdx-feed-launch__meta">
-          <span className="num">${l.ticker}</span>
-          {l.designName ? <> · {l.designName}</> : null}
-          {" · "}
-          <time dateTime={new Date(l.createdAt).toISOString()} className="num">
-            {timeAgo(l.createdAt, now)}
-          </time>
+      <div className="cdx-feed-launch__body">
+        <span className="cdx-feed-launch__card" data-art={!l.cardImage || undefined}>
+          {src ? (
+            <img
+              src={src}
+              alt=""
+              width={40}
+              height={56}
+              loading="lazy"
+              decoding="async"
+              onError={() => setBroken(true)}
+            />
+          ) : null}
         </span>
-      </span>
-      <span className="cdx-feed-launch__links">
-        <TextLink href={pumpFunCoinUrl(l.tokenMint)} target="_blank">
-          View on pump.fun<span className="sr-only">: {l.name} (opens in a new tab)</span>
-          <Icon name="external" size={14} />
-        </TextLink>
-        <TextLink href={solscanTokenUrl(l.tokenMint)} target="_blank">
-          Solscan<span className="sr-only">: {l.name} token (opens in a new tab)</span>
-          <Icon name="external" size={14} />
-        </TextLink>
-      </span>
+        <span className="cdx-feed-launch__id">
+          <span className="cdx-feed-launch__name">{l.name}</span>
+          <span className="cdx-feed-launch__meta">
+            <span className="num">${l.ticker}</span>
+            {l.designName ? <> · {l.designName}</> : null}
+            {" · "}
+            <time dateTime={new Date(l.createdAt).toISOString()} className="num">
+              {timeAgo(l.createdAt, now)}
+            </time>
+          </span>
+        </span>
+        <span className="cdx-feed-launch__links">
+          <TextLink href={pumpFunCoinUrl(l.tokenMint)} target="_blank">
+            View on pump.fun<span className="sr-only">: {l.name} (opens in a new tab)</span>
+            <Icon name="external" size={14} />
+          </TextLink>
+          <TextLink href={solscanTokenUrl(l.tokenMint)} target="_blank">
+            Solscan<span className="sr-only">: {l.name} token (opens in a new tab)</span>
+            <Icon name="external" size={14} />
+          </TextLink>
+        </span>
+      </div>
     </li>
   );
 }
 
-/** The launch list while it loads: the rows' own size, flat bars, no shimmer, no layout shift when data lands. */
-export function LaunchedSkeleton({ rows = 3 }: { rows?: number }) {
+/** The launch list while it loads: the tiles' own size, flat bars, no shimmer, no layout shift when data lands. */
+export function LaunchedSkeleton({ rows = 2 }: { rows?: number }) {
   return (
     <ul aria-busy="true" aria-label="Loading launches" className="cdx-home-launched__list">
       {Array.from({ length: rows }, (_, i) => (
         <li key={i} aria-hidden className="cdx-feed-launch" data-skeleton>
-          <span className="cdx-feed-launch__card" />
-          <span className="cdx-feed-launch__id">
-            <span className="cdx-feed-launch__bar" data-w="name" />
-            <span className="cdx-feed-launch__bar" data-w="meta" />
-          </span>
+          <div className="cdx-feed-launch__body">
+            <span className="cdx-feed-launch__card" />
+            <span className="cdx-feed-launch__id">
+              <span className="cdx-feed-launch__bar" data-w="name" />
+              <span className="cdx-feed-launch__bar" data-w="meta" />
+            </span>
+          </div>
         </li>
       ))}
     </ul>
