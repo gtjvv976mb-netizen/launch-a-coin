@@ -363,9 +363,9 @@ function Launch() {
 
   const dirty = !!(name || ticker || lore || website || xUrl || devBuy || imageUrl || step);
   useEffect(() => {
-    if (!draftReady || (live && liveLocked)) return;
+    if (!draftReady || (live && liveLocked) || recoveryOnly) return;
     writeDraft(dirty ? { name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey, step, imageUrl: live ? null : imageUrl } : null);
-  }, [draftReady, dirty, name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey, step, imageUrl, live, liveLocked]);
+  }, [draftReady, dirty, name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey, step, imageUrl, live, liveLocked, recoveryOnly]);
 
 
   async function handleFile(file: File | undefined) {
@@ -466,7 +466,7 @@ function Launch() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftReady]);
   // Recovery-only mainnet mode opens on the wallet panel, where a saved launch is found and finished.
-  useEffect(() => { if (recoveryOnly && draftReady) setStep(7); }, [recoveryOnly, draftReady]);
+  useEffect(() => { if (recoveryOnly && draftReady) { setStep(7); setMobileView("details"); } }, [recoveryOnly, draftReady]);
 
   /** Start over asks first, in the page: the safe answer is focused, and Escape or Keep editing returns to the trigger. */
   function askStartOver() {
@@ -617,7 +617,7 @@ function Launch() {
           <div className="cdx-launch-step-head">
             <label htmlFor="launch-step">{step + 1} / {steps.length}</label>
             <select id="launch-step" aria-label="Launch step" value={step} onChange={e => goTo(Number(e.target.value))}>{steps.map((title, i) => <option key={title} value={i}>{title}</option>)}</select>
-            {dirty && !(live && liveLocked) ? <button ref={startOverRef} type="button" className="mdx-link cdx-launch-start-over" aria-expanded={confirmReset} aria-controls={confirmReset ? `${viewId}-reset` : undefined} onClick={() => (confirmReset ? keepDraft() : askStartOver())}>Start over</button> : null}
+            {dirty && !(live && liveLocked) && !recoveryOnly ? <button ref={startOverRef} type="button" className="mdx-link cdx-launch-start-over" aria-expanded={confirmReset} aria-controls={confirmReset ? `${viewId}-reset` : undefined} onClick={() => (confirmReset ? keepDraft() : askStartOver())}>Start over</button> : null}
             <p className="sr-only" aria-live="polite">{`Step ${step + 1} of ${steps.length}: ${steps[step]}`}</p>
           </div>
           {confirmReset && dirty && !(live && liveLocked) ? (
