@@ -62,7 +62,7 @@ describe("permanent creator-selected card designs", () => {
     for (const key of [DEFAULT_CARD_DESIGN, "one-piece", "neon-circuit", "stock-tsla"]) {
       const html = renderToStaticMarkup(<MintCardFace card={{...TOKEN,cardTemplate:key,image:"",name:"A creator token with a long identity",ticker:"CREATOR123"}} />);
       expect(html).toContain('data-card-layout="mintdex-v1"');
-      expect(html).toContain("Your token art");
+      expect(html).toContain("Your coin art");
       expect(html).toContain("A creator token with a long identity");
       expect(html).toContain("CREATOR123");
       expect(html).not.toContain("data-card-skin-ready");
