@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { CardData } from "../../mintdex/MintCard";
 import { getCardDesign } from "../../../lib/carddex/designs";
+import { getTradingPair } from "../../../lib/carddex/pairs";
+import { Icon } from "../../mintdex/ui";
 import { CanonicalCardFace } from "../CanonicalCardFace";
 import { CardControlButton } from "../CardControls";
 import { HeroTurntable } from "../HeroTurntable";
@@ -32,13 +34,22 @@ export function LaunchCardPreview({ card }: { card: CardData }) {
   </div>;
 }
 
-/** Phones: the same live card as a small face beside the step title; a tap opens it in 3D. */
-export function LaunchCardThumb({ card }: { card: CardData }) {
+/**
+ * Phones and landscape phones: the same live card as one compact row above the form (a small face, the coin, its
+ * design and pair); a tap opens it in 3D. The design name is on screen here, so a design picked elsewhere is
+ * confirmed at the top of the page.
+ */
+export function LaunchCardRow({ card }: { card: CardData }) {
   const viewer = useViewer();
+  const design = getCardDesign(card.cardTemplate);
   return <>
-    <button ref={viewer.opener} type="button" className="cdx-launch-thumb" onClick={() => viewer.setOpen(true)} aria-haspopup="dialog" aria-label={`Preview card in 3D: ${card.name}`}>
-      <span className="cdx-launch-thumb__card" aria-hidden><CanonicalCardFace card={card} design={getCardDesign(card.cardTemplate)} compact lite sizes="72px" /></span>
-      <span className="cdx-launch-thumb__label" aria-hidden>Preview</span>
+    <button ref={viewer.opener} type="button" className="cdx-launch-row" onClick={() => viewer.setOpen(true)} aria-haspopup="dialog" aria-label={`Preview your card in 3D: ${card.name}, ${design.name}`}>
+      <span className="cdx-launch-row__face" aria-hidden><CanonicalCardFace card={card} design={design} compact lite sizes="48px" /></span>
+      <span className="cdx-launch-row__text">
+        <strong>{card.name}{card.ticker ? <span className="cdx-launch-row__ticker"> · ${card.ticker}</span> : null}</strong>
+        <span>{design.name} · {getTradingPair(card.ticker, card.quoteAssetKey)}</span>
+      </span>
+      <span className="cdx-launch-row__go" aria-hidden><Icon name="rotate-3d" />3D</span>
     </button>
     {viewer.open ? <Suspense fallback={null}><InspectStage card={card} open={viewer.open} onOpenChange={viewer.setOpen} /></Suspense> : null}
   </>;

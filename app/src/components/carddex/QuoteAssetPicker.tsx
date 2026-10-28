@@ -47,13 +47,37 @@ function AssetDisclosure({ asset, live }: { asset: Readonly<PairAsset>; live: bo
   </details>;
 }
 
+/**
+ * The mint and the terms on one visible line that wraps (Launch's Pair field; no disclosure): the short mint linked
+ * to Solscan (its full address in the link's name), then each terms link, then what the quote does and does not do.
+ */
+export function QuoteAssetMeta({ quoteAssetKey, live = false }: { quoteAssetKey: string; live?: boolean }) {
+  const asset = getPairAsset(quoteAssetKey);
+  const short = `${asset.mint.slice(0, 4)}…${asset.mint.slice(-4)}`;
+  const external = (href: string, label: string, name?: string) => <a className="mdx-link mdx-hit" href={href} target="_blank" rel="noreferrer" aria-label={name}>{label}<Icon name="external" size={12} /></a>;
+  return <div className="cdx-pair-meta">
+    <p className="cdx-pair-meta__links">
+      <span>{asset.kind === "native" ? "Wrapped SOL mint" : "Mint"} {external(`https://solscan.io/token/${asset.mint}`, short, `${asset.kind === "native" ? "Wrapped SOL mint" : "Quote asset mint"} ${asset.mint} on Solscan`)}</span>
+      {asset.issuerTerms ? external(asset.issuerTerms, "Issuer terms") : null}
+      {asset.listingProviderTerms ? external(asset.listingProviderTerms, `${asset.listingProvider ?? "Listing"} terms`) : null}
+      {external(PAIR_ASSETS_SOURCE, "Pump.fun pairs")}
+    </p>
+    {asset.kind !== "native" ? <p>SOL also pays network and account costs.</p> : null}
+    {asset.kind === "stock" ? <p>A tokenized-stock quote does not make your coin company shares.</p> : null}
+    {live ? <p>The exact mint is checked again before wallet review.</p> : null}
+  </div>;
+}
+
 /** Changing a bound finish's quote requires an explicit compatible finish, never a hidden mismatch. */
-export function QuoteAssetPicker({ value, designKey, ticker, onChange, onPendingChange, confirmationRef, balance, compact = false, live = false, disabled = false, viewport = false }: {
+export function QuoteAssetPicker({ value, designKey, ticker, onChange, onPendingChange, confirmationRef, balance, compact = false, live = false, disabled = false, viewport = false, variant = "default" }: {
   value: string; designKey: string; ticker?: string;
   onChange: (quote: PairAssetKey, design: string) => void;
   onPendingChange?: (pending: boolean) => void;
   confirmationRef?: Ref<HTMLDivElement>;
   balance?: string; compact?: boolean; live?: boolean; disabled?: boolean; viewport?: boolean;
+  /** "inline" (Launch's Pair field): the select, its pair line and the mint and terms on one visible line; no
+   * Matching designs toggle and no disclosure. A pending change asks under the select. */
+  variant?: "default" | "inline";
 }) {
   const id = useId();
   const asset = getPairAsset(value);
@@ -127,7 +151,7 @@ export function QuoteAssetPicker({ value, designKey, ticker, onChange, onPending
     </div> : null}
   </div> : null;
   const pairControls = <>
-    <div className="cdx-pair-picker__head"><label htmlFor={id} className="mdx-label">Pair asset</label><span>{pairKindLabel(asset)}</span></div>
+    <div className="cdx-pair-picker__head"><label htmlFor={id} className="mdx-label">{variant === "inline" ? "Pair" : "Pair asset"}</label><span>{pairKindLabel(asset)}</span></div>
     <select ref={quoteSelectRef} id={id} className="mdx-select mdx-select--field" value={asset.key} disabled={disabled} onChange={e => choose(e.target.value as PairAssetKey)} aria-describedby={`${id}-help`}>
       {([ ["native", "Native"], ["stable", "Stablecoin"], ["stock", "Tokenized stocks"], ["meme", "Memecoins"], ["collector", "Collector tokens"] ] as const).map(([kind,label]) =>
         <optgroup key={kind} label={label}>{PAIR_ASSETS.filter(a => a.kind === kind).map(a => <option key={a.key} value={a.key}>{a.symbol} · {a.name}</option>)}</optgroup>
@@ -150,6 +174,12 @@ export function QuoteAssetPicker({ value, designKey, ticker, onChange, onPending
         <button type="button" disabled={disabled} className="mdx-btn mdx-btn--ghost mdx-btn--sm" onClick={clearPending}>Keep {asset.symbol}</button>
       </div>
     </div> : null;
+  // The inline picker (Launch's Pair field): everything on the page, nothing behind a toggle or a disclosure.
+  if (variant === "inline") return <div className="cdx-pair-picker cdx-pair-picker--inline">
+    {pairControls}
+    {confirmChange}
+    <QuoteAssetMeta quoteAssetKey={asset.key} live={live} />
+  </div>;
   // The viewport picker (Launch's Pair step, the Designs pair tab): one panel, no sub-tabs. The quote, its pair line,
   // matching designs, then the mint and terms behind one disclosure (LAUNCH-04, browse-16).
   if (viewport) return <div className="cdx-pair-picker cdx-pair-picker--viewport">

@@ -9,6 +9,7 @@ import type { TransactionPlan } from "./transaction";
 export const WALLET_NOTICE_TITLE = "What your wallet will show";
 export const WALLET_NOTICE_COPY = {
   networkFee: (sol: string) => `A network fee of about ${sol} SOL.`,
+  networkFeeLater: "A network fee. The exact amount is in your review.",
   initialBuy: (amount: string, symbol: string) => `Your initial buy: ${amount} ${symbol}.`,
   tokenAccount: "A new token account that holds your coin.",
   unverified: "Your new coin marked as unverified. That's normal for a coin created seconds ago.",
@@ -36,5 +37,20 @@ export function walletNoticeItems(plan: Pick<TransactionPlan, "kind" | "review">
   if (plan.kind === "token") items.push({ key: "coinSigner", text: WALLET_NOTICE_COPY.coinSigner });
   else items.push({ key: "cardSigner", text: WALLET_NOTICE_COPY.cardSigner }, { key: "cardLock", text: WALLET_NOTICE_COPY.cardLock });
   items.push({ key: "newSite", text: WALLET_NOTICE_COPY.newSite(siteHost) });
+  return items;
+}
+
+/**
+ * The same list before anything is prepared (the Launch ticket, above the primary): what the coin transaction's
+ * wallet prompt will carry, from what the form already knows. It mirrors walletNoticeItems for a coin plan, with the
+ * fee amount left to the review and the initial buy's amount left out (the review shows both exactly).
+ */
+export function walletNoticePreview({ hasBuy, quoteKind, siteHost }: { hasBuy: boolean; quoteKind: string; siteHost?: string }): WalletNoticeItem[] {
+  const items: WalletNoticeItem[] = [{ key: "networkFeeLater", text: WALLET_NOTICE_COPY.networkFeeLater }];
+  if (hasBuy) {
+    items.push({ key: "tokenAccount", text: WALLET_NOTICE_COPY.tokenAccount }, { key: "unverified", text: WALLET_NOTICE_COPY.unverified });
+    if (quoteKind === "stock") items.push({ key: "stockQuote", text: WALLET_NOTICE_COPY.stockQuote });
+  }
+  items.push({ key: "coinSigner", text: WALLET_NOTICE_COPY.coinSigner }, { key: "newSite", text: WALLET_NOTICE_COPY.newSite(siteHost) });
   return items;
 }

@@ -1,18 +1,27 @@
-/* Launch (/launch): the builder, the live launch panel UI, the design and pair pickers (QuoteAssetPicker is also
- * shown on Designs; browse styles its placement only). Owned by the "launch" screen group
+/* Launch (/launch): the one-page launch form, the live launch panel UI, the design and pair pickers (QuoteAssetPicker
+ * is also shown on Designs; browse styles its placement only). Owned by the "launch" screen group
  * (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css). Tokens: carddex-theme.css.
  *
- * The one question: "Is my coin and its card ready, and what will it cost?"
- *   desktop (>=1024): the step rail | the form (the one panel) | the live card on its stage, inside the 1152 column:
- *     200 + 24 + 452 + 24 + 452 = 1152 (the two 1fr tracks share what the rail leaves).
- *   tablet (768-1023): form | stage; the steps open in a sheet from "Step 3 of 8".
- *   phone (<768): the form alone, one step per page, a small live card beside the step title (tap: 3D), Back and
- *     Next on a footer that stays at the bottom of the screen while a long step scrolls.
- * Elevation by lightness alone: the form panel is the only surface; the rail and the card's stage sit on the
- * ground. No gold here: the card is the only colour. */
+ * The one question: "Is my coin and its card ready, and what will it cost?" Three blocks answer it, on screen together
+ * at desktop: the form (every field, nothing behind a step), the live card, and the ticket (every cost line, the total
+ * and the one Launch button). Density rules R1-R8 (.taste-skill/density/rules.md).
+ *   desktop (>=1024): form | card | ticket, three tracks across the column; the card and the demo ticket stick while
+ *     the form scrolls (each is shorter than the screen; the taller live ticket scrolls with the page).
+ *   tablet (768-1023, taller than 500): form | a side column (the card, then the cost summary).
+ *   phones and landscape phones: the card as one compact row above the form (tap: 3D), the form, the cost summary,
+ *     and the page's action bar (total + the primary) above the tab bar.
+ * Elevation by lightness alone: the fields panel and the ticket are the surfaces; the card stands on the ground.
+ * No gold here: the card is the only colour. */
 
 /* ------------------------------------------------ the page */
-.cdx-launch { gap: var(--gap-page); }
+.cdx-launch {
+  gap: var(--gap-page);
+  /* The three desktop tracks: the card track holds a 240-420px card, the ticket a 264-340px column. */
+  --launch-card-col: clamp(256px, 28%, 440px);
+  --launch-ticket-col: clamp(264px, 22%, 340px);
+  /* The height a sticky column may take: the screen less the top bar, main's padding, the header row and its gap. */
+  --launch-avail: calc(var(--cdx-app-height, 100dvh) - var(--topbar-h) - 32px - var(--pagehead-h) - var(--gap-page));
+}
 .cdx-launch .mdx-pagehead__context { min-height: 20px; }
 /* The header (and the Mainnet | Demo switch) paints above the turning card, whose projection can swing past its stage. */
 .cdx-launch > .mdx-pagehead { position: relative; z-index: 1; }
@@ -40,161 +49,66 @@
 .cdx-launch-mode a:focus-visible { outline-offset: -2px; }
 @media (hover: hover) and (pointer: fine) { .cdx-launch-mode a:not([aria-current]):hover { color: var(--color-ink); } }
 
-/* ------------------------------------------------ the grid */
-.cdx-launch-grid {
-  display: grid;
-  flex: 1;
-  min-height: 0;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
-  gap: 24px;
+/* ------------------------------------------------ the grid: one DOM, three arrangements */
+/* Phones and landscape phones: one column (the preview row, the fields, the cost summary); the stage stays mounted
+ * but hidden. */
+.cdx-launch-grid { display: flex; min-width: 0; flex-direction: column; gap: var(--gap-section); }
+.cdx-launch-side { display: block; min-width: 0; }
+.cdx-launch .cdx-create-preview { display: none; }
+@media (min-width: 768px) and (max-width: 1023.98px) and (min-height: 500.02px) {
+  .cdx-launch-grid { display: grid; grid-template-columns: minmax(0, 1fr) 264px; align-items: start; }
+  .cdx-launch .cdx-launch-row { display: none; }
+  .cdx-launch-side { display: flex; flex-direction: column; gap: var(--gap-section); }
+  .cdx-launch .cdx-create-preview { display: flex; }
 }
-@media (min-width: 768px) {
-  .cdx-launch-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); }
+/* A tall tablet holds the demo side column whole: it sticks while the form scrolls (the live one is taller). */
+@media (min-width: 768px) and (max-width: 1023.98px) and (min-height: 900px) {
+  .cdx-launch-side:not(:has(.cdx-launch-ticket[data-live])) { position: sticky; top: 0; align-self: start; }
 }
 @media (min-width: 1024px) {
   .cdx-launch-grid {
-    grid-template-columns: minmax(176px, 200px) minmax(340px, 1fr) minmax(300px, 1fr);
-    grid-template-rows: minmax(0, 1fr);
-    align-items: stretch;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--launch-card-col) var(--launch-ticket-col);
+    align-items: start;
   }
+  .cdx-launch .cdx-launch-row { display: none; }
+  /* The card and the ticket become the grid's second and third tracks. */
+  .cdx-launch-side { display: contents; }
+  .cdx-launch .cdx-create-preview { display: flex; }
 }
 
-/* ------------------------------------------------ the step rail (desktop) and the step sheet (phones) */
-.cdx-launch-steps { display: none; min-width: 0; }
-@media (min-width: 1024px) {
-  .cdx-launch-steps { display: flex; flex-direction: column; gap: 12px; align-self: start; padding-top: 4px; }
-}
-.cdx-launch-steps--sheet { display: flex; flex-direction: column; margin-inline: -8px; }
-.cdx-launch-steps__count { font-size: var(--text-caption); line-height: 16px; font-weight: 500; color: var(--color-slate); font-variant-numeric: tabular-nums; }
-.cdx-launch-progress { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 4px; }
-.cdx-launch-progress > i { height: 4px; border-radius: var(--radius-pill); background: var(--color-track); }
-.cdx-launch-progress > i[data-on] { background: var(--color-ink); }
-.cdx-launch-steps__list { display: flex; flex-direction: column; gap: 2px; margin-inline: -8px; }
-.cdx-launch-steps__item {
-  position: relative;
-  display: flex;
-  width: 100%;
-  min-height: 48px;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 8px;
-  border-radius: var(--radius-row);
-  color: var(--color-slate);
-  text-align: left;
-  transition: background-color var(--t-hover) ease, color var(--t-hover) ease;
-}
-.cdx-launch-steps__mark {
-  display: grid;
-  width: 24px;
-  height: 24px;
-  flex: none;
-  place-items: center;
-  border-radius: var(--radius-pill);
-  background: var(--color-nested);
-  color: var(--color-slate);
-  font-size: var(--text-caption);
-  font-weight: 600;
-}
-.cdx-launch-steps__text { display: grid; min-width: 0; gap: 2px; }
-.cdx-launch-steps__title { font-size: var(--text-body); line-height: 18px; font-weight: 500; }
-.cdx-launch-steps__sub { overflow: hidden; font-size: var(--text-caption); line-height: 16px; color: var(--color-placeholder); text-overflow: ellipsis; white-space: nowrap; }
-.cdx-launch-steps__item[data-state="done"] .cdx-launch-steps__mark { color: var(--color-ink); }
-.cdx-launch-steps__item[data-state="done"] .cdx-launch-steps__title { color: var(--color-ink); }
-.cdx-launch-steps__item[data-state="problem"] .cdx-launch-steps__mark { background: var(--color-down-soft); color: var(--color-down-hover); }
-.cdx-launch-steps__item[data-state="problem"] .cdx-launch-steps__sub { color: var(--color-down-hover); }
-.cdx-launch-steps__item[data-state="current"] { background: var(--color-surface); color: var(--color-ink); }
-.cdx-launch-steps__item[data-state="current"] .cdx-launch-steps__mark { background: var(--color-ink); color: var(--color-on-cta); }
-.cdx-launch-steps__item[data-state="current"] .cdx-launch-steps__title { font-weight: 600; }
-.cdx-launch-steps__item[data-state="current"] .cdx-launch-steps__sub { color: var(--color-slate); }
-.cdx-launch-steps__item:focus-visible { outline-offset: -2px; }
-.cdx-launch-steps__item:active { background: var(--color-track); }
-@media (hover: hover) and (pointer: fine) {
-  .cdx-launch-steps__item:not([data-state="current"]):hover { background: var(--color-track); color: var(--color-ink); }
-}
-/* In the sheet the current row sits on the sheet's own surface, so it takes the nested step. */
-.cdx-launch-steps--sheet .cdx-launch-steps__item[data-state="current"] { background: var(--color-nested); }
-.cdx-launch-steps--sheet .cdx-launch-steps__item { min-height: 52px; }
+/* ------------------------------------------------ the fields panel */
+/* The turning card's projection can swing over its neighbours: the panels paint above it. */
+.cdx-launch-fields,
+.cdx-launch-ticket { position: relative; z-index: 1; min-width: 0; }
+.cdx-launch-fields { display: grid; gap: var(--gap-section); container: launch-fields / inline-size; }
+.cdx-launch-fields__note { font-size: var(--text-body); line-height: 20px; color: var(--color-ink); }
+.cdx-launch-f { min-width: 0; }
+.cdx-launch-required { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px var(--gap-section); }
+/* Optional fields, visible (no accordion): one fieldset under the required three. */
+.cdx-launch-more { min-inline-size: 0; margin: 0; padding: 0; border: 0; }
+.cdx-launch-more__legend { padding: 0; margin-bottom: 8px; font-size: var(--text-body); line-height: 20px; font-weight: 600; color: var(--color-slate); }
+.cdx-launch-more__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px var(--gap-section); }
+.cdx-launch-more__grid > * { min-width: 0; }
 
-/* ------------------------------------------------ the form: the one panel */
-.cdx-create-form { display: flex; min-width: 0; flex-direction: column; gap: 20px; }
-@media (min-width: 1024px) {
-  /* Content height: the form grows with its fields and the footer follows them (nothing scrolls inside the page). */
-  .cdx-create-form { align-self: start; min-height: 0; }
-}
-.cdx-launch-step-head { display: flex; align-items: flex-start; gap: 16px; }
-.cdx-launch-step-head__text { display: flex; min-width: 0; flex: 1; flex-direction: column; align-items: flex-start; gap: 4px; }
-.cdx-launch-step-head__count {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--color-slate);
-  font-size: var(--text-caption);
-  line-height: 16px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  transition: color var(--t-hover) ease;
-}
-/* The step sheet's trigger: a caption that reaches the hit size without growing. */
-button.cdx-launch-step-head__count::before { content: ""; position: absolute; inset: calc((16px - var(--hit)) / 2) -8px; }
-button.cdx-launch-step-head__count { text-decoration: underline; text-decoration-color: var(--color-control-border); text-underline-offset: 3px; }
-@media (hover: hover) and (pointer: fine) { button.cdx-launch-step-head__count:hover { color: var(--color-ink); } }
-@media (min-width: 1024px) {
-  button.cdx-launch-step-head__count { display: none; }
-}
-.cdx-launch-step-head__title { font-size: var(--text-title); line-height: 26px; font-weight: 600; color: var(--color-ink); text-wrap: balance; }
-.cdx-launch-step-head__title:focus { outline: none; }
-.cdx-launch-step-head__intro { font-size: var(--text-body); line-height: 20px; color: var(--color-slate); text-wrap: pretty; }
-.cdx-launch-progress--form { margin-top: -8px; }
-@media (min-width: 1024px) { .cdx-launch-progress--form { display: none; } }
-.cdx-launch-blocked { font-size: var(--text-body); line-height: 20px; color: var(--color-ink); }
-
-/* The small live card beside the step title (phones only: tablet and desktop show the stage). */
-.cdx-launch-thumb {
-  position: relative;
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  border-radius: var(--radius-row);
-  color: var(--color-slate);
-  font-size: var(--text-caption);
-  line-height: 16px;
-  font-weight: 500;
-  transition: transform var(--t-press) var(--ease-out), color var(--t-hover) ease;
-}
-.cdx-launch-thumb__card { display: block; width: 64px; }
-.cdx-launch-thumb__card > .mdx-card { width: 100%; }
-.cdx-launch-thumb__label { text-decoration: underline; text-decoration-color: var(--color-control-border); text-underline-offset: 3px; }
-.cdx-launch-thumb:active { transform: scale(0.96); }
-@media (min-width: 768px) { .cdx-launch-thumb { display: none; } }
-
-/* ------------------------------------------------ the steps' fields */
-.cdx-launch-content { display: block; }
-.cdx-launch-step { display: grid; align-content: start; gap: 20px; }
-.cdx-launch .cdx-launch-description { min-height: 112px; }
-.cdx-launch-note { display: grid; gap: 4px; margin-top: -12px; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
-.cdx-launch-note__error { color: var(--color-down); }
-
-/* Artwork: a dropzone with the image (or its slot) and what it takes. */
+/* Artwork: a dropzone with the image (or its slot) and what to do, then what it takes and Remove under it. */
 .cdx-launch .cdx-launch-art {
   display: flex;
   width: 100%;
-  min-height: 120px;
+  min-height: 88px;
+  /* The dropzone primitive centres a grid; this one is a row (the slot, then what to do). */
+  place-items: initial;
   align-items: center;
   justify-content: flex-start;
-  gap: 16px;
+  gap: 12px;
   padding: 12px;
   border-radius: var(--radius-pop);
   text-align: left;
-  place-items: initial;
 }
 .cdx-launch-art__frame {
   display: grid;
-  width: 96px;
-  height: 96px;
+  width: 64px;
+  height: 64px;
   flex: none;
   place-items: center;
   overflow: hidden;
@@ -205,7 +119,7 @@ button.cdx-launch-step-head__count { text-decoration: underline; text-decoration
 /* Preparing: the slot is a flat bar at the image's size (no shimmer gradient). */
 .cdx-launch-art__frame[data-busy] { background: var(--color-raised); }
 .cdx-launch-art__image { width: 100%; height: 100%; object-fit: cover; outline: 1px solid var(--image-outline); outline-offset: -1px; border-radius: inherit; }
-.cdx-launch-art__copy { display: grid; min-width: 0; gap: 4px; }
+.cdx-launch-art__copy { display: grid; min-width: 0; gap: 2px; }
 .cdx-launch-art__copy strong { font-size: var(--text-body); line-height: 20px; font-weight: 600; color: var(--color-ink); }
 .cdx-launch-art__copy > span { font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
 .cdx-launch .cdx-launch-art:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; }
@@ -213,135 +127,113 @@ button.cdx-launch-step-head__count { text-decoration: underline; text-decoration
 @media (hover: hover) and (pointer: fine) {
   .cdx-launch .cdx-launch-art:hover:not(:disabled) { border-color: var(--color-slate); background: var(--color-raised); }
 }
+.cdx-launch-art__spec { display: flex; align-items: baseline; gap: 12px; margin-top: 6px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+.cdx-launch-art__spec > span { min-width: 0; flex: 1; }
+.cdx-launch-art__remove { flex: none; font-size: var(--text-caption); font-weight: 500; color: var(--color-ink); }
 
-/* ------------------------------------------------ the review: what you chose, then the cost */
-.cdx-launch-commit { gap: 24px; }
-.cdx-launch-review { display: grid; min-width: 0; gap: 12px; }
-.cdx-launch-section { font-size: var(--text-lead); line-height: 24px; font-weight: 600; color: var(--color-ink); }
-.cdx-launch-section-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-/* Key-value rows: label, value (right edge), and the Edit action in one fixed trailing column. */
-.cdx-launch-summary { display: grid; grid-template-columns: minmax(84px, auto) minmax(0, 1fr) auto; column-gap: 16px; }
-.cdx-launch-summary > div { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; min-height: var(--hit); align-items: center; border-bottom: 1px solid var(--color-rule); }
-.cdx-launch-summary > div:last-child { border-bottom: 0; }
-.cdx-launch-summary dt { font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
-.cdx-launch-summary dd { display: flex; min-width: 0; justify-content: flex-end; font-size: var(--text-body); line-height: 20px; color: var(--color-ink); text-align: right; }
-.cdx-launch-summary__clip { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cdx-launch-summary__thumb { display: block; width: 40px; height: 40px; border-radius: 4px; object-fit: cover; outline: 1px solid var(--image-outline); outline-offset: -1px; }
-.cdx-launch-summary > div:has(.cdx-launch-summary__thumb) { min-height: 56px; }
-.cdx-launch-summary__missing { color: var(--color-down); font-weight: 500; }
-.cdx-launch-summary__none { color: var(--color-slate); }
-.cdx-launch-summary__edit .mdx-link { font-size: var(--text-body); }
-
-/* Cost: line items right-aligned on one edge, the total under a hairline. */
-.cdx-launch-cost { display: grid; min-width: 0; }
-.cdx-launch-cost > div { display: flex; min-height: 36px; align-items: baseline; justify-content: space-between; gap: 16px; padding-block: 8px; }
-.cdx-launch-cost dt { min-width: 0; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
-.cdx-launch-cost dd { min-width: 0; flex: none; font-size: var(--text-body); line-height: 20px; color: var(--color-ink); text-align: right; font-variant-numeric: tabular-nums; }
-.cdx-launch-cost > div[data-total] { margin-top: 4px; border-top: 1px solid var(--color-hairline); padding-top: 12px; }
-.cdx-launch-cost > div[data-total] :is(dt, dd) { color: var(--color-ink); font-weight: 600; }
-.cdx-launch-cost__plus { color: var(--color-slate); font-weight: 500; }
-.cdx-launch-fee-note,
-.cdx-launch-demo-note,
-.cdx-launch-rules { font-size: var(--text-body); line-height: 20px; color: var(--color-slate); text-wrap: pretty; }
-.cdx-launch-fee-note { color: var(--color-ink); }
-.cdx-launch-live-skeleton { height: 320px; border-radius: var(--radius-row); }
-
-/* ------------------------------------------------ Start over (asked in place of the step) */
-.cdx-launch-reset { display: grid; gap: 8px; padding: 16px; border-radius: var(--radius-row); background: var(--color-nested); }
-.cdx-launch-reset__q { font-size: var(--text-lead); line-height: 24px; font-weight: 600; color: var(--color-ink); }
-.cdx-launch-reset__note { font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
-.cdx-launch-reset__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-/* The destructive answer sits on the nested box, so its pill takes the next lightness step. */
-.cdx-launch-reset .mdx-btn--danger { background: var(--color-raised); }
-
-/* ------------------------------------------------ the footer: Back left, the step's one primary right */
-.cdx-launch-step-footer { display: grid; flex: none; gap: 12px; padding-top: 16px; border-top: 1px solid var(--color-hairline); }
-.cdx-launch-step-footer__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-/* The total, on the footer beside the button that pays it, so it is in view on every screen. */
-.cdx-launch-total { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; font-size: var(--text-lead); line-height: 24px; font-weight: 600; color: var(--color-ink); }
-.cdx-launch-total .mdx-unit { font-size: var(--text-body); font-weight: 500; }
-.cdx-launch-step-footer__end { display: flex; min-width: 0; align-items: center; justify-content: flex-end; gap: 16px; }
-.cdx-launch-skip { font-size: var(--text-body); white-space: nowrap; }
-/* The narrowest phones (360): on Links the row holds Back, Skip to review and "Next: Initial buy", 10px past the
- * panel; the link folds onto two lines instead (40px, inside the footer's 44px row). */
-@media (max-width: 399.98px) {
-  .cdx-launch-skip { min-width: 0; white-space: normal; text-align: right; text-wrap: balance; }
+/* Field areas follow the panel's own width (named container queries), not the screen's. */
+@container launch-fields (min-width: 360px) {
+  .cdx-launch-required { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .cdx-launch-f--art { grid-column: 1 / -1; }
 }
-@media (max-width: 1023.98px) {
-  /* The page grows with its step (no clipped fields), and the footer stays in reach at the bottom of the screen
-   * while a long step scrolls under it. */
-  .cdx-launch-step-footer {
-    position: sticky;
-    /* A sticky box stops at main's content edge; -16px (main's bottom padding) takes it down to the tab bar. */
-    bottom: -16px;
-    z-index: 1;
-    margin: 0 calc(var(--pad-panel) * -1) calc(var(--pad-panel) * -1);
-    padding: 12px var(--pad-panel) max(12px, env(safe-area-inset-bottom));
-    border-radius: 0 0 var(--radius-panel) var(--radius-panel);
-    background: var(--color-surface);
+@container launch-fields (min-width: 400px) {
+  .cdx-launch-more__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .cdx-launch-f--design,
+  .cdx-launch-f--pair,
+  .cdx-launch-f--buy,
+  .cdx-launch-f--lore { grid-column: 1 / -1; }
+}
+@container launch-fields (min-width: 520px) {
+  .cdx-launch-f--pair,
+  .cdx-launch-f--buy { grid-column: auto; }
+}
+/* Wide (600px of fields and up): Name and Ticker beside the artwork, and the description beside the two links. */
+@container launch-fields (min-width: 600px) {
+  .cdx-launch-required {
+    grid-template-areas: "name art" "ticker art";
+    grid-template-rows: auto 1fr;
   }
-}
-@media (max-width: 767.98px) {
-  /* Phones: one column, and a short step's panel fills the screen so Back and Next sit at its foot. */
-  .cdx-launch-grid { display: flex; flex-direction: column; }
-  .cdx-create-form { flex: 1; }
-  .cdx-launch-content { flex: 1; }
-  .cdx-launch .cdx-create-preview { display: none; }
-}
-/* Landscape phones: the step rail beside the form (the width is there, the height is not); the card stays as the
- * small face in the step head. */
-@media (min-width: 560px) and (max-width: 1023.98px) and (max-height: 500px) {
-  .cdx-launch-grid { display: grid; grid-template-columns: minmax(168px, 200px) minmax(0, 1fr); }
-  .cdx-launch-steps { display: flex; flex-direction: column; gap: 12px; padding-top: 4px; }
-  .cdx-launch .cdx-create-preview { display: none; }
-  .cdx-launch-thumb { display: flex; }
-  button.cdx-launch-step-head__count { display: none; }
-  .cdx-launch-progress--form { display: none; }
-  .cdx-launch-steps__item { min-height: 44px; }
-  /* Height is what is short: the step head drops its intro line and the card face shrinks. */
-  .cdx-launch { gap: 12px; }
-  .cdx-launch-grid { gap: 16px; }
-  .cdx-create-form { gap: 12px; }
-  .cdx-launch-step-head__intro { display: none; }
-  .cdx-launch-thumb__card { width: 40px; }
-  .cdx-launch-thumb__label { display: none; }
-  .cdx-launch-step-footer { padding-block: 8px; }
-  .cdx-launch-step-footer, .cdx-launch-step-footer__row { gap: 8px; }
-  .cdx-launch-total { font-size: var(--text-body); line-height: 20px; }
-}
-/* The shortest phones held sideways (568x320): the top bar steps aside so a field and the footer fit, as on the
- * Designs library (carddex-viewport.css). */
-@media (min-width: 560px) and (max-width: 1023.98px) and (max-height: 360px) {
-  .cdx-viewport:has(.cdx-launch) .cdx-topbar { display: none; }
-}
-@media (max-width: 380px) {
-  .cdx-launch-step-footer__end { gap: 12px; }
-  .cdx-launch-summary { column-gap: 12px; }
+  .cdx-launch-f--name { grid-area: name; }
+  .cdx-launch-f--ticker { grid-area: ticker; }
+  .cdx-launch-f--art { grid-area: art; }
+  .cdx-launch-more__grid {
+    grid-template-areas: "design design" "pair buy" "lore website" "lore x";
+  }
+  .cdx-launch-f--design { grid-area: design; }
+  .cdx-launch-f--pair { grid-area: pair; }
+  .cdx-launch-f--buy { grid-area: buy; }
+  .cdx-launch-f--lore { grid-area: lore; }
+  .cdx-launch-f--website { grid-area: website; }
+  .cdx-launch-f--x { grid-area: x; }
+  /* The artwork cell is as tall as Name and Ticker together: its dropzone takes what the label and spec leave. */
+  .cdx-launch-f--art { display: flex; flex-direction: column; }
+  .cdx-launch .cdx-launch-art { flex: 1; min-height: 120px; }
+  .cdx-launch-art__frame { width: 96px; height: 96px; }
 }
 
-/* ------------------------------------------------ the card's stage: a calm ground, the card and its controls */
-.cdx-create-preview {
-  --cw: min(calc(100cqw - 48px), 300px);
+/* The description grows with its text (three lines to start); it never scrolls on its own. Browsers without
+ * field-sizing are sized by launch.tsx. */
+.cdx-launch .cdx-launch-description { min-block-size: 84px; resize: none; overflow-y: hidden; field-sizing: content; }
+
+/* The initial buy: the amount, then one row of quick amounts (None, 0.1, 0.5, 1, 5), then its note. */
+.cdx-launch-quick { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: 8px; margin-top: 8px; }
+.cdx-launch-quick .mdx-btn { padding-inline: 0; }
+.cdx-launch-quick .mdx-btn[aria-pressed="true"] { background: var(--color-ink); color: var(--color-on-cta); }
+.cdx-launch-note { display: grid; gap: 4px; margin-top: 8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+.cdx-launch-note__error { color: var(--color-down); font-size: var(--text-body); line-height: 20px; }
+.cdx-launch-slippage { margin-top: 8px; font-size: var(--text-body); line-height: 20px; }
+/* The live ticket's Total waits on the review: its words take the row beside the short label. */
+.cdx-launch-cost > div[data-total]:has(> .cdx-live-later) > dt { flex: none; }
+
+/* Focus moved to a field that needs something lands clear of the screen's edges (and of the action bar on phones). */
+.cdx-launch :is(input, textarea, select, button, [tabindex="-1"]) { scroll-margin-block: 16px; }
+@media (max-width: 1023.98px) {
+  .cdx-launch :is(input, textarea, select, button, [tabindex="-1"]) { scroll-margin-block: 16px calc(var(--actionbar-h) + 16px); }
+}
+
+/* ------------------------------------------------ the preview row (phones and landscape phones) */
+.cdx-launch-row {
+  position: relative;
   display: flex;
+  width: 100%;
+  min-height: 72px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px var(--pad-panel);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  text-align: left;
+  transition: background-color var(--t-hover) ease, transform var(--t-press) var(--ease-out);
+}
+.cdx-launch-row__face { display: block; width: 44px; flex: none; }
+.cdx-launch-row__face > .mdx-card { width: 100%; }
+.cdx-launch-row__text { display: grid; min-width: 0; flex: 1; gap: 2px; }
+.cdx-launch-row__text > strong { overflow: hidden; font-size: var(--text-body); line-height: 20px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.cdx-launch-row__ticker { font-weight: 500; color: var(--color-slate); }
+.cdx-launch-row__text > span { overflow: hidden; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); text-overflow: ellipsis; white-space: nowrap; }
+.cdx-launch-row__go { display: inline-flex; flex: none; align-items: center; gap: 4px; height: 32px; padding: 0 12px; border-radius: var(--radius-pill); background: var(--color-nested); font-size: var(--text-caption); font-weight: 600; }
+.cdx-launch-row:active { transform: scale(0.98); }
+.cdx-launch-row:focus-visible { outline-offset: 2px; }
+
+/* ------------------------------------------------ the card's stage: the card, its controls and one caption */
+.cdx-create-preview {
+  /* Phones never show it; the tablet side column: the column's width; desktop: the track or the screen's height. */
+  --cw: min(calc(100cqw - 16px), 420px);
   min-width: 0;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  container-type: inline-size;
-}
-@media (min-width: 768px) and (max-width: 1023.98px) {
-  .cdx-create-preview { position: sticky; top: 0; padding-top: 8px; }
+  gap: 8px;
+  padding-top: 8px;
+  container: launch-card / inline-size;
 }
 @media (min-width: 1024px) {
-  .cdx-create-preview {
-    /* Room above and below for the card's turn (its projection swings past its box) and the control row. */
-    --cw: min(calc(100cqw - 64px), calc((100cqh - 150px) * 0.7159), 420px);
-    /* The stage keeps a screen's height (main less its padding, the header row and its gap), so the card's size does
-     * not follow the form beside it; it stretches with a taller form. It never scrolls. */
-    min-height: calc(var(--cdx-app-height, 100dvh) - var(--topbar-h) - 32px - var(--pagehead-h) - var(--gap-page));
-    justify-content: center;
-    container-type: size;
-  }
+  /* The column is the card plus 80px (8 above, the 12 + 36 control row, 8, the 16px caption), never taller than
+   * the screen, so it can stick. */
+  .cdx-create-preview { --cw: min(calc(100cqw - 16px), calc((var(--launch-avail) - 80px) * 0.7159), 420px); }
+}
+@media (min-width: 1024px) and (min-height: 600px) {
+  .cdx-create-preview { position: sticky; top: 0; align-self: start; }
 }
 /* The card is its stage's width (card3d.css, unlayered, sets .mdx-card3d to 100%), so the stage takes --cw: a wider
  * column must not grow the card past the screen's height. */
@@ -354,39 +246,163 @@ button.cdx-launch-step-head__count { text-decoration: underline; text-decoration
 .cdx-launch-card .mdx-card3d__halo { display: none !important; }
 .cdx-create-preview__note { font-size: var(--text-caption); line-height: 16px; color: var(--color-placeholder); text-align: center; }
 
-/* ------------------------------------------------ the design picker (Card design step) and its library dialog */
+/* ------------------------------------------------ the ticket: every cost line, the total, the one primary */
+.cdx-launch-ticket__panel { display: grid; min-width: 0; }
+@media (min-width: 1024px) and (min-height: 700px) {
+  /* The demo ticket is shorter than the screen, so it sticks beside the form; the live one scrolls with the page. */
+  .cdx-launch-ticket:not([data-live]) { position: sticky; top: 0; align-self: start; }
+}
+.cdx-launch-demo { display: grid; min-width: 0; gap: 12px; }
+.cdx-launch-ticket__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cdx-launch-section { font-size: var(--text-lead); line-height: 24px; font-weight: 600; color: var(--color-ink); }
+
+/* Cost: line items right-aligned on one edge, the total under a hairline. */
+.cdx-launch-cost { display: grid; min-width: 0; }
+.cdx-launch-cost > div { display: flex; min-height: 32px; align-items: baseline; justify-content: space-between; gap: 12px; padding-block: 6px; }
+.cdx-launch-cost dt { min-width: 0; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
+.cdx-launch-cost dd { min-width: 0; flex: none; font-size: var(--text-body); line-height: 20px; color: var(--color-ink); text-align: right; font-variant-numeric: tabular-nums; }
+.cdx-launch-cost > div[data-total] { margin-top: 4px; border-top: 1px solid var(--color-hairline); padding-top: 10px; }
+.cdx-launch-cost > div[data-total] :is(dt, dd) { color: var(--color-ink); font-size: var(--text-lead); line-height: 24px; font-weight: 600; }
+.cdx-launch-cost > div[data-total] .mdx-unit { font-size: var(--text-body); font-weight: 500; }
+.cdx-launch-cost__plus { color: var(--color-slate); font-weight: 500; }
+.cdx-launch-ticket__note,
+.cdx-launch-rules { font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); text-wrap: pretty; }
+.cdx-launch-fee-note { font-size: var(--text-caption); line-height: 16px; color: var(--color-ink); text-wrap: pretty; }
+.cdx-launch-live-skeleton { height: 420px; border-radius: var(--radius-row); }
+
+/* Required to launch: three words on one row, each with its mark (a check, an empty ring, or after a press a warning:
+ * icon and colour together, never colour alone). */
+.cdx-launch-ready { display: grid; gap: 4px; }
+.cdx-launch-ready > ul { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.cdx-launch-ready li { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
+.cdx-launch-ready__mark { display: grid; width: 16px; height: 16px; flex: none; place-items: center; border: 1.5px solid var(--color-control-border); border-radius: var(--radius-pill); }
+.cdx-launch-ready li[data-state="done"] { color: var(--color-ink); }
+.cdx-launch-ready li[data-state="done"] .cdx-launch-ready__mark { border-color: var(--color-up-soft); background: var(--color-up-soft); color: var(--color-up); }
+.cdx-launch-ready li[data-state="missing"] { color: var(--color-down-hover); }
+.cdx-launch-ready li[data-state="missing"] .cdx-launch-ready__mark { border-color: var(--color-down-soft); background: var(--color-down-soft); }
+.cdx-launch-ready__status { font-size: var(--text-caption); line-height: 16px; color: var(--color-down-hover); }
+.cdx-launch-ready__status:empty { display: none; }
+
+/* The primary: in the ticket from 1024px; below that the page's action bar carries it. */
+.cdx-launch-go { display: grid; }
+@media (max-width: 1023.98px) {
+  .cdx-launch-go,
+  .cdx-launch .cdx-live-primary { display: none; }
+}
+.cdx-launch-go__short { display: none; }
+@media (max-width: 380px) {
+  .cdx-launch-bar .cdx-launch-go__long { display: none; }
+  .cdx-launch-bar .cdx-launch-go__short { display: inline; }
+}
+
+/* The action bar (phones and tablets): the total over its label at the left, the primary filling the rest. */
+.cdx-launch-bar__total { display: grid; flex: none; gap: 0; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+.cdx-launch-bar__total > span:last-child { color: var(--color-ink); font-size: var(--text-body); line-height: 20px; font-weight: 600; white-space: nowrap; }
+.cdx-launch-bar__total .cdx-launch-cost__plus { display: block; font-size: var(--text-caption); line-height: 16px; }
+.cdx-launch-bar--live > .mdx-btn { width: 100%; }
+
+/* ------------------------------------------------ landscape phones: height is what is short */
+@media (max-width: 1023.98px) and (max-height: 500px) {
+  .cdx-launch { gap: 12px; }
+  .cdx-launch-row { min-height: 52px; padding-block: 6px; }
+  .cdx-launch-row__face { width: 32px; }
+  .cdx-launch .cdx-launch-bar { min-height: 52px; padding-block: 4px; }
+}
+/* The shortest phones held sideways (568x320): the top bar steps aside so a field and the bar fit. */
+@media (min-width: 560px) and (max-width: 1023.98px) and (max-height: 360px) {
+  .cdx-viewport:has(.cdx-launch) .cdx-topbar { display: none; }
+}
+
+/* ------------------------------------------------ the design picker: the chosen design, suggestions, All designs */
 .cdx-design-picker { display: grid; min-width: 0; justify-items: start; gap: 0; }
 .cdx-design-picker > .mdx-label { margin-bottom: 8px; }
 .cdx-design-picker__help { margin-top: 8px; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); text-wrap: pretty; }
 .cdx-design-picker__browse { margin-top: 16px; }
 .cdx-design-picker .cdx-pair-badge { width: 100%; }
-.mdx-dialog:has(.cdx-design-browser) { height: min(720px, calc(var(--cdx-app-height, 100dvh) - 32px)); }
-.cdx-design-browser { display: flex; flex: 1; min-height: 0; flex-direction: column; gap: 16px; }
-.cdx-design-browser__chips { flex: none; margin-inline: -4px; padding: 4px; }
-.cdx-design-browser__filter { display: grid; flex: none; gap: 0; max-width: 360px; }
-.cdx-design-browser__grid {
-  display: grid;
-  flex: 1;
-  min-height: 0;
-  gap: 12px;
-  padding: 4px;
-  grid-template-columns: repeat(var(--design-columns, 1), minmax(0, 1fr));
-  grid-template-rows: repeat(var(--design-rows, 1), minmax(0, 1fr));
+.cdx-design-picker--inline { justify-items: stretch; container: launch-swatches / inline-size; }
+.cdx-design-picker__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.cdx-design-picker__head .mdx-label { margin: 0; }
+.cdx-design-picker__kept { font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+/* A fixed count of cells by width (4, 6 or 7, the last is All designs), so no empty track is left at the end; the
+ * suggestions past the count are not rendered for the eye or for focus. */
+.cdx-design-picker__swatches { --swatch-n: 4; display: grid; grid-template-columns: repeat(var(--swatch-n), minmax(0, 96px)); gap: 8px; }
+.cdx-design-picker__swatches > li { min-width: 0; }
+.cdx-design-picker__swatches > li:nth-child(n + 4):not(.cdx-design-picker__all) { display: none; }
+@container launch-swatches (min-width: 448px) {
+  .cdx-design-picker__swatches { --swatch-n: 6; }
+  .cdx-design-picker__swatches > li:nth-child(n + 4):not(.cdx-design-picker__all) { display: block; }
+  .cdx-design-picker__swatches > li:nth-child(n + 6):not(.cdx-design-picker__all) { display: none; }
 }
+@container launch-swatches (min-width: 524px) {
+  .cdx-design-picker__swatches { --swatch-n: 7; }
+  .cdx-design-picker__swatches > li:nth-child(n + 6):not(.cdx-design-picker__all) { display: block; }
+}
+.cdx-design-picker__swatch {
+  position: relative;
+  display: grid;
+  width: 100%;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-row);
+  color: var(--color-slate);
+  text-align: center;
+  transition: background-color var(--t-hover) ease, color var(--t-hover) ease, transform var(--t-press) var(--ease-out);
+}
+.cdx-design-picker__face { display: block; width: 100%; }
+.cdx-design-picker__face > .mdx-card { width: 100%; }
+/* Two lines at most ("Yu-Gi-Oh! Monster" and "Yu-Gi-Oh! Spell" must not read the same), the full name in the label. */
+.cdx-design-picker__name { display: -webkit-box; min-height: 32px; overflow: hidden; font-size: var(--text-caption); line-height: 16px; font-weight: 500; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; }
+.cdx-design-picker__swatch[aria-pressed="true"] { background: var(--color-nested); color: var(--color-ink); outline: 2px solid var(--color-ink); outline-offset: -2px; }
+.cdx-design-picker__swatch[aria-pressed="true"] .cdx-design-picker__name { font-weight: 600; }
+.cdx-design-picker__swatch:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; }
+.cdx-design-picker__swatch:active:not(:disabled) { transform: scale(0.96); }
+.cdx-design-picker__swatch:disabled { cursor: not-allowed; opacity: 0.5; }
+@media (hover: hover) and (pointer: fine) {
+  .cdx-design-picker__swatch:not([aria-pressed="true"]):hover:not(:disabled) { background: var(--color-track); color: var(--color-ink); }
+}
+/* All designs: a cell the size of a swatch, the card's shape in outline with a chevron. */
+.cdx-design-picker__more { align-content: start; color: var(--color-ink); }
+.cdx-design-picker__more-icon { display: grid; aspect-ratio: 63 / 88; width: 100%; place-items: center; border-radius: 6px; background: var(--color-nested); }
+.cdx-design-picker__more .cdx-design-picker__name { text-wrap: balance; }
+
+/* The library dialog: every design in the collection, in an auto-fill grid that grows in the dialog's scrolling body;
+ * the collection filter stays at the body's top. */
+.cdx-design-browser { display: grid; min-width: 0; gap: 12px; }
+.cdx-design-browser__filters {
+  position: sticky;
+  top: -4px;
+  z-index: 1;
+  display: grid;
+  gap: 8px;
+  margin: -4px -4px 0;
+  padding: 4px;
+  background: var(--color-surface);
+}
+.cdx-overlay--sheet .cdx-design-browser__filters { top: -16px; margin: -16px calc(var(--sheet-pad) * -1) 0; padding: 16px var(--sheet-pad) 8px; }
+.cdx-design-browser__chips { margin: 0; padding: 0; }
+.cdx-design-browser__collection { display: none; }
+/* Phones, and any screen held sideways: the six chips would take two rows of a short screen, so one select. */
+@media (max-width: 767.98px), (max-height: 500px) {
+  .cdx-design-browser__chips { display: none; }
+  .cdx-design-browser__collection { display: grid; }
+}
+.cdx-design-browser__collection .mdx-label,
+.cdx-design-browser__filter .mdx-label { margin-bottom: 4px; }
+.cdx-design-browser__filter { display: grid; gap: 0; max-width: 360px; }
+.cdx-design-browser__grid { padding: 4px 0; }
 .cdx-design-browser__choice {
   position: relative;
   display: flex;
+  width: 100%;
   min-width: 0;
-  min-height: 0;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 8px;
   padding: 12px 8px;
   border-radius: var(--radius-row);
   background: transparent;
   color: var(--color-ink);
-  container-type: size;
+  container-type: inline-size;
   transition: background-color var(--t-hover) ease;
 }
 .cdx-design-browser__choice[aria-pressed="true"] { background: var(--color-nested); outline: 2px solid var(--color-ink); outline-offset: -2px; }
@@ -395,33 +411,22 @@ button.cdx-launch-step-head__count { text-decoration: underline; text-decoration
 @media (hover: hover) and (pointer: fine) {
   .cdx-design-browser__choice:not([aria-pressed="true"]):hover:not(:disabled) { background: var(--color-track); }
 }
-.cdx-design-browser__art { flex: none; width: min(160px, 84cqw, calc((100cqh - 74px) * 0.715909)); }
+.cdx-design-browser__art { flex: none; width: min(160px, 84cqw); }
 .cdx-design-browser__art > .mdx-card { width: 100%; }
-.cdx-design-browser__choice > strong { display: block; flex: none; width: 100%; min-height: 2.6em; color: var(--color-ink); font-size: var(--text-caption); line-height: 16px; font-weight: 600; overflow-wrap: anywhere; text-align: center; }
-.cdx-design-browser__quote { flex: none; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); white-space: nowrap; }
+.cdx-design-browser__choice > strong { display: block; width: 100%; min-height: 2.6em; color: var(--color-ink); font-size: var(--text-caption); line-height: 16px; font-weight: 600; overflow-wrap: anywhere; text-align: center; }
+.cdx-design-browser__quote { font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); white-space: nowrap; }
 .cdx-design-browser__quote[data-bound="true"] { color: var(--color-ink); font-weight: 500; }
-.cdx-design-browser__meta { display: flex; flex: none; min-height: 20px; align-items: center; justify-content: center; gap: 6px; }
-.cdx-design-browser .cdx-page-controls { gap: 8px; }
+.cdx-design-browser__meta { display: flex; min-height: 20px; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; }
 @media (max-width: 560px) {
-  .cdx-design-browser { gap: 12px; }
-  .cdx-design-browser__grid { gap: 8px; }
   .cdx-design-browser__choice { padding: 8px 4px; }
 }
+/* Short screens held sideways: smaller art, so two rows of tiles show at once. */
 @media (max-height: 440px) {
-  .cdx-design-browser { gap: 8px; }
-  .cdx-design-browser__choice { gap: 4px; padding: 4px; }
-  .cdx-design-browser__art { width: min(100px, 70cqw, calc((100cqh - 68px) * 0.715909)); }
-}
-@media (min-width: 560px) and (max-height: 440px) {
-  .cdx-design-browser__choice { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: 1fr 1fr; align-items: center; gap: 4px 8px; padding: 8px; }
-  .cdx-design-browser__choice:only-child { grid-template-columns: auto auto; justify-content: center; }
-  .cdx-design-browser__art { grid-column: 1; grid-row: 1 / -1; width: min(72px, 36cqw, calc((100cqh - 12px) * 0.715909)); }
-  .cdx-design-browser__choice > strong { grid-column: 2; grid-row: 1; align-self: end; min-height: 0; text-align: left; }
-  .cdx-design-browser__meta { grid-column: 2; grid-row: 2; align-self: start; justify-content: flex-start; max-width: 100%; }
-  .cdx-design-browser__quote { white-space: normal; }
+  .cdx-design-browser__choice { gap: 4px; padding: 6px 4px; }
+  .cdx-design-browser__art { width: min(100px, 70cqw); }
 }
 
-/* ------------------------------------------------ the pair picker (Pair step; also the Designs pair tab) */
+/* ------------------------------------------------ the pair picker (Launch's Pair field; also the Designs pair tab) */
 .cdx-app .cdx-library .cdx-pair-picker { min-width: 0; }
 .cdx-pair-picker { display: grid; min-width: 0; gap: 0; }
 .cdx-pair-picker__head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 8px; }
@@ -514,12 +519,24 @@ button.cdx-launch-step-head__count { text-decoration: underline; text-decoration
 .cdx-design-picker .mdx-select--field,
 .cdx-live-panel .mdx-select--field { text-overflow: ellipsis; }
 
-/* ------------------------------------------------ the mainnet panel (live mode, the Review step) */
-.cdx-live-panel { display: grid; min-width: 0; gap: 24px; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
+
+/* Launch's inline picker: the mint and terms on one visible line that wraps, then what the quote does and does not do. */
+.cdx-pair-meta { display: grid; gap: 2px; margin-top: 8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+.cdx-pair-meta__links { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 12px; }
+.cdx-pair-meta .mdx-link { display: inline-flex; align-items: center; gap: 2px; font-size: var(--text-caption); font-variant-numeric: tabular-nums; }
+.cdx-pair-picker--inline .cdx-pair-change { margin-top: 8px; }
+.cdx-pair-picker--inline .cdx-pair-picker__hint { margin-top: 6px; }
+
+/* ------------------------------------------------ the mainnet panel (live mode: the ticket's body) */
+.cdx-live-panel { display: grid; min-width: 0; gap: 16px; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
 .cdx-live-panel p { overflow-wrap: anywhere; text-wrap: pretty; }
 .cdx-live-block { display: grid; min-width: 0; gap: 12px; }
 .cdx-live-callout { display: grid; justify-items: start; gap: 12px; padding: 12px 16px; border-radius: var(--radius-row); background: var(--color-nested); color: var(--color-ink); }
-.cdx-live-later { color: var(--color-slate); font-weight: 400; white-space: normal; max-width: 22ch; }
+/* A value that is not known yet (the exact network costs): words, not a figure, so the label and the words share the
+ * row and each wraps in its half. */
+.cdx-launch-cost > div:has(> .cdx-live-later) > dt { flex: 1 1 0; }
+.cdx-launch-cost dd.cdx-live-later { flex: 1 1 0; color: var(--color-slate); font-weight: 400; white-space: normal; }
+.cdx-launch-cost > div[data-total] dd.cdx-live-later { font-size: var(--text-body); line-height: 20px; font-weight: 400; color: var(--color-slate); }
 .cdx-live-slippage { display: flex; align-items: center; justify-content: space-between; gap: 16px; color: var(--color-ink); }
 .cdx-live-slippage > select { width: 104px; flex: none; }
 .cdx-live-check { position: relative; display: flex; min-height: var(--hit); align-items: flex-start; gap: 12px; padding-block: 4px; color: var(--color-ink); cursor: pointer; }
@@ -544,21 +561,32 @@ button.cdx-launch-step-head__count { text-decoration: underline; text-decoration
 .cdx-live-stage[data-state="todo"] .cdx-live-stage__title { color: var(--color-slate); }
 .cdx-live-stage__status { color: var(--color-slate); }
 .cdx-live-stage__links { display: flex; flex-wrap: wrap; gap: 4px 20px; margin-top: 6px; }
-/* Saved launches (recovery) behind one disclosure. */
-.cdx-live-saved { min-width: 0; border-top: 1px solid var(--color-hairline); }
-.cdx-live-saved > summary { display: flex; min-height: var(--hit); align-items: center; justify-content: space-between; gap: 12px; color: var(--color-ink); font-weight: 500; list-style: none; cursor: pointer; }
-.cdx-live-saved > summary::-webkit-details-marker { display: none; }
-.cdx-live-saved > summary > svg { flex: none; transition: transform var(--t-fast) var(--ease-in-out); }
-.cdx-live-saved[open] > summary > svg { transform: rotate(180deg); }
-.cdx-live-saved__body { display: grid; justify-items: start; gap: 12px; padding-bottom: 8px; }
+/* Saved launches, in the page: find or resume one, or the one line asking for the creator wallet. */
+.cdx-live-saved { justify-items: start; }
 .cdx-live-saved__list { display: grid; width: 100%; gap: 8px; }
 .cdx-live-saved__list .mdx-btn { justify-content: space-between; }
+.cdx-live-saved .mdx-empty--compact { width: 100%; }
+.cdx-live-discard { display: grid; justify-items: start; gap: 4px; }
+.cdx-live-subhead { font-size: var(--text-body); line-height: 20px; font-weight: 600; color: var(--color-ink); }
+.cdx-live-title { text-wrap: balance; }
+.cdx-live-net { font-size: var(--text-caption); line-height: 16px; font-weight: 500; color: var(--color-slate); }
+.cdx-live-next { font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+/* In the ticket the wallet preview is a quiet list in the ticket's caption size (the review dialog keeps its own). */
+.cdx-launch-ticket .cdx-live-wallet-notice { gap: 8px; }
+.cdx-launch-ticket .cdx-live-wallet-notice-title { font-size: var(--text-body); line-height: 20px; }
+.cdx-launch-ticket .cdx-live-wallet-notice-list { gap: 4px; }
+.cdx-launch-ticket .cdx-live-wallet-notice-list > li { font-size: var(--text-caption); line-height: 16px; }
+.cdx-launch-ticket .cdx-live-wallet-notice-list > li::before { top: 6px; }
+.cdx-launch-ticket .cdx-live-wallet-notice-safety { padding: 8px 12px; font-size: var(--text-caption); line-height: 16px; }
+.cdx-live-wallet-line { margin-top: -8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+.cdx-live-terms { gap: 8px; }
+.cdx-live-terms > p { font-size: var(--text-caption); line-height: 16px; }
 
 /* The guide (dialog or sheet). The wallet chooser is mintdex/wallet-connect.tsx, styled in overlays.css. */
 .cdx-live-guide { display: grid; gap: 12px; padding-left: 20px; list-style: decimal; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
 .cdx-live-guide li::marker { color: var(--color-ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 
-/* The wallet review dialog: three pages (Summary, What your wallet will show, Addresses), Continue on every one. */
+/* The wallet review dialog: one page (the costs, what your wallet will show, the addresses), Continue under it. */
 /* The dialog is a fixed-height deck: it takes the height the review needs (up to the screen), and the page region
  * is the one part that scrolls when a short screen cannot hold it, so nothing ever overlaps. */
 .mdx-dialog:has(.cdx-live-review-modal) { height: min(760px, calc(var(--cdx-app-height, 100dvh) - 32px)); }
@@ -570,17 +598,14 @@ button.cdx-launch-step-head__count { text-decoration: underline; text-decoration
 .cdx-live-review-actions { display: flex; flex-direction: row-reverse; gap: 8px; }
 .cdx-live-review-actions > .mdx-btn { flex: 1 1 0; width: auto; min-width: 0; }
 @media (max-width: 1023.98px) { .cdx-live-review-actions { flex-direction: column; } .cdx-live-review-actions > .mdx-btn { flex: none; width: 100%; } }
-.cdx-live-review-progress { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
-.cdx-live-review-progress > span:first-child { color: var(--color-ink); font-weight: 600; }
 .cdx-live-review-page { display: grid; align-content: start; gap: 12px; }
+.cdx-live-review-page .cdx-live-wallet-notice { margin-top: 4px; }
 .cdx-live-review-page:focus { outline: none; }
 .cdx-live-network { display: grid; gap: 2px; }
 .cdx-live-network strong { color: var(--color-ink); font-weight: 600; }
 .cdx-live-review > div[data-total] dd { font-weight: 600; }
 .cdx-live-review[data-stack] > div { display: grid; gap: 2px; }
 .cdx-live-review[data-stack] dd { text-align: left; flex: initial; }
-.cdx-live-review-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.cdx-live-review-nav > span { font-size: var(--text-caption); color: var(--color-slate); font-variant-numeric: tabular-nums; }
 
 /* "What your wallet will show" (LiveWalletNotice, unstyled hooks): a calm list, then the one safety line. */
 .cdx-live-wallet-notice { display: grid; gap: 12px; }
@@ -602,14 +627,12 @@ button.cdx-launch-step-head__count { text-decoration: underline; text-decoration
 .cdx-paged-message[data-kind="error"] > p { padding: 12px 16px; border-radius: var(--radius-row); background: var(--color-down-soft); color: var(--color-down-hover); }
 .cdx-paged-message[data-kind="status"] > p { color: var(--color-ink); }
 
-/* ------------------------------------------------ reduced motion and Calm: no scale on press, fades only */
-@media (prefers-reduced-motion: reduce) {
-  .cdx-launch-thumb:active { transform: none; }
-  .cdx-pair-matching__toggle > svg,
-  .cdx-pair-disclosure > summary > svg,
-  .cdx-live-saved > summary > svg { transition: none; }
-}
-:root[data-motion="calm"] .cdx-launch-thumb:active { transform: none; }
 
-/* Last, so no display rule above can show a hidden step. */
-.cdx-launch [hidden] { display: none; }
+/* ------------------------------------------------ reduced motion and Calm: no scale on press, colour changes only */
+@media (prefers-reduced-motion: reduce) {
+  .cdx-launch-row:active,
+  .cdx-design-picker__swatch:active:not(:disabled) { transform: none; }
+  .cdx-pair-matching__toggle > svg,
+  .cdx-pair-disclosure > summary > svg { transition: none; }
+}
+:root[data-motion="calm"] :is(.cdx-launch-row, .cdx-design-picker__swatch):active { transform: none; }
