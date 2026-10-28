@@ -92,7 +92,7 @@
 .cdx-launch-step-head .cdx-launch-start-over { flex:none; min-height:44px; padding-inline:4px; font-size:13px; white-space:nowrap; }
 @media (pointer: fine) { .cdx-launch-step-head .cdx-launch-start-over { min-height:40px; } }
 /* The in-page Start over check: a question and two answers on the form's paper, no extra panel. */
-.cdx-launch-reset { display:flex; flex:none; flex-wrap:wrap; align-items:center; gap:8px; padding-bottom:10px; border-bottom:1px solid var(--color-hairline); }
+.cdx-launch-reset { display:flex; flex:none; flex-wrap:wrap; align-items:center; gap:8px; padding:10px 12px; border-radius:var(--radius-row); background:var(--color-plinth); }
 .cdx-launch-reset > p { flex:1 1 100%; margin:0; font-size:13px; line-height:1.4; color:var(--color-ink); }
 .cdx-launch-reset > button { min-height:44px; padding-inline:12px; font-size:12px; }
 @media (pointer: fine) { .cdx-launch-reset > button { min-height:40px; } }

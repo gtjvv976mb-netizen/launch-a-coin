@@ -1,5 +1,5 @@
 /* The object leads. Collector paper and controls recede around the cards. */
-.cdx-app .mdx-rail { width:176px; padding:20px 14px 16px; border-right:1px solid #76623e; background:#28231d; box-shadow:none; }
+.cdx-app .mdx-rail { width:176px; padding:20px 16px 16px; border-right:1px solid #76623e; background:#28231d; box-shadow:none; }
 .cdx-app .mdx-rail .mdx-tab { min-height:46px; font-size:13px; }
 .cdx-app .mdx-rail .mdx-tab__tile { width:28px; height:28px; }
 .cdx-app .mdx-rail-pill { border-radius:9px; background:rgb(255 225 112 / .08); box-shadow:none; }
