@@ -1,0 +1,24 @@
+{
+  "composition": "Three back-facing cards in a fan, separate crown, no lettering. Actual 63:88 site template.",
+  "rendering": "Original full-resolution site WebPs embedded unchanged. Same fill behavior as GeneratedCardReverse.",
+  "sources": [
+    {
+      "position": "left",
+      "design": "yugioh-spell",
+      "path": "app/public/assets/carddex/higgsfield/yugioh-spell-back.webp",
+      "sha256": "a3005591cf30352191e825373b92bee39b47ba79f9400b28abdccdc4c71f9393"
+    },
+    {
+      "position": "right",
+      "design": "aurora",
+      "path": "app/public/assets/carddex/higgsfield/aurora-back.webp",
+      "sha256": "5f21dbdace6a36a7a46cf6ae344e22844c94822239fca098f7ec79fa0d9d41cf"
+    },
+    {
+      "position": "center",
+      "design": "regal",
+      "path": "app/public/assets/carddex/higgsfield/regal-back.webp",
+      "sha256": "3dd4519345bdf4e3956f8bf8dde14eba535e28be49dd901ccadc7e716a7b2c0d"
+    }
+  ]
+}

@@ -21,3 +21,7 @@ node brand/logo/export.mjs
 The exporter uses the installed `playwright-cli` and Chromium. Set `PLAYWRIGHT_CLI` and `PLAYWRIGHT_CONFIG` to override the executable and browser configuration when needed. It renders the native SVG directly and produces a light/dark proof at 32, 48, 64, 96 and 180px in `output/playwright/logo-fan-2026-10-28/logo-size-proof.png`. Inspect the proof after a master edit. No fonts, raster tracing, external requests or image-generation credits are required.
 
 The rejected paid Higgsfield concept remains in `archive/`. This replacement was authored as repository-native vector artwork without additional generation spend.
+
+## Downloadable logo using actual site designs
+
+The subsequent requested export is in [`site-backs/`](site-backs/README.md): the same fan/crown concept now uses the site's exact emerald vortex, crimson ruby and amethyst crescent reverse artwork. It includes a 2048px transparent PNG, a charcoal preview and a self-contained SVG with embedded original card images. The installed public logo assets above are separate. Reproduce this export with `node brand/logo/export-site-backs.mjs`.
