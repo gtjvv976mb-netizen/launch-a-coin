@@ -762,7 +762,7 @@ export function ChainLaunch() {
 
           <div className="mt-auto">
             <p className="mb-1 text-[13px] leading-[1.45] text-slate">
-              <TextLink to="/legal" search={{ tab: "terms" }}>
+              <TextLink to="/legal" hash="terms">
                 Content rules
               </TextLink>
               : {WORDS.contentRule}

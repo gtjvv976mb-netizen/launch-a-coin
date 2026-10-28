@@ -294,39 +294,52 @@ function Legal() {
   const docRef = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState<Section["id"]>("terms");
 
-  // The section whose heading has reached the top of the document view is the current one; at the very end, the last.
+  // The page itself scrolls (main#content, or the window when there is no app frame), so the jump nav follows
+  // that scroller: the section whose heading has reached the top of its view is current; at the very end, the last.
+  const scroller = useCallback((): HTMLElement | null => docRef.current?.closest<HTMLElement>("#content") ?? null, []);
   const update = useCallback(() => {
     const doc = docRef.current;
     if (!doc) return;
-    const top = doc.getBoundingClientRect().top;
+    const box = scroller();
+    const top = box ? box.getBoundingClientRect().top : 0;
     let next: Section["id"] = SECTIONS[0].id;
     for (const s of SECTIONS) {
       const el = document.getElementById(s.id);
       if (el && el.getBoundingClientRect().top - top <= 48) next = s.id;
     }
-    if (doc.scrollTop > 0 && doc.scrollTop + doc.clientHeight >= doc.scrollHeight - 2) next = SECTIONS[SECTIONS.length - 1].id;
+    const el = box ?? document.documentElement;
+    if (el.scrollTop > 0 && el.scrollTop + el.clientHeight >= el.scrollHeight - 2) next = SECTIONS[SECTIONS.length - 1].id;
     setCurrent(next);
-  }, []);
+  }, [scroller]);
 
-  // Land on the linked section: #token-risk, or an old ?tab=risks link.
+  // Land on the linked section: #token-risk, or an old ?tab=risks link. A later #hash change does the same.
   useEffect(() => {
-    const hash = decodeURIComponent(window.location.hash.slice(1));
-    const target = hash && document.getElementById(hash) ? hash : tab;
-    if (target && target !== "terms") document.getElementById(target)?.scrollIntoView({ block: "start" });
-    update();
+    const land = () => {
+      const hash = decodeURIComponent(window.location.hash.slice(1));
+      const target = hash && document.getElementById(hash) ? hash : tab;
+      if (target && target !== "terms") document.getElementById(target)?.scrollIntoView({ block: "start" });
+      update();
+    };
+    land();
+    // The router may restore or apply the hash scroll after this effect; read the position again once it has.
+    const raf = requestAnimationFrame(update);
+    window.addEventListener("hashchange", land);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("hashchange", land);
+    };
   }, [tab, update]);
 
   useEffect(() => {
-    const doc = docRef.current;
-    if (!doc) return;
+    const target: HTMLElement | Window = scroller() ?? window;
     // Four rect reads per scroll event: cheap enough to run directly, and it keeps working in a background tab.
-    doc.addEventListener("scroll", update, { passive: true });
+    target.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
     return () => {
-      doc.removeEventListener("scroll", update);
+      target.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
-  }, [update]);
+  }, [scroller, update]);
 
   function onNav(e: MouseEvent<HTMLAnchorElement>, id: Section["id"]) {
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;

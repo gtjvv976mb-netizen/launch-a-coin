@@ -377,6 +377,7 @@ export function TextLink({
   to,
   params,
   search,
+  hash,
   href,
   target,
   rel,
@@ -389,6 +390,7 @@ export function TextLink({
   to?: LinkProps["to"];
   params?: LinkProps["params"];
   search?: LinkProps["search"];
+  hash?: LinkProps["hash"];
   href?: string;
   target?: string;
   rel?: string;
@@ -405,6 +407,7 @@ export function TextLink({
         to={to}
         params={params}
         search={search}
+        hash={hash}
         onClick={onClick}
         className={cls}
         aria-label={ariaLabel}

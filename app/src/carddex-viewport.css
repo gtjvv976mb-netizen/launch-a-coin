@@ -70,17 +70,18 @@ body { overflow:clip; }
 .cdx-legal { gap:12px; }
 /* A Read page: keep the capped column centred on wide screens instead of leaving a dead strip on the right. */
 @media (min-width:1024px){ .cdx-app .cdx-legal { width:100%; max-width:760px; margin-inline:auto; } }
-/* One scrolling document under a jump nav that stays in view; the current section is underlined. */
+/* One document scrolled by the page (main#content) under a jump nav; the current section is underlined. */
 .cdx-legal__nav { flex:none; display:flex; flex-wrap:wrap; column-gap:20px; }
-.cdx-legal__nav a { display:inline-flex; align-items:center; min-height:44px; border-bottom:2px solid transparent; font-size:15px; font-weight:500; color:var(--color-slate); text-decoration:none; transition:color 160ms cubic-bezier(.22,1,.36,1), border-color 160ms cubic-bezier(.22,1,.36,1); }
+.cdx-legal__nav a { display:inline-flex; align-items:center; justify-content:center; min-width:44px; min-height:44px; border-bottom:2px solid transparent; font-size:15px; font-weight:500; color:var(--color-slate); text-decoration:none; transition:color 160ms cubic-bezier(.22,1,.36,1), border-color 160ms cubic-bezier(.22,1,.36,1); }
 .cdx-legal__nav a:hover { color:var(--color-ink); }
 .cdx-legal__nav a[aria-current] { color:var(--color-ink); font-weight:600; border-bottom-color:var(--color-neon); }
-.cdx-legal__doc { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:4px 8px 32px 2px; border-radius:var(--radius-row); }
+.cdx-legal__doc { padding:4px 8px 32px 2px; border-radius:var(--radius-row); }
 .cdx-legal__doc > section { max-width:65ch; }
 .cdx-legal__doc h2 { margin-top:32px; font-size:21px; font-weight:600; line-height:1.3; color:var(--color-ink); scroll-margin-top:8px; }
 .cdx-legal__doc h2:focus { outline:none; }
 .cdx-legal__doc h3 { margin-top:20px; font-size:16px; font-weight:600; line-height:1.35; color:var(--color-ink); scroll-margin-top:8px; }
-.cdx-legal__doc p, .cdx-legal__doc li { margin-top:6px; font-size:15px; line-height:1.6; color:var(--color-ink); }
+/* About 65 characters a line: Instrument Sans averages ~0.69ch a glyph, so 46ch, not 65ch. */
+.cdx-legal__doc p, .cdx-legal__doc li { max-width:46ch; margin-top:6px; font-size:15px; line-height:1.6; color:var(--color-ink); text-wrap:pretty; }
 .cdx-legal__summary { padding:4px 16px 16px; border-radius:var(--radius-row); background:var(--color-plinth); }
 .cdx-legal__doc .cdx-legal__summary h2 { margin-top:12px; font-size:17px; }
 .cdx-legal__summary ul { margin-top:4px; padding-left:20px; list-style:disc; }

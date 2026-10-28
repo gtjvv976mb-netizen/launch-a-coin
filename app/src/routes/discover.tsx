@@ -174,7 +174,7 @@ function Discover() {
                 Clear search
               </Button>
             ) : null}
-            <ButtonLink to="/launch">Launch a card</ButtonLink>
+            <ButtonLink to="/launch">Launch a coin</ButtonLink>
           </div>
         </div>
       )}

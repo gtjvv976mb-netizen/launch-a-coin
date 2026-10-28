@@ -567,7 +567,7 @@ function ReportDialog({
         <fieldset>
           <legend className="text-[15px] leading-[1.5] text-slate">
             What breaks the{" "}
-            <TextLink to="/legal" search={{ tab: "terms" }} onClick={() => onOpenChange(false)}>
+            <TextLink to="/legal" hash="terms" onClick={() => onOpenChange(false)}>
               content rules
             </TextLink>
             ?
