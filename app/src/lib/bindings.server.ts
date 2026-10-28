@@ -19,6 +19,8 @@ type AppEnv = {
   DB?: D1Database;
   STORAGE?: R2Bucket;
   ASSETS?: Fetcher;
+  // This Worker itself, for own-origin reads that a zone route cannot fetch() (Cloudflare for SaaS).
+  SELF?: Fetcher;
   KV?: KVNamespace;
   // The container's Durable Object — present only when "container" is set in
   // the manifest. Reach an instance with env.CONTAINER.getByName(id), then

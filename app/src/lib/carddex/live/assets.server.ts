@@ -2,7 +2,7 @@ import { bindings } from "../../bindings.server";
 import { imageSize } from "../../mintdex/server/art.server";
 import { db, one, stmt, UserError } from "../../mintdex/server/db.server";
 import { sha256 } from "./auth.server";
-import { requireLiveConfig } from "./config.server";
+import { publicOrigin, requireLiveConfig } from "./config.server";
 import type { LiveAsset, LiveAssets } from "./types";
 
 const EXT: Record<string, string> = {"image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "application/json": "json"};
@@ -28,13 +28,33 @@ export async function putPublicAsset(wallet: string, bytes: Uint8Array, mimeType
   ]);
   return {sha256: hash, url: assetUrl(hash, mimeType), mimeType, bytes: bytes.length};
 }
+/** Behind Cloudflare for SaaS this Worker runs on a zone route, and a routed Worker cannot fetch() its own zone.
+ * Static files come straight from ASSETS, Worker-served paths (/m/, /api/live/assets/) through the SELF service
+ * binding; plain fetch only where neither binding exists (local dev). */
+export function fetchOwnOrigin(url: string, init: RequestInit): Promise<Response> {
+  const {ASSETS, SELF} = bindings();
+  if (ASSETS && new URL(url).pathname.startsWith("/assets/")) return ASSETS.fetch(url, init as never) as unknown as Promise<Response>;
+  if (SELF) return SELF.fetch(url, init as never) as unknown as Promise<Response>;
+  return fetch(url, init);
+}
+/** Opt-in production probe (/api/live/health?self=1) that both own-origin paths answer before a DNS cutover. */
+export async function selfCheck(): Promise<Response> {
+  const origin = publicOrigin(bindings().CARDDEX_PUBLIC_ORIGIN);
+  if (!origin) return Response.json({ok: false, reason: "no public origin"}, {status: 503, headers: {"cache-control": "no-store"}});
+  const probe = async (path: string) => {
+    try { const r = await fetchOwnOrigin(`${origin}${path}`, {redirect: "manual", signal: AbortSignal.timeout(8_000)}); await r.arrayBuffer(); return r.status; }
+    catch { return 0; }
+  };
+  const [assets, worker] = await Promise.all([probe("/assets/brand/carddex.svg"), probe("/robots.txt")]);
+  return Response.json({ok: assets === 200 && worker === 200, self: Boolean(bindings().SELF), assets, worker}, {headers: {"cache-control": "no-store"}});
+}
 export async function fetchPublicBytes(url: string, maxBytes = MAX_BYTES): Promise<Uint8Array> {
   const {origin} = requireLiveConfig();
   const parsed = new URL(url);
   if (parsed.origin !== origin || parsed.search || parsed.hash || parsed.username || parsed.password) throw new UserError("Public launch assets must use the configured Launch a Card origin.");
   // Workers rejects redirect:"error" before sending a request. Manual mode keeps
   // this same-origin check intact; every 3xx fails the !ok check below.
-  const response = await fetch(url, {redirect: "manual", signal: AbortSignal.timeout(15_000), headers: {accept: "image/png,image/webp,image/jpeg,application/json"}});
+  const response = await fetchOwnOrigin(url, {redirect: "manual", signal: AbortSignal.timeout(15_000), headers: {accept: "image/png,image/webp,image/jpeg,application/json"}});
   if (!response.ok || Number(response.headers.get("content-length") ?? 0) > maxBytes) throw new UserError("A public launch asset is not reachable or exceeds the size limit.");
   const bytes = new Uint8Array(await response.arrayBuffer());
   if (bytes.length > maxBytes) throw new UserError("A public launch asset exceeds the size limit.");
