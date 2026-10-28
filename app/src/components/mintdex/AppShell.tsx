@@ -1118,9 +1118,10 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
             scroll horizontally while it does. Bleeds into the padding stay visible. */}
         <main
           id="content"
+          data-scroll-restoration-id="content"
           tabIndex={-1}
           aria-busy={pending || undefined}
-          className="cdx-viewport-main mdx-main mdx-scroll min-h-0 flex-1 p-4 pb-[calc(80px_+_env(safe-area-inset-bottom))] [--main-pad:16px] max-lg:overflow-x-clip lg:overflow-x-hidden lg:overflow-y-auto lg:p-6 lg:[--main-pad:24px] short:p-4 short:[--main-pad:16px] fit:overflow-clip">
+          className="cdx-viewport-main mdx-main mdx-scroll min-h-0 flex-1 p-4 pb-[calc(80px_+_env(safe-area-inset-bottom))] [--main-pad:16px] max-lg:overflow-x-clip lg:overflow-x-hidden lg:overflow-y-auto lg:p-6 lg:[--main-pad:24px] short:p-4 short:[--main-pad:16px]">
           {children}
         </main>
         <MobileTabs pending={pending} />

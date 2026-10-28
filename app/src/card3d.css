@@ -2699,8 +2699,9 @@
 .mdx-v3dbtn {
   position: absolute;
   z-index: 6;
-  top: 8px;
-  right: 8px;
+  /* On the card's corner, outside its face: the edition mark (1/1) sits just inside the top right corner. */
+  top: -10px;
+  right: -10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2752,8 +2753,8 @@
     opacity: 0.94;
     width: 32px;
     height: 32px;
-    top: 6px;
-    right: 6px;
+    top: -8px;
+    right: -8px;
   }
 }
 /* Keep the compact rotate glyph clear of the artwork while giving touch a 44px target. */
