@@ -2,7 +2,7 @@ import { useId, useRef } from "react";
 import { getCardDesign } from "../../lib/carddex/designs";
 import { generatedCardAssets } from "../../lib/carddex/generated-assets";
 import { CANONICAL_CARD_LAYOUT } from "../../lib/carddex/card-template";
-import { generatedSkinSource, useReadyImage } from "./GeneratedCardArt";
+import { generatedSkinSource, phoneCopy, useDeferredPlate, useReadyImage } from "./GeneratedCardArt";
 import { defaultQuoteForDesign, getPairAsset } from "../../lib/carddex/pairs";
 
 type Box = { x:number; y:number; w:number; h:number };
@@ -23,16 +23,25 @@ function BorderSlice({source,from,to,sourceInset,targetInset}:{source:string;fro
   return <>{[0,1,2].flatMap(y=>[0,1,2].filter(x=>x!==1||y!==1).map(x=><svg key={`${x}-${y}`} x={tx[x]*1000} y={ty[y]*1000} width={(tx[x+1]-tx[x])*1000} height={(ty[y+1]-ty[y])*1000} viewBox={`${sx[x]*1000} ${sy[y]*1000} ${(sx[x+1]-sx[x])*1000} ${(sy[y+1]-sy[y])*1000}`} preserveAspectRatio="none" overflow="hidden"><use href={`#${source}`} /></svg>))}</>;
 }
 
+const stagedIdle=()=>true;
+
 /** Untouched Higgsfield pixels decorate the same permanent print grid in browser and exported NFTs. */
-export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,eager=false,sizes}:{cardTemplate:string;quoteAssetKey?:string;priority?:boolean;eager?:boolean;sizes?:string}) {
+export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,eager=false,lite=false,sizes}:{cardTemplate:string;quoteAssetKey?:string;priority?:boolean;eager?:boolean;lite?:boolean;sizes?:string}) {
   const id=useId().replaceAll(":", "");
   const assets=generatedCardAssets(cardTemplate);
   const imageRef=useRef<HTMLImageElement>(null);
   const image=useReadyImage(imageRef,assets.front ?? null);
+  const box=useRef<HTMLDivElement>(null);
+  // A staged slot (eager: a neighbour the card turns to next) and a lite miniature (the blurred neighbours beside
+  // the Home card) wait for the first touch or turn, or load plus idle (PERF-1), and phones take their 320px copy;
+  // the shown face and other lazy cards load as before.
+  const staged=(eager||lite)&&!priority;
+  const wanted=useDeferredPlate(box,!staged,stagedIdle)||!staged;
+  const small=staged&&!!assets.front320&&phoneCopy();
   const ready=image.ready && !!image.decodedSource && !!generatedSkinSource(cardTemplate);
   const quote=quoteAssetKey?getPairAsset(quoteAssetKey):defaultQuoteForDesign(cardTemplate);
-  return <div className="cdx-canonical-skin" data-market-finish={quote.kind} data-card-skin-ready={ready?"":undefined} data-card-skin-source={ready?cardTemplate:undefined} aria-hidden>
-    {assets.front?<img ref={imageRef} className="cdx-canonical-skin__loader" src={assets.front} srcSet={assets.front320?`${assets.front320} 320w, ${assets.front} 1260w`:undefined} sizes={sizes??(priority||eager?"300px":"auto, 300px")} alt="" draggable={false} loading={priority||eager?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":eager?"low":undefined} onLoad={image.onLoad} onError={image.onError} />:null}
+  return <div ref={box} className="cdx-canonical-skin" data-market-finish={quote.kind} data-card-skin-ready={ready?"":undefined} data-card-skin-source={ready?cardTemplate:undefined} aria-hidden>
+    {assets.front&&wanted?<img ref={imageRef} className="cdx-canonical-skin__loader" src={small?assets.front320:assets.front} srcSet={assets.front320&&!small?`${assets.front320} 320w, ${assets.front} 1260w`:undefined} sizes={assets.front320&&!small?sizes??(priority||eager?"300px":"auto, 300px"):undefined} alt="" draggable={false} loading={priority||eager?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":eager?"low":undefined} onLoad={image.onLoad} onError={image.onError} />:null}
     <CanonicalSkinSurface cardTemplate={cardTemplate} quoteAssetKey={quoteAssetKey} sourceUri={ready?image.decodedSource:undefined} id={id} />
   </div>;
 }

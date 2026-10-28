@@ -33,7 +33,7 @@ export const Route = createFileRoute("/portfolio")({
   head: () => pageHead({
     path: "/portfolio",
     title: "Your collection | Launch a Card",
-    description: "Your tokens, your one-of-one NFT cards and your quote balances on Launch a Card.",
+    description: "Your coins, your one-of-one NFT cards and your quote balances on Launch a Card.",
     noindex: NOINDEX_PORTFOLIO,
   }),
   component: Portfolio,
@@ -120,11 +120,11 @@ function Collection({ me }: { me: NonNullable<Me> }) {
         <div className="min-w-0"><dt className="mdx-micro truncate">NFT cards</dt><dd className="mt-1"><Num size="lg">{data?.deeds.length ?? 0}</Num></dd></div>
       </dl>
       <div className="flex flex-none items-center justify-between gap-4">
-        <Tabs panels idBase={tabsId} label="Portfolio sections" value={view} onChange={(next) => void navigate({ search: { tab: next === "cards" ? "cards" : next === "balances" ? "balances" : undefined }, replace: true, resetScroll: false })} options={[{ value: "coins", label: "Tokens", count: data?.holdings.length }, { value: "cards", label: "NFT cards", count: data?.deeds.length }, {value:"balances",label:"Balances"}]} />
+        <Tabs panels idBase={tabsId} label="Portfolio sections" value={view} onChange={(next) => void navigate({ search: { tab: next === "cards" ? "cards" : next === "balances" ? "balances" : undefined }, replace: true, resetScroll: false })} options={[{ value: "coins", label: "Coins", count: data?.holdings.length }, { value: "cards", label: "NFT cards", count: data?.deeds.length }, {value:"balances",label:"Balances"}]} />
 
       </div>
       <div ref={grid.ref} {...tabPanelProps(tabsId, view)} className="cdx-portfolio__rows" style={{"--page-columns":grid.columns,"--page-rows":grid.rows} as CSSProperties}>
-        {!data ? <div className="grid gap-3" aria-busy="true" aria-label="Loading your collection">{[0, 1, 2].map((n) => <Skeleton key={n} className="h-20 w-full rounded-panel" />)}</div> : view === "balances" ? <dl className="cdx-balance-grid" aria-label="Demo quote balances">{balances.slice(from,from+perPage).map(([key,value])=><div key={key}><dt>{getPairAsset(key).symbol}</dt><dd>{quoteAtoms(value,key,true)}</dd><span className="text-[12px] text-slate">Held value: {quoteAtoms(data.totals.holdingsValueByQuote[key]??0,key,true)}</span></div>)}</dl> : view === "cards" ? data.deeds.length ? <Cards rows={data.deeds.slice(from, from + perPage)} /> : <EmptyState title="Your first card awaits" body="Launch a token and choose the premium design for its one-of-one card." action={<ButtonLink to="/launch">Launch a token</ButtonLink>} /> : data.holdings.length ? <Holdings rows={data.holdings.slice(from, from + perPage)} /> : <EmptyState title="No tokens yet" body="Discover a token to trade, or launch one of your own." action={<ButtonLink to="/discover">Discover tokens</ButtonLink>} />}
+        {!data ? <div className="grid gap-3" aria-busy="true" aria-label="Loading your collection">{[0, 1, 2].map((n) => <Skeleton key={n} className="h-20 w-full rounded-panel" />)}</div> : view === "balances" ? <dl className="cdx-balance-grid" aria-label="Demo quote balances">{balances.slice(from,from+perPage).map(([key,value])=><div key={key}><dt>{getPairAsset(key).symbol}</dt><dd>{quoteAtoms(value,key,true)}</dd><span className="text-[12px] text-slate">Held value: {quoteAtoms(data.totals.holdingsValueByQuote[key]??0,key,true)}</span></div>)}</dl> : view === "cards" ? data.deeds.length ? <Cards rows={data.deeds.slice(from, from + perPage)} /> : <EmptyState title="Your first card awaits" body="Launch a coin and choose the premium design for its one-of-one card." action={<ButtonLink to="/launch">Launch a coin</ButtonLink>} /> : data.holdings.length ? <Holdings rows={data.holdings.slice(from, from + perPage)} /> : <EmptyState title="No coins yet" body="Discover a coin to trade, or launch one of your own." action={<ButtonLink to="/discover">Discover coins</ButtonLink>} />}
       </div>
       <PageControls page={page} pages={pages} onPage={setPage} label={view==="balances" ? "Separate demo balances" : `${rows?.length ?? 0} ${view==="cards"?"cards":"coins"}`} />
     </PageFrame>
