@@ -20,7 +20,20 @@ export const BACK_SRCSET = "/assets/carddex-back.svg 900w";
  * the img loaded, read back once it is in) and the seal's holo runs with the light. `face` puts it in front, with
  * no turn (CardBack hand).
  */
-export function BackFace({ sizes, eager = false, face = false, theme }: { sizes: string; eager?: boolean; face?: boolean; theme?: CardBackTheme }) {
+export function BackFace({
+  sizes,
+  eager = false,
+  eagerPlate = eager,
+  face = false,
+  theme,
+}: {
+  sizes: string;
+  eager?: boolean;
+  /** The design's generated back (GeneratedCardReverse): eager loads it at once instead of when it can be seen. */
+  eagerPlate?: boolean;
+  face?: boolean;
+  theme?: CardBackTheme;
+}) {
   const themed = getMemeIcon(theme?.memeIcon) ?? getEdition(theme?.edition);
   const ref = useRef<HTMLDivElement>(null);
   const img = useRef<HTMLImageElement>(null);
@@ -59,7 +72,7 @@ export function BackFace({ sizes, eager = false, face = false, theme }: { sizes:
       />
       {/* The design's template (card3d.css): the recolor and motif, all in this plane. */}
       <i className="mdx-card3d__back-tint" />
-      <GeneratedCardReverse cardTemplate={theme?.cardTemplate} eager={eager} sizes={sizes}>{themed ? <ThemeBack theme={theme} sizes={sizes} /> : <DesignBack cardTemplate={theme?.cardTemplate} />}</GeneratedCardReverse>
+      <GeneratedCardReverse cardTemplate={theme?.cardTemplate} eager={eagerPlate} sizes={sizes}>{themed ? <ThemeBack theme={theme} sizes={sizes} /> : <DesignBack cardTemplate={theme?.cardTemplate} />}</GeneratedCardReverse>
       <div className="mdx-card3d__back-lights">
         <div className="mdx-card3d__back-foil" />
         <div className="mdx-card3d__back-seal" />

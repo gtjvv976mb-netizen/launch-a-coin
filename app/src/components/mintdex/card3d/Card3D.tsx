@@ -328,8 +328,9 @@ export function Card3DView(p: Card3DProps & Card3DInternal) {
             {p.poseBack}
             {/* The slab: its cut edge (walls built after mount), the printed back plane, the face plane. */}
             <div ref={edgesRef} className="mdx-card3d__edges" aria-hidden />
-            {/* One shared 2KB SVG for every card, so loading it eagerly costs one cached request and keeps it off the LCP path. */}
-            {backOn ? <BackFace sizes={backSizes} eager theme={backTheme} /> : null}
+            {/* One shared 2KB SVG for every card, so loading it eagerly costs one cached request and keeps it off the LCP path.
+                The design's own back (up to ~190KB) still waits until the card can be seen or is turned. */}
+            {backOn ? <BackFace sizes={backSizes} eager eagerPlate={false} theme={backTheme} /> : null}
             <div ref={facesRef} className="mdx-card3d__faces">
               <FaceDepth.Provider value={depth}>
                 {list.map((f) => (
