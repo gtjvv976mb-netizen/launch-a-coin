@@ -256,6 +256,19 @@ export async function abandonLiveLaunchIntent(wallet: string, input: {intentId: 
   await guardedBatch([snapshotGuard(row), clearGuard(), planSetGuard(row.id, "token", plans), clearGuard(), stmt("UPDATE live_launch_intents SET status = 'abandoned', updated_at = ? WHERE id = ? AND status IN ('prepared','token_pending')", Date.now(), row.id)]);
   return {intent: publicIntent(await ownedIntent(wallet, row.id))};
 }
+// Copy for a transaction that was definitely not broadcast: this stage keeps its state and can be prepared again.
+function notSent(reason: string, saved: boolean) {
+  return `${reason} ${saved ? "Check this launch's saved transaction before preparing another." : "Prepare again for a fresh transaction."}`;
+}
+async function checkBeforeSend(plan: WalletTransactionPlan, transactionBase64: string, saved: boolean) {
+  try { return await sdk.checkSignedWalletTransaction({plan, transactionBase64}, {connection: connection()}); }
+  catch (error) {
+    if (error instanceof sdk.SignedTransactionNotSent) throw new UserError(notSent(error.reason === "expired"
+      ? "Your wallet approval expired before it could be sent. Nothing was sent or charged."
+      : `Solana's final check rejected this transaction, so it was not sent and nothing was charged (${error.message.replace(/^Signed transaction simulation failed: /, "").slice(0, 200)}).`, saved));
+    throw new UserError(notSent("The final mainnet check could not finish, so this transaction was not sent.", saved));
+  }
+}
 export async function submitLiveTransaction(wallet: string, input: {intentId: string; kind: "token" | "nft"; messageSha256: string; transactionBase64: string}) {
   const row = await ownedIntent(wallet, input.intentId);
   // Sending the coin transaction starts the coin; re-sending saved bytes and the card stage are recovery.
@@ -264,13 +277,18 @@ export async function submitLiveTransaction(wallet: string, input: {intentId: st
   const prepared = await one<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = ? AND message_sha256 = ?", row.id, input.kind, input.messageSha256);
   if (!prepared) throw new UserError("This transaction was not prepared for this launch.");
   const plan = JSON.parse(prepared.plan_json) as WalletTransactionPlan; checkPlan(row, plan);
-  const signed = await chain(async () => sdk.validateSignedWalletTransaction(plan, input.transactionBase64));
   const submittedSignature = input.kind === "token" ? row.token_signature : row.nft_signature;
+  let signed: ReturnType<typeof sdk.validateSignedWalletTransaction>;
+  try { signed = sdk.validateSignedWalletTransaction(plan, input.transactionBase64); }
+  catch (error) { throw new UserError(notSent(`The signed transaction differs from the one you reviewed, so it was not sent (${error instanceof Error ? error.message.slice(0, 200) : "invalid signature"}).`, !!submittedSignature)); }
   if (submittedSignature && submittedSignature !== signed.signature) throw new UserError("A different transaction for this stage is already pending. Recover it before authorizing another.");
   if (prepared.signature && (prepared.signature !== signed.signature || prepared.signed_transaction_base64 !== signed.transactionBase64)) throw new UserError("This prepared transaction already has different submitted bytes.");
+  // Read-only checks run before anything is saved. A definite failure (expired approval, failed signed simulation)
+  // leaves this stage as it was, so the creator can prepare it again with the same keys.
+  const checked = await checkBeforeSend(plan, signed.transactionBase64, !!submittedSignature);
   const now = Date.now();
-  // Store the deterministic signature and exact signed bytes before RPC submission. An uncertain network
-  // answer can only retry those bytes or recover that signature, never spend again with a new transaction.
+  // Store the deterministic signature and exact signed bytes immediately before broadcast (or once the chain already
+  // has them). An uncertain network answer can only retry those bytes or recover that signature, never spend again.
   await guardedBatch([
     input.kind === "token"
       ? stmt("INSERT INTO tx_guard (ok) SELECT CASE WHEN EXISTS (SELECT 1 FROM live_launch_intents WHERE id = ? AND (status = 'prepared' OR (status = 'token_pending' AND token_signature = ?))) THEN 1 ELSE 0 END", row.id, signed.signature)
@@ -284,7 +302,8 @@ export async function submitLiveTransaction(wallet: string, input: {intentId: st
       : stmt("UPDATE live_launch_intents SET nft_signature = ?, updated_at = ? WHERE id = ? AND status = 'nft_pending'", signed.signature, now, row.id),
   ]);
   try {
-    const result = await chain(() => sdk.sendSignedWalletTransaction({plan, transactionBase64: signed.transactionBase64}, {connection: connection()}));
+    if (checked.status === "landed") return {intent: publicIntent(await ownedIntent(wallet, row.id)), signature: signed.signature, submission: "submitted" as const};
+    const result = await sdk.broadcastSignedWalletTransaction({plan, transactionBase64: signed.transactionBase64}, {connection: connection()});
     if (result.signature !== signed.signature) throw new UserError("The provider returned another transaction signature.");
     return {intent: publicIntent(await ownedIntent(wallet, row.id)), signature: signed.signature,
       submission: result.status === "submission-uncertain" ? "unknown" as const : "submitted" as const,

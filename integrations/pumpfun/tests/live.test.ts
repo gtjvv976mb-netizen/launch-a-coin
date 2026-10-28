@@ -11,7 +11,7 @@ import { getAssetV1AccountDataSerializer as rawAssetSerializer } from "@metaplex
 import { getPluginRegistryV1AccountDataSerializer as rawRegistrySerializer } from "@metaplex-foundation/mpl-core/dist/src/generated/types/pluginRegistryV1AccountData.js";
 import { publicKey as umiKey } from "@metaplex-foundation/umi";
 import { MAINNET_GENESIS_HASH, PAIR_ASSETS } from "../src/index.ts";
-import { CORE_PROGRAM_ID, PACKET_LIMIT, assertNftMintReplaceable, assertTokenMintReplaceable, creatorNftInstructions, measureTokenTransaction, prepareCreatorNftTransaction, prepareTokenTransaction, recoverCreatorLaunch, sendSignedWalletTransaction, transactionBytes, validateSignedWalletTransaction, verifyCreatorNft, verifyTokenLaunch, type LiveConnection, type LiveLaunchInput, type WalletTransactionPlan } from "../src/live.ts";
+import { CORE_PROGRAM_ID, PACKET_LIMIT, SignedTransactionNotSent, assertNftMintReplaceable, broadcastSignedWalletTransaction, checkSignedWalletTransaction, assertTokenMintReplaceable, creatorNftInstructions, measureTokenTransaction, prepareCreatorNftTransaction, prepareTokenTransaction, recoverCreatorLaunch, sendSignedWalletTransaction, transactionBytes, validateSignedWalletTransaction, verifyCreatorNft, verifyTokenLaunch, type LiveConnection, type LiveLaunchInput, type WalletTransactionPlan } from "../src/live.ts";
 import fixture from "./fixtures/mainnet-pair-accounts-2026-10-28.json";
 import feeFixture from "./fixtures/mainnet-fee-account-2026-10-28.json";
 import art from "../src/design-assets.json";
@@ -365,5 +365,33 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     rpc.height(1000); rpc.simulationError({ InstructionError: [2, "InsufficientFunds"] });
     await expect(sendSignedWalletTransaction({ plan, transactionBase64: signed }, { connection: rpc.connection })).rejects.toThrow("Signed transaction simulation failed");
     expect(rpc.sent()).toBe(0);
+  });
+  test("pre-send checks name definite failures, recover landed signatures and never broadcast", async () => {
+    const input = defaultInput(), rpc = mockRpc(), plan = await prepareTokenTransaction(input, { connection: rpc.connection });
+    expect(plan.preparedBlockHeight).toBe(1000); expect(plan.lastValidBlockHeight - plan.preparedBlockHeight).toBe(200);
+    const tx = VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64")); tx.sign([creatorKey, tokenKey]);
+    const signed = { plan, transactionBase64: Buffer.from(tx.serialize()).toString("base64") }, signature = bs58.encode(tx.signatures[0]);
+    const rejected = async (reason: string) => {
+      const error = await checkSignedWalletTransaction(signed, { connection: rpc.connection }).catch((caught) => caught);
+      expect(error).toBeInstanceOf(SignedTransactionNotSent); expect(error.reason).toBe(reason);
+    };
+    expect(() => validateSignedWalletTransaction(plan, plan.transactionBase64)).toThrow("invalid signature");
+    await expect(checkSignedWalletTransaction({ plan, transactionBase64: plan.transactionBase64 }, { connection: rpc.connection })).rejects.toThrow("invalid signature");
+    rpc.height(1201); await rejected("expired");
+    rpc.height(1000); rpc.simulationError("BlockhashNotFound"); await rejected("expired");
+    rpc.simulationError({ InstructionError: [2, "InsufficientFunds"] }); await rejected("simulation");
+    rpc.simulationError("AlreadyProcessed");
+    expect(await checkSignedWalletTransaction(signed, { connection: rpc.connection })).toEqual({ status: "landed", signature, err: null });
+    rpc.simulationError(null);
+    expect(await checkSignedWalletTransaction(signed, { connection: rpc.connection })).toEqual({ status: "ready", signature, blocksLeft: 200 });
+    expect(rpc.sent()).toBe(0);
+    expect(await broadcastSignedWalletTransaction(signed, { connection: rpc.connection })).toEqual({ status: "submitted", signature });
+    expect(rpc.sent()).toBe(1);
+    rpc.remember(plan, signature); rpc.height(1300);
+    expect((await checkSignedWalletTransaction(signed, { connection: rpc.connection })).status).toBe("landed");
+    rpc.connection.getSignatureStatuses = async () => ({ context: { slot }, value: [{ slot, confirmations: null, err: { InstructionError: [2, "Custom"] }, confirmationStatus: "confirmed" }] }) as any;
+    expect(await checkSignedWalletTransaction(signed, { connection: rpc.connection })).toEqual({ status: "landed", signature, err: { InstructionError: [2, "Custom"] } });
+    await expect(sendSignedWalletTransaction(signed, { connection: rpc.connection })).rejects.toThrow("already failed");
+    expect(rpc.sent()).toBe(1);
   });
 });

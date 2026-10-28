@@ -126,10 +126,11 @@ export function transactionBytes(message: VersionedMessage): number {
 async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", instructions: TransactionInstruction[],
   minimumTokensOut: string, options: LiveOptions) {
   const id = identity(input), connection = options.connection;
-  const [latest, payerAccount, prioritySamples] = await Promise.all([
+  const [latest, payerAccount, prioritySamples, preparedBlockHeight] = await Promise.all([
     connection.getLatestBlockhash("confirmed"),
     connection.getAccountInfoAndContext(id.creator, "confirmed"),
     connection.getRecentPrioritizationFees({ lockedWritableAccounts: [id.creator] }),
+    connection.getBlockHeight("confirmed"),
   ]);
   const payerBefore = safeLamports(payerAccount.value?.lamports ?? 0, "Wallet balance");
   const fees = prioritySamples.map((sample) => sample.prioritizationFee).filter((fee) => Number.isSafeInteger(fee) && fee >= 0).sort((a, b) => a - b);
@@ -176,6 +177,8 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
     transactionBase64: Buffer.from(transaction.serialize()).toString("base64"),
     messageSha256: digest(transaction.message.serialize()),
     blockhash: latest.blockhash, lastValidBlockHeight: latest.lastValidBlockHeight,
+    // The signing window: this blockhash stops landing after lastValidBlockHeight - preparedBlockHeight more blocks.
+    preparedBlockHeight: Math.min(preparedBlockHeight, latest.lastValidBlockHeight),
     requiredSigners, feePayer: input.creator, bindingSha256: id.bindingSha256,
     verifiedSlot: Math.max(payerAccount.context.slot, simulation.context.slot),
     preparedAt: (options.now?.() ?? new Date()).toISOString(),
@@ -487,23 +490,43 @@ export function validateSignedWalletTransaction(plan: WalletTransactionPlan, tra
   return { signature, transactionBase64, messageSha256: plan.messageSha256 };
 }
 
+/** A definite pre-send failure. Nothing was broadcast, so the same stage can be prepared again. */
+export class SignedTransactionNotSent extends Error {
+  constructor(readonly reason: "expired" | "simulation", message: string) { super(message); this.name = "SignedTransactionNotSent"; }
+}
+type SignedInput = { plan: WalletTransactionPlan; transactionBase64: string };
 /**
- * Authorized server relay only. The caller MUST persist the deterministic
- * signature and these exact signed bytes before invoking this function.
- * Transport uncertainty returns the same signature; never replace or re-sign it.
+ * Read-only checks before any broadcast, in order: signatures against the plan, the signature status, blockhash
+ * expiry, then a sigVerify simulation. "landed" means the chain already knows this signature (keep and recover it,
+ * including a failed one). An expired blockhash or a failed simulation throws SignedTransactionNotSent.
  */
-export async function sendSignedWalletTransaction(input: { plan: WalletTransactionPlan; transactionBase64: string }, options: { connection: LiveConnection }) {
+export async function checkSignedWalletTransaction(input: SignedInput, options: { connection: LiveConnection }) {
   const validated = validateSignedWalletTransaction(input.plan, input.transactionBase64);
   const connection = options.connection;
   await assertMainnet(connection);
   const statuses = await connection.getSignatureStatuses([validated.signature], { searchTransactionHistory: true });
   const existing = statuses.value[0];
-  if (existing?.err) throw new Error(`The signed transaction already failed: ${JSON.stringify(existing.err)}`);
-  if (existing) return { status: "already-submitted" as const, signature: validated.signature };
-  if (await connection.getBlockHeight("confirmed") > input.plan.lastValidBlockHeight) throw new Error("The signed transaction blockhash expired; prepare a fresh transaction after recovery checks");
+  if (existing) return { status: "landed" as const, signature: validated.signature, err: existing.err ?? null };
+  const height = await connection.getBlockHeight("confirmed");
+  if (height > input.plan.lastValidBlockHeight) throw new SignedTransactionNotSent("expired", "The signed transaction blockhash expired before it was sent; prepare a fresh transaction");
   const transaction = VersionedTransaction.deserialize(Buffer.from(validated.transactionBase64, "base64"));
   const simulation = await connection.simulateTransaction(transaction, { sigVerify: true, replaceRecentBlockhash: false, commitment: "confirmed", minContextSlot: input.plan.verifiedSlot });
-  if (simulation.value.err) throw new Error(`Signed transaction simulation failed: ${JSON.stringify(simulation.value.err)}`);
+  const err = simulation.value.err;
+  // Someone else broadcast these exact bytes: recover them like any landed signature.
+  if (err === "AlreadyProcessed") return { status: "landed" as const, signature: validated.signature, err: null };
+  if (err === "BlockhashNotFound") throw new SignedTransactionNotSent("expired", "The signed transaction blockhash expired before it was sent; prepare a fresh transaction");
+  if (err) throw new SignedTransactionNotSent("simulation", `Signed transaction simulation failed: ${JSON.stringify(err)}`);
+  return { status: "ready" as const, signature: validated.signature, blocksLeft: input.plan.lastValidBlockHeight - height };
+}
+
+/**
+ * Authorized server relay only. Run checkSignedWalletTransaction first, then persist the deterministic signature
+ * and these exact signed bytes, then call this. Transport uncertainty returns the same signature; never replace or
+ * re-sign it.
+ */
+export async function broadcastSignedWalletTransaction(input: SignedInput, options: { connection: LiveConnection }) {
+  const validated = validateSignedWalletTransaction(input.plan, input.transactionBase64);
+  const connection = options.connection;
   try {
     const signature = await connection.sendRawTransaction(Buffer.from(validated.transactionBase64, "base64"), {
       skipPreflight: false, preflightCommitment: "confirmed", maxRetries: 3, minContextSlot: input.plan.verifiedSlot,
@@ -514,4 +537,14 @@ export async function sendSignedWalletTransaction(input: { plan: WalletTransacti
     return { status: "submission-uncertain" as const, signature: validated.signature,
       reason: error instanceof Error ? error.message : "RPC transport failed" };
   }
+}
+
+/** Checks, then broadcasts, for callers that keep no state between the two. */
+export async function sendSignedWalletTransaction(input: SignedInput, options: { connection: LiveConnection }) {
+  const checked = await checkSignedWalletTransaction(input, options);
+  if (checked.status === "landed") {
+    if (checked.err) throw new Error(`The signed transaction already failed: ${JSON.stringify(checked.err)}`);
+    return { status: "already-submitted" as const, signature: checked.signature };
+  }
+  return broadcastSignedWalletTransaction(input, options);
 }

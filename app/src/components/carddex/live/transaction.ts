@@ -51,6 +51,8 @@ export type TransactionPlan = {
   messageSha256: string;
   blockhash: string;
   lastValidBlockHeight: number;
+  /** Block height when prepared; lastValidBlockHeight minus this is the signing window in blocks. */
+  preparedBlockHeight?: number;
   requiredSigners: readonly string[];
   feePayer: string;
   bindingSha256: string;
