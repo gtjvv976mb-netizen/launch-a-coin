@@ -1,13 +1,13 @@
-import { useEffect, useId, useMemo, useState, type CSSProperties } from "react";
-import { CARD_DESIGNS, type CardDesign } from "../../lib/carddex/designs";
+import { useEffect, useId, useMemo, useState } from "react";
+import { CARD_DESIGNS, getCardDesign, type CardDesign } from "../../lib/carddex/designs";
 
 import { PAIR_ASSETS, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, recommendedMemeQuoteForDesign, type PairAssetKey } from "../../lib/carddex/pairs";
 import { MEME_PAIR_PRESETS } from "../../lib/carddex/design-pairings";
-import { Badge, Button, Chip, Modal } from "../mintdex/ui";
+import { AutoGrid, Badge, Button, Chip, Icon, Modal } from "../mintdex/ui";
 import type { CardData } from "../mintdex/MintCard";
 import { CanonicalCardFace } from "./CanonicalCardFace";
 import { PairBadge } from "./QuoteAssetPicker";
-import { PageControls, usePageCapacity } from "./Viewport";
+import { designRow, type DesignRow } from "./launch-form";
 
 const DESIGN_GROUPS = [
   ["all", "All designs"],
@@ -27,6 +27,15 @@ function inGroup(design: CardDesign, group: DesignGroup) {
     : group === "memes" ? !!recommendedMemeQuoteForDesign(design.key) : design.category === group);
 }
 
+/** The creator's live card in another design: the same details, that design's quote when it is bound to one. */
+function cardIn(base: CardData, design: CardDesign, quoteKey: string, asset = boundQuoteForDesign(design.key) ?? getPairAsset(quoteKey)): CardData {
+  return {
+    ...base, cardTemplate: design.key, level: design.materialLevel,
+    quoteAssetKey: asset.key, quoteMint: asset.mint,
+    ...(asset.key !== quoteKey ? { mcapUsd: null, mcapQuote: undefined, mcapLabel: "At launch" } : {}),
+  };
+}
+
 export function CardDesignPicker({
   value,
   onChange,
@@ -37,6 +46,8 @@ export function CardDesignPicker({
   previewCard,
   disabled = false,
   compact = false,
+  variant = "default",
+  seedReady = true,
 }: {
   value: string;
   onChange: (key: string) => void;
@@ -47,35 +58,28 @@ export function CardDesignPicker({
   previewCard?: CardData;
   disabled?: boolean;
   compact?: boolean;
+  /** "inline" (Launch): the chosen design and a short row of suggestions, one tap each, then "All designs" (the
+   * library dialog). "default": the select and the Browse button. */
+  variant?: "default" | "inline";
+  /** Inline only: the row is seeded once the page knows its starting design (the URL, then a saved draft). */
+  seedReady?: boolean;
 }) {
   const id = useId();
   const quoteKey = quoteAssetKey ?? defaultQuoteForDesign(value).key;
   const [open, setOpen] = useState(false);
   const [group, setGroup] = useState<DesignGroup>("all");
   const [memePairFilter, setMemePairFilter] = useState("all");
-  const [pageIndex, setPageIndex] = useState(0);
-  const [compactLandscape, setCompactLandscape] = useState(false);
-  useEffect(() => {
-    const media = window.matchMedia("(min-width:560px) and (max-height:440px)");
-    const update = () => setCompactLandscape(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
-  const capacity = usePageCapacity({ rowHeight: compactLandscape ? 100 : 210, minWidth: compactLandscape ? 200 : 116, maxColumns: 4, maxRows: 2 });
   const filterPair = group === "memes" ? memePairAssets.find(asset => asset.key === memePairFilter) : null;
   const designs = useMemo(() => CARD_DESIGNS.filter(design => inGroup(design, group) && (!filterPair || MEME_PAIR_PRESETS.some(preset => preset.design === design.key && preset.quote === filterPair.key))), [group, filterPair?.key]);
-  const pages = Math.max(1, Math.ceil(designs.length / capacity.count));
-  const page = Math.min(pageIndex, pages - 1);
-  const visibleDesigns = designs.slice(page * capacity.count, (page + 1) * capacity.count);
-  const visibleColumns = Math.min(capacity.columns, Math.max(1, visibleDesigns.length));
-  const visibleRows = Math.min(capacity.rows, Math.max(1, Math.ceil(visibleDesigns.length / visibleColumns)));
   useEffect(() => {
     if (disabled) setOpen(false);
   }, [disabled]);
+  // The suggestion row holds still while the creator picks inside it (launch-form.ts designRow).
+  const [row, setRow] = useState<DesignRow | null>(null);
   useEffect(() => {
-    if (open) setPageIndex(Math.floor(Math.max(0, designs.findIndex(design => design.key === value)) / capacity.count));
-  }, [open, value, designs, capacity.count]);
+    if (variant !== "inline" || !seedReady) return;
+    setRow(prev => designRow(prev, value, quoteKey));
+  }, [variant, seedReady, value, quoteKey]);
   const browse = () => {
     if (disabled) return;
     setGroup(boundQuoteForDesign(value)?.kind === "stock" ? "stocks" : recommendedMemeQuoteForDesign(value, quoteKey)?.key === quoteKey ? "memes" : "all");
@@ -88,10 +92,90 @@ export function CardDesignPicker({
     else onChange(key);
     setOpen(false);
   };
+  const pickGroup = (key: DesignGroup) => { if (disabled) return; setGroup(key); setMemePairFilter("all"); };
   const baseCard: CardData = previewCard ?? {
     name: "Your coin", ticker: ticker || "TICKER", image: "", level: 1,
     mcapUsd: null, mcapLabel: "At launch", holders: 0, dexNo: 0, ownerHandle: "you",
   };
+
+  // The library: your coin previewed in every design, in a dialog, so the draft never leaves the page. Every design
+  // in the chosen collection is laid out (the dialog body scrolls); the collection filter stays at its top.
+  const library = (
+    <Modal open={open && !disabled} onOpenChange={setOpen} title="Choose your card design" description="Your coin in each permanent design. Choosing one keeps your coin details and artwork." width={860}>
+      <div className="cdx-design-browser" data-vaul-no-drag>
+        <div className="cdx-design-browser__filters">
+          {/* Collections: wrapping chips from 768px, one select on phones (chips would run past two lines). */}
+          <div className="mdx-chiprow cdx-design-browser__chips" role="group" aria-label="Collection">
+            {DESIGN_GROUPS.map(([key, label]) => <Chip key={key} pressed={group === key} count={CARD_DESIGNS.filter(design => inGroup(design, key)).length} onClick={() => pickGroup(key)}>{label}</Chip>)}
+          </div>
+          <div className="cdx-design-browser__collection">
+            <label htmlFor={`${id}-group`} className="mdx-label">Collection</label>
+            <select id={`${id}-group`} className="mdx-select mdx-select--field" value={group} disabled={disabled} onChange={event => pickGroup(event.target.value as DesignGroup)}>
+              {DESIGN_GROUPS.map(([key, label]) => <option key={key} value={key}>{label} ({CARD_DESIGNS.filter(design => inGroup(design, key)).length})</option>)}
+            </select>
+          </div>
+          {group === "memes" ? <div className="cdx-design-browser__filter">
+            <label htmlFor={`${id}-pair`} className="mdx-label">Pair asset</label>
+            <select id={`${id}-pair`} className="mdx-select mdx-select--field" value={memePairFilter} disabled={disabled} onChange={event => setMemePairFilter(event.target.value)}>
+              <option value="all">All pairs</option>
+              {memePairAssets.map(asset => <option key={asset.key} value={asset.key}>{asset.symbol} · {asset.name}</option>)}
+            </select>
+          </div> : null}
+        </div>
+        <AutoGrid min="var(--tile-min-design)" className="cdx-design-browser__grid" label={`Choose a permanent card design, ${designs.length} ${designs.length === 1 ? "design" : "designs"}`}>
+          {designs.map(design => {
+            const bound = boundQuoteForDesign(design.key);
+            const preset = group === "memes" ? recommendedMemeQuoteForDesign(design.key, filterPair?.key ?? (design.key === value ? quoteKey : undefined)) : null;
+            const asset = bound ?? preset ?? getPairAsset(quoteKey);
+            const paired = bound ?? preset;
+            const current = value === design.key && (!paired || asset.key === quoteKey);
+            return <li key={design.key}>
+              <button type="button" className="cdx-design-browser__choice" disabled={disabled} aria-pressed={current} aria-label={`Choose ${design.name}${paired ? `, ${asset.symbol} pair` : ""}`} onClick={() => choose(design.key, preset?.key)}>
+                <div className="cdx-design-browser__art" aria-hidden><CanonicalCardFace card={cardIn(baseCard, design, quoteKey, asset)} design={design} compact lite sizes="160px" /></div>
+                <strong>{design.name}</strong>
+                <span className="cdx-design-browser__meta">
+                  <span className="cdx-design-browser__quote" data-bound={!!paired}>{paired ? `${asset.symbol} pair` : "Any quote"}</span>
+                  {current ? <Badge tone="ink">Current</Badge> : null}
+                </span>
+              </button>
+            </li>;
+          })}
+        </AutoGrid>
+      </div>
+    </Modal>
+  );
+
+  if (variant === "inline") {
+    const keys = (row ?? designRow(null, value, quoteKey)).keys;
+    return (
+      <div className={`cdx-design-picker cdx-design-picker--inline ${className}`}>
+        <div className="cdx-design-picker__head">
+          <span id={`${id}-label`} className="mdx-label">Card design</span>
+          <span className="cdx-design-picker__kept">Kept for good</span>
+        </div>
+        <ul className="cdx-design-picker__swatches" aria-labelledby={`${id}-label`}>
+          {keys.map(key => {
+            const design = getCardDesign(key);
+            const bound = boundQuoteForDesign(key);
+            return <li key={key}>
+              <button type="button" className="cdx-design-picker__swatch" aria-pressed={value === key} aria-label={`${design.name}, ${bound ? `${bound.symbol} pair` : "any pair"}`} disabled={disabled} onClick={() => { if (!disabled && value !== key) onChange(key); }}>
+                <span className="cdx-design-picker__face" aria-hidden><CanonicalCardFace card={cardIn(baseCard, design, quoteKey)} design={design} compact lite sizes="96px" /></span>
+                <span className="cdx-design-picker__name">{design.name}</span>
+              </button>
+            </li>;
+          })}
+          <li className="cdx-design-picker__all">
+            <button type="button" className="cdx-design-picker__swatch cdx-design-picker__more" disabled={disabled} aria-haspopup="dialog" onClick={browse}>
+              <span className="cdx-design-picker__more-icon" aria-hidden><Icon name="chevron-right" /></span>
+              <span className="cdx-design-picker__name">All {CARD_DESIGNS.length} designs</span>
+            </button>
+          </li>
+        </ul>
+        {library}
+      </div>
+    );
+  }
+
   return (
     <div className={`cdx-design-picker ${compact ? "cdx-design-picker--compact" : ""} ${className}`}>
       <label htmlFor={id} className="mdx-label">
@@ -125,56 +209,18 @@ export function CardDesignPicker({
       <p id={`${id}-help`} className="cdx-design-picker__help">
         Your coin keeps this design for good. Every design uses the same card layout{boundQuoteForDesign(value) ? `; this one is paired with ${boundQuoteForDesign(value)!.symbol}` : ""}.
       </p>
-      {/* The visual library: your coin previewed in every design, in a dialog, so the draft never leaves the page. */}
       <Button
         variant="outline"
         size="sm"
         disabled={disabled}
         onClick={browse}
         aria-haspopup="dialog"
-        aria-expanded={open}
         className="cdx-design-picker__browse"
       >
         Browse all {CARD_DESIGNS.length} designs
       </Button>
       {!compact ? <PairBadge quoteAssetKey={quoteKey} ticker={ticker || "YOUR COIN"} compact /> : null}
-      <Modal open={open && !disabled} onOpenChange={setOpen} title="Choose your card design" description="Your coin in each permanent design. Choosing one keeps your coin details and artwork." width={860}>
-        <div className="cdx-design-browser" data-vaul-no-drag>
-          {/* Collections as one row of filter chips (it scrolls sideways when it does not fit). */}
-          <div className="mdx-chiprow cdx-design-browser__chips" role="group" aria-label="Collection">
-            {DESIGN_GROUPS.map(([key, label]) => <Chip key={key} pressed={group === key} count={CARD_DESIGNS.filter(design => inGroup(design, key)).length} onClick={() => { if (disabled) return; setGroup(key); setMemePairFilter("all"); setPageIndex(0); }}>{label}</Chip>)}
-          </div>
-          {group === "memes" ? <div className="cdx-design-browser__filter">
-            <label htmlFor={`${id}-pair`} className="mdx-label">Pair asset</label>
-            <select id={`${id}-pair`} className="mdx-select mdx-select--field" value={memePairFilter} disabled={disabled} onChange={event => { setMemePairFilter(event.target.value); setPageIndex(0); }}>
-              <option value="all">All pairs</option>
-              {memePairAssets.map(asset => <option key={asset.key} value={asset.key}>{asset.symbol} · {asset.name}</option>)}
-            </select>
-          </div> : null}
-          <div ref={capacity.ref} className="cdx-design-browser__grid" aria-label="Choose a permanent card design" style={{ "--design-columns": visibleColumns, "--design-rows": visibleRows } as CSSProperties}>
-            {visibleDesigns.map(design => {
-              const bound = boundQuoteForDesign(design.key);
-              const preset = group === "memes" ? recommendedMemeQuoteForDesign(design.key, filterPair?.key ?? (design.key === value ? quoteKey : undefined)) : null;
-              const asset = bound ?? preset ?? getPairAsset(quoteKey);
-              const paired = bound ?? preset;
-              const card: CardData = {
-                ...baseCard, cardTemplate: design.key, level: design.materialLevel,
-                quoteAssetKey: asset.key, quoteMint: asset.mint,
-                ...(asset.key !== quoteKey ? { mcapUsd: null, mcapQuote: undefined, mcapLabel: "At launch" } : {}),
-              };
-              return <button key={design.key} type="button" className="cdx-design-browser__choice" disabled={disabled} aria-pressed={value === design.key && (!paired || asset.key === quoteKey)} aria-label={`Choose ${design.name}${paired ? `, ${asset.symbol} pair` : ""}`} onClick={() => choose(design.key, preset?.key)}>
-                <div className="cdx-design-browser__art" aria-hidden><CanonicalCardFace card={card} design={design} compact lite sizes="160px" /></div>
-                <strong>{design.name}</strong>
-                <span className="cdx-design-browser__meta">
-                  <span className="cdx-design-browser__quote" data-bound={!!paired}>{paired ? `${asset.symbol} pair` : "Any quote"}</span>
-                  {value === design.key && (!paired || asset.key === quoteKey) ? <Badge tone="ink">Current</Badge> : null}
-                </span>
-              </button>;
-            })}
-          </div>
-          <PageControls page={page} pages={pages} onPage={setPageIndex} label={`${designs.length} ${designs.length === 1 ? "design" : "designs"}`} />
-        </div>
-      </Modal>
+      {library}
     </div>
   );
 }
