@@ -55,7 +55,7 @@
   .mdx-v3dbtn::before {
     content: "";
     position: absolute;
-    inset: -3px;
+    inset: -5px;
     border-radius: inherit;
   }
 }

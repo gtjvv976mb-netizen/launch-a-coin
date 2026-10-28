@@ -556,7 +556,7 @@
    * keep an edge on the canvas and the panel. Round like the card it names. */
   .mdx-mini {
     border-radius: 1.5px;
-    outline: 1px solid rgb(220 235 255 / 0.28);
+    outline: 1px solid var(--image-outline);
     outline-offset: 0;
   }
   /* Card back (.mdx-cardback): moved to card3d.css. */
@@ -986,8 +986,10 @@
 
   /* Press: scale in 100ms, then spring back over 220ms on release. After the hover rules so it wins
    * while the pointer is still over the button. */
-  .mdx-btn:active:not(:disabled, [aria-disabled="true"]) {
-    transform: scale(0.97);
+  /* The :is() matches every button but carries a class's weight, so this ties the 0,4,0 hover lift above and,
+   * coming later, wins on mouse devices too (calm's !important transform: none still overrides it). */
+  .mdx-btn:is(.mdx-btn--primary, .mdx-btn--buy, .mdx-btn--sell, .mdx-btn--outline, *):active:not(:disabled, [aria-disabled="true"]) {
+    transform: scale(0.96);
     transition-duration: var(--t-press);
     transition-timing-function: var(--ease-room);
   }
@@ -1425,7 +1427,7 @@
     background-color: var(--color-tint);
   }
   .mdx-thumb {
-    outline: 1px solid rgb(200 225 255 / 0.12);
+    outline: 1px solid var(--image-outline);
     outline-offset: -1px;
   }
   /* The 6px live dot (the one green without a sign). It pings once on mount and on each real event. */

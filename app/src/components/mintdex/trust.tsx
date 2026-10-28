@@ -166,7 +166,7 @@ export function SimTag({ className = "" }: { className?: string }) {
     <span
       title={SIM_TAG_HINT}
       className={cx(
-        "inline-flex h-[18px] flex-none items-center rounded-pill bg-track px-1.5 align-[1px] text-[11px] font-semibold leading-none text-slate",
+        "inline-flex h-[18px] flex-none items-center rounded-pill bg-track px-1.5 align-[1px] text-[12px] font-semibold leading-none text-slate",
         className,
       )}
     >
@@ -309,6 +309,7 @@ export function ShareButton({
           align="end"
           sideOffset={6}
           collisionPadding={menuCollisionPadding()}
+          aria-label={label}
           className="mdx-menu mdx-pop z-50 flex w-[220px] flex-col outline-none"
         >
           {manual ? (

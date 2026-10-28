@@ -1073,6 +1073,27 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
     };
   }, []);
 
+  // While a modal dialog is open (the demo, guide, 3D, Inspect or account dialog, portaled outside this root), the
+  // page behind it is inert: Radix's aria-hidden skips live regions and their ancestors, so the activity log and its
+  // links stayed reachable. Popovers and menus are not modal (no aria-modal) and leave the page alone. The flag
+  // drops as soon as the dialog reports data-state="closed", before Radix hands focus back to the opener.
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || typeof MutationObserver === "undefined") return;
+    const sync = () => {
+      const open = !!document.querySelector('[aria-modal="true"][data-state="open"]');
+      if (open !== root.inert) root.inert = open;
+    };
+    const mo = new MutationObserver(sync);
+    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-state", "aria-modal"] });
+    sync();
+    return () => {
+      mo.disconnect();
+      root.inert = false;
+    };
+  }, []);
+
   // "/" focuses the rail search from anywhere (not while typing in a field or inside a dialog).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -1089,7 +1110,7 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
 
   return (
     // relative isolate: the sky (L9) sits behind every page on the wall, above this root's own background.
-    <div data-screen={path === "/" ? "home" : path.split("/")[1]} className="cdx-app cdx-viewport relative isolate flex min-h-dvh bg-wall text-ink lg:h-dvh lg:overflow-hidden">
+    <div ref={rootRef} data-screen={path === "/" ? "home" : path.split("/")[1]} className="cdx-app cdx-viewport relative isolate flex min-h-dvh bg-wall text-ink lg:h-dvh lg:overflow-hidden">
       <Sky />
       {/* First stop for keyboard users (P1-24): skips the rail's search, six tabs and wallet. */}
       <a

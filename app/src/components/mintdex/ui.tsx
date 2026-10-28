@@ -2267,6 +2267,7 @@ function DialogModal({ open, onOpenChange, title, description, children, width =
       <Dialog.Portal>
         <Dialog.Overlay className="mdx-overlay fixed inset-0 z-50 bg-[var(--overlay)]" />
         <Dialog.Content
+          aria-modal="true"
           className="mdx-dialog fixed left-1/2 top-1/2 z-50 flex w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 flex-col rounded-aside bg-plinth p-6 text-ink shadow-modal outline-none max-lg:rounded-panel"
           style={{ maxWidth: width }}
           onOpenAutoFocus={() => {
@@ -2291,9 +2292,10 @@ function DialogModal({ open, onOpenChange, title, description, children, width =
             <Dialog.Title className="pt-1 text-[18px] font-semibold leading-[1.3] tracking-[-0.01em] text-ink">
               {title}
             </Dialog.Title>
-            {/* 32px circle on desktop, 44px on phones (backlog P1-25); the negative margins keep the glyph put. */}
+            {/* 40px circle under a fine pointer, 44px on phones and touch screens (backlog P1-25); the negative margins
+                keep the glyph put. Only the fill and ink fade: the focus ring never transitions. */}
             <Dialog.Close
-              className="-mr-2 -mt-1 grid h-8 w-8 flex-none place-items-center rounded-pill text-ink transition-colors duration-(--t-fast) ease-room hover:bg-track max-lg:-mr-3.5 max-lg:-mt-2.5 max-lg:h-11 max-lg:w-11"
+              className="-mr-3 -mt-2 grid h-10 w-10 flex-none place-items-center rounded-pill text-ink transition-[background-color,color] duration-(--t-fast) ease-room hover:bg-track pointer-coarse:-mr-3.5 pointer-coarse:-mt-2.5 pointer-coarse:h-11 pointer-coarse:w-11 max-lg:-mr-3.5 max-lg:-mt-2.5 max-lg:h-11 max-lg:w-11"
               aria-label="Close"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden>
