@@ -11,7 +11,7 @@ import { getAssetV1AccountDataSerializer as rawAssetSerializer } from "@metaplex
 import { getPluginRegistryV1AccountDataSerializer as rawRegistrySerializer } from "@metaplex-foundation/mpl-core/dist/src/generated/types/pluginRegistryV1AccountData.js";
 import { publicKey as umiKey } from "@metaplex-foundation/umi";
 import { MAINNET_GENESIS_HASH, PAIR_ASSETS } from "../src/index.ts";
-import { CORE_PROGRAM_ID, assertNftMintReplaceable, assertTokenMintReplaceable, creatorNftInstructions, prepareCreatorNftTransaction, prepareTokenTransaction, recoverCreatorLaunch, sendSignedWalletTransaction, validateSignedWalletTransaction, verifyCreatorNft, verifyTokenLaunch, type LiveConnection, type LiveLaunchInput, type WalletTransactionPlan } from "../src/live.ts";
+import { CORE_PROGRAM_ID, PACKET_LIMIT, assertNftMintReplaceable, assertTokenMintReplaceable, creatorNftInstructions, measureTokenTransaction, prepareCreatorNftTransaction, prepareTokenTransaction, recoverCreatorLaunch, sendSignedWalletTransaction, transactionBytes, validateSignedWalletTransaction, verifyCreatorNft, verifyTokenLaunch, type LiveConnection, type LiveLaunchInput, type WalletTransactionPlan } from "../src/live.ts";
 import fixture from "./fixtures/mainnet-pair-accounts-2026-10-28.json";
 import feeFixture from "./fixtures/mainnet-fee-account-2026-10-28.json";
 import art from "../src/design-assets.json";
@@ -180,6 +180,62 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     rpc.addQuoteBalance(input, 1_000_000n);
     await expect(prepareTokenTransaction(input, { connection: rpc.connection })).rejects.toThrow("1232-byte packet limit");
     expect(rpc.sent()).toBe(0);
+  });
+
+  describe("initial-buy size preflight", () => {
+    // Every quote works with this finish, so each case isolates the quote, name and symbol.
+    const sized = (quoteKey: string, name = "Collector", symbol = "COLLECT", initialBuyQuoteBaseUnits = "100000"): LiveLaunchInput => {
+      const input = defaultInput();
+      return { ...input, quoteKey: quoteKey as LiveLaunchInput["quoteKey"], name, symbol, initialBuyQuoteBaseUnits,
+        card: { ...input.card, designKey: "obsidian-archive", frontSha256: art["obsidian-archive"].front.sha256, backSha256: art["obsidian-archive"].back.sha256 } };
+    };
+    const measure = (input: LiveLaunchInput, rpc = mockRpc()) => measureTokenTransaction({ creator: input.creator, name: input.name, symbol: input.symbol, tokenMetadataUri: input.tokenMetadataUri, quoteKey: input.quoteKey }, { connection: rpc.connection });
+    const wire = (plan: WalletTransactionPlan) => Buffer.from(plan.transactionBase64, "base64").length;
+    function seedBuybackAta(rpc: ReturnType<typeof mockRpc>, quoteKey: string) {
+      const global = PUMP_SDK.decodeGlobal(rpc.accounts.get(GLOBAL_PDA.toBase58())!);
+      const recipient = global.buybackFeeRecipients.find((key) => !key.equals(PublicKey.default))!;
+      const quote = PAIR_ASSETS.find((asset) => asset.key === quoteKey)!;
+      const data = Buffer.alloc(165);
+      AccountLayout.encode({ mint: new PublicKey(quote.mint), owner: recipient, amount: 0n, delegateOption: 0, delegate: PublicKey.default,
+        state: AccountState.Initialized, isNativeOption: 0, isNative: 0n, delegatedAmount: 0n, closeAuthorityOption: 0, closeAuthority: PublicKey.default }, data);
+      rpc.accounts.set(getAssociatedTokenAddressSync(new PublicKey(quote.mint), recipient, true, new PublicKey(quote.tokenProgram)).toBase58(), info(new PublicKey(quote.tokenProgram), data));
+    }
+    test("byte count matches the serialized wire size of prepared plans", async () => {
+      for (const input of [sized("sol"), sized("sol", "Collector", "COLLECT", "0"), defaultInput()]) {
+        const plan = await prepareTokenTransaction(input, { connection: mockRpc().connection });
+        expect(transactionBytes(VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64")).message)).toBe(wire(plan));
+      }
+    });
+    test("SOL with a short name: the buy fits, exactly as prepare builds it", async () => {
+      const input = sized("sol"), size = await measure(input);
+      const withBuy = await prepareTokenTransaction(input, { connection: mockRpc().connection });
+      const withoutBuy = await prepareTokenTransaction({ ...input, initialBuyQuoteBaseUnits: "0" }, { connection: mockRpc().connection });
+      expect(size.limit).toBe(PACKET_LIMIT);
+      expect(size.buyBytes).toBe(wire(withBuy)); expect(size.createBytes).toBe(wire(withoutBuy));
+      expect(size.buyBytes).toBeLessThanOrEqual(PACKET_LIMIT);
+    });
+    test("SOL with a 32-byte name and 13-character symbol: the buy does not fit, the coin alone does", async () => {
+      const input = sized("sol", "N".repeat(32), "S".repeat(13)), size = await measure(input);
+      expect(size.buyBytes).toBeGreaterThan(PACKET_LIMIT); expect(size.createBytes).toBeLessThanOrEqual(PACKET_LIMIT);
+      await expect(prepareTokenTransaction(input, { connection: mockRpc().connection })).rejects.toThrow(`${size.buyBytes} bytes and exceeds Solana's 1232-byte packet limit`);
+      expect(wire(await prepareTokenTransaction({ ...input, initialBuyQuoteBaseUnits: "0" }, { connection: mockRpc().connection }))).toBe(size.createBytes);
+    });
+    test("USDC with a buy does not fit even with a short name; the coin alone does", async () => {
+      const input = sized("usdc"), rpc = mockRpc(); rpc.addQuoteBalance(input, 1_000_000n);
+      const size = await measure(input, rpc);
+      expect(size.buyBytes).toBeGreaterThan(PACKET_LIMIT); expect(size.createBytes).toBeLessThanOrEqual(PACKET_LIMIT);
+      await expect(prepareTokenTransaction(input, { connection: rpc.connection })).rejects.toThrow(`${size.buyBytes} bytes`);
+    });
+    test("an existing buyback account is left out exactly as prepare leaves it out", async () => {
+      const input = sized("tslax"), rpc = mockRpc(); rpc.addQuoteBalance(input, 1_000_000n);
+      const missing = await measure(input, rpc);
+      seedBuybackAta(rpc, "tslax");
+      const present = await measure(input, rpc);
+      expect(present.buyBytes).toBeLessThan(missing.buyBytes);
+      if (present.buyBytes <= PACKET_LIMIT) expect(wire(await prepareTokenTransaction(input, { connection: rpc.connection }))).toBe(present.buyBytes);
+      expect(present.createBytes).toBe(missing.createBytes);
+      expect(rpc.sent()).toBe(0);
+    });
   });
 
   test("simulation failure prevents offering a transaction to the wallet", async () => {

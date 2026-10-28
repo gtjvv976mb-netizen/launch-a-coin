@@ -2,13 +2,14 @@ import * as sdk from "../../../../../integrations/pumpfun/src/live";
 import type { LiveLaunchInput, WalletTransactionPlan } from "../../../../../integrations/pumpfun/src/live";
 import reviewedDesigns from "../../../../../integrations/pumpfun/src/design-assets.json";
 import { getCardDesign } from "../designs";
-import { getPairAsset } from "../pairs";
+import { getPairAsset, isPairAssetKey } from "../pairs";
 import { clearGuard, db, guard, one, q, readBatch, stmt, UserError } from "../../mintdex/server/db.server";
-import { fetchPublicBytes, putPublicAsset, putPublicJson, validateOwnedAsset, verifyPublicJson } from "./assets.server";
+import { fetchPublicBytes, metadataUriPlaceholder, putPublicAsset, putPublicJson, validateOwnedAsset, verifyPublicJson } from "./assets.server";
 import { sha256, walletBytes } from "./auth.server";
 import { COMPOSITION_VERSION, requireTrustedComposition } from "./composition.server";
+import { BUY_DOES_NOT_FIT } from "./copy";
 import { requireLiveConfig } from "./config.server";
-import { normalizeLiveFields } from "./validation.server";
+import { normalizeLiveFields, normalizeLiveIdentity } from "./validation.server";
 import type { LiveAssets, LiveLaunchIntent, LivePrepareInput, LiveStage } from "./types";
 
 type Payload = {input: Omit<LiveLaunchInput, "nftMint">; assets: LiveAssets; fields: ReturnType<typeof normalizeLiveFields>};
@@ -105,6 +106,16 @@ async function preparePayload(wallet: string, raw: LivePrepareInput): Promise<Pa
     card: {designKey: fields.cardTemplate, frontUri: sources.front.url, backUri: sources.back.url,
       frontSha256: sources.front.sha256, backSha256: sources.back.sha256, nftMetadataUri: nftMetadata.url}}};
 }
+/** Exact coin-transaction size for this creator, name, symbol and quote, before any artwork or metadata is uploaded. */
+export async function checkLiveLaunchSize(wallet: string, raw: {name: string; symbol: string; quoteAssetKey: string; initialBuyQuoteBaseUnits: string}) {
+  requireLiveConfig("launch"); walletBytes(wallet);
+  const {name, symbol} = normalizeLiveIdentity(raw);
+  if (!isPairAssetKey(raw.quoteAssetKey)) throw new UserError("Choose a supported pump.fun quote asset.");
+  if (!/^(0|[1-9][0-9]{0,19})$/.test(raw.initialBuyQuoteBaseUnits)) throw new UserError("Review the initial-buy atoms before preparing a real launch.");
+  const size = await chain(() => sdk.measureTokenTransaction({creator: wallet, name, symbol, quoteKey: raw.quoteAssetKey as LiveLaunchInput["quoteKey"], tokenMetadataUri: metadataUriPlaceholder()}, {connection: connection()}));
+  const bytes = BigInt(raw.initialBuyQuoteBaseUnits) > 0n ? size.buyBytes : size.createBytes;
+  return {limit: size.limit, bytes, fits: bytes <= size.limit, buyBytes: size.buyBytes, buyFits: size.buyBytes <= size.limit, createBytes: size.createBytes, createFits: size.createBytes <= size.limit};
+}
 export async function prepareLiveLaunch(wallet: string, raw: LivePrepareInput) {
   requireLiveConfig("launch");
   if (!/^[a-zA-Z0-9_-]{8,100}$/.test(raw.idempotencyKey)) throw new UserError("Use a stable launch request identifier.");
@@ -121,6 +132,8 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareInput) {
     const transaction = await chain(() => sdk.prepareTokenTransaction(adapterInput(existing), {connection: connection()}));
     await savePlan(existing, transaction); return {intent: publicIntent(existing), transaction};
   }
+  // A buy that cannot fit fails here, before the token and card metadata are written. Prepare still re-checks the bytes.
+  if (/^[1-9][0-9]{0,19}$/.test(raw.initialBuyQuoteBaseUnits) && !(await checkLiveLaunchSize(wallet, {...fields, initialBuyQuoteBaseUnits: raw.initialBuyQuoteBaseUnits})).fits) throw new UserError(BUY_DOES_NOT_FIT);
   const payload = await preparePayload(wallet, raw);
   const transaction = await chain(() => sdk.prepareTokenTransaction({...payload.input, nftMint: raw.nftMint}, {connection: connection()}));
   const id = crypto.randomUUID(), now = Date.now();

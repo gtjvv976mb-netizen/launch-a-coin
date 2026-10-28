@@ -34,6 +34,7 @@ const storage = {
 let env: Record<string, unknown>;
 mock.module("../../src/lib/bindings.server", () => ({bindings: () => env}));
 let tokenVerified = false, nftVerified = false, replaceable = false, uncertain = false, prepareCalls = 0, nftPrepareCalls = 0, sendCalls = 0, receiptCreator: string | null = null;
+let sizes = {createBytes: 950, buyBytes: 1200}, measured: any[] = [];
 let tokenVerifyHook: (() => Promise<void>) | undefined, nftVerifyHook: (() => Promise<void>) | undefined, nftPrepareHook: (() => Promise<void>) | undefined, nftReplaceHook: (() => Promise<void>) | undefined;
 const binding = "b".repeat(64);
 function identity(input: any) { return {creatorWallet: receiptCreator ?? input.creator, tokenMint: input.mint, quoteMint: getPairAsset(input.quoteKey).mint, nftMint: input.nftMint}; }
@@ -46,6 +47,7 @@ function plan(input: any, kind: "token" | "nft") {
 function signedSignature(prepared: {kind: string; messageSha256: string}) { return prepared.kind === "token" ? "s".repeat(88) : String.fromCharCode(115 + Number(prepared.messageSha256.slice(-2))).repeat(88); }
 mock.module("../../../integrations/pumpfun/src/live", () => ({
   createMainnetConnection: () => ({}),
+  measureTokenTransaction: async (input: any) => { measured.push(input); return {limit: 1232, ...sizes}; },
   prepareTokenTransaction: async (input: any) => plan(input, "token"),
   verifyTokenLaunch: async (input: any, options: any) => { const result = {status: tokenVerified ? "verified" : "pending", ...identity(input), signature: options.signature, slot: 101, messageSha256: options.expectedMessageSha256}; const hook = tokenVerifyHook; tokenVerifyHook = undefined; await hook?.(); return result; },
   verifyCreatorNft: async (input: any, options: any) => { const result = {status: nftVerified ? "verified" : "pending", ...identity(input), signature: options.signature, slot: 102, messageSha256: options.expectedMessageSha256}; const hook = nftVerifyHook; nftVerifyHook = undefined; await hook?.(); return result; },
@@ -85,6 +87,7 @@ beforeEach(() => {
   env = {DB: localD1, STORAGE: storage, CARDDEX_DEPLOYMENT_ENV: "production", CARDDEX_PUBLIC_ORIGIN: "https://launchacard.fun", CARDDEX_MAINNET_RPC_URL: "https://rpc.example.test", CARDDEX_LIVE_LAUNCH_ENABLED: "true"};
   tokenVerified = nftVerified = replaceable = uncertain = false; prepareCalls = nftPrepareCalls = sendCalls = 0; receiptCreator = null;
   tokenVerifyHook = nftVerifyHook = nftPrepareHook = nftReplaceHook = undefined;
+  sizes = {createBytes: 950, buyBytes: 1200}; measured = [];
 });
 afterAll(() => { globalThis.fetch = nativeFetch; sqlite.close(); });
 function image(width: number, height: number) { const bytes = new Uint8Array(40); bytes.set([0x89, 0x50, 0x4e, 0x47]); new DataView(bytes.buffer).setUint32(16, width); new DataView(bytes.buffer).setUint32(20, height); return bytes; }
@@ -238,6 +241,30 @@ describe("isolated real-launch server lifecycle", () => {
     nftVerified = true;
     expect((await service.confirmLiveCreatorNft(creator, {intentId: first.intent.id, signature: sent.signature, messageSha256: fresh.transaction!.messageSha256})).intent.status).toBe("complete");
     expect(sqlite.query("SELECT signature, signed_transaction_base64 FROM live_launch_transactions WHERE message_sha256 = ?").get(old.messageSha256)).toEqual({signature: oldSent.signature, signed_transaction_base64: `${old.transactionBase64}-signed`});
+  });
+  test("the size check measures the final URI length and reports the buy and the coin alone", async () => {
+    const prepared = await service.prepareLiveLaunch(creator, await input());
+    const check = (initialBuyQuoteBaseUnits: string) => service.checkLiveLaunchSize(creator, {name: "  Launch   Fixture ", symbol: "fix", quoteAssetKey: "sol", initialBuyQuoteBaseUnits});
+    expect(await check("1000")).toEqual({limit: 1232, bytes: 1200, fits: true, buyBytes: 1200, buyFits: true, createBytes: 950, createFits: true});
+    expect(measured[0]).toMatchObject({creator, name: "Launch Fixture", symbol: "FIX", quoteKey: "sol"});
+    expect(measured[0].tokenMetadataUri).toMatch(/^https:\/\/launchacard\.fun\/m\/[A-Za-z0-9_-]{43}$/);
+    expect(measured[0].tokenMetadataUri.length).toBe(prepared.intent.tokenMetadataUri.length);
+    sizes = {createBytes: 929, buyBytes: 1240};
+    expect(await check("1000")).toMatchObject({bytes: 1240, fits: false, buyFits: false, createFits: true});
+    expect(await check("0")).toMatchObject({bytes: 929, fits: true, buyFits: false});
+    await expect(service.checkLiveLaunchSize(creator, {name: "Fixture", symbol: "FIX", quoteAssetKey: "not-a-quote", initialBuyQuoteBaseUnits: "1"})).rejects.toThrow("supported pump.fun quote");
+    env.CARDDEX_LIVE_LAUNCH_ENABLED = "false";
+    await expect(check("1000")).rejects.toThrow("not open");
+  });
+  test("a buy that cannot fit is refused before any token or card metadata is written", async () => {
+    const original = await input(), stored = objects.size;
+    sizes = {createBytes: 1032, buyBytes: 1289};
+    await expect(service.prepareLiveLaunch(creator, {...original, initialBuyQuoteBaseUnits: "1000"})).rejects.toThrow("doesn't fit in one transaction");
+    expect(objects.size).toBe(stored); expect(prepareCalls).toBe(0);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 0});
+    measured = [];
+    expect((await service.prepareLiveLaunch(creator, original)).intent.status).toBe("prepared");
+    expect(measured).toHaveLength(0);
   });
   test("turning off new launches keeps sign-in, saved launches and the card stage working", async () => {
     const coin = await service.prepareLiveLaunch(creator, await input());

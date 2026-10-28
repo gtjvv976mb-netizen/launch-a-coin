@@ -38,6 +38,7 @@ import { QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
 import { LiveLaunchPanel, type LiveLaunchHandle } from "../components/carddex/live/LiveLaunchPanel";
 import { liveReadinessQuery, useLiveLaunchOpen, useLiveRecoveryOpen } from "../components/carddex/live/readiness";
 import { parseLiveAmount } from "../components/carddex/live/amounts";
+import { BUY_DOES_NOT_FIT, useLiveBuyFit } from "../components/carddex/live/buy-fit";
 import { PagedMessage } from "../components/carddex/live/PagedMessage";
 import type { LiveLaunchIntent } from "../lib/carddex/live/types";
 import "../carddex-live.css";
@@ -330,6 +331,11 @@ function Launch() {
   // Field checks (the server repeats every one of them).
   const nameOk = name.trim().length >= 2;
   const tickerOk = TICKER_RE.test(ticker);
+  // Checked where the creator decides on a buy (exact bytes, server side): a buy that cannot fit one transaction for
+  // this pair and name is turned off here, and the panel checks again before any artwork is uploaded.
+  const buyFits = useLiveBuyFit(live && liveOpen && !liveLocked && step >= 6 && nameOk && tickerOk, name, ticker, quoteKey);
+  const buyBlocked = live && buyFits === false;
+  useEffect(() => { if (buyBlocked) setDevBuy(""); }, [buyBlocked]);
   const websiteError = linkError(website, "web");
   const xError = linkError(xUrl, "x");
   const ready =
@@ -746,7 +752,7 @@ function Launch() {
             <div className="cdx-launch-initial cdx-launch-step" hidden={step !== 6}>
               <Field label="Initial buy (optional)" htmlFor="dev">
                 <Input
-                  disabled={live && liveLocked}
+                  disabled={live && liveLocked || buyBlocked}
                   ref={devRef}
                   id="dev"
                   numeric
@@ -766,6 +772,8 @@ function Launch() {
                   <span role="alert" className="block text-down">
                     {devError}
                   </span>
+                ) : buyBlocked ? (
+                  <span role="status" className="block text-ink">{BUY_DOES_NOT_FIT}</span>
                 ) : !devQuote?.ok ? (
                   <span className="block">{live ? `Optional real ${quoteAsset.symbol} buy with coin creation. Exact amounts and slippage appear before wallet review.` : `Optional test-asset buy. Maximum ${formatQuoteAmount(maxDev, quoteKey)} ${quoteAsset.symbol}.`}</span>
                 ) : null}

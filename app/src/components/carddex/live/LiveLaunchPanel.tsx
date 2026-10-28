@@ -1,4 +1,5 @@
 import { useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   abandonLiveLaunchIntent, confirmLiveCreatorNft, confirmLiveToken, createLiveWalletChallenge, getLiveLaunchIntent,
   getLiveWallet, listLiveLaunchIntents, prepareLiveCreatorNft,
@@ -11,6 +12,7 @@ import { getPairAsset, getTradingPair } from "../../../lib/carddex/pairs";
 import type { CardData } from "../../mintdex/MintCard";
 import { Button, Modal } from "../../mintdex/ui";
 import { LiveWalletButton } from "./LiveWalletButton";
+import { BUY_DOES_NOT_FIT, checkLiveBuyFit, liveBuyFitKey } from "./buy-fit";
 import { formatLiveAmount } from "./amounts";
 import { PagedMessage } from "./PagedMessage";
 import { useLiveReadiness } from "./readiness";
@@ -58,6 +60,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, onInva
 }) {
   const wallet = useLiveWallet();
   const readiness = useLiveReadiness();
+  const queryClient = useQueryClient();
   const [busy, setBusy] = useState<Busy>(null), [error, setError] = useState("");
   const [terms, setTerms] = useState(false), [slippageBps, setSlippageBps] = useState(100);
   const [intent, setIntent] = useState<LiveLaunchIntent | null>(null);
@@ -197,6 +200,14 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, onInva
       }
       if (creator.current && creator.current !== address) throw new Error("Reconnect the wallet that owns this prepared launch.");
       await authenticate(address, version);
+      if (draft.initialBuyQuoteBaseUnits !== "0") {
+        // Nothing is uploaded for a buy that cannot fit the one coin transaction.
+        setBusy("preparing");
+        const size = unwrap(await checkLiveBuyFit(draft.name, draft.symbol, draft.quoteAssetKey, draft.initialBuyQuoteBaseUnits));
+        assertCurrent(version, address);
+        queryClient.setQueryData(liveBuyFitKey(draft.name, draft.symbol, draft.quoteAssetKey), size);
+        if (!size.fits) throw new Error(size.createFits ? BUY_DOES_NOT_FIT : "This coin's name and symbol don't fit in one transaction. Use a shorter name or symbol.");
+      }
       if (!tokenKey.current) tokenKey.current = createEphemeralSigner();
       if (!nftKey.current) nftKey.current = createEphemeralSigner();
       if (!idempotencyKey.current) idempotencyKey.current = crypto.randomUUID();

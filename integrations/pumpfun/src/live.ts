@@ -4,7 +4,7 @@ import bs58 from "bs58";
 import BN from "bn.js";
 import {
   ComputeBudgetProgram, Connection, PublicKey, TransactionInstruction,
-  TransactionMessage, VersionedTransaction, type AccountInfo,
+  TransactionMessage, VersionedTransaction, type AccountInfo, type VersionedMessage,
   type VersionedTransactionResponse,
 } from "@solana/web3.js";
 import {
@@ -27,8 +27,8 @@ import {
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { toWeb3JsInstruction } from "@metaplex-foundation/umi-web3js-adapters";
 import {
-  MAINNET_GENESIS_HASH, PUBLIC_MAINNET_RPC, hash, immutable,
-  preparePumpLaunchPlan, publicKey, reviewLaunchInput, type PrepareLaunchInput,
+  MAINNET_GENESIS_HASH, PAIR_ASSETS, PUBLIC_MAINNET_RPC, hash, immutable,
+  preparePumpLaunchPlan, publicKey, reviewLaunchInput, reviewTokenFields, type PairKey, type PrepareLaunchInput,
 } from "./index.ts";
 
 export const CORE_PROGRAM_ID = new PublicKey("CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d");
@@ -105,6 +105,24 @@ function decodeInstruction(input: { programId: string; accounts: { address: stri
   });
 }
 
+/** Solana's packet limit for one signed transaction (no lookup tables are used). */
+export const PACKET_LIMIT = 1232;
+function compileWalletTransaction(payer: PublicKey, blockhash: string, units: number, microLamports: number, instructions: TransactionInstruction[]) {
+  return new VersionedTransaction(new TransactionMessage({
+    payerKey: payer, recentBlockhash: blockhash,
+    instructions: [ComputeBudgetProgram.setComputeUnitLimit({ units }), ComputeBudgetProgram.setComputeUnitPrice({ microLamports }), ...instructions],
+  }).compileToV0Message());
+}
+const shortVec = (length: number) => length < 0x80 ? 1 : length < 0x4000 ? 2 : 3;
+/** Exact signed wire size, also past the packet limit where web3.js serialization overruns. */
+export function transactionBytes(message: VersionedMessage): number {
+  const signers = message.header.numRequiredSignatures;
+  const instructions = message.compiledInstructions.reduce((total, ix) => total + 1 + shortVec(ix.accountKeyIndexes.length) + ix.accountKeyIndexes.length + shortVec(ix.data.length) + ix.data.length, 0);
+  const lookups = message.addressTableLookups.reduce((total, lookup) => total + 32 + shortVec(lookup.writableIndexes.length) + lookup.writableIndexes.length + shortVec(lookup.readonlyIndexes.length) + lookup.readonlyIndexes.length, 0);
+  return shortVec(signers) + 64 * signers + (message.version === 0 ? 1 : 0) + 3 + shortVec(message.staticAccountKeys.length) + 32 * message.staticAccountKeys.length + 32 +
+    shortVec(message.compiledInstructions.length) + instructions + (message.version === 0 ? shortVec(message.addressTableLookups.length) + lookups : 0);
+}
+
 async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", instructions: TransactionInstruction[],
   minimumTokensOut: string, options: LiveOptions) {
   const id = identity(input), connection = options.connection;
@@ -116,23 +134,13 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
   const payerBefore = safeLamports(payerAccount.value?.lamports ?? 0, "Wallet balance");
   const fees = prioritySamples.map((sample) => sample.prioritizationFee).filter((fee) => Number.isSafeInteger(fee) && fee >= 0).sort((a, b) => a - b);
   const microLamports = Math.min(100_000, Math.max(1_000, fees[Math.floor(fees.length * 0.75)] ?? 1_000));
-  function compile(limit: number) {
-    return new VersionedTransaction(new TransactionMessage({
-      payerKey: id.creator, recentBlockhash: latest.blockhash,
-      instructions: [ComputeBudgetProgram.setComputeUnitLimit({ units: limit }),
-        ComputeBudgetProgram.setComputeUnitPrice({ microLamports }), ...instructions],
-    }).compileToV0Message());
-  }
+  const compile = (limit: number) => compileWalletTransaction(id.creator, latest.blockhash, limit, microLamports, instructions);
   const first = compile(1_400_000);
-  let packetBytes: number;
-  try { packetBytes = first.serialize().length; }
-  catch (error) {
-    if (/encoding overruns|overrun|transaction too large/i.test(error instanceof Error ? error.message : "")) {
-      throw new Error("Launch transaction exceeds Solana's 1232-byte packet limit; use an initial buy of 0 or shorter metadata URIs");
-    }
-    throw error;
-  }
-  if (packetBytes > 1232) throw new Error(`Launch transaction is ${packetBytes} bytes and exceeds Solana's 1232-byte packet limit; use an initial buy of 0 or shorter metadata URIs`);
+  // The final guard. measureTokenTransaction lets the app refuse a non-fitting buy before anything is uploaded.
+  const packetBytes = transactionBytes(first.message);
+  if (packetBytes > PACKET_LIMIT) throw new Error(kind === "token"
+    ? `Launch transaction is ${packetBytes} bytes and exceeds Solana's ${PACKET_LIMIT}-byte packet limit; launch without an initial buy, or use a shorter name or symbol`
+    : `Card transaction is ${packetBytes} bytes and exceeds Solana's ${PACKET_LIMIT}-byte packet limit`);
   const firstSimulation = await connection.simulateTransaction(first, {
     sigVerify: false, replaceRecentBlockhash: false, commitment: "confirmed",
     accounts: { encoding: "base64", addresses: [input.creator] },
@@ -186,6 +194,50 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
 }
 export type WalletTransactionPlan = Awaited<ReturnType<typeof makeWalletPlan>>;
 
+type PumpGlobal = ReturnType<typeof PUMP_SDK.decodeGlobal>;
+type PumpQuoteControl = ReturnType<typeof PUMP_SDK.decodeQuoteControl>;
+function launchCurve(global: PumpGlobal, quoteControl: PumpQuoteControl, quoteMint: PublicKey, creator: PublicKey) {
+  return { ...newBondingCurve(global, quoteMint, quoteControl), creator, isMayhemMode: false };
+}
+/** The initial buy as the wallet receives it: base ATA, the buyback ATA on token quotes, then buy_exact_quote_in_v3. */
+async function firstBuyInstructions(keys: { mint: PublicKey; creator: PublicKey; quoteMint: PublicKey; quoteTokenProgram: PublicKey },
+  global: PumpGlobal, curve: ReturnType<typeof launchCurve>, buy: bigint, estimate: BN, minimumTokensOut: string) {
+  const buybackFeeRecipient = global.buybackFeeRecipients.find((key) => !key.equals(PublicKey.default));
+  const firstBuy = await PUMP_SDK.buyExactQuoteInV3Instructions({
+    mint: keys.mint, user: keys.creator, bondingCurve: curve, associatedUserAccountInfo: null,
+    amount: estimate, quoteAmount: new BN(buy.toString()), slippage: 0,
+    quoteTokenProgram: keys.quoteTokenProgram, tokenProgram: TOKEN_2022_PROGRAM_ID,
+    buybackFeeRecipient,
+  });
+  // The convenience builder rounds percentages to tenths. Use its public raw
+  // instruction builder for the exact integer-bps minimum shown in review.
+  firstBuy[firstBuy.length - 1] = await PUMP_SDK.getBuyExactQuoteInV3InstructionRaw({
+    mint: keys.mint, user: keys.creator, spendableQuoteIn: new BN(buy.toString()),
+    minTokensOut: new BN(minimumTokensOut), quoteMint: keys.quoteMint,
+    quoteTokenProgram: keys.quoteTokenProgram, tokenProgram: TOKEN_2022_PROGRAM_ID,
+    buybackFeeRecipient, partialFill: false,
+  });
+  return firstBuy;
+}
+// The SDK emits idempotent ATA creation even when an ATA already exists.
+// Removing only a freshly verified matching ATA saves its owner key and
+// setup bytes, allowing many custom-quote creates + first buys to stay atomic.
+async function withoutExistingSetup(connection: Pick<LiveConnection, "getMultipleAccountsInfoAndContext">, instructions: TransactionInstruction[]) {
+  const setup = instructions.filter((ix) => ix.programId.equals(ASSOCIATED_TOKEN_PROGRAM_ID) && ix.data.length === 1 && ix.data[0] === 1);
+  const omit = new Set<TransactionInstruction>();
+  if (setup.length) {
+    const snapshot = await connection.getMultipleAccountsInfoAndContext(setup.map((ix) => ix.keys[1].pubkey), "confirmed");
+    setup.forEach((ix, index) => {
+      const account = snapshot.value[index];
+      if (!account) return;
+      const decoded = unpackAccount(ix.keys[1].pubkey, account, ix.keys[5].pubkey);
+      if (!decoded.isInitialized || decoded.isFrozen || !decoded.owner.equals(ix.keys[2].pubkey) || !decoded.mint.equals(ix.keys[3].pubkey)) throw new Error("An existing token account is incompatible with the initial buy");
+      omit.add(ix);
+    });
+  }
+  return instructions.filter((ix) => !omit.has(ix));
+}
+
 /** Real unsigned v0 transaction. This function never signs or sends it. */
 export async function prepareTokenTransaction(input: LiveLaunchInput, options: LiveOptions): Promise<WalletTransactionPlan> {
   const id = identity(input), connection = options.connection;
@@ -204,45 +256,41 @@ export async function prepareTokenTransaction(input: LiveLaunchInput, options: L
       const account = unpackAccount(quoteAta, quoteAccount, new PublicKey(id.asset.tokenProgram));
       if (!account.owner.equals(id.creator) || !account.mint.equals(id.quoteMint) || account.isFrozen || account.amount < id.buy) throw new Error(`Insufficient or frozen ${id.asset.symbol} quote balance`);
     }
-    const curve = { ...newBondingCurve(global, id.quoteMint, quoteControl), creator: id.creator, isMayhemMode: false };
+    const curve = launchCurve(global, quoteControl, id.quoteMint, id.creator);
     const estimate = getBuyV3TokenAmountFromQuoteAmount({ global, feeConfig, mintSupply: global.tokenTotalSupply,
       bondingCurve: curve, amount: new BN(id.buy.toString()), curveBaseTokenBalance: global.tokenTotalSupply });
     if (estimate.lten(0)) throw new Error("The selected initial buy is too small to receive any token units");
     minimumTokensOut = estimate.muln(10_000 - id.slippageBps).divn(10_000).toString();
     if (minimumTokensOut === "0") throw new Error("The slippage-adjusted initial buy would receive zero token units");
-    const buybackFeeRecipient = global.buybackFeeRecipients.find((key) => !key.equals(PublicKey.default));
-    const firstBuy = await PUMP_SDK.buyExactQuoteInV3Instructions({
-      mint: id.mint, user: id.creator, bondingCurve: curve, associatedUserAccountInfo: null,
-      amount: estimate, quoteAmount: new BN(id.buy.toString()), slippage: 0,
-      quoteTokenProgram: new PublicKey(id.asset.tokenProgram), tokenProgram: TOKEN_2022_PROGRAM_ID,
-      buybackFeeRecipient,
-    });
-    // The convenience builder rounds percentages to tenths. Use its public raw
-    // instruction builder for the exact integer-bps minimum shown in review.
-    firstBuy[firstBuy.length - 1] = await PUMP_SDK.getBuyExactQuoteInV3InstructionRaw({
-      mint: id.mint, user: id.creator, spendableQuoteIn: new BN(id.buy.toString()),
-      minTokensOut: new BN(minimumTokensOut), quoteMint: id.quoteMint,
-      quoteTokenProgram: new PublicKey(id.asset.tokenProgram), tokenProgram: TOKEN_2022_PROGRAM_ID,
-      buybackFeeRecipient, partialFill: false,
-    });
-    instructions.push(...firstBuy);
+    instructions.push(...await firstBuyInstructions({ mint: id.mint, creator: id.creator, quoteMint: id.quoteMint,
+      quoteTokenProgram: new PublicKey(id.asset.tokenProgram) }, global, curve, id.buy, estimate, minimumTokensOut));
   }
-  // The SDK emits idempotent ATA creation even when an ATA already exists.
-  // Removing only a freshly verified matching ATA saves its owner key and
-  // setup bytes, allowing many custom-quote creates + first buys to stay atomic.
-  const setup = instructions.filter((ix) => ix.programId.equals(ASSOCIATED_TOKEN_PROGRAM_ID) && ix.data.length === 1 && ix.data[0] === 1);
-  const omit = new Set<TransactionInstruction>();
-  if (setup.length) {
-    const snapshot = await connection.getMultipleAccountsInfoAndContext(setup.map((ix) => ix.keys[1].pubkey), "confirmed");
-    setup.forEach((ix, index) => {
-      const account = snapshot.value[index];
-      if (!account) return;
-      const decoded = unpackAccount(ix.keys[1].pubkey, account, ix.keys[5].pubkey);
-      if (!decoded.isInitialized || decoded.isFrozen || !decoded.owner.equals(ix.keys[2].pubkey) || !decoded.mint.equals(ix.keys[3].pubkey)) throw new Error("An existing token account is incompatible with the initial buy");
-      omit.add(ix);
-    });
-  }
-  return makeWalletPlan(input, "token", instructions.filter((ix) => !omit.has(ix)), minimumTokensOut, options);
+  return makeWalletPlan(input, "token", await withoutExistingSetup(connection, instructions), minimumTokensOut, options);
+}
+
+// Placeholders only change key and hash values, never the wire size: a mint signer and a blockhash are 32 bytes each.
+const SIZE_MINT = new PublicKey(new Uint8Array(32).fill(7)), SIZE_BLOCKHASH = new PublicKey(new Uint8Array(32).fill(8)).toBase58();
+export type TokenSizeInput = { creator: string; name: string; symbol: string; tokenMetadataUri: string; quoteKey: PairKey };
+/**
+ * Exact wire size of the coin transaction prepareTokenTransaction builds, with and without an initial buy, from the
+ * same builders, the real Pump accounts and a metadata URI of the final length. The buy amount never changes the size.
+ * Existing ATAs are omitted exactly as prepare omits them; any other ATA create is counted. No blockhash, signing or send.
+ */
+export async function measureTokenTransaction(input: TokenSizeInput, options: { connection: Pick<LiveConnection, "getMultipleAccountsInfoAndContext"> }) {
+  const asset = PAIR_ASSETS.find((candidate) => candidate.key === input.quoteKey);
+  if (!asset) throw new Error("Choose a verified CardDex pair asset");
+  const creator = publicKey(input.creator, "creator"), quoteMint = new PublicKey(asset.mint), quoteTokenProgram = new PublicKey(asset.tokenProgram);
+  const tokenMetadataUri = reviewTokenFields(input);
+  const create = await PUMP_SDK.createV2Instruction({ mint: SIZE_MINT, user: creator, creator, name: input.name, symbol: input.symbol,
+    uri: tokenMetadataUri, quoteMint, quoteTokenProgram, mayhemMode: false, cashback: false, holderReward: false });
+  const snapshot = await options.connection.getMultipleAccountsInfoAndContext([GLOBAL_PDA, QUOTE_CONTROL_PDA], "confirmed");
+  const [globalInfo, quoteControlInfo] = snapshot.value;
+  if (!globalInfo?.owner.equals(PUMP_PROGRAM_ID) || !quoteControlInfo?.owner.equals(PUMP_PROGRAM_ID)) throw new Error("Current Pump accounts are unavailable");
+  const global = PUMP_SDK.decodeGlobal(globalInfo), quoteControl = PUMP_SDK.decodeQuoteControl(quoteControlInfo);
+  const buy = await withoutExistingSetup(options.connection, [create, ...await firstBuyInstructions({ mint: SIZE_MINT, creator, quoteMint, quoteTokenProgram },
+    global, launchCurve(global, quoteControl, quoteMint, creator), 1n, new BN(1), "1")]);
+  const bytes = (instructions: TransactionInstruction[]) => transactionBytes(compileWalletTransaction(creator, SIZE_BLOCKHASH, 1_400_000, 1_000, instructions).message);
+  return { limit: PACKET_LIMIT, createBytes: bytes([create]), buyBytes: bytes(buy) };
 }
 
 function coreAttributes(input: LiveLaunchInput) {
