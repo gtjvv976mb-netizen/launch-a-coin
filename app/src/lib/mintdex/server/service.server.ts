@@ -185,8 +185,8 @@ async function summarize(rows: CoinRaw[], [holders, bids, before, vol]: AggRows)
       tradingPair: getTradingPair(r.ticker, asset.key),
       ...metrics,
       cardTemplate: design.key,
-      stockTicker: design.stock?.ticker ?? null,
-      tokenPair: design.stock?.pair ?? null,
+      stockTicker: asset.kind === "stock" ? asset.referenceTicker ?? null : null,
+      tokenPair: asset.kind === "stock" ? getTradingPair(r.ticker, asset.key) : null,
       level: design.materialLevel,
       liveLevel: design.materialLevel,
       change24h: base > 0 ? metrics.priceQuote / base - 1 : 0,
@@ -758,7 +758,7 @@ export type LaunchInput = {
   cardTemplate?: string;
   quoteAssetKey?: string;
   quoteMint?: string;
-  /** Optional catalog echoes, checked for consistency; these never establish a stock association. */
+  /** Optional quote echoes, checked for consistency; these never establish a stock association. */
   stockTicker?: string;
   tokenPair?: string;
 };
@@ -786,11 +786,13 @@ export async function launchCoin(user: SessionUser, input: LaunchInput): Promise
   if (!isCardDesignKey(cardTemplate)) throw new UserError("Choose an available card design.");
   const design = getCardDesign(cardTemplate);
   const asset = launchQuote(cardTemplate, input);
-  if (input.stockTicker !== undefined && input.stockTicker !== design.stock?.ticker) {
-    throw new UserError("The stock reference must match the selected card design.");
+  const stockTicker = asset.kind === "stock" ? asset.referenceTicker : undefined;
+  const tokenPair = asset.kind === "stock" ? getTradingPair(ticker, asset.key) : undefined;
+  if (input.stockTicker !== undefined && input.stockTicker !== stockTicker) {
+    throw new UserError("The stock reference must match the selected quote asset.");
   }
-  if (input.tokenPair !== undefined && input.tokenPair !== design.stock?.pair) {
-    throw new UserError("The reference pair must match the selected card design.");
+  if (input.tokenPair !== undefined && input.tokenPair !== tokenPair) {
+    throw new UserError("The reference pair must match the selected token and quote asset.");
   }
   if (name.length < 2 || name.length > 24) throw new UserError("Names are 2 to 24 characters.");
   if (!TICKER_RE.test(ticker)) throw new UserError("Tickers are 2 to 8 letters or numbers.");

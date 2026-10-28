@@ -22,9 +22,9 @@ export type CoinSummary = QuoteIdentity & {
   lore: string;
   /** Creator-selected design identity. Fixed for the lifetime of this Launch a Card card. */
   cardTemplate?: string;
-  /** Associated stock reference derived from the fixed design; never equity backing or ownership. */
+  /** Stock reference derived from the actual stored quote; never equity backing or ownership. */
   stockTicker?: string | null;
-  /** Catalog-defined reference pair, such as GME / SOL; no external market or redemption promise. */
+  /** Legacy alias of the creator token's actual stock-quote trading pair; otherwise null. */
   tokenPair?: string | null;
   /** Fixed material/lighting finish chosen at launch; independent of market cap. */
   level: number;

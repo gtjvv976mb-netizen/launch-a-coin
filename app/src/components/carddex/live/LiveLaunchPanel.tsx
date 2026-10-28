@@ -305,7 +305,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, onInvalid, onLockedC
   const reviewPages = ["Identity", "Network costs", "Total & initial buy", "Quote & issuance", "Wallet approval"];
   return <section className="cdx-live-panel" aria-label="Mainnet wallet launch">
     <label className="cdx-live-pane-label">Wallet &amp; launch<select className="mdx-input" aria-label="Wallet launch section" value={pane} onChange={e => setPane(e.target.value)}><option value="launch">Launch</option><option value="terms">Transaction terms</option><option value="recovery">Recover launch</option><option value="saved">Saved launch details</option><option value="status">Status &amp; messages</option></select></label>
-    <div className="cdx-live-pane" hidden={pane !== "launch"}>
+    <div className="cdx-live-pane" data-launch-pane="launch" hidden={pane !== "launch"}>
       {intent ? <h2>{currentTitle}</h2> : null}
       {!wallet.address ? <LiveWalletButton buttonRef={connectButton} quiet /> : <p className="cdx-live-address">Creator · {brief(wallet.address)}{!wallet.mainnet ? " · Switch to mainnet" : ""}</p>}
       {!available ? <button type="button" className="mdx-link cdx-live-readiness-link" onClick={() => setPane("status")}>{readiness.isPending ? "Checking mainnet readiness…" : "Mainnet setup required · view status"}</button> : null}
@@ -318,20 +318,20 @@ export function LiveLaunchPanel({ draft, card, pairPending, onInvalid, onLockedC
         {intent?.status === "nft_pending" && (intent.nftSignature || uncertain) ? <Button variant="outline" block pending={!!busy} disabled={!available} onClick={() => void checkConfirmation()}>Check card confirmation</Button> : null}
       </div>
     </div>
-    <div className="cdx-live-pane" hidden={pane !== "terms"}>
+    <div className="cdx-live-pane" data-launch-pane="terms" hidden={pane !== "terms"}>
       <p>Token creation and card issuance are separate paid mainnet transactions. Exact costs appear before each wallet approval. Your selected quote funds only the optional initial buy.</p>
       {selected.kind === "stock" ? <p>A tokenized-stock quote does not make your creator token company shares.</p> : null}
       <label className="cdx-live-check cdx-live-slippage"><span>Initial-buy slippage</span><select className="mdx-input" value={slippageBps} disabled={!!intent} onChange={e => setSlippageBps(Number(e.target.value))}><option value={50}>0.5%</option><option value={100}>1%</option><option value={300}>3%</option></select></label>
       <button type="button" className="mdx-link cdx-live-back" onClick={() => setPane("launch")}>Back to launch</button>
     </div>
-    <div ref={recoveryBody} tabIndex={-1} role="region" aria-label="Saved launch recovery" className="cdx-live-pane" hidden={pane !== "recovery"}>
+    <div ref={recoveryBody} tabIndex={-1} role="region" aria-label="Saved launch recovery" className="cdx-live-pane" data-launch-pane="recovery" hidden={pane !== "recovery"}>
       {intent && (intent.status === "prepared" || intent.status === "token_pending") ? <><p>An unused launch can be discarded only after every prepared transaction expires and the server verifies no token exists.</p><button type="button" className="mdx-link" disabled={!!busy} onClick={() => void discardExpiredDraft()}>Discard expired unused draft</button></> : null}
       {wallet.address && available && !intent ? <><button type="button" className="mdx-link" disabled={!!busy} onClick={() => void recover(savedIntent(wallet.address!) ?? undefined)}>Find / resume saved launch</button>{recoveryItems.slice(recoveryPage * 2, recoveryPage * 2 + 2).map(i => <button key={i.id} type="button" className="mdx-btn mdx-btn--outline" disabled={!!busy} onClick={() => void recover(i.id)}>{brief(i.tokenMint)} · {i.status === "nft_pending" ? "Card pending" : "Check launch"}</button>)}{recoveryItems.length > 2 ? <nav className="cdx-launch-subtabs" aria-label="Saved launch pages"><button type="button" disabled={recoveryPage === 0} onClick={() => goRecovery(recoveryPage - 1)}>Previous</button><span>{recoveryPage + 1} / {Math.ceil(recoveryItems.length / 2)}</span><button type="button" disabled={(recoveryPage + 1) * 2 >= recoveryItems.length} onClick={() => goRecovery(recoveryPage + 1)}>Next</button></nav> : null}</> : !intent ? <p>Connect the creator wallet after mainnet setup is ready to find a saved launch.</p> : <p>This launch is saved. Use Launch to check its current stage.</p>}
     </div>
-    <div className="cdx-live-pane" hidden={pane !== "saved"}>
+    <div className="cdx-live-pane" data-launch-pane="saved" hidden={pane !== "saved"}>
       {intent ? <><dl className="cdx-live-review"><div><dt>Token mint</dt><dd><a href={`https://solscan.io/token/${intent.tokenMint}`} target="_blank" rel="noreferrer">{brief(intent.tokenMint)}</a></dd></div><div><dt>Quote asset</dt><dd>{selected.symbol}</dd></div><div><dt>Permanent finish</dt><dd>{getCardDesign(intent.cardTemplate).name}</dd></div></dl><p>These launch details are locked to this saved request.</p><div className="cdx-live-links">{intent.status === "complete" ? <><a href={`https://pump.fun/coin/${intent.tokenMint}`} target="_blank" rel="noreferrer">Token on pump.fun</a><a href={`https://solscan.io/account/${intent.nftMint}`} target="_blank" rel="noreferrer">Card NFT</a><a href={intent.nftMetadataUri} target="_blank" rel="noreferrer">Metadata</a></> : null}{intent.tokenSignature ? <a href={`https://solscan.io/tx/${intent.tokenSignature}`} target="_blank" rel="noreferrer">Token transaction</a> : null}{intent.nftSignature ? <a href={`https://solscan.io/tx/${intent.nftSignature}`} target="_blank" rel="noreferrer">Card transaction</a> : null}</div></> : <p>No saved launch is loaded. Complete your token details or use Recover launch.</p>}
     </div>
-    <div className="cdx-live-pane" hidden={pane !== "status"}>
+    <div className="cdx-live-pane" data-launch-pane="status" hidden={pane !== "status"}>
       {error ? <PagedMessage text={error} alert /> : busy ? <PagedMessage text={BUSY_COPY[busy]} /> : readiness.isPending ? <p role="status">Checking mainnet readiness…</p> : readiness.isError ? <p>Launch readiness could not be checked.</p> : !available ? <PagedMessage text={[...(readiness.data?.blockers ?? []), "No transaction or charge is requested while setup is incomplete."].join(" ")} /> : <p>Mainnet setup is ready. Each transaction still needs your wallet approval.</p>}
       <div className="cdx-live-actions"><button type="button" className="mdx-btn mdx-btn--outline" onClick={() => void readiness.refetch()}>Check readiness</button><button type="button" className="mdx-btn mdx-btn--ghost" onClick={() => setPane("launch")}>Back to launch</button></div>
     </div>

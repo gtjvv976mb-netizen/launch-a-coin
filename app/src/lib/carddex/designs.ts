@@ -1,6 +1,8 @@
 import { TIERS, type Finish, type TierKey } from "../mintdex/tiers";
 import { EDITION_CATALOG, type EditionKey } from "../mintdex/editions";
 import { MEME_ICON_CATALOG, type MemeIconKey } from "../mintdex/meme-icons";
+import verifiedAssets from "./pair-assets.json";
+import { DESIGN_QUOTE_KEYS } from "./design-pairings";
 
 export type StockDesignKey = "stock-gme" | "stock-tsla" | "stock-nvda" | "stock-aapl" | "stock-mstr" | "stock-coin";
 export type ClassicDesignKey = StockDesignKey | "pokemon-classic" | "pokemon-full-art" | "yugioh-monster" | "yugioh-spell" | "magic-etched" | "duel-masters" | "one-piece" | "obsidian-archive";
@@ -10,8 +12,8 @@ export type CardDesign = {
   name: string;
   description: string;
   category: "classic" | "premium" | "limited" | "stocks";
-  /** A visual reference only; not a share, backing claim or company affiliation. */
-  stock?: { ticker: string; name: string; pair: string };
+  /** The bound tokenized quote's stock reference; never a company share or affiliation. */
+  stock?: { ticker: string; name: string; quoteAssetKey: string };
   /** Fixed print/material reference. This never reads the token's price or market cap. */
   materialLevel: number;
   palette: readonly [string, string, string];
@@ -24,12 +26,12 @@ export type CardDesign = {
 export const DEFAULT_CARD_DESIGN: CardDesignKey = "pokemon-classic";
 
 const STOCKS: readonly CardDesign[] = [
-  { key: "stock-gme", name: "GameStop Arcade", description: "Crimson enamel, black console hardware and silver controller engravings. A premium GMEX-paired finish.", category: "stocks", stock: { ticker: "GME", name: "GameStop", pair: "GME / SOL" }, materialLevel: 12, palette: ["#1b1115", "#e44746", "#f3e4dc"], finish: "holo", layout: "stock-gme" },
-  { key: "stock-tsla", name: "Tesla Current", description: "Pearl ceramic, brushed titanium and electric-red conductor rails, paired with Tesla xStock (TSLAX).", category: "stocks", stock: { ticker: "TSLA", name: "Tesla", pair: "TSLA / SOL" }, materialLevel: 11, palette: ["#263039", "#d73742", "#f0efeb"], finish: "holo", layout: "stock-tsla" },
-  { key: "stock-nvda", name: "NVIDIA Silicon", description: "Obsidian silicon, emerald circuitry and precision chip fittings, paired with NVIDIA xStock (NVDAX).", category: "stocks", stock: { ticker: "NVDA", name: "NVIDIA", pair: "NVDA / SOL" }, materialLevel: 13, palette: ["#111c19", "#b8d967", "#eaf0d3"], finish: "prism", layout: "stock-nvda" },
-  { key: "stock-aapl", name: "Apple Titanium", description: "Satin titanium, pearl ceramic and a precisely machined monolithic surround, paired with Apple xStock (AAPLX).", category: "stocks", stock: { ticker: "AAPL", name: "Apple", pair: "AAPL / SOL" }, materialLevel: 11, palette: ["#353838", "#c9ccc8", "#f3f1eb"], finish: "holo", layout: "stock-aapl" },
-  { key: "stock-mstr", name: "Strategy Reserve", description: "Burnished copper, treasury-vault steel and stacked medallion engravings, paired with Strategy xStock (MSTRX).", category: "stocks", stock: { ticker: "MSTR", name: "Strategy", pair: "MSTR / SOL" }, materialLevel: 14, palette: ["#241c18", "#e5a05c", "#f5e1c0"], finish: "gold", layout: "stock-mstr" },
-  { key: "stock-coin", name: "Coinbase Vault", description: "Cobalt enamel, polished palladium and a precision-cut vault surround, paired with Coinbase xStock (COINX).", category: "stocks", stock: { ticker: "COIN", name: "Coinbase", pair: "COIN / SOL" }, materialLevel: 11, palette: ["#0c2456", "#9bc5ee", "#eff4f6"], finish: "holo", layout: "stock-coin" },
+  { key: "stock-gme", name: "GameStop Arcade", description: "Crimson enamel, black console hardware and silver controller engravings. A premium GMEX-paired finish.", category: "stocks", materialLevel: 12, palette: ["#1b1115", "#e44746", "#f3e4dc"], finish: "holo", layout: "stock-gme" },
+  { key: "stock-tsla", name: "Tesla Current", description: "Pearl ceramic, brushed titanium and electric-red conductor rails, paired with Tesla xStock (TSLAX).", category: "stocks", materialLevel: 11, palette: ["#263039", "#d73742", "#f0efeb"], finish: "holo", layout: "stock-tsla" },
+  { key: "stock-nvda", name: "NVIDIA Silicon", description: "Obsidian silicon, emerald circuitry and precision chip fittings, paired with NVIDIA xStock (NVDAX).", category: "stocks", materialLevel: 13, palette: ["#111c19", "#b8d967", "#eaf0d3"], finish: "prism", layout: "stock-nvda" },
+  { key: "stock-aapl", name: "Apple Titanium", description: "Satin titanium, pearl ceramic and a precisely machined monolithic surround, paired with Apple xStock (AAPLX).", category: "stocks", materialLevel: 11, palette: ["#353838", "#c9ccc8", "#f3f1eb"], finish: "holo", layout: "stock-aapl" },
+  { key: "stock-mstr", name: "Strategy Reserve", description: "Burnished copper, treasury-vault steel and stacked medallion engravings, paired with Strategy xStock (MSTRX).", category: "stocks", materialLevel: 14, palette: ["#241c18", "#e5a05c", "#f5e1c0"], finish: "gold", layout: "stock-mstr" },
+  { key: "stock-coin", name: "Coinbase Vault", description: "Cobalt enamel, polished palladium and a precision-cut vault surround, paired with Coinbase xStock (COINX).", category: "stocks", materialLevel: 11, palette: ["#0c2456", "#9bc5ee", "#eff4f6"], finish: "holo", layout: "stock-coin" },
 ];
 
 const CLASSICS: readonly CardDesign[] = [
@@ -61,13 +63,19 @@ const PREMIUM_COPY: Record<TierKey,string> = {
 };
 
 /** A creator selects one permanent design at launch; every finish is available from the first card. */
-export const CARD_DESIGNS: readonly CardDesign[] = [
+const BASE_CARD_DESIGNS: readonly CardDesign[] = [
   ...CLASSICS,
   ...STOCKS,
   ...TIERS.map((tier): CardDesign => ({ key: tier.key, name: tier.name, description: PREMIUM_COPY[tier.key], category: "premium", materialLevel: tier.level, palette: [tier.ring, tier.sheen[0], "#f3e8cd"], finish: tier.level >= 13 ? tier.finish : tier.level >= 11 ? "holo" : "foil" })),
-  ...MEME_ICON_CATALOG.map((icon): CardDesign => ({ key: icon.key, name: icon.name, description: icon.description, category: "limited", materialLevel: 14, palette: icon.palette, finish: "gold", memeIcon: icon.key, ...(icon.key === "gamestop" ? { stock: { ticker: "GME", name: "GameStop", pair: "GME / SOL" } } : icon.key === "blackberry" ? { stock: { ticker: "BB", name: "BlackBerry", pair: "BB / SOL" } } : {}) })),
+  ...MEME_ICON_CATALOG.map((icon): CardDesign => ({ key: icon.key, name: icon.name, description: icon.description, category: "limited", materialLevel: 14, palette: icon.palette, finish: "gold", memeIcon: icon.key })),
   ...EDITION_CATALOG.map((edition): CardDesign => ({ key: edition.key, name: edition.name, description: edition.description.replaceAll("MintDex", "Launch a Card"), category: "limited", materialLevel: edition.key === "astral" ? 13 : 14, palette: edition.palette, finish: edition.key === "astral" ? "prism" : "gold", edition: edition.key })),
 ];
+
+export const CARD_DESIGNS: readonly CardDesign[] = BASE_CARD_DESIGNS.map(design => {
+  const key = DESIGN_QUOTE_KEYS[design.key as keyof typeof DESIGN_QUOTE_KEYS];
+  const asset = verifiedAssets.find(asset => asset.key === key && asset.kind === "stock");
+  return asset?.referenceTicker ? {...design, stock: {ticker:asset.referenceTicker,name:asset.name,quoteAssetKey:asset.key}} : design;
+});
 
 const BY_KEY = new Map(CARD_DESIGNS.map((design) => [design.key, design]));
 export function isCardDesignKey(value: unknown): value is CardDesignKey {

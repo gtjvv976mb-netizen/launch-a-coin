@@ -5,6 +5,10 @@ import { resolve } from "node:path";
 import { ed25519 } from "@noble/curves/ed25519";
 import { base58Encode } from "../../../chain/sdk/src/bytes";
 import { getPairAsset } from "../../src/lib/carddex/pairs";
+import { MEME_PAIR_PRESETS } from "../../src/lib/carddex/design-pairings";
+import renderAssets from "../../src/lib/carddex/render-assets.json";
+import { CARD_RENDERER_VERSION } from "../../src/lib/carddex/card-template";
+import { CREATOR_CARD_RENDERER_VERSION } from "../../src/lib/carddex/live/creator-print";
 
 // Only synthetic in-memory sign-in keys and mocked RPC are used. This test cannot submit a transaction.
 const creatorSeed = new Uint8Array(32).fill(7), creator = base58Encode(ed25519.getPublicKey(creatorSeed));
@@ -34,6 +38,7 @@ const storage = {
 let env: Record<string, unknown>;
 mock.module("../../src/lib/bindings.server", () => ({bindings: () => env}));
 let tokenVerified = false, nftVerified = false, replaceable = false, uncertain = false, prepareCalls = 0, nftPrepareCalls = 0, sendCalls = 0, receiptCreator: string | null = null;
+let tokenInputs: any[] = [], nftInputs: any[] = [];
 let tokenVerifyHook: (() => Promise<void>) | undefined, nftVerifyHook: (() => Promise<void>) | undefined, nftPrepareHook: (() => Promise<void>) | undefined, nftReplaceHook: (() => Promise<void>) | undefined;
 const binding = "b".repeat(64);
 function identity(input: any) { return {creatorWallet: receiptCreator ?? input.creator, tokenMint: input.mint, quoteMint: getPairAsset(input.quoteKey).mint, nftMint: input.nftMint}; }
@@ -46,10 +51,10 @@ function plan(input: any, kind: "token" | "nft") {
 function signedSignature(prepared: {kind: string; messageSha256: string}) { return prepared.kind === "token" ? "s".repeat(88) : String.fromCharCode(115 + Number(prepared.messageSha256.slice(-2))).repeat(88); }
 mock.module("../../../integrations/pumpfun/src/live", () => ({
   createMainnetConnection: () => ({}),
-  prepareTokenTransaction: async (input: any) => plan(input, "token"),
+  prepareTokenTransaction: async (input: any) => { tokenInputs.push(input); return plan(input, "token"); },
   verifyTokenLaunch: async (input: any, options: any) => { const result = {status: tokenVerified ? "verified" : "pending", ...identity(input), signature: options.signature, slot: 101, messageSha256: options.expectedMessageSha256}; const hook = tokenVerifyHook; tokenVerifyHook = undefined; await hook?.(); return result; },
   verifyCreatorNft: async (input: any, options: any) => { const result = {status: nftVerified ? "verified" : "pending", ...identity(input), signature: options.signature, slot: 102, messageSha256: options.expectedMessageSha256}; const hook = nftVerifyHook; nftVerifyHook = undefined; await hook?.(); return result; },
-  prepareCreatorNftTransaction: async (input: any) => { if (!tokenVerified) throw new Error("Token is not finalized"); const hook = nftPrepareHook; nftPrepareHook = undefined; await hook?.(); return nftVerified ? {status: "already-created", receipt: {status: "verified", ...identity(input)}} : plan(input, "nft"); },
+  prepareCreatorNftTransaction: async (input: any) => { if (!tokenVerified) throw new Error("Token is not finalized"); nftInputs.push(input); const hook = nftPrepareHook; nftPrepareHook = undefined; await hook?.(); return nftVerified ? {status: "already-created", receipt: {status: "verified", ...identity(input)}} : plan(input, "nft"); },
   assertNftMintReplaceable: async () => { if (!replaceable || nftVerified) throw new Error("Prior NFT blockhash has not expired or its account exists"); const hook = nftReplaceHook; nftReplaceHook = undefined; await hook?.(); return {replaceable: true}; },
   assertTokenMintReplaceable: async () => { if (!replaceable || tokenVerified) throw new Error("Prior token blockhash has not expired or its account exists"); return {replaceable: true}; },
   validateSignedWalletTransaction: (prepared: any, bytes: string) => {
@@ -69,7 +74,7 @@ const auth = await import("../../src/lib/carddex/live/auth.server");
 const assets = await import("../../src/lib/carddex/live/assets.server");
 const service = await import("../../src/lib/carddex/live/service.server");
 const {compositionBinding} = await import("../../src/lib/carddex/live/validation.server");
-const {COMPOSITION_VERSION} = await import("../../src/lib/carddex/live/composition.server");
+const {COMPOSITION_VERSION, loadRendererAsset} = await import("../../src/lib/carddex/live/composition.server");
 const nativeFetch = globalThis.fetch;
 globalThis.fetch = (async (request: Request | string | URL) => {
   const url = new URL(typeof request === "string" ? request : request instanceof URL ? request : request.url);
@@ -84,6 +89,7 @@ beforeEach(() => {
   for (const name of readdirSync(migrations).filter(name => name.endsWith(".sql")).sort()) { const sql = readFileSync(resolve(migrations, name), "utf8"); if (sql.replace(/--[^\n]*/g, "").trim()) sqlite.exec(sql); }
   env = {DB: localD1, STORAGE: storage, CARDDEX_DEPLOYMENT_ENV: "production", CARDDEX_PUBLIC_ORIGIN: "https://launchacard.fun", CARDDEX_MAINNET_RPC_URL: "https://rpc.example.test", CARDDEX_LIVE_LAUNCH_ENABLED: "true"};
   tokenVerified = nftVerified = replaceable = uncertain = false; prepareCalls = nftPrepareCalls = sendCalls = 0; receiptCreator = null;
+  tokenInputs = []; nftInputs = [];
   tokenVerifyHook = nftVerifyHook = nftPrepareHook = nftReplaceHook = undefined;
 });
 afterAll(() => { globalThis.fetch = nativeFetch; sqlite.close(); });
@@ -95,6 +101,85 @@ async function input(overrides: Partial<{cardTemplate: string; quoteAssetKey: st
   return {...fields, idempotencyKey: "fixture-request", nftMint, initialBuyQuoteBaseUnits: "0", slippageBps: 100, termsAcknowledged: true as const, assets: refs};
 }
 describe("isolated real-launch server lifecycle", () => {
+  const stockPairs = {"stock-gme": "gmex", "stock-tsla": "tslax", "stock-nvda": "nvdax", "stock-aapl": "aaplx", "stock-mstr": "mstrx", "stock-coin": "coinx", gamestop: "gmex", amc: "amc", coinbase: "coinx", strategy: "mstrx"};
+  const designPairs = [...Object.entries(stockPairs), ...MEME_PAIR_PRESETS.map(({design, quote}) => [design, quote] as const)];
+  for (const [cardTemplate, quoteKey] of designPairs) test(`${cardTemplate}/${quoteKey} preserves its exact quote through metadata, NFT preparation and saved reads`, async () => {
+    const quote = getPairAsset(quoteKey);
+    const original = await input({cardTemplate, quoteAssetKey: quote.key, quoteMint: quote.mint});
+    await expect(service.prepareLiveLaunch(creator, {...original, quoteMint: getPairAsset("usdc").mint})).rejects.toThrow("quote mint does not match");
+    expect(prepareCalls).toBe(0);
+    const prepared = await service.prepareLiveLaunch(creator, original);
+    expect(tokenInputs).toHaveLength(1);
+    expect(tokenInputs[0]).toMatchObject({quoteKey: quote.key, card: {designKey: cardTemplate}});
+    expect(prepared.intent).toMatchObject({quoteAssetKey: quote.key, quoteMint: quote.mint, cardTemplate});
+    for (const uri of [prepared.intent.tokenMetadataUri, prepared.intent.nftMetadataUri]) {
+      const metadata = await (await fetch(uri)).json() as any;
+      expect(metadata.properties.launchACard).toMatchObject({quoteAssetKey: quote.key, quoteMint: quote.mint, cardTemplate, tokenMint: mint, creatorWallet: creator, cardImageSha256: prepared.intent.assets.cardImage.sha256});
+    }
+    const metadata = await (await fetch(prepared.intent.nftMetadataUri)).json() as any;
+    expect(metadata.attributes).toContainEqual({trait_type: "Card design", value: cardTemplate});
+    expect(metadata.attributes).toContainEqual({trait_type: "Quote asset", value: quote.symbol});
+    expect(metadata.attributes).toContainEqual({trait_type: "Quote mint", value: quote.mint});
+    const stored = sqlite.query("SELECT quote_key, quote_mint, design_key FROM live_launch_intents WHERE id = ?").get(prepared.intent.id);
+    expect(stored).toEqual({quote_key: quote.key, quote_mint: quote.mint, design_key: cardTemplate});
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: prepared.intent.id, signature: "s".repeat(88), messageSha256: prepared.transaction!.messageSha256});
+    const nft = await service.prepareLiveCreatorNft(creator, {intentId: prepared.intent.id});
+    expect(nftInputs).toHaveLength(1);
+    expect(nftInputs[0]).toMatchObject({quoteKey: quote.key, nftMetadataSha256: prepared.intent.nftMetadataSha256, card: {designKey: cardTemplate, nftMetadataUri: prepared.intent.nftMetadataUri}});
+    expect(nft.transaction!.bindingSha256).toBe(prepared.intent.bindingSha256);
+    nftVerified = true;
+    await service.confirmLiveCreatorNft(creator, {intentId: prepared.intent.id, signature: "t".repeat(88), messageSha256: nft.transaction!.messageSha256});
+    const recovered = await service.getLiveLaunchIntent(creator, prepared.intent.id);
+    expect(recovered).toMatchObject({status: "complete", quoteAssetKey: quote.key, quoteMint: quote.mint, cardTemplate, nftMetadataUri: prepared.intent.nftMetadataUri, assets: prepared.intent.assets});
+    expect((await service.listLiveLaunchIntents(creator))[0]).toEqual(recovered);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM coins").get()).toEqual({n: 0});
+    expect(sendCalls).toBe(0);
+  });
+  for (const [cardTemplate, quoteKey] of [["pokemon-classic", "sol"], ["pokemon-full-art", "tslax"], ["pepe", "sol"], ["pepe", "gmex"], ...["ember", "relic", "tide", "neon-circuit", "frost", "mythic", "celestial", "regal", "wildtype", "aurora"].map(design => [design, "sol"])]) test(`saved ${cardTemplate}/${quoteKey} intent retains its existing quote and committed print`, async () => {
+    const quote = getPairAsset(quoteKey), original = await input({cardTemplate, quoteAssetKey: quote.key, quoteMint: quote.mint});
+    const prepared = await service.prepareLiveLaunch(creator, original);
+    // Existing intents must recover without being reinterpreted by the new chooser presets.
+    sqlite.query("UPDATE live_compositions SET renderer_version = 'launchacard-canonical-v1'").run();
+    const recovered = await service.prepareLiveLaunch(creator, original);
+    expect(recovered.intent).toEqual(prepared.intent);
+    expect(recovered.intent).toMatchObject({cardTemplate, quoteAssetKey: quote.key, quoteMint: quote.mint, assets: prepared.intent.assets});
+    expect(prepareCalls).toBe(2);
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: prepared.intent.id, signature: "s".repeat(88), messageSha256: recovered.transaction!.messageSha256});
+    await service.prepareLiveCreatorNft(creator, {intentId: prepared.intent.id});
+    expect(nftInputs[0]).toMatchObject({quoteKey: quote.key, card: {designKey: cardTemplate, nftMetadataUri: prepared.intent.nftMetadataUri}});
+    expect(sendCalls).toBe(0);
+  });
+  test("trusted renderer rejects stale atlas metadata and changed bytes", async () => {
+    expect(COMPOSITION_VERSION).toBe(CARD_RENDERER_VERSION);
+    expect(CREATOR_CARD_RENDERER_VERSION).toBe(CARD_RENDERER_VERSION);
+    const atlas = renderAssets["pokemon-classic"], original = {...atlas};
+    try {
+      atlas.rendererVersion = "launchacard-canonical-v1";
+      await expect(loadRendererAsset(atlas.path)).rejects.toThrow("current trusted renderer");
+      Object.assign(atlas, original, {rendererVersion: CARD_RENDERER_VERSION, sourceSha256: "0".repeat(64)});
+      await expect(loadRendererAsset(atlas.path)).rejects.toThrow("approved design");
+      Object.assign(atlas, original, {rendererVersion: CARD_RENDERER_VERSION});
+      env.ASSETS = {fetch: async () => new Response(new Uint8Array([1, 2, 3]))};
+      await expect(loadRendererAsset(atlas.path)).rejects.toThrow("trusted conversion manifest");
+      env.ASSETS = {fetch: async () => new Response(readFileSync(resolve(import.meta.dir, "../../public", `.${atlas.path}`)))};
+      expect(await loadRendererAsset(atlas.path)).toEqual(new Uint8Array(readFileSync(resolve(import.meta.dir, "../../public", `.${atlas.path}`))));
+    } finally { Object.assign(atlas, original); }
+  });
+  test("new launches require the current print while saved intents retain their committed images", async () => {
+    const original = await input();
+    sqlite.query("UPDATE live_compositions SET renderer_version = 'launchacard-canonical-v1'").run();
+    await expect(service.prepareLiveLaunch(creator, original)).rejects.toThrow("Compose the canonical");
+    expect(prepareCalls).toBe(0);
+    sqlite.query("UPDATE live_compositions SET renderer_version = ?").run(COMPOSITION_VERSION);
+    const prepared = await service.prepareLiveLaunch(creator, original);
+    sqlite.query("UPDATE live_compositions SET renderer_version = 'launchacard-canonical-v1'").run();
+    const recovered = await service.prepareLiveLaunch(creator, original);
+    expect(recovered.intent.id).toBe(prepared.intent.id);
+    expect(recovered.intent.assets).toEqual(prepared.intent.assets);
+    expect(recovered.intent.nftMetadataUri).toBe(prepared.intent.nftMetadataUri);
+  });
   test("public asset checks reject redirects before a second origin can be fetched", async () => {
     const transport = globalThis.fetch;
     const calls: Array<{url: string; redirect?: RequestRedirect}> = [];
@@ -141,6 +226,7 @@ describe("isolated real-launch server lifecycle", () => {
     expect(nftJson.properties.launchACard.creatorWallet).toBe(creator);
     expect(nftJson.properties.launchACard.tokenMint).toBe(mint);
     expect(nftJson.properties.launchACard.cardImageSha256).toBe(prepared.intent.assets.cardImage.sha256);
+    expect(nftJson.properties.launchACard.rendererVersion).toBe(CARD_RENDERER_VERSION);
     expect(sqlite.query("SELECT COUNT(*) AS n FROM users").get()).toEqual({n: 0});
     expect(sqlite.query("SELECT COUNT(*) AS n FROM coins").get()).toEqual({n: 0});
     await expect(service.getLiveLaunchIntent(otherWallet, prepared.intent.id)).rejects.toThrow("does not belong");

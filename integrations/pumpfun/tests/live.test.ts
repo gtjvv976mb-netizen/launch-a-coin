@@ -16,6 +16,7 @@ import fixture from "./fixtures/mainnet-pair-accounts-2026-10-28.json";
 import feeFixture from "./fixtures/mainnet-fee-account-2026-10-28.json";
 import art from "../src/design-assets.json";
 import { validateLivePlan, type ExpectedPlan } from "../../../app/src/components/carddex/live/transaction";
+import { MEME_PAIR_PRESETS } from "../../../app/src/lib/carddex/design-pairings";
 
 // Synthetic keys and blockhash are confined to this offline RPC mock. No test
 // connection has a network transport; signed fixtures can never be submitted.
@@ -34,6 +35,16 @@ const defaultInput = (): LiveLaunchInput => ({
     nftMetadataUri: "https://launchacard.fun/m/" + "2".repeat(64) },
   renderedCardSha256: "3".repeat(64), nftMetadataSha256: "4".repeat(64), initialBuyQuoteBaseUnits: "0", slippageBps: 100,
 });
+function expectedPlan(input: LiveLaunchInput, plan: WalletTransactionPlan): ExpectedPlan {
+  const quote = PAIR_ASSETS.find((asset) => asset.key === input.quoteKey)!;
+  return { kind: plan.kind, creator: input.creator, mint: plan.kind === "token" ? input.mint : input.nftMint,
+    tokenMint: input.mint, name: input.name, symbol: input.symbol, tokenMetadataUri: input.tokenMetadataUri,
+    nftMetadataUri: input.card.nftMetadataUri, cardTemplate: input.card.designKey, cardImageSha256: input.renderedCardSha256!,
+    nftMetadataSha256: input.nftMetadataSha256!, bindingSha256: plan.bindingSha256, quoteKey: quote.key,
+    quoteMint: quote.mint, quoteTokenProgram: quote.tokenProgram, quoteDecimals: quote.decimals,
+    initialBuyQuoteBaseUnits: plan.kind === "token" ? input.initialBuyQuoteBaseUnits ?? "0" : "0",
+    launchInitialBuyQuoteBaseUnits: input.initialBuyQuoteBaseUnits ?? "0" };
+}
 
 function accountFromFixture(value: any): AccountInfo<Buffer> {
   return { executable: value.executable, owner: new PublicKey(value.owner), lamports: value.lamports,
@@ -70,13 +81,13 @@ function mockRpc() {
       err: null, fee: 11000, preBalances: [], postBalances: [], loadedAddresses: { readonly: [], writable: [] },
     } });
   }
-  function addQuoteBalance(input: LiveLaunchInput, amount: bigint) {
+  function addQuoteBalance(input: LiveLaunchInput, amount: bigint, ownerAddress = input.creator) {
     const quote = PAIR_ASSETS.find((asset) => asset.key === input.quoteKey)!;
-    const mint = new PublicKey(quote.mint), owner = new PublicKey(input.creator), tokenProgram = new PublicKey(quote.tokenProgram);
+    const mint = new PublicKey(quote.mint), owner = new PublicKey(ownerAddress), tokenProgram = new PublicKey(quote.tokenProgram);
     const data = Buffer.alloc(165);
     AccountLayout.encode({ mint, owner, amount, delegateOption: 0, delegate: PublicKey.default, state: AccountState.Initialized,
       isNativeOption: 0, isNative: 0n, delegatedAmount: 0n, closeAuthorityOption: 0, closeAuthority: PublicKey.default }, data);
-    accounts.set(getAssociatedTokenAddressSync(mint, owner, false, tokenProgram).toBase58(), info(tokenProgram, data));
+    accounts.set(getAssociatedTokenAddressSync(mint, owner, true, tokenProgram).toBase58(), info(tokenProgram, data));
   }
   async function addToken(input: LiveLaunchInput) {
     const mint = new PublicKey(input.mint);
@@ -113,29 +124,66 @@ function mockRpc() {
 }
 
 describe("mainnet wallet preparation, independent confirmation and separate NFT recovery", () => {
-  test("actual SDK plans pass the independent browser verifier for all16quotes and Core NFT issuance", async () => {
-    function expected(input: LiveLaunchInput, plan: WalletTransactionPlan): ExpectedPlan {
-      const quote = PAIR_ASSETS.find((asset) => asset.key === input.quoteKey)!;
-      return { kind: plan.kind, creator: input.creator, mint: plan.kind === "token" ? input.mint : input.nftMint,
-        tokenMint: input.mint, name: input.name, symbol: input.symbol, tokenMetadataUri: input.tokenMetadataUri,
-        nftMetadataUri: input.card.nftMetadataUri, cardTemplate: input.card.designKey, cardImageSha256: input.renderedCardSha256!,
-        nftMetadataSha256: input.nftMetadataSha256!, bindingSha256: plan.bindingSha256, quoteKey: quote.key,
-        quoteMint: quote.mint, quoteTokenProgram: quote.tokenProgram, quoteDecimals: quote.decimals,
-        initialBuyQuoteBaseUnits: plan.kind === "token" ? input.initialBuyQuoteBaseUnits ?? "0" : "0",
-        launchInitialBuyQuoteBaseUnits: input.initialBuyQuoteBaseUnits ?? "0" };
-    }
+  test("actual SDK plans pass the independent browser verifier for all 25 quotes and Core NFT issuance", async () => {
     for (const quote of PAIR_ASSETS) {
       const input = defaultInput(); input.quoteKey = quote.key;
       input.card = { ...input.card, designKey: "obsidian-archive", frontSha256: art["obsidian-archive"].front.sha256, backSha256: art["obsidian-archive"].back.sha256 };
       const plan = await prepareTokenTransaction(input, { connection: mockRpc().connection });
-      expect(validateLivePlan(plan, expected(input, plan)).signers).toEqual([input.creator, input.mint]);
+      expect(validateLivePlan(plan, expectedPlan(input, plan)).signers).toEqual([input.creator, input.mint]);
     }
     const input = defaultInput(), rpc = mockRpc();
     const token = await prepareTokenTransaction(input, { connection: rpc.connection });
     rpc.remember(token, tokenSignature); await rpc.addToken(input);
     const nft = await prepareCreatorNftTransaction(input, { connection: rpc.connection, tokenSignature });
     if (nft.status !== "wallet-signature-required") throw new Error("Expected a fresh NFT plan");
-    expect(validateLivePlan(nft, expected(input, nft)).signers).toEqual([input.creator, input.nftMint]);
+    expect(validateLivePlan(nft, expectedPlan(input, nft)).signers).toEqual([input.creator, input.nftMint]);
+  });
+
+  for (const {design: designKey, quote: quoteKey} of MEME_PAIR_PRESETS) test(`${designKey}/${quoteKey} themed preset preserves exact identity through actual SDK token and NFT plans`, async () => {
+    const input = defaultInput(), design = art[designKey];
+    input.quoteKey = quoteKey;
+    input.card = {...input.card, designKey, frontSha256:design.front.sha256, backSha256:design.back.sha256};
+    const quote=PAIR_ASSETS.find(asset=>asset.key===quoteKey)!,rpc=mockRpc();
+    const token=await prepareTokenTransaction(input,{connection:rpc.connection});
+    const wire=validateLivePlan(token,expectedPlan(input,token));
+    const create=wire.instructions.find(instruction=>instruction.program===PUMP_PROGRAM_ID.toBase58())!;
+    expect(create.accounts[16]).toBe(quote.mint);
+    expect(create.accounts[18]).toBe(quote.tokenProgram);
+    expect(token.review).toMatchObject({quoteKey,quoteMint:quote.mint,quoteDecimals:quote.decimals,initialBuyQuoteBaseUnits:"0"});
+    expect(wire.signatures.every(signature=>signature.every(byte=>byte===0))).toBe(true);
+    rpc.remember(token,tokenSignature);await rpc.addToken(input);
+    const nft=await prepareCreatorNftTransaction(input,{connection:rpc.connection,tokenSignature,tokenMessageSha256:token.messageSha256});
+    if(nft.status!=="wallet-signature-required")throw Error("Expected a fresh NFT plan");
+    expect(validateLivePlan(nft,expectedPlan(input,nft)).signers).toEqual([input.creator,input.nftMint]);
+    expect(nft.bindingSha256).toBe(token.bindingSha256);
+    expect(nft.review).toMatchObject({quoteKey,quoteMint:quote.mint,quoteDecimals:quote.decimals});
+    rpc.remember(nft,nftSignature);rpc.addNft(input);
+    expect(await verifyCreatorNft(input,{connection:rpc.connection,signature:nftSignature,expectedMessageSha256:nft.messageSha256})).toMatchObject({status:"verified",quoteMint:quote.mint,bindingSha256:token.bindingSha256});
+    expect(rpc.sent()).toBe(0);
+  });
+
+  const stockPairs = {"stock-gme": "gmex", "stock-tsla": "tslax", "stock-nvda": "nvdax", "stock-aapl": "aaplx", "stock-mstr": "mstrx", "stock-coin": "coinx", gamestop: "gmex", amc: "amc", coinbase: "coinx", strategy: "mstrx"};
+  for (const [designKey, quoteKey] of Object.entries(stockPairs)) test(`${designKey} actual SDK token and Core plans preserve the exact stock binding`, async () => {
+    const input = defaultInput(), design = art[designKey as keyof typeof art];
+    input.quoteKey = quoteKey;
+    input.card = {...input.card, designKey, frontSha256: design.front.sha256, backSha256: design.back.sha256};
+    const quote = PAIR_ASSETS.find(asset => asset.key === quoteKey)!, rpc = mockRpc();
+    const token = await prepareTokenTransaction(input, {connection: rpc.connection});
+    const tokenWire = validateLivePlan(token, expectedPlan(input, token));
+    const create = tokenWire.instructions.find(instruction => instruction.program === PUMP_PROGRAM_ID.toBase58())!;
+    expect(create.accounts[16]).toBe(quote.mint);
+    expect(create.accounts[18]).toBe(quote.tokenProgram);
+    expect(token.review).toMatchObject({quoteKey, quoteMint: quote.mint, quoteDecimals: quote.decimals, initialBuyQuoteBaseUnits: "0"});
+    expect(tokenWire.signatures.every(signature => signature.every(byte => byte === 0))).toBe(true);
+    rpc.remember(token, tokenSignature); await rpc.addToken(input);
+    const nft = await prepareCreatorNftTransaction(input, {connection: rpc.connection, tokenSignature, tokenMessageSha256: token.messageSha256});
+    if (nft.status !== "wallet-signature-required") throw new Error("Expected a fresh NFT plan");
+    expect(validateLivePlan(nft, expectedPlan(input, nft)).signers).toEqual([input.creator, input.nftMint]);
+    expect(nft.bindingSha256).toBe(token.bindingSha256);
+    expect(nft.review).toMatchObject({quoteKey, quoteMint: quote.mint, quoteDecimals: quote.decimals});
+    rpc.remember(nft, nftSignature); rpc.addNft(input);
+    expect(await verifyCreatorNft(input, {connection: rpc.connection, signature: nftSignature, expectedMessageSha256: nft.messageSha256})).toMatchObject({status: "verified", quoteMint: quote.mint, bindingSha256: token.bindingSha256});
+    expect(rpc.sent()).toBe(0);
   });
 
   test("token transaction is unsigned v0 with no lookup tables and exact cost/pair review", async () => {
@@ -173,6 +221,37 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     expect(pumpInstructions).toHaveLength(2);
     expect(Buffer.from(pumpInstructions[1].data).readBigUInt64LE(8)).toBe(100_000n);
     expect(Buffer.from(pumpInstructions[1].data).readBigUInt64LE(16)).toBe(BigInt(plan.review.minimumTokensOut));
+  });
+
+  for (const quoteKey of ["pengu", "giga", "spx", "trump", "useless", "chillguy"]) test(`${quoteKey} initial buy retains exact atoms when it fits and explicitly rejects oversized metadata`, async () => {
+    const preset = MEME_PAIR_PRESETS.find(preset => preset.quote === quoteKey)!;
+    const input = defaultInput(), design = art[preset.design], rpc = mockRpc();
+    input.quoteKey = quoteKey;
+    input.card = {...input.card, designKey: preset.design, frontSha256: design.front.sha256, backSha256: design.back.sha256};
+    input.initialBuyQuoteBaseUnits = "1234567";
+    const quote = PAIR_ASSETS.find(asset => asset.key === quoteKey)!;
+    rpc.addQuoteBalance(input, 1_234_566n);
+    await expect(prepareTokenTransaction(input, {connection: rpc.connection})).rejects.toThrow(`Insufficient or frozen ${quote.symbol}`);
+    rpc.addQuoteBalance(input, 1_234_567n);
+    const global = PUMP_SDK.decodeGlobal(rpc.accounts.get(GLOBAL_PDA.toBase58())!);
+    const recipient = global.buybackFeeRecipients.find(key => !key.equals(PublicKey.default))!;
+    rpc.addQuoteBalance(input, 0n, recipient.toBase58());
+    await expect(prepareTokenTransaction(input, {connection: rpc.connection})).rejects.toThrow("1232-byte packet limit");
+    // The adapter supports short public metadata URIs too. The app's current
+    // longer URI must produce the explicit size error above, never omit a buy.
+    input.tokenMetadataUri = "https://launchacard.fun/m/short";
+    const plan = await prepareTokenTransaction(input, {connection: rpc.connection});
+    const wire = validateLivePlan(plan, expectedPlan(input, plan));
+    const pump = wire.instructions.filter(instruction => instruction.program === PUMP_PROGRAM_ID.toBase58());
+    expect(pump).toHaveLength(2);
+    expect(pump[1].accounts[2]).toBe(quote.mint);
+    expect(pump[1].accounts[4]).toBe(quote.tokenProgram);
+    expect(Buffer.from(pump[1].data).readBigUInt64LE(8)).toBe(1_234_567n);
+    expect(plan.review).toMatchObject({quoteKey, quoteMint: quote.mint, quoteDecimals: quote.decimals, initialBuyQuoteBaseUnits: "1234567", launchInitialBuyQuoteBaseUnits: "1234567"});
+    expect(Buffer.from(pump[1].data).readBigUInt64LE(16)).toBe(BigInt(plan.review.minimumTokensOut));
+    expect(BigInt(plan.review.minimumTokensOut)).toBeGreaterThan(0n);
+    expect(wire.signatures.every(signature => signature.every(byte => byte === 0))).toBe(true);
+    expect(rpc.sent()).toBe(0);
   });
 
   test("oversized custom-pair initial buys fail explicitly instead of dropping the buy", async () => {

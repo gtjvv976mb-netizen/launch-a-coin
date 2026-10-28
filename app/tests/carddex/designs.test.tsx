@@ -8,22 +8,28 @@ import { resolve } from "node:path";
 import { CARD_GENERATED_ASSETS, generatedCardAssets } from "../../src/lib/carddex/generated-assets";
 import { generatedCardStyle } from "../../src/components/carddex/GeneratedCardArt";
 import { CANONICAL_CARD_LAYOUT, CANONICAL_CARD_TEMPLATE } from "../../src/lib/carddex/card-template";
-import { frameLayout } from "../../src/lib/mintdex/tiers";
 
 const TOKEN: CardData = { name: "Creator's token", ticker: "OWN", image: "/assets/creatures/glorb.webp", dexNo: 25, level: 1, mcapUsd: 10, holders: 17, lore: "The creator's own story.", ownerHandle: "creator" };
 
 describe("permanent creator-selected card designs", () => {
-  test("one immutable physical template retains the original MintDex print grid", () => {
-    const original = frameLayout("spark");
+  test("one immutable physical template aligns all content and reclaims the removed footer", () => {
     expect(CANONICAL_CARD_LAYOUT.aspect).toBe(63 / 88);
-    for (const role of ["window", "name", "type", "text", "footer", "radius"] as const) expect(CANONICAL_CARD_LAYOUT[role]).toEqual(original[role]);
+    expect(CANONICAL_CARD_LAYOUT.radius).toBe(.0504);
+    expect(CANONICAL_CARD_LAYOUT.footer).toEqual([]);
+    const boxes = [CANONICAL_CARD_LAYOUT.name,CANONICAL_CARD_LAYOUT.window,CANONICAL_CARD_LAYOUT.type,CANONICAL_CARD_LAYOUT.text];
+    for (const [i,box] of boxes.entries()) {
+      expect(box.x).toBe(.1); expect(box.w).toBe(.8);
+      expect(box.y+box.h).toBeLessThan(.95);
+      if(i) expect(box.y).toBeGreaterThan(boxes[i-1].y+boxes[i-1].h);
+    }
+    expect(CANONICAL_CARD_LAYOUT.text.y+CANONICAL_CARD_LAYOUT.text.h).toBeGreaterThan(.92);
     expect(Object.isFrozen(CANONICAL_CARD_LAYOUT)).toBe(true);
     expect(Object.isFrozen(CANONICAL_CARD_LAYOUT.window)).toBe(true);
     expect(Object.isFrozen(CANONICAL_CARD_LAYOUT.footer)).toBe(true);
   });
 
   test("all48 actual full, compact and lite fronts put the same live roles in the same boxes before decode", () => {
-    const roles = ["name", "art", "ticker", "details", "creator", "serial"];
+    const roles = ["name", "art", "ticker", "details"];
     const boxes = (html:string) => roles.map(role => {
       const tag = html.match(new RegExp(`<[^>]+data-card-slot="${role}"[^>]*>`))?.[0];
       expect(tag).toBeTruthy();
@@ -32,14 +38,6 @@ describe("permanent creator-selected card designs", () => {
     });
     const defaultFront = renderToStaticMarkup(<MintCardFace card={{...TOKEN,cardTemplate:DEFAULT_CARD_DESIGN}} />);
     const baseline = boxes(defaultFront);
-    const sealPath = (html:string) => html.match(/<g[^>]+data-card-decoration="seal"[^>]*><path d="([^"]+)"/)?.[1];
-    const defaultSeal = sealPath(defaultFront)!;
-    const sealNumbers = defaultSeal.match(/-?\d+(?:\.\d+)?/g)!.map(Number);
-    const sealX = sealNumbers.filter((_,i)=>i%2===0);
-    const sealY = sealNumbers.filter((_,i)=>i%2===1);
-    expect(Math.min(...sealX)).toBeGreaterThan((CANONICAL_CARD_LAYOUT.footer[0].x+CANONICAL_CARD_LAYOUT.footer[0].w)*1000);
-    expect(Math.max(...sealX)).toBeLessThan(CANONICAL_CARD_LAYOUT.footer[1].x*1000);
-    expect(Math.min(...sealY)).toBeGreaterThan((CANONICAL_CARD_LAYOUT.text.y+CANONICAL_CARD_LAYOUT.text.h)*1000);
     const geometry = (key:string) => Object.fromEntries(Object.entries(generatedCardStyle(key)).filter(([key])=>key!=="--generated-ink"));
     for (const design of CARD_DESIGNS) {
       expect(geometry(design.key)).toEqual(geometry(DEFAULT_CARD_DESIGN));
@@ -47,7 +45,8 @@ describe("permanent creator-selected card designs", () => {
         const html = renderToStaticMarkup(<MintCardFace {...mode} card={{...TOKEN,cardTemplate:design.key}} />);
         expect(html).toContain(`data-card-layout="${CANONICAL_CARD_TEMPLATE}"`);
         expect(boxes(html)).toEqual(baseline);
-        expect(sealPath(html)).toBe(defaultSeal);
+        for (const retired of ['data-card-slot="creator"','data-card-slot="serial"','mdx-card__foot','data-card-decoration="seal"','data-card-decoration="market-engraving"',">Launch a Card<",">Owner ","@creator"]) expect(html).not.toContain(retired);
+        expect(html).toContain(">1/1<");
         expect(html).not.toContain("data-classic-layout=");
         expect(html).not.toContain("cdx-trading-card__effect");
         expect(html).not.toContain("mdx-meme-icon__frame");
@@ -61,7 +60,7 @@ describe("permanent creator-selected card designs", () => {
   test("missing art and long creator identity retain the common fallback print", () => {
     for (const key of [DEFAULT_CARD_DESIGN, "one-piece", "neon-circuit", "stock-tsla"]) {
       const html = renderToStaticMarkup(<MintCardFace card={{...TOKEN,cardTemplate:key,image:"",name:"A creator token with a long identity",ticker:"CREATOR123"}} />);
-      expect(html).toContain('data-card-layout="mintdex-v1"');
+      expect(html).toContain(`data-card-layout="${CANONICAL_CARD_TEMPLATE}"`);
       expect(html).toContain("Your token art");
       expect(html).toContain("A creator token with a long identity");
       expect(html).toContain("CREATOR123");
@@ -93,14 +92,16 @@ describe("permanent creator-selected card designs", () => {
     }
   });
 
-  test("all 48 front renderers retain creator identity and all reverses stay wordless", () => {
+  test("all 48 fronts retain token identity without owner/number plates and reverses stay wordless", () => {
     for (const design of CARD_DESIGNS) {
       const card = { ...TOKEN, cardTemplate: design.key };
       const front = renderToStaticMarkup(<MintCardFace card={card} />);
       const reverse = renderToStaticMarkup(<BackFace sizes="225px" theme={cardBackTheme(card)} />);
       expect(front).toContain(`data-card-template="${design.key}"`);
       expect(front).toContain("OWN");
-      expect(front).toContain("creator");
+      expect(front).toContain("The creator&#x27;s own story.");
+      expect(front).not.toContain('data-card-slot="creator"');
+      expect(front).not.toContain('data-card-slot="serial"');
       expect(front).not.toContain(">MintDex<");
       expect(reverse).not.toContain("<text");
       expect(reverse).not.toContain(">MintDex<");
@@ -128,9 +129,10 @@ describe("permanent creator-selected card designs", () => {
       const geometry = generatedCardStyle(key) as Record<string,string>;
       expect(geometry["--generated-art-mask"]).toStartWith('url("data:image/svg+xml,');
       expect(geometry["--generated-foil-holes"]).toStartWith('url("data:image/svg+xml,');
-      for (const slot of ["art", "name", "type", "text", "footer", "foot-a", "foot-b"]) {
+      for (const slot of ["art", "name", "type", "text"]) {
         for (const dimension of ["x", "y", "w", "h"]) expect(geometry[`--generated-${slot}-${dimension}`]).toEndWith("%");
       }
+      for (const slot of ["footer", "foot-a", "foot-b"]) expect(geometry[`--generated-${slot}-x`]).toBeUndefined();
       for (const source of [assets.front, assets.back, assets.front320, assets.back320].filter(Boolean) as string[]) {
         expect(source.startsWith("/assets/carddex/higgsfield/")).toBe(true);
         expect(existsSync(resolve(import.meta.dir, "../../public", source.slice(1)))).toBe(true);

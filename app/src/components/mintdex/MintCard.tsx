@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type Ref } from "react";
 import { getCardDesign, type CardDesign } from "../../lib/carddex/designs";
 import { CanonicalCardFace } from "../carddex/CanonicalCardFace";
+import { canonicalSkinAsset } from "../carddex/CanonicalCardSkin";
 import { generatedCardAssets } from "../../lib/carddex/generated-assets";
 import { marketCapText } from "../../lib/carddex/quote-display";
 import "../../carddex-cards.css";
@@ -100,7 +101,8 @@ export function preloadCard(card: CardData, sizes: string, level = card.level): 
   if (typeof window === "undefined") return Promise.resolve();
   const design = cardDesign(card);
   const generated = generatedCardAssets(design.key);
-  const jobs: Promise<unknown>[] = [{source:generated.front,small:generated.front320},{source:generated.back,small:generated.back320}].filter(asset=>asset.source).map(({source,small}) => {
+  const skin = canonicalSkinAsset(design.key,card.quoteAssetKey);
+  const jobs: Promise<unknown>[] = [{source:skin?.path,small:skin?.previewPath},{source:generated.back,small:generated.back320}].filter(asset=>asset.source).map(({source,small}) => {
     const image = new Image();
     if (small) { image.srcset = `${small} 320w, ${source} 1260w`; image.sizes = sizes; }
     image.src = source!; image.decoding = "async";

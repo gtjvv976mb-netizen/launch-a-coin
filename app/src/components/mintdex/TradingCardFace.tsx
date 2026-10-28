@@ -5,6 +5,7 @@ import { dexNo } from "../../lib/mintdex/format";
 import { useImageFailure } from "./image-state";
 import { GeneratedCardFront, generatedCardStyle } from "../carddex/GeneratedCardArt";
 import { marketCapText } from "../../lib/carddex/quote-display";
+import { getTradingPair } from "../../lib/carddex/pairs";
 import type { CardData } from "./MintCard";
 
 function Star() {
@@ -88,7 +89,7 @@ export function TradingCardFace({ card, design, priority = false, sizes, compact
     </div>
     <div className="cdx-trading-card__name"><strong>{card.name}</strong><span className="cdx-trading-card__attribute" aria-label="One of one"><svg viewBox="0 0 32 32" aria-hidden><path d="m16 3 11 6.5v13L16 29 5 22.5v-13Z" /><path d="M16 8v16M11 12l5-4 5 4" /></svg></span></div>
     {duel ? <div className="cdx-trading-card__star-rail" aria-hidden>{Array.from({ length: design.layout === "yugioh-spell" ? 1 : 8 }, (_, index) => <i key={index}><Star /></i>)}</div> : null}
-    <div className="cdx-trading-card__type"><b>${card.ticker}</b><span>{design.stock?.pair ?? "1 / 1"}</span></div>
+    <div className="cdx-trading-card__type"><b>${card.ticker}</b><span>{card.tradingPair ?? getTradingPair(card.ticker, card.quoteAssetKey)}</span></div>
     <div className="cdx-trading-card__effect">
       <p>{card.lore || "Every token has a story. This is where yours begins."}</p>
       <div className="cdx-trading-card__stats"><span>Market cap <b>{quote}</b></span><span>Holders <b>{sample || card.dexNo > 0 || card.mintAddress ? card.holders : "—"}</b></span></div>

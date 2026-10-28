@@ -36,9 +36,10 @@ mock.module("../../src/lib/mintdex/server/background.server", () => ({ runInBack
 const service = await import("../../src/lib/mintdex/server/service.server");
 const seed = await import("../../src/lib/mintdex/server/seed.server");
 const { CARD_DESIGNS, DEFAULT_CARD_DESIGN, getCardDesign } = await import("../../src/lib/carddex/designs");
+const { MEME_PAIR_PRESETS } = await import("../../src/lib/carddex/design-pairings");
 const { INITIAL_RESERVES, quoteBuy, quoteSell } = await import("../../src/lib/mintdex/curve");
 const { LAUNCH_FEE, LAMPORTS } = await import("../../src/lib/mintdex/constants");
-const { PAIR_ASSETS, defaultQuoteForDesign } = await import("../../src/lib/carddex/pairs");
+const { PAIR_ASSETS, defaultQuoteForDesign, getPairAsset, getTradingPair } = await import("../../src/lib/carddex/pairs");
 const { demoQuoteStartBalance, initialQuoteReserves, maxInitialBuyQuoteAtoms, quoteUnit } = await import("../../src/lib/carddex/quote-simulation");
 const migrations = resolve(import.meta.dir, "../../migrations");
 
@@ -67,10 +68,11 @@ describe("CardDex fixed creator cards and token trading", () => {
       expect(stored.creator_id).toBe(user.id);
       expect(stored.mint_address).toBeNull();
       const page = await service.getCoinPage(result.id, "qa-session");
+      const asset = defaultQuoteForDesign(design.key);
       expect(page?.coin.cardTemplate).toBe(design.key);
       expect(page?.coin.level).toBe(design.materialLevel);
-      expect(page?.coin.stockTicker).toBe(design.stock?.ticker ?? null);
-      expect(page?.coin.tokenPair).toBe(design.stock?.pair ?? null);
+      expect(page?.coin.stockTicker).toBe(asset.kind === "stock" ? asset.referenceTicker : null);
+      expect(page?.coin.tokenPair).toBe(asset.kind === "stock" ? getTradingPair(`D${String(index).padStart(2, "0")}`, asset.key) : null);
       expect(page?.bids).toEqual([]);
       expect(page?.sales).toEqual([]);
     }
@@ -81,7 +83,7 @@ describe("CardDex fixed creator cards and token trading", () => {
 
   test("stock references are catalog-derived, survive token trades, and reject spoofed associations", async () => {
     const stockDesigns = CARD_DESIGNS.filter((design) => design.stock);
-    expect(stockDesigns.length).toBeGreaterThan(0);
+    expect(stockDesigns.map(design => design.key).sort()).toEqual(["stock-gme", "stock-tsla", "stock-nvda", "stock-aapl", "stock-mstr", "stock-coin", "gamestop", "amc", "coinbase", "strategy"].sort());
     for (const [index, design] of stockDesigns.entries()) {
       const asset = defaultQuoteForDesign(design.key);
       const amount = Math.floor(initialQuoteReserves(asset.key).vSol / 30);
@@ -91,12 +93,12 @@ describe("CardDex fixed creator cards and token trading", () => {
       await service.trade(user, id, "sell", Math.floor(buy.tokens / 2), 0, identity);
       const page = await service.getCoinPage(id, "qa-session");
       expect(page?.coin.cardTemplate).toBe(design.key);
-      expect(page?.coin.stockTicker).toBe(design.stock!.ticker);
-      expect(page?.coin.tokenPair).toBe(design.stock!.pair);
+      expect(page?.coin.stockTicker).toBe(asset.referenceTicker);
+      expect(page?.coin.tokenPair).toBe(getTradingPair(`S${String(index).padStart(2, "0")}`, asset.key));
       expect(page?.coin.ticker).toBe(`S${String(index).padStart(2, "0")}`);
       const item = (await service.getPortfolio("qa-session"))?.deeds.find((item) => item.coin.id === id);
-      expect(item?.coin.stockTicker).toBe(design.stock!.ticker);
-      expect(item?.coin.tokenPair).toBe(design.stock!.pair);
+      expect(item?.coin.stockTicker).toBe(asset.referenceTicker);
+      expect(item?.coin.tokenPair).toBe(getTradingPair(`S${String(index).padStart(2, "0")}`, asset.key));
     }
     const stock = stockDesigns[0];
     const base = { name: "Stock Reference", ticker: "SPOOF", image: "/api/img/art/qa-token.png", lore: "Reference artwork only.", devBuy: 0, cardTemplate: stock.key };
@@ -107,8 +109,38 @@ describe("CardDex fixed creator cards and token trading", () => {
     await expect(service.launchCoin(user, { ...base, cardTemplate: ordinary.key, stockTicker: stock.stock!.ticker })).rejects.toThrow("stock reference must match");
     expect((sqlite.query("SELECT balance FROM users WHERE id = ?").get(user.id) as { balance: number }).balance).toBe(before);
     expect(sqlite.query("SELECT COUNT(*) AS n FROM coins WHERE ticker = 'SPOOF'").get()).toEqual({ n: 0 });
-    const accepted = await service.launchCoin(user, { ...base, stockTicker: stock.stock!.ticker, tokenPair: stock.stock!.pair });
-    expect((await service.getCoinPage(accepted.id, null))?.coin.tokenPair).toBe(stock.stock!.pair);
+    const stockQuote = defaultQuoteForDesign(stock.key);
+    await expect(service.launchCoin(user, { ...base, tokenPair: `${stockQuote.referenceTicker} / SOL` })).rejects.toThrow("reference pair must match");
+    const accepted = await service.launchCoin(user, { ...base, stockTicker: stockQuote.referenceTicker, tokenPair: getTradingPair(base.ticker, stockQuote.key) });
+    expect((await service.getCoinPage(accepted.id, null))?.coin.tokenPair).toBe(getTradingPair(base.ticker, stockQuote.key));
+  });
+
+  test("a neutral design derives stock references from its selected quote", async () => {
+    const asset = getPairAsset("tslax");
+    const input = { name: "Neutral Stock Quote", ticker: "NEUTRAL", image: "/api/img/art/qa-token.png", lore: "The actual quote defines this association.", cardTemplate: "spark", devBuy: 0, quoteAssetKey: asset.key, quoteMint: asset.mint, stockTicker: "TSLA", tokenPair: "NEUTRAL / TSLAX" };
+    const {id} = await service.launchCoin(user, input);
+    const page = (await service.getCoinPage(id, "qa-session"))!;
+    expect(row(id).quote_mint).toBe(asset.mint);
+    expect(page.coin).toMatchObject({cardTemplate: "spark", stockTicker: "TSLA", tokenPair: "NEUTRAL / TSLAX", tradingPair: "NEUTRAL / TSLAX"});
+    expect((await service.getPortfolio("qa-session"))?.deeds.find(item => item.coin.id === id)?.coin.stockTicker).toBe("TSLA");
+    await expect(service.launchCoin(user, {...input, ticker: "WRONG", stockTicker: "GME", tokenPair: "WRONG / TSLAX"})).rejects.toThrow("stock reference must match");
+    await expect(service.launchCoin(user, {...input, ticker: "OLDPAIR", tokenPair: "TSLA / SOL"})).rejects.toThrow("reference pair must match");
+  });
+
+  test("historical stock artwork keeps its stored SOL quote through reads and trades", async () => {
+    const design = getCardDesign("stock-tsla"), now = Date.now();
+    // Represents a pre-pairing row: the quote columns retain their migration defaults.
+    sqlite.query(`INSERT INTO coins (id, dex_no, name, ticker, image, creator_id, owner_id, v_sol, v_tok, level, peak_level, card_template, created_at, last_trade_at)
+      VALUES ('legacy-stock-sol', 1, 'Historical Tesla Art', 'OLDTSLA', '/api/img/art/qa-token.png', ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(user.id, user.id, INITIAL_RESERVES.vSol, INITIAL_RESERVES.vTok, design.materialLevel, design.materialLevel, design.key, now, now);
+    const sol = getPairAsset("sol");
+    const bought = await service.trade(user, "legacy-stock-sol", "buy", LAMPORTS, 0, {quoteAssetKey: sol.key, quoteMint: sol.mint});
+    await service.trade(user, "legacy-stock-sol", "sell", Math.floor(bought.tokens / 2), 0, {quoteAssetKey: sol.key, quoteMint: sol.mint});
+    const page = (await service.getCoinPage("legacy-stock-sol", "qa-session"))!;
+    expect(page.coin).toMatchObject({cardTemplate: "stock-tsla", quoteAssetKey: "sol", quoteMint: sol.mint, stockTicker: null, tokenPair: null, tradingPair: "OLDTSLA / SOL"});
+    expect(page.trades.every(trade => trade.quoteAssetKey === "sol")).toBe(true);
+    expect(row("legacy-stock-sol").quote_asset_key).toBe("sol");
+    expect(row("legacy-stock-sol").quote_mint).toBe(sol.mint);
+    expect((await service.getPortfolio("qa-session"))?.deeds.find(item => item.coin.id === "legacy-stock-sol")?.coin).toMatchObject({stockTicker: null, tokenPair: null});
   });
 
   for (const asset of PAIR_ASSETS) test(`${asset.symbol} quote atoms stay separate through launch, edit, buy, sell and portfolio`, async () => {
@@ -136,6 +168,8 @@ describe("CardDex fixed creator cards and token trading", () => {
     expect(page.coin.quoteDecimals).toBe(asset.decimals);
     expect(page.coin.quoteTokenProgram).toBe(asset.tokenProgram);
     expect(page.coin.tradingPair).toBe(`QNT / ${asset.symbol}`);
+    expect(page.coin.stockTicker).toBe(asset.kind === "stock" ? asset.referenceTicker : null);
+    expect(page.coin.tokenPair).toBe(asset.kind === "stock" ? `QNT / ${asset.symbol}` : null);
     expect(page.coin.lore).toBe("An edited creator story.");
     expect(page.coin.vQuote).toBe(sale.after.vSol);
     expect(page.trades.every(trade => trade.quoteAssetKey === asset.key)).toBe(true);
@@ -156,7 +190,7 @@ describe("CardDex fixed creator cards and token trading", () => {
     const portfolio = (await service.getPortfolio("qa-session"))!;
     expect(portfolio.holdings[0].coin.quoteAssetKey).toBe(asset.key);
     expect(portfolio.totals.holdingsValueByQuote[asset.key]).toBe(portfolio.holdings[0].valueQuote);
-    if (asset.kind === "stock" || asset.kind === "meme") {
+    if (asset.kind === "stock" || asset.kind === "meme" || asset.kind === "collector") {
       expect(page.coin.mcapUsd).toBeNull();
       expect(page.coin.priceSol).toBeNull();
       expect(bought.sol).toBeNull();
@@ -167,6 +201,44 @@ describe("CardDex fixed creator cards and token trading", () => {
       expect((await service.getHome()).stats.volume).toBeNull();
       expect((await service.recentEvents()).every(event => event.amount === null)).toBe(true);
     }
+  });
+
+  test("collector and meme design presets retain the creator's token and selected quote through trades and collection reads", async () => {
+    await service.getMe(user);
+    for (const [index, preset] of MEME_PAIR_PRESETS.entries()) {
+      const asset = getPairAsset(preset.quote), amount = Math.floor(initialQuoteReserves(asset.key).vSol / 30);
+      const ticker = `P${index}`, identity = {quoteAssetKey: asset.key, quoteMint: asset.mint};
+      const {id} = await service.launchCoin(user, {name: "Own Collector Token", ticker, image: "/api/img/art/qa-token.png", lore: "A themed finish with the creator's own token.", cardTemplate: preset.design, devBuy: amount, ...identity});
+      const replacement = PAIR_ASSETS.find(other => other.key !== asset.key && other.decimals === asset.decimals)!;
+      const beforeSubstitution = writeCalls;
+      await expect(service.trade(user, id, "buy", amount, 0, {quoteAssetKey: replacement.key, quoteMint: replacement.mint})).rejects.toThrow("does not match");
+      await expect(service.trade(user, id, "buy", amount, 0, {...identity, quoteMint: replacement.mint})).rejects.toThrow("does not match");
+      expect(writeCalls).toBe(beforeSubstitution);
+      const bought = await service.trade(user, id, "buy", amount, 0, identity);
+      await service.trade(user, id, "sell", Math.floor(bought.tokens / 2), 0, identity);
+      const coin = (await service.getCoinPage(id, "qa-session"))!.coin;
+      expect(coin).toMatchObject({cardTemplate: preset.design, ticker, image: "/api/img/art/qa-token.png", ...identity, quoteDecimals: asset.decimals, quoteTokenProgram: asset.tokenProgram, tradingPair: `${ticker} / ${asset.symbol}`, stockTicker: null, tokenPair: null, mcapUsd: null, priceSol: null});
+      expect(row(id)).toMatchObject({card_template: preset.design, quote_asset_key: asset.key, quote_mint: asset.mint, owner_id: user.id, creator_id: user.id});
+      const deed = (await service.getPortfolio("qa-session"))!.deeds.find(item => item.coin.id === id)!;
+      expect(deed.coin).toMatchObject({cardTemplate: preset.design, ticker, ...identity});
+      expect((await service.allCoins()).find(coin => coin.id === id)).toMatchObject({cardTemplate: preset.design, ...identity});
+    }
+  });
+
+  for (const [cardTemplate, quoteKey] of [["pokemon-classic", "sol"], ["pokemon-full-art", "tslax"], ["pepe", "sol"], ["pepe", "gmex"], ...["ember", "relic", "tide", "neon-circuit", "frost", "mythic", "celestial", "regal", "wildtype", "aurora"].map(design => [design, "sol"])]) test(`existing ${cardTemplate}/${quoteKey} row keeps its stored quote through reads and trading`, async () => {
+    await service.getMe(user);
+    const asset = getPairAsset(quoteKey), design = getCardDesign(cardTemplate), initial = initialQuoteReserves(quoteKey), now = Date.now();
+    sqlite.query(`INSERT INTO coins (id, dex_no, name, ticker, image, creator_id, owner_id, v_sol, v_tok, level, peak_level, card_template, quote_asset_key, quote_mint, created_at, last_trade_at)
+      VALUES ('legacy-themed-pair', 1, 'Historical Themed Token', 'OLDTHEME', '/api/img/art/qa-token.png', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(user.id, user.id, initial.vSol, initial.vTok, design.materialLevel, design.materialLevel, cardTemplate, asset.key, asset.mint, now, now);
+    const identity = {quoteAssetKey: asset.key, quoteMint: asset.mint}, amount = Math.floor(initial.vSol / 30);
+    const bought = await service.trade(user, "legacy-themed-pair", "buy", amount, 0, identity);
+    await service.trade(user, "legacy-themed-pair", "sell", Math.floor(bought.tokens / 2), 0, identity);
+    const page = (await service.getCoinPage("legacy-themed-pair", "qa-session"))!;
+    expect(page.coin).toMatchObject({cardTemplate, ...identity, tradingPair: `OLDTHEME / ${asset.symbol}`, stockTicker: asset.kind === "stock" ? asset.referenceTicker : null});
+    expect(page.trades.every(trade => trade.quoteAssetKey === asset.key)).toBe(true);
+    expect(row("legacy-themed-pair")).toMatchObject({card_template: cardTemplate, quote_asset_key: asset.key, quote_mint: asset.mint});
+    expect((await service.getPortfolio("qa-session"))!.deeds.find(item => item.coin.id === "legacy-themed-pair")?.coin).toMatchObject({cardTemplate, ...identity});
   });
 
   test("quote spoofing, incompatible designs, unsafe amounts and raw quote updates are rejected", async () => {

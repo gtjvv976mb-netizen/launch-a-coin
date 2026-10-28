@@ -1,8 +1,8 @@
 import type { CardData } from "../../../components/mintdex/MintCard";
-import { CANONICAL_CARD_LAYOUT as layout } from "../card-template";
+import { CANONICAL_CARD_LAYOUT as layout, CANONICAL_CARD_PRINT as print, CANONICAL_CARD_TEMPLATE, CARD_RENDERER_VERSION } from "../card-template";
 import { getPairAsset } from "../pairs";
 
-export const CREATOR_CARD_RENDERER_VERSION = "launchacard-canonical-v1";
+export const CREATOR_CARD_RENDERER_VERSION = CARD_RENDERER_VERSION;
 export const CREATOR_IMAGE_DIMENSIONS = Object.freeze({ card: {width:1260,height:1760}, case: {width:1440,height:2240} });
 const W=1260,H=1760;
 const xml=(s:string)=>s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&apos;"}[c]!));
@@ -14,29 +14,30 @@ function lines(s:string,width:number,size:number) {let remaining=s.replace(/\s+/
 const box=(b:{x:number;y:number;w:number;h:number})=>({x:b.x*W,y:b.y*H,w:b.w*W,h:b.h*H});
 
 /** The approved flattened SVG skin, shared content boxes, fonts and actual creator artwork. */
-export function creatorCardSvg(card:CardData,tokenMint:string,creator:string,artUri:string,atlasUri:string) {
-  const a=box(layout.window),n=box(layout.name),t=box(layout.type),d=box(layout.text),fa=box(layout.footer[0]),fb=box(layout.footer[1]);
+export function creatorCardSvg(card:CardData,tokenMint:string,_creator:string,artUri:string,atlasUri:string) {
+  const a=box(layout.window),n=box(layout.name),t=box(layout.type),d=box(layout.text),unit=W/100;
   const ink=card.cardTemplate==="neon-circuit"?"#e2f4f0":"#30251a";
-  const titleSize=80.64,typeSize=36.54,loreSize=49.77,rowSize=38.43,footerSize=28.98;
-  const left=d.x+47.88,right=d.x+d.w-47.88;
-  const firstRow=d.y+d.h-30.24-(3*44.1945+2*8.82);
+  const titleSize=print.title*unit,numeralSize=print.numeral*unit,typeSize=print.type*unit,loreSize=print.lore*unit,rowSize=print.row*unit;
+  const nameInset=print.nameInset*unit,typeInset=print.typeInset*unit;
+  const nameWidth=n.w-2*nameInset-widthOf("1/1",numeralSize)-2*unit;
+  const left=d.x+print.detailsInset*unit,right=d.x+d.w-print.detailsInset*unit;
+  const rowHeight=rowSize*print.rowLine,rowGap=print.rowGap*unit;
+  const firstRow=d.y+d.h-print.detailsBottom*unit-(3*rowHeight+2*rowGap);
   const description=lines(card.lore||"A fresh coin in the dex. Its story is still being written.",right-left,loreSize);
   const quote=getPairAsset(card.quoteAssetKey||"sol");
   const rows=[["Token address",`${tokenMint.slice(0,5)}...${tokenMint.slice(-4)}`],["Market cap","At creation"],["Holders","0"]];
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1260" height="1760" viewBox="0 0 1260 1760">
-    <defs><clipPath id="card-edge"><rect width="1260" height="1760" rx="63.504"/></clipPath><clipPath id="art-edge"><rect x="${a.x}" y="${a.y}" width="${a.w}" height="${a.h}" rx="12"/></clipPath><clipPath id="name-edge"><rect x="${n.x+47.88}" y="${n.y}" width="${n.w-185}" height="${n.h}"/></clipPath></defs>
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1260" height="1760" viewBox="0 0 1260 1760" data-card-layout="${CANONICAL_CARD_TEMPLATE}">
+    <defs><clipPath id="card-edge"><rect width="1260" height="1760" rx="${layout.radius*W}"/></clipPath><clipPath id="art-edge"><rect x="${a.x}" y="${a.y}" width="${a.w}" height="${a.h}" rx="${print.artRadius*unit}"/></clipPath><clipPath id="name-edge"><rect x="${n.x+nameInset}" y="${n.y}" width="${nameWidth}" height="${n.h}"/></clipPath></defs>
     <g clip-path="url(#card-edge)"><image width="1260" height="1760" href="${xml(atlasUri)}"/>
     <image x="${a.x}" y="${a.y}" width="${a.w}" height="${a.h}" preserveAspectRatio="xMidYMid slice" clip-path="url(#art-edge)" href="${xml(artUri)}"/>
     <g fill="${ink}" font-family="Libre Caslon Text,serif">
-      <text x="${n.x+47.88}" y="${n.y+n.h/2+titleSize*.34}" font-size="${titleSize}" clip-path="url(#name-edge)">${xml(fit(card.name,n.w-190,titleSize))}</text>
-      <text x="${n.x+n.w-42.84}" y="${n.y+n.h/2+46.62*.34}" text-anchor="end" font-size="46.62" font-weight="700">1/1</text>
-      <text x="${t.x+37.8}" y="${t.y+t.h/2+typeSize*.34}" font-family="Courier Prime,monospace" font-size="${typeSize}">$${xml(card.ticker)}</text>
-      <text x="${t.x+t.w-37.8}" y="${t.y+t.h/2+typeSize*.34}" text-anchor="end" font-style="italic" font-size="${typeSize}">${xml(quote.symbol)} pair</text>
-      ${description.map((line,i)=>`<text x="${left}" y="${d.y+32.76+loreSize*.8+i*loreSize*1.3}" font-style="italic" font-size="${loreSize}">${xml(line)}</text>`).join("")}
-      <path d="M${left} ${firstRow-17.64}H${right}" stroke="${ink}" stroke-opacity=".28" stroke-width="3.15"/>
-      ${rows.map(([label,value],i)=>{const y=firstRow+rowSize*.8+i*(44.1945+8.82),lx=left+widthOf(label,rowSize)+15,rx=right-widthOf(value,rowSize,true)-15;return `<text x="${left}" y="${y}" font-size="${rowSize}" font-weight="600">${label}</text><path d="M${lx} ${y-5}H${rx}" stroke="${ink}" stroke-opacity=".3" stroke-dasharray="3 7" stroke-width="2"/><text x="${right}" y="${y}" text-anchor="end" font-family="Courier Prime,monospace" font-size="${rowSize}">${xml(value)}</text>`;}).join("")}
-      <text x="${fa.x+32.76}" y="${fa.y+fa.h/2+footerSize*.34}" font-family="Courier Prime,monospace" font-size="${footerSize}">${xml(fit(`Owner @${creator.slice(0,4)}…${creator.slice(-4)}`,fa.w-65,footerSize,true))}</text>
-      <text x="${fb.x+fb.w-32.76}" y="${fb.y+fb.h/2+footerSize*.34}" text-anchor="end" font-family="Courier Prime,monospace" font-size="${footerSize}">1 / 1</text>
+      <text x="${n.x+nameInset}" y="${n.y+n.h/2+titleSize*.34}" font-size="${titleSize}" clip-path="url(#name-edge)">${xml(fit(card.name,nameWidth,titleSize))}</text>
+      <text x="${n.x+n.w-nameInset}" y="${n.y+n.h/2+numeralSize*.34}" text-anchor="end" font-size="${numeralSize}" font-weight="700">1/1</text>
+      <text x="${t.x+typeInset}" y="${t.y+t.h/2+typeSize*.34}" font-family="Courier Prime,monospace" font-size="${typeSize}">$${xml(card.ticker)}</text>
+      <text x="${t.x+t.w-typeInset}" y="${t.y+t.h/2+typeSize*.34}" text-anchor="end" font-style="italic" font-size="${typeSize}">${xml(quote.symbol)} pair</text>
+      ${description.map((line,i)=>`<text x="${left}" y="${d.y+print.detailsTop*unit+loreSize*(.8+(print.loreLine-1)/2)+i*loreSize*print.loreLine}" font-style="italic" font-size="${loreSize}">${xml(line)}</text>`).join("")}
+      <path d="M${left} ${firstRow-print.rowsTop*unit-.125*unit}H${right}" stroke="${ink}" stroke-opacity=".22" stroke-width="${.25*unit}"/>
+      ${rows.map(([label,value],i)=>{const y=firstRow+rowSize*(.8+(print.rowLine-1)/2)+i*(rowHeight+rowGap),lx=left+widthOf(label,rowSize)+1.4*unit,rx=right-widthOf(value,rowSize,true)-1.4*unit;return `<text x="${left}" y="${y}" font-size="${rowSize}" font-weight="600">${label}</text><path d="M${lx} ${y-.6*unit}H${rx}" stroke="${ink}" stroke-opacity=".35" stroke-dasharray="3 7" stroke-width="${.25*unit}"/><text x="${right}" y="${y}" text-anchor="end" font-family="Courier Prime,monospace" font-size="${rowSize}" font-weight="500">${xml(value)}</text>`;}).join("")}
     </g></g></svg>`;
 }
 

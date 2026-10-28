@@ -107,7 +107,8 @@ describe("unsigned official Pump custom-pair preparer", () => {
     expect("transaction" in plan).toBe(false);
   });
 
-  test("all 16 catalog assets use exact reviewed mints/programs; SOL has no extra quote accounts", async () => {
+  test("all 25 catalog assets use exact reviewed mints/programs; SOL has no extra quote accounts", async () => {
+    expect(PAIR_ASSETS).toHaveLength(25);
     for (const asset of PAIR_ASSETS) {
       const plan = await preparePumpLaunchPlan(input("obsidian-archive", asset.key), { connection: reader().connection, now });
       expect(plan.binding.quote.mint).toBe(asset.mint);
@@ -164,6 +165,16 @@ describe("unsigned official Pump custom-pair preparer", () => {
     await expect(preparePumpLaunchPlan(input(), { connection: changedDecimals.connection })).rejects.toThrow("decimals or token program");
     const changedProgram = reader({ mutate(accounts) { accounts.get(asset.mint)!.owner = TOKEN_PROGRAM_ID; } });
     await expect(preparePumpLaunchPlan(input(), { connection: changedProgram.connection })).rejects.toThrow();
+  });
+
+  test("each additional meme quote rejects substituted mint units or token-program ownership", async () => {
+    for (const key of ["pengu","giga","spx","trump","useless","chillguy"]) {
+      const asset=PAIR_ASSETS.find(candidate=>candidate.key===key)!;
+      const changedDecimals=reader({mutate(accounts){accounts.get(asset.mint)!.data[44]=asset.decimals+1;}});
+      await expect(preparePumpLaunchPlan(input("obsidian-archive",key),{connection:changedDecimals.connection})).rejects.toThrow("decimals or token program");
+      const changedProgram=reader({mutate(accounts){accounts.get(asset.mint)!.owner=TOKEN_2022_PROGRAM_ID;}});
+      await expect(preparePumpLaunchPlan(input("obsidian-archive",key),{connection:changedProgram.connection})).rejects.toThrow();
+    }
   });
 
   test("rejects zero quote reserves and disabled coin creation", async () => {

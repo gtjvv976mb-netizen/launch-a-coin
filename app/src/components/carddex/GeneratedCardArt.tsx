@@ -80,19 +80,22 @@ export function generatedSkinSource(key?: string): GeneratedSkinSource | null {
   const plates = { ...DEFAULT_PRINT_LAYOUT, ...PRINT_LAYOUTS[key], ...measured.prints };
   if (key === "duel-masters" || key === "one-piece") {
     plates.name = measured.prints?.type ?? PRINT_LAYOUTS[key].name;
-    plates.type = PRINT_LAYOUTS[key].type;
+    plates.type = plates.name;
   }
+  // The original archive name bar has a large medallion through its center. Its own clean
+  // companion bar supplies the same parchment/metal without covering the live token name.
+  if (key === "obsidian-archive") plates.name = plates.type;
   if (key === "relic" && !measured.prints?.name) plates.name = measured.prints?.type ?? DEFAULT_PRINT_LAYOUT.name;
   return {art:measured.art,mask:measured.mask,plates};
 }
 
 function svgUrl(source:string) { return `url("data:image/svg+xml,${encodeURIComponent(source)}")`; }
 const canonical = CANONICAL_CARD_LAYOUT;
-const PRINT_BOXES = { art:canonical.window,name:canonical.name,type:canonical.type,text:canonical.text,"foot-a":canonical.footer[0],"foot-b":canonical.footer[1],footer:{x:canonical.footer[0].x,y:canonical.footer[0].y,w:canonical.footer[1].x+canonical.footer[1].w-canonical.footer[0].x,h:canonical.footer[0].h} };
+const PRINT_BOXES = { art:canonical.window,name:canonical.name,type:canonical.type,text:canonical.text };
 const CANONICAL_GEOMETRY: Record<string,string> = {};
 for (const [name,box] of Object.entries(PRINT_BOXES)) for (const [key,value] of Object.entries(box)) CANONICAL_GEOMETRY[`--generated-${name}-${key}`] = `${value*100}%`;
 CANONICAL_GEOMETRY["--generated-art-mask"] = svgUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><rect width="1000" height="1000" rx="12" fill="white"/></svg>');
-const holes = Object.entries(PRINT_BOXES).filter(([key])=>key!=="footer").map(([,box])=>`<rect x="${box.x*1000}" y="${box.y*1000}" width="${box.w*1000}" height="${box.h*1000}" rx="5" fill="white"/>`).join("");
+const holes = Object.values(PRINT_BOXES).map(box=>`<rect x="${box.x*1000}" y="${box.y*1000}" width="${box.w*1000}" height="${box.h*1000}" rx="5" fill="white"/>`).join("");
 CANONICAL_GEOMETRY["--generated-foil-holes"] = svgUrl(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="none">${holes}</svg>`);
 Object.freeze(CANONICAL_GEOMETRY);
 

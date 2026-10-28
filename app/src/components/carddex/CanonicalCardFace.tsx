@@ -1,6 +1,6 @@
 import { useRef, type CSSProperties } from "react";
 import type { CardDesign } from "../../lib/carddex/designs";
-import { CANONICAL_CARD_LAYOUT, CANONICAL_CARD_TEMPLATE } from "../../lib/carddex/card-template";
+import { CANONICAL_CARD_LAYOUT, CANONICAL_CARD_PRINT, CANONICAL_CARD_TEMPLATE } from "../../lib/carddex/card-template";
 import { cardArtSources } from "../../lib/mintdex/art";
 import { tierForLevel } from "../../lib/mintdex/tiers";
 import { CardPrint, boxStyle } from "../mintdex/CardPrint";
@@ -9,7 +9,11 @@ import type { CardData } from "../mintdex/MintCard";
 import { GeneratedCardFinish, generatedCardStyle } from "./GeneratedCardArt";
 import { CanonicalCardSkin } from "./CanonicalCardSkin";
 
-/** All48 choices share this exact print. A skin can change decoration, never its live content boxes. */
+const printVars = Object.fromEntries(Object.entries(CANONICAL_CARD_PRINT).map(([key,value])=>[
+  `--canonical-${key.replace(/[A-Z]/g,c=>`-${c.toLowerCase()}`)}`, `${value}${key.endsWith("Line") ? "" : "cqw"}`,
+]));
+
+/** All48 choices share this exact print. A skin changes material, never live content geometry. */
 export function CanonicalCardFace({ card, design, priority = false, sizes, compact = false, lite = false, className = "", style, label }: {
   card: CardData; design: CardDesign; priority?: boolean; sizes?: string; compact?: boolean; lite?: boolean; className?: string; style?: CSSProperties; label?: string;
 }) {
@@ -19,6 +23,7 @@ export function CanonicalCardFace({ card, design, priority = false, sizes, compa
   const dark = design.key === "neon-circuit";
   const vars = {
     ...generatedCardStyle(design.key),
+    ...printVars,
     "--design-base": design.palette[0], "--design-metal": design.palette[1], "--design-paper": design.palette[2],
     "--canonical-paper": dark ? "#102b30" : design.palette[2], "--canonical-ink": dark ? "#e2f4f0" : "#30251a",
     "--accent": dark ? "#e2f4f0" : "#30251a", "--card-radius": "5.04% / 3.61%", aspectRatio: "63 / 88", ...style,

@@ -2,6 +2,8 @@ import { imageSize } from "../../mintdex/server/art.server";
 import { one, stmt, UserError } from "../../mintdex/server/db.server";
 import { getCardDesign } from "../designs";
 import { getTradingPair } from "../pairs";
+import { CARD_RENDERER_VERSION } from "../card-template";
+import { CREATOR_IMAGE_DIMENSIONS } from "./creator-print";
 import { bindings } from "../../bindings.server";
 import reviewedDesigns from "../../../../../integrations/pumpfun/src/design-assets.json";
 import renderedDesigns from "../render-assets.json";
@@ -11,15 +13,19 @@ import { requireLiveConfig } from "./config.server";
 import { compositionBinding, normalizeLiveFields } from "./validation.server";
 import type { LiveAssets, LiveComposeInput } from "./types";
 
-export const COMPOSITION_VERSION = "launchacard-canonical-v1";
+export const COMPOSITION_VERSION = CARD_RENDERER_VERSION;
 export async function loadRendererAsset(path: string): Promise<Uint8Array> {
   if (!/^\/(assets|fonts)\/[a-zA-Z0-9_./-]+$/.test(path) || path.includes("..") || path.includes("//")) throw new UserError("The card renderer requested an unsupported asset.");
+  const rendered = path.startsWith("/assets/carddex/render/") ? Object.values(renderedDesigns).find(asset => asset.path === path) : undefined;
+  if (path.startsWith("/assets/carddex/render/")) {
+    const source = rendered && reviewedDesigns[rendered.designKey as keyof typeof reviewedDesigns];
+    if (!rendered || rendered.rendererVersion !== COMPOSITION_VERSION || rendered.width !== CREATOR_IMAGE_DIMENSIONS.card.width || rendered.height !== CREATOR_IMAGE_DIMENSIONS.card.height || !source || rendered.sourceSha256 !== source.front.sha256) throw new UserError("The card render atlas does not match the current trusted renderer and approved design.");
+  }
   const response = await bindings().ASSETS?.fetch(`${requireLiveConfig().origin}${path}`);
   const bytes = response?.ok ? new Uint8Array(await response.arrayBuffer()) : await fetchPublicBytes(`${requireLiveConfig().origin}${path}`);
   const reviewed = Object.values(reviewedDesigns).flatMap(design => [design.front, design.back]).find(asset => asset.path === path);
   if (path.startsWith("/assets/carddex/higgsfield/") && (!reviewed || await sha256(bytes) !== reviewed.sha256)) throw new UserError("The public card frame differs from the approved premium design.");
   if (path.startsWith("/assets/carddex/render/")) {
-    const rendered = Object.values(renderedDesigns).find(asset => asset.path === path);
     if (!rendered || await sha256(bytes) !== rendered.sha256) throw new UserError("The card render atlas differs from its trusted conversion manifest.");
   }
   return bytes;

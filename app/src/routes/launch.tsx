@@ -535,7 +535,7 @@ function Launch() {
 
           </div>
           <div className="cdx-launch-step" hidden={step !== 2}>
-          <CardDesignPicker value={designKey} onChange={pick} quoteAssetKey={quoteKey} ticker={ticker} disabled={live && liveLocked} compact />
+          <CardDesignPicker value={designKey} onChange={pick} onPairChange={changePair} quoteAssetKey={quoteKey} ticker={ticker} previewCard={previewCard} disabled={live && liveLocked} compact />
           <p className="cdx-launch-step-copy">One permanent finish. Every design uses the same card layout.</p>
           </div>
           <div className="cdx-launch-step" hidden={step !== 3}>
