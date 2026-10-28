@@ -1,0 +1,9 @@
+# Launch a Card — pixel-art logo
+
+Current requested direction, 28 October 2026: a wordless Pokémon-era pixel-art emblem using the site's actual Doge, Pokémon Classic and Pepe card backs, fanned below a separate crown. The creator corrected the earlier abstract-card concept to require the real site designs, then requested a pixelated Pokémon-like style. This asset supersedes those abstract-card concepts for this logo exploration. The social kit is paused pending this logo-first work.
+
+`launch-a-card-pixel-logo.png` is a **1254 × 1254 RGBA PNG**, 1,413,232 bytes, with genuine transparent pixels. Its opaque silhouette fits inside a circular avatar crop: maximum solid-pixel radius 583.55px against a 627px canvas radius. The crown, both meme faces and the central ball motif are visible. Its gold, cream and charcoal match the existing website chrome; blue belongs to the actual Pokémon card artwork.
+
+Created with the **built-in image generation tool**, using four local references: the existing actual-card fan logo, `doge-back.webp`, `pokemon-classic-back.webp`, and `pepe-back.webp` from `app/public/assets/carddex/higgsfield/`. The new image is a pixel-art interpretation of those actual designs, not a byte-for-byte embedding or an unchanged card export. No additional Higgsfield generation was submitted. The selected generated file was copied unchanged into this folder. The live website and external profiles have not been changed by this logo exploration.
+
+The generation brief is retained in `prompt.md`. Direction for a later site pass: make the cards the primary objects, retain the warm gold/cream/charcoal base, and use restrained pixel accents and game-like card reveal motions around this mark. Do not change functional launch, wallet, quote or NFT behavior as part of branding.

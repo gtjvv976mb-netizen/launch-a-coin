@@ -1,5 +1,11 @@
 # Launch a Card symbol
 
+## Current requested direction
+
+The owner likes pixel art and has asked for **no crown**. The [crown-free series](pixel-crown-free-series-2026-10-28/README.md) contains three proposals: Card Fan, Booster Pack and Collector Album, all using pixel-art interpretations of the actual Doge, Pokémon Classic and Pepe backs. Compare them in [the preview](pixel-crown-free-series-2026-10-28/series-preview.png). No final option has been selected or installed. The earlier crowned pixel version is retained in [pixel-real-cards-2026-10-28](pixel-real-cards-2026-10-28/README.md), and the social kit remains paused.
+
+## Installed website mark
+
 The current identity is a **fanned hand of three card backs with a separate floating crown**. Jade, garnet and plum enamel distinguish the cards; champagne foil edges, engraved back patterns and ruby/emerald crown settings make the mark recognizable without lettering. All three cards face backward. There is no literal hand, front artwork window, monogram or theme name.
 
 The installed symbol remains transparent and wordless in the desktop rail, phone header and SVG favicon. Existing asset filenames are retained to keep every consumer consistent. The app icons use a charcoal canvas with an 8% inset so the crown and fan stay clear of icon crops.

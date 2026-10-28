@@ -1,0 +1,65 @@
+[
+  {
+    "file": "01-card-fan.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "bytes": 1302938,
+    "alpha": [
+      0,
+      255
+    ],
+    "solid_bbox": [
+      27,
+      221,
+      1227,
+      1028
+    ],
+    "solid_max_circle_radius": 642.93,
+    "canvas_circle_radius": 627.0
+  },
+  {
+    "file": "02-booster-pack.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "bytes": 1480295,
+    "alpha": [
+      0,
+      255
+    ],
+    "solid_bbox": [
+      67,
+      171,
+      1188,
+      1148
+    ],
+    "solid_max_circle_radius": 652.88,
+    "canvas_circle_radius": 627.0
+  },
+  {
+    "file": "03-collectors-album.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "bytes": 1444922,
+    "alpha": [
+      0,
+      255
+    ],
+    "solid_bbox": [
+      35,
+      222,
+      1220,
+      1102
+    ],
+    "solid_max_circle_radius": 684.45,
+    "canvas_circle_radius": 627.0
+  }
+]

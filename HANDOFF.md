@@ -1,5 +1,11 @@
 # Launch a Card handoff — 28 October 2026
 
+## Source repository and current brand work
+
+The owner supplied the existing empty public repository **https://github.com/gtjvv976mb-netizen/launch-a-coin** for this project. Its existing repository name is retained; the product is Launch a Card. The initial source upload includes the existing development history and subsequent logo work. Private environment files, credentials, local runtime state and ignored output are excluded.
+
+The latest requested logo direction is **pixel art without a crown**, using the site's actual Doge, Pokémon Classic and Pepe motifs. Three proposals and circle-safe transparent downloads are in `brand/logo/pixel-crown-free-series-2026-10-28/`; the preceding crowned pixel mark and abstract concepts are retained as earlier explorations. No final option has been selected, no new logo has been installed on the site, and the pump.fun/X kit remains paused at the owner's logo-first request. See `brand/logo/README.md` for asset routing.
+
 Public name is **Launch a Card** and public origin is **https://launchacard.fun** (owner-selected). Internal project folder `carddex`, asset filenames, CSS and database/session identifiers are retained for recoverability. MintDex is an independent project and must not be changed or reused.
 
 ## Latest live and viewport release

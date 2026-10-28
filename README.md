@@ -1,5 +1,7 @@
 # Launch a Card
 
+Source repository: [gtjvv976mb-netizen/launch-a-coin](https://github.com/gtjvv976mb-netizen/launch-a-coin). The repository's existing name is retained; the platform is branded **Launch a Card**.
+
 Independent project based on MintDex, publicly branded **Launch a Card** at **https://launchacard.fun**. The recoverable folder and internal carddex identifiers remain stable. Creators choose one permanent premium card design for their token and its one-of-one NFT trading card. The token launch provider is **pump.fun**.
 
 ## Included
@@ -70,6 +72,8 @@ The owner saved the active app-specific Helius endpoint as the encrypted, server
 Current provider reference, reviewed 28 October 2026: [official pump.fun coin creation](https://github.com/pump-fun/pump-public-docs/blob/main/docs/instructions/COIN_CREATION.md). Historical accounts and fees are not assumed current.
 
 ## Generated assets
+
+The current logo exploration is a [crown-free pixel-art series](brand/logo/pixel-crown-free-series-2026-10-28/README.md), with Card Fan, Booster Pack and Collector Album options based on the actual site card designs. These proposals have not replaced the installed website mark. Earlier logo concepts and the paused pump.fun/X kit remain under `brand/` for recovery.
 
 The approved Higgsfield work produced 99 completed images: 96 card faces, two website visuals and one logo that the owner rejected. The quoted total was 272.25 credits; the tools did not provide an itemized actual-charge reconciliation. No paid regeneration was submitted. The current logo is a separate native vector refinement, created without further generation spend; the rejected generated logo is retained in `brand/logo/archive/`.
 

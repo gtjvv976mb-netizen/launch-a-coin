@@ -1,0 +1,47 @@
+[
+  {
+    "file": "01-card-fan-avatar.png",
+    "size": [
+      1500,
+      1500
+    ],
+    "bytes": 1404310,
+    "alpha": [
+      0,
+      255
+    ],
+    "all_alpha_max_radius": 729.1,
+    "canvas_circle_radius": 750.0,
+    "fits_circle": true
+  },
+  {
+    "file": "02-booster-pack-avatar.png",
+    "size": [
+      1500,
+      1500
+    ],
+    "bytes": 1602527,
+    "alpha": [
+      0,
+      255
+    ],
+    "all_alpha_max_radius": 729.72,
+    "canvas_circle_radius": 750.0,
+    "fits_circle": true
+  },
+  {
+    "file": "03-collectors-album-avatar.png",
+    "size": [
+      1500,
+      1500
+    ],
+    "bytes": 1551653,
+    "alpha": [
+      0,
+      255
+    ],
+    "all_alpha_max_radius": 729.89,
+    "canvas_circle_radius": 750.0,
+    "fits_circle": true
+  }
+]

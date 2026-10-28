@@ -1,0 +1,38 @@
+{
+  "description": "Three actual back-facing site cards, Doge left, Pokémon Classic center, Pepe right; separate crown, no lettering.",
+  "sourceIntegrity": "Original full-resolution WebPs embedded unchanged; 63:88 proportions and fill behavior match the site.",
+  "canvas": 160,
+  "circularSafeRadius": 72,
+  "sources": [
+    {
+      "position": "left",
+      "design": "doge",
+      "x": 48,
+      "y": 88,
+      "angle": -20,
+      "width": 52,
+      "path": "app/public/assets/carddex/higgsfield/doge-back.webp",
+      "sha256": "d7087aee025b5da400d424344f780880e2d50cd3849a10941145343d45562003"
+    },
+    {
+      "position": "right",
+      "design": "pepe",
+      "x": 112,
+      "y": 88,
+      "angle": 20,
+      "width": 52,
+      "path": "app/public/assets/carddex/higgsfield/pepe-back.webp",
+      "sha256": "110aadf4fa9135036efe4f556b4163d4692de1aa6d9d6e60ffb8485da1554f3b"
+    },
+    {
+      "position": "front-center",
+      "design": "pokemon-classic",
+      "x": 80,
+      "y": 112,
+      "angle": 0,
+      "width": 48,
+      "path": "app/public/assets/carddex/higgsfield/pokemon-classic-back.webp",
+      "sha256": "f851e97b09f0b747adca0924f26bab829d9fe70a040532e2d82051a9f222ad4d"
+    }
+  ]
+}
