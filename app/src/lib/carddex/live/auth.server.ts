@@ -1,6 +1,7 @@
 import { ed25519 } from "@noble/curves/ed25519";
 import { db, one, stmt, UserError } from "../../mintdex/server/db.server";
 import { requireLiveConfig } from "./config.server";
+import { liveSignInMessage, liveSignInProblem } from "./sign-in";
 import type { LiveWallet } from "./types";
 
 export const LIVE_SESSION_COOKIE = "carddex_live_session";
@@ -32,7 +33,7 @@ export async function createWalletChallenge(wallet: string) {
   const recent = await one<{n: number}>("SELECT COUNT(*) AS n FROM live_wallet_challenges WHERE wallet = ? AND created_at > ?", wallet, now - 60_000);
   if ((recent?.n ?? 0) >= 5) throw new UserError("Wait a minute before requesting another wallet challenge.");
   const challengeId = crypto.randomUUID();
-  const message = `${new URL(origin).host} wants you to sign in with your Solana account:\n${wallet}\n\nAuthorize Launch a Card launch preparation. This message does not send a transaction or move funds.\n\nURI: ${origin}\nVersion: 1\nChain ID: solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d\nNonce: ${randomToken()}\nIssued At: ${new Date(now).toISOString()}\nExpiration Time: ${new Date(expiresAt).toISOString()}`;
+  const message = liveSignInMessage({ origin, wallet, nonce: randomToken(), issuedAt: new Date(now), expiresAt: new Date(expiresAt) });
   await stmt("INSERT INTO live_wallet_challenges (id, wallet, origin, message, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)", challengeId, wallet, origin, message, now, expiresAt).run();
   return { challengeId, message, expiresAt };
 }
@@ -40,7 +41,8 @@ export async function verifyWalletChallenge(input: {challengeId: string; wallet:
   const { origin } = requireLiveConfig("recovery");
   const challenge = await one<{wallet: string; origin: string; message: string; expires_at: number; consumed_at: number | null}>("SELECT * FROM live_wallet_challenges WHERE id = ?", input.challengeId);
   const now = Date.now();
-  if (!challenge || challenge.wallet !== input.wallet || challenge.origin !== origin || challenge.consumed_at !== null || challenge.expires_at <= now) throw new UserError("This wallet challenge expired or was already used. Request a fresh challenge.");
+  // The stored message must still be this site's current mainnet wording, the same check the page ran before signing.
+  if (!challenge || challenge.wallet !== input.wallet || challenge.origin !== origin || challenge.consumed_at !== null || challenge.expires_at <= now || liveSignInProblem(challenge.message, { origin, wallet: input.wallet })) throw new UserError("This wallet challenge expired or was already used. Request a fresh challenge.");
   let signature: Uint8Array;
   try { signature = Uint8Array.from(atob(input.signatureBase64), char => char.charCodeAt(0)); }
   catch { throw new UserError("The wallet signature is invalid."); }

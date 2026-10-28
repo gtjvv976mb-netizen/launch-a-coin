@@ -179,9 +179,10 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
   const requiredSigners = transaction.message.staticAccountKeys.slice(0, transaction.message.header.numRequiredSignatures).map((key) => key.toBase58());
   const expectedSigner = kind === "token" ? input.mint : input.nftMint;
   if (requiredSigners.length !== 2 || !requiredSigners.includes(input.creator) || !requiredSigners.includes(expectedSigner)) throw new Error("Unexpected transaction signer set");
+  const serialized = transaction.serialize();
   return immutable({
     kind, network: "solana:mainnet" as const, status: "wallet-signature-required" as const,
-    transactionBase64: Buffer.from(transaction.serialize()).toString("base64"),
+    transactionBase64: Buffer.from(serialized).toString("base64"),
     messageSha256: digest(transaction.message.serialize()),
     blockhash: latest.blockhash, lastValidBlockHeight: latest.lastValidBlockHeight,
     // The signing window: this blockhash stops landing after lastValidBlockHeight - preparedBlockHeight more blocks.
@@ -199,6 +200,8 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
       priorityFeeLamports: priorityFee.toString(), rentAndProgramCostLamports: rentAndProgram.toString(),
       totalDebitLamports: totalDebit.toString(), reserveBufferLamports: reserveBuffer.toString(),
       walletBalanceLamports: payerBefore.toString(), computeUnitLimit, microLamportsPerComputeUnit: microLamports,
+      // The signed wire size equals this unsigned one: both signature slots are already in the bytes.
+      transactionBytes: serialized.length, packetLimit: PACKET_LIMIT,
     },
   });
 }
@@ -495,6 +498,35 @@ export function validateSignedWalletTransaction(plan: WalletTransactionPlan, tra
   }
   const signature = bs58.encode(transaction.signatures[0]);
   return { signature, transactionBase64, messageSha256: plan.messageSha256 };
+}
+
+/**
+ * What a wallet changed in a prepared transaction, for the server log only: sizes, signers, blockhash, compute budget
+ * and the outer programs it added or removed. It never signs, sends or trusts the returned bytes, which cannot land
+ * without the new asset signature that only the page holds.
+ */
+export function describeWalletChange(plan: WalletTransactionPlan, transactionBase64: string) {
+  const before = VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64"));
+  const raw = Buffer.from(transactionBase64, "base64");
+  const summary = { bytesBefore: Buffer.from(plan.transactionBase64, "base64").length, bytesAfter: raw.length, limit: PACKET_LIMIT };
+  let after: VersionedTransaction;
+  try { after = VersionedTransaction.deserialize(raw); } catch { return { ...summary, parsed: false as const }; }
+  const key = (tx: VersionedTransaction, index: number) => tx.message.staticAccountKeys[index]?.toBase58() ?? `lookup:${index}`;
+  const instructions = (tx: VersionedTransaction) => tx.message.compiledInstructions.map((ix) => ({ program: key(tx, ix.programIdIndex),
+    id: `${key(tx, ix.programIdIndex)}|${ix.accountKeyIndexes.map((index) => key(tx, index)).join(",")}|${Buffer.from(ix.data).toString("hex")}` }));
+  const signers = (tx: VersionedTransaction) => tx.message.staticAccountKeys.slice(0, tx.message.header.numRequiredSignatures).map((k) => k.toBase58()).join(",");
+  const planned = instructions(before), returned = instructions(after);
+  const compute = (list: typeof planned) => list.filter((ix) => ix.program === ComputeBudgetProgram.programId.toBase58()).map((ix) => ix.id).sort().join(";");
+  let cursor = 0;
+  for (const ix of returned) if (cursor < planned.length && ix.id === planned[cursor].id) cursor++;
+  const programs = (list: typeof planned) => new Set(list.map((ix) => ix.program));
+  return { ...summary, parsed: true as const, version: after.version, lookupTables: after.message.addressTableLookups.length,
+    messageSha256: digest(after.message.serialize()), blockhashChanged: after.message.recentBlockhash !== before.message.recentBlockhash,
+    signersChanged: signers(after) !== signers(before), walletSigned: after.signatures[0]?.some(Boolean) ?? false,
+    instructionsBefore: planned.length, instructionsAfter: returned.length, planInstructionsKept: cursor === planned.length,
+    computeBudgetChanged: compute(returned) !== compute(planned),
+    programsAdded: [...programs(returned)].filter((program) => !programs(planned).has(program)),
+    programsRemoved: [...programs(planned)].filter((program) => !programs(returned).has(program)) };
 }
 
 /** A definite pre-send failure. Nothing was broadcast, so the same stage can be prepared again. */

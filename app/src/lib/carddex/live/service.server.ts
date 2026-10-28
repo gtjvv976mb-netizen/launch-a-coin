@@ -10,7 +10,7 @@ import { COMPOSITION_VERSION, requireTrustedComposition } from "./composition.se
 import { BUY_DOES_NOT_FIT } from "./copy";
 import { requireLiveConfig } from "./config.server";
 import { normalizeLiveFields, normalizeLiveIdentity } from "./validation.server";
-import type { LiveAssets, LiveLaunchIntent, LivePrepareInput, LiveStage } from "./types";
+import { LIVE_PACKET_LIMIT, type LiveAssets, type LiveLaunchIntent, type LivePrepareInput, type LiveStage } from "./types";
 
 type Payload = {input: Omit<LiveLaunchInput, "nftMint">; assets: LiveAssets; fields: ReturnType<typeof normalizeLiveFields>};
 type IntentRow = {id: string; creator_wallet: string; token_mint: string; nft_mint: string; quote_key: string; quote_mint: string; design_key: string; payload_sha256: string; payload_json: string; binding_sha256: string; token_metadata_uri: string; nft_metadata_uri: string; status: LiveStage; token_signature: string | null; nft_signature: string | null; token_receipt_json: string | null; nft_receipt_json: string | null; created_at: number; updated_at: number};
@@ -54,6 +54,19 @@ function checkPlan(row: Pick<IntentRow, "creator_wallet" | "token_mint" | "nft_m
   const asset = plan.kind === "token" ? row.token_mint : row.nft_mint;
   if (plan.feePayer !== row.creator_wallet || plan.bindingSha256 !== row.binding_sha256 || plan.requiredSigners.length !== 2 || !plan.requiredSigners.includes(asset) || !plan.requiredSigners.includes(row.creator_wallet)) throw new UserError("The prepared transaction does not match this immutable creator launch.");
 }
+/** Serialized bytes of a prepared or signed launch transaction (base64 only, so no RPC or parsing is needed). */
+function wireBytes(transactionBase64: string) {
+  const padding = transactionBase64.endsWith("==") ? 2 : transactionBase64.endsWith("=") ? 1 : 0;
+  return Math.max(0, Math.floor(transactionBase64.length * 3 / 4) - padding);
+}
+/**
+ * One server log line per launch transaction: stage, size and headroom under Solana's packet limit. Ids and hashes
+ * only: no keys, signatures or wallet addresses. Prepare already refuses anything over the limit.
+ */
+function logTransactionSize(event: "prepared" | "signed", intentId: string, kind: "token" | "nft", messageSha256: string, transactionBase64: string, extra: Record<string, string> = {}) {
+  const bytes = wireBytes(transactionBase64);
+  console.info(`Live launch transaction ${event}`, JSON.stringify({intentId, kind, messageSha256, bytes, limit: LIVE_PACKET_LIMIT, headroom: LIVE_PACKET_LIMIT - bytes, ...extra}));
+}
 async function savePlan(row: IntentRow, plan: WalletTransactionPlan) {
   checkPlan(row, plan);
   const now = Date.now();
@@ -62,6 +75,7 @@ async function savePlan(row: IntentRow, plan: WalletTransactionPlan) {
     snapshotGuard(row), clearGuard(),
     stmt("INSERT OR IGNORE INTO live_launch_transactions (id, intent_id, kind, message_sha256, plan_json, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'prepared', ?, ?)", crypto.randomUUID(), row.id, plan.kind, plan.messageSha256, JSON.stringify(plan), now, now),
   ]);
+  logTransactionSize("prepared", row.id, plan.kind, plan.messageSha256, plan.transactionBase64);
 }
 async function sourceAssets(wallet: string, designKey: string) {
   const design = reviewedDesigns[designKey as keyof typeof reviewedDesigns];
@@ -148,6 +162,7 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareInput) {
     if (!concurrent || concurrent.payload_sha256 !== requestedHash) throw new UserError("This launch mint or request identifier is already reserved.");
     await savePlan(concurrent, transaction); return {intent: publicIntent(concurrent), transaction};
   }
+  logTransactionSize("prepared", id, "token", transaction.messageSha256, transaction.transactionBase64);
   return {intent: publicIntent(await ownedIntent(wallet, id)), transaction};
 }
 
@@ -257,29 +272,36 @@ export async function abandonLiveLaunchIntent(wallet: string, input: {intentId: 
   await guardedBatch([snapshotGuard(row), clearGuard(), planSetGuard(row.id, "token", plans), clearGuard(), stmt("UPDATE live_launch_intents SET status = 'abandoned', updated_at = ? WHERE id = ? AND status IN ('prepared','token_pending')", Date.now(), row.id)]);
   return {intent: publicIntent(await ownedIntent(wallet, row.id))};
 }
-/** Not sent, and never sendable as signed (expired, rejected by the signed simulation, or not the reviewed message). */
-export class UnsendableTransaction extends UserError {}
+/**
+ * Not sent, and never sendable as signed (expired, rejected by the signed simulation, or not the reviewed message).
+ * `expired`: the wallet approval's blockhash ran out, so the page prepares a fresh transaction and asks once more.
+ */
+export class UnsendableTransaction extends UserError {
+  constructor(message: string, readonly expired = false) { super(message); }
+}
 /** What the client sees of a failed live operation: only a UserError's message, and whether the stage is prepared again. */
 export function liveFailure(error: unknown) {
   return {ok: false as const, error: error instanceof UserError ? error.message : "The real launch could not proceed. Your demo balances were not used.",
-    ...(error instanceof UnsendableTransaction ? {unsendable: true as const} : {})};
+    ...(error instanceof UnsendableTransaction ? {unsendable: true as const, ...(error.expired ? {expired: true as const} : {})} : {})};
 }
 // A refusal before any broadcast. With nothing saved, an unsendable stage is prepared again and any other refusal
 // keeps the same signed bytes for another send. A re-send of saved bytes says only that this retry was not sent.
-function notSent(saved: boolean, unsaved: string, retry: string, unsendable = true) {
+function notSent(saved: boolean, unsaved: string, retry: string, unsendable = true, expired = false) {
   if (saved) return new UserError(`This retry was not sent because ${retry}. Check this launch's saved transaction before preparing another.`);
-  return unsendable ? new UnsendableTransaction(`${unsaved} Prepare again for a fresh transaction.`) : new UserError(`${unsaved} Send again to retry with the same wallet approval.`);
+  return unsendable ? new UnsendableTransaction(`${unsaved} Prepare again for a fresh transaction.`, expired) : new UserError(`${unsaved} Send again to retry with the same wallet approval.`);
 }
 async function checkBeforeSend(plan: WalletTransactionPlan, transactionBase64: string, saved: boolean) {
   try { return await sdk.checkSignedWalletTransaction({plan, transactionBase64}, {connection: connection()}); }
   catch (error) {
     if (!(error instanceof sdk.SignedTransactionNotSent)) throw notSent(saved, "The final mainnet check could not finish, so this transaction was not sent yet.", "the final mainnet check could not finish", false);
-    if (error.reason === "expired") throw notSent(saved, "Your wallet approval expired before it could be sent. Nothing was sent or charged.", "its wallet approval expired");
+    if (error.reason === "expired") throw notSent(saved, "Your wallet approval expired before it could be sent. Nothing was sent or charged.", "its wallet approval expired", true, true);
     const detail = error.message.replace(/^Signed transaction simulation failed: /, "").slice(0, 200);
     throw notSent(saved, `Solana's final check rejected this transaction, so it was not sent and nothing was charged (${detail}).`, `Solana's final check rejected it (${detail})`);
   }
 }
-export async function submitLiveTransaction(wallet: string, input: {intentId: string; kind: "token" | "nft"; messageSha256: string; transactionBase64: string}) {
+/** Wallet name and signing order, for the log line only: they change no check. */
+type SigningContext = {walletName?: string; signingOrder?: "wallet-first" | "page-first"};
+export async function submitLiveTransaction(wallet: string, input: {intentId: string; kind: "token" | "nft"; messageSha256: string; transactionBase64: string} & SigningContext) {
   const row = await ownedIntent(wallet, input.intentId);
   if (input.kind === "token" && !["prepared", "token_pending"].includes(row.status) || input.kind === "nft" && row.status !== "nft_pending") throw new UserError("This launch has already advanced beyond that wallet transaction.");
   const prepared = await one<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = ? AND message_sha256 = ?", row.id, input.kind, input.messageSha256);
@@ -294,6 +316,7 @@ export async function submitLiveTransaction(wallet: string, input: {intentId: st
   }
   if (submittedSignature && submittedSignature !== signed.signature) throw new UserError("A different transaction for this stage is already pending. Recover it before authorizing another.");
   if (prepared.signature && (prepared.signature !== signed.signature || prepared.signed_transaction_base64 !== signed.transactionBase64)) throw new UserError("This prepared transaction already has different submitted bytes.");
+  logTransactionSize("signed", row.id, input.kind, plan.messageSha256, signed.transactionBase64, {...(input.walletName ? {wallet: input.walletName} : {}), ...(input.signingOrder ? {order: input.signingOrder} : {})});
   // Read-only checks run before anything is saved. A definite failure (expired approval, failed signed simulation)
   // leaves this stage as it was, so the creator can prepare it again with the same keys.
   const checked = await checkBeforeSend(plan, signed.transactionBase64, !!submittedSignature);
@@ -326,4 +349,17 @@ export async function submitLiveTransaction(wallet: string, input: {intentId: st
     return {intent: publicIntent(await ownedIntent(wallet, row.id)), signature: signed.signature, submission: "unknown" as const,
       warning: "The provider did not return a definitive submission result. Check this saved signature before authorizing anything else."};
   }
+}
+/**
+ * A wallet returned a different message from the reviewed plan, so the page refused to co-sign it. Logs what changed
+ * (sizes, blockhash, compute budget, programs added) so the mainnet test can show whether wallets add guard
+ * instructions. Nothing is saved, signed or sent; the returned bytes cannot land without the page's signature.
+ */
+export async function reportLiveWalletChange(wallet: string, input: {intentId: string; kind: "token" | "nft"; messageSha256: string; walletName: string; transactionBase64: string}) {
+  const row = await ownedIntent(wallet, input.intentId);
+  const prepared = await one<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = ? AND message_sha256 = ?", row.id, input.kind, input.messageSha256);
+  if (!prepared) throw new UserError("This transaction was not prepared for this launch.");
+  const plan = JSON.parse(prepared.plan_json) as WalletTransactionPlan; checkPlan(row, plan);
+  console.warn("Live wallet changed the prepared transaction", JSON.stringify({intentId: row.id, kind: input.kind, messageSha256: input.messageSha256, wallet: input.walletName, ...sdk.describeWalletChange(plan, input.transactionBase64)}));
+  return {};
 }
