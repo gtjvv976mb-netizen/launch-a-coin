@@ -11,7 +11,7 @@ export type CoinSort = "trending" | "mcap" | "new" | "next";
 /** How close the market cap is to unlocking the card's next design (the top design sorts last). */
 export function nextDesignProgress(c: Pick<CoinSummary, "level" | "mcapUsd">) {
   if (c.level >= MAX_LEVEL) return -1;
-  return c.mcapUsd / TIERS[c.level].minUsd;
+  return c.mcapUsd === null ? -1 : c.mcapUsd / TIERS[c.level].minUsd;
 }
 
 /** The coins with one design (0 or a level outside 1..MAX_LEVEL keeps every coin). Never mutates the input. */
@@ -25,9 +25,9 @@ export function filterByDesign<T extends Pick<CoinSummary, "level">>(coins: T[],
  */
 export function sortCoins<T extends CoinSummary>(coins: T[], sort: CoinSort = "trending") {
   return [...coins].sort((a, b) => {
-    if (sort === "mcap") return b.mcapUsd - a.mcapUsd;
+    if (sort === "mcap") return (b.mcapUsd ?? -1) - (a.mcapUsd ?? -1) || b.lastTradeAt - a.lastTradeAt;
     if (sort === "new") return b.createdAt - a.createdAt;
     if (sort === "next") return nextDesignProgress(b) - nextDesignProgress(a);
-    return b.volume24h - a.volume24h || b.lastTradeAt - a.lastTradeAt;
+    return (b.volume24h ?? -1) - (a.volume24h ?? -1) || b.lastTradeAt - a.lastTradeAt;
   });
 }

@@ -101,7 +101,7 @@ const SIM_COPY: ModeCopy = {
     "Choose a permanent card design, add your token, and try the pump.fun launch flow with test SOL.",
   guideLaunch:
     "Choose a design, add your token art and launch. The demo creates a simulated token and one-of-one card in your collection.",
-  guideNote: "Test mode: balances are test SOL with no cash value, and the curve mirrors pump.fun.",
+  guideNote: "Local demo: separate test-asset balances and a simulated bonding curve. No real token or NFT is minted.",
   curveComplete: "Curve complete (simulated)",
   botsNote: "Includes demo bots in test mode.",
   walletUnit: "test SOL",

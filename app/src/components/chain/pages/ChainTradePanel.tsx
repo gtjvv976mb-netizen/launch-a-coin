@@ -140,8 +140,8 @@ export function ChainTradePanel({
   }, [quoted, onQuote]);
 
   const afterUsd = est ? est.mcapAfterLamports * perLamport : coin.mcapUsd;
-  const afterLevel = est ? levelForMcap(afterUsd) : 0;
-  const reaches = side === "buy" && afterLevel > coin.level ? tierForLevel(afterLevel) : null;
+  const afterLevel = est && afterUsd != null ? levelForMcap(afterUsd) : null;
+  const reaches = side === "buy" && afterLevel != null && afterLevel > coin.level ? tierForLevel(afterLevel) : null;
   const highImpact = !!est && Math.abs(est.impact) > HIGH_IMPACT;
 
   // What blocks the trade, in the order the ticket says it (the sim ticket's order, P1-9).
@@ -440,7 +440,7 @@ export function ChainTradePanel({
         {est && !hideAfter && (
           <>
             <QuoteRow label="Market cap after">
-              <Num size="sm">{usdCompact(afterUsd)}</Num>
+              <Num size="sm">{afterUsd == null ? "—" : usdCompact(afterUsd)}</Num>
             </QuoteRow>
             <QuoteRow label="Venue">
               <span className="text-[13px] text-ink">{venue}</span>

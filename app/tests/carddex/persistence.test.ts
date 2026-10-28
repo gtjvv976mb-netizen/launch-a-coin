@@ -38,6 +38,8 @@ const seed = await import("../../src/lib/mintdex/server/seed.server");
 const { CARD_DESIGNS, DEFAULT_CARD_DESIGN, getCardDesign } = await import("../../src/lib/carddex/designs");
 const { INITIAL_RESERVES, quoteBuy, quoteSell } = await import("../../src/lib/mintdex/curve");
 const { LAUNCH_FEE, LAMPORTS } = await import("../../src/lib/mintdex/constants");
+const { PAIR_ASSETS, defaultQuoteForDesign } = await import("../../src/lib/carddex/pairs");
+const { demoQuoteStartBalance, initialQuoteReserves, maxInitialBuyQuoteAtoms, quoteUnit } = await import("../../src/lib/carddex/quote-simulation");
 const migrations = resolve(import.meta.dir, "../../migrations");
 
 const user = { id: "creator", handle: "creator", balance: 2000 * 1e9, faucet_at: 0, created_at: Date.now() };
@@ -81,9 +83,12 @@ describe("CardDex fixed creator cards and token trading", () => {
     const stockDesigns = CARD_DESIGNS.filter((design) => design.stock);
     expect(stockDesigns.length).toBeGreaterThan(0);
     for (const [index, design] of stockDesigns.entries()) {
-      const { id } = await launch(design.key, LAMPORTS, `S${String(index).padStart(2, "0")}`);
-      const buy = await service.trade(user, id, "buy", LAMPORTS);
-      await service.trade(user, id, "sell", Math.floor(buy.tokens / 2));
+      const asset = defaultQuoteForDesign(design.key);
+      const amount = Math.floor(initialQuoteReserves(asset.key).vSol / 30);
+      const identity = { quoteAssetKey: asset.key, quoteMint: asset.mint };
+      const { id } = await launch(design.key, amount, `S${String(index).padStart(2, "0")}`);
+      const buy = await service.trade(user, id, "buy", amount, 0, identity);
+      await service.trade(user, id, "sell", Math.floor(buy.tokens / 2), 0, identity);
       const page = await service.getCoinPage(id, "qa-session");
       expect(page?.coin.cardTemplate).toBe(design.key);
       expect(page?.coin.stockTicker).toBe(design.stock!.ticker);
@@ -104,6 +109,223 @@ describe("CardDex fixed creator cards and token trading", () => {
     expect(sqlite.query("SELECT COUNT(*) AS n FROM coins WHERE ticker = 'SPOOF'").get()).toEqual({ n: 0 });
     const accepted = await service.launchCoin(user, { ...base, stockTicker: stock.stock!.ticker, tokenPair: stock.stock!.pair });
     expect((await service.getCoinPage(accepted.id, null))?.coin.tokenPair).toBe(stock.stock!.pair);
+  });
+
+  for (const asset of PAIR_ASSETS) test(`${asset.symbol} quote atoms stay separate through launch, edit, buy, sell and portfolio`, async () => {
+    await service.getMe(user);
+    const initial = initialQuoteReserves(asset.key);
+    const amount = Math.floor(initial.vSol / 30);
+    const identity = { quoteAssetKey: asset.key, quoteMint: asset.mint };
+    const input = { name: "Quote Native Token", ticker: "QNT", image: "/api/img/art/qa-token.png", lore: "Own token, real quote identity, simulated accounting.", cardTemplate: "spark", devBuy: amount, ...identity };
+    const first = quoteBuy(initial, amount);
+    const { id } = await service.launchCoin(user, input);
+    await service.updateLore(user, id, "An edited creator story.");
+    const second = quoteBuy(first.after, amount);
+    const bought = await service.trade(user, id, "buy", amount, second.tokensOut, identity);
+    const tokensToSell = Math.floor(bought.tokens / 2);
+    const sale = quoteSell(second.after, tokensToSell);
+    const sold = await service.trade(user, id, "sell", tokensToSell, sale.solOut, identity);
+    const stored = row(id);
+    expect(stored.quote_asset_key).toBe(asset.key);
+    expect(stored.quote_mint).toBe(asset.mint);
+    expect(stored.card_template).toBe("spark");
+    expect(stored.v_sol).toBe(sale.after.vSol);
+    const page = (await service.getCoinPage(id, "qa-session"))!;
+    expect(page.coin.quoteAssetKey).toBe(asset.key);
+    expect(page.coin.quoteMint).toBe(asset.mint);
+    expect(page.coin.quoteDecimals).toBe(asset.decimals);
+    expect(page.coin.quoteTokenProgram).toBe(asset.tokenProgram);
+    expect(page.coin.tradingPair).toBe(`QNT / ${asset.symbol}`);
+    expect(page.coin.lore).toBe("An edited creator story.");
+    expect(page.coin.vQuote).toBe(sale.after.vSol);
+    expect(page.trades.every(trade => trade.quoteAssetKey === asset.key)).toBe(true);
+    expect(bought.quoteNet).toBe(amount);
+    expect(sold.quoteNet).toBe(sale.solOut);
+    const allFees = first.fee + second.fee + sale.fee;
+    const native = (sqlite.query("SELECT balance FROM users WHERE id = ?").get(user.id) as { balance: number }).balance;
+    expect(native).toBe(user.balance - LAUNCH_FEE - (asset.key === "sol" ? amount * 2 - sale.solOut : 0));
+    if (asset.key !== "sol") {
+      const wallet = sqlite.query("SELECT balance FROM quote_balances WHERE user_id = ? AND quote_asset_key = ?").get(user.id, asset.key) as { balance: number };
+      expect(wallet.balance).toBe(demoQuoteStartBalance(asset.key) - amount * 2 + sale.solOut);
+      expect(sqlite.query("SELECT amount FROM protocol_quote_fees WHERE quote_asset_key = ?").get(asset.key)).toEqual({ amount: String(allFees) });
+    }
+    expect(Number((sqlite.query("SELECT value FROM meta WHERE key = 'protocol_fees'").get() as { value: string }).value)).toBe(LAUNCH_FEE + (asset.key === "sol" ? allFees : 0));
+    for (const other of PAIR_ASSETS.filter(other => other.key !== "sol" && other.key !== asset.key)) {
+      expect(sqlite.query("SELECT balance FROM quote_balances WHERE user_id = ? AND quote_asset_key = ?").get(user.id, other.key)).toEqual({ balance: demoQuoteStartBalance(other.key) });
+    }
+    const portfolio = (await service.getPortfolio("qa-session"))!;
+    expect(portfolio.holdings[0].coin.quoteAssetKey).toBe(asset.key);
+    expect(portfolio.totals.holdingsValueByQuote[asset.key]).toBe(portfolio.holdings[0].valueQuote);
+    if (asset.kind === "stock" || asset.kind === "meme") {
+      expect(page.coin.mcapUsd).toBeNull();
+      expect(page.coin.priceSol).toBeNull();
+      expect(bought.sol).toBeNull();
+      expect(sold.net).toBeNull();
+      expect(page.trades.every(trade => trade.sol === null && trade.price === null && trade.mcapUsd === null)).toBe(true);
+      expect(portfolio.holdings[0].valueSol).toBeNull();
+      expect(portfolio.totals.holdingsValue).toBeNull();
+      expect((await service.getHome()).stats.volume).toBeNull();
+      expect((await service.recentEvents()).every(event => event.amount === null)).toBe(true);
+    }
+  });
+
+  test("quote spoofing, incompatible designs, unsafe amounts and raw quote updates are rejected", async () => {
+    const base = { name: "Quote Guard", ticker: "GUARD", image: "/api/img/art/qa-token.png", lore: "Immutable quote identity.", cardTemplate: "spark", devBuy: 0 };
+    const before = writeCalls;
+    await expect(service.launchCoin(user, { ...base, quoteAssetKey: "unsupported" })).rejects.toThrow("supported pump.fun quote");
+    await expect(service.launchCoin(user, { ...base, quoteAssetKey: "usdc", quoteMint: PAIR_ASSETS[0].mint })).rejects.toThrow("quote mint");
+    await expect(service.launchCoin(user, { ...base, cardTemplate: "stock-tsla", quoteAssetKey: "sol" })).rejects.toThrow("compatible card");
+    await expect(service.launchCoin(user, { ...base, devBuy: Number.MAX_SAFE_INTEGER + 1 })).rejects.toThrow("safe initial-buy");
+    await expect(service.launchCoin(user, { ...base, devBuy: 1.5 })).rejects.toThrow("safe initial-buy");
+    expect(writeCalls).toBe(before);
+    const asset = PAIR_ASSETS.find(asset => asset.key === "usdc")!;
+    const { id } = await service.launchCoin(user, { ...base, quoteAssetKey: asset.key, quoteMint: asset.mint });
+    const writes = writeCalls;
+    await expect(service.trade(user, id, "buy", quoteUnit(asset.key))).rejects.toThrow("confirm its quote");
+    await expect(service.trade(user, id, "buy", quoteUnit(asset.key), 0, { quoteAssetKey: "sol" })).rejects.toThrow("does not match");
+    await expect(service.trade(user, id, "buy", Number.MAX_SAFE_INTEGER + 1, 0, { quoteAssetKey: asset.key })).rejects.toThrow("safe integer");
+    expect(writeCalls).toBe(writes);
+    expect(() => sqlite.query("UPDATE coins SET quote_asset_key = 'sol' WHERE id = ?").run(id)).toThrow("quote asset is immutable");
+    expect(() => sqlite.query("UPDATE coins SET quote_mint = 'fake' WHERE id = ?").run(id)).toThrow("quote asset is immutable");
+  });
+
+  test("65 BONK round trips preserve exact analytics past MAX_SAFE_INTEGER without blocking sells", async () => {
+    const asset = PAIR_ASSETS.find(asset => asset.key === "bonk")!;
+    const identity = { quoteAssetKey: asset.key, quoteMint: asset.mint };
+    const { id } = await service.launchCoin(user, { name: "Busy BONK", ticker: "BUSY", image: "/api/img/art/qa-token.png", lore: "Exact quote analytics.", cardTemplate: "bonk", devBuy: 0, ...identity });
+    let reserves = initialQuoteReserves(asset.key);
+    const amount = maxInitialBuyQuoteAtoms(asset.key);
+    let volume = 0n, fees = 0n, spent = 0n, firstBuy = 0n;
+    for (let i = 0; i < 65; i++) {
+      const buy = quoteBuy(reserves, amount);
+      const bought = await service.trade(user, id, "buy", amount, buy.tokensOut, identity);
+      const sell = quoteSell(buy.after, bought.tokens);
+      await service.trade(user, id, "sell", bought.tokens, sell.solOut, identity);
+      volume += BigInt(buy.solIn) + BigInt(sell.gross);
+      fees += BigInt(buy.fee) + BigInt(sell.fee);
+      spent += BigInt(buy.solIn) - BigInt(sell.solOut);
+      reserves = sell.after;
+      if (i === 0) firstBuy = BigInt(buy.solIn);
+    }
+    expect(volume > BigInt(Number.MAX_SAFE_INTEGER)).toBe(true);
+    // Keep the lifetime total while excluding one trade from the rolling window.
+    sqlite.query("UPDATE trades SET created_at = ? WHERE id = (SELECT MIN(id) FROM trades WHERE coin_id = ?)").run(Date.now() - 25 * 3_600_000, id);
+    const page = (await service.getCoinPage(id, "qa-session"))!;
+    expect(page.coin.volumeQuote).toBe(volume.toString());
+    expect(page.coin.volume24hQuote).toBe((volume - firstBuy).toString());
+    expect(page.coin.volume).toBeNull();
+    expect(page.coin.volume24h).toBeNull();
+    expect((await service.allCoins())[0].volumeQuote).toBe(volume.toString());
+    expect((await service.getHome()).stats.volumeByQuote).toEqual({ bonk: volume.toString() });
+    expect(sqlite.query("SELECT amount, typeof(amount) AS storage FROM protocol_quote_fees WHERE quote_asset_key = 'bonk'").get()).toEqual({ amount: fees.toString(), storage: "text" });
+    const balance = (sqlite.query("SELECT balance FROM quote_balances WHERE user_id = ? AND quote_asset_key = 'bonk'").get(user.id) as { balance: number }).balance;
+    expect(Number.isSafeInteger(balance)).toBe(true);
+    expect(balance).toBe(demoQuoteStartBalance("bonk") - Number(spent));
+    expect(sqlite.query("SELECT amount FROM holdings WHERE user_id = ? AND coin_id = ?").get(user.id, id)).toEqual({ amount: 0 });
+    // The deprecated INTEGER cache no longer accumulates or becomes REAL.
+    expect(sqlite.query("SELECT volume, typeof(volume) AS storage FROM coins WHERE id = ?").get(id)).toEqual({ volume: 0, storage: "integer" });
+  });
+
+  test("volume aggregation survives SQLite SUM overflow using individual exact trade atoms", async () => {
+    const { id } = await launch("spark");
+    const amount = Number.MAX_SAFE_INTEGER;
+    const at = Date.now();
+    const insert = sqlite.query("INSERT INTO trades (coin_id, user_id, side, sol, tokens, price, mcap_usd, created_at) VALUES (?, ?, 'buy', ?, 1, 1, 1, ?)");
+    sqlite.transaction(() => { for (let i = 0; i < 1100; i++) insert.run(id, user.id, amount, at); })();
+    const expected = BigInt(amount) * 1100n;
+    expect(expected > 9_223_372_036_854_775_807n).toBe(true);
+    expect(() => sqlite.query("SELECT SUM(sol) FROM trades").get()).toThrow("integer overflow");
+    const page = (await service.getCoinPage(id, null))!;
+    expect(page.coin.volumeQuote).toBe(expected.toString());
+    expect(page.coin.volume24hQuote).toBe(expected.toString());
+    expect((await service.getHome()).stats.volumeByQuote.sol).toBe(expected.toString());
+  });
+
+  test("quote and native fee ledgers add exact text totals beyond signed 64-bit integers", async () => {
+    const asset = PAIR_ASSETS.find(asset => asset.key === "bonk")!;
+    const identity = { quoteAssetKey: asset.key, quoteMint: asset.mint };
+    const { id } = await service.launchCoin(user, { name: "Fee Precision", ticker: "FEE", image: "/api/img/art/qa-token.png", lore: "Exact accumulated fees.", cardTemplate: "bonk", devBuy: 0, ...identity });
+    const prior = 184_467_440_737_095_516_179n;
+    sqlite.query("INSERT INTO protocol_quote_fees (quote_asset_key, amount) VALUES ('bonk', ?)").run(prior.toString());
+    const amount = maxInitialBuyQuoteAtoms("bonk");
+    const buy = quoteBuy(initialQuoteReserves("bonk"), amount);
+    const bought = await service.trade(user, id, "buy", amount, buy.tokensOut, identity);
+    const sell = quoteSell(buy.after, bought.tokens);
+    await service.trade(user, id, "sell", bought.tokens, sell.solOut, identity);
+    expect(sqlite.query("SELECT amount FROM protocol_quote_fees WHERE quote_asset_key = 'bonk'").get()).toEqual({ amount: (prior + BigInt(buy.fee) + BigInt(sell.fee)).toString() });
+    sqlite.query("UPDATE protocol_quote_fees SET amount = ? WHERE quote_asset_key = 'sol'").run(prior.toString());
+    sqlite.query("UPDATE meta SET value = ? WHERE key = 'protocol_fees'").run(prior.toString());
+    const devBuy = LAMPORTS;
+    const first = quoteBuy(INITIAL_RESERVES, devBuy);
+    await launch("spark", devBuy, "SOLFEE");
+    const expectedNative = (prior + BigInt(LAUNCH_FEE) + BigInt(first.fee)).toString();
+    expect(sqlite.query("SELECT amount, typeof(amount) AS storage FROM protocol_quote_fees WHERE quote_asset_key = 'sol'").get()).toEqual({ amount: expectedNative, storage: "text" });
+    expect(sqlite.query("SELECT value FROM meta WHERE key = 'protocol_fees'").get()).toEqual({ value: expectedNative });
+    for (const invalid of ["", "-1", "01", "1e3", "2.5"]) {
+      expect(() => sqlite.query("UPDATE protocol_quote_fees SET amount = ? WHERE quote_asset_key = 'bonk'").run(invalid)).toThrow("CHECK");
+    }
+  });
+
+  test("mixed portfolio spot values and per-quote totals retain large exact atom-rounded estimates", async () => {
+    const launchQuoted = (key: string, ticker: string, amount: number) => {
+      const asset = PAIR_ASSETS.find(asset => asset.key === key)!;
+      return service.launchCoin(user, { name: "Portfolio Precision", ticker, image: "/api/img/art/qa-token.png", lore: "Separate quote values.", cardTemplate: "spark", devBuy: amount, quoteAssetKey: key, quoteMint: asset.mint });
+    };
+    const first = await launchQuoted("bonk", "BONKONE", maxInitialBuyQuoteAtoms("bonk"));
+    await launchQuoted("bonk", "BONKTWO", quoteUnit("bonk"));
+    await launchQuoted("sol", "SOLHOLD", LAMPORTS);
+    await launchQuoted("usdc", "USDCHOLD", quoteUnit("usdc"));
+    const whale = { ...user, id: "whale", handle: "whale" };
+    sqlite.query("INSERT INTO users (id, handle, balance, is_npc, faucet_at, created_at) VALUES (?, ?, ?, 0, 0, ?)").run(whale.id, whale.handle, whale.balance, whale.created_at);
+    await service.getMe(whale);
+    sqlite.query("UPDATE quote_balances SET balance = ? WHERE user_id = ? AND quote_asset_key = 'bonk'").run(8_000_000_000_000_000, whale.id);
+    const bonk = PAIR_ASSETS.find(asset => asset.key === "bonk")!;
+    await service.trade(whale, first.id, "buy", 8_000_000_000_000_000, 0, { quoteAssetKey: "bonk", quoteMint: bonk.mint });
+    const portfolio = (await service.getPortfolio("qa-session"))!;
+    const expected: Record<string, bigint> = {};
+    for (const item of portfolio.holdings) {
+      const stored = row(item.coin.id);
+      const denominator = BigInt(Number(stored.v_tok));
+      const atoms = (BigInt(item.amount) * BigInt(Number(stored.v_sol)) + denominator / 2n) / denominator;
+      expect(item.valueQuote).toBe(atoms.toString());
+      expected[item.coin.quoteAssetKey] = (expected[item.coin.quoteAssetKey] ?? 0n) + atoms;
+    }
+    expect(BigInt(portfolio.holdings.find(item => item.coin.id === first.id)!.valueQuote) > BigInt(Number.MAX_SAFE_INTEGER)).toBe(true);
+    expect(portfolio.totals.holdingsValueByQuote).toEqual(Object.fromEntries(Object.entries(expected).map(([key, value]) => [key, value.toString()])));
+    expect(Object.keys(portfolio.totals.holdingsValueByQuote).sort()).toEqual(["bonk", "sol", "usdc"]);
+    expect(portfolio.totals.holdingsValue).toBeNull();
+    expect(portfolio.holdings.filter(item => item.coin.quoteAssetKey === "bonk").every(item => item.valueSol === null)).toBe(true);
+  });
+
+  test("exact fee migration preserves preexisting integer atoms without a JS-number round trip", () => {
+    sqlite.close(); sqlite = new Database(":memory:");
+    for (const name of readdirSync(migrations).filter(name => name.endsWith(".sql") && name < "0010").sort()) {
+      const sql = readFileSync(resolve(migrations, name), "utf8");
+      if (sql.replace(/--[^\n]*/g, "").trim()) sqlite.exec(sql);
+    }
+    const prior = "9007199254740993";
+    sqlite.query("INSERT INTO protocol_quote_fees (quote_asset_key, amount) VALUES ('bonk', ?)").run(prior);
+    sqlite.query("INSERT INTO meta (key, value) VALUES ('protocol_fees', ?)").run(prior);
+    sqlite.exec(readFileSync(resolve(migrations, "0010_carddex_exact_analytics.sql"), "utf8"));
+    expect(sqlite.query("SELECT quote_asset_key, amount, typeof(amount) AS storage FROM protocol_quote_fees ORDER BY quote_asset_key").all()).toEqual([
+      { quote_asset_key: "bonk", amount: prior, storage: "text" },
+      { quote_asset_key: "sol", amount: prior, storage: "text" },
+    ]);
+  });
+
+  test("migration preserves existing SOL curves even when their skin now defaults to another quote", async () => {
+    sqlite.close(); sqlite = new Database(":memory:");
+    for (const name of readdirSync(migrations).filter(name => name.endsWith(".sql") && name < "0009").sort()) {
+      const sql = readFileSync(resolve(migrations, name), "utf8");
+      if (sql.replace(/--[^\n]*/g, "").trim()) sqlite.exec(sql);
+    }
+    await localD1.batch(seed.buildSeed() as Prepared[]);
+    sqlite.exec(readFileSync(resolve(migrations, "0009_carddex_quote_assets.sql"), "utf8"));
+    const coins = await service.allCoins();
+    expect(coins).toHaveLength(10);
+    expect(coins.some(coin => coin.cardTemplate === "doge")).toBe(true);
+    expect(coins.every(coin => coin.quoteAssetKey === "sol")).toBe(true);
+    expect(coins.every(coin => coin.quoteMint === PAIR_ASSETS[0].mint)).toBe(true);
   });
 
   test("dev buy, token buy and token sell conserve quoted funds and never evolve or accrue royalties", async () => {

@@ -7,7 +7,7 @@ import { View3DHost } from "../components/mintdex/card3d";
 import { PageFrame, Change } from "../components/mintdex/ui";
 import { listCoins } from "../lib/mintdex/api";
 import { getCardDesign } from "../lib/carddex/designs";
-import { usdCompact } from "../lib/mintdex/format";
+import { marketCapText } from "../lib/carddex/quote-display";
 import { pageHead } from "../lib/mintdex/seo";
 import "../carddex.css";
 
@@ -55,8 +55,8 @@ function Discover() {
           search.sort === "new"
             ? b.createdAt - a.createdAt
             : search.sort === "mcap"
-              ? b.mcapUsd - a.mcapUsd
-              : b.volume24h - a.volume24h,
+              ? (b.mcapUsd ?? -1) - (a.mcapUsd ?? -1)
+              : (b.volume24h ?? -1) - (a.volume24h ?? -1),
         ),
     [data, query, search.sort],
   );
@@ -127,7 +127,7 @@ function Discover() {
                 <span>${c.ticker}</span>
               </div>
               <div>
-                <span>{usdCompact(c.mcapUsd)}</span>
+                <span>{marketCapText(c)}</span>
                 <Change v={c.change24h} />
               </div>
             </Link>

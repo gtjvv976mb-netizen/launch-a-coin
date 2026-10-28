@@ -118,6 +118,7 @@ export function useChainMe(): Me {
       id: address,
       handle: name || shortAddress(address),
       balance: lamports,
+      quoteBalances: { sol: lamports },
       canFaucet: false,
       faucetReadyAt: null,
     };

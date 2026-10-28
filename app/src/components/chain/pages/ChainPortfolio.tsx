@@ -708,7 +708,7 @@ function shape(w: ApiWallet) {
         listNote: card.listed && l && !live ? (l.voided ? "Listing voided" : "Listing expired") : null,
       };
     })
-    .sort((a, b) => b.coin.mcapUsd - a.coin.mcapUsd);
+    .sort((a, b) => a.coin.mcapUsd == null ? b.coin.mcapUsd == null ? 0 : 1 : b.coin.mcapUsd == null ? -1 : b.coin.mcapUsd - a.coin.mcapUsd);
   const item = (x: { bid: ApiBid; coin: ApiCoinSummary }): BidItem => ({ bid: x.bid, raw: x.coin, coin: toCoinSummary(x.coin) });
   return {
     holdings: [...w.coins].sort((a, b) => num(b.valueLamports) - num(a.valueLamports)),

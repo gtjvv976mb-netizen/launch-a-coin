@@ -1,0 +1,23 @@
+{
+  "name": "@carddex/pumpfun-launch-plan",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test tests",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@pump-fun/pump-sdk": "4.1.0",
+    "@solana/spl-token": "0.4.15",
+    "@solana/web3.js": "1.98.2"
+  },
+  "devDependencies": {
+    "@types/bun": "1.3.10",
+    "@types/node": "22.16.5",
+    "typescript": "5.8.3"
+  },
+  "overrides": {
+    "@pump-fun/pump-swap-sdk": "2.1.0"
+  }
+}

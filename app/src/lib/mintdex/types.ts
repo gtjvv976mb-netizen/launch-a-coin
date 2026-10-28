@@ -2,7 +2,18 @@
 
 import type { InboxKind } from "./copy";
 
-export type CoinSummary = {
+/** Exact, nonnegative decimal integer atoms. Aggregates may exceed JavaScript's safe integer range. */
+export type AtomicAmount = string;
+
+export type QuoteIdentity = {
+  quoteAssetKey: string;
+  quoteMint: string;
+  quoteSymbol: string;
+  quoteDecimals: number;
+  quoteTokenProgram: string;
+};
+
+export type CoinSummary = QuoteIdentity & {
   id: string;
   dexNo: number;
   name: string;
@@ -19,11 +30,19 @@ export type CoinSummary = {
   level: number;
   /** Compatibility copy of the fixed material finish. */
   liveLevel: number;
-  mcapUsd: number;
-  priceSol: number;
+  tradingPair: string;
+  priceQuote: number;
+  mcapQuote: number;
+  valuationMode: "demo-reference" | "quote-native";
+  mcapUsd: number | null;
+  priceSol: number | null;
   change24h: number;
-  volume: number;
-  volume24h: number;
+  /** Approximate legacy SOL-equivalent analytics; never a wallet or settlement amount. */
+  volume: number | null;
+  volume24h: number | null;
+  /** Exact cumulative and rolling-24h totals in this token's quote atoms. */
+  volumeQuote: AtomicAmount;
+  volume24hQuote: AtomicAmount;
   holders: number;
   trades: number;
   curveProgress: number;
@@ -49,7 +68,8 @@ export type CoinSummary = {
 };
 
 export type CoinDetail = CoinSummary & {
-  vSol: number;
+  vSol: number | null;
+  vQuote: number;
   vTok: number;
   ownerFees: number;
   ownerEarnings: number;
@@ -58,13 +78,16 @@ export type CoinDetail = CoinSummary & {
   deedGuide: number;
 };
 
-export type TradeRow = {
+export type TradeRow = QuoteIdentity & {
   id: number;
   side: "buy" | "sell";
-  sol: number;
+  sol: number | null;
+  quoteAmount: number;
   tokens: number;
-  price: number;
-  mcapUsd: number;
+  price: number | null;
+  priceQuote: number;
+  mcapQuote: number;
+  mcapUsd: number | null;
   handle: string;
   /** The trader is a demo bot (test mode). */
   isBot: boolean;
@@ -98,7 +121,7 @@ export type SaleRow = {
   createdAt: number;
 };
 
-export type EventRow = {
+export type EventRow = QuoteIdentity & {
   id: number;
   kind: "launch" | "buy" | "sell" | "levelup" | "bid" | "sale" | "list";
   coinId: string;
@@ -108,7 +131,8 @@ export type EventRow = {
   handle: string | null;
   /** The player behind the event is a demo bot (test mode). */
   isBot: boolean;
-  amount: number;
+  amount: number | null;
+  quoteAmount: number;
   level: number;
   createdAt: number;
 };
@@ -141,6 +165,8 @@ export type Me = {
   id: string;
   handle: string;
   balance: number;
+  /** Separate simulated balances in each quote asset's integer atomic units. */
+  quoteBalances: Record<string, number>;
   canFaucet: boolean;
   faucetReadyAt: number | null;
   /** Only the getMe read (the root loader and its poll) carries the inbox; write results leave it out. */
@@ -164,7 +190,7 @@ export type HomeData = {
   featured: CoinSummary[];
   trending: CoinSummary[];
   activity: EventRow[];
-  stats: { coins: number; deedSales: number; volume: number; players: number };
+  stats: { coins: number; deedSales: number; volume: number | null; volumeByQuote: Record<string, AtomicAmount>; players: number };
 };
 
 export type MarketData = {
@@ -174,11 +200,13 @@ export type MarketData = {
 };
 
 export type PortfolioData = {
-  holdings: Array<{ coin: CoinSummary; amount: number; valueSol: number }>;
+  /** valueQuote is the exact atom-rounded spot estimate; it is not a guaranteed liquidation payout. */
+  holdings: Array<{ coin: CoinSummary; amount: number; valueSol: number | null; valueQuote: AtomicAmount }>;
   deeds: Array<{ coin: CoinSummary; earnings: number }>;
   bids: Array<{ bid: BidRow; coin: CoinSummary }>;
   offers: Array<{ bid: BidRow; coin: CoinSummary }>;
-  totals: { holdingsValue: number; earnings: number; escrowed: number };
+  /** holdingsValue is a legacy approximate SOL conversion. Per-quote totals preserve every rounded atom. */
+  totals: { holdingsValue: number | null; holdingsValueByQuote: Record<string, AtomicAmount>; earnings: number; escrowed: number };
 };
 
 export type LevelsData = {

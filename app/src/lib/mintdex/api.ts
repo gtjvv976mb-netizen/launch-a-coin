@@ -196,14 +196,16 @@ export const tradeCoin = createServerFn({ method: "POST" })
     z.object({
       coinId,
       side: z.enum(["buy", "sell"]),
-      amount: lamports,
-      minOut: z.number().int().min(0).default(0),
+      amount: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+      minOut: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).default(0),
+      quoteAssetKey: z.string().max(32).optional(),
+      quoteMint: z.string().max(48).optional(),
     }),
   )
   .handler(async ({ data }) =>
     attempt(async () => {
       const user = await requireUser();
-      const { me, rev, ...fill } = await svc.trade(user, data.coinId, data.side, data.amount, data.minOut);
+      const { me, rev, ...fill } = await svc.trade(user, data.coinId, data.side, data.amount, data.minOut, data);
       return { ...fill, ...(await fresh({ me, rev })) };
     }),
   );
@@ -217,8 +219,10 @@ export const launch = createServerFn({ method: "POST" })
       lore: z.string().max(400),
       website: z.string().max(240).optional(),
       xUrl: z.string().max(240).optional(),
-      devBuy: z.number().int().min(0).max(1_000_000_000_000),
+      devBuy: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
       cardTemplate: z.string().max(48).optional(),
+      quoteAssetKey: z.string().max(32).optional(),
+      quoteMint: z.string().max(48).optional(),
       stockTicker: z.string().max(12).optional(),
       tokenPair: z.string().max(48).optional(),
     }),

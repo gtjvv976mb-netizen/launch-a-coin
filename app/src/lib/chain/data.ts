@@ -104,7 +104,7 @@ const EMPTY_HOME: HomeData & { rev: string } = {
   featured: [],
   trending: [],
   activity: [],
-  stats: { coins: 0, deedSales: 0, volume: 0, players: 0 },
+  stats: { coins: 0, deedSales: 0, volume: 0, volumeByQuote: {}, players: 0 },
   rev: "",
 };
 
@@ -152,7 +152,7 @@ export type ChainMarketData = { market: MarketData & { rev: string }; all: CoinS
 /** Market: listings, top bids and recent sales from GET /market, plus every coin for All cards. */
 export async function chainMarket(): Promise<ChainMarketData> {
   const [market, all] = await Promise.all([client.getMarket(), chainCoinList()]);
-  const out: ChainMarketData = { market: toMarket(market), all: [...all].sort((a, b) => b.mcapUsd - a.mcapUsd) };
+  const out: ChainMarketData = { market: toMarket(market), all: [...all].sort((a, b) => (b.mcapUsd ?? 0) - (a.mcapUsd ?? 0)) };
   // SSR read one page of coins: the browser reads them all right after hydration.
   if (SSR && all.length >= 100) out.fallback = true;
   return out;

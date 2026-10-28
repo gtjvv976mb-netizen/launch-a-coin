@@ -2,9 +2,9 @@ import { useEffect, useRef, useState, type CSSProperties, type Ref } from "react
 import { getCardDesign, type CardDesign } from "../../lib/carddex/designs";
 import { CanonicalCardFace } from "../carddex/CanonicalCardFace";
 import { generatedCardAssets } from "../../lib/carddex/generated-assets";
+import { marketCapText } from "../../lib/carddex/quote-display";
 import "../../carddex-cards.css";
 
-import { usdCompact } from "../../lib/mintdex/format";
 import { cardArtSources } from "../../lib/mintdex/art";
 import {
   MAX_LEVEL,
@@ -33,6 +33,10 @@ import type {
 export type CardData = {
   /** The creator-selected permanent print. Price and market cap never change it. */
   cardTemplate?: string;
+  quoteAssetKey?: string;
+  quoteMint?: string;
+  tradingPair?: string;
+  mcapQuote?: number;
   /** Cosmetic preview identity, independent from the token's earned market-cap tier. Not an entitlement. */
   edition?: EditionKey;
   /** Cosmetic template preview applied to this token's identity; never a purchased entitlement. */
@@ -41,7 +45,7 @@ export type CardData = {
   ticker: string;
   image: string;
   level: number;
-  mcapUsd: number;
+  mcapUsd: number | null;
   /** A preview without a current quote can name the unavailable value instead of inventing a market cap. */
   mcapLabel?: string;
   holders: number;
@@ -133,7 +137,7 @@ export function tierLight(level: number): TierLight {
 
 /** The scene's label (the old card's aria-label, unchanged). */
 export function cardLabel(card: CardData, _level = card.level) {
-  return `${card.name} ($${card.ticker}), ${cardDesign(card).name} trading card, market cap ${card.mcapLabel ?? usdCompact(card.mcapUsd)}${card.ownerHandle ? `, creator @${card.ownerHandle}` : ""}`;
+  return `${card.name} ($${card.ticker}), ${cardDesign(card).name} trading card, market cap ${card.mcapLabel ?? marketCapText(card)}${card.ownerHandle ? `, creator @${card.ownerHandle}` : ""}`;
 }
 
 type FaceProps = {

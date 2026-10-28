@@ -37,7 +37,7 @@ export function HeroTurntable({ card, className = "", playing: controlled, onPla
     const body = ctl.body;
     if (body) body.flip.t = Math.round(body.flip.x / 360) * 360;
     Engine.kick();
-  }, [followEdits, card.name, card.ticker, card.image, card.lore, card.cardTemplate, card.mcapUsd]);
+  }, [followEdits, card.name, card.ticker, card.image, card.lore, card.cardTemplate, card.quoteAssetKey, card.mcapQuote, card.mcapUsd]);
   const toggle = () => {
     const value = !playing;
     setLocalPlaying(value);

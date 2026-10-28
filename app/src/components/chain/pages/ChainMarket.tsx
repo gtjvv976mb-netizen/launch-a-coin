@@ -16,7 +16,7 @@ import { useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { boostedPollMs, chainCoinPage, takeFresh, useChainWallet, type ChainCoinPage } from "../../../lib/chain/data";
 import { num } from "../../../lib/chain/adapt";
 import { MARKET_COPY } from "../../../lib/mintdex/copy";
-import { usdCompact } from "../../../lib/mintdex/format";
+import { marketCapText, marketCapWatch } from "../../../lib/carddex/quote-display";
 import { tierForLevel } from "../../../lib/mintdex/tiers";
 import type { CoinSummary } from "../../../lib/mintdex/types";
 import { CardBack, View3DHost, type Card3DHandle } from "../../mintdex/card3d";
@@ -103,7 +103,7 @@ export function ChainMarketTile({
   width: number;
   view?: MarketView;
 }) {
-  const mcap = usdCompact(coin.mcapUsd);
+  const mcap = marketCapText(coin);
   const label = [
     `${coin.name}, ${tierForLevel(coin.level).name} design`,
     `market cap ${mcap}`,
@@ -120,7 +120,7 @@ export function ChainMarketTile({
           <GridCaption
             name={coin.name}
             value={
-              <Num size="sm" tone="inherit" watch={coin.mcapUsd}>
+              <Num size="sm" tone="inherit" watch={marketCapWatch(coin)}>
                 {mcap}
               </Num>
             }
@@ -208,7 +208,7 @@ function SheetBody({ page }: { page: ChainCoinPage }) {
             <div className="text-[13px]">
               <dt className="text-slate">Market cap</dt>
               <dd>
-                <Num size="sm">{usdCompact(coin.mcapUsd)}</Num>
+                <Num size="sm">{marketCapText(coin)}</Num>
               </dd>
             </div>
           </dl>

@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-import { atName, timeAgo, usdCompact } from "../../lib/mintdex/format";
+import { atName, timeAgo } from "../../lib/mintdex/format";
 import { tierForLevel } from "../../lib/mintdex/tiers";
+import { getPairAsset } from "../../lib/carddex/pairs";
+import { marketCapText, quoteAtoms } from "../../lib/carddex/quote-display";
 import type { CoinSummary, EventRow, SaleRow } from "../../lib/mintdex/types";
 import { BotTag } from "./trust";
 import { Change, FrameMini, SectionHead, Thumb, solFigure, useTick } from "./ui";
@@ -41,7 +43,7 @@ export function CoinRow({ coin, rank, flipId }: { coin: CoinSummary; rank?: numb
         <span className="block truncate text-[12px] leading-[1.3] text-slate">${coin.ticker}</span>
       </span>
       <span className="flex flex-col items-end">
-        <span className="num text-[16px] leading-[1.2] text-ink">{usdCompact(coin.mcapUsd)}</span>
+        <span className="num text-[16px] leading-[1.2] text-ink">{marketCapText(coin)}</span>
         <Change v={coin.change24h} hideZero className="text-[13px] leading-[1.3]" />
       </span>
     </Link>
@@ -61,10 +63,10 @@ function Who({ handle, bot = false }: { handle: string | null; bot?: boolean }) 
   );
 }
 
-function Amount({ lamports }: { lamports: number }) {
+function Amount({ lamports, quoteAssetKey }: { lamports: number | null; quoteAssetKey?: string }) {
   return (
     <>
-      <span className="num">{solFigure(lamports)}</span> SOL
+      <span className="num">{quoteAtoms(lamports ?? 0, quoteAssetKey, true)}</span> {getPairAsset(quoteAssetKey).symbol}
     </>
   );
 }
@@ -119,7 +121,7 @@ function eventParts(e: EventRow): { who: ReactNode; what: ReactNode } {
         who,
         what: (
           <>
-            sold <Amount lamports={e.amount} /> of {t}
+            sold <Amount lamports={e.quoteAmount ?? e.amount} quoteAssetKey={e.quoteAssetKey} /> of {t}
           </>
         ),
       };
@@ -128,7 +130,7 @@ function eventParts(e: EventRow): { who: ReactNode; what: ReactNode } {
         who,
         what: (
           <>
-            bought <Amount lamports={e.amount} /> of {t}
+            bought <Amount lamports={e.quoteAmount ?? e.amount} quoteAssetKey={e.quoteAssetKey} /> of {t}
           </>
         ),
       };

@@ -21,7 +21,7 @@ import {
   tradeCoin,
   updateLore,
 } from "../../lib/mintdex/api";
-import { FAUCET_AMOUNT, LAMPORTS, TOKEN_UNIT, TRADE_FEE_BPS } from "../../lib/mintdex/constants";
+import { FAUCET_AMOUNT, TOKEN_UNIT, TRADE_FEE_BPS } from "../../lib/mintdex/constants";
 import {
   COIN_COPY,
   FLOW,
@@ -33,8 +33,6 @@ import {
   type ReportReason,
 } from "../../lib/mintdex/copy";
 import {
-  INITIAL_RESERVES,
-  mcapUsd,
   priceSol,
   quoteBuy,
   quoteSell,
@@ -51,15 +49,16 @@ import {
   atName,
   dexNo,
   cleanAmount,
-  parseSol,
   priceText,
   sol,
   timeAgo,
   tokens,
   usdCompact,
-  usdFull,
 } from "../../lib/mintdex/format";
 import { getCardDesign } from "../../lib/carddex/designs";
+import { getPairAsset } from "../../lib/carddex/pairs";
+import { marketCapText, marketCapWatch, quoteAtoms, quoteNumber } from "../../lib/carddex/quote-display";
+import { formatQuoteAmount, parseQuoteAmount, initialQuoteReserves, quoteMetrics } from "../../lib/carddex/quote-simulation";
 import type { CoinDetail, CoinPage, TradeRow } from "../../lib/mintdex/types";
 import { CardBack, CardCase, View3DButton, useView3DGestures, type Card3DHandle } from "./card3d";
 import { useClaimable } from "./cases";
@@ -86,7 +85,6 @@ import {
   SideToggle,
   Tabs,
   TextLink,
-  solFigure,
   useLiveList,
   useSize,
 } from "./ui";
@@ -142,7 +140,7 @@ const HERO_FIT =
 /** Header row of the middle column: name, ticker and design | market cap hero and 24h change. */
 export function CoinHeader({ coin, className = "" }: { coin: CoinDetail; className?: string }) {
   const design = getCardDesign(coin.cardTemplate);
-  const hero = usdFull(coin.mcapUsd);
+  const hero = coin.mcapUsd == null ? quoteNumber(coin.mcapQuote, true) : marketCapText(coin, false);
   return (
     <header
       className={cx(
@@ -174,7 +172,7 @@ export function CoinHeader({ coin, className = "" }: { coin: CoinDetail; classNa
           className="flex flex-col items-start [--hero-reserve:296px] @max-[460px]:[--hero-reserve:256px]"
           style={{ "--hero-em": heroEm(hero).toFixed(3) } as CSSProperties}
         >
-          <Num size="hero" watch={coin.mcapUsd} odo className={HERO_FIT}>
+          <Num size="hero" unit={coin.mcapUsd == null ? coin.quoteSymbol : undefined} watch={marketCapWatch(coin)} odo className={HERO_FIT}>
             {hero}
           </Num>
           <span className="mt-0.5 text-[12px] font-medium leading-none text-slate">Market cap</span>
@@ -207,8 +205,8 @@ export function CoinStats({
     watch?: number;
     tick?: boolean;
   }> = [
-    { key: "price", label: "Price (SOL)", value: priceSolText(coin.priceSol), watch: coin.priceSol, tick: true },
-    { key: "volume", label: "Volume", value: sol(coin.volume, 1), unit: "SOL" },
+    { key: "price", label: `Price (${coin.quoteSymbol ?? "SOL"})`, value: priceSolText(coin.priceQuote ?? coin.priceSol ?? 0), watch: coin.priceQuote ?? coin.priceSol ?? 0, tick: true },
+    { key: "volume", label: "Volume", value: quoteAtoms(coin.volumeQuote ?? coin.volume ?? 0, coin.quoteAssetKey, true), unit: coin.quoteSymbol ?? "SOL" },
     { key: "holders", label: "Holders", value: coin.holders.toLocaleString("en-US") },
     { key: "trades", label: "Token trades", value: coin.trades.toLocaleString("en-US") },
   ];
@@ -303,8 +301,8 @@ export function CoinPhoneHero({
           <ShareButton {...coinShare(coin)} label={`Share ${coin.name}`} />
         </div>
         <span className="mt-0.5 text-[13px] leading-[17px] text-slate">${coin.ticker}</span>
-        <Num size="hero" watch={coin.mcapUsd} tick className="mt-2.5 text-[28px]!">
-          {usdFull(coin.mcapUsd)}
+        <Num size="hero" unit={coin.mcapUsd == null ? coin.quoteSymbol : undefined} watch={marketCapWatch(coin)} tick className="mt-2.5 text-[28px]!">
+          {coin.mcapUsd == null ? quoteNumber(coin.mcapQuote, true) : marketCapText(coin, false)}
         </Num>
         <div className="mt-1.5 flex items-center gap-2">
           <span className="text-[12px] font-medium leading-none text-slate">Market cap</span>
@@ -631,6 +629,8 @@ function niceStep(span: number, count: number) {
 export function McapChart({
   trades,
   currentUsd,
+  currentQuote,
+  quoteAssetKey = "sol",
   createdAt,
   level,
   tradeCount,
@@ -638,7 +638,9 @@ export function McapChart({
   className = "",
 }: {
   trades: TradeRow[];
-  currentUsd: number;
+  currentUsd: number | null;
+  currentQuote?: number;
+  quoteAssetKey?: string;
   createdAt: number;
   /** How many trades the coin has had, when the chart points are not one per trade (devnet). */
   tradeCount?: number;
@@ -647,6 +649,10 @@ export function McapChart({
   pane?: string;
   className?: string;
 }) {
+  const quoteNative = currentUsd == null;
+  const currentValue = currentUsd ?? currentQuote ?? 0;
+  const quoteSymbol = getPairAsset(quoteAssetKey).symbol;
+  const chartFigure = (value: number) => quoteNative ? quoteNumber(value, true) : usdCompact(value);
   const [range, setRange] = useState<RangeKey>("all");
   const [hover, setHover] = useState<number | null>(null);
   // The clock starts on the client so server and client render the same first frame.
@@ -686,14 +692,15 @@ export function McapChart({
   const points = useMemo(() => {
     const ms = RANGES.find((r) => r.key === range)!.ms;
     const from = Number.isFinite(ms) ? now - ms : Math.min(createdAt, now);
-    const launchUsd = mcapUsd(INITIAL_RESERVES);
+    const launchMetrics = quoteMetrics(initialQuoteReserves(quoteAssetKey), quoteAssetKey);
+    const launchUsd = quoteNative ? launchMetrics.mcapQuote : launchMetrics.mcapUsd ?? 0;
     const pts: Array<{ t: number; v: number }> = [];
     const before = [...trades].reverse().find((t) => t.createdAt < from);
-    pts.push({ t: from, v: before ? before.mcapUsd : launchUsd });
-    for (const t of trades) if (t.createdAt >= from) pts.push({ t: t.createdAt, v: t.mcapUsd });
-    pts.push({ t: now, v: currentUsd });
+    pts.push({ t: from, v: before ? (before.mcapUsd ?? before.mcapQuote ?? launchUsd) : launchUsd });
+    for (const t of trades) if (t.createdAt >= from) pts.push({ t: t.createdAt, v: t.mcapUsd ?? t.mcapQuote ?? launchUsd });
+    pts.push({ t: now, v: currentValue });
     return pts;
-  }, [trades, range, currentUsd, createdAt, now]);
+  }, [trades, range, currentValue, quoteNative, quoteAssetKey, createdAt, now]);
 
   const t0 = points[0].t;
   const t1 = points[points.length - 1].t;
@@ -748,7 +755,7 @@ export function McapChart({
   return (
     <section className={cx("flex flex-col", className)} aria-label="Market cap chart" data-pane={pane}>
       <SectionHead
-        title="Market cap"
+        title={quoteNative ? `Market cap · ${quoteSymbol}` : "Market cap"}
         right={
           few ? undefined : (
             <Tabs
@@ -786,7 +793,7 @@ export function McapChart({
             onPointerMove={onMove}
             onPointerLeave={() => setHover(null)}
             role="img"
-            aria-label={`Market cap chart, now ${usdCompact(currentUsd)}`}
+            aria-label={`Market cap chart, now ${chartFigure(currentValue)}${quoteNative ? ` ${quoteSymbol}` : ""}`}
           >
             {ticks.map((v) => (
               <g key={v} className="mdx-grid-in">
@@ -799,7 +806,7 @@ export function McapChart({
                   strokeWidth={1}
                 />
                 <text x={W - padR + 8} y={y(v) + 4} className="num fill-slate" fontSize={11}>
-                  {usdCompact(v)}
+                  {chartFigure(v)}
                 </text>
               </g>
             ))}
@@ -818,7 +825,7 @@ export function McapChart({
               <circle
                 key={ping}
                 cx={x(t1)}
-                cy={y(currentUsd)}
+                cy={y(currentValue)}
                 r={3.5}
                 aria-hidden
                 className="mdx-live__ping fill-neon"
@@ -829,7 +836,7 @@ export function McapChart({
             <circle
               key={`end-${range}`}
               cx={x(t1)}
-              cy={y(currentUsd)}
+              cy={y(currentValue)}
               r={3.5}
               className="mdx-dot-in fill-neon stroke-sheet"
               strokeWidth={2}
@@ -864,7 +871,7 @@ export function McapChart({
               animation: "mdx-fade 120ms var(--ease-room) both",
             }}
           >
-            <span className="num text-[14px] leading-none text-plinth">{usdCompact(hp.v)}</span>
+            <span className="num text-[14px] leading-none text-plinth">{chartFigure(hp.v)}{quoteNative ? ` ${quoteSymbol}` : ""}</span>
             <span className="text-[12px] leading-none text-hairline">
               {hover === points.length - 1 ? "Now" : timeAgo(hp.t, now)}
             </span>
@@ -873,7 +880,7 @@ export function McapChart({
       </div>
       {/* What the USD figures mean (P0-5). The chart above is flexible, so on desktop this line comes out of
           the chart's height, never out of the page. */}
-      {MODE_COPY.usdNote ? (
+      {quoteNative ? <p className="mt-1 flex-none text-[12px] leading-4 text-slate">Simulated market cap in {quoteSymbol}. No live USD conversion.</p> : MODE_COPY.usdNote ? (
         <p className="mt-1 flex-none text-[12px] leading-4 text-slate">{MODE_COPY.usdNote}</p>
       ) : null}
     </section>
@@ -941,6 +948,7 @@ export function TradesList({
         <p className="mt-2 text-[13px] leading-[1.45] text-slate">No trades yet. Be the first.</p>
       ) : (
         <>
+          {rows[0]?.mcapUsd == null ? <p className="mt-1 text-[11px] leading-4 text-slate">Amounts and market cap in {rows[0]?.quoteSymbol}.</p> : null}
           <div
             className={cx(
               TRADE_COLS,
@@ -949,7 +957,7 @@ export function TradesList({
           >
             <span>Time</span>
             <span>Trader</span>
-            <span className="text-right">SOL</span>
+            <span className="truncate text-right">{rows[0]?.quoteSymbol ?? "SOL"}</span>
             <span className="whitespace-nowrap text-right max-[359px]:hidden">Market cap</span>
           </div>
           <div
@@ -979,10 +987,10 @@ export function TradesList({
                     )}
                   >
                     {t.side === "buy" ? "+" : "-"}
-                    {solFigure(t.sol)}
+                    {quoteAtoms(t.quoteAmount ?? t.sol ?? 0, t.quoteAssetKey, true)}
                   </span>
-                  <span className="num text-right text-[14px] text-ink max-[359px]:hidden">
-                    {usdCompact(t.mcapUsd)}
+                  <span className="num whitespace-nowrap text-right text-[14px] text-ink max-[359px]:hidden">
+                    {t.mcapUsd == null ? quoteNumber(t.mcapQuote, true) : marketCapText(t)}
                   </span>
                 </div>
               )}
@@ -1082,32 +1090,35 @@ export function TradePanel({
   useKeyboardSafe(formRef);
   const now = useNow(60_000);
 
-  const reserves = { vSol: coin.vSol, vTok: coin.vTok };
+  const asset = getPairAsset(coin.quoteAssetKey);
+  const fmt = (atoms: number) => formatQuoteAmount(atoms, asset.key);
+  const walletQuote = me?.quoteBalances?.[asset.key] ?? (asset.key === "sol" ? me?.balance ?? 0 : 0);
+  const reserves = { vSol: coin.vQuote ?? coin.vSol, vTok: coin.vTok };
   const holding = viewer?.holding ?? 0;
   const amount =
-    side === "buy" ? parseSol(input) : Math.round(parseFloat(input || "0") * TOKEN_UNIT);
+    side === "buy" ? parseQuoteAmount(input || "0", asset.key) ?? NaN : Math.round(parseFloat(input || "0") * TOKEN_UNIT);
   const quote = useMemo<Quote | null>(() => {
     if (!Number.isFinite(amount) || amount <= 0) return null;
     return side === "buy" ? quoteBuy(reserves, amount) : quoteSell(reserves, amount);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [side, amount, coin.vSol, coin.vTok]);
+  }, [side, amount, coin.vQuote, coin.vSol, coin.vTok]);
 
-  const afterUsd = quote?.ok ? mcapUsd(quote.after) : coin.mcapUsd;
+  const afterMetrics = quote?.ok ? quoteMetrics(quote.after, asset.key) : coin;
   const impact = quote?.ok ? priceSol(quote.after) / priceSol(reserves) - 1 : 0;
   const highImpact = !!quote?.ok && Math.abs(impact) > HIGH_IMPACT;
 
   // What blocks the trade, in the order the ticket should say it (P1-9).
-  const short = !!quote?.ok && !!me && side === "buy" && (quote as BuyQuote).solIn > me.balance;
+  const short = !!quote?.ok && !!me && side === "buy" && (quote as BuyQuote).solIn > walletQuote;
   let blocker: TicketMessage | null = null;
   if (quote && !quote.ok) {
     const t = `${quote.reason ?? "Enter an amount"}.`;
     blocker = { kind: "error", text: t, plain: t };
   } else if (short && me) {
-    const plain = notEnoughSentence(me, now);
+    const plain = asset.key === "sol" ? notEnoughSentence(me, now) : `Not enough demo ${asset.symbol}. Your balance is ${fmt(walletQuote)} ${asset.symbol}.`;
     blocker = {
       kind: "error",
       plain,
-      text: me.canFaucet ? (
+      text: me.canFaucet && asset.key === "sol" ? (
         <>
           {FLOW.notEnough}.{" "}
           <button
@@ -1154,8 +1165,8 @@ export function TradePanel({
       ? `You receive ${
           side === "buy"
             ? `${tokens((quote as BuyQuote).tokensOut)} $${coin.ticker}`
-            : `${sol((quote as SellQuote).solOut)} SOL`
-        }. Price impact ${pctText(impact)}. Fee ${sol(quote.fee)} SOL.`
+            : `${fmt((quote as SellQuote).solOut)} ${asset.symbol}`
+        }. Price impact ${pctText(impact)}. Fee ${fmt(quote.fee)} ${asset.symbol}.`
       : "",
     700,
   );
@@ -1178,13 +1189,13 @@ export function TradePanel({
     );
     const res = await run(
       "trade",
-      () => tradeCoin({ data: { coinId: coin.id, side, amount, minOut } }),
+      () => tradeCoin({ data: { coinId: coin.id, side, amount, minOut, quoteAssetKey: asset.key, quoteMint: asset.mint } }),
       (r) =>
         r.side === "buy"
-          ? `Bought ${tokens(r.tokens)} $${coin.ticker} for ${solFigure(r.net)} SOL.`
+          ? `Bought ${tokens(r.tokens)} $${coin.ticker} for ${fmt(r.quoteNet ?? r.net ?? 0)} ${asset.symbol}.`
           : // What the wallet received, after the fee, in the quote's own format ("You receive 0.491 SOL"), so
             // the toast, the quote and the wallet agree (P0-8).
-            `Sold ${tokens(r.tokens)} $${coin.ticker} for ${sol(r.net)} SOL.`,
+            `Sold ${tokens(r.tokens)} $${coin.ticker} for ${fmt(r.quoteNet ?? r.net ?? 0)} ${asset.symbol}.`,
       {
         keys: [["coin", coin.id], ["portfolio"]],
         // Holdings update immediately; the permanent card design stays unchanged.
@@ -1225,7 +1236,7 @@ export function TradePanel({
     if (!me) {
       const intent = quote?.ok
         ? side === "buy"
-          ? `Enter and buy ${input} SOL of $${coin.ticker}`
+          ? `Enter and buy ${input} ${asset.symbol} of $${coin.ticker}`
           : `Enter and sell $${coin.ticker}`
         : "Enter CardDex";
       require(
@@ -1244,7 +1255,7 @@ export function TradePanel({
 
   const quick =
     side === "buy"
-      ? [0.1, 0.5, 1, 5].map((v) => ({ label: String(v), aria: `${v} SOL`, value: String(v) }))
+      ? [0.1, 0.5, 1, 5].map((v) => ({ label: String(v), aria: `${v} ${asset.symbol}`, value: String(v) }))
       : [0.25, 0.5, 0.75, 1].map((f) => {
           // 25/50/75% fill whole tokens (two decimals under one token); Max stays exact so it sells everything.
           const part = (holding * f) / TOKEN_UNIT;
@@ -1262,7 +1273,7 @@ export function TradePanel({
 
   // A stable label (P1-9 step 2): the reason lives in the message slot, never in the button.
   const label = !me ? FLOW.enterToTrade : `${side === "buy" ? "Buy" : "Sell"} $${coin.ticker}`;
-  const suffix = side === "buy" ? "SOL" : `$${coin.ticker}`;
+  const suffix = side === "buy" ? asset.symbol : `$${coin.ticker}`;
 
   return (
     <form
@@ -1293,7 +1304,7 @@ export function TradePanel({
             {side === "buy" ? (
               me ? (
                 <>
-                  Wallet <span className="num">{sol(me.balance, 2)}</span> SOL
+                  Demo <span className="num">{fmt(walletQuote)}</span> {asset.symbol}
                 </>
               ) : (
                 // Signed out there is no wallet yet (P0-5): say how to get one, not "Wallet 0.00".
@@ -1302,7 +1313,7 @@ export function TradePanel({
                   className="mdx-link mdx-hit text-[12px]"
                   onClick={() => openEnter("Pick a handle to trade.")}
                 >
-                  {MODE_COPY.enterForSol}
+                  Enter for demo {asset.symbol}
                 </button>
               )
             ) : (
@@ -1326,7 +1337,7 @@ export function TradePanel({
             enterKeyHint="go"
             autoComplete="off"
             value={input}
-            onChange={(e) => edit(cleanAmount(e.target.value, side === "buy" ? 9 : 6))}
+            onChange={(e) => edit(cleanAmount(e.target.value, side === "buy" ? asset.decimals : 6))}
             placeholder="0.0"
             className="mdx-input num h-12 text-[20px]"
             style={{ paddingRight: suffix.length > 4 ? 104 : 56 }}
@@ -1366,8 +1377,8 @@ export function TradePanel({
                 {tokens((quote as BuyQuote).tokensOut)}
               </Num>
             ) : (
-              <Num size="sm" unit="SOL">
-                {sol((quote as SellQuote).solOut)}
+              <Num size="sm" unit={asset.symbol}>
+                {fmt((quote as SellQuote).solOut)}
               </Num>
             )
           ) : (
@@ -1387,8 +1398,8 @@ export function TradePanel({
         {TRADE_FEE_LINES.map((line) => (
           <QuoteRow key={line.key} label={FEE_LINE_LABEL[line.key] ?? WORDS.tradeFeeLabel}>
             {quote?.ok ? (
-              <Num size="sm" unit="SOL">
-                {sol(Math.round((quote.fee * line.bps) / TRADE_FEE_BPS))}
+              <Num size="sm" unit={asset.symbol}>
+                {fmt(Math.round((quote.fee * line.bps) / TRADE_FEE_BPS))}
               </Num>
             ) : (
               EMPTY
@@ -1397,7 +1408,7 @@ export function TradePanel({
         ))}
         {!hideAfter && (
           <QuoteRow label="Market cap after">
-            <Num size="sm">{usdCompact(afterUsd)}</Num>
+            <Num size="sm">{marketCapText({...afterMetrics, quoteAssetKey:asset.key})}</Num>
           </QuoteRow>
         )}
       </dl>
@@ -1456,6 +1467,7 @@ export function DeedPanel({
 }) {
   const { coin, viewer } = page;
   const design = getCardDesign(coin.cardTemplate);
+  const asset = getPairAsset(coin.quoteAssetKey);
   return (
     <section data-pane={pane} className={className} aria-label="NFT card ownership">
       <SectionHead title="The creator's card" right={<span className="mdx-micro text-ink">1 / 1</span>} />
@@ -1463,13 +1475,13 @@ export function DeedPanel({
         <div className="flex items-start justify-between gap-3"><dt className="text-slate">Owner</dt><dd className="min-w-0 text-right font-medium text-ink"><Handle handle={coin.ownerHandle} bot={coin.ownerIsBot} />{viewer?.isOwner ? <span className="ml-1.5 text-slate">(you)</span> : null}</dd></div>
         <div className="flex items-start justify-between gap-3"><dt className="text-slate">Design</dt><dd className="min-w-0 text-right font-medium text-ink">{design.name}</dd></div>
         <div className="flex items-start justify-between gap-3"><dt className="text-slate">Edition</dt><dd className="text-ink">One of one</dd></div>
-        {design.stock ? <>
-          <div className="flex items-start justify-between gap-3"><dt className="text-slate">Stock reference</dt><dd className="text-right font-medium text-ink">{design.stock.ticker}</dd></div>
-          <div className="flex items-start justify-between gap-3"><dt className="text-slate">Reference pair</dt><dd className="text-right font-medium text-ink">{design.stock.pair}</dd></div>
-        </> : null}
+        <div className="flex items-start justify-between gap-3"><dt className="text-slate">Trading pair</dt><dd className="text-right font-medium text-ink">{coin.tradingPair ?? `${coin.ticker} / ${asset.symbol}`}</dd></div>
+        <div className="flex items-start justify-between gap-3"><dt className="text-slate">Quote asset</dt><dd className="min-w-0 text-right font-medium text-ink">{asset.name}</dd></div>
+        {asset.issuer ? <div className="flex items-start justify-between gap-3"><dt className="text-slate">Issuer</dt><dd className="text-right text-ink">{asset.issuer}</dd></div> : null}
+        <div className="flex items-start justify-between gap-3"><dt className="text-slate">Quote mint</dt><dd className="min-w-0 text-right"><a className="mdx-link break-all" href={`https://solscan.io/token/${asset.mint}`} target="_blank" rel="noreferrer" aria-label={`View ${asset.symbol} quote mint on Solscan`}>{asset.mint.slice(0,6)}…{asset.mint.slice(-6)} ↗</a></dd></div>
       </dl>
       <p className="mt-4 border-t border-hairline pt-3 text-pretty text-[13px] leading-[1.5] text-slate">The token trades. Its creator holds a separate collectible card with the design chosen at launch.</p>
-      {design.stock ? <p className="mt-2 text-[12px] leading-[1.5] text-slate">Design reference only; no shares or equity backing.</p> : null}
+      {asset.kind === "stock" ? <p className="mt-2 text-[12px] leading-[1.5] text-slate">Paired with a tokenized stock asset. Your token does not represent company shares.</p> : null}
       <p className="mt-2 text-[12px] leading-[1.5] text-slate">{MODE_COPY.guideNote}</p>
     </section>
   );

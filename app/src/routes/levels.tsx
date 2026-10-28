@@ -3,7 +3,6 @@ import { useMemo, useState, type CSSProperties } from "react";
 import { z } from "zod";
 import { HeroTurntable } from "../components/carddex/HeroTurntable";
 import { MintCard, type CardData } from "../components/mintdex/MintCard";
-import type { CardSide } from "../components/mintdex/card3d";
 import { PageFrame } from "../components/mintdex/ui";
 import {
   CARD_DESIGNS,
@@ -13,11 +12,15 @@ import {
   type CardDesign,
 } from "../lib/carddex/designs";
 import { pageHead } from "../lib/mintdex/seo";
+import { allowedQuotesForDesign, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, isPairAssetKey } from "../lib/carddex/pairs";
+import { initialQuoteReserves, quoteMetrics } from "../lib/carddex/quote-simulation";
+import { PairBadge, QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
 import "../carddex.css";
 
 export const Route = createFileRoute("/levels")({
   validateSearch: z.object({
     design: z.string().optional().catch(undefined),
+    quote: z.string().optional().catch(undefined),
     collection: z.string().optional().catch(undefined),
     icon: z.string().optional().catch(undefined),
     edition: z.string().optional().catch(undefined),
@@ -35,7 +38,8 @@ const GROUPS = [
   { key: "all", name: "All designs" },
   { key: "classic", name: "Trading card classics" },
   { key: "premium", name: "Premium" },
-  { key: "stocks", name: "Stock-linked" },
+  { key: "stocks", name: "Tokenized stock pairs" },
+  { key: "memes", name: "Memecoin pairs" },
   { key: "limited", name: "Limited editions" },
 ] as const;
 
@@ -44,15 +48,18 @@ function Designs() {
   const navigate = useNavigate({ from: "/levels" });
   const key = search.design ?? search.icon ?? search.edition;
   const design = getCardDesign(isCardDesignKey(key) ? key : DEFAULT_CARD_DESIGN);
-  const [category, setCategory] = useState(search.collection === "stocks" ? "stocks" : "all");
+  const [category, setCategory] = useState(search.collection === "stocks" || search.collection === "memes" ? search.collection : "all");
   const [query, setQuery] = useState("");
-  const [side, setSide] = useState<CardSide>("face");
+  const requestedQuote = isPairAssetKey(search.quote) ? getPairAsset(search.quote) : null;
+  const quote = boundQuoteForDesign(design.key) ?? (requestedQuote && allowedQuotesForDesign(design.key).some(a=>a.key===requestedQuote.key) ? requestedQuote : defaultQuoteForDesign(design.key));
+  const sampleMetrics = quoteMetrics(initialQuoteReserves(quote.key), quote.key);
+  const matchesCategory = (d: CardDesign, group: string) => group === "all" || (group === "stocks" ? boundQuoteForDesign(d.key)?.kind === "stock" : group === "memes" ? boundQuoteForDesign(d.key)?.kind === "meme" : d.category === group);
   const shown = useMemo(
     () =>
       CARD_DESIGNS.filter(
         (d) =>
-          (category === "all" || d.category === category) &&
-          `${d.name} ${d.description}`.toLowerCase().includes(query.toLowerCase()),
+          matchesCategory(d, category) &&
+          `${d.name} ${d.description} ${boundQuoteForDesign(d.key)?.symbol ?? ""} ${boundQuoteForDesign(d.key)?.name ?? ""}`.toLowerCase().includes(query.toLowerCase()),
       ),
     [category, query],
   );
@@ -62,7 +69,10 @@ function Designs() {
     ticker: "GLORB",
     image: "/assets/creatures/glorb.webp",
     level: design.materialLevel,
-    mcapUsd: 125000,
+    quoteAssetKey: quote.key,
+    quoteMint: quote.mint,
+    mcapUsd: sampleMetrics.mcapUsd,
+    mcapQuote: sampleMetrics.mcapQuote,
     holders: 842,
     dexNo: 0,
     dexLabel: "Sample",
@@ -70,8 +80,8 @@ function Designs() {
     ownerHandle: "you",
   };
   const pick = (d: CardDesign) => {
-    setSide("face");
-    void navigate({ search: { design: d.key }, replace: true, resetScroll: false }).then(() => {
+    const nextQuote = boundQuoteForDesign(d.key) ?? quote;
+    void navigate({ search: { design: d.key, quote: nextQuote.key }, replace: true, resetScroll: false }).then(() => {
       if (window.innerWidth < 1024)
         document.querySelector(".cdx-archive__vitrine")?.scrollIntoView({
           block: "start",
@@ -91,7 +101,7 @@ function Designs() {
         </div>
         <Link
           to="/launch"
-          search={{ design: design.key }}
+          search={{ design: design.key, quote: quote.key }}
           className="mdx-btn mdx-btn--primary cdx-use-design"
         >
           Launch with this design ↗
@@ -114,22 +124,13 @@ function Designs() {
                 : design.category === "classic"
                   ? "Trading card classic"
                   : design.category === "stocks"
-                    ? "Stock-linked edition"
+                    ? "Tokenized-stock paired finish"
                     : "Premium collection"}
             </p>
             <h2>{design.name}</h2>
             <p>{design.description}</p>
-            {design.stock && (
-              <p className="cdx-stock-reference">
-                <span>
-                  Stock reference <b>{design.stock.ticker}</b>
-                </span>
-                <span>
-                  Reference pair <b>{design.stock.pair}</b>
-                </span>
-              </p>
-            )}
-            <Link to="/launch" search={{ design: design.key }} className="cdx-text-action mt-6">
+            <PairBadge quoteAssetKey={quote.key} ticker="GLORB" />
+            <Link to="/launch" search={{ design: design.key, quote: quote.key }} className="cdx-text-action mt-6">
               Make this your design ↗
             </Link>
             <span className="cdx-demo-note">
@@ -150,6 +151,7 @@ function Designs() {
               onChange={(e) => setQuery(e.target.value)}
               type="search"
             />
+            <QuoteAssetPicker value={quote.key} designKey={design.key} ticker="GLORB" compact onChange={(nextQuote,nextDesign)=>void navigate({ search:{design:nextDesign,quote:nextQuote},replace:true,resetScroll:false })} />
             <div className="cdx-filter" aria-label="Filter designs">
               {GROUPS.map((g) => (
                 <button
@@ -162,7 +164,7 @@ function Designs() {
                   <span>
                     {g.key === "all"
                       ? CARD_DESIGNS.length
-                      : CARD_DESIGNS.filter((d) => d.category === g.key).length}
+                      : CARD_DESIGNS.filter((d) => matchesCategory(d, g.key)).length}
                   </span>
                 </button>
               ))}
@@ -188,7 +190,7 @@ function Designs() {
               >
                 <div className="cdx-design-row__preview" aria-hidden>
                   <MintCard
-                    card={{ ...card, cardTemplate: d.key, level: d.materialLevel }}
+                    card={{ ...card, cardTemplate: d.key, level: d.materialLevel, quoteAssetKey: (boundQuoteForDesign(d.key) ?? quote).key, quoteMint: (boundQuoteForDesign(d.key) ?? quote).mint, ...quoteMetrics(initialQuoteReserves((boundQuoteForDesign(d.key) ?? quote).key), (boundQuoteForDesign(d.key) ?? quote).key) }}
                     depth="flat"
                     sizes="40px"
                   />
@@ -196,13 +198,9 @@ function Designs() {
                 <span className="cdx-design-row__text">
                   <strong>{d.name}</strong>
                   <small>
-                    {d.category === "classic"
-                      ? "Trading card classic"
-                      : d.category === "limited"
-                        ? "Limited edition"
-                        : d.category === "stocks"
-                          ? `${d.stock?.ticker} / Stock reference`
-                          : "Premium foil"}
+                    {boundQuoteForDesign(d.key)
+                      ? `${boundQuoteForDesign(d.key)!.symbol} · ${boundQuoteForDesign(d.key)!.kind === "stock" ? "Tokenized stock quote" : "Memecoin quote"}`
+                      : d.category === "classic" ? "Trading card classic" : d.category === "limited" ? "Limited edition finish" : "Premium foil"}
                   </small>
                 </span>
                 <span className="cdx-design-row__arrow" aria-hidden>
@@ -217,8 +215,7 @@ function Designs() {
             )}
           </div>
           <p className="cdx-library__foot">
-            Every design is available at launch. Stock-linked editions are visual references, not
-            shares or a claim of equity backing. Your token artwork and identity remain yours.
+            Paired finishes use their supported pump.fun quote mint. Tokenized-stock quotes are distinct from your creator token and NFT. All launches here are local simulations.
           </p>
         </section>
       </div>

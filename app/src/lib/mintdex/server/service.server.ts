@@ -6,15 +6,12 @@ import {
   FAUCET_COOLDOWN_MS,
   LAMPORTS,
   LAUNCH_FEE,
-  MAX_DEV_BUY,
+  SOL_USD,
+  TOTAL_SUPPLY_TOKENS,
   TICKER_RE,
 } from "../constants";
 import {
-  INITIAL_RESERVES,
-  curveProgress,
   isGraduated,
-  mcapUsd,
-  priceSol,
   quoteBuy,
   quoteSell,
   type Reserves,
@@ -23,6 +20,9 @@ import { FLOW, notEnoughSentence } from "../copy";
 import { looksLikeAddress } from "../seo";
 import { filterByDesign, sortCoins } from "../sort";
 import { CARD_DESIGNS, DEFAULT_CARD_DESIGN, getCardDesign, isCardDesignKey } from "../../carddex/designs";
+import { getTradingPair } from "../../carddex/pairs";
+import { initialQuoteReserves, maxInitialBuyQuoteAtoms, quoteAtomsToSol, quoteCurveProgress, quoteMetrics } from "../../carddex/quote-simulation";
+import { demoQuoteBalances, ensureDemoQuoteWallet, launchQuote, quoteIdentity, resolveStoredQuote } from "./quotes.server";
 import type {
   CoinDetail,
   CoinPage,
@@ -35,6 +35,8 @@ import type {
   Me,
   PortfolioData,
   TradeRow,
+  QuoteIdentity,
+  AtomicAmount,
 } from "../types";
 import { viewerQuery, type SessionUser } from "./auth.server";
 import {
@@ -73,6 +75,8 @@ type CoinRaw = {
   ticker: string;
   lore: string;
   image: string;
+  quote_asset_key: string;
+  quote_mint: string;
   website: string | null;
   x_url: string | null;
   creator_id: string;
@@ -116,12 +120,19 @@ function allCoinsQuery(includeHidden = false) {
 type HolderAgg = { coin_id: string; n: number };
 type BidAgg = { coin_id: string; top: number; n: number };
 type PriceAgg = { coin_id: string; price: number };
-type VolAgg = { coin_id: string; v: number };
+type VolAgg = { coin_id: string; atoms: string; recent: number };
 type AggRows = [HolderAgg[], BidAgg[], PriceAgg[], VolAgg[]];
+
+/** Sum only like-quote atoms, preserving arbitrary-size decimal totals in the public JSON shape. */
+function sumAtomsByQuote(rows: Array<[string, AtomicAmount]>): Record<string, AtomicAmount> {
+  const totals: Record<string, AtomicAmount> = {};
+  for (const [key, amount] of rows) totals[key] = (BigInt(totals[key] ?? "0") + BigInt(amount)).toString();
+  return totals;
+}
 
 /**
  * Compatibility aggregate slots for holders, an empty retired bid slot, the last price before the 24h window and
- * 24h volume. Table-wide for lists; with `coinId` scoped to that one coin (P1-3 step 3: a coin page no longer
+ * individual volume rows. Table-wide for lists; with `coinId` scoped to that one coin (P1-3 step 3: a coin page no longer
  * aggregates every coin in the dex).
  */
 function aggQueries(since: number, coinId?: string) {
@@ -137,7 +148,9 @@ function aggQueries(since: number, coinId?: string) {
       since,
       ...p,
     ),
-    q<VolAgg>(`SELECT coin_id, SUM(sol) AS v FROM trades WHERE created_at > ?${only} GROUP BY coin_id`, since, ...p),
+    // Cast each integer to text before crossing D1's JSON boundary. BigInt aggregation below avoids
+    // both JS rounding and SQLite SUM overflow, including totals beyond the signed 64-bit range.
+    q<VolAgg>(`SELECT coin_id, CAST(sol AS TEXT) AS atoms, CASE WHEN created_at > ? THEN 1 ELSE 0 END AS recent FROM trades${coinId ? " WHERE coin_id = ?" : ""}`, since, ...p),
   ] as const;
 }
 
@@ -146,15 +159,21 @@ async function summarize(rows: CoinRaw[], [holders, bids, before, vol]: AggRows)
   if (!rows.length) return [];
   const hMap = new Map(holders.map((h) => [h.coin_id, h.n]));
   const pMap = new Map(before.map((p) => [p.coin_id, p.price]));
-  const vMap = new Map(vol.map((v) => [v.coin_id, v.v]));
-  const launchPrice = priceSol(INITIAL_RESERVES);
-
+  const vMap = new Map<string, bigint>();
+  const recentMap = new Map<string, bigint>();
+  for (const trade of vol) {
+    const atoms = BigInt(trade.atoms);
+    vMap.set(trade.coin_id, (vMap.get(trade.coin_id) ?? 0n) + atoms);
+    if (trade.recent) recentMap.set(trade.coin_id, (recentMap.get(trade.coin_id) ?? 0n) + atoms);
+  }
   return rows.map((r) => {
+    const asset = resolveStoredQuote(r);
     const res: Reserves = { vSol: r.v_sol, vTok: r.v_tok };
-    const price = priceSol(res);
-    const base = pMap.get(r.id) ?? launchPrice;
-    const usd = mcapUsd(res);
+    const metrics = quoteMetrics(res, asset.key);
+    const base = pMap.get(r.id) ?? quoteMetrics(initialQuoteReserves(asset.key), asset.key).priceQuote;
     const design = getCardDesign(r.card_template);
+    const volume = vMap.get(r.id) ?? 0n;
+    const volume24h = recentMap.get(r.id) ?? 0n;
     return {
       id: r.id,
       dexNo: r.dex_no,
@@ -162,19 +181,22 @@ async function summarize(rows: CoinRaw[], [holders, bids, before, vol]: AggRows)
       ticker: r.ticker,
       image: r.image,
       lore: r.lore,
+      ...quoteIdentity(asset),
+      tradingPair: getTradingPair(r.ticker, asset.key),
+      ...metrics,
       cardTemplate: design.key,
       stockTicker: design.stock?.ticker ?? null,
       tokenPair: design.stock?.pair ?? null,
       level: design.materialLevel,
       liveLevel: design.materialLevel,
-      mcapUsd: usd,
-      priceSol: price,
-      change24h: base > 0 ? price / base - 1 : 0,
-      volume: r.volume,
-      volume24h: vMap.get(r.id) ?? 0,
+      change24h: base > 0 ? metrics.priceQuote / base - 1 : 0,
+      volume: quoteAtomsToSol(Number(volume), asset.key),
+      volume24h: quoteAtomsToSol(Number(volume24h), asset.key),
+      volumeQuote: volume.toString(),
+      volume24hQuote: volume24h.toString(),
       holders: hMap.get(r.id) ?? 0,
       trades: r.trades,
-      curveProgress: curveProgress(res),
+      curveProgress: quoteCurveProgress(res, asset.key),
       ownerId: r.owner_id,
       ownerHandle: r.owner_handle,
       ownerIsBot: !!r.owner_npc,
@@ -236,7 +258,7 @@ function faucetState(user: { balance: number; faucet_at: number }, now = Date.no
 /** The local demo balance and optional empty notification state. */
 export async function getMe(user: SessionUser | null, opts: { inbox?: boolean } = {}): Promise<Me> {
   if (!user) return null;
-  const me: NonNullable<Me> = { id: user.id, handle: user.handle, balance: user.balance, ...faucetState(user) };
+  const me: NonNullable<Me> = { id: user.id, handle: user.handle, balance: user.balance, quoteBalances: await demoQuoteBalances(user), ...faucetState(user) };
   if (opts.inbox) me.inbox = await getInbox(user);
   return me;
 }
@@ -275,6 +297,8 @@ type EventRaw = {
   name: string;
   ticker: string;
   image: string;
+  quote_asset_key: string;
+  quote_mint: string;
   handle: string | null;
   npc: number | null;
   amount: number;
@@ -283,7 +307,9 @@ type EventRaw = {
 };
 
 function mapEvent(e: EventRaw): EventRow {
+  const asset = resolveStoredQuote(e);
   return {
+    ...quoteIdentity(asset),
     id: e.id,
     kind: e.kind,
     coinId: e.coin_id,
@@ -292,7 +318,8 @@ function mapEvent(e: EventRaw): EventRow {
     image: e.image,
     handle: e.handle,
     isBot: !!e.npc,
-    amount: e.amount,
+    amount: quoteAtomsToSol(e.amount, asset.key),
+    quoteAmount: e.amount,
     level: e.level,
     createdAt: e.created_at,
   };
@@ -300,7 +327,7 @@ function mapEvent(e: EventRaw): EventRow {
 
 function eventsQuery(limit: number) {
   return q<EventRaw>(
-    `SELECT e.id, e.kind, e.coin_id, c.name, c.ticker, c.image, u.handle, u.is_npc AS npc, e.amount, e.level, e.created_at
+    `SELECT e.id, e.kind, e.coin_id, c.name, c.ticker, c.image, c.quote_asset_key, c.quote_mint, u.handle, u.is_npc AS npc, e.amount, e.level, e.created_at
        FROM events e JOIN coins c ON c.id = e.coin_id LEFT JOIN users u ON u.id = e.user_id
       WHERE e.kind IN ('launch', 'buy', 'sell') AND c.hidden = 0
       ORDER BY e.id DESC LIMIT ?`,
@@ -325,12 +352,10 @@ export async function getHome(): Promise<HomeData & Rev> {
   // One token per selected design. Equal material finishes must not hide distinct card templates.
   const featured: CoinSummary[] = [];
   for (const design of CARD_DESIGNS) {
-    const best = coins.filter((c) => c.cardTemplate === design.key).sort((a, b) => b.mcapUsd - a.mcapUsd)[0];
+    const best = sortCoins(coins.filter((c) => c.cardTemplate === design.key), "mcap")[0];
     if (best) featured.push(best);
   }
-  const trending = [...coins]
-    .sort((a, b) => b.volume24h - a.volume24h || b.lastTradeAt - a.lastTradeAt)
-    .slice(0, 6);
+  const trending = sortCoins(coins).slice(0, 6);
   return {
     featured,
     trending,
@@ -338,7 +363,8 @@ export async function getHome(): Promise<HomeData & Rev> {
     stats: {
       coins: coins.length,
       deedSales: 0,
-      volume: coins.reduce((s, c) => s + c.volume, 0),
+      volume: coins.some(coin => coin.volume === null) ? null : coins.reduce((s, c) => s + (c.volume ?? 0), 0),
+      volumeByQuote: sumAtomsByQuote(coins.map(coin => [coin.quoteAssetKey, coin.volumeQuote])),
       players: players[0]?.n ?? 0,
     },
     rev: revString(rev[0]?.value),
@@ -413,7 +439,8 @@ export async function getCoinPage(id: string, viewerHash: string | null): Promis
 
   const coin: CoinDetail = {
     ...summary,
-    vSol: raw.v_sol,
+    vSol: quoteAtomsToSol(raw.v_sol, summary.quoteAssetKey),
+    vQuote: raw.v_sol,
     vTok: raw.v_tok,
     ownerFees: 0,
     ownerEarnings: 0,
@@ -423,12 +450,16 @@ export async function getCoinPage(id: string, viewerHash: string | null): Promis
   };
 
   const tradeRows: TradeRow[] = trades.map((t) => ({
+    ...quoteIdentity(resolveStoredQuote(raw)),
     id: t.id,
     side: t.side,
-    sol: t.sol,
+    sol: quoteAtomsToSol(t.sol, summary.quoteAssetKey),
+    quoteAmount: t.sol,
     tokens: t.tokens,
-    price: t.price,
-    mcapUsd: t.mcap_usd,
+    price: summary.valuationMode === "quote-native" ? null : t.price * (summary.quoteSymbol === "SOL" ? 1 : 1 / SOL_USD),
+    priceQuote: t.price,
+    mcapQuote: t.price * TOTAL_SUPPLY_TOKENS,
+    mcapUsd: summary.valuationMode === "quote-native" ? null : t.mcap_usd,
     handle: t.handle,
     isBot: !!t.npc,
     createdAt: t.created_at,
@@ -473,19 +504,25 @@ export async function getPortfolio(viewerHash: string): Promise<(PortfolioData &
   if (!user) return null;
   const coins = await summarize(raw, [h, b, p, v]);
   const byId = new Map(coins.map((c) => [c.id, c]));
+  const rawById = new Map(raw.map(coin => [coin.id, coin]));
 
   const holdingRows = holdings
     .filter((x) => byId.has(x.coin_id))
     .map((x) => {
       const coin = byId.get(x.coin_id)!;
-      return { coin, amount: x.amount, valueSol: Math.round(x.amount * 1e-6 * coin.priceSol * LAMPORTS) };
+      const reserves = rawById.get(x.coin_id)!;
+      // Mark-to-market is an estimate, not a liquidation quote. Round the integer reserve ratio once,
+      // without losing atoms through price multiplication or converting a large result to Number.
+      const denominator = BigInt(reserves.v_tok);
+      const valueQuote = ((BigInt(x.amount) * BigInt(reserves.v_sol) + denominator / 2n) / denominator).toString();
+      return { coin, amount: x.amount, valueQuote, valueSol: quoteAtomsToSol(Number(valueQuote), coin.quoteAssetKey) };
     })
-    .sort((a, b) => b.valueSol - a.valueSol);
+    .sort((a, b) => (b.valueSol ?? -1) - (a.valueSol ?? -1));
 
   const deeds = coins
     .filter((c) => c.ownerId === user.id)
     .map((coin) => ({ coin, earnings: 0 }))
-    .sort((a, b) => b.coin.mcapUsd - a.coin.mcapUsd);
+    .sort((a, b) => (b.coin.mcapUsd ?? -1) - (a.coin.mcapUsd ?? -1));
 
   return {
     holdings: holdingRows,
@@ -493,7 +530,8 @@ export async function getPortfolio(viewerHash: string): Promise<(PortfolioData &
     bids: [],
     offers: [],
     totals: {
-      holdingsValue: holdingRows.reduce((s, x) => s + x.valueSol, 0),
+      holdingsValue: holdingRows.some(row => row.valueSol === null) ? null : holdingRows.reduce((s, x) => s + (x.valueSol ?? 0), 0),
+      holdingsValueByQuote: sumAtomsByQuote(holdingRows.map(row => [row.coin.quoteAssetKey, row.valueQuote])),
       earnings: 0,
       escrowed: 0,
     },
@@ -504,7 +542,7 @@ export async function getPortfolio(viewerHash: string): Promise<(PortfolioData &
 export async function getLevels(): Promise<LevelsData> {
   const coins = await allCoins();
   const counts = CARD_DESIGNS.map((design) => coins.filter((coin) => coin.cardTemplate === design.key).length);
-  const coin = [...coins].sort((a, b) => b.volume - a.volume)[0] ?? null;
+  const coin = sortCoins(coins)[0] ?? null;
   return { coin, counts };
 }
 
@@ -515,17 +553,34 @@ export async function getLevels(): Promise<LevelsData> {
  * `sol` is the trade's gross size (what the trades list and volume record); `net` is what the wallet moved by:
  * paid on a buy (fee included), received on a sell (after the fee). Toasts state `net` (backlog P0-8).
  */
-type TradeResult = { side: "buy" | "sell"; sol: number; net: number; tokens: number; levelUp: number | null };
+type TradeResult = QuoteIdentity & { side: "buy" | "sell"; sol: number | null; net: number | null; quoteAmount: number; quoteNet: number; tokens: number; levelUp: number | null };
 
 // Every write returns Settled (db.server.ts): the player's row after the write and the new data revision, read
 // in the same batch, so the client can update the balance and free the button without refetching (P0-12).
 
-function protocolFeeStmt(amount: number): D1PreparedStatement {
-  return stmt(
-    `INSERT INTO meta (key, value) VALUES ('protocol_fees', ?)
-     ON CONFLICT(key) DO UPDATE SET value = CAST(CAST(value AS INTEGER) + CAST(excluded.value AS INTEGER) AS TEXT)`,
-    String(amount),
+async function protocolFeeStmts(amount: number, quoteKey = "sol"): Promise<D1PreparedStatement[]> {
+  const [rows, legacy] = await readBatch(
+    q<{ amount: string }>("SELECT amount FROM protocol_quote_fees WHERE quote_asset_key = ?", quoteKey),
+    q<{ value: string }>("SELECT value FROM meta WHERE key = 'protocol_fees' AND ? = 'sol'", quoteKey),
   );
+  // Fresh seed worlds may have only the native compatibility row; migrated worlds have both.
+  const before = rows[0]?.amount ?? legacy[0]?.value ?? "0";
+  const after = (BigInt(before) + BigInt(amount)).toString();
+  const statements = [
+    rows.length
+      ? guard("EXISTS (SELECT 1 FROM protocol_quote_fees WHERE quote_asset_key = ? AND amount = ?)", quoteKey, before)
+      : guard("NOT EXISTS (SELECT 1 FROM protocol_quote_fees WHERE quote_asset_key = ?)", quoteKey),
+    clearGuard(),
+    stmt("INSERT INTO protocol_quote_fees (quote_asset_key, amount) VALUES (?, ?) ON CONFLICT(quote_asset_key) DO UPDATE SET amount = excluded.amount", quoteKey, after),
+  ];
+  if (quoteKey === "sol") statements.push(
+    legacy.length
+      ? guard("EXISTS (SELECT 1 FROM meta WHERE key = 'protocol_fees' AND value = ?)", legacy[0].value)
+      : guard("NOT EXISTS (SELECT 1 FROM meta WHERE key = 'protocol_fees')"),
+    clearGuard(),
+    stmt("INSERT INTO meta (key, value) VALUES ('protocol_fees', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value", after),
+  );
+  return statements;
 }
 
 /**
@@ -538,33 +593,44 @@ export async function trade(
   side: "buy" | "sell",
   amount: number,
   minOut = 0,
+  input: { quoteAssetKey?: string; quoteMint?: string } = {},
 ): Promise<TradeResult & Settled> {
-  if (!Number.isFinite(amount) || amount <= 0) throw new UserError("Enter an amount.");
+  if (!Number.isSafeInteger(amount) || amount <= 0 || !Number.isSafeInteger(minOut) || minOut < 0) throw new UserError("Enter a safe integer amount in the asset's atomic units.");
+  const identity = await one<{ quote_asset_key: string; quote_mint: string }>("SELECT quote_asset_key, quote_mint FROM coins WHERE id = ?", coinId);
+  if (!identity) throw new UserError("That coin does not exist.");
+  const asset = resolveStoredQuote(identity);
+  if (asset.key !== "sol" && input.quoteAssetKey === undefined) throw new UserError("Refresh the trade ticket to confirm its quote asset.");
+  if (input.quoteAssetKey !== undefined && input.quoteAssetKey !== asset.key || input.quoteMint !== undefined && input.quoteMint !== asset.mint) throw new UserError("The trade quote does not match this token's immutable quote asset.");
+  await ensureDemoQuoteWallet(user.id);
   let result: TradeResult | null = null;
 
   const settled = await atomic(async () => {
     // The coin, the wallet and the bag in one round trip; the guards below catch anything that moves after.
-    const [coins, wallets, bags] = await readBatch(
-      q<{ v_sol: number; v_tok: number; owner_id: string; level: number; peak_level: number }>(
-        "SELECT v_sol, v_tok, owner_id, level, peak_level FROM coins WHERE id = ?",
+    const [coins, wallets, bags, quoteWallets] = await readBatch(
+      q<{ v_sol: number; v_tok: number; owner_id: string; level: number; peak_level: number; quote_asset_key: string; quote_mint: string }>(
+        "SELECT v_sol, v_tok, owner_id, level, peak_level, quote_asset_key, quote_mint FROM coins WHERE id = ?",
         coinId,
       ),
       q<{ balance: number; faucet_at: number }>("SELECT balance, faucet_at FROM users WHERE id = ?", user.id),
       q<{ amount: number }>("SELECT amount FROM holdings WHERE user_id = ? AND coin_id = ?", user.id, coinId),
+      q<{ balance: number }>("SELECT balance FROM quote_balances WHERE user_id = ? AND quote_asset_key = ?", user.id, asset.key),
     );
     const c = coins[0];
     if (!c) throw new UserError("That coin does not exist.");
+    if (resolveStoredQuote(c).key !== asset.key) throw new UserError("The token's quote identity changed.");
     const r: Reserves = { vSol: c.v_sol, vTok: c.v_tok };
     const now = Date.now();
     const s: D1PreparedStatement[] = [
       // Retry if token reserves or creator ownership changed after the read.
       guard(
-        "EXISTS (SELECT 1 FROM coins WHERE id = ? AND v_sol = ? AND v_tok = ? AND owner_id = ? AND peak_level = ?)",
+        "EXISTS (SELECT 1 FROM coins WHERE id = ? AND v_sol = ? AND v_tok = ? AND owner_id = ? AND peak_level = ? AND quote_asset_key = ? AND quote_mint = ?)",
         coinId,
         c.v_sol,
         c.v_tok,
         c.owner_id,
         c.peak_level,
+        asset.key,
+        asset.mint,
       ),
       clearGuard(),
     ];
@@ -579,16 +645,16 @@ export async function trade(
       const q = quoteBuy(r, amount);
       if (!q.ok) throw new UserError(q.reason ?? "Cannot buy right now.");
       if (q.tokensOut < minOut) throw new UserError("Price moved. Check the new quote and try again.");
-      const bal = wallets[0];
+      const bal = asset.key === "sol" ? wallets[0] : quoteWallets[0];
       // The same words as the ticket (P1-9 step 6): claim the faucet when it is open, else when it opens.
-      if (!bal || bal.balance < q.solIn) throw new UserError(notEnoughSentence(faucetState(bal ?? { balance: 0, faucet_at: 0 }, now)));
+      if (!bal || bal.balance < q.solIn) throw new UserError(asset.key === "sol" ? notEnoughSentence(faucetState(wallets[0] ?? { balance: 0, faucet_at: 0 }, now)) : `Not enough demo ${asset.symbol} for this buy.`);
       solMoved = q.solIn;
       tokMoved = q.tokensOut;
       ownerFee = 0;
       protocolFee = q.fee;
       after = q.after;
       s.push(
-        stmt("UPDATE users SET balance = balance - ? WHERE id = ?", q.solIn, user.id),
+        asset.key === "sol" ? stmt("UPDATE users SET balance = balance - ? WHERE id = ?", q.solIn, user.id) : stmt("UPDATE quote_balances SET balance = balance - ? WHERE user_id = ? AND quote_asset_key = ?", q.solIn, user.id, asset.key),
         stmt(
           `INSERT INTO holdings (user_id, coin_id, amount) VALUES (?, ?, ?)
            ON CONFLICT(user_id, coin_id) DO UPDATE SET amount = amount + excluded.amount`,
@@ -603,6 +669,8 @@ export async function trade(
       if (q.solOut < minOut) throw new UserError("Price moved. Check the new quote and try again.");
       const h = bags[0];
       if (!h || h.amount < q.tokensIn) throw new UserError("You do not hold that many coins.");
+      const wallet = asset.key === "sol" ? wallets[0] : quoteWallets[0];
+      if (!wallet || !Number.isSafeInteger(wallet.balance + q.solOut)) throw new UserError("This balance would exceed the safe integer range of the local demo.");
       solMoved = q.solOut;
       tokMoved = q.tokensIn;
       ownerFee = 0;
@@ -617,11 +685,13 @@ export async function trade(
         ),
         clearGuard(),
         stmt("UPDATE holdings SET amount = amount - ? WHERE user_id = ? AND coin_id = ?", q.tokensIn, user.id, coinId),
-        stmt("UPDATE users SET balance = balance + ? WHERE id = ?", q.solOut, user.id),
+        asset.key === "sol" ? stmt("UPDATE users SET balance = balance + ? WHERE id = ?", q.solOut, user.id) : stmt("UPDATE quote_balances SET balance = balance + ? WHERE user_id = ? AND quote_asset_key = ?", q.solOut, user.id, asset.key),
       );
     }
 
-    const usd = mcapUsd(after);
+    if (![after.vSol, after.vTok, solMoved, tokMoved].every(Number.isSafeInteger)) throw new UserError("This trade exceeds the safe integer range of the local demo.");
+    const metrics = quoteMetrics(after, asset.key);
+    const usd = metrics.mcapUsd ?? 0;
     // Market data changes; the creator-selected NFT design never does.
     const live = c.level;
     const peak = c.peak_level;
@@ -630,18 +700,18 @@ export async function trade(
     s.push(
       // Token fees go to the protocol only; the creator card accrues no financial entitlement.
       stmt(
-        `UPDATE coins SET v_sol = ?, v_tok = ?, volume = volume + ?, owner_fees = owner_fees + ?,
-                fee_vault = fee_vault + ?, level = ?, peak_level = MAX(peak_level, ?), peak_mcap_usd = MAX(peak_mcap_usd, ?),
+        `UPDATE coins SET v_sol = ?, v_tok = ?, owner_fees = owner_fees + ?,
+                fee_vault = fee_vault + ?, level = ?, peak_level = MAX(peak_level, ?), peak_mcap_usd = MAX(peak_mcap_usd, ?), peak_mcap_quote = MAX(peak_mcap_quote, ?),
                 trades = trades + 1, last_trade_at = ?
           WHERE id = ?`,
         after.vSol,
         after.vTok,
-        grossVolume,
         ownerFee,
         ownerFee,
         live,
         peak,
         usd,
+        metrics.mcapQuote,
         now,
         coinId,
       ),
@@ -653,11 +723,10 @@ export async function trade(
         side,
         grossVolume,
         tokMoved,
-        priceSol(after),
+        metrics.priceQuote,
         usd,
         now,
       ),
-      protocolFeeStmt(protocolFee),
     );
     if (grossVolume >= LAMPORTS && side === "buy") {
       s.push(
@@ -671,8 +740,8 @@ export async function trade(
         ),
       );
     }
-    result = { side, sol: grossVolume, net: solMoved, tokens: tokMoved, levelUp: null };
-    return s;
+    result = { ...quoteIdentity(asset), side, sol: quoteAtomsToSol(grossVolume, asset.key), net: quoteAtomsToSol(solMoved, asset.key), quoteAmount: grossVolume, quoteNet: solMoved, tokens: tokMoved, levelUp: null };
+    return [...s, ...await protocolFeeStmts(protocolFee, asset.key)];
   }, "The price moved while your order was filling. Please try again.", 3, { meId: user.id });
 
   return { ...result!, me: settled.me, rev: settled.rev };
@@ -687,6 +756,8 @@ export type LaunchInput = {
   xUrl?: string;
   devBuy: number;
   cardTemplate?: string;
+  quoteAssetKey?: string;
+  quoteMint?: string;
   /** Optional catalog echoes, checked for consistency; these never establish a stock association. */
   stockTicker?: string;
   tokenPair?: string;
@@ -714,6 +785,7 @@ export async function launchCoin(user: SessionUser, input: LaunchInput): Promise
   const cardTemplate = input.cardTemplate ?? DEFAULT_CARD_DESIGN;
   if (!isCardDesignKey(cardTemplate)) throw new UserError("Choose an available card design.");
   const design = getCardDesign(cardTemplate);
+  const asset = launchQuote(cardTemplate, input);
   if (input.stockTicker !== undefined && input.stockTicker !== design.stock?.ticker) {
     throw new UserError("The stock reference must match the selected card design.");
   }
@@ -728,31 +800,40 @@ export async function launchCoin(user: SessionUser, input: LaunchInput): Promise
   }
   const website = cleanUrl(input.website);
   const xUrl = cleanUrl(input.xUrl, (h) => /(^|\.)(x|twitter)\.com$/.test(h));
-  const devBuy = Math.floor(input.devBuy || 0);
-  if (devBuy < 0 || devBuy > MAX_DEV_BUY) throw new UserError("Dev buy can be up to 20 SOL.");
+  const devBuy = input.devBuy ?? 0;
+  if (!Number.isSafeInteger(devBuy) || devBuy < 0 || devBuy > maxInitialBuyQuoteAtoms(asset.key)) throw new UserError(`Choose a safe initial-buy amount within the demo ${asset.symbol} cap.`);
 
   const taken = await one<{ id: string }>("SELECT id FROM coins WHERE ticker = ?", ticker);
   if (taken) throw new UserError(`$${ticker} is already in the dex. Pick another ticker.`);
 
   const id = newId(8);
   const now = Date.now();
-  const q = devBuy > 0 ? quoteBuy(INITIAL_RESERVES, devBuy) : null;
-  const after = q?.ok ? q.after : INITIAL_RESERVES;
-  const cost = LAUNCH_FEE + (q?.ok ? q.solIn : 0);
+  const initial = initialQuoteReserves(asset.key);
+  const q = devBuy > 0 ? quoteBuy(initial, devBuy) : null;
+  if (q && !q.ok) throw new UserError(q.reason ?? "The initial buy is too small.");
+  const after = q?.ok ? q.after : initial;
+  const cost = LAUNCH_FEE + (asset.key === "sol" && q?.ok ? q.solIn : 0);
   // Creator cards carry no royalty or fee entitlement, including on the initial buy.
   const creatorFee = 0;
   if (user.balance < cost) throw new UserError("Not enough SOL for the launch fee and dev buy.");
+  await ensureDemoQuoteWallet(user.id);
+  if (asset.key !== "sol" && q?.ok) {
+    const wallet = await one<{ balance: number }>("SELECT balance FROM quote_balances WHERE user_id = ? AND quote_asset_key = ?", user.id, asset.key);
+    if (!wallet || wallet.balance < q.solIn) throw new UserError(`Not enough demo ${asset.symbol} for the initial buy.`);
+  }
 
-  const usd = mcapUsd(after);
+  const metrics = quoteMetrics(after, asset.key);
+  const usd = metrics.mcapUsd ?? 0;
   const level = design.materialLevel;
   const s: D1PreparedStatement[] = [
+    guard("EXISTS (SELECT 1 FROM users WHERE id = ? AND balance >= ?)", user.id, cost), clearGuard(),
     stmt("UPDATE users SET balance = balance - ? WHERE id = ?", cost, user.id),
     stmt(
       `INSERT INTO coins (id, dex_no, name, ticker, lore, image, website, x_url, creator_id, owner_id,
                           v_sol, v_tok, volume, owner_fees, level, peak_level, list_price, trades, is_seed,
-                          created_at, last_trade_at, fee_vault, mint_address, card_template, peak_mcap_usd)
+                          created_at, last_trade_at, fee_vault, mint_address, card_template, peak_mcap_usd, quote_asset_key, quote_mint, peak_mcap_quote)
        VALUES (?, (SELECT COALESCE(MAX(dex_no), 0) + 1 FROM coins), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, 0, ?, ?, ?,
-               NULL, ?, ?)`,
+               NULL, ?, ?, ?, ?, ?)`,
       id,
       name,
       ticker,
@@ -774,6 +855,9 @@ export async function launchCoin(user: SessionUser, input: LaunchInput): Promise
       creatorFee,
       cardTemplate,
       usd,
+      asset.key,
+      asset.mint,
+      metrics.mcapQuote,
     ),
     stmt(
       "INSERT INTO events (kind, coin_id, user_id, amount, level, created_at) VALUES ('launch', ?, ?, 0, ?, ?)",
@@ -782,10 +866,13 @@ export async function launchCoin(user: SessionUser, input: LaunchInput): Promise
       level,
       now,
     ),
-    protocolFeeStmt(LAUNCH_FEE + (q?.ok ? q.fee : 0)),
   ];
   if (q?.ok) {
     s.push(
+      ...(asset.key === "sol" ? [] : [
+        guard("EXISTS (SELECT 1 FROM quote_balances WHERE user_id = ? AND quote_asset_key = ? AND balance >= ?)", user.id, asset.key, q.solIn), clearGuard(),
+        stmt("UPDATE quote_balances SET balance = balance - ? WHERE user_id = ? AND quote_asset_key = ?", q.solIn, user.id, asset.key),
+      ]),
       stmt("INSERT INTO holdings (user_id, coin_id, amount) VALUES (?, ?, ?)", user.id, id, q.tokensOut),
       stmt(
         `INSERT INTO trades (coin_id, user_id, side, sol, tokens, price, mcap_usd, created_at)
@@ -794,13 +881,17 @@ export async function launchCoin(user: SessionUser, input: LaunchInput): Promise
         user.id,
         q.solIn,
         q.tokensOut,
-        priceSol(after),
+        metrics.priceQuote,
         usd,
         now,
       ),
     );
   }
-  const settled = await atomic(async () => s, "Launch failed. Check your balance and try again.", 2, { meId: user.id });
+  const settled = await atomic(async () => [
+    ...s,
+    ...await protocolFeeStmts(LAUNCH_FEE + (asset.key === "sol" && q?.ok ? q.fee : 0)),
+    ...(asset.key !== "sol" && q?.ok ? await protocolFeeStmts(q.fee, asset.key) : []),
+  ], "Launch failed. Check your balance and try again.", 2, { meId: user.id });
   return { id, me: settled.me, rev: settled.rev };
 }
 

@@ -247,6 +247,8 @@ function CoinView() {
           <McapChart
             trades={trades}
             currentUsd={coin.mcapUsd}
+            currentQuote={coin.mcapQuote}
+            quoteAssetKey={coin.quoteAssetKey}
             createdAt={coin.createdAt}
             level={coin.level}
             pane="chart"

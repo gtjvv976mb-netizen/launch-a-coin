@@ -44,6 +44,7 @@ import { getHome } from "../lib/mintdex/api";
 import { hasRecentActivity } from "../lib/mintdex/activity-freshness";
 import { CARD_BIDDING_SUSPENDED } from "../lib/mintdex/card-bidding";
 import { getCardDesign } from "../lib/carddex/designs";
+import { marketCapText, marketCapWatch } from "../lib/carddex/quote-display";
 import { EXPLORE_COINS, HOME_COPY, IS_SIM, MODE_COPY, WORDS } from "../lib/mintdex/copy";
 import { sol, usdCompact } from "../lib/mintdex/format";
 import { tierForLevel } from "../lib/mintdex/tiers";
@@ -154,7 +155,7 @@ function useLot(featured: CoinSummary[], initialId?: string, onSelect?: (id: str
     setSel({ id: to.id, i: target });
     if (how === "auto") return;
     setAnnounce(
-      `${to.name}, ${tierForLevel(to.level).name} design, market cap ${usdCompact(to.mcapUsd)}, ${target + 1} of ${count}`,
+      `${to.name}, ${tierForLevel(to.level).name} design, market cap ${marketCapText(to)}, ${target + 1} of ${count}`,
     );
     onSelect?.(to.id);
   }
@@ -375,8 +376,8 @@ function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
             <Figure>
               {/* The odometer stays mounted across a step and rolls to the next coin's figure; flashKey keeps the
                   up/down flash for real moves of one coin only (a step is not a market move). */}
-              <Num size="lg" watch={c.mcapUsd} flashKey={c.id} odo>
-                {usdCompact(c.mcapUsd)}
+              <Num size="lg" watch={marketCapWatch(c)} flashKey={c.id} odo>
+                {marketCapText(c)}
               </Num>
               <Change v={c.change24h} pill hideZero className="text-[13px]" />
             </Figure>
@@ -670,7 +671,7 @@ function Home() {
   const trending = data.trending.slice(0, 5);
   // What the order means (the Worker ranks by 24h volume, then by the latest trade): on a quiet day every coin has
   // zero volume and the list is simply the most recently traded.
-  const trendingBasis = trending.some((c) => c.volume24h > 0)
+  const trendingBasis = trending.some((c) => (c.volume24h ?? 0) > 0)
     ? HOME_COPY.trendingByVolume
     : HOME_COPY.trendingByLatest;
   // A poll that only reorders Trending must not replay the rows' entrance (delta 13.4); rows glide to their new

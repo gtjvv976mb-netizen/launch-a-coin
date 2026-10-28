@@ -3,6 +3,7 @@ import { getCardDesign } from "../../lib/carddex/designs";
 import { generatedCardAssets } from "../../lib/carddex/generated-assets";
 import { CANONICAL_CARD_LAYOUT } from "../../lib/carddex/card-template";
 import { generatedSkinSource, useReadyImage } from "./GeneratedCardArt";
+import { defaultQuoteForDesign, getPairAsset } from "../../lib/carddex/pairs";
 
 type Box = { x:number; y:number; w:number; h:number };
 const WHOLE: Box = {x:0,y:0,w:1,h:1};
@@ -23,9 +24,10 @@ function BorderSlice({source,from,to,sourceInset,targetInset}:{source:string;fro
 }
 
 /** Untouched Higgsfield pixels are an inline decoration atlas around one permanent print grid. */
-export function CanonicalCardSkin({cardTemplate,priority=false,sizes}:{cardTemplate:string;priority?:boolean;sizes?:string}) {
+export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,sizes}:{cardTemplate:string;quoteAssetKey?:string;priority?:boolean;sizes?:string}) {
   const id=useId().replaceAll(":","");
   const design=getCardDesign(cardTemplate);
+  const quote=quoteAssetKey?getPairAsset(quoteAssetKey):defaultQuoteForDesign(cardTemplate);
   const assets=generatedCardAssets(cardTemplate);
   const imageRef=useRef<HTMLImageElement>(null);
   const image=useReadyImage(imageRef,assets.front ?? null);
@@ -34,7 +36,7 @@ export function CanonicalCardSkin({cardTemplate,priority=false,sizes}:{cardTempl
   const dark=design.key==="neon-circuit";
   const raster=`${id}raster`,material=`${id}material`,mask=`${id}gray`;
   const paper=dark?"#102b30":design.palette[2];
-  return <div className="cdx-canonical-skin" data-card-skin-ready={ready?"":undefined} data-card-skin-source={ready?cardTemplate:undefined} aria-hidden>
+  return <div className="cdx-canonical-skin" data-market-finish={quote.kind} data-card-skin-ready={ready?"":undefined} data-card-skin-source={ready?cardTemplate:undefined} aria-hidden>
     {assets.front?<img ref={imageRef} className="cdx-canonical-skin__loader" src={assets.front} srcSet={assets.front320?`${assets.front320} 320w, ${assets.front} 1260w`:undefined} sizes={sizes??(priority?"300px":"auto, 300px")} alt="" draggable={false} loading={priority?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":undefined} onLoad={image.onLoad} onError={image.onError} />:null}
     <svg className="cdx-canonical-skin__surface" viewBox="0 0 1000 1000" preserveAspectRatio="none" focusable="false">
       <defs>
@@ -57,6 +59,10 @@ export function CanonicalCardSkin({cardTemplate,priority=false,sizes}:{cardTempl
         {Object.entries(PLATES).map(([key,box])=><BorderSlice key={key} source={material} from={grow(source.plates[key],.009,.0065)} to={grow(box,RIM.x,RIM.y)} sourceInset={{x:.009,y:.0065}} targetInset={RIM} />)}
       </g>:null}
       <g className="cdx-canonical-skin__engraving" fill="none" stroke={design.palette[1]} opacity=".42" strokeWidth="1.6"><path d="M68 842V943H932V842M90 855H417M583 855H912M90 866H417M583 866H912M88 953H912" /><path d={SEAL_RAYS} /></g>
+      {quote.kind==="stock"?<g data-card-decoration="market-engraving" fill="none" stroke={`url(#${id}metal)`} strokeWidth="2" opacity=".8">
+        <path d="M102 883 137 880 163 869 187 875 213 860 238 866 265 854 293 863 322 848 350 858 383 847 410 851M590 851 618 861 646 846 674 856 700 846 726 861 752 850 779 862 806 851 835 868 866 860 900 871" />
+        {[142,199,258,317,376,623,682,741,800,859].map((x,i)=><g key={x}><path d={`M${x} ${i%2?873:860}v15`} /><rect x={x-3} y={i%2?876:864} width="6" height="7" fill={design.palette[1]} /></g>)}
+      </g>:null}
       <g className="cdx-canonical-skin__seal" data-card-decoration="seal">
         <path d={sealHex(51)} fill={`url(#${id}metal)`} stroke={design.palette[2]} strokeWidth="1.5" />
         <path d={sealHex(44)} fill={design.palette[0]} stroke={design.palette[1]} strokeWidth="2" />

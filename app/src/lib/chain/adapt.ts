@@ -34,6 +34,11 @@ import type {
 } from "../mintdex/types";
 import { CLUSTER } from "../mintdex/mode";
 import { TIERS } from "../mintdex/tiers";
+import { getPairAsset, getTradingPair } from "../carddex/pairs";
+
+// Inactive legacy SDK records are native SOL only; they do not infer custom quote identities from a skin.
+const legacySol = getPairAsset("sol");
+const LEGACY_SOL_QUOTE = { quoteAssetKey: legacySol.key, quoteMint: legacySol.mint, quoteSymbol: legacySol.symbol, quoteDecimals: legacySol.decimals, quoteTokenProgram: legacySol.tokenProgram };
 
 export const LAMPORTS_PER_SOL = 1_000_000_000;
 export const TOKEN_UNIT = 1_000_000;
@@ -150,6 +155,13 @@ function buyablePrice(listing: ApiCoinSummary["listing"]): number | null {
 export function toCoinSummary(c: ApiCoinSummary): CoinSummary {
   const holder = c.holder ?? c.launcher;
   return {
+    ...LEGACY_SOL_QUOTE,
+    tradingPair: getTradingPair(c.symbol, "sol"),
+    priceQuote: Number.isFinite(c.priceSol) ? c.priceSol : 0,
+    mcapQuote: num(c.mcapLamports) / LAMPORTS_PER_SOL,
+    volumeQuote: c.volume24hLamports,
+    volume24hQuote: c.volume24hLamports,
+    valuationMode: "demo-reference",
     id: c.mint,
     dexNo: c.dexNo ?? 0,
     name: c.name,
@@ -203,6 +215,7 @@ export function toCoinDetail(c: ApiCoinDetail): CoinDetail {
     feeVault: num(card.fees.total),
     listPrice: buyablePrice(card.listing),
     ...reserves(c.curve, c.pool),
+    vQuote: reserves(c.curve, c.pool).vSol,
     ownerFees: paid + num(card.fees.total),
     ownerEarnings: paid,
     website: c.links.website,
@@ -221,6 +234,10 @@ export function toTrades(trades: ApiTrade[], perLamport: number): TradeRow[] {
       const sol = num(t.solLamports);
       const toks = num(t.tokens);
       return {
+        ...LEGACY_SOL_QUOTE,
+        quoteAmount: sol,
+        priceQuote: toks > 0 ? sol / LAMPORTS_PER_SOL / (toks / TOKEN_UNIT) : 0,
+        mcapQuote: num(t.mcapAfterLamports) / LAMPORTS_PER_SOL,
         id: numericId(`${t.sig}:${i}`),
         side: t.side,
         sol,
@@ -243,6 +260,10 @@ export function chartRows(points: Array<[number, string]>, perLamport: number): 
   return [...points]
     .sort((a, b) => a[0] - b[0])
     .map(([t, mcap], i) => ({
+      ...LEGACY_SOL_QUOTE,
+      quoteAmount: 0,
+      priceQuote: 0,
+      mcapQuote: num(mcap) / LAMPORTS_PER_SOL,
       id: i + 1,
       side: "buy" as const,
       sol: 0,
@@ -306,6 +327,8 @@ export function toEvent(e: ApiEvent): EventRow | null {
   const kind = EVENT_KINDS[e.kind];
   if (!kind) return null;
   return {
+    ...LEGACY_SOL_QUOTE,
+    quoteAmount: num(e.amountLamports),
     id: numericId(e.id),
     kind,
     coinId: e.mint,
@@ -325,13 +348,14 @@ export function toEvent(e: ApiEvent): EventRow | null {
 export function toHome(r: ApiHomeResponse): HomeData & { rev: string } {
   return {
     // Lowest design first, as the test-mode home lists them (Home steps from the rarest).
-    featured: r.featured.map(toCoinSummary).sort((a, b) => a.level - b.level || a.mcapUsd - b.mcapUsd),
+    featured: r.featured.map(toCoinSummary).sort((a, b) => a.level - b.level || (a.mcapUsd ?? 0) - (b.mcapUsd ?? 0)),
     trending: r.trending.map(toCoinSummary),
     activity: r.activity.map(toEvent).filter((e): e is EventRow => e !== null),
     stats: {
       coins: r.stats.coins,
       deedSales: r.stats.cardSales,
       volume: num(r.stats.volume24hLamports),
+      volumeByQuote: { sol: r.stats.volume24hLamports },
       players: r.stats.wallets,
     },
     rev: r.rev,
@@ -350,7 +374,7 @@ export function toMarket(r: ApiMarketResponse): MarketData & { rev: string } {
 /** Levels: how many cards hold each design, and the busiest coin for the stage card. */
 export function toLevels(coins: CoinSummary[]): LevelsData {
   const counts = TIERS.map((t) => coins.filter((c) => c.level === t.level).length);
-  const coin = [...coins].sort((a, b) => b.volume24h - a.volume24h || b.mcapUsd - a.mcapUsd)[0] ?? null;
+  const coin = [...coins].sort((a, b) => (b.volume24h ?? 0) - (a.volume24h ?? 0) || (b.mcapUsd ?? 0) - (a.mcapUsd ?? 0))[0] ?? null;
   return { coin, counts };
 }
 

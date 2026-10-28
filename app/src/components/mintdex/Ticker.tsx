@@ -16,6 +16,8 @@ import { getHome } from "../../lib/mintdex/api";
 import { IS_SIM } from "../../lib/mintdex/mode";
 import { tierForLevel } from "../../lib/mintdex/tiers";
 import type { EventRow } from "../../lib/mintdex/types";
+import { getPairAsset } from "../../lib/carddex/pairs";
+import { quoteAtoms } from "../../lib/carddex/quote-display";
 import { revPoll, useNow } from "./hooks";
 import { FrameMini, Thumb, solFigure, usePauseGate } from "./ui";
 
@@ -118,7 +120,7 @@ function Row({ e, copy }: { e: EventRow; copy: boolean }) {
         ) : (
           <span className="mdx-ticker__amt num">
             {e.kind === "sell" ? "-" : e.kind === "buy" ? "+" : ""}
-            {solFigure(e.amount)} SOL
+            {quoteAtoms(e.quoteAmount ?? e.amount ?? 0, e.quoteAssetKey, true)} {getPairAsset(e.quoteAssetKey).symbol}
           </span>
         )}
       </Link>

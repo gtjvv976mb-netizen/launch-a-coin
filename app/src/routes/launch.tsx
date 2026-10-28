@@ -24,23 +24,25 @@ import {
 import {
   ArtPrompt,
   ChainLaunch,
-  CostTotal,
   MoreOptions,
   PhonePreview,
 } from "../components/chain/pages/ChainLaunch";
 import { launch } from "../lib/mintdex/api";
-import { LAMPORTS, LAUNCH_FEE, MAX_DEV_BUY, TICKER_RE } from "../lib/mintdex/constants";
+import { LAUNCH_FEE, TICKER_RE } from "../lib/mintdex/constants";
 import { FLOW, IS_SIM, LAUNCH_COPY, MODE_COPY, WORDS } from "../lib/mintdex/copy";
-import { INITIAL_RESERVES, mcapUsd, quoteBuy } from "../lib/mintdex/curve";
-import { parseSol, sol, tokens } from "../lib/mintdex/format";
+import { quoteBuy } from "../lib/mintdex/curve";
+import { sol, tokens } from "../lib/mintdex/format";
 import { pageHead, sentences } from "../lib/mintdex/seo";
 import { z } from "zod";
 import { HeroTurntable } from "../components/carddex/HeroTurntable";
 import { CardDesignPicker } from "../components/carddex/CardDesignPicker";
 import { DEFAULT_CARD_DESIGN, getCardDesign, isCardDesignKey } from "../lib/carddex/designs";
+import { allowedQuotesForDesign, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, isPairAssetKey, type PairAssetKey } from "../lib/carddex/pairs";
+import { formatQuoteAmount, initialQuoteReserves, maxInitialBuyQuoteAtoms, parseQuoteAmount, quoteMetrics } from "../lib/carddex/quote-simulation";
+import { QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
 
 export const Route = createFileRoute("/launch")({
-  validateSearch: z.object({ design: z.string().optional().catch(undefined) }),
+  validateSearch: z.object({ design: z.string().optional().catch(undefined), quote: z.string().optional().catch(undefined) }),
   head: () =>
     pageHead({
       path: "/launch",
@@ -57,14 +59,13 @@ export const Route = createFileRoute("/launch")({
 // ---------------------------------------------------------------- copy
 
 /** What really happens to the coin, per mode (P0-5): in test mode, a simulated curve. */
-const CONTEXT = MODE_COPY.launchContext;
-const MAX_DEV_SOL = (MAX_DEV_BUY / LAMPORTS).toLocaleString("en-US");
+const CONTEXT = "Choose a permanent finish and quote asset, then preview a token launch with test balances.";
 const ENTER_TO_UPLOAD = "Enter CardDex to upload card art and launch.";
 
 // ---------------------------------------------------------------- stage geometry
 
 /** Space below the complete card for the selected finish and its stock reference, if any. */
-const CAPTION_H = 184;
+const CAPTION_H = 206;
 const PREVIEW_CONTROLS_H = 48;
 /**
  * Desktop card width, read by the stage's descendants through --cw: the widest 63/88 card that fits the
@@ -199,10 +200,24 @@ function Launch() {
   const [designKey, setDesignKey] = useState(() =>
     isCardDesignKey(search.design) ? search.design : DEFAULT_CARD_DESIGN,
   );
+  const [quoteKey, setQuoteKey] = useState<PairAssetKey>(() => {
+    const bound = boundQuoteForDesign(designKey);
+    return bound?.key ?? (isPairAssetKey(search.quote) ? search.quote : defaultQuoteForDesign(designKey).key);
+  });
+  const [pairNotice, setPairNotice] = useState("");
+  const [pairPending, setPairPending] = useState(false);
   const design = getCardDesign(designKey);
+  const quoteAsset = getPairAsset(quoteKey);
   useEffect(() => {
-    if (isCardDesignKey(search.design)) setDesignKey(search.design);
-  }, [search.design]);
+    const nextDesign = isCardDesignKey(search.design) ? search.design : DEFAULT_CARD_DESIGN;
+    const bound = boundQuoteForDesign(nextDesign);
+    const requested = isPairAssetKey(search.quote) ? search.quote : undefined;
+    const nextQuote = bound?.key ?? requested ?? defaultQuoteForDesign(nextDesign).key;
+    setDesignKey(nextDesign);
+    setQuoteKey(nextQuote);
+    setDevBuy("");
+    setPairNotice(search.quote && !isPairAssetKey(search.quote) ? `That quote asset is unavailable. ${getPairAsset(nextQuote).symbol} is selected; review the quote before creating the demo token.` : bound && requested && requested !== bound.key ? `${getCardDesign(nextDesign).name} is paired with ${bound.symbol}; the quote has been matched to this finish.` : "");
+  }, [search.design, search.quote]);
 
   const fileRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -212,6 +227,7 @@ function Launch() {
   const xRef = useRef<HTMLInputElement>(null);
   const devRef = useRef<HTMLInputElement>(null);
   const moreRef = useRef<HTMLDetailsElement>(null);
+  const pairConfirmationRef = useRef<HTMLDivElement>(null);
 
   useEffect(
     () => () => {
@@ -220,25 +236,30 @@ function Launch() {
     [preview],
   );
 
-  // Dev buy quote on the fresh curve, and what the launch costs in total.
-  const devLamports = devBuy ? parseSol(devBuy) : 0;
-  const devNaN = !!devBuy && !Number.isFinite(devLamports);
-  const devOver = Number.isFinite(devLamports) && devLamports > MAX_DEV_BUY;
-  const devQuote =
-    devLamports > 0 && !devNaN && !devOver ? quoteBuy(INITIAL_RESERVES, devLamports) : null;
-  const after = devQuote?.ok ? devQuote.after : INITIAL_RESERVES;
-  const total = LAUNCH_FEE + (devQuote?.ok ? devQuote.solIn : 0);
+  // Initial buys use the selected quote's atomic units; the demo launch fee remains native test SOL.
+  const initialReserves = initialQuoteReserves(quoteKey);
+  const parsedDev = devBuy ? parseQuoteAmount(devBuy, quoteKey) : 0;
+  const devAtoms = parsedDev ?? 0;
+  const maxDev = maxInitialBuyQuoteAtoms(quoteKey);
+  const devNaN = !!devBuy && parsedDev === null;
+  const devOver = devAtoms > maxDev;
+  const devQuote = devAtoms > 0 && !devNaN && !devOver ? quoteBuy(initialReserves, devAtoms) : null;
+  const after = devQuote?.ok ? devQuote.after : initialReserves;
+  const metrics = quoteMetrics(after, quoteKey);
+  const nativeCost = LAUNCH_FEE + (quoteKey === "sol" && devQuote?.ok ? devQuote.solIn : 0);
+  const quoteBalance = me ? quoteKey === "sol" ? me.balance : me.quoteBalances[quoteKey] ?? 0 : 0;
   const devError = devNaN
-    ? "Enter an amount like 0.5."
+    ? `Enter a valid ${quoteAsset.symbol} amount with up to ${quoteAsset.decimals} decimals.`
     : devOver
-      ? `Dev buy is capped at ${MAX_DEV_SOL} SOL.`
-      : devQuote && !devQuote.ok
-        ? `${devQuote.reason}.`
-        : null;
-  const balanceError =
-    me && !devError && me.balance < total
-      ? `Not enough SOL. You have ${sol(me.balance)} SOL.`
-      : null;
+      ? `Initial buy is capped at ${formatQuoteAmount(maxDev, quoteKey)} ${quoteAsset.symbol} in this demo.`
+      : devQuote && !devQuote.ok ? `${devQuote.reason}.` : null;
+  const balanceError = me && !devError
+    ? me.balance < nativeCost
+      ? `Not enough test SOL for the launch fee${quoteKey === "sol" ? " and initial buy" : ""}. You have ${sol(me.balance)} SOL.`
+      : quoteKey !== "sol" && devQuote?.ok && devQuote.solIn > quoteBalance
+        ? `Not enough test ${quoteAsset.symbol}. You have ${formatQuoteAmount(quoteBalance, quoteKey)} ${quoteAsset.symbol}.`
+        : null
+    : null;
 
   // Field checks (the server repeats every one of them).
   const nameOk = name.trim().length >= 2;
@@ -253,6 +274,7 @@ function Launch() {
     !xError &&
     !devError &&
     !balanceError &&
+    !pairPending &&
     !uploading;
 
   // An error shows once the field is left with something in it, or after a submit attempt.
@@ -322,6 +344,10 @@ function Launch() {
   }
 
   function focusFirstProblem() {
+    if (pairPending) {
+      pairConfirmationRef.current?.focus();
+      return;
+    }
     const first = !nameOk
       ? nameRef
       : !tickerOk
@@ -361,12 +387,14 @@ function Launch() {
           data: {
             name,
             cardTemplate: designKey,
+            quoteAssetKey: quoteKey,
+            quoteMint: quoteAsset.mint,
             ticker,
             image: imageUrl,
             lore,
             website: website.trim() || undefined,
             xUrl: xUrl.trim() || undefined,
-            devBuy: devQuote?.ok ? devLamports : 0,
+            devBuy: devQuote?.ok ? devAtoms : 0,
           },
         }),
       undefined,
@@ -378,6 +406,10 @@ function Launch() {
 
   function submit(e: FormEvent) {
     e.preventDefault();
+    if (pairPending) {
+      focusFirstProblem();
+      return;
+    }
     // Signed out: the Enter dialog names the launch, then finishes it (P1-11). Without art yet, that means
     // pointing at the art field, the one thing left to do.
     require(() => void attempt(), "Enter CardDex to launch your coin.", ticker && imageUrl
@@ -391,7 +423,7 @@ function Launch() {
   useEffect(() => {
     reset("launch");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, ticker, lore, website, xUrl, devBuy, imageUrl]);
+  }, [name, ticker, lore, website, xUrl, devBuy, imageUrl, quoteKey, designKey]);
 
   // The live preview's data: the big stage on desktop, the small card beside Name and Ticker on phones.
   const previewCard: CardData = {
@@ -401,20 +433,28 @@ function Launch() {
     level: design.materialLevel,
     cardTemplate: designKey,
     // The same live quote and identity fields occupy the same card slots in every finish.
-    mcapUsd: mcapUsd(after),
+    quoteAssetKey: quoteKey,
+    quoteMint: quoteAsset.mint,
+    mcapUsd: metrics.mcapUsd,
+    mcapQuote: metrics.mcapQuote,
     holders: devQuote?.ok ? 1 : 0,
     dexNo: 0,
     dexLabel: "New",
     ownerHandle: me?.handle ?? "you",
     lore: lore.trim() || undefined,
   };
-  const pick = (key: string) => {
-    if (isCardDesignKey(key)) setDesignKey(key);
+  const changePair = (nextQuote: PairAssetKey, nextDesign: string) => {
+    if (!isCardDesignKey(nextDesign) || !allowedQuotesForDesign(nextDesign).some(a => a.key === nextQuote)) return;
+    const changed = nextQuote !== quoteKey;
+    setDesignKey(nextDesign);
+    setQuoteKey(nextQuote);
+    if (changed) setDevBuy("");
+    setPairNotice(changed ? `Pair changed to ${getPairAsset(nextQuote).symbol}.${devBuy ? " The initial buy was cleared so its amount is not reused in another asset." : ""}` : "");
   };
-  const costItems = [
-    ...(devQuote?.ok ? [{ label: "Dev buy", lamports: devQuote.solIn }] : []),
-    { label: LAUNCH_COPY.costLaunchFee, lamports: LAUNCH_FEE },
-  ];
+  const pick = (key: string) => {
+    if (!isCardDesignKey(key)) return;
+    changePair(boundQuoteForDesign(key)?.key ?? quoteKey, key);
+  };
 
   return (
     <PageFrame className="mdx-page">
@@ -471,8 +511,11 @@ function Launch() {
             </div>
           </div>
 
+          <QuoteAssetPicker value={quoteKey} designKey={designKey} ticker={ticker || "YOUR TOKEN"} onChange={changePair} onPendingChange={setPairPending} confirmationRef={pairConfirmationRef} balance={me ? formatQuoteAmount(quoteBalance, quoteKey) : undefined} />
+          {pairNotice ? <p className="cdx-pair-notice" role="status">{pairNotice}</p> : null}
+
           <div className="lg:hidden">
-            <CardDesignPicker value={designKey} onChange={pick} />
+            <CardDesignPicker value={designKey} onChange={pick} quoteAssetKey={quoteKey} ticker={ticker} />
           </div>
 
           <Gap />
@@ -592,12 +635,12 @@ function Launch() {
               </Field>
             </div>
             <div className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-[180px_minmax(0,1fr)] sm:items-end">
-              <Field label="Dev buy" htmlFor="dev">
+              <Field label="Initial buy (optional)" htmlFor="dev">
                 <Input
                   ref={devRef}
                   id="dev"
                   numeric
-                  suffix="SOL"
+                  suffix={quoteAsset.symbol}
                   inputMode="decimal"
                   autoComplete="off"
                   value={devBuy}
@@ -614,7 +657,7 @@ function Launch() {
                     {devError}
                   </span>
                 ) : !devQuote?.ok ? (
-                  <span className="block">{LAUNCH_COPY.devEmpty(`${MAX_DEV_SOL} SOL`)}</span>
+                  <span className="block">Optional test-asset buy. Maximum {formatQuoteAmount(maxDev, quoteKey)} {quoteAsset.symbol}.</span>
                 ) : null}
                 <span aria-live="polite" className="block empty:hidden">
                   {devQuote?.ok && !devError ? (
@@ -641,19 +684,26 @@ function Launch() {
               </TextLink>
               : {WORDS.contentRule}
             </p>
-            <CostTotal total={total} items={costItems} className="mb-2" />
+            <dl className="cdx-launch-cost" aria-label="Demo launch cost" aria-live="polite">
+              <div><dt>Demo launch fee</dt><dd>{sol(LAUNCH_FEE, 3)} test SOL</dd></div>
+              {devQuote?.ok ? <div><dt>Initial buy</dt><dd>{formatQuoteAmount(devQuote.solIn, quoteKey)} test {quoteAsset.symbol}</dd></div> : null}
+              {quoteKey === "sol" && devQuote?.ok ? <div><dt>Total</dt><dd>{sol(nativeCost, 3)} test SOL</dd></div> : null}
+              <small>{quoteKey === "sol" ? "Demo amounts only; no real token or NFT is minted." : `The native SOL fee and ${quoteAsset.symbol} initial buy are separate test assets. No real token or NFT is minted.`}</small>
+            </dl>
             {balanceError ? (
               <p role="alert" className="mb-2 text-[13px] leading-[1.45] text-down">
                 {balanceError}
               </p>
             ) : null}
+            {pairPending ? <p className="cdx-pair-notice mb-2" role="status">Confirm or cancel the quote change before creating this demo token.</p> : null}
             <Button
               type="submit"
               size="lg"
               block
               pending={pending === "launch"}
               pendingLabel="Minting your card..."
-              disabled={!!me && uploading}
+              disabled={pairPending || (!!me && uploading)}
+              onBlocked={pairPending ? focusFirstProblem : undefined}
               feedback={feedback("launch")}
               successLabel="Minted"
             >
@@ -684,7 +734,7 @@ function Launch() {
           <div className="cdx-create-preview__picker">
             {/* Flush with the card's left edge; free to run to the stage's right edge. */}
             <div className="w-full">
-              <CardDesignPicker value={designKey} onChange={pick} />
+              <CardDesignPicker value={designKey} onChange={pick} quoteAssetKey={quoteKey} ticker={ticker} />
             </div>
           </div>
         </section>

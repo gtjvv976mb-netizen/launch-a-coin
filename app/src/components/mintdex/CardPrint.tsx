@@ -1,7 +1,8 @@
 import type { CSSProperties } from "react";
-import { getCardDesign } from "../../lib/carddex/designs";
+import { defaultQuoteForDesign, getPairAsset } from "../../lib/carddex/pairs";
+import { marketCapText } from "../../lib/carddex/quote-display";
 
-import { dexNo, usdCompact } from "../../lib/mintdex/format";
+import { dexNo } from "../../lib/mintdex/format";
 import type { Box, FrameLayout, Tier } from "../../lib/mintdex/tiers";
 import type { CardData } from "./MintCard";
 
@@ -26,7 +27,7 @@ function MintAddress({ address }: { address: string }) {
 /** The original MintDex name, ticker, lore, token rows and footer, shared without layout variants. */
 export function CardPrint({ card, layout, tier, preview = false }: { card: CardData; layout: FrameLayout; tier: Tier; preview?: boolean }) {
   const [footA, footB] = layout.footer;
-  const stock = getCardDesign(card.cardTemplate).stock;
+  const quote = card.quoteAssetKey ? getPairAsset(card.quoteAssetKey) : defaultQuoteForDesign(card.cardTemplate);
   // A local creator mock-up has no verified tier, holder count or token address. Real cards retain every value.
   const unquoted = preview && card.dexNo <= 0 && !card.mintAddress && card.dexLabel !== "Sample";
   const ownerHandle = unquoted ? undefined : card.ownerHandle;
@@ -37,7 +38,7 @@ export function CardPrint({ card, layout, tier, preview = false }: { card: CardD
     </div>
     <div className="mdx-card__type" data-card-slot="ticker" style={boxStyle(layout.type)}>
       <span className="mdx-card__ticker">${card.ticker}</span>
-      <span>{stock?.pair ?? (unquoted ? "Preview" : "Trading card")}</span>
+      <span>{quote.symbol} pair</span>
     </div>
     <div className="mdx-card__text" data-card-slot="details" style={boxStyle(layout.text)}>
       <p className="mdx-card__lore" data-card-slot="description">{card.lore || (unquoted ? "Your token's story will appear here." : "A fresh coin in the dex. Its story is still being written.")}</p>
@@ -48,7 +49,7 @@ export function CardPrint({ card, layout, tier, preview = false }: { card: CardD
           <b>{card.mintAddress ? <MintAddress address={card.mintAddress} /> : card.dexLabel === "Sample" ? "Sample token" : card.dexNo > 0 ? "Demo token" : "—"}</b>
         </div>
         <div className="mdx-card__row" data-card-slot="market-cap">
-          <span>Market cap</span><i /><b>{card.mcapLabel ?? usdCompact(card.mcapUsd)}</b>
+          <span>Market cap</span><i /><b>{card.mcapLabel ?? marketCapText(card)}</b>
         </div>
         <div className="mdx-card__row mdx-card__row--holders" data-card-slot="holders">
           <span>Holders</span><i /><b>{unquoted ? "—" : card.holders}</b>

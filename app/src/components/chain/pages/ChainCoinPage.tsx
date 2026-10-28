@@ -23,7 +23,8 @@ import {
   type ChainCoinRoute,
 } from "../../../lib/chain/data";
 import { COIN_COPY, COIN_NOT_FOUND, FIXPACK_COPY, MODE_COPY } from "../../../lib/mintdex/copy";
-import { priceText, sol, usdFull } from "../../../lib/mintdex/format";
+import { priceText, sol } from "../../../lib/mintdex/format";
+import { marketCapText, marketCapWatch } from "../../../lib/carddex/quote-display";
 import type { CoinDetail } from "../../../lib/mintdex/types";
 import {
   COIN_CARD_SIZES,
@@ -101,7 +102,8 @@ function priceSolText(p: number) {
  * the 8 as a subscript for 0.000000001032 (the usual DEX notation). The full value is the title and what screen
  * readers hear.
  */
-function PriceSol({ p }: { p: number }) {
+function PriceSol({ p }: { p: number | null }) {
+  if (p == null) return <>—</>;
   const full = priceSolText(p);
   const m = /^0\.(0{4,})(\d+)$/.exec(full);
   if (!m) return <>{full}</>;
@@ -164,8 +166,8 @@ function ChainPhoneHero({
           <ShareButton {...coinShare(coin)} label={`Share ${coin.name}`} />
         </div>
         <span className="mt-0.5 text-[13px] leading-[17px] text-slate">${coin.ticker}</span>
-        <Num size="hero" watch={coin.mcapUsd} tick className="mt-2.5 text-[28px]!">
-          {usdFull(coin.mcapUsd)}
+        <Num size="hero" watch={marketCapWatch(coin)} tick className="mt-2.5 text-[28px]!">
+          {marketCapText(coin, false)}
         </Num>
         <div className="mt-1.5 flex items-center gap-2">
           <span className="text-[12px] font-medium leading-none text-slate">Market cap</span>
@@ -262,8 +264,8 @@ function ChainCoinStats({ page, pane, className = "" }: { page: ChainCoinPage; p
   const holders = page.detail.holders;
   const known = holders != null;
   const items: Array<{ key: string; label: ReactNode; value: ReactNode; unit?: string; watch?: number; tick?: boolean }> = [
-    { key: "price", label: "Price (SOL)", value: <PriceSol p={coin.priceSol} />, watch: coin.priceSol, tick: true },
-    { key: "volume", label: "Volume 24h", value: sol(coin.volume24h, 2), unit: "SOL" },
+    { key: "price", label: "Price (SOL)", value: <PriceSol p={coin.priceSol} />, watch: coin.priceSol ?? undefined, tick: true },
+    { key: "volume", label: "Volume 24h", value: coin.volume24h == null ? "—" : sol(coin.volume24h, 2), unit: "SOL" },
     ...(known ? [{ key: "holders", label: "Holders", value: holders.toLocaleString("en-US") }] : []),
     {
       key: "fees",

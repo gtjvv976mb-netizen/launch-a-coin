@@ -1,9 +1,10 @@
 import { useId, useRef, type CSSProperties } from "react";
 import type { CardDesign } from "../../lib/carddex/designs";
 import { cardArtSources } from "../../lib/mintdex/art";
-import { dexNo, usdCompact } from "../../lib/mintdex/format";
+import { dexNo } from "../../lib/mintdex/format";
 import { useImageFailure } from "./image-state";
 import { GeneratedCardFront, generatedCardStyle } from "../carddex/GeneratedCardArt";
+import { marketCapText } from "../../lib/carddex/quote-display";
 import type { CardData } from "./MintCard";
 
 function Star() {
@@ -27,7 +28,7 @@ export function TradingCardFace({ card, design, priority = false, sizes, compact
   } as CSSProperties;
   const sample = card.dexLabel === "Sample";
   const address = card.mintAddress ? `${card.mintAddress.slice(0, 5)}…${card.mintAddress.slice(-4)}` : sample ? "Sample token" : card.dexNo > 0 ? "Demo token" : "Not launched";
-  const quote = card.mcapLabel ?? usdCompact(card.mcapUsd);
+  const quote = card.mcapLabel ?? marketCapText(card);
   return <div className={`mdx-card cdx-trading-card ${compact ? "cdx-trading-card--compact" : ""} ${className}`} data-classic-layout={design.layout} data-card-template={design.key} data-finish={design.finish} data-carddex-premium="" style={style} role={label ? "img" : undefined} aria-label={label}>
     <div className="cdx-trading-card__stock" aria-hidden />
     <GeneratedCardFront cardTemplate={design.key} priority={priority} />

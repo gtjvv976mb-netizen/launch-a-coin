@@ -1,0 +1,482 @@
+{
+  "pokemon-classic": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/pokemon-classic-front.webp",
+      "sha256": "f2335930f158850f763359f12d4e749cfee197c4aaa395318c8fe7f4a6c75ddc"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/pokemon-classic-back.webp",
+      "sha256": "f851e97b09f0b747adca0924f26bab829d9fe70a040532e2d82051a9f222ad4d"
+    }
+  },
+  "pokemon-full-art": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/pokemon-full-art-front.webp",
+      "sha256": "f9d989dc9f1f17035020bce5c3e09dafcb4f942248d4642aa8f329de35f27842"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/pokemon-full-art-back.webp",
+      "sha256": "cd0658657b746dcea7972f33832fd7bf0a87e280040274e07d105e50c321b424"
+    }
+  },
+  "yugioh-monster": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/yugioh-monster-front.webp",
+      "sha256": "b1d9f578f0c2e5f98ca717ebf9630ace2b2cbe7be2246a67f2d732388f2c4e46"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/yugioh-monster-back.webp",
+      "sha256": "4fe348ab617bca9b18d3dec3fa4c5405989830209bb3e3b58e8737317fccdec1"
+    }
+  },
+  "yugioh-spell": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/yugioh-spell-front.webp",
+      "sha256": "26d1fad1ed30ded30b4b76eed48574d040a666c9891d87fe7cdd46ff849cc2c5"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/yugioh-spell-back.webp",
+      "sha256": "a3005591cf30352191e825373b92bee39b47ba79f9400b28abdccdc4c71f9393"
+    }
+  },
+  "magic-etched": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/magic-etched-front.webp",
+      "sha256": "692167de26e864de5f6f5eac550cc807a698dd6d504d66c9d5fe60a5403e4c91"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/magic-etched-back.webp",
+      "sha256": "f9be5cb15023d7123a52d252681e3dafca425152ad2ef5f280958ed90abd08fd"
+    }
+  },
+  "duel-masters": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/duel-masters-front.webp",
+      "sha256": "9d64df6c4482698c77a2206f10a3803b0ddf14ecb10eaa613bd6cac56ecd1de6"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/duel-masters-back.webp",
+      "sha256": "a57bc8ec7d069f0f9d0a34172271ded37de597d82eaf8c42c2e19d58b8288d93"
+    }
+  },
+  "one-piece": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/one-piece-front.webp",
+      "sha256": "b2a5545c49369d36a517931f46701369a89198d32dfb640967ce34553f512604"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/one-piece-back.webp",
+      "sha256": "01bce18b47fbf5d1b7f88b6f32451798743c5fbd313dfd2995f5dd68dbdd898c"
+    }
+  },
+  "obsidian-archive": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/obsidian-archive-front.webp",
+      "sha256": "2549b84261ed66950a506f2abb8cef9d7bb7073942f9ef952ab624f8cb5b397d"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/obsidian-archive-back.webp",
+      "sha256": "bab27d628d298ddfe2365e0cde5f9eb8d6a4f330ccea588dc3d4415f26e0d986"
+    }
+  },
+  "stock-gme": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/stock-gme-front.webp",
+      "sha256": "544f174dd43d569d79ec2d5e99e4c8dc54d7ed8091a0855365c0d289a5ab85c6"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/stock-gme-back.webp",
+      "sha256": "6dac21d32f3f5201c8d6cdb802f791935f7795875b0a957e328c123cfa501d7a"
+    }
+  },
+  "stock-tsla": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/stock-tsla-front.webp",
+      "sha256": "810373f2f98025574ec91ae8fa6f53cac8b1d0263027bccd36d8d3719ac33032"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/stock-tsla-back.webp",
+      "sha256": "29b6b8a0e0ae6f39f0d399658475ced26b1ec354b74f0aebe39384150a932794"
+    }
+  },
+  "stock-nvda": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/stock-nvda-front.webp",
+      "sha256": "69ea9aa4b083e8013ae8623d3804dcc0ac9b790d53449ca540b9cf075ecc6271"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/stock-nvda-back.webp",
+      "sha256": "02c16ca130621344f0774475b71ccf063016783e39dd806fa437fb2810e5a2af"
+    }
+  },
+  "stock-aapl": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/stock-aapl-front.webp",
+      "sha256": "e27fbc01c5e19877f9c98b443f35261682e9538b1e1ecee697e394fb920b87bd"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/stock-aapl-back.webp",
+      "sha256": "bee8a88ddd6de1454d0799c048cdee32b39c42d5d8541cbd08d2522c86d37726"
+    }
+  },
+  "stock-mstr": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/stock-mstr-front.webp",
+      "sha256": "947810c14e80d62934fef45af7a0bb6d142d726d42bbff52725e9917ef8e1ef8"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/stock-mstr-back.webp",
+      "sha256": "2f5c89cc74593cab438ab16030ec006caad5469b4b5b7579a0db1bd4f54d1a92"
+    }
+  },
+  "stock-coin": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/stock-coin-front.webp",
+      "sha256": "a3043930f3089f9d70560c334585f8e4577f7f1fc7b8922f88f43d7ed9b8e98e"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/stock-coin-back.webp",
+      "sha256": "955c43987cc990ac480c3e17b02aa409c715071affd88e71958b321a950373c1"
+    }
+  },
+  "spark": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/spark-front.webp",
+      "sha256": "829b638c5b4e609a73f85ea6d65aae48b58b66a74c06261cd7ab15bd21388067"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/spark-back.webp",
+      "sha256": "93724c6e1d9338415c718a53cd583253caac32eb42685aceed0a67e7a9252e40"
+    }
+  },
+  "surge": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/surge-front.webp",
+      "sha256": "bb6e062d573b395897c842b3ee80a368e2ceb2c2e209662d003dba3cf9b463f4"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/surge-back.webp",
+      "sha256": "8650221e9fb1bcf6390513c4ac9373fbd04258d877115612f2e3375ecc284572"
+    }
+  },
+  "nova": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/nova-front.webp",
+      "sha256": "e7253092caf97a71e1628578745b6d3f898311a44ba98fe23ffbf259b89cf8ae"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/nova-back.webp",
+      "sha256": "27732340f4a8f99e4a42e12e03e666e1d3ad2d85220a9ae9888fbab9be25c3bb"
+    }
+  },
+  "tide": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/tide-front.webp",
+      "sha256": "5cc8a991dbf2d67560643de8a5fe48167868845bf84bc8410152c9a2a62e741c"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/tide-back.webp",
+      "sha256": "08b3a62dc3fd43b804249a4b6d1be764cef79bef7e38442932584ce3151fba27"
+    }
+  },
+  "apex": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/apex-front.webp",
+      "sha256": "8c6d422a6ce7e02e6ec15239e631e5eb5fa20b0c0727f4b62af32754f42e2b6a"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/apex-back.webp",
+      "sha256": "5e0e31105bd5d3ff1c3e72d1716bd2fef6980799dcb87871b59c86c952496819"
+    }
+  },
+  "ember": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/ember-front.webp",
+      "sha256": "b8718e25f305fec73c3103d3cead0e52229080246b3c18c64bf98d443ae735dc"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/ember-back.webp",
+      "sha256": "ddfaf532aae3d9f26c3758a2075300963bbd850b704b9e2d0a984ec07630f937"
+    }
+  },
+  "bloom": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/bloom-front.webp",
+      "sha256": "c3a67d407a2e3961ae3a7b639e9b2a23257b5a543910061ecb409c84c20213b2"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/bloom-back.webp",
+      "sha256": "adc19a074afdadaf35b7f838d62f18d198c976c9a7bc19fa86581be829120777"
+    }
+  },
+  "mythic": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/mythic-front.webp",
+      "sha256": "0a032735b3e866438a4b0d8d11d6ed4079bcee966db7a4292fa1b5527d50affc"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/mythic-back.webp",
+      "sha256": "3782e0b75d90df3a9aaa29313aa238b40020e217616c8418a774ed375ca532bc"
+    }
+  },
+  "aurora": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/aurora-front.webp",
+      "sha256": "aa4ff44a679980f4003e1319af828b51aa8c07a7597cccb41c3269aabc08a918"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/aurora-back.webp",
+      "sha256": "5f21dbdace6a36a7a46cf6ae344e22844c94822239fca098f7ec79fa0d9d41cf"
+    }
+  },
+  "relic": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/relic-front.webp",
+      "sha256": "be216297adb1d47381539ab01fb485a68659c93b0a85b808df63af422cd4aa73"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/relic-back.webp",
+      "sha256": "ba794a1e849f4ed058b40ce9c8c8a6495033426d6460e1b6f4188042b5f4ed32"
+    }
+  },
+  "frost": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/frost-front.webp",
+      "sha256": "33cc617dc7a611ce340ae52a84d0b22765803725a8e6191fc90fa38d17f15bae"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/frost-back.webp",
+      "sha256": "0c53e091486b3fa93749ea32f9dccbee69aca115641de534a681a52e880c1f3c"
+    }
+  },
+  "regal": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/regal-front.webp",
+      "sha256": "f8e15999b446adf89026205d28496574e3ee23a81efc2df3dd2fcc0204010451"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/regal-back.webp",
+      "sha256": "3dd4519345bdf4e3956f8bf8dde14eba535e28be49dd901ccadc7e716a7b2c0d"
+    }
+  },
+  "celestial": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/celestial-front.webp",
+      "sha256": "fb1fc5ae75eec88f692ef2178189af7fe1def648e8dc95bc00ff34544f228d69"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/celestial-back.webp",
+      "sha256": "0db70fed15f8ad4b52cd901cfd955bcfef60f5a2f12c2c1d73becf14be18bafd"
+    }
+  },
+  "legend": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/legend-front.webp",
+      "sha256": "c04512958414fdf944088481552ee85e52f6a2a76829738ef0a662ed7b4670fb"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/legend-back.webp",
+      "sha256": "bfda8b3712b17801bbb718934f3a5f54dfbce008098875c9ff366b351f16a858"
+    }
+  },
+  "doge": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/doge-front.webp",
+      "sha256": "76b971bf8e7b70af3bd6491b9ea785d2149a6e4d53964d8f4b7c110c846376ec"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/doge-back.webp",
+      "sha256": "d7087aee025b5da400d424344f780880e2d50cd3849a10941145343d45562003"
+    }
+  },
+  "pepe": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/pepe-front.webp",
+      "sha256": "47bf704875d6d606147af062afbbf204efeeb1ccb684c30d719b02acdbb32be2"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/pepe-back.webp",
+      "sha256": "110aadf4fa9135036efe4f556b4163d4692de1aa6d9d6e60ffb8485da1554f3b"
+    }
+  },
+  "shib": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/shib-front.webp",
+      "sha256": "e8755e9e5a81dddf7108e2911c768bc327b7e5385731576b701ad1d0c282d3a5"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/shib-back.webp",
+      "sha256": "1eb852feed20a93b2f0b6ea4de8f7311eb74b0dd3f0e8553b1069121817f7581"
+    }
+  },
+  "bonk": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/bonk-front.webp",
+      "sha256": "ec6803f14d1194c53c0d52996fc2bda35e273b831ca2f97a47bf51a6455351f4"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/bonk-back.webp",
+      "sha256": "c1503d9b731f3baf94a29aa008b01c9c05b01b01984f6a38f63afb7119fd7b00"
+    }
+  },
+  "wif": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/wif-front.webp",
+      "sha256": "35b1d23d85e0805d4cbb1d1118c120259202258c1946ea9f5b180ffb1e092d31"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/wif-back.webp",
+      "sha256": "ef529ea98483c9d1e8a2bedb0b633d4fa9b861f50b41ad506ed9280a32d3eae2"
+    }
+  },
+  "popcat": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/popcat-front.webp",
+      "sha256": "d34b06f3036019f2ee30c32548513e37e8a1efe70370ea0fc37e484a87d2a81c"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/popcat-back.webp",
+      "sha256": "b7401685558506acc0a5df6df993ea7c92ae0486023fe7519b53e62793a56749"
+    }
+  },
+  "gamestop": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/gamestop-front.webp",
+      "sha256": "55290091b1db2c128b45e1308a8d7fe43ad21939b88464aeee1fcc2458b83a00"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/gamestop-back.webp",
+      "sha256": "6bb05d01c19ea5ad2cb8cf53f914f3834c432f5b881ff3e34def594e0ddd2aed"
+    }
+  },
+  "amc": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/amc-front.webp",
+      "sha256": "9c3c23241ed8033018fef444e18aba0603d319692c4ec26602dd517362441caf"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/amc-back.webp",
+      "sha256": "e55dc56372262f817ff981cb8caf640c88cbb6ea1d4d67502e5960863584e005"
+    }
+  },
+  "blackberry": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/blackberry-front.webp",
+      "sha256": "abeef03a108f25cb64bd1d16bd0f205f6cc24ab5e35b942741c7458bb6d2fc2d"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/blackberry-back.webp",
+      "sha256": "a68782c1d9ba4c53f0e64ab60903af09db648b343b86bec9527f9ffead9b5977"
+    }
+  },
+  "nokia": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/nokia-front.webp",
+      "sha256": "d3b2e53d5c2b3946bef1b882598e70bf3c31be83ccc0c90439fa8ae6489fbba8"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/nokia-back.webp",
+      "sha256": "28aae0d18045ee058739961d6ecfb6f80c4c00b6df2bd720a4e0251db441b6ed"
+    }
+  },
+  "coinbase": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/coinbase-front.webp",
+      "sha256": "0ddc1fee240fb571ec9b167915d304bb193fbb5e14b7a4ca166563241139cebf"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/coinbase-back.webp",
+      "sha256": "b5e6494e312adc63163ba2421a63b959dff126238bbab89523df9f23e1bb0409"
+    }
+  },
+  "binance": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/binance-front.webp",
+      "sha256": "eebc858cf205d778af0d5e7db964d3e024c26ddcceab4d6f6e9dedbdb303dddf"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/binance-back.webp",
+      "sha256": "8e61dee0b7124946fa8b3dbfe4dab683a76690c079e67f95fc64cce27cb25798"
+    }
+  },
+  "kraken": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/kraken-front.webp",
+      "sha256": "6f993b63a2db1b44a59ba372fdd3ab02382d76c507436d622753782440a8e12e"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/kraken-back.webp",
+      "sha256": "3c2eb3b7d81d720f78be144b2a78b2823b50f4a5dfa0514b9376fd488949d9e7"
+    }
+  },
+  "strategy": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/strategy-front.webp",
+      "sha256": "5e9ca52763c7428c88f88c995a0470016395723657ef364da20cd7a595133dd7"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/strategy-back.webp",
+      "sha256": "4397e1ba9fbecce6b35ff86d80e0525710000a988ace53a28079d33634914e50"
+    }
+  },
+  "wildtype": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/wildtype-front.webp",
+      "sha256": "01e471c5292398e76b4e38d934e1536a9a6be1c1200ebf4ef5bb147dfdffe318"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/wildtype-back.webp",
+      "sha256": "a3e99823ca26c660cedfaabe5f3103d43de946f3417ef0708bfa7e9b03b3b590"
+    }
+  },
+  "ronin": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/ronin-front.webp",
+      "sha256": "659c7c59565b425ac69d77964b1f88e56065b8b1e489681b5c14c66a632cd8fb"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/ronin-back.webp",
+      "sha256": "a566de1b516a4ba7d1df760f79cf07e9125652a92e03e3afa894e4f9cec34bcb"
+    }
+  },
+  "astral": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/astral-front.webp",
+      "sha256": "6912eeef22690132595b441a850eaa0d8dddd21bae405086428e85230f41ba35"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/astral-back.webp",
+      "sha256": "6d5211103d5e82c5b90b8a15478cab55ea598dd85c31a497b3ed67e2a2b62266"
+    }
+  },
+  "neon-circuit": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/neon-circuit-front.webp",
+      "sha256": "901b5975a0e663ccf6311ce35bec261c0576e02978d40cbd7dbc4d36f60b3393"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/neon-circuit-back.webp",
+      "sha256": "7f2a711ca674414a2944b774ee14f33bfb3a0325a6b5ec828582f5ed741abbab"
+    }
+  },
+  "sovereign": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/sovereign-front.webp",
+      "sha256": "4d4986d94eca1f0d0660c325443e050d36448d3384b15f396e357565db826c46"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/sovereign-back.webp",
+      "sha256": "40dee3fe6a1a2c59076e865d398ef9a6891f52a83e721bab78b5747aba69f6bf"
+    }
+  },
+  "abyssal": {
+    "front": {
+      "path": "/assets/carddex/higgsfield/abyssal-front.webp",
+      "sha256": "9ad2255e0eb88f4d84f9ba370356a604fb698b07b1cbc84b5f76be34a604c26e"
+    },
+    "back": {
+      "path": "/assets/carddex/higgsfield/abyssal-back.webp",
+      "sha256": "19b8f9e2f08f55cea2f640bd1c7f2e4c79fa88cd9dcb67b9dac716208d8b8fd3"
+    }
+  }
+}

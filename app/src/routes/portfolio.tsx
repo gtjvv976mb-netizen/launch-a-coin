@@ -10,6 +10,8 @@ import {
   Pager, Skeleton, Tabs, TextLink, Thumb,
 } from "../components/mintdex/ui";
 import { getCardDesign } from "../lib/carddex/designs";
+import { getPairAsset } from "../lib/carddex/pairs";
+import { quoteAtoms } from "../lib/carddex/quote-display";
 import { claimFaucet, getPortfolio } from "../lib/mintdex/api";
 import { FLOW, IS_SIM, MODE_COPY } from "../lib/mintdex/copy";
 import { sol, tokens } from "../lib/mintdex/format";
@@ -36,15 +38,15 @@ function Holdings({ rows }: { rows: PortfolioData["holdings"] }) {
         <span>Token</span><span className="text-right">Held</span><span className="text-right">Value</span><span className="text-right">24h</span><span>Card design</span>
       </div>
       <div className="mdx-stagger divide-y divide-hairline">
-        {rows.map(({ coin, amount, valueSol }) => (
+        {rows.map(({ coin, amount, valueQuote }) => (
           <Link key={coin.id} to="/coin/$id" params={{ id: coin.id }} className="group grid min-h-20 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-row px-3 py-3 transition-colors hover:bg-tint lg:min-h-16 lg:grid-cols-[minmax(0,1.7fr)_1fr_1fr_80px_minmax(0,1fr)] lg:gap-5">
             <span className="flex min-w-0 items-center gap-3">
               <Thumb src={coin.image} size={40} />
               <span className="min-w-0"><span className="block truncate text-[15px] font-semibold text-ink group-hover:underline">{coin.name}</span><span className="block truncate text-[12px] text-slate">${coin.ticker}<span className="lg:hidden"> · {tokens(amount)} held</span></span></span>
             </span>
             <span className="num hidden text-right text-[14px] text-ink lg:block">{tokens(amount)}</span>
-            <span className="text-right"><span className="num block text-[15px] text-ink">{sol(valueSol)} <span className="text-[12px] text-slate">SOL</span></span><Change v={coin.change24h} className="text-[12px] lg:hidden" /></span>
-            <Change v={coin.change24h} className="hidden text-right text-[13px] lg:block" />
+            <span className="text-right"><span className="num block text-[15px] text-ink">{quoteAtoms(valueQuote, coin.quoteAssetKey, true)} <span className="text-[12px] text-slate">{coin.quoteSymbol}</span></span><Change v={coin.change24h} className="text-[12px] lg:hidden" /></span>
+            <span className="hidden text-right lg:block"><Change v={coin.change24h} className="text-[13px]" /></span>
             <span className="hidden truncate text-[12px] text-slate lg:block">{getCardDesign(coin.cardTemplate).name}</span>
           </Link>
         ))}
@@ -103,9 +105,17 @@ function Collection({ me }: { me: NonNullable<Me> }) {
       <PageHeader title={`@${me.handle}`} context="Your tokens. Your one-of-one cards." right={me.canFaucet ? <Button variant="outline" pending={pending === "faucet"} pendingLabel="Claiming..." onClick={() => void run("faucet", () => claimFaucet(), FLOW.faucetSent, { keys: [["portfolio"]] })}>{FLOW.claimFaucet}</Button> : undefined} />
       <dl className="grid flex-none grid-cols-3 gap-3 rounded-panel border border-hairline bg-plinth p-4 sm:gap-6">
         <div className="min-w-0"><dt className="mdx-micro truncate">Demo wallet</dt><dd className="mt-1"><Num size="lg" unit="SOL" watch={me.balance}>{sol(me.balance, 2)}</Num></dd></div>
-        <div className="min-w-0"><dt className="mdx-micro truncate">Token value</dt><dd className="mt-1"><Num size="lg" unit="SOL" watch={data?.totals.holdingsValue}>{sol(data?.totals.holdingsValue ?? 0)}</Num></dd></div>
+        <div className="min-w-0"><dt className="mdx-micro truncate">Token value</dt><dd className="mt-1">{data?.totals.holdingsValue === null ? <span className="text-[20px] font-semibold text-ink">By quote</span> : <Num size="lg" unit="SOL" watch={data?.totals.holdingsValue ?? undefined}>{sol(data?.totals.holdingsValue ?? 0)}</Num>}</dd></div>
         <div className="min-w-0"><dt className="mdx-micro truncate">NFT cards</dt><dd className="mt-1"><Num size="lg">{data?.deeds.length ?? 0}</Num></dd></div>
       </dl>
+      {Object.keys(data?.totals.holdingsValueByQuote ?? {}).length > 0 ? <dl className="grid flex-none grid-cols-2 gap-3 rounded-panel border border-hairline bg-plinth p-4 sm:grid-cols-3" aria-label="Token values by quote asset">
+        {Object.entries(data?.totals.holdingsValueByQuote ?? {}).map(([key,value])=><div key={key} className="min-w-0"><dt className="mdx-micro">{getPairAsset(key).symbol} holdings</dt><dd className="mt-1 truncate text-[15px] font-semibold text-ink">{quoteAtoms(value,key,true)} {getPairAsset(key).symbol}</dd></div>)}
+      </dl> : null}
+      <details className="flex-none rounded-panel border border-hairline bg-plinth px-4 py-3 text-[13px] text-slate">
+        <summary className="cursor-pointer font-semibold text-ink">Demo quote balances</summary>
+        <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">{Object.entries(me.quoteBalances ?? {sol:me.balance}).map(([key,value])=><div key={key} className="min-w-0"><dt>{getPairAsset(key).symbol}</dt><dd className="mt-0.5 break-words font-medium text-ink">{quoteAtoms(value,key,true)}</dd></div>)}</dl>
+        <p className="mt-3">Separate test balances. Stock and memecoin quantities are not added to SOL.</p>
+      </details>
       <div className="flex flex-none items-center justify-between gap-4">
         <Tabs label="Portfolio sections" value={view} onChange={(next) => void navigate({ search: { tab: next === "cards" ? "cards" : undefined }, replace: true, resetScroll: false })} options={[{ value: "coins", label: "Tokens", count: data?.holdings.length }, { value: "cards", label: "NFT cards", count: data?.deeds.length }]} />
         <Pager page={page} pages={pages} onPage={setPage} />
