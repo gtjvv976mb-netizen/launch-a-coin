@@ -166,7 +166,7 @@ type RenderFaceProps = FaceProps & { mode: "flat" | "3d" | "lite"; className?: s
 function Face(input: RenderFaceProps) {
   const card = designedCard(input.card);
   const design = cardDesign(card);
-  return <CanonicalCardFace card={card} design={design} priority={input.priority || input.eager} sizes={input.sizes} compact={input.compact} lite={input.mode === "lite"} className={input.className} style={input.style} label={input.mode === "flat" ? cardLabel(card) : undefined} />;
+  return <CanonicalCardFace card={card} design={design} priority={input.priority} eager={!input.priority && input.eager} sizes={input.sizes} compact={input.compact} lite={input.mode === "lite"} className={input.className} style={input.style} label={input.mode === "flat" ? cardLabel(card) : undefined} />;
 }
 
 /**

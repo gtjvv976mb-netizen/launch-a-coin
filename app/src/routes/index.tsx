@@ -49,7 +49,7 @@ import { marketCapText, marketCapWatch } from "../lib/carddex/quote-display";
 import { EXPLORE_COINS, HOME_COPY, IS_SIM, MODE_COPY, WORDS } from "../lib/mintdex/copy";
 import { sol, usdCompact } from "../lib/mintdex/format";
 import { tierForLevel } from "../lib/mintdex/tiers";
-import { SITE_DESCRIPTION, pageHead } from "../lib/mintdex/seo";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_ORIGIN, pageHead } from "../lib/mintdex/seo";
 import type { CoinSummary } from "../lib/mintdex/types";
 import "../home-motion.css";
 import { Card3DView } from "../components/mintdex/card3d/Card3D";
@@ -67,17 +67,42 @@ function validateHomeSearch(raw: Record<string, unknown>): HomeSearch {
   return { card: typeof raw.card === "string" && CARD_PARAM.test(raw.card) ? raw.card : undefined };
 }
 
+const HOME_JSON_LD = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_ORIGIN}/#organization`,
+      name: SITE_NAME,
+      url: `${SITE_ORIGIN}/`,
+      logo: `${SITE_ORIGIN}/assets/brand/carddex-512.png`,
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_ORIGIN}/#website`,
+      name: SITE_NAME,
+      url: `${SITE_ORIGIN}/`,
+      description: SITE_DESCRIPTION,
+      publisher: { "@id": `${SITE_ORIGIN}/#organization` },
+    },
+  ],
+}).replace(/</g, "\\u003c");
+
 export const Route = createFileRoute("/")({
   validateSearch: validateHomeSearch,
   // Stepping the featured card stays on this match: no reload (the polled query keeps the data fresh).
   shouldReload: ({ cause }) => cause !== "stay",
   loader: IS_SIM ? () => getHome() : chainHomeLoader,
-  head: () =>
-    pageHead({
+  head: () => ({
+    ...pageHead({
       path: "/",
       title: "Launch a Card: every coin is a one-of-one card",
       description: SITE_DESCRIPTION,
     }),
+    // SEO-5: who runs the site and what it is, from facts the site already states. No sameAs: the site links
+    // no Launch a Card social account yet ([TO FILL: official X and Telegram URLs]).
+    scripts: [{ type: "application/ld+json", children: HOME_JSON_LD }],
+  }),
   component: Home,
 });
 

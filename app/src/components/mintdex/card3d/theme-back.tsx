@@ -50,6 +50,7 @@ export function ThemeBack({ theme, sizes }: { theme?: CardBackTheme; sizes: stri
       draggable={false}
       loading="eager"
       decoding="async"
+      fetchPriority="low"
       onError={print.onError}
       onLoad={print.onLoad}
     /> : null}

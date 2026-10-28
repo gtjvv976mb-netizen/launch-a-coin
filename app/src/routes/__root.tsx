@@ -24,7 +24,7 @@ import { PageNotFound } from "../components/mintdex/PageStatus";
 import { Button, ToastProvider } from "../components/mintdex/ui";
 import { markHydrated, View3DProvider } from "../components/mintdex/card3d";
 import { ROUTE_ERROR } from "../lib/mintdex/copy";
-import { SITE_DESCRIPTION } from "../lib/mintdex/seo";
+import { SITE_DESCRIPTION, SITE_OG_IMAGE, SITE_OG_IMAGE_ALT, absoluteUrl } from "../lib/mintdex/seo";
 import { readViewport } from "../lib/mintdex/viewport";
 
 declare const __HF_DESIGN_INSPECTOR__: boolean;
@@ -65,12 +65,17 @@ function toOwnAssetUrl(value: string | null | undefined): string | null {
  * canonical links follow SITE_ORIGIN (seo.ts): mintdex.fun while both hosts serve the same devnet site, then
  * devnet.mintdex.fun once MAINNET_SITE_LIVE is set.
  */
-function buildHead(meta: AppMeta, devnetSite = false) {
-  const title = meta.og_title ?? DEFAULT_TITLE;
+function buildHead(meta: AppMeta, devnetSite = false, notFound = false) {
+  // An unknown path (the root's not-found page, HTTP 404): its own title and description, and noindex (A11Y-11, F15).
+  const title = notFound ? "Page not found | Launch a Card" : (meta.og_title ?? DEFAULT_TITLE);
   // Always our own description, never app-meta.json's og_description: the marketplace meta API writes that
   // file with claims test mode cannot make ("every pump.fun coin"), and ours carries the mode suffix (P0-5).
-  const description = SITE_DESCRIPTION;
-  const ogImage = toOwnAssetUrl(meta.og_image_url);
+  const description = notFound
+    ? "This page is not on Launch a Card. Browse tokens and their cards on Discover, or go back home."
+    : SITE_DESCRIPTION;
+  // The site's own share image (Home's hero, 1200x630) unless app-meta.json names one (SEO-1).
+  const ownImage = toOwnAssetUrl(meta.og_image_url);
+  const ogImage = ownImage ?? absoluteUrl(SITE_OG_IMAGE);
   const ogVideo = toOwnAssetUrl(meta.og_video_url);
 
   return {
@@ -88,7 +93,7 @@ function buildHead(meta: AppMeta, devnetSite = false) {
       { name: "application-name", content: "Launch a Card" },
       // Which build this is (launch-plan D4 and E checks: curl the HTML and read it). sim, devnet or mainnet.
       { name: "carddex-mode", content: MODE },
-      ...(devnetSite ? [{ name: "robots", content: "noindex" }] : []),
+      ...(devnetSite || notFound ? [{ name: "robots", content: "noindex" }] : []),
       { property: "og:site_name", content: "Launch a Card" },
       { property: "og:title", content: title },
       { property: "og:description", content: description },
@@ -100,20 +105,15 @@ function buildHead(meta: AppMeta, devnetSite = false) {
         ? [
             { property: "og:image", content: ogImage },
             { name: "twitter:image", content: ogImage },
+            ...(ownImage ? [] : [{ property: "og:image:alt", content: SITE_OG_IMAGE_ALT }, { name: "twitter:image:alt", content: SITE_OG_IMAGE_ALT }]),
           ]
         : []),
       ...(ogVideo ? [{ property: "og:video", content: ogVideo }] : []),
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      // Preload the chrome's current body and title face. Card fonts load only when a card paints.
-      {
-        rel: "preload",
-        href: "/fonts/instrument-sans-latin-wdth-normal.woff2",
-        as: "font",
-        type: "font/woff2",
-        crossOrigin: "anonymous" as const,
-      },
+      // No font preload (F17): Instrument Sans is not used early enough for one to pay off, and Chrome warned on
+      // every route that the preloaded file went unused. Its @font-face (font-display: swap) loads it on use.
       // The same wordless gold card-and-crown mark serves browser, mobile and installed-app branding.
       { rel: "icon", href: "/assets/brand/carddex.svg", type: "image/svg+xml" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/assets/brand/carddex-180.png" },
@@ -165,7 +165,7 @@ async function loadRootData({location}:{location:{pathname:string;searchStr:stri
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: ({ loaderData }) => buildHead(appMeta, loaderData?.devnetSite ?? false),
+  head: ({ loaderData, match }) => buildHead(appMeta, loaderData?.devnetSite ?? false, !!match.globalNotFound),
   // `now` is the page's clock for its first frame (see useNow in hooks.ts): it is dehydrated with the
   // loader data, so server HTML and the hydrating client compute the same relative times. `vp` is the
   // viewport cookie (P1-20), so fitted grids lay out their server HTML for this screen.

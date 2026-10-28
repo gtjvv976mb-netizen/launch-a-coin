@@ -11,7 +11,11 @@ export const Route = createFileRoute("/legal")({
   validateSearch: z.object({
     tab: z.enum(["terms", "fees", "privacy", "risks"]).optional().catch(undefined),
   }),
-  head: () => pageHead({ path: "/legal", title: "Terms, privacy and risks | Launch a Card" }),
+  head: () => pageHead({
+    path: "/legal",
+    title: "Terms, privacy and risks | Launch a Card",
+    description: "Terms of use, privacy, fees and risk disclosures for launching coins with Launch a Card.",
+  }),
   component: Legal,
 });
 

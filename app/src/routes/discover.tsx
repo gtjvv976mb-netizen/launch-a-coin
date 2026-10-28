@@ -128,7 +128,7 @@ function Discover() {
       </p>
       {coins.length > 0 ? (
         <ul ref={gridRef} role="list" className="cdx-token-grid">
-          {visible.map((c) => (
+          {visible.map((c, i) => (
             <li key={c.id} className="cdx-token-item">
               <article className="cdx-token-cell">
                 <View3DHost item={{ id: c.id, card: c }} list={items}>
@@ -137,7 +137,9 @@ function Discover() {
                     params={{ id: c.id }}
                     aria-label={`Open ${c.name}, $${c.ticker}, ${getCardDesign(c.cardTemplate).name} design`}
                   >
-                    <MintCard card={c} depth="table" idle="turntable" />
+                    {/* The first row loads at once and at high priority; the rest when they near the screen. The sizes match the
+                        laid-out card (two columns below 1024, about 200px above), so sharp screens get the 320px copies. */}
+                    <MintCard card={c} depth="table" idle="turntable" priority={i < 4} sizes="(max-width: 1023px) 50vw, 200px" />
                   </Link>
                 </View3DHost>
                 <Link to="/coin/$id" params={{ id: c.id }} className="cdx-token-cell__caption">
