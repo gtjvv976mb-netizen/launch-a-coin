@@ -1,75 +1,242 @@
 /* Home (/) screen sheet. Owned by the home screen group (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css).
- * The blocks below were moved here unchanged from the shared sheets, in their old cascade order. */
-/* The aside is a column of sections (the sheets below set its gap, padding and the phone view switch). */
-.cdx-home__aside { display:flex; flex-direction:column; }
+ * true-black-flat, Operate mode: the featured card on a calm surface panel (no halo, glows or ambient loops), the
+ * pulse blocks on surface panels, elevation by lightness alone, gold only on the curve fill.
+ *
+ * Grid (the 1152px column; main supplies the gutters):
+ * - fit, 1280x720 and up: the stage beside a 2 x 2 grid of Trending | Recent activity over Collection | Launched,
+ *   at 4fr 5fr (501 + 24 + 627 = 1152; the pulse cells 301.5 + 24 + 301.5), one screen at main's height. The pulse
+ *   scrolls in itself only when a short window needs it.
+ * - 1024 to 1279, and wide but short windows: the stage beside Trending over Recent activity at 7fr 5fr, then
+ *   Collection | Launched across the column; the page flows.
+ * - under 1024: the PageHeader, the two view tabs, then one view. The card view fits the screen (the card fills
+ *   what the header, tabs, caption and controls leave); the pulse view flows in the page. */
 
-/* ---- moved from alive.css (same order as there) */
-body[data-scroll-locked] .mdx-holo-ink {
-  animation-play-state: paused !important;
-}
-
-/* ---------------------------------------------------------------- headline ink (L12)
- * "card." in a deep holo ink (every stop at least 4.5:1 on the wall). A white sheen sweeps it once on load (the one
- * allowed small paint animation). */
-.mdx-holo-ink {
-  background-image:
-    linear-gradient(100deg, rgb(255 255 255 / 0) 38%, rgb(255 255 255 / 0.85) 50%, rgb(255 255 255 / 0) 62%),
-    linear-gradient(100deg, #3dffb5 0%, #38d9ff 45%, #ff3dce 100%);
-  background-size:
-    300% 100%,
-    100% 100%;
-  background-position:
-    130% 0,
-    0 0;
-  background-repeat: no-repeat;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  text-shadow: none;
-  filter: drop-shadow(0 0 18px rgb(61 255 181 / 0.35));
-}
-/* Once only (MOT-4): the old 9 s repeat repainted the headline forever for no one's benefit. */
-:root:not([data-motion="calm"]) .mdx-holo-ink {
-  animation: mdx-ink-once 1.6s var(--ease-sheen) 0.5s both;
-}
-
-/* ---------------------------------------------------------------- Home: the turntable vitrine (5.1)
- * --W is the card's width: 260px under fit; at fit the size container's fill, so that the card (88/63 W) and the
- * plinth hanging 0.2W under it both fit its height (QA: the plinth ran off the foot of a 1920x1080 screen), and
- * the group (the prev ghost's 0.24W, the card, the 36px gap and the 240px caption) fits its width. The group
- * sits centered: the ghosts have room on both sides and the stage no longer leaves an empty right half. */
-.mdx-lot {
-  --W: min(260px, calc(100vw - 32px));
-}
-/* Phones: the dots and Pause stay above the tab bar on the first screen (QA: hidden under it at 375x812). The
- * card, its plinth room and the dots take 1.567W under a header block of about 430px. */
-@media (max-width: 1023.98px) {
-  .mdx-lot {
-    --W: min(260px, calc(100vw - 32px), max(200px, calc((100dvh - 430px) / 1.567)));
-  }
+/* ---------------------------------------------------------------- the frame */
+/* Home flows with its content (main scrolls), except where it fits the screen: fit, and the phone's card view. */
+.cdx-app.cdx-viewport .cdx-viewport-main > .cdx-home {
+  height: auto;
+  min-height: 100%;
 }
 @media (min-width: 1280px) and (min-height: 720px) {
-  .mdx-lot {
-    --W: min(calc((100cqh - 8px) / 1.597), calc((100cqw - 290px) / 1.26));
-    justify-content: center;
-    padding-left: calc(var(--W) * 0.24);
-    padding-bottom: calc(var(--W) * 0.2);
+  .cdx-app.cdx-viewport .cdx-viewport-main > .cdx-home {
+    height: 100%;
+    min-height: var(--cdx-fit-floor, 520px);
+  }
+}
+@media (max-width: 1023.98px) {
+  .cdx-app.cdx-viewport .cdx-viewport-main > .cdx-home:has(> .cdx-home__body[data-home-view="card"]) {
+    height: 100%;
+    min-height: var(--cdx-fit-floor, 520px);
+  }
+  .cdx-home.mdx-frame {
+    gap: 12px;
+  }
+}
+
+/* The view tabs are a phone and tablet control; from 1024 both views show. A segmented control is as wide as its
+ * options: full width on a phone only. */
+.cdx-home__tabs {
+  display: none;
+}
+@media (max-width: 1023.98px) {
+  .cdx-home__tabs {
+    display: flex;
+  }
+}
+@media (min-width: 560px) and (max-width: 1023.98px) {
+  .cdx-home__tabs {
+    width: 360px;
+    align-self: flex-start;
+  }
+  /* Room for the primary beside the title (as from 1024), so the card keeps the 48px a row of its own would take. */
+  .cdx-home .mdx-pagehead {
+    flex-wrap: nowrap;
+  }
+  .cdx-home .mdx-pagehead__right {
+    width: auto;
+  }
+}
+
+/* ---------------------------------------------------------------- the body grid */
+.cdx-home__body {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  align-content: start;
+  gap: var(--gap-section);
+}
+.cdx-home__pulse {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: var(--gap-section);
+}
+.cdx-home__feed,
+.cdx-home__side {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--gap-section);
+}
+/* Two narrow lists side by side once the pulse view is wide enough (tablets); from 1024 see the body grid. */
+@media (min-width: 640px) and (max-width: 1023.98px) {
+  .cdx-home__feed,
+  .cdx-home__side {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+@media (max-width: 1023.98px) {
+  .cdx-home__body {
+    flex: 1;
+  }
+  .cdx-home__body[data-home-view="card"] .cdx-home__pulse,
+  .cdx-home__body[data-home-view="pulse"] .cdx-home__stage {
+    display: none;
+  }
+  .cdx-home__body[data-home-view="card"] {
+    grid-template-rows: minmax(0, 1fr);
+    align-content: stretch;
+  }
+}
+/* 1024 to 1279 (and short windows): the stage beside Trending over Collection, then Recent activity beside Launched,
+ * so the two rows balance (the stage against two short blocks; six activity rows against the launch list). The pulse
+ * wrappers are only the phone tab's panel here: they lend their panels to the body grid. */
+@media (min-width: 1024px) {
+  .cdx-home__body {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    grid-template-areas: "stage trending" "stage collection" "activity launched";
+    align-items: start;
+  }
+  .cdx-home__stage {
+    grid-area: stage;
+    align-self: stretch;
+  }
+  .cdx-home__pulse,
+  .cdx-home__feed,
+  .cdx-home__side {
+    display: contents;
+  }
+  .cdx-home-trending {
+    grid-area: trending;
+  }
+  .cdx-home-collection {
+    grid-area: collection;
+  }
+  .cdx-home-activity {
+    grid-area: activity;
+    align-self: stretch;
+  }
+  .cdx-home-launched {
+    grid-area: launched;
+    align-self: stretch;
+  }
+}
+/* Fit: the stage beside one 2 x 2 grid, where the feed's and the side's panels share the columns and the second row
+ * takes what the first leaves (the feed and side wrappers lend their panels to it; see the end of the panel rules). */
+@media (min-width: 1280px) and (min-height: 720px) {
+  .cdx-home__body {
+    flex: 1;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 5fr);
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: "stage pulse";
+    align-items: stretch;
+  }
+  .cdx-home__stage {
+    min-height: 0;
+  }
+  .cdx-home__pulse {
+    display: grid;
+    min-height: 0;
+    grid-area: pulse;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto minmax(0, 1fr);
+    align-content: stretch;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  .cdx-home-trending,
+  .cdx-home-collection,
+  .cdx-home-activity,
+  .cdx-home-launched {
+    grid-area: auto;
+    align-self: stretch;
+  }
+}
+
+/* ---------------------------------------------------------------- the stage: the featured card */
+/* Phones: on the ground, edge to edge of the column. From 1024: a surface panel, the card centred in it. */
+.cdx-home__stage {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+}
+@media (min-width: 1024px) {
+  .cdx-home__stage {
+    padding: var(--pad-panel);
+    border-radius: var(--radius-panel);
+    background: var(--color-surface);
+  }
+}
+.cdx-home__carousel,
+.cdx-home__slide {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+/* The card's box. Where the stage has a height (fit, the phone card view) it is a size container and the card takes
+ * what fits: its own 88/63 height plus turn room above and below (1.517W at fit, 1.5W on phones), leaving 48px each
+ * side for the chevrons at fit and 0.8 of the width on phones. Elsewhere the card is sized from the window, with
+ * 0.12W of turn room (1.637W). */
+.cdx-home__display {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  place-items: center;
+}
+.cdx-home__lot {
+  --W: max(220px, min(320px, calc((100dvh - 380px) / 1.637)));
+  display: flex;
+  justify-content: center;
+}
+@media (min-width: 1280px) and (min-height: 720px) {
+  .cdx-home__display {
+    container-type: size;
+  }
+  .cdx-home__lot {
+    --W: min(400px, calc(100cqh / 1.517), calc(100cqw - 96px));
+  }
+}
+@media (max-width: 1023.98px) {
+  .cdx-home__display {
+    container-type: size;
+  }
+  .cdx-home__lot {
+    --W: min(320px, calc(100cqh / 1.5), calc(100cqw * 0.8));
   }
 }
 .mdx-tt {
   width: var(--W);
-  /* Under fit the plinth hangs below the card: room for it before the dots (which may sit on its foot). */
-  margin-bottom: calc(var(--W) * 0.17);
-  /* The featured card rests turned toward its caption (on the right at fit), lit from that side (light.ts
-   * restLight and restAngle of rx 5, ry 10). */
+  padding-block: calc(var(--W) * 0.12);
+  /* The featured card rests turned a little, lit from that side (light.ts restLight and restAngle of rx 5, ry 10). */
   --hand-ry: 10;
   --hand-a: 11.18;
   --hand-px: 0.778;
 }
+@media (max-width: 1023.98px) {
+  .mdx-tt {
+    padding-block: calc(var(--W) * 0.05);
+  }
+}
+/* 0.06W above and below at fit: the swap's arc is short there (turnArcScale 0.2); the near edge of a turning card may
+ * run some 0.04W further, into the caption's 16px margin, never onto it. */
 @media (min-width: 1280px) and (min-height: 720px) {
   .mdx-tt {
-    margin-bottom: 0;
+    padding-block: calc(var(--W) * 0.06);
   }
 }
 .mdx-tt__card {
@@ -78,584 +245,627 @@ body[data-scroll-locked] .mdx-holo-ink {
   display: block;
   -webkit-user-drag: none;
 }
-
-/* The plinth: a top ellipse (1.2W by 0.26W) whose center sits 0.06W under the card's bottom, a 3px holo rim
- * behind it, a side band, and a pool of the tier's light standing in for a reflection. */
-.mdx-tt__plinth {
-  position: absolute;
-  left: calc(var(--W) * -0.1);
-  width: calc(var(--W) * 1.2);
-  top: calc(100% - var(--W) * 0.07);
-  height: calc(var(--W) * 0.27);
-  z-index: 1;
-  pointer-events: none;
-}
-.mdx-tt__plinth > i {
-  position: absolute;
-  display: block;
-}
-.mdx-tt__band {
-  left: 0;
-  right: 0;
-  top: calc(var(--W) * 0.13);
-  height: calc(var(--W) * 0.14);
-  border-radius: 0 0 50% 50% / 0 0 calc(var(--W) * 0.13) calc(var(--W) * 0.13);
-  background: linear-gradient(to bottom, #1a2233 0%, #10151f 60%, #0a0e15 100%);
-  box-shadow: 0 10px 30px -10px rgb(61 255 181 / 0.35);
-}
-.mdx-tt__rim {
-  left: -3px;
-  right: -3px;
-  top: -3px;
-  height: calc(var(--W) * 0.26 + 6px);
-  border-radius: 50%;
-  background: conic-gradient(from 200deg, #3dffb5, #38d9ff, #8b7bff, #ff3dce, #ffe45c, #3dffb5);
-  box-shadow: 0 0 22px rgb(61 255 181 / 0.55), 0 0 60px -10px rgb(255 61 206 / 0.45);
-}
-.mdx-tt__top {
-  left: 0;
-  right: 0;
-  top: 0;
-  height: calc(var(--W) * 0.26);
-  border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 40%, #1f2a3d 0%, #141b29 55%, #0c111a 100%);
-  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.3), inset 0 0 24px rgb(61 255 181 / 0.12);
-}
-.mdx-tt__pool {
-  left: 16%;
-  right: 16%;
-  top: calc(var(--W) * 0.03);
-  height: calc(var(--W) * 0.17);
-  border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 50%, var(--pool, #fff) 0%, rgb(255 255 255 / 0) 70%);
-  opacity: 0.6;
-  transition: background 600ms var(--ease-room);
+/* card3d.css is unlayered: the calm stage drops the design-colour halo and the prism ring that turns behind it. */
+.cdx-home .mdx-card3d__halo {
+  display: none !important;
 }
 
-/* The aura: a 1.6W disc of four soft glows in the tier's colors behind the card. Two layers crossfade. */
-.mdx-tt__aura {
-  position: absolute;
-  left: calc(var(--W) * -0.3);
-  top: calc(var(--W) * (44 / 63 - 0.8));
-  width: calc(var(--W) * 1.6);
-  height: calc(var(--W) * 1.6);
-  z-index: 0;
-  pointer-events: none;
-  /* The turning square must never widen the page: the disc clips it. */
-  overflow: clip;
-  border-radius: 50%;
+/* ---------------------------------------------------------------- the market line under the card */
+.cdx-home__caption {
+  flex: none;
+  container-type: inline-size;
+  margin-top: 16px;
 }
-.mdx-tt__aura-spin {
-  position: absolute;
-  inset: 0;
+.cdx-home-lot__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
 }
-.mdx-tt__aura-spin > i {
-  position: absolute;
-  inset: 0;
-  display: block;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 32% 30%, var(--a1) 0%, rgb(255 255 255 / 0) 36%),
-    radial-gradient(circle at 70% 32%, var(--a2) 0%, rgb(255 255 255 / 0) 34%),
-    radial-gradient(circle at 68% 72%, var(--a3) 0%, rgb(255 255 255 / 0) 34%),
-    radial-gradient(circle at 30% 68%, var(--a4) 0%, rgb(255 255 255 / 0) 36%);
-  opacity: 0;
-  transition: opacity 600ms var(--ease-room);
+.cdx-home-lot__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.mdx-tt__aura-spin > i[data-on] {
-  opacity: 0.5;
+.cdx-home-lot__meta {
+  margin-top: 4px;
+  overflow: hidden;
+  font-size: var(--text-body);
+  line-height: 20px;
+  color: var(--color-slate);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-:root:not([data-motion]) .mdx-tt__aura-spin {
-  animation: mdx-aura 26s linear infinite;
+.cdx-home-lot__market {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin-top: 16px;
 }
-
-/* The ghosts: the previous and next featured coins far behind, out of focus (set once, only their float moves).
- * Each fades out toward its outer edge, so wherever the page clips it (the rail edge at x 224) there is no hard
- * vertical cut (QA). */
-.mdx-tt__ghosts {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  perspective: 1200px;
-  perspective-origin: 50% 40%;
-  pointer-events: none;
-}
-.mdx-tt__ghost {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: var(--W);
-  pointer-events: auto;
-  cursor: pointer;
-  transform: translate3d(calc(var(--W) * -0.26), calc(var(--W) * -0.03), -160px) rotateZ(-7deg);
-}
-.mdx-tt__ghost--next {
-  transform: translate3d(calc(var(--W) * 0.18), calc(var(--W) * -0.05), -200px) rotateZ(5deg);
-}
-@media (max-width: 1279.98px), (max-height: 719.98px) {
-  .mdx-tt__ghost {
-    transform: translate3d(calc(var(--W) * -0.3), calc(var(--W) * -0.04), -180px) rotateZ(-6deg);
-  }
-  .mdx-tt__ghost--next {
-    transform: translate3d(calc(var(--W) * 0.3), calc(var(--W) * -0.04), -180px) rotateZ(6deg);
+@container (min-width: 380px) {
+  .cdx-home-lot__market {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: end;
+    gap: 24px;
   }
 }
-.mdx-tt__lens {
-  filter: blur(3px) saturate(0.9);
-  opacity: 0.5;
-  transition: opacity var(--t-base) var(--ease-room);
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 16%);
-  mask-image: linear-gradient(to right, transparent, #000 16%);
-}
-.mdx-tt__ghost--next .mdx-tt__lens {
-  -webkit-mask-image: linear-gradient(to left, transparent, #000 16%);
-  mask-image: linear-gradient(to left, transparent, #000 16%);
-}
-@media (hover: hover) {
-  .mdx-tt__ghost:hover .mdx-tt__lens {
-    opacity: 0.72;
-  }
-}
-:root:not([data-motion]) .mdx-tt__float {
-  animation: mdx-ghost-float 9s var(--ease-drift, ease-in-out) infinite alternate;
-}
-:root:not([data-motion]) .mdx-tt__ghost--next .mdx-tt__float {
-  animation-duration: 11s;
-  animation-delay: -4s;
-}
-
-/* "Drag to spin to the next card": first visit only, at the card's top right (5.1) just above it, never on its
- * corner gem. 12px up, clear of the breathing card's rise (about 7px: at 6px the card's top edge touched it), and
- * right-aligned, clear of "How it works" on narrow phones. A turn sweeps far past the card's box, so the chip
- * goes the moment the card turns (index.tsx). Fades in, then out with its 6 s. */
-.mdx-tt__hint {
-  position: absolute;
-  top: -38px;
-  right: 0;
-  width: max-content;
-  z-index: 4;
-  display: inline-flex;
-  height: 26px;
+.cdx-home-lot__label {
+  display: flex;
   align-items: center;
-  padding: 0 10px;
-  border-radius: var(--radius-pill);
-  background: var(--color-sheet);
-  box-shadow: var(--shadow-raise), 0 0 0 1px rgb(61 255 181 / 0.4), 0 0 14px -2px rgb(61 255 181 / 0.45);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-ink);
-  pointer-events: none;
-  animation: mdx-hint 6s var(--ease-room) both;
+  gap: 8px;
+  font-size: var(--text-caption);
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--color-slate);
 }
-:root[data-motion="calm"] .mdx-tt__hint {
-  display: none;
+.cdx-home-lot__figure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin-top: 4px;
 }
-
-/* "Tilt to shine" (iOS, after mount): on the plinth's top, under the card, never over its footer. */
-.mdx-tt__chip {
-  top: calc(100% + var(--W) * 0.035);
-  bottom: auto;
+.cdx-home-lot__change {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
-
-/* The vitrine's dressing (L8): bokeh, dust (clipped by the stage) and one light beam over the card. */
-.mdx-vitrine {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  overflow: clip;
-  pointer-events: none;
+.cdx-home-lot__period {
+  font-size: var(--text-caption);
+  color: var(--color-slate);
 }
-/* The beam falls from above the stage: the dressing fades in over the stage's top 18% (a mask, so the sky's glow
- * shows through there instead of a wall-colored band), and the stage's top edge (under the phone header) never
- * shows as a line. */
-.mdx-vitrine {
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%);
-  mask-image: linear-gradient(to bottom, transparent, #000 18%);
+/* The curve track's note line sits on the figure's baseline row: room for its 6px track under the label. */
+.cdx-home-lot__curve {
+  padding-bottom: 6px;
 }
-.mdx-vitrine__bokeh b {
-  position: absolute;
-  left: var(--x);
-  top: var(--y);
-  width: var(--sz);
-  height: var(--sz);
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--c) 0%, rgb(255 255 255 / 0) 68%);
-  opacity: 0.32;
-}
-.mdx-vitrine__beam {
-  position: absolute;
-  left: calc(50% - 210px);
-  top: -12%;
-  width: 420px;
-  height: 112%;
-  background: radial-gradient(ellipse 34% 90% at 50% 0%, rgb(120 255 220 / 0.22) 0%, rgb(120 255 220 / 0) 70%);
-  transform-origin: 50% 0;
-  opacity: 0.85;
-}
-.mdx-vitrine__dust > div {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-}
-.mdx-vitrine__dust i {
-  position: absolute;
-  left: var(--x);
-  top: var(--y);
-  width: var(--s);
-  height: var(--s);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgb(255 255 255 / 0.95) 0%, rgb(140 255 220 / 0.9) 40%, rgb(140 255 220 / 0) 72%);
-}
-/* At fit the card stands in the centered group: the beam falls on it. Its center is the stage's middle plus
- * 0.12W minus 138px (half the gap and caption), with W estimated from the viewport (the lot's own size is not
- * visible from here). */
-@media (min-width: 1280px) and (min-height: 720px) {
-  .mdx-vitrine__beam {
-    left: calc(50% - 348px + (100vh - 247px) * 0.075);
-  }
-}
-:root:not([data-motion]) .mdx-vitrine__bokeh b {
-  animation: mdx-bokeh var(--d) var(--ease-drift, ease-in-out) var(--del) infinite alternate;
-}
-:root:not([data-motion]) .mdx-vitrine__beam {
-  animation: mdx-beam 17s var(--ease-drift, ease-in-out) infinite alternate;
-}
-:root:not([data-motion]) .mdx-vitrine__dust > div {
-  animation: mdx-dust var(--d) linear var(--del) infinite;
-}
-/* The sky behind every page carries the glows now (hype arcade): the vitrine keeps three bokeh; phones also fewer
- * motes. */
-.mdx-vitrine__bokeh b:nth-child(n + 4) {
-  display: none;
-}
+/* Phones: the ticker and design line goes (the card face shows both) so the card keeps the first screen. */
 @media (max-width: 1023.98px) {
-  .mdx-vitrine__dust i:nth-child(n + 4) {
+  .cdx-home__caption {
+    margin-top: 8px;
+  }
+  .cdx-home-lot__meta {
     display: none;
   }
-}
-/* Lite keeps the stage, without its extras; calm keeps nothing that moves. */
-:root[data-motion="lite"] .mdx-vitrine__dust,
-:root[data-motion="calm"] .mdx-vitrine,
-:root[data-motion="calm"] .mdx-tt__aura {
-  display: none;
-}@media (forced-colors: active) {
-.mdx-vitrine, .mdx-tt__aura, .mdx-tt__ghosts, .mdx-tt__pool {
-    display: none;
-  }
-  .mdx-holo-ink {
-    background: none;
-    color: CanvasText;
-    -webkit-text-fill-color: CanvasText;
-  }
-  .mdx-tt__rim {
-    background: CanvasText;
-  }
-}@media (prefers-contrast: more) {
-  .mdx-tt__lens {
-    opacity: 0.3;
-  }
-}
-
-/* ---- moved from carddex-theme.css (same order as there) */
-.mdx-holo-ink {
-  background-image: linear-gradient(100deg, transparent 38%, rgb(255 243 159 / .9) 50%, transparent 62%), linear-gradient(100deg, var(--color-neon), #9b6617 45%, var(--color-ink));
-}
-.mdx-vitrine__beam { background: radial-gradient(ellipse 34% 90% at 50% 0%, rgb(255 216 66 / .22), transparent 70%); }
-.mdx-vitrine__dust i { background: radial-gradient(circle, var(--color-surface), rgb(255 216 66 / .7) 40%, transparent 72%); }
-.mdx-tt__plinth { display: none; }
-
-/* ---- moved from carddex-gallery.css (same order as there) */
-/* One featured card, one caption, one navigation row. */
-.cdx-app .cdx-home { grid-template-columns:minmax(0,1fr) 236px; gap:32px; height:100%; min-height:0; }
-.cdx-home__intro { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; column-gap:18px; }
-.cdx-home__intro .mdx-display { font-size:clamp(28px,3.5vw,42px); line-height:1.05; letter-spacing:-.03em; }
-.cdx-home__intro .mdx-holo-ink { color:inherit; background:none; -webkit-text-fill-color:currentColor; }
-.cdx-home__copy { grid-row:2; color:var(--color-slate); font-size:13px; line-height:1.4; margin-top:7px; }
-.cdx-home__launch { grid-column:2; grid-row:1 / 3; align-self:center; font-size:13px; }
-.cdx-home__display { margin:0; }
-.cdx-app .cdx-home__lot { --W:min(480px,calc((100dvh - 235px)*.715909),calc((100vw - 600px)*.82)); flex-direction:column; align-items:center; justify-content:center; padding:8px 0 0; gap:0; }
-.cdx-home .mdx-stage { justify-content:center; }
-.cdx-home .mdx-tt { margin-bottom:0; }
-.cdx-home .mdx-vitrine__bokeh, .cdx-home .mdx-vitrine__dust { display:none; }
-.cdx-home .mdx-vitrine__beam { opacity:.25; }
-.cdx-home .mdx-ghost { opacity:.24; }
-.cdx-home__caption { flex:none; width:min(100%,480px); margin-top:18px; }
-.cdx-home__caption .mdx-caption { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:3px 16px; }
-.cdx-home__caption .mdx-name { font-size:23px; margin:0; }
-.cdx-home__caption .mdx-leaders { grid-column:1; margin-top:2px; gap:0; min-height:auto !important; }
-.cdx-home__caption .mdx-leaders dt { font-size:12px; }
-/* The label stays whole: the dotted leader gives way first (the shared rule lets the dt truncate). */
-.cdx-home__caption .mdx-leaders dt { flex:none; }
-.cdx-home__caption .mdx-leaders dd { flex:1 1 auto; }
-/* Phones: too narrow for label, leader and figures on one line, so the label sits above the figures. */
-@media(max-width:479px) {
- .cdx-home__caption .mdx-leaders > div { flex-direction:column; align-items:flex-start; }
- .cdx-home__caption .mdx-leaders dd { justify-content:flex-start; }
- .cdx-home__caption .mdx-leaders dd::before { display:none; }
-}
-.cdx-home__caption .mdx-caption > div:last-child { grid-column:2; grid-row:1 / 3; margin:0; }
-.cdx-home__touchtools { display:flex; justify-content:center; align-items:center; gap:10px; min-height:22px; margin-top:9px; }
-.cdx-home__touchtools p { font-size:var(--type-min); }
-.cdx-home__controls { display:flex; align-items:center; justify-content:center; gap:18px; margin-top:6px; min-height:40px; }
-.cdx-home__stepper { width:auto; }
-.cdx-app .cdx-home__aside { border:0; border-left:1px solid var(--color-rule); border-radius:0; background:transparent; box-shadow:none; margin:0; padding:6px 0 0 22px; gap:26px; overflow:auto; }
-.cdx-home__aside h2 { font-size:14px; }
-.cdx-home__aside .mdx-row { min-height:56px; }
-.cdx-home__activity { border-top:1px solid var(--color-rule); padding-top:16px; }
-.cdx-home__activity summary { cursor:pointer; min-height:36px; font-size:13px; color:var(--color-slate); }
-.cdx-home__activity[open] > div { max-height:400px; padding-top:10px; }
-/* Fit the whole rotating object: 88/63 card height, 0.24W motion padding, and
-   176px for caption, hint, navigation and stage clearance. Keep mobile unchanged. */
-@media (min-width:1280px) and (min-height:720px) {
- .cdx-app .cdx-home__lot { --W:min(480px,calc((100cqh - 176px)/1.636825),calc((100cqw - 64px)/1.26)); }
- .cdx-home__lot .mdx-tt { padding-block:calc(var(--W)*.12); }
- .cdx-home__lot .mdx-tt__card .mdx-card3d { perspective:4000px; }
-}@media (max-width:1023px) {
- .cdx-app .cdx-home { grid-template-columns:1fr; height:auto; gap:38px; }
- .cdx-home__intro .mdx-display { font-size:30px; }
- .cdx-home__intro { column-gap:10px; }
- .cdx-home__launch { min-height:38px; font-size:var(--type-min); padding-inline:12px; }
- .cdx-home__copy { font-size:12px; max-width:25ch; }
- .cdx-app .cdx-home__lot { --W:min(300px,calc(100vw - 80px),max(220px,calc((100dvh - 310px)*.715909))); padding-top:22px; }
- .cdx-home__display { min-height:0; }
- .cdx-home__caption { width:min(100%,360px); margin-top:17px; }
- .cdx-home__caption .mdx-name { font-size:22px; }
- .cdx-app .cdx-home__aside { border:0; border-top:1px solid var(--color-rule); padding:22px 0 0; margin:0; }
- .cdx-home__activity[open] > div { max-height:none; }
-}
-@media (max-width:560px) {
- .cdx-app .cdx-home__intro .mdx-display { max-width:9ch; font-size:30px; }
-}
-@media (max-width:359px) {
- .cdx-home__launch { font-size:var(--type-min); padding-inline:10px; }
-}
-
-/* ---- moved from carddex-viewport.css (same order as there) */
-/* Home keeps one complete rotating object; pulse is a separate phone view. */
-.cdx-viewport .cdx-home { height:100%; min-height:0; gap:20px; }
-.cdx-home-mobile-tabs { display:none; }
-.cdx-viewport .cdx-home-stage { min-height:0; }
-.cdx-viewport .cdx-home .mdx-stage { flex:1; min-height:0; }
-.cdx-viewport .cdx-home__display { container-type:size; flex:1; min-height:0; }
-.cdx-viewport .cdx-home__lot { height:100%; --W:min(480px,calc((100cqh - 166px)/1.636825),calc((100cqw - 44px)/1.26)); padding:0; }
-.cdx-viewport .cdx-home__lot .mdx-tt { padding-block:calc(var(--W)*.12); }
-.cdx-viewport .cdx-home__caption { margin-top:8px; }
-.cdx-viewport .cdx-home__aside { min-height:0; overflow-x:clip; overflow-y:auto; gap:22px; }
-/* Rows bleed 8px into each side (-mx-2) for their hover fill; the right padding keeps that fill and the prices inside. */
-@media(min-width:1024px) { .cdx-app.cdx-viewport .cdx-home__aside { padding-right:10px; }
-}
-.cdx-home-pulse-list { flex:1; min-height:0; }
-.cdx-viewport .cdx-home-pulse-list .mdx-row { min-height:56px; }
-@media(max-width:1023px) {
- .cdx-viewport .cdx-home { display:flex; flex-direction:column; gap:8px; }
- .cdx-home-mobile-tabs { display:flex; }
- .cdx-viewport .cdx-home-stage,.cdx-viewport .cdx-home__aside { flex:1; min-height:0; }
- .cdx-home[data-home-view=card] .cdx-home__aside,.cdx-home[data-home-view=pulse] .cdx-home-stage { display:none; }
- .cdx-viewport .cdx-home__aside { padding:8px; margin:0; border:0; }
- /* Collection pulse flows in <main> (the page scroller) instead of scrolling inside it. */
- .cdx-viewport .cdx-home[data-home-view=pulse] { height:auto; min-height:100%; }
- .cdx-app.cdx-viewport .cdx-home[data-home-view=pulse] .cdx-home__aside { flex:none; overflow:visible; }
- .cdx-viewport .cdx-home__lot { --W:min(340px,calc((100cqh - 156px)/1.636825),calc((100cqw - 44px)/1.26)); }
- .cdx-viewport .cdx-home__intro .mdx-display { max-width:none; font-size:26px; }
- .cdx-viewport .cdx-home__copy { max-width:none; margin-top:4px; font-size:var(--type-min); }
- .cdx-viewport .cdx-home__caption .mdx-name { font-size:20px; }
- .cdx-viewport .cdx-home__caption { margin-top:5px; }
- .cdx-viewport .cdx-home__controls { margin-top:2px; }
- .cdx-viewport .cdx-home__touchtools { margin-top:3px; }
-}
-@media(max-width:359px) and (max-height:700px) {
- .cdx-viewport .cdx-home__intro .mdx-display { font-size:22px; }
- .cdx-viewport .cdx-home__copy { font-size:var(--type-min); }
- .cdx-viewport .cdx-home__launch { min-height:36px; }
- .cdx-viewport .cdx-home__lot { --W:min(240px,calc((100cqh - 146px)/1.636825),calc((100cqw - 40px)/1.26)); }
- .cdx-viewport .cdx-home__caption .mdx-name { font-size:18px; }
- .cdx-viewport .cdx-home__caption .mdx-leaders { font-size:var(--type-min); }
-}
-/* The full-turn projection has spare room above its caption; center that envelope below the headline. */
-@media(min-width:360px) and (max-width:1023px) { .cdx-viewport .cdx-home__lot .mdx-tt { translate:0 12px; }
-}
-@media(max-width:359px) { .cdx-viewport .cdx-home__lot .mdx-tt { translate:0 2px; }
-}
-
-/* ---- moved from home-motion.css (whole file, same order) */
-/* Home's authored arrival and collector-display lighting. The display's new motion lives on its own
- * elements, never on a Card3D transform. Full motion remains the owner's default; the existing explicit
- * Calm control removes it, and the stage gate pauses it offscreen, behind dialogs and under Pause. */
-.mdx-home.mdx-page {
-  animation: none;
-}
-
-@keyframes mdx-home-arrive {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 10px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-@keyframes mdx-home-arrive-soft {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-:root:not([data-motion="calm"]) .mdx-home-arrival {
-  animation: mdx-home-arrive 500ms var(--ease-room) var(--home-arrival-delay, 0ms) both;
-}
-.mdx-home-arrival--copy {
-  --home-arrival-delay: 60ms;
-}
-.mdx-home-arrival--actions {
-  --home-arrival-delay: 120ms;
-}
-:root[data-motion="lite"] .mdx-home-arrival {
-  animation-name: mdx-home-arrive-soft;
-  animation-duration: var(--t-base);
-}
-
-/* An actual circular tracer is projected into the ellipse of the plinth. Keeping projection and spin
- * on separate elements preserves the ellipse while only transform changes during each orbit. */
-.mdx-tt__orbit {
-  position: absolute;
-  left: -1%;
-  top: -1%;
-  width: 102%;
-  aspect-ratio: 1;
-  transform: scaleY(0.217);
-  transform-origin: 50% 0;
-  pointer-events: none;
-}
-.mdx-tt__orbit > b {
-  position: absolute;
-  inset: 0;
-  display: block;
-  border-radius: 50%;
-  background: conic-gradient(from 35deg,
-    transparent 0deg 188deg,
-    var(--pool, var(--color-neon)) 230deg,
-    #f1fff9 250deg,
-    transparent 253deg 360deg);
-  -webkit-mask-image: radial-gradient(closest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
-  mask-image: radial-gradient(closest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
-  opacity: 0.9;
-  transform: rotate(0deg);
-}
-
-/* A low light runs over the stand's front face; its text-free surface gives the turntable a powered
- * state without moving the caption, the controls or the information on the card. */
-.mdx-tt__charge {
-  position: absolute;
-  inset: auto 1% 2%;
-  height: 44%;
-  overflow: clip;
-  border-radius: 0 0 50% 50% / 0 0 100% 100%;
-  pointer-events: none;
-}
-.mdx-tt__charge > b {
-  position: absolute;
-  inset: 0 auto 0 -24%;
-  display: block;
-  width: 24%;
-  background: linear-gradient(105deg, transparent, rgb(225 255 246 / 0.48), transparent);
-  opacity: 0;
-  transform: translate3d(0, 0, 0);
-}
-@keyframes mdx-home-orbit {
-  to { transform: rotate(360deg); }
-}
-@keyframes mdx-home-charge {
-  0%, 58% { opacity: 0; transform: translate3d(0, 0, 0); }
-  64% { opacity: 0.65; }
-  86% { opacity: 0.65; }
-  94%, 100% { opacity: 0; transform: translate3d(525%, 0, 0); }
-}
-:root:not([data-motion]) .mdx-tt__plinth[data-lit] .mdx-tt__orbit > b {
-  animation: mdx-home-orbit 8s linear infinite;
-}
-:root:not([data-motion]) .mdx-tt__plinth[data-lit] .mdx-tt__charge > b {
-  animation: mdx-home-charge 8s linear infinite;
-}
-.mdx-home[data-ambient-paused] .mdx-home-arrival,
-body[data-scroll-locked] .mdx-home-arrival,
-body[data-scroll-locked] .mdx-tt__orbit > b,
-body[data-scroll-locked] .mdx-tt__charge > b {
-  animation-play-state: paused !important;
-}
-:root[data-motion="calm"] .mdx-home-arrival {
-  animation: none;
-}
-:root[data-motion] .mdx-tt__orbit,
-:root[data-motion] .mdx-tt__charge {
-  display: none;
-}
-/* Phones: rotation belongs to the card; navigation belongs to a separate, predictable control area.
- * The dots keep real 44px targets instead of being squeezed between the previous/next arrows. */
-@media (max-width: 1023.98px) {
-  /* Phones already have an in-flow drag hint and sensor control below the caption. */
-  .mdx-home .mdx-tt__hint,
-  .mdx-home .mdx-tt__chip {
-    display: none;
-  }
-  .mdx-home .mdx-tt__touchtools {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  .cdx-home-lot__market {
+    margin-top: 8px;
     gap: 8px;
-    margin-top: 10px;
-    width: 100%;
   }
-  .mdx-home .mdx-tt__phonegyro {
-    position: static;
-    min-height: 44px;
-    transform: none;
-    touch-action: manipulation;
-    transition: transform 120ms var(--ease-room);
+}
+
+/* ---------------------------------------------------------------- the carousel controls */
+.cdx-home__controls {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+.cdx-home__stepper {
+  width: auto;
+}
+@media (max-width: 1023.98px) {
+  .cdx-home__controls {
+    margin-top: 8px;
   }
-  .mdx-home .mdx-tt__phonegyro:active {
-    transform: scale(0.97);
-  }
-  .mdx-home .mdx-tt__phonecontrols {
+}
+/* From 1024 the dots and Pause take the row and the chevrons stand on the card's two sides: the slide is a grid,
+ * the controls row lends its children to it, and each chevron is placed in the card's row (its containing block),
+ * centred on it. The card leaves 48px on each side for them (--W above). */
+@media (min-width: 1024px) {
+  .cdx-home__slide {
     position: relative;
-    z-index: 2;
     display: grid;
-    grid-template-columns: 44px minmax(0, 1fr) 44px;
-    align-items: center;
-    width: min(352px, 100%);
-    margin-top: 4px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto auto auto;
   }
-  .mdx-home .mdx-tt__phonecontrols > button {
+  .cdx-home__display {
     grid-row: 1;
-    min-width: 44px;
-    min-height: 44px;
   }
-  .mdx-home .mdx-tt__phonecontrols > button:first-child {
-    grid-column: 1;
+  .cdx-home__caption {
+    grid-row: 2;
   }
-  .mdx-home .mdx-tt__phonecontrols > button:last-child {
-    grid-column: 3;
+  .cdx-home__gyro {
+    grid-row: 3;
   }
-  .mdx-home .mdx-tt__phonestepper {
+  .cdx-home__controls {
     display: contents;
   }
-  .mdx-home .mdx-tt__phonestepper > .mdx-playbtn {
+  .cdx-home__controls > .mdx-btn {
+    position: absolute;
+    z-index: 4;
+    top: 50%;
     grid-row: 1;
-    grid-column: 2;
+    grid-column: 1;
+    translate: 0 -50%;
+  }
+  .cdx-home__controls > .mdx-btn:first-child {
+    left: 0;
+  }
+  .cdx-home__controls > .mdx-btn:last-child {
+    right: 0;
+  }
+  .cdx-home__stepper {
+    grid-row: 4;
     justify-self: center;
-  }
-  .mdx-home .mdx-tt__phonestepper > [role="group"] {
-    grid-row: 2;
-    grid-column: 1 / -1;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 100%;
-  }
-  .mdx-home .mdx-tt__phonestepper > [role="group"] > button {
-    flex: 0 0 44px;
-    width: 44px;
-    min-height: 44px;
+    margin-top: 16px;
   }
 }
+/* Where the page flows (1024 to 1279, short windows) the stage may stand taller than its card group (it spans two
+ * blocks on the right): the group sits in its middle instead of the card's row taking the slack. */
+@media (min-width: 1024px) and (max-width: 1279.98px), (min-width: 1024px) and (max-height: 719.98px) {
+  .cdx-home__slide {
+    grid-template-rows: auto auto auto auto;
+    align-content: center;
+  }
+}
+/* Phones held sideways: the card beside its caption and controls, so the pair fits the short screen. */
+@media (min-width: 560px) and (max-width: 1023.98px) and (max-height: 500px) {
+  .cdx-home__slide {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr) auto auto auto minmax(0, 1fr);
+    column-gap: 24px;
+  }
+  .cdx-home__display {
+    grid-row: 1 / -1;
+    grid-column: 1;
+  }
+  /* The page flows past the header to a stage exactly as tall as the view between the top bar and the 44px tab bar
+   * (less main's padding), so the whole card and its caption are in view together. */
+  .cdx-app.cdx-viewport .cdx-viewport-main > .cdx-home:has(> .cdx-home__body[data-home-view="card"]) {
+    height: auto;
+    min-height: 100%;
+  }
+  .cdx-home__body[data-home-view="card"] {
+    flex: none;
+    height: calc(100dvh - var(--topbar-h) - 44px - 32px);
+  }
+  .cdx-home__caption {
+    grid-row: 2;
+    grid-column: 2;
+  }
+  .cdx-home__gyro {
+    grid-row: 3;
+    grid-column: 2;
+  }
+  .cdx-home__controls {
+    grid-row: 4;
+    grid-column: 2;
+  }
+  .cdx-home__controls {
+    justify-content: flex-start;
+  }
+}
+/* Phone tilt (iOS asks first): in the flow under the caption. card3d.css is unlayered and right-aligns the row. */
+.cdx-home__gyro {
+  display: flex;
+  justify-content: center !important;
+  padding: 8px 0 0 !important;
+}
+
+/* ---------------------------------------------------------------- feed and side panels */
+@media (min-width: 1280px) and (min-height: 720px) {
+  .cdx-home__pulse > * > .cdx-home-panel {
+    min-height: 0;
+  }
+}
+.cdx-home-panel {
+  display: flex;
+  min-width: 0;
+  flex: none;
+  flex-direction: column;
+  gap: 8px;
+  padding: var(--pad-panel);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+}
+/* The two section-head controls read alike (chrome-16): Pause takes See all's ink and size; See all keeps its
+ * underline as the one that leaves the page. */
+.cdx-home-panel .mdx-livepause {
+  font-size: var(--text-body);
+  color: var(--color-ink);
+}
+@media (hover: hover) and (pointer: fine) {
+  .cdx-home-panel .mdx-livepause:hover {
+    color: var(--color-slate);
+  }
+}
+.cdx-home-panel__meta {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-caption);
+  line-height: 20px;
+  color: var(--color-slate);
+}
+/* Rows bleed 8px into the panel padding so their hover and focus fill keeps the text on the panel's text edge. */
+.cdx-home-panel__list {
+  display: flex;
+  flex-direction: column;
+  margin-inline: -8px;
+}
+.cdx-home-panel__empty {
+  padding-block: 8px;
+  font-size: var(--text-body);
+  line-height: 20px;
+  color: var(--color-slate);
+  text-wrap: pretty;
+}
+.cdx-home-panel__error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding-block: 8px;
+  font-size: var(--text-body);
+  line-height: 20px;
+  color: var(--color-slate);
+}
+
+/* Rows: a nested step on hover (fine pointers only, 120ms colour), the inset ring and fill on keyboard focus
+ * (mintdex.css); a tap on touch keeps the shared press (mintdex.css, hover: none). */
+.cdx-feed-coin,
+.cdx-feed-event {
+  transition: background-color var(--t-hover) ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cdx-feed-coin:hover,
+  .cdx-feed-event:hover {
+    background-color: var(--color-nested);
+  }
+}
+.cdx-feed-coin:focus-visible,
+.cdx-feed-event:focus-visible {
+  background-color: var(--color-nested);
+}
+
+/* Trending row on a 64px pitch (the 36px thumb plus 28, which also puts five rows level with six activity rows):
+ * rank, thumb, name and ticker over the curve, market cap over the change (right edge, tabular). */
+.cdx-feed-coin {
+  display: grid;
+  min-height: 64px;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+}
+.cdx-feed-coin[data-ranked] {
+  grid-template-columns: 20px 36px minmax(0, 1fr) auto;
+}
+.cdx-feed-coin__rank {
+  overflow: clip;
+  font-size: var(--text-caption);
+  color: var(--color-slate);
+}
+.cdx-feed-coin__id {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+.cdx-feed-coin__name {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 6px;
+  font-size: var(--text-body);
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.cdx-feed-coin__ticker {
+  flex: none;
+  font-size: var(--text-caption);
+  font-weight: 500;
+  color: var(--color-slate);
+}
+/* The curve as one small line: "Curve 64%" then a 4px track (the CurveTrack sm, laid out in a row). */
+.cdx-feed-coin .mdx-curve {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.cdx-feed-coin .mdx-curve__label {
+  font-weight: 500;
+  color: var(--color-slate);
+}
+.cdx-feed-coin .mdx-curve__track {
+  flex: 1;
+  max-width: 88px;
+}
+.cdx-feed-coin__figures {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.cdx-feed-coin__cap {
+  font-size: var(--text-body);
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+.cdx-feed-coin__change {
+  font-size: var(--text-caption);
+  line-height: 16px;
+}
+
+/* Activity row: thumb, then who and the time over what they did (slate, the amount and ticker in ink). */
+.cdx-feed-event {
+  display: grid;
+  min-width: 0;
+  min-height: 48px;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 6px 8px;
+}
+.cdx-feed-event .mdx-thumb {
+  margin-top: 6px;
+}
+.cdx-feed-event__text {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "who time" "what what";
+  column-gap: 8px;
+  font-size: var(--text-body);
+  line-height: 20px;
+}
+.cdx-feed-event__who {
+  display: flex;
+  min-width: 0;
+  grid-area: who;
+  align-items: baseline;
+  color: var(--color-ink);
+}
+.cdx-feed-event__bot {
+  flex: none;
+  font-size: var(--text-caption);
+  color: var(--color-slate);
+  white-space: pre;
+}
+.cdx-feed-event__what {
+  min-width: 0;
+  grid-area: what;
+  color: var(--color-slate);
+  overflow-wrap: anywhere;
+}
+.cdx-feed-event__amount,
+.cdx-feed-event__ticker {
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+.cdx-feed-event__time {
+  grid-area: time;
+  font-size: var(--text-caption);
+  color: var(--color-slate);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- collection KPIs */
+.cdx-home-collection {
+  container-type: inline-size;
+}
+/* The primitive's divided container sits inside the panel: no second fill, cells start on the panel's text edge. */
+.cdx-home-collection .mdx-kpis {
+  border-radius: 0;
+  background: none;
+}
+.cdx-home-collection .mdx-kpi:first-child {
+  padding-left: 0;
+}
+.cdx-home-collection .mdx-kpi:last-child {
+  padding-right: 0;
+}
+/* A narrow panel (the fit side column, phones) lists the KPIs: label left, figure right, one rule between rows. */
+@container (max-width: 419.98px) {
+  .cdx-home-collection .mdx-kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cdx-home-collection .mdx-kpi {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    column-gap: 12px;
+    padding: 10px 0;
+  }
+  .cdx-home-collection .mdx-kpi:first-child {
+    padding-top: 4px;
+  }
+  .cdx-home-collection .mdx-kpi:last-child {
+    grid-column: auto;
+    padding-bottom: 0;
+  }
+  /* The primitive draws its cell dividers as inset hairlines; a list takes one row rule instead. */
+  .cdx-home-collection .mdx-kpi:nth-child(n) {
+    box-shadow: none; /* taste-skill-ignore: removes the primitive's divider, adds no shadow */
+  }
+  .cdx-home-collection .mdx-kpi + .mdx-kpi {
+    border-top: 1px solid var(--color-hairline);
+  }
+  .cdx-home-collection .mdx-kpi__value {
+    margin-top: 0;
+    justify-content: flex-end;
+  }
+  .cdx-home-collection .mdx-kpi__sub {
+    grid-column: 1 / -1;
+    margin-top: 0;
+  }
+}
+
+/* At fit the second row is as tall as the first leaves: the three KPI rows spread over it (placed space, not a band
+ * under the last row). */
+@media (min-width: 1280px) and (min-height: 720px) {
+  .cdx-home-collection .mdx-kpis {
+    flex: 1;
+    align-content: space-around;
+  }
+}
+
+/* ---------------------------------------------------------------- launched on pump.fun (real launches) */
+.cdx-home-launched {
+  container-type: inline-size;
+}
+/* At fit the list scrolls inside its panel past what the row holds; an empty state sits in the middle of it. */
+@media (min-width: 1280px) and (min-height: 720px) {
+  .cdx-home-launched__list {
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+  .cdx-home-launched__empty {
+    flex: 1;
+    align-content: center;
+  }
+}
+.cdx-home-launched__list {
+  display: flex;
+  flex-direction: column;
+}
+.cdx-home-launched__list:not([data-all]) > :nth-child(n + 7) {
+  display: none;
+}
+.cdx-home-launched__more {
+  align-self: flex-start;
+  margin-top: 4px;
+  font-size: var(--text-body);
+}
+@media (min-width: 1280px) and (min-height: 720px) {
+  .cdx-home-launched__list:not([data-all]) > :nth-child(n + 7) {
+    display: grid;
+  }
+  .cdx-home-launched__more {
+    display: none;
+  }
+}
+.cdx-home-launched__empty {
+  padding-block: 16px 8px;
+}
+.cdx-home-launched__empty .mdx-empty__title {
+  font-size: var(--text-body);
+}
+/* A launch row: the card (40 x 56, the card's own 63/88), name over $TICKER, design and time, then the links. The
+ * links take a line of their own in a narrow panel and the row's right end in a wide one. */
+.cdx-feed-launch {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 40px minmax(0, 1fr);
+  grid-template-areas: "card id" "card links";
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 4px;
+  padding-block: 8px;
+}
+.cdx-feed-launch + .cdx-feed-launch {
+  border-top: 1px solid var(--color-rule);
+}
+@container (min-width: 480px) {
+  .cdx-feed-launch {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    grid-template-areas: "card id links";
+    column-gap: 16px;
+  }
+}
+.cdx-feed-launch__card {
+  display: block;
+  width: 40px;
+  height: 56px;
+  overflow: hidden;
+  grid-area: card;
+  border-radius: 3px;
+  background: var(--color-nested);
+  outline: 1px solid var(--image-outline);
+  outline-offset: -1px;
+}
+.cdx-feed-launch__card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cdx-feed-launch__id {
+  display: flex;
+  min-width: 0;
+  grid-area: id;
+  flex-direction: column;
+  align-self: end;
+}
+@container (min-width: 480px) {
+  .cdx-feed-launch__id {
+    align-self: center;
+  }
+}
+.cdx-feed-launch__name {
+  overflow: hidden;
+  font-size: var(--text-body);
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--color-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cdx-feed-launch__meta {
+  overflow: hidden;
+  font-size: var(--text-caption);
+  line-height: 16px;
+  color: var(--color-slate);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cdx-feed-launch__links {
+  display: flex;
+  min-width: 0;
+  grid-area: links;
+  flex-wrap: wrap;
+  align-items: center;
+  align-self: start;
+  gap: 4px 20px;
+  font-size: var(--text-caption);
+  line-height: 16px;
+}
+@container (min-width: 480px) {
+  .cdx-feed-launch__links {
+    align-self: center;
+  }
+}
+.cdx-feed-launch__links .mdx-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+/* Loading: flat nested bars at the row's real size (no shimmer), so nothing shifts when the list lands. */
+.cdx-feed-launch[data-skeleton] {
+  grid-template-areas: "card id";
+}
+.cdx-feed-launch__bar {
+  display: block;
+  height: 12px;
+  margin-block: 4px;
+  border-radius: var(--radius-chip);
+  background: var(--color-nested);
+}
+.cdx-feed-launch__bar[data-w="name"] {
+  width: min(120px, 60%);
+  height: 14px;
+}
+.cdx-feed-launch__bar[data-w="meta"] {
+  width: min(168px, 80%);
+}
+.cdx-feed-launch[data-skeleton] .cdx-feed-launch__id {
+  align-self: center;
+}
+
+/* ---------------------------------------------------------------- motion
+ * State feedback only (Operate mode): the caption fades 160ms on a swap, rows tint on hover, an arriving activity
+ * row takes the wash once, Trending rows glide on a reorder (useFlip, off under calm). The card is the card engine. */
 @media (forced-colors: active) {
-  .mdx-tt__orbit,
-  .mdx-tt__charge { display: none; }
+  .cdx-feed-launch__card,
+  .cdx-feed-launch__bar {
+    border: 1px solid CanvasText; /* taste-skill-ignore: forced colours drop fills, so the blank card keeps an edge */
+  }
 }
