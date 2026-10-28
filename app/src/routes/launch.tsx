@@ -36,7 +36,7 @@ import { allowedQuotesForDesign, boundQuoteForDesign, defaultQuoteForDesign, get
 import { formatQuoteAmount, initialQuoteReserves, maxInitialBuyQuoteAtoms, parseQuoteAmount, quoteMetrics } from "../lib/carddex/quote-simulation";
 import { QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
 import { LiveLaunchPanel, type LiveLaunchHandle } from "../components/carddex/live/LiveLaunchPanel";
-import { useLiveLaunchOpen } from "../components/carddex/live/readiness";
+import { liveReadinessQuery, useLiveLaunchOpen } from "../components/carddex/live/readiness";
 import { parseLiveAmount } from "../components/carddex/live/amounts";
 import { PagedMessage } from "../components/carddex/live/PagedMessage";
 import type { LiveLaunchIntent } from "../lib/carddex/live/types";
@@ -46,12 +46,18 @@ import "../carddex-launch.css";
 
 export const Route = createFileRoute("/launch")({
   validateSearch: z.object({ design: z.string().optional().catch(undefined), quote: z.string().optional().catch(undefined), mode: z.enum(["live", "demo"]).optional().catch(undefined) }),
+  // Readiness is read on the server, so the HTML is drawn in the mode the page will keep (no test-then-mainnet
+  // swap after hydration). It is shared with every readiness reader through the query cache, and switching
+  // between Mainnet and Demo (a search change) reuses it instead of asking again.
+  loaderDeps: () => ({}),
+  staleTime: 30_000,
+  loader: async ({ context }) => ({ readiness: await context.queryClient.ensureQueryData(liveReadinessQuery).catch(() => null) }),
   head: () =>
     pageHead({
       path: "/launch",
       title: "Launch a coin | Launch a Card",
       description: sentences(
-        "Choose a permanent card design, add your token details and preview its one-of-one card",
+        "Choose a permanent card design, add your coin details and preview its one-of-one card",
         "Try the full launch in test mode with test SOL",
       ),
     }),
@@ -61,7 +67,7 @@ export const Route = createFileRoute("/launch")({
 // ---------------------------------------------------------------- copy
 
 /** What really happens to the coin, per mode (P0-5): in test mode, a simulated curve. */
-const CONTEXT = "A pump.fun token and your one-of-one card.";
+const CONTEXT = "A pump.fun coin and your one-of-one card.";
 const ENTER_TO_UPLOAD = "Try the demo to upload card art and launch.";
 /** Shown in place of the Mainnet switch while the owner keeps real launches off. */
 const MAINNET_CLOSED = "Test mode · Real mainnet launches are not open yet.";
@@ -202,7 +208,7 @@ function Launch() {
   const [draftReady, setDraftReady] = useState(false);
   const [mobileView, setMobileView] = useState<"card" | "details">("card");
   const viewId = useId();
-  const steps = ["Token", "Artwork", "Design", "Pair", "Story", "Links", "Initial buy", "Launch"];
+  const steps = ["Coin", "Artwork", "Design", "Pair", "Story", "Links", "Initial buy", "Launch"];
   // A creator's permanent design choice is independent of the token's market data.
   const search = Route.useSearch();
   // Test mode is the default. Mainnet needs both an explicit choice and the owner's switch (CARDDEX_LIVE_LAUNCH_ENABLED).
@@ -245,10 +251,13 @@ function Launch() {
     setDesignKey(nextDesign);
     setQuoteKey(nextQuote);
     setDevBuy("");
-    setPairNotice(search.quote && !isPairAssetKey(search.quote) ? `That quote asset is unavailable. ${getPairAsset(nextQuote).symbol} is selected; review the quote before creating the token.` : bound && requested && requested !== bound.key ? `${getCardDesign(nextDesign).name} is paired with ${bound.symbol}; the quote has been matched to this finish.` : "");
+    setPairNotice(search.quote && !isPairAssetKey(search.quote) ? `That quote asset is unavailable. ${getPairAsset(nextQuote).symbol} is selected; review the quote before creating the coin.` : bound && requested && requested !== bound.key ? `${getCardDesign(nextDesign).name} is paired with ${bound.symbol}; the quote has been matched to this finish.` : "");
   }, [search.design, search.quote]);
 
   // Restore the saved draft once, after the URL's design and quote are applied. A design in the URL wins.
+  // The mode is known from the first render (the loader read readiness on the server), so `live` here is the
+  // page's real mode, not a test-mode placeholder.
+  const restoreStep = useRef<number | null>(null);
   useEffect(() => {
     const d = readDraft();
     if (d) {
@@ -258,9 +267,10 @@ function Launch() {
       if (!search.design && !search.quote && isCardDesignKey(savedDesign) && isPairAssetKey(savedQuote) && allowedQuotesForDesign(savedDesign).some(a => a.key === savedQuote)) {
         setDesignKey(savedDesign); setQuoteKey(savedQuote); setDevBuy(str(d.devBuy));
       }
-      if (typeof d.step === "number" && Number.isInteger(d.step)) setStep(Math.max(0, Math.min(7, d.step)));
+      // The saved step is a target, not a jump: the effect below re-checks the earlier steps first.
+      if (typeof d.step === "number" && Number.isInteger(d.step)) restoreStep.current = Math.max(0, Math.min(7, d.step));
       // Only an uploaded demo image can come back; prepared mainnet art lives in memory.
-      if (!modeRef.current && typeof d.imageUrl === "string" && d.imageUrl.startsWith("/")) { setImageUrl(d.imageUrl); setPreview(d.imageUrl); }
+      if (!live && typeof d.imageUrl === "string" && d.imageUrl.startsWith("/")) { setImageUrl(d.imageUrl); setPreview(d.imageUrl); }
     }
     setDraftReady(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -403,10 +413,13 @@ function Launch() {
     handleFile(e.dataTransfer.files?.[0]);
   }
 
+  // Signed out in test mode, art cannot be uploaded yet: the visitor may still browse every step (the Design
+  // picker included), and the art field and the final submit ask them to try the demo.
+  const artGated = !live && !me;
   /** Each step's own fields, checked as the visitor leaves it (the server repeats every check at launch). */
   const stepProblem = (n: number): RefObject<HTMLElement | null> | null =>
     n === 0 ? (!nameOk ? nameRef : !tickerOk ? tickerRef : null)
-      : n === 1 ? (!hasArt || uploading ? artRef : null)
+      : n === 1 ? (!artGated && (!hasArt || uploading) ? artRef : null)
         : n === 5 ? (websiteError ? websiteRef : xError ? xRef : null)
           : n === 6 ? (devError ? devRef : null)
             : null;
@@ -426,6 +439,19 @@ function Launch() {
     setStep(target);
     if (focusStep) requestAnimationFrame(() => document.getElementById("launch-step")?.focus({ preventScroll: true }));
   }
+  // A restored draft opens on its saved step only when every step before it still passes; otherwise it opens on
+  // the first step with a problem, with that step's errors shown.
+  useEffect(() => {
+    const target = restoreStep.current;
+    if (!draftReady || target === null) return;
+    restoreStep.current = null;
+    let n = 0;
+    while (n < target && !stepProblem(n)) n++;
+    if (n < target) setChecked(c => (c.includes(n) ? c : [...c, n]));
+    setStep(n);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftReady]);
+
   function startOver() {
     writeDraft(null);
     if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview);
@@ -495,7 +521,7 @@ function Launch() {
     }
     // Signed out: the Enter dialog names the launch, then finishes it (P1-11). Without art yet, that means
     // pointing at the art field, the one thing left to do.
-    require(() => void attempt(), "Try the demo to launch a coin.", ticker && imageUrl
+    require(() => void attempt(), imageUrl ? "Try the demo to launch a coin." : ENTER_TO_UPLOAD, ticker && imageUrl
       ? `Start the demo and launch $${ticker}`
       : "Start the demo");
   }
@@ -551,7 +577,7 @@ function Launch() {
         </nav>
       ) : undefined} />
 
-      <ViewTabs className="cdx-launch-mobile-tabs" label="Create view" idBase={viewId} tabs={[{ id: "card", label: "Your card", selected: mobileView === "card", onSelect: () => setMobileView("card"), panel: `${viewId}-card` }, { id: "details", label: "Token details", selected: mobileView === "details", onSelect: () => setMobileView("details"), panel: `${viewId}-details` }]} />
+      <ViewTabs className="cdx-launch-mobile-tabs" label="Create view" idBase={viewId} tabs={[{ id: "card", label: "Your card", selected: mobileView === "card", onSelect: () => setMobileView("card"), panel: `${viewId}-card` }, { id: "details", label: "Coin details", selected: mobileView === "details", onSelect: () => setMobileView("details"), panel: `${viewId}-details` }]} />
       <div className="cdx-create-layout">
         {/* ------------------------------------------------ the form (plinth) */}
         <form
@@ -646,7 +672,7 @@ function Launch() {
           <p className="cdx-launch-step-copy">One permanent finish. Every design uses the same card layout.</p>
           </div>
           <div className="cdx-launch-step" hidden={step !== 3}>
-          <QuoteAssetPicker viewport value={quoteKey} designKey={designKey} ticker={ticker || "YOUR TOKEN"} onChange={changePair} onPendingChange={setPairPending} confirmationRef={pairConfirmationRef} live={live} disabled={live && liveLocked} balance={!live && me ? formatQuoteAmount(quoteBalance, quoteKey) : undefined} compact />
+          <QuoteAssetPicker viewport value={quoteKey} designKey={designKey} ticker={ticker || "YOUR COIN"} onChange={changePair} onPendingChange={setPairPending} confirmationRef={pairConfirmationRef} live={live} disabled={live && liveLocked} balance={!live && me ? formatQuoteAmount(quoteBalance, quoteKey) : undefined} compact />
           {pairNotice && !pairPending ? <p className="cdx-pair-notice" role="status">{pairNotice}</p> : null}
 
           </div>
@@ -713,7 +739,7 @@ function Launch() {
                     {devError}
                   </span>
                 ) : !devQuote?.ok ? (
-                  <span className="block">{live ? `Optional real ${quoteAsset.symbol} buy with token creation. Exact amounts and slippage appear before wallet review.` : `Optional test-asset buy. Maximum ${formatQuoteAmount(maxDev, quoteKey)} ${quoteAsset.symbol}.`}</span>
+                  <span className="block">{live ? `Optional real ${quoteAsset.symbol} buy with coin creation. Exact amounts and slippage appear before wallet review.` : `Optional test-asset buy. Maximum ${formatQuoteAmount(maxDev, quoteKey)} ${quoteAsset.symbol}.`}</span>
                 ) : null}
                 <span aria-live="polite" className="block empty:hidden">
                   {devQuote?.ok && !devError ? (
@@ -743,12 +769,12 @@ function Launch() {
               <div><dt>Demo launch fee</dt><dd>{sol(LAUNCH_FEE, 3)} test SOL</dd></div>
               {devQuote?.ok ? <div><dt>Initial buy</dt><dd>{formatQuoteAmount(devQuote.solIn, quoteKey)} test {quoteAsset.symbol}</dd></div> : null}
               {quoteKey === "sol" && devQuote?.ok ? <div><dt>Total</dt><dd>{sol(nativeCost, 3)} test SOL</dd></div> : null}
-              <small>{liveOpen ? "" : "Real mainnet launches are not open yet. "}{quoteKey === "sol" ? "Demo amounts only; no real token or NFT is minted." : `The native SOL fee and ${quoteAsset.symbol} initial buy are separate test assets. No real token or NFT is minted.`}</small>
+              <small>{liveOpen ? "" : "Real mainnet launches are not open yet. "}{quoteKey === "sol" ? "Demo amounts only; no real coin or NFT is minted." : `The native SOL fee and ${quoteAsset.symbol} initial buy are separate test assets. No real coin or NFT is minted.`}</small>
             </dl>
             {balanceError ? (
               <PagedMessage text={balanceError} alert />
             ) : null}
-            {pairPending ? <p className="cdx-pair-notice mb-2" role="status">Confirm or cancel the quote change before creating this demo token.</p> : null}
+            {pairPending ? <p className="cdx-pair-notice mb-2" role="status">Confirm or cancel the quote change before creating this demo coin.</p> : null}
             <Button
               type="submit"
               size="lg"
@@ -760,7 +786,7 @@ function Launch() {
               feedback={feedback("launch")}
               successLabel="Minted"
             >
-              {!me ? "Try the demo to launch" : uploading ? "Uploading art..." : "Create demo token and card"}
+              {!me ? "Try the demo to launch" : uploading ? "Uploading art..." : "Create demo coin and card"}
             </Button>
             {/* The server's reason for a failed launch takes the launcher line's place (no new row, P1-8). */}
             {launchError ? (

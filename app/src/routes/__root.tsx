@@ -15,6 +15,7 @@ import { getMe } from "../lib/mintdex/api";
 // repo by the marketplace meta API and read at BUILD time — no runtime fetch.
 import appMetaJson from "../app-meta.json";
 import { AppShell } from "../components/mintdex/AppShell";
+import { liveReadinessQuery } from "../components/carddex/live/readiness";
 import { SessionProvider } from "../components/mintdex/session";
 import { WalletMount } from "../components/chain/WalletMount";
 import { IS_SIM, MODE } from "../lib/mintdex/mode";
@@ -157,9 +158,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-async function loadRootData({location}:{location:{pathname:string;searchStr:string}}):Promise<{me:Awaited<ReturnType<typeof getMe>>|null;now:number;vp:ReturnType<typeof readViewport>;devnetSite:boolean}> {
+async function loadRootData({location,context}:{location:{pathname:string;searchStr:string};context:{queryClient:QueryClient}}):Promise<{me:Awaited<ReturnType<typeof getMe>>|null;now:number;vp:ReturnType<typeof readViewport>;devnetSite:boolean}> {
+  // Test mode is the default on /launch, so the demo session loads there too. Only a mainnet launch that can
+  // really open (mode=live and readiness.ready, from the same cached query the page uses) leaves it out.
+  const liveLaunch = location.pathname === "/launch" && new URLSearchParams(location.searchStr).get("mode") === "live" &&
+    (await context.queryClient.ensureQueryData(liveReadinessQuery).catch(() => null))?.ready === true;
   return {
-    me: IS_SIM && !(location.pathname === "/launch" && new URLSearchParams(location.searchStr).get("mode") !== "demo") ? await getMe() : null,
+    me: IS_SIM && !liveLaunch ? await getMe() : null,
     now: Date.now(), vp: readViewport(), devnetSite: isDevnetTestSite(),
   };
 }

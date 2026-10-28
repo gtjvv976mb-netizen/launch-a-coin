@@ -1,11 +1,36 @@
 import { useQuery } from "@tanstack/react-query";
+import { useMatch } from "@tanstack/react-router";
 import { getLiveLaunchReadiness } from "../../../lib/carddex/live/api";
+import type { LiveReadiness } from "../../../lib/carddex/live/types";
 
 /**
- * True only when the owner has turned mainnet launches on (CARDDEX_LIVE_LAUNCH_ENABLED). It shares the
- * readiness query with LiveLaunchPanel, and stays false while loading, on error and when `active` is false.
+ * The one readiness query (F17): every reader shares this key and freshness, so a /launch load asks the server
+ * once. Route loaders seed it with `ensureQueryData`, so the server HTML already knows the mode.
+ */
+export const liveReadinessQuery = {
+  queryKey: ["live-launch-readiness"] as const,
+  queryFn: () => getLiveLaunchReadiness(),
+  staleTime: 30_000,
+  retry: 1,
+};
+
+/** The readiness the /launch loader read on the server, so hydration starts in the mode the HTML was drawn in. */
+export function useLoadedReadiness(): LiveReadiness | undefined {
+  const match = useMatch({ from: "/launch", shouldThrow: false });
+  return (match?.loaderData as { readiness?: LiveReadiness | null } | undefined)?.readiness ?? undefined;
+}
+
+/** The shared readiness query, starting from the loader's answer when the page has one. */
+export function useLiveReadiness(active = true) {
+  const loaded = useLoadedReadiness();
+  return useQuery({ ...liveReadinessQuery, enabled: active, initialData: loaded });
+}
+
+/**
+ * True only when mainnet launches can actually finish (readiness.ready: configured and switched on by
+ * CARDDEX_LIVE_LAUNCH_ENABLED). Stays false while loading, on error and when `active` is false.
  */
 export function useLiveLaunchOpen(active = true): boolean {
-  const readiness = useQuery({ queryKey: ["live-launch-readiness"], queryFn: () => getLiveLaunchReadiness(), staleTime: 30_000, retry: 1, enabled: active });
-  return active && readiness.data?.enabled === true;
+  const readiness = useLiveReadiness(active);
+  return active && readiness.data?.ready === true;
 }
