@@ -46,7 +46,7 @@ export const Route = createFileRoute("/api/upload")({
     handlers: {
       POST: async ({ request }) => {
         const user = await userFromRequest(request);
-        if (!user) return json({ ok: false, error: "Enter Launch a Card first to upload art." }, 401);
+        if (!user) return json({ ok: false, error: "Try the demo first to upload art." }, 401);
         const { STORAGE } = bindings();
         if (!STORAGE) return json({ ok: false, error: "Uploads are not available right now." }, 503);
 

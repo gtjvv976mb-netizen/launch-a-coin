@@ -39,6 +39,21 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   });
 }
 
+/**
+ * Caching and indexing for what the Worker answers (static files take theirs from public/_headers): pages are
+ * revalidated on every visit unless a route set its own Cache-Control, and the workers.dev mirror is never indexed,
+ * so search keeps launchacard.fun.
+ */
+function applySiteHeaders(response: Response, url: URL): Response {
+  const html = (response.headers.get("content-type") ?? "").includes("text/html");
+  const mirror = url.hostname.endsWith(".workers.dev");
+  if (!(html && !response.headers.has("cache-control")) && !mirror) return response;
+  const headers = new Headers(response.headers);
+  if (html && !headers.has("cache-control")) headers.set("Cache-Control", "no-cache");
+  if (mirror) headers.set("X-Robots-Tag", "noindex");
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     // One canonical hop also keeps www wallet pages on the configured origin.
@@ -58,7 +73,7 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(req, env, ctx);
-      return applySecurityHeaders(await normalizeCatastrophicSsrResponse(response), url);
+      return applySiteHeaders(applySecurityHeaders(await normalizeCatastrophicSsrResponse(response), url), url);
     } catch (error) {
       console.error(error);
       return applySecurityHeaders(

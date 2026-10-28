@@ -75,7 +75,9 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .mdx-btn--primary::after { animation: none !important; opacity: 0 !important; }
-  .mdx-btn, .mdx-case__btn, .cdx-filter button { transition: none !important; }
+  /* Keep the color and opacity feedback (150ms); only the lift and press scale go. */
+  .mdx-btn, .mdx-case__btn, .cdx-filter button { transition-property: background-color, color, border-color, opacity !important; transition-duration: 150ms !important; }
+  .mdx-btn:is(:hover, :active), .mdx-case__btn:is(:hover, :active), .cdx-filter button:is(:hover, :active) { transform: none !important; }
 }
 @media (forced-colors: active) {
   .mdx-tab[data-active="true"]::after { display: none; }

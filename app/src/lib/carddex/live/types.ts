@@ -10,7 +10,11 @@ export type LivePrepareInput = {
 export type LiveComposeInput = Pick<LivePrepareInput, "tokenMint" | "name" | "symbol" | "description" | "website" | "xUrl" | "cardTemplate" | "quoteAssetKey" | "quoteMint">;
 export type { WalletTransactionPlan } from "../../../../../integrations/pumpfun/src/live";
 export type LiveReadiness = {
-  implemented: true; configured: boolean; enabled: boolean; ready: boolean;
+  implemented: true; configured: boolean;
+  /** New launches: the switch, and switched on with everything configured. */
+  enabled: boolean; ready: boolean;
+  /** Existing launches (sign-in, confirmations, the card stage, discards): the switch, and ready to serve. */
+  recoveryEnabled: boolean; recoveryReady: boolean;
   network: "solana-mainnet-beta"; publicOrigin: string | null; blockers: string[];
 };
 export type LiveWallet = { wallet: string; expiresAt: number };
@@ -23,4 +27,5 @@ export type LiveLaunchIntent = {
   tokenSignature: string | null; nftSignature: string | null;
   createdAt: number; updatedAt: number;
 };
-export type LiveResult<T extends object = object> = ({ok: true} & T) | {ok: false; error: string};
+/** `unsendable`: the server did not send this signed transaction and never will, so its stage is prepared again. */
+export type LiveResult<T extends object = object> = ({ok: true} & T) | {ok: false; error: string; unsendable?: true};

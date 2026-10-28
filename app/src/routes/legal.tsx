@@ -1,101 +1,393 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { PageControls, PagedText } from "../components/carddex/Viewport";
-import { z } from "zod";
-import { PageFrame, PageHeader } from "../components/mintdex/ui";
+import { createFileRoute } from "@tanstack/react-router";
+import { Fragment, useCallback, useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
+import { oneOf, searchSchema } from "../lib/mintdex/search";
+import { PageFrame, PageHeader, prefersReducedMotion } from "../components/mintdex/ui";
+import { LAMPORTS, LAUNCH_FEE, TRADE_FEE_BPS } from "../lib/mintdex/constants";
+import { pct } from "../lib/mintdex/copy";
 import { pageHead } from "../lib/mintdex/seo";
+
 export const Route = createFileRoute("/legal")({
-  validateSearch: z.object({
-    tab: z.enum(["terms", "privacy", "risks"]).optional().catch(undefined),
+  // Old links (?tab=privacy) still land on their section of the one document.
+  validateSearch: searchSchema({
+    tab: oneOf(["terms", "fees", "privacy", "risks"]),
   }),
-  head: () => pageHead({ path: "/legal", title: "Terms and privacy | Launch a Card" }),
+  head: () => pageHead({
+    path: "/legal",
+    title: "Terms, privacy and risks | Launch a Card",
+    description: "Terms of use, privacy, fees and risk disclosures for launching coins with Launch a Card.",
+  }),
   component: Legal,
 });
-const CONTENT = {
-  terms: {
+
+const UPDATED = "28 October 2026";
+
+/** A fact the operator still has to supply. Shown as an obvious marked slot, never as a guess. */
+function Fill({ children }: { children: string }) {
+  return <mark className="cdx-legal__fill">[TO FILL: {children}]</mark>;
+}
+
+type Item = { id: string; title: string; body: ReactNode };
+type Section = { id: "terms" | "fees" | "privacy" | "risks"; title: string; items: Item[] };
+
+const DEMO_LAUNCH_FEE = (LAUNCH_FEE / LAMPORTS).toLocaleString("en-US");
+
+const SECTIONS: Section[] = [
+  {
+    id: "terms",
     title: "Terms",
-    sections: [
-      [
-        "Wallet launches and demo trading",
-        "The wallet launch flow, when configured and enabled, creates a real pump.fun token and a separate collectible NFT on Solana mainnet. Each transaction requires your wallet approval and real network costs. Pages labelled demo use simulated tokens, balances and trading; test funds have no cash value.",
-      ],
-      [
-        "Your card",
-        "A creator chooses one permanent design at launch. Market-cap changes never replace it. After the token launch is verified, a separate immutable one-of-one card NFT is created in the creator’s wallet. NFT ownership does not convey token ownership or stock rights. Launch a Card has no NFT marketplace, bids or resale royalties.",
-      ],
-      [
-        "Content rules",
-        "Use names, descriptions and art you have the right to use. Do not impersonate another project, mislead users, promote scams or promise investment returns.",
-      ],
-      [
-        "Test data",
-        "Demo tokens and balances may be reset during development. This local build is provided as is.",
-      ],
+    items: [
+      {
+        id: "operator",
+        title: "Who runs Launch a Card",
+        body: (
+          <>
+            <p>
+              Launch a Card is operated by <Fill>operator legal name</Fill>, <Fill>registered address</Fill>.
+            </p>
+            <p>
+              Questions about these terms: <Fill>contact email</Fill>. Rights and takedown requests:{" "}
+              <Fill>takedown contact</Fill>.
+            </p>
+          </>
+        ),
+      },
+      {
+        id: "eligibility",
+        title: "Who can use it",
+        body: (
+          <p>
+            Minimum age: <Fill>minimum age</Fill>. Not available in: <Fill>restricted countries and regions</Fill>.
+          </p>
+        ),
+      },
+      {
+        id: "wallet-launches",
+        title: "Wallet launches and demo trading",
+        body: (
+          <p>
+            The wallet launch flow, when configured and enabled, creates a real pump.fun token and a separate
+            collectible NFT on Solana mainnet. Each transaction requires your wallet approval and real network costs.
+            Pages labelled demo use simulated tokens, balances and trading; test funds have no cash value. On this
+            site, a coin means a token created on pump.fun.
+          </p>
+        ),
+      },
+      {
+        id: "your-card",
+        title: "Your card",
+        body: (
+          <p>
+            A creator chooses one permanent design at launch. Market-cap changes never replace it. After the token
+            launch is verified, a separate immutable one-of-one card NFT is created in the creator’s wallet. NFT
+            ownership does not convey token ownership or stock rights. Launch a Card has no NFT marketplace, bids or
+            resale royalties.
+          </p>
+        ),
+      },
+      {
+        id: "content-rules",
+        title: "Content rules",
+        body: (
+          <p>
+            Use names, descriptions and art you have the right to use. Do not impersonate another project, mislead
+            users, promote scams or promise investment returns.
+          </p>
+        ),
+      },
+      {
+        id: "test-data",
+        title: "Test data",
+        body: <p>Demo tokens and balances may be reset during development. The demo is provided as is.</p>,
+      },
+      {
+        id: "liability",
+        title: "Liability",
+        body: (
+          <p>
+            <Fill>warranty disclaimer and limitation of liability, written by counsel</Fill>
+          </p>
+        ),
+      },
+      {
+        id: "governing-law",
+        title: "Governing law and disputes",
+        body: (
+          <p>
+            Governing law: <Fill>governing law</Fill>. Disputes: <Fill>courts or dispute process</Fill>.
+          </p>
+        ),
+      },
+      {
+        id: "changes",
+        title: "Changes to these terms",
+        body: (
+          <p>
+            The Updated date at the top of this page shows the current version. How changes are announced:{" "}
+            <Fill>how changes are announced</Fill>.
+          </p>
+        ),
+      },
     ],
   },
-  privacy: {
+  {
+    id: "fees",
+    title: "Fees",
+    items: [
+      {
+        id: "fee-table",
+        title: "What a launch and a trade cost",
+        body: (
+          <>
+            <p>Your wallet shows the exact amounts of every real transaction before you sign it.</p>
+            <table className="cdx-legal__fees">
+              <thead>
+                <tr>
+                  <th scope="col">Fee</th>
+                  <th scope="col">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Launch a Card fee per launch</th>
+                  <td>Launch a Card currently adds no fee to launch or card transactions.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Launch a Card share of trading fees</th>
+                  <td>
+                    <Fill>platform share of trading fees, or none</Fill>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">Card NFT issuance</th>
+                  <td>
+                    Account rent, the Solana network fee and the Metaplex NFT fee, paid from your wallet.{" "}
+                    <Fill>typical total in SOL</Fill>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">pump.fun creation and trading fees</th>
+                  <td>
+                    Set and charged by pump.fun. <Fill>link to pump.fun fee schedule</Fill>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">Solana network fees</th>
+                  <td>Paid to the network for each transaction you sign.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Demo</th>
+                  <td>
+                    Launch fee {DEMO_LAUNCH_FEE} test SOL. Trading fee {pct(TRADE_FEE_BPS)} in test SOL. Test SOL has
+                    no cash value.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </>
+        ),
+      },
+    ],
+  },
+  {
+    id: "privacy",
     title: "Privacy",
-    sections: [
-      [
-        "Browser session",
-        "Separate session cookies remember your demo account and wallet-authenticated launch session. Wallet authentication uses a clearly labelled message, not a transaction. No wallet private keys are requested or stored by the server.",
-      ],
-      [
-        "Launch records and public assets",
-        "Launch details, wallet addresses, recovery records and images are stored in this platform’s own database and object storage. Published token and NFT metadata, images and blockchain records are public. Confirmed blockchain data cannot be removed by clearing browser data. Launch a Card does not share MintDex accounts or data.",
-      ],
-      [
-        "External links",
-        "Opening pump.fun or another external link takes you to that service, which applies its own terms and privacy policy.",
-      ],
+    items: [
+      {
+        id: "browser-session",
+        title: "Browser session",
+        body: (
+          <p>
+            Separate session cookies remember your demo account and wallet-authenticated launch session. Wallet
+            authentication uses a clearly labelled message, not a transaction. No wallet private keys are requested or
+            stored by the server.
+          </p>
+        ),
+      },
+      {
+        id: "launch-records",
+        title: "Launch records and public assets",
+        body: (
+          <p>
+            Launch details, wallet addresses, recovery records and images are stored in this platform’s own database
+            and object storage. Published token and NFT metadata, images and blockchain records are public. Confirmed
+            blockchain data cannot be removed by clearing browser data. Launch a Card accounts and data are separate
+            from any other service.
+          </p>
+        ),
+      },
+      {
+        id: "external-links",
+        title: "External links",
+        body: (
+          <p>
+            Opening pump.fun or another external link takes you to that service, which applies its own terms and
+            privacy policy.
+          </p>
+        ),
+      },
+      {
+        id: "privacy-requests",
+        title: "Questions about your data",
+        body: (
+          <p>
+            Contact <Fill>privacy contact email</Fill>.
+          </p>
+        ),
+      },
     ],
   },
-  risks: {
+  {
+    id: "risks",
     title: "Risks",
-    sections: [
-      [
-        "Demo values",
-        "Prices and market caps in this demo are simulated. They are not investment advice or live market quotes.",
-      ],
-      [
-        "Live launches",
-        "Real launches require wallet approval, current network costs and an admitted pump.fun quote asset. Token creation and NFT delivery are separate wallet transactions. If NFT delivery is interrupted after token creation, resume the existing launch rather than creating another token. A design preview is not proof of an on-chain NFT.",
-      ],
-      [
-        "Token risk",
-        "Real memecoins can lose all value. A collectible design does not guarantee token demand, returns or liquidity.",
-      ],
-      ["Stock and memecoin pairs", "A stock-themed design selects a specific admitted tokenized quote asset. It does not make the new token a stock, grant equity or promise backing. Quote assets have their own issuer terms, availability and risks. Pump.fun admission is rechecked before each wallet transaction."],
+    items: [
+      {
+        id: "demo-values",
+        title: "Demo values",
+        body: (
+          <p>
+            Prices and market caps in this demo are simulated. They are not investment advice or live market quotes.
+          </p>
+        ),
+      },
+      {
+        id: "live-launches",
+        title: "Live launches",
+        body: (
+          <p>
+            Real launches require wallet approval, current network costs and an admitted pump.fun quote asset. Token
+            creation and NFT delivery are separate wallet transactions. If NFT delivery is interrupted after token
+            creation, resume the existing launch rather than creating another token. A design preview is not proof of
+            an on-chain NFT.
+          </p>
+        ),
+      },
+      {
+        id: "token-risk",
+        title: "Token risk",
+        body: (
+          <p>
+            Real memecoins can lose all value. A collectible design does not guarantee token demand, returns or
+            liquidity.
+          </p>
+        ),
+      },
+      {
+        id: "stock-pairs",
+        title: "Stock and memecoin pairs",
+        body: (
+          <p>
+            A stock-themed design selects a specific admitted tokenized quote asset. It does not make the new token a
+            stock, grant equity or promise backing. Quote assets have their own issuer terms, availability and risks.
+            Pump.fun admission is rechecked before each wallet transaction.
+          </p>
+        ),
+      },
     ],
   },
-};
+];
+
+/** One readable document: a short summary, then every section with real headings and linkable anchors. */
 function Legal() {
-  const tab = Route.useSearch().tab ?? "terms",
-    content = CONTENT[tab];
-  const [sectionIndex,setSectionIndex] = useState(0);
-  const section = Math.min(sectionIndex,content.sections.length-1);
+  const { tab } = Route.useSearch();
+  const docRef = useRef<HTMLDivElement>(null);
+  const [current, setCurrent] = useState<Section["id"]>("terms");
+
+  // The page itself scrolls (main#content, or the window when there is no app frame), so the jump nav follows
+  // that scroller: the section whose heading has reached the top of its view is current; at the very end, the last.
+  const scroller = useCallback((): HTMLElement | null => docRef.current?.closest<HTMLElement>("#content") ?? null, []);
+  const update = useCallback(() => {
+    const doc = docRef.current;
+    if (!doc) return;
+    const box = scroller();
+    const top = box ? box.getBoundingClientRect().top : 0;
+    let next: Section["id"] = SECTIONS[0].id;
+    for (const s of SECTIONS) {
+      const el = document.getElementById(s.id);
+      if (el && el.getBoundingClientRect().top - top <= 48) next = s.id;
+    }
+    const el = box ?? document.documentElement;
+    if (el.scrollTop > 0 && el.scrollTop + el.clientHeight >= el.scrollHeight - 2) next = SECTIONS[SECTIONS.length - 1].id;
+    setCurrent(next);
+  }, [scroller]);
+
+  // Land on the linked section: #token-risk, or an old ?tab=risks link. A later #hash change does the same.
+  useEffect(() => {
+    const land = () => {
+      const hash = decodeURIComponent(window.location.hash.slice(1));
+      const target = hash && document.getElementById(hash) ? hash : tab;
+      if (target && target !== "terms") document.getElementById(target)?.scrollIntoView({ block: "start" });
+      update();
+    };
+    land();
+    // The router may restore or apply the hash scroll after this effect; read the position again once it has.
+    const raf = requestAnimationFrame(update);
+    window.addEventListener("hashchange", land);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("hashchange", land);
+    };
+  }, [tab, update]);
+
+  useEffect(() => {
+    const target: HTMLElement | Window = scroller() ?? window;
+    // Four rect reads per scroll event: cheap enough to run directly, and it keeps working in a background tab.
+    target.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      target.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [scroller, update]);
+
+  function onNav(e: MouseEvent<HTMLAnchorElement>, id: Section["id"]) {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (!el) return;
+    history.replaceState(history.state, "", `#${id}`);
+    setCurrent(id);
+    el.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    el.focus({ preventScroll: true });
+  }
+
   return (
     <PageFrame className="cdx-legal">
-      <PageHeader title={content.title} context="Launch a Card · Updated 28 October 2026" />
-      <nav className="flex gap-5">
-        {(["terms", "privacy", "risks"] as const).map((t) => (
-          <Link
-            key={t}
-            to="/legal"
-            search={{ tab: t }}
-            onClick={()=>setSectionIndex(0)}
-            aria-current={tab === t ? "page" : undefined}
-            className="mdx-link min-h-11 inline-flex items-center"
+      <PageHeader title="Terms, privacy and risks" context={`Launch a Card · Updated ${UPDATED}`} wrapContext />
+      <nav className="cdx-legal__nav" aria-label="Sections">
+        {SECTIONS.map((s) => (
+          <a
+            key={s.id}
+            href={`#${s.id}`}
+            onClick={(e) => onNav(e, s.id)}
+            aria-current={current === s.id ? "location" : undefined}
           >
-            {CONTENT[t].title}
-          </Link>
+            {s.title}
+          </a>
         ))}
       </nav>
-      <section className="cdx-legal__section" key={`${tab}-${section}`}>
-        <h2>{content.sections[section][0]}</h2>
-        <PagedText text={content.sections[section][1]} label="Read this section" />
-      </section>
-      <PageControls page={section} pages={content.sections.length} onPage={setSectionIndex} label={`${content.title} sections`} />
+      <div ref={docRef} className="cdx-legal__doc" tabIndex={0} role="region" aria-label="Terms, privacy and risks">
+        <section className="cdx-legal__summary" aria-labelledby="legal-summary">
+          <h2 id="legal-summary">The short version</h2>
+          <ul>
+            <li>Demo prices, balances and trades are simulated. Test funds have no cash value.</li>
+            <li>Wallet launches create a real pump.fun token and cost real SOL. You approve each transaction.</li>
+            <li>Real memecoins can lose all value.</li>
+          </ul>
+        </section>
+        {SECTIONS.map((s) => (
+          <section key={s.id} aria-labelledby={s.id}>
+            <h2 id={s.id} tabIndex={-1}>
+              {s.title}
+            </h2>
+            {s.items.map((item) => (
+              <Fragment key={item.id}>
+                <h3 id={item.id}>{item.title}</h3>
+                {item.body}
+              </Fragment>
+            ))}
+          </section>
+        ))}
+      </div>
     </PageFrame>
   );
 }

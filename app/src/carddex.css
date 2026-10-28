@@ -1,7 +1,7 @@
 /* CardDex's fixed-design selector in MintDex's existing card-led application layout. */
 .cdx-eyebrow {
   color: var(--color-neon);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.12em;
   line-height: 1.6;
@@ -99,7 +99,7 @@
 .cdx-demo-note {
   display: block;
   color: var(--color-slate);
-  font-size: 10px;
+  font-size: var(--type-min);
   line-height: 1.5;
   margin-top: 8px;
 }
@@ -139,14 +139,14 @@
   border-radius: 8px;
   padding: 6px 9px;
   color: var(--color-slate);
-  font-size: 11px;
+  font-size: var(--type-min);
   border: 1px solid transparent;
   transition:
     background 0.16s,
     color 0.16s;
 }
 .cdx-filter button span {
-  font-size: 9px;
+  font-size: var(--type-min);
   opacity: 0.7;
 }
 .cdx-filter button[aria-pressed="true"] {
@@ -217,7 +217,7 @@
   display: block;
   margin-top: 5px;
   color: var(--color-slate);
-  font-size: 10px;
+  font-size: var(--type-min);
   line-height: 1.3;
 }
 .cdx-design-row__arrow {
@@ -227,7 +227,7 @@
 .cdx-library__foot {
   flex: none;
   color: var(--color-slate);
-  font-size: 10px;
+  font-size: var(--type-min);
   line-height: 1.6;
   padding-top: 12px;
 }
@@ -240,7 +240,7 @@
   align-items: center;
   border-block: 1px solid var(--color-hairline);
   margin-top: 12px;
-  font-size: 10px;
+  font-size: var(--type-min);
   color: var(--color-slate);
 }
 .cdx-stock-reference b {
@@ -309,7 +309,7 @@
   color: var(--color-slate);
 }
 .cdx-token-cell > p {
-  font-size: 10px;
+  font-size: var(--type-min);
   padding-top: 4px;
 }
 .cdx-empty {
@@ -331,7 +331,7 @@
   justify-content: center;
   padding: 5px 9px;
   min-height: 38px;
-  font-size: 11px;
+  font-size: var(--type-min);
   color: var(--color-slate);
   border: 1px solid var(--color-hairline);
   border-radius: 8px;
@@ -389,7 +389,7 @@
   padding-top: 10px;
 }
 .cdx-create-preview .cdx-design-picker p {
-  font-size: 11px;
+  font-size: var(--type-min);
 }
 .cdx-create-preview .cdx-design-picker label {
   font-size: 12px;
@@ -482,7 +482,7 @@
     font-size: 31px;
   }
   .cdx-eyebrow {
-    font-size: 9px;
+    font-size: 11px;
   }
   .cdx-use-design {
     width: 100%;
@@ -514,7 +514,7 @@
   .cdx-filter button {
     padding-inline: 8px;
     min-height: 44px;
-    font-size: 11px;
+    font-size: var(--type-min);
   }
   .cdx-token-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -523,7 +523,7 @@
   }
   .cdx-token-cell__caption {
     gap: 5px;
-    font-size: 10px;
+    font-size: var(--type-min);
   }
   .cdx-token-cell__caption strong {
     font-size: 12px;

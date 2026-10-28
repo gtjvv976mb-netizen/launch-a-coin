@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { z } from "zod";
+import { useEffect, useId, useRef, useState } from "react";
+import { num, oneOf, searchSchema } from "../../lib/mintdex/search";
 
 import {
   CoinCase,
@@ -19,7 +19,8 @@ import {
 } from "../../components/mintdex/coin";
 import { revPoll } from "../../components/mintdex/hooks";
 import { LaunchedDialog } from "../../components/mintdex/trust";
-import { EmptyState, Ledge, Modal, Tabs, TextLink, prefersReducedMotion } from "../../components/mintdex/ui";
+import { Ledge, Modal, Tabs, TextLink, prefersReducedMotion } from "../../components/mintdex/ui";
+import { EmptyState } from "../../components/mintdex/empty-state";
 import { ChainCoinNotFound } from "../../components/chain/pages/ChainCoinNotFound";
 import { ChainCoinView } from "../../components/chain/pages/ChainCoinPage";
 import { chainCoinHead, chainCoinLoader, type ChainCoinRoute } from "../../lib/chain/data";
@@ -34,8 +35,8 @@ import {
   sentences,
   shareArt,
 } from "../../lib/mintdex/seo";
-import { PageControls, PagedText } from "../../components/carddex/Viewport";
 import { getCardDesign } from "../../lib/carddex/designs";
+import { ViewTabs, tabPanelProps } from "../../components/carddex/ViewTabs";
 import type { CoinDetail } from "../../lib/mintdex/types";
 
 /** Phone sections (P1-5): one at a time under the hero, kept in ?tab= so a notification can link to the card. */
@@ -52,9 +53,9 @@ const TAB_OPTIONS: Array<{ value: CoinTab; label: string }> = [
  * ?minted=1: the launcher just minted this card, so the page opens "Your card is live" once (P1-12).
  * ?tab=card|chart|trades: the phone section that shows (Trade when absent). Desktop shows everything.
  */
-const coinSearch = z.object({
-  minted: z.number().int().optional().catch(undefined),
-  tab: z.enum(["trade", "card", "chart", "trades", "details"]).optional().catch(undefined),
+const coinSearch = searchSchema({
+  minted: num(true),
+  tab: oneOf(["trade", "card", "chart", "trades", "details"]),
 });
 
 export const Route = createFileRoute("/coin/$id")({
@@ -134,7 +135,7 @@ function CoinView() {
   const tab: CoinTab = tabParam ?? "card";
   const navigate = Route.useNavigate();
   const [detailTab,setDetailTab] = useState("token");
-  const [ownershipPage,setOwnershipPage] = useState(0);
+  const tabsId = useId(), detailsId = useId();
   const setTab = (next: CoinTab) => void navigate({search:p=>({...p,tab:next==="card"?undefined:next}),replace:true,resetScroll:false});
   // "Your card is live" opens after mount (never in the server HTML) and only for the coin's launcher, so a
   // pasted ?minted=1 link shows nothing to anyone else. Closing it drops ?minted from the URL.
@@ -184,18 +185,18 @@ function CoinView() {
   ];
   return (
     <div key={coin.id} data-tab={tab} className="cdx-coin-screen">
-      <header className="cdx-coin-screen__head"><CoinHeader coin={coin} /><span className="text-[12px] text-slate">Demo token · {coin.tradingPair}</span></header>
-      <div className="cdx-coin-screen__tabs"><Tabs value={tab} options={TAB_OPTIONS} onChange={setTab} label="Coin sections" className="mdx-tabs--fill" /></div>
+      <header className="cdx-coin-screen__head"><CoinHeader coin={coin} /><span className="text-[12px] text-slate">Demo coin · {coin.tradingPair}</span></header>
+      <div className="cdx-coin-screen__tabs"><Tabs panels idBase={tabsId} value={tab} options={TAB_OPTIONS} onChange={setTab} label="Coin sections" className="mdx-tabs--fill" /></div>
       <div className="cdx-coin-screen__body">
         <section className="cdx-coin-screen__object" aria-label={`${coin.name} collectible card`}>
           <div className="cdx-coin-screen__case"><CoinCase coin={coin} latestTradeId={latestTradeId} priority /></div>
         </section>
-        <section className="cdx-coin-screen__pane" aria-label={TAB_OPTIONS.find(option=>option.value===tab)?.label}>
-          {tab==="card" ? <><h2 className="text-lg font-semibold">The creator’s card</h2><div className="cdx-coin-screen__ownership"><dl>{ownershipRows.slice(ownershipPage*3,ownershipPage*3+3).map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><PageControls page={ownershipPage} pages={2} onPage={setOwnershipPage} label="Card details" /></div><p className="text-[12px] text-slate">Fixed design. Its token trades separately.</p></> : null}
+        <section className="cdx-coin-screen__pane" {...tabPanelProps(tabsId, tab)}>
+          {tab==="card" ? <><h2 className="text-lg font-semibold">The creator’s card</h2><div className="cdx-coin-screen__ownership"><dl>{ownershipRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div><p className="text-[12px] text-slate">Fixed design. Its token trades separately.</p></> : null}
           {tab==="chart" ? <><CoinStats coin={coin} /><McapChart trades={trades} tradeCount={coin.trades} currentUsd={coin.mcapUsd} currentQuote={coin.mcapQuote} quoteAssetKey={coin.quoteAssetKey} createdAt={coin.createdAt} level={coin.level} className="cdx-coin-screen__chart" /></> : null}
           {tab==="trade" ? <TradePanel page={page} compact hideQuick hideAfter className="cdx-coin-screen__trade" /> : null}
           {tab==="trades" ? <TradesList trades={trades} count={coin.trades} className="cdx-coin-screen__trades" /> : null}
-          {tab==="details" ? <><div className="cdx-view-tabs" aria-label="Token details"><button type="button" aria-pressed={detailTab==="token"} onClick={()=>setDetailTab("token")}>Token</button><button type="button" aria-pressed={detailTab==="story"} onClick={()=>setDetailTab("story")}>Story</button><button type="button" aria-pressed={detailTab==="owner"} onClick={()=>setDetailTab("owner")}>Ownership</button></div>{detailTab==="token" ? <CoinDetails coin={coin} isOwner={isOwner} onEdit={()=>setLoreOpen(true)} /> : detailTab==="story" ? <PagedText text={coin.lore || "The creator has not added a description."} label="Token story" /> : <div className="cdx-coin-screen__ownership"><dl>{ownershipRows.slice(ownershipPage*3,ownershipPage*3+3).map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><PageControls page={ownershipPage} pages={2} onPage={setOwnershipPage} label="Creator card" /></div>}</> : null}
+          {tab==="details" ? <><ViewTabs className="cdx-view-tabs" label="Coin details" idBase={detailsId} tabs={[{id:"token",label:"Coin",selected:detailTab==="token",onSelect:()=>setDetailTab("token")},{id:"story",label:"Story",selected:detailTab==="story",onSelect:()=>setDetailTab("story")},{id:"owner",label:"Ownership",selected:detailTab==="owner",onSelect:()=>setDetailTab("owner")}]} /><div className="contents" {...tabPanelProps(detailsId, detailTab)}>{detailTab==="token" ? <CoinDetails coin={coin} isOwner={isOwner} onEdit={()=>setLoreOpen(true)} /> : detailTab==="story" ? <p className="cdx-coin-screen__story">{coin.lore || "The creator has not added a description."}</p> : <div className="cdx-coin-screen__ownership"><dl>{ownershipRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div>}</div></> : null}
         </section>
       </div>
       <Modal open={loreOpen} onOpenChange={setLoreOpen} title="Edit description">

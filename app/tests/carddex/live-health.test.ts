@@ -5,7 +5,7 @@ import type { LiveReadiness } from "../../src/lib/carddex/live/types";
 
 const SECRET = "provider-secret-must-never-appear", ENDPOINT = `https://provider.example/rpc/${SECRET}?key=${SECRET}`;
 const readiness = (configured = true): LiveReadiness => ({ implemented: true, configured, enabled: false, ready: false,
-  network: "solana-mainnet-beta", publicOrigin: "https://launchacard.fun", blockers: [SECRET] });
+  recoveryEnabled: true, recoveryReady: configured, network: "solana-mainnet-beta", publicOrigin: "https://launchacard.fun", blockers: [SECRET] });
 function fixture() {
   let time = 1_798_000_000_000, endpoint: string | undefined = ENDPOINT;
   const calls: { url: string; init: RequestInit; payload: any }[] = [];
@@ -20,7 +20,7 @@ describe("sanitized read-only mainnet release health", () => {
   test("works while launches are disabled and makes only the two fixed finalized reads", async () => {
     const rpc = fixture(), response = await rpc.handler(), body = await response.json();
     expect(response.status).toBe(200); expect(response.headers.get("cache-control")).toBe("no-store");
-    expect(body).toEqual({ ok: true, readiness: { configured: true, enabled: false, ready: false, network: "solana-mainnet-beta", publicOrigin: "https://launchacard.fun" },
+    expect(body).toEqual({ ok: true, readiness: { configured: true, enabled: false, ready: false, recoveryEnabled: true, recoveryReady: true, network: "solana-mainnet-beta", publicOrigin: "https://launchacard.fun" },
       rpc: { status: "healthy", checkedAt: new Date(1_798_000_000_000).toISOString(), finalizedSlot: 462_400_000, finalizedBlockHeight: 440_000_000 } });
     expect(rpc.calls.map(call => call.payload)).toEqual([
       { jsonrpc: "2.0", id: 1, method: "getGenesisHash", params: [] },
@@ -28,6 +28,14 @@ describe("sanitized read-only mainnet release health", () => {
     ]);
     for (const call of rpc.calls) { expect(call.init.method).toBe("POST"); expect(call.init.redirect).toBe("manual"); }
     expect(JSON.stringify(body)).not.toContain(SECRET);
+  });
+  test("reports the new-launch and recovery switches separately", async () => {
+    for (const [enabled, recoveryEnabled] of [[false, true], [true, true], [false, false]]) {
+      const handler = createLiveHealthHandler({ readiness: () => ({ ...readiness(), enabled, ready: enabled && recoveryEnabled, recoveryEnabled, recoveryReady: recoveryEnabled }), rpcUrl: () => ENDPOINT,
+        fetch: async (_url, init) => { const payload = JSON.parse(init.body as string); return Response.json({ jsonrpc: "2.0", id: payload.id, result: payload.method === "getGenesisHash" ? MAINNET_GENESIS_HASH : { absoluteSlot: 20, blockHeight: 10 } }); } });
+      const body = await (await handler()).json();
+      expect(body.readiness).toMatchObject({ enabled, ready: enabled && recoveryEnabled, recoveryEnabled, recoveryReady: recoveryEnabled });
+    }
   });
   test("the default transport invokes global fetch with its global receiver", async () => {
     const original = globalThis.fetch;
@@ -72,7 +80,7 @@ describe("sanitized read-only mainnet release health", () => {
         } });
       const response = await handler(), body = await response.json();
       expect(response.status).toBe(503); expect(body.ok).toBe(false); expect(body.rpc.status).toBe(failure);
-      expect(body.readiness).toMatchObject({ configured: true, enabled: true, ready: false });
+      expect(body.readiness).toMatchObject({ configured: true, enabled: true, ready: false, recoveryEnabled: true, recoveryReady: false });
     }
   });
   test("redirects, upstream403, malformed bank data, JSON-RPC errors and thrown secrets are sanitized and cached", async () => {

@@ -115,7 +115,7 @@ describe("exact original print and actual earned state", () => {
       expect(classText(markup, "mdx-card__ticker")).toBe(`$${custom.ticker}`);
       expect(classText(markup, "mdx-card__numeral")).toBe("—");
       expect(markup).not.toContain('src=""');
-      expect(markup).toContain("Your token art");
+      expect(markup).toContain("Your coin art");
       expect(label).toContain("template preview");
       expect(label).not.toMatch(/Spark design|tier 1|market cap \$0|owner @/);
     }

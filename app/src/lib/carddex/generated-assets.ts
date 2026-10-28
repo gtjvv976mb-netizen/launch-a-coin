@@ -62,3 +62,14 @@ export function generatedCardAssets(key?: string): GeneratedCardAssets {
     ? CARD_GENERATED_ASSETS[key as CardDesignKey] ?? {}
     : {};
 }
+
+/**
+ * A generated face's srcset: the 320 px copy, the 480 and 640 px copies written beside it (<base>-480.webp and
+ * <base>-640.webp, so a phone takes the step just above its need instead of the next 2x) and the 1260 px original.
+ */
+export function generatedSrcSet(small: string, full: string) {
+  const mid = /-320\.webp$/.test(small)
+    ? `${small.replace(/-320\.webp$/, "-480.webp")} 480w, ${small.replace(/-320\.webp$/, "-640.webp")} 640w, `
+    : "";
+  return `${small} 320w, ${mid}${full} 1260w`;
+}

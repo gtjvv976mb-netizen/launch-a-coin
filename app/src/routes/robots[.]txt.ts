@@ -7,7 +7,13 @@ import { SITE_ORIGIN } from '../lib/mintdex/seo'
 export const Route = createFileRoute('/robots.txt')({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async ({ request }) => {
+        // The workers.dev mirror (SEO-4): crawl nothing there, so search only lists launchacard.fun.
+        if (new URL(request.url).hostname.endsWith('.workers.dev')) {
+          return new Response('User-agent: *\nDisallow: /\n', {
+            headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=86400' },
+          })
+        }
         const body = [
           'User-agent: *',
           'Allow: /',

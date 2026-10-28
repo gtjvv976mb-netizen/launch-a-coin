@@ -16,7 +16,11 @@
     "CARDDEX_PUBLIC_ORIGIN": "https://launchacard.fun",
     "CARDDEX_DEPLOYMENT_ENV": "production",
     // Configure CARDDEX_MAINNET_RPC_URL as a Worker secret with a provider endpoint.
-    "CARDDEX_LIVE_LAUNCH_ENABLED": "true"
+    // Two switches. CARDDEX_LIVE_LAUNCH_ENABLED ("true" only) opens new mainnet launches.
+    // CARDDEX_LIVE_RECOVERY_ENABLED (on unless "false") lets creators sign in and finish saved launches.
+    // To stop new launches in an incident, set only CARDDEX_LIVE_LAUNCH_ENABLED to "false": recovery keeps working.
+    "CARDDEX_LIVE_LAUNCH_ENABLED": "true",
+    "CARDDEX_LIVE_RECOVERY_ENABLED": "true"
   },
   "d1_databases": [{"binding": "DB", "database_name": "launch-a-card", "database_id": "ffc8ba69-4d9d-404c-9c3d-e4a7f187cb3a", "migrations_dir": "migrations"}],
   "r2_buckets": [{"binding": "STORAGE", "bucket_name": "launch-a-card"}]

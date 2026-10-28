@@ -1,12 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cardLabel, useCardSlots, type CardData } from "../mintdex/MintCard";
 import { Card3DView } from "../mintdex/card3d/Card3D";
 import { Engine, motionLevel, type Body } from "../mintdex/card3d/motion3d";
 import type { Card3DHandle } from "../mintdex/card3d/types";
 
 /** A full revolution in the shared engine, with the same rounded slab, both-face lighting and touch input. */
-export function HeroTurntable({ card, className = "", playing: controlled, onPlayingChange, followEdits = false, viewportFit = false }: {
+export function HeroTurntable({ card, className = "", playing: controlled, onPlayingChange, followEdits = false, viewportFit = false, controls }: {
   card: CardData; className?: string; playing?: boolean; onPlayingChange?: (playing: boolean) => void; followEdits?: boolean; viewportFit?: boolean;
+  /** More buttons for the end of the control row (Launch's Inspect), so the row keeps one even gap. */
+  controls?: ReactNode;
 }) {
   const [localPlaying, setLocalPlaying] = useState(true);
   const playing = controlled ?? localPlaying;
@@ -31,7 +33,12 @@ export function HeroTurntable({ card, className = "", playing: controlled, onPla
   };
   useEffect(() => {
     const body = slots.ctl.current?.body;
-    if (!playing && body) body.flip.snap(body.flip.x);
+    // Pause settles the card on its nearest front face (F7), never frozen edge-on or showing its back; calm snaps.
+    if (!playing && body && !slots.ctl.current?.busy) {
+      const front = Math.round(body.flip.x / 360) * 360;
+      if (motionLevel() === "calm") body.flip.snap(front);
+      else body.flip.t = front;
+    }
     lastFrame.current = 0;
     Engine.kick();
   }, [playing]);
@@ -56,6 +63,7 @@ export function HeroTurntable({ card, className = "", playing: controlled, onPla
     <div className="cdx-hero-turntable__controls">
       <button type="button" onClick={() => { lastInput.current = performance.now(); slots.handle.current?.turnOver(); }} aria-label="Turn card over">Turn over</button>
       <button type="button" onClick={toggle} aria-pressed={!playing}>{playing ? "Pause rotation" : "Resume rotation"}</button>
+      {controls}
     </div>
   </div>;
 }

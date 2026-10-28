@@ -8,7 +8,7 @@
  */
 import { useQueryClient, type QueryKey } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 import { ChainClientError, type OnTxStep, type TxProgress, type TxStep } from "../../../lib/chain/client";
 import { boost } from "../../../lib/chain/data";
@@ -357,7 +357,7 @@ export function StepLine({ steps, step, className = "" }: { steps: TxStep[]; ste
   return (
     <div className={cx("min-w-0", className)} role="status" aria-live="polite">
       <div className="mdx-progress" aria-hidden>
-        <div className="mdx-progress__fill" style={{ width: `${Math.round(((i + 1) / steps.length) * 100)}%` }} />
+        <div className="mdx-progress__fill" style={{ "--fill": (i + 1) / steps.length } as CSSProperties} />
       </div>
       <p className="mt-1.5 truncate text-[13px] leading-5 text-slate">
         <span className="num text-ink">

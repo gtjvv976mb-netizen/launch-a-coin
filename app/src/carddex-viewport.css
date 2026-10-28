@@ -1,30 +1,46 @@
-/* Viewport application: every content collection has explicit pages or tabs. */
+/* Viewport application: the shell (rail, phone header, tab bar) fills the screen and <main> scrolls inside it.
+   Full-screen views fill <main>, down to a floor that keeps the card usable on short screens; documents and
+   lists grow with their content. */
 html, body { height:100%; overscroll-behavior:none; }
 body { overflow:clip; }
 .cdx-app.cdx-viewport { height:100dvh; min-height:0; overflow:clip; }
 .cdx-viewport .cdx-shell-content { min-height:0; }
-.cdx-viewport .cdx-viewport-main { min-height:0; padding:12px; --main-pad:12px; overflow:clip; }
+.cdx-viewport .cdx-viewport-main { min-height:0; padding:12px; --main-pad:12px; overflow-x:clip; overflow-y:auto; overscroll-behavior:contain; }
 .cdx-viewport .mdx-rail { min-height:0; overflow:clip; }
 .cdx-viewport .mdx-mobile-tabs { position:relative; inset:auto; flex:none; border-radius:0; }
 .cdx-viewport .mdx-mtab { height:58px; }
 .cdx-viewport .mdx-mhead { position:relative; }
 .cdx-viewport-main > :first-child { height:100%; min-height:0; }
+/* Beats the routes' own min-height:0, so a short landscape screen scrolls instead of shrinking the card to 0px. */
+.cdx-app.cdx-viewport .cdx-viewport-main > :first-child { min-height:var(--cdx-fit-floor,520px); }
+/* Lists and documents grow with their content (a paged legal view keeps its measured frame). */
+.cdx-app.cdx-viewport .cdx-viewport-main > :is(.cdx-discover,.cdx-legal:not(:has(.cdx-paged-copy))) { height:auto; min-height:100%; }
 .cdx-page-controls { display:flex; flex:none; min-height:44px; align-items:center; justify-content:space-between; gap:8px; font-size:12px; color:var(--color-slate); }
 .cdx-page-controls__label { min-width:0; overflow-wrap:anywhere; }
 .cdx-paged-copy { display:flex; flex-direction:column; height:100%; min-height:0; gap:8px; }
 .cdx-paged-copy__text { flex:1; min-height:0; font-size:15px; line-height:1.55; overflow-wrap:anywhere; }
 .cdx-view-tabs { display:flex; gap:4px; flex:none; }
 .cdx-view-tabs button { flex:1; min-height:40px; padding:7px 10px; border-radius:6px; font-size:12px; color:var(--color-slate); }
-.cdx-view-tabs button[aria-pressed=true] { color:#fff8e5; background:#342c20; }
+.cdx-view-tabs button[aria-selected=true] { color:#fff8e5; background:#342c20; }
 .cdx-fit-region { flex:1; min-height:0; }
 .cdx-viewport .cdx-discover { gap:10px; }
 .cdx-viewport .cdx-archive__head { flex:none; min-height:40px; }
 .cdx-viewport .cdx-discover__tools { flex:none; margin:0; }
-.cdx-viewport .cdx-token-grid { flex:1; min-height:0; overflow:clip; padding:8px; gap:14px; grid-template-columns:repeat(var(--page-columns,1),minmax(0,1fr)); grid-template-rows:repeat(var(--page-rows,1),minmax(0,1fr)); }
-.cdx-viewport .cdx-token-cell { container-type:size; max-width:none; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-.cdx-viewport .cdx-token-cell > div { width:min(76cqw,calc((100cqh - 68px)*.55)); }
+/* Discover is a natural card list: two columns on phones and tablets, as many 190px columns as fit above. */
+.cdx-app.cdx-viewport .cdx-token-grid { flex:none; overflow:visible; margin:0; padding:8px 4px 4px; list-style:none; gap:28px 20px; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); grid-template-rows:none; }
+.cdx-token-item { min-width:0; display:flex; justify-content:center; }
+.cdx-app.cdx-viewport .cdx-token-cell { max-width:290px; min-height:0; display:flex; flex-direction:column; }
 .cdx-viewport .cdx-token-cell__caption { width:100%; flex:none; min-height:50px; padding-top:9px; }
+.cdx-token-cell__name { min-width:0; margin:0; font:inherit; }
 .cdx-viewport .cdx-token-cell__caption strong { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cdx-discover__count { flex:none; margin:0; font-size:13px; color:var(--color-slate); }
+.cdx-viewport .cdx-discover .cdx-empty { display:flex; flex-direction:column; align-items:flex-start; gap:12px; padding:20px 4px; color:var(--color-slate); }
+.cdx-viewport .cdx-discover .cdx-empty > p { color:var(--color-ink); font-size:15px; overflow-wrap:anywhere; }
+.cdx-empty__actions { display:flex; flex-wrap:wrap; gap:8px; }
+.cdx-discover__more { display:flex; flex-direction:column; align-items:center; gap:6px; padding:8px 0 16px; font-size:12px; color:var(--color-slate); }
+@media(max-width:1023px) {
+ .cdx-app.cdx-viewport .cdx-token-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px 12px; padding-inline:0; }
+}
 .cdx-viewport .cdx-archive { gap:10px; }
 .cdx-viewport .cdx-archive__body { flex:1; min-height:0; overflow:clip; gap:20px; }
 .cdx-viewport .cdx-archive__vitrine { min-height:0; container-type:size; padding:0 18px; gap:6px; }
@@ -34,7 +50,9 @@ body { overflow:clip; }
 .cdx-viewport .cdx-library { min-height:0; display:flex; flex-direction:column; overflow:clip; gap:8px; }
 .cdx-viewport .cdx-library__tools { flex:none; }
 .cdx-viewport .cdx-filter { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); margin:6px 0 0; overflow:visible; gap:2px; }
-.cdx-viewport .cdx-filter button { min-width:0; min-height:32px; padding:4px; font-size:11px; justify-content:center; }
+.cdx-viewport .cdx-filter button { min-width:0; min-height:32px; padding:4px; font-size:var(--type-min); justify-content:center; }
+/* The design filters wrap rather than scroll, so a chip past the edge (Limited) is never hidden. */
+html .cdx-viewport .cdx-library__tools .cdx-filter { flex-wrap:wrap; overflow-x:visible; }
 .cdx-viewport .cdx-library__list { flex:1; min-height:0; overflow:clip; padding:4px; gap:8px; grid-template-columns:repeat(var(--page-columns,2),minmax(0,1fr)); grid-template-rows:repeat(var(--page-rows,1),minmax(0,1fr)); grid-auto-rows:initial; }
 .cdx-viewport .cdx-design-row { min-height:0; padding:8px 5px; overflow:clip; container-type:size; gap:6px; justify-content:center; }
 .cdx-viewport .cdx-design-row__preview { width:min(118px,calc((100cqh - 58px)*.63),78cqw); flex:none; }
@@ -52,28 +70,48 @@ body { overflow:clip; }
 .cdx-balance-grid > div { min-width:0; padding:10px; background:#fffaf0; border-radius:8px; display:flex; flex-direction:column; justify-content:center; font-size:13px; }
 .cdx-balance-grid dd { overflow-wrap:anywhere; }
 .cdx-legal { gap:12px; }
-.cdx-legal nav { flex:none; }
-.cdx-legal__section { flex:1; min-height:0; display:flex; flex-direction:column; gap:10px; max-width:68ch; }
-.cdx-legal__section h2 { flex:none; font-size:19px; }
+/* A Read page: keep the capped column centred on wide screens instead of leaving a dead strip on the right. */
+@media (min-width:1024px){ .cdx-app .cdx-legal { width:100%; max-width:760px; margin-inline:auto; } }
+/* One document scrolled by the page (main#content) under a jump nav; the current section is underlined. */
+.cdx-legal__nav { flex:none; display:flex; flex-wrap:wrap; column-gap:20px; }
+.cdx-legal__nav a { display:inline-flex; align-items:center; justify-content:center; min-width:44px; min-height:44px; border-bottom:2px solid transparent; font-size:15px; font-weight:500; color:var(--color-slate); text-decoration:none; transition:color 160ms cubic-bezier(.22,1,.36,1), border-color 160ms cubic-bezier(.22,1,.36,1); }
+.cdx-legal__nav a:hover { color:var(--color-ink); }
+.cdx-legal__nav a[aria-current] { color:var(--color-ink); font-weight:600; border-bottom-color:var(--color-neon); }
+.cdx-legal__doc { padding:4px 8px 32px 2px; border-radius:var(--radius-row); }
+.cdx-legal__doc > section { max-width:65ch; }
+.cdx-legal__doc h2 { margin-top:32px; font-size:21px; font-weight:600; line-height:1.3; color:var(--color-ink); scroll-margin-top:8px; }
+.cdx-legal__doc h2:focus { outline:none; }
+.cdx-legal__doc h3 { margin-top:20px; font-size:16px; font-weight:600; line-height:1.35; color:var(--color-ink); scroll-margin-top:8px; }
+/* About 65 characters a line: Instrument Sans averages ~0.69ch a glyph, so 46ch, not 65ch. */
+.cdx-legal__doc p, .cdx-legal__doc li { max-width:46ch; margin-top:6px; font-size:15px; line-height:1.6; color:var(--color-ink); text-wrap:pretty; }
+.cdx-legal__summary { padding:4px 16px 16px; border-radius:var(--radius-row); background:var(--color-plinth); }
+.cdx-legal__doc .cdx-legal__summary h2 { margin-top:12px; font-size:17px; }
+.cdx-legal__summary ul { margin-top:4px; padding-left:20px; list-style:disc; }
+.cdx-legal__fill { padding:0 4px; border:1px dashed var(--color-hype); border-radius:var(--radius-chip); background:var(--color-tint); color:var(--color-ink); font-weight:600; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+.cdx-legal__fees { width:100%; margin-top:12px; border-collapse:collapse; font-size:14px; line-height:1.5; }
+.cdx-legal__fees th, .cdx-legal__fees td { padding:8px 12px 8px 0; border-bottom:1px solid var(--color-rule); text-align:left; vertical-align:top; }
+.cdx-legal__fees thead th { font-size:12px; font-weight:600; color:var(--color-slate); border-bottom-color:var(--color-hairline); }
+.cdx-legal__fees tbody th { width:40%; font-weight:600; color:var(--color-ink); }
+@media(max-width:639px) { .cdx-legal__fees tbody th { width:44%; } .cdx-legal__nav { column-gap:16px; } }
 @media(max-width:1023px) {
- .cdx-viewport .cdx-viewport-main { padding:10px; --main-pad:10px; }
- .cdx-viewport .mdx-h1 { font-size:25px; }
+ .cdx-viewport .cdx-viewport-main { padding:10px max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left)); --main-pad:max(16px, env(safe-area-inset-left)); }
+ .cdx-viewport .mdx-h1 { font-size:var(--type-page-title-sm); }
  .cdx-viewport .cdx-archive__body { display:flex; flex-direction:column; gap:0; }
  .cdx-archive-mobile-tabs { display:flex; }
  .cdx-archive--preview .cdx-library, .cdx-archive--library .cdx-archive__vitrine { display:none; }
  .cdx-viewport .cdx-archive__vitrine { flex:1; }
  .cdx-viewport .cdx-library { flex:1; }
- .cdx-viewport .cdx-archive__head h1 { max-width:none; font-size:24px; }
+ .cdx-viewport .cdx-archive__head h1 { max-width:none; font-size:var(--type-page-title-sm); }
  .cdx-viewport .cdx-archive__head .cdx-muted { display:none; }
- .cdx-viewport .cdx-archive__head .cdx-use-design { min-height:40px; padding:7px 9px; font-size:11px; }
- .cdx-viewport .cdx-discover__tools { display:grid; grid-template-columns:minmax(0,1fr) 108px; }
- .cdx-viewport .cdx-discover__tools input,.cdx-viewport .cdx-discover__tools select { width:100%; min-width:0; }
- .cdx-viewport .cdx-library__foot { font-size:10px; }
+ .cdx-viewport .cdx-archive__head .cdx-use-design { min-height:40px; padding:7px 9px; font-size:var(--type-min); }
+ .cdx-viewport .cdx-discover__tools { display:grid; grid-template-columns:minmax(0,1fr) auto; }
+ .cdx-viewport .cdx-discover__tools input { width:100%; min-width:0; }
+ .cdx-viewport .cdx-discover__tools select { width:auto; min-width:max-content; padding-right:36px; }
+ .cdx-viewport .cdx-library__foot { font-size:var(--type-min); }
  .cdx-viewport .cdx-hero-turntable__controls { gap:3px; padding-top:8px; }
  .cdx-viewport .cdx-hero-turntable__controls button { padding:5px 8px; }
  .cdx-portfolio__summary .mdx-num { font-size:21px; }
  .cdx-page-controls { min-height:44px; }
- .cdx-legal > header p { display:none; }
 }
 @media(max-height:700px) {
  .cdx-viewport .mdx-rail { padding-block:10px; }
@@ -93,7 +131,9 @@ body { overflow:clip; }
 .cdx-viewport .cdx-home__lot { height:100%; --W:min(480px,calc((100cqh - 166px)/1.636825),calc((100cqw - 44px)/1.26)); padding:0; }
 .cdx-viewport .cdx-home__lot .mdx-tt { padding-block:calc(var(--W)*.12); }
 .cdx-viewport .cdx-home__caption { margin-top:8px; }
-.cdx-viewport .cdx-home__aside { min-height:0; overflow:clip; gap:10px; }
+.cdx-viewport .cdx-home__aside { min-height:0; overflow-x:clip; overflow-y:auto; gap:22px; }
+/* Rows bleed 8px into each side (-mx-2) for their hover fill; the right padding keeps that fill and the prices inside. */
+@media(min-width:1024px) { .cdx-app.cdx-viewport .cdx-home__aside { padding-right:10px; } }
 .cdx-home-pulse-list { flex:1; min-height:0; }
 .cdx-viewport .cdx-home-pulse-list .mdx-row { min-height:56px; }
 @media(max-width:1023px) {
@@ -102,9 +142,12 @@ body { overflow:clip; }
  .cdx-viewport .cdx-home-stage,.cdx-viewport .cdx-home__aside { flex:1; min-height:0; }
  .cdx-home[data-home-view=card] .cdx-home__aside,.cdx-home[data-home-view=pulse] .cdx-home-stage { display:none; }
  .cdx-viewport .cdx-home__aside { padding:8px; margin:0; border:0; }
+ /* Collection pulse flows in <main> (the page scroller) instead of scrolling inside it. */
+ .cdx-viewport .cdx-home[data-home-view=pulse] { height:auto; min-height:100%; }
+ .cdx-app.cdx-viewport .cdx-home[data-home-view=pulse] .cdx-home__aside { flex:none; overflow:visible; }
  .cdx-viewport .cdx-home__lot { --W:min(340px,calc((100cqh - 156px)/1.636825),calc((100cqw - 44px)/1.26)); }
  .cdx-viewport .cdx-home__intro .mdx-display { max-width:none; font-size:26px; }
- .cdx-viewport .cdx-home__copy { max-width:none; margin-top:4px; font-size:11px; }
+ .cdx-viewport .cdx-home__copy { max-width:none; margin-top:4px; font-size:var(--type-min); }
  .cdx-viewport .cdx-home__caption .mdx-name { font-size:20px; }
  .cdx-viewport .cdx-home__caption { margin-top:5px; }
  .cdx-viewport .cdx-home__controls { margin-top:2px; }
@@ -112,11 +155,11 @@ body { overflow:clip; }
 }
 @media(max-width:359px) and (max-height:700px) {
  .cdx-viewport .cdx-home__intro .mdx-display { font-size:22px; }
- .cdx-viewport .cdx-home__copy { font-size:10px; }
+ .cdx-viewport .cdx-home__copy { font-size:var(--type-min); }
  .cdx-viewport .cdx-home__launch { min-height:36px; }
  .cdx-viewport .cdx-home__lot { --W:min(240px,calc((100cqh - 146px)/1.636825),calc((100cqw - 40px)/1.26)); }
  .cdx-viewport .cdx-home__caption .mdx-name { font-size:18px; }
- .cdx-viewport .cdx-home__caption .mdx-leaders { font-size:11px; }
+ .cdx-viewport .cdx-home__caption .mdx-leaders { font-size:var(--type-min); }
 }
 /* Coin sections are real screen tabs, with a permanent desktop case beside them. */
 .cdx-coin-screen { display:flex; flex-direction:column; gap:10px; height:100%; min-height:0; }
@@ -130,11 +173,13 @@ body { overflow:clip; }
 .cdx-coin-screen__object { min-height:0; container-type:size; display:flex; align-items:center; justify-content:center; }
 .cdx-coin-screen__case { width:min(440px,calc((100cqh - 100px)*112/173.683),calc(100cqw - 60px)); }
 .cdx-coin-screen__pane { min-height:0; display:flex; flex-direction:column; gap:12px; padding:12px; }
+.cdx-coin-screen[data-tab=card] .cdx-coin-screen__pane, .cdx-coin-screen[data-tab=details] .cdx-coin-screen__pane { overflow-y:auto; }
+.cdx-coin-screen__story { font-size:15px; line-height:1.55; max-width:68ch; overflow-wrap:anywhere; white-space:pre-line; }
 .cdx-coin-screen__chart { flex:1; min-height:0; }
 .cdx-coin-screen__chart .cdx-candles { min-height:0; }
 .cdx-coin-screen__trades { flex:1; min-height:0; }
 .cdx-trades-page { flex:1; min-height:0; }
-.cdx-coin-screen__ownership { flex:1; min-height:0; display:flex; flex-direction:column; justify-content:space-between; }
+.cdx-coin-screen__ownership { flex:none; display:flex; flex-direction:column; }
 .cdx-coin-screen__ownership dl > div { padding-block:12px; border-bottom:1px solid #ded0b2; font-size:14px; }
 .cdx-coin-screen__ownership dt { color:var(--color-slate); font-size:12px; }
 .cdx-coin-screen__ownership dd { margin-top:4px; overflow-wrap:anywhere; }
@@ -147,8 +192,8 @@ body { overflow:clip; }
 @media(max-width:1023px) {
  .cdx-coin-screen__head { align-items:center; }
  .cdx-coin-screen__head > span { display:none; }
- .cdx-coin-screen__head .mdx-h1 { font-size:24px; }
- .cdx-coin-screen__tabs .mdx-tabs button { padding-inline:7px; font-size:11px; }
+ .cdx-coin-screen__head .mdx-h1 { font-size:var(--type-page-title-sm); }
+ .cdx-coin-screen__tabs .mdx-tabs button { padding-inline:7px; font-size:var(--type-min); }
  .cdx-coin-screen__body { display:flex; flex-direction:column; gap:0; }
  .cdx-coin-screen__pane { flex:1; padding:6px; }
  .cdx-coin-screen[data-tab=card] .cdx-coin-screen__pane { display:none; }
@@ -172,7 +217,7 @@ body { overflow:clip; }
 .cdx-paged-copy__text { position:relative; }
 .cdx-category-select { display:none; }
 @media(max-width:1023px) {
- .cdx-viewport .cdx-archive__head h1 { font-size:22px; white-space:nowrap; }
+ .cdx-viewport .cdx-archive__head h1 { font-size:var(--type-page-title-sm); white-space:nowrap; }
  .cdx-library-desktop-tabs { display:none; }
  .cdx-viewport .cdx-library__tools { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:6px; }
  .cdx-viewport .cdx-library__tools .cdx-filter { display:none; }

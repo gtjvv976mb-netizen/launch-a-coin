@@ -41,7 +41,7 @@ export function CardPrint({ card, layout, tier, preview = false }: { card: CardD
       <span>{quote.symbol} pair</span>
     </div>
     <div className="mdx-card__text" data-card-slot="details" style={boxStyle(layout.text)}>
-      <p className="mdx-card__lore" data-card-slot="description">{card.lore || (unquoted ? "Your token's story will appear here." : "A fresh coin in the dex. Its story is still being written.")}</p>
+      <p className="mdx-card__lore" data-card-slot="description">{card.lore || (unquoted ? "Your coin's story will appear here." : "A fresh coin in the collection. Its story is still being written.")}</p>
       <div className="mdx-card__rows">
         <div className="mdx-card__row" data-card-slot="address">
           <span><span className="mdx-card__long">Token address</span><span className="mdx-card__short">Address</span></span>

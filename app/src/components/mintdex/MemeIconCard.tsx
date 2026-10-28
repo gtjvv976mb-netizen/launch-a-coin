@@ -282,7 +282,7 @@ export function MemeIconCard({ icon: input, card, compact = false, priority = fa
           onLoad={art.onLoad}
         /> : null}
         {!artSource || art.failed ? <span className={art.failed ? "mdx-meme-icon__art-unavailable" : "mdx-meme-icon__art-empty"}>
-          {art.failed ? "Token artwork unavailable" : "Your token art"}
+          {art.failed ? "Coin artwork unavailable" : "Your coin art"}
         </span> : null}
       </div>
       {frameSource ? <img

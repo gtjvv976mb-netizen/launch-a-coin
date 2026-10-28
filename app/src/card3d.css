@@ -1997,10 +1997,21 @@
     transform: rotate(360deg);
   }
 }
-:root:not([data-motion]) .mdx-card3d > .mdx-card3d__halo > b::before {
+/* The featured (hand) card's halo turns; a card in a grid or list only while it has keyboard focus or the mouse
+ * (MOT-3: a browse grid never moves by itself). */
+:root:not([data-motion]) .mdx-card3d:not([data-depth="table"]) > .mdx-card3d__halo > b::before,
+:root:not([data-motion]) .mdx-card3d[data-depth="table"]:focus-within > .mdx-card3d__halo > b::before {
   animation: mdx-prism 7s linear infinite;
 }
+@media (hover: hover) and (pointer: fine) {
+  :root:not([data-motion]) .mdx-card3d[data-depth="table"]:hover > .mdx-card3d__halo > b::before {
+    animation: mdx-prism 7s linear infinite;
+  }
+}
 :root:not([data-motion="calm"]) .mdx-card3d[data-state~="offscreen"] > .mdx-card3d__halo > b::before,
+/* Pause (Home's featured cards, the coin case's turntable) stops the halo too, not only the turn (WCAG 2.2.2). */
+.mdx-home[data-ambient-paused] .mdx-card3d > .mdx-card3d__halo > b::before,
+.mdx-case[data-paused] .mdx-card3d > .mdx-card3d__halo > b::before,
 :root:not([data-motion="calm"]) body[data-scroll-locked] .mdx-card3d:not([role="dialog"] .mdx-card3d) > .mdx-card3d__halo > b::before {
   animation-play-state: paused !important;
 }
@@ -2020,8 +2031,15 @@
  * a 3x phone; perspective() inside the keyframes did not). Symmetric ends, so the middle of the swing is the
  * rest pose: a dealt card starts its sway there (moments.ts sets --float-delay to minus half a period) and the
  * deal hands over without a jump. The deal and the shuffle own __enter while they run (animation-name none). */
-:root:not([data-motion="calm"]):not([data-motion="lite"]) .mdx-card3d[data-depth="table"]:not([data-still]) > .mdx-card3d__enter {
+/* MOT-3: only the card with keyboard focus or the mouse sways; a grid of cards never drifts by itself. A dealt or
+ * spinning card keeps no sway (the rules below set animation-name none; the :not()s keep this one from beating them). */
+:root:not([data-motion="calm"]):not([data-motion="lite"]) .mdx-card3d[data-depth="table"]:not([data-still]):not([data-spin3d]):not([data-state~="dealing"]):focus-within > .mdx-card3d__enter {
   animation: mdx-sway var(--float-dur, 7s) var(--ease-drift) var(--float-delay, 0s) infinite alternate;
+}
+@media (hover: hover) and (pointer: fine) {
+  :root:not([data-motion="calm"]):not([data-motion="lite"]) .mdx-card3d[data-depth="table"]:not([data-still]):not([data-spin3d]):not([data-state~="dealing"]):hover > .mdx-card3d__enter {
+    animation: mdx-sway var(--float-dur, 7s) var(--ease-drift) var(--float-delay, 0s) infinite alternate;
+  }
 }
 :root:not([data-motion="calm"]):not([data-motion="lite"]) .mdx-card3d[data-depth="table"][data-state~="dealing"] > .mdx-card3d__enter {
   animation-name: none;
@@ -2472,6 +2490,16 @@
 .mdx-case__btn:active {
   transform: scale(0.97);
 }
+/* Every loop on and around a paused case holds still. */
+.mdx-case[data-paused] *,
+.mdx-case[data-paused] *::before,
+.mdx-case[data-paused] *::after {
+  animation-play-state: paused !important;
+}
+/* Calm turns nothing, so its Pause has nothing to stop: hidden, holding its place so the row does not shift. */
+:root[data-motion="calm"] .mdx-case__btn--pause {
+  visibility: hidden;
+}
 .mdx-case__scene:focus-visible {
   outline: none;
 }
@@ -2684,23 +2712,25 @@
 .mdx-v3dbtn {
   position: absolute;
   z-index: 6;
-  top: 8px;
-  right: 8px;
+  /* On the card's corner, outside its face: the edition mark (1/1) sits just inside the top right corner. */
+  top: -10px;
+  right: -10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  color: var(--color-neon, #3dffb5);
-  background: rgb(8 11 20 / 0.78);
-  border: 1px solid rgb(61 255 181 / 0.55);
-  box-shadow: 0 0 14px -2px rgb(61 255 181 / 0.55);
+  /* A quiet chip in the cream system, like the phone tilt chip: sheet fill, control border, ink glyph, no glow. */
+  color: var(--color-ink);
+  background: var(--color-sheet);
+  border: 1px solid var(--color-control-border); /* taste-skill-ignore: the control boundary a secondary chip needs (3:1) */
+  box-shadow: none;
   opacity: 0;
   transition:
-    opacity 160ms ease,
-    transform 160ms ease,
-    box-shadow 160ms ease;
+    opacity 160ms var(--ease-room),
+    transform 160ms var(--ease-room),
+    background-color 150ms ease;
   -webkit-tap-highlight-color: transparent;
 }
 .mdx-v3d-host:focus-within > .mdx-v3dbtn,
@@ -2715,8 +2745,7 @@
     opacity: 1;
   }
   .mdx-v3dbtn:hover {
-    transform: scale(1.06);
-    box-shadow: var(--glow-neon, 0 0 16px rgb(61 255 181 / 0.6));
+    background: var(--color-tint);
   }
   :root:not([data-motion="calm"]) .mdx-v3dbtn:hover > svg {
     transform: rotate(-18deg);
@@ -2737,16 +2766,17 @@
     opacity: 0.94;
     width: 32px;
     height: 32px;
-    top: 6px;
-    right: 6px;
+    top: -8px;
+    right: -8px;
   }
 }
-/* Keep the compact rotate glyph clear of the artwork while giving touch a 44px target. */
+/* Keep the compact rotate glyph clear of the artwork while giving touch a 44px target. The extra area grows
+ * inward and down over the card's corner (the side a grid cell never clips), not out past the cell's edge. */
 @media (pointer: coarse) {
   .mdx-v3dbtn::before {
     content: "";
     position: absolute;
-    inset: -7px;
+    inset: -1px -1px -15px -15px;
     border-radius: inherit;
   }
 }
@@ -2775,7 +2805,8 @@
   z-index: 90;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  color: var(--color-ink, #eef3fa);
+  /* Its own light-on-dark ink: the backdrop stays night-dark in the cream theme (carddex-theme.css --v3d-*). */
+  color: var(--v3d-ink, #eef3fa);
   background: radial-gradient(ellipse 70% 58% at 50% 44%, #16213d 0%, #0a0f1f 52%, #03040a 100%);
   outline: none;
   overflow: clip;
@@ -2823,8 +2854,7 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--color-neon, #3dffb5);
-  text-shadow: 0 0 12px rgb(61 255 181 / 0.6);
+  color: var(--v3d-accent, #3dffb5);
 }
 .mdx-v3d__tools {
   display: flex;
@@ -2841,20 +2871,20 @@
   border-radius: 999px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-ink, #eef3fa);
-  background: rgb(21 28 41 / 0.72);
-  border: 1px solid rgb(148 178 220 / 0.22);
-  transition:
-    border-color 140ms ease,
-    box-shadow 140ms ease;
+  color: var(--v3d-ink, #eef3fa);
+  background: var(--v3d-control, rgb(21 28 41 / 0.72));
+  border: 1px solid var(--v3d-control-border, rgb(148 178 220 / 0.5)); /* taste-skill-ignore: 3:1 control boundary on the night backdrop */
+  transition: border-color 140ms var(--ease-room);
 }
-.mdx-v3d__btn:hover {
-  border-color: rgb(61 255 181 / 0.8);
-  box-shadow: 0 0 16px -2px rgb(61 255 181 / 0.5);
+@media (hover: hover) and (pointer: fine) {
+  .mdx-v3d__btn:hover {
+    border-color: var(--v3d-control-hover, rgb(61 255 181 / 0.8));
+  }
 }
 .mdx-v3d__btn:focus-visible,
-.mdx-v3d__go:focus-visible {
-  outline: 2px solid var(--color-zap, #38d9ff);
+.mdx-v3d__go:focus-visible,
+.mdx-v3d .mdx-v3d__step:focus-visible {
+  outline: 2px solid var(--v3d-accent, #38d9ff);
   outline-offset: 2px;
 }
 .mdx-v3d__close {
@@ -2949,6 +2979,19 @@
   translate: 0 -50%;
   background: rgb(21 28 41 / 0.78);
 }
+/* The chevrons are outline buttons: re-ink them for the night backdrop (the page's outline recipe is dark ink). */
+.mdx-v3d .mdx-v3d__step {
+  color: var(--v3d-ink, #eef3fa);
+  background: var(--v3d-control, rgb(21 28 41 / 0.78));
+  border: 1px solid var(--v3d-control-border, rgb(148 178 220 / 0.5)); /* taste-skill-ignore: 3:1 control boundary on the night backdrop */
+  box-shadow: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mdx-v3d .mdx-v3d__step:hover:not(:disabled, [aria-disabled="true"]) {
+    border-color: var(--v3d-control-hover, rgb(61 255 181 / 0.8));
+    box-shadow: none;
+  }
+}
 .mdx-v3d__step--prev {
   left: 16px;
 }
@@ -2982,10 +3025,10 @@
   justify-content: center;
   gap: 10px;
   font-size: 14px;
-  color: var(--color-slate, #9ba8bc);
+  color: var(--v3d-muted, #9ba8bc);
 }
 .mdx-v3d__ticker {
-  color: var(--color-ink, #eef3fa);
+  color: var(--v3d-ink, #eef3fa);
   font-weight: 600;
 }
 .mdx-v3d__go {
@@ -2993,7 +3036,7 @@
 }
 .mdx-v3d__hint {
   font-size: 12px;
-  color: var(--color-slate, #9ba8bc);
+  color: var(--v3d-muted, #9ba8bc);
 }
 .mdx-v3d__hint-touch {
   display: none;
