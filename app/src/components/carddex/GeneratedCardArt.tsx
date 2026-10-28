@@ -36,36 +36,77 @@ export function GeneratedCardFinish({ cardTemplate }: { cardTemplate?: string })
   return <div className="cdx-generated-finish" aria-hidden><i className="cdx-generated-finish__spectrum" /><i className="cdx-generated-finish__glint" /></div>;
 }
 
+/** Phones (the site's 767px breakpoint) take the 320px copy of a hidden or deferred plate, whatever their pixel ratio. */
+export function phoneCopy() {
+  return typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(max-width: 767px)").matches;
+}
+
+/**
+ * Wait to fetch a plate the visitor cannot see yet (PERF-1). It loads on the first touch, key or focus on its card,
+ * when the card starts turning or shows its back, or (when `idle` allows) once the page has loaded and gone idle
+ * with the card on screen. Before then the img is not rendered at all, so nothing is queued.
+ */
+export function useDeferredPlate(ref: RefObject<HTMLElement | null>, start: boolean, idle: () => boolean) {
+  const [wanted, setWanted] = useState(start);
+  useEffect(() => {
+    if (wanted) return;
+    const want = () => setWanted(true);
+    const scene = ref.current?.closest<HTMLElement>(".mdx-card3d") ?? null;
+    const intent = ["pointerdown", "keydown", "focusin"] as const;
+    for (const t of intent) scene?.addEventListener(t, want, { once: true, passive: true });
+    const turned = () => {
+      const state = scene?.dataset.state ?? "";
+      if (scene?.dataset.side === "back" || /\b(turning|dragging|held)\b/.test(state)) want();
+    };
+    const watch = scene ? new MutationObserver(turned) : null;
+    watch?.observe(scene!, { attributes: true, attributeFilter: ["data-side", "data-state"] });
+    turned();
+    const ric = typeof window.requestIdleCallback === "function";
+    let handle: number | undefined;
+    // Both must hold, in either order: the page has gone idle and the card is on screen.
+    let seen = !scene;
+    let rested = false;
+    const check = () => { if (seen && rested && idle()) want(); };
+    const view = scene && typeof IntersectionObserver === "function" ? new IntersectionObserver((rows) => { seen = rows.some((r) => r.isIntersecting); check(); }) : null;
+    if (view && scene) view.observe(scene); else seen = true;
+    const go = () => {
+      const fire = () => { rested = true; check(); };
+      handle = ric ? window.requestIdleCallback(fire, { timeout: 3000 }) : globalThis.setTimeout(fire, 600) as unknown as number;
+    };
+    if (document.readyState === "complete") go();
+    else window.addEventListener("load", go, { once: true });
+    return () => {
+      for (const t of intent) scene?.removeEventListener(t, want);
+      watch?.disconnect();
+      view?.disconnect();
+      window.removeEventListener("load", go);
+      if (handle !== undefined) { if (ric) window.cancelIdleCallback(handle); else clearTimeout(handle); }
+    };
+  }, [wanted, ref, idle]);
+  return wanted;
+}
+
+/** A back turns into view by itself only where the card moves on its own; under calm it waits for the visitor. */
+const backIdle = () => typeof document !== "undefined" && document.documentElement.dataset.motion !== "calm";
+
 /** A verified wordless reverse replaces the native engraving after decode; errors retain the native back. */
 export function GeneratedCardReverse({ cardTemplate, eager = false, sizes, children }: { cardTemplate?: string; eager?: boolean; sizes?: string; children: ReactNode }) {
   const assets = generatedCardAssets(cardTemplate);
   const source = assets.back ?? null;
   const ref = useRef<HTMLImageElement>(null);
+  const box = useRef<HTMLDivElement>(null);
   const image = useReadyImage(ref, source);
-  // A back that starts face down waits for the page to load and go idle (PERF-1): the native back shows until then,
-  // so the faces, CSS and scripts never queue behind it.
-  const [wanted, setWanted] = useState(eager);
-  useEffect(() => {
-    if (wanted || !source) return;
-    const ric = typeof window.requestIdleCallback === "function";
-    let idle: number | undefined;
-    const go = () => {
-      idle = ric ? window.requestIdleCallback(() => setWanted(true), { timeout: 3000 }) : globalThis.setTimeout(() => setWanted(true), 600) as unknown as number;
-    };
-    if (document.readyState === "complete") go();
-    else window.addEventListener("load", go, { once: true });
-    return () => {
-      window.removeEventListener("load", go);
-      if (idle !== undefined) { if (ric) window.cancelIdleCallback(idle); else clearTimeout(idle); }
-    };
-  }, [wanted, source]);
+  // A back that starts face down waits until it can be seen (useDeferredPlate): the native back shows until then.
+  const wanted = useDeferredPlate(box, eager, backIdle) || eager;
   if (!source) return <>{children}</>;
-  return <div className="cdx-generated-reverse" data-generated-back-ready={image.ready ? "" : undefined}>
+  // Rendered only after mount (wanted), so the phone choice never differs from the server markup.
+  const small = !!assets.back320 && phoneCopy();
+  return <div ref={box} className="cdx-generated-reverse" data-generated-back-ready={image.ready ? "" : undefined}>
     {!image.ready ? children : null}
-    {!wanted ? null : <>{/* A hidden back loads lazily at its laid-out width (sizes "auto": the 320px copy for a small card), so it is
-        never preloaded or fetched at full size ahead of the faces. A back shown face up (eager) takes the
-        card's own sizes, since "auto" is only valid on a lazy image. */}
-    <img ref={ref} src={source} srcSet={assets.back320 ? `${assets.back320} 320w, ${source} 1260w` : undefined} sizes={assets.back320 ? (eager ? sizes ?? "(max-width: 767px) 72vw, 400px" : "auto, (max-width: 767px) 72vw, 400px") : undefined} alt="" hidden={image.failed} draggable={false} loading={eager ? "eager" : "lazy"} decoding="async" fetchPriority={eager ? undefined : "low"} onLoad={image.onLoad} onError={image.onError} /></>}
+    {!wanted ? null : <>{/* A hidden back loads lazily at its laid-out width (sizes "auto"), so it is never preloaded
+        or fetched at full size ahead of the faces; phones take the 320px copy outright. A back shown face up
+        (eager) takes the card's own sizes, since "auto" is only valid on a lazy image. */}
+    <img ref={ref} src={small ? assets.back320 : source} srcSet={assets.back320 && !small ? `${assets.back320} 320w, ${source} 1260w` : undefined} sizes={assets.back320 && !small ? (eager ? sizes ?? "(max-width: 767px) 72vw, 400px" : "auto, (max-width: 767px) 72vw, 400px") : undefined} alt="" hidden={image.failed} draggable={false} loading={eager ? "eager" : "lazy"} decoding="async" fetchPriority={eager ? undefined : "low"} onLoad={image.onLoad} onError={image.onError} /></>}
   </div>;
 }
 

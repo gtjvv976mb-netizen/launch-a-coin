@@ -496,7 +496,7 @@ export function CoinDetails({
       <CaptionTop coin={coin} className="mb-2 hidden lg:block" />
       <DesignProgress coin={coin} className="max-lg:hidden" />
       {/* In test mode the address is a test key that was never deployed (decision C6): the row says so. */}
-      {coin.mintAddress ? <Address address={coin.mintAddress} row label className="mt-3 max-lg:mt-0" /> : <p className="mt-3 text-[12px] leading-5 text-slate max-lg:mt-0">No on-chain address in this local demo.</p>}
+      {coin.mintAddress ? <Address address={coin.mintAddress} row label className="mt-3 max-lg:mt-0" /> : <p className="mt-3 text-[12px] leading-5 text-slate max-lg:mt-0">No on-chain address in the demo.</p>}
       {coin.graduated && (
         <p className="mt-2 text-[13px] font-medium leading-[1.45] text-ink max-lg:mt-0">
           {MODE_COPY.curveComplete}
