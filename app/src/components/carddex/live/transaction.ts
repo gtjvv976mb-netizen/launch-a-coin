@@ -1,5 +1,6 @@
 import { ed25519 } from "@noble/curves/ed25519.js";
 import { sha256 } from "@noble/hashes/sha2.js";
+import { LIVE_PACKET_LIMIT } from "../../../lib/carddex/live/types";
 
 const ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const TOKEN_2022 = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
@@ -53,6 +54,8 @@ export type TransactionPlan = {
   lastValidBlockHeight: number;
   /** Block height when prepared; lastValidBlockHeight minus this is the signing window in blocks. */
   preparedBlockHeight?: number;
+  /** Server time the plan was built (ISO). The page times freshness from when it received the plan instead. */
+  preparedAt?: string;
   requiredSigners: readonly string[];
   feePayer: string;
   bindingSha256: string;
@@ -68,6 +71,9 @@ export type TransactionPlan = {
     quoteMint: string;
     quoteDecimals: number;
     minimumTokensOut: string;
+    /** Serialized wire size and Solana's packet limit, measured by the server. Older saved plans have neither. */
+    transactionBytes?: number;
+    packetLimit?: number;
     [key: string]: unknown;
   };
 };
@@ -76,7 +82,7 @@ type WireInstruction = { program: string; accounts: string[]; data: Uint8Array }
 type Wire = { bytes: Uint8Array; message: Uint8Array; signatureOffset: number; signatures: Uint8Array[]; signers: string[]; blockhash: string; programs: string[]; keys: string[]; instructions: WireInstruction[] };
 /** Narrow parser for this adapter's v0 transactions. Lookup tables and additional signers are refused. */
 export function parseLiveTransaction(bytes: Uint8Array): Wire {
-  if (bytes.length > 1232 || bytes.length < 134) throw new Error("The prepared transaction has an invalid size.");
+  if (bytes.length > LIVE_PACKET_LIMIT || bytes.length < 134) throw new Error("The prepared transaction has an invalid size.");
   let offset = 0;
   const take = (length: number) => {
     if (!Number.isSafeInteger(length) || length < 0 || offset + length > bytes.length) throw new Error("The transaction is truncated.");
@@ -171,8 +177,15 @@ function validateOperations(wire: Wire, expected: ExpectedPlan, plan: Transactio
     if (create.accounts.length !== 8 || create.accounts.some((key, i) => key !== expectedCreate[i]) || hex(update.data) !== "0f00000100" || update.accounts.length !== 6 || update.accounts.some((key, i) => key !== expectedUpdate[i])) throw new Error("The card NFT owner or permanent metadata authority is not the one reviewed.");
   }
 }
+/** The plain refusal for a transaction over Solana's size limit, before the wallet opens. */
+export function oversizedPlanError(bytes: number) {
+  return `This transaction is ${bytes.toLocaleString("en-US")} bytes, over Solana's ${LIVE_PACKET_LIMIT.toLocaleString("en-US")}-byte limit, so your wallet was not opened. Use a shorter name or symbol, or launch without an initial buy.`;
+}
 export function validateLivePlan(plan: TransactionPlan, expected: ExpectedPlan): Wire {
-  const wire = parseLiveTransaction(fromBase64(plan.transactionBase64));
+  const bytes = fromBase64(plan.transactionBase64);
+  if (bytes.length > LIVE_PACKET_LIMIT) throw new Error(oversizedPlanError(bytes.length));
+  if (plan.review.transactionBytes !== undefined && plan.review.transactionBytes !== bytes.length) throw new Error("The transaction size differs from the review. Prepare it again.");
+  const wire = parseLiveTransaction(bytes);
   if (plan.network !== MAINNET_CHAIN) throw new Error("This launch transaction is not for Solana mainnet.");
   if (plan.kind !== expected.kind || plan.feePayer !== expected.creator || wire.signers[0] !== expected.creator) throw new Error("The transaction fee payer does not match your connected wallet.");
   if (wire.signers[1] !== expected.mint || plan.requiredSigners.length !== 2 || plan.requiredSigners.some((s, i) => s !== wire.signers[i])) throw new Error("The transaction requires an unexpected signer.");
@@ -196,11 +209,94 @@ export function partiallySignPlan(plan: TransactionPlan, expected: ExpectedPlan,
   out.set(ed25519.sign(wire.message, signer.seed), wire.signatureOffset + 64);
   return out;
 }
+/** The page-first order, for wallets not yet tested with wallet-first: checks what the wallet returns for a pre-signed plan. */
 export function validateWalletResult(before: Uint8Array, signed: Uint8Array, creator: string): Uint8Array {
   const original = parseLiveTransaction(before), result = parseLiveTransaction(signed);
   if (!sameBytes(original.message, result.message) || result.signers[0] !== creator || !sameBytes(original.signatures[1], result.signatures[1])) throw new Error("Your wallet changed the prepared transaction. Nothing was submitted.");
   if (!result.signatures.every((sig, i) => ed25519.verify(sig, result.message, fromBase58(result.signers[i])))) throw new Error("The wallet returned invalid or incomplete transaction signatures. Nothing was submitted.");
   return signed;
+}
+
+/**
+ * Who signs first. "wallet-first": the wallet signs the unsigned plan, then this page adds the new coin or card
+ * signature to exactly what the wallet returned (Phantom's documented order). "page-first": the earlier order.
+ */
+export type SigningOrder = "wallet-first" | "page-first";
+export function signingOrderFor(walletName: string | null | undefined, walletFirst: readonly string[] | undefined): SigningOrder {
+  const name = walletName?.trim().toLowerCase();
+  return name && walletFirst?.some(entry => entry === "*" || entry.trim().toLowerCase() === name) ? "wallet-first" : "page-first";
+}
+export const WALLET_CHANGED_TRANSACTION = "Nothing was sent and nothing was charged. Your wallet returned a different transaction from the one you reviewed, so this page stopped before adding its own signature. Close this review and try again.";
+/** The wallet returned a different message. `returned` holds its bytes for the server's change log; they cannot land unsigned by this page. */
+export class WalletChangedTransaction extends Error {
+  constructor(readonly returned: Uint8Array) { super(WALLET_CHANGED_TRANSACTION); this.name = "WalletChangedTransaction"; }
+}
+/**
+ * Wallet-first: the wallet must return the reviewed message byte for byte, signed by the creator (the fee payer) in
+ * the first slot, with the new asset's slot still empty. Any other message is refused, never co-signed.
+ */
+export function validateWalletFirstResult(unsigned: Uint8Array, signed: Uint8Array, creator: string): Uint8Array {
+  const original = parseLiveTransaction(unsigned);
+  let result: Wire;
+  try { result = parseLiveTransaction(signed); } catch { throw new WalletChangedTransaction(signed.slice()); }
+  if (!sameBytes(original.message, result.message)) throw new WalletChangedTransaction(signed.slice());
+  if (result.signers[0] !== creator || !ed25519.verify(result.signatures[0], result.message, fromBase58(creator))) throw new Error("Your wallet did not return a valid signature from the creator wallet. Nothing was submitted.");
+  if (result.signatures[1].some(Boolean)) throw new Error("The wallet returned an unexpected second signature. Nothing was submitted.");
+  return signed;
+}
+/** Adds the new coin or card signature to the wallet-signed bytes, then checks both signatures on the final bytes. */
+export function addEphemeralSignature(walletSigned: Uint8Array, signer: EphemeralSigner, mint: string): Uint8Array {
+  const wire = parseLiveTransaction(walletSigned);
+  if (signer.address !== mint || wire.signers[1] !== mint) throw new Error("This page holds a different new-address key than this transaction needs. Nothing was submitted.");
+  if (wire.signatures[1].some(Boolean)) throw new Error("The transaction already has a second signature. Nothing was submitted.");
+  const out = wire.bytes.slice();
+  out.set(ed25519.sign(wire.message, signer.seed), wire.signatureOffset + 64);
+  const final = parseLiveTransaction(out);
+  if (!sameBytes(final.message, wire.message) || !final.signatures.every((sig, i) => ed25519.verify(sig, final.message, fromBase58(final.signers[i])))) throw new Error("The signed transaction failed its signature check. Nothing was submitted.");
+  return out;
+}
+/**
+ * Validates the plan, asks the wallet to sign in the chosen order and returns bytes signed by both the creator and
+ * the new asset. `walletSign` is the wallet prompt; it returns whatever the wallet hands back.
+ */
+export async function signPlanWithWallet(plan: TransactionPlan, expected: ExpectedPlan, signer: EphemeralSigner, order: SigningOrder,
+  walletSign: (transaction: Uint8Array) => Promise<Uint8Array>): Promise<Uint8Array> {
+  const wire = validateLivePlan(plan, expected);
+  if (signer.address !== expected.mint || wire.signatures.some(signature => signature.some(Boolean))) throw new Error("The prepared transaction already contains an unexpected signature.");
+  if (order === "page-first") {
+    const partial = partiallySignPlan(plan, expected, signer);
+    return validateWalletResult(partial, await walletSign(partial), expected.creator);
+  }
+  const unsigned = wire.bytes.slice();
+  const returned = await walletSign(unsigned.slice());
+  validateWalletFirstResult(unsigned, returned, expected.creator);
+  return addEphemeralSignature(returned, signer, expected.mint);
+}
+
+/** A plan this page received more than ~30 s ago is prepared again before the wallet opens, so its blockhash is fresh. */
+export const PLAN_FRESH_MS = 30_000;
+export const planIsStale = (receivedAt: number, now: number, maxAgeMs = PLAN_FRESH_MS) => !(receivedAt > 0) || now - receivedAt > maxAgeMs;
+/**
+ * Whether a re-prepared plan can go to the wallet without another review: same stage, quote and initial buy, a SOL
+ * total that rose by no more than the priority-fee change, and a minimum coin output that did not fall.
+ */
+export function refreshKeepsReview(previous: TransactionPlan, next: TransactionPlan): boolean {
+  const before = previous.review, after = next.review;
+  const priorityRise = BigInt(after.priorityFeeLamports) > BigInt(before.priorityFeeLamports) ? BigInt(after.priorityFeeLamports) - BigInt(before.priorityFeeLamports) : 0n;
+  return next.kind === previous.kind && after.quoteMint === before.quoteMint && after.initialBuyQuoteBaseUnits === before.initialBuyQuoteBaseUnits &&
+    BigInt(after.totalDebitLamports) <= BigInt(before.totalDebitLamports) + priorityRise && BigInt(after.minimumTokensOut) >= BigInt(before.minimumTokensOut);
+}
+/**
+ * The plan to open the wallet with. A fresh plan goes as it is. A stale one is prepared again through `refresh`
+ * (which validates it): "refreshed" when nothing reviewed moved, "changed" when the review must be shown again,
+ * "gone" when the stage no longer needs this transaction.
+ */
+export async function planForWallet(plan: TransactionPlan, receivedAt: number, refresh: () => Promise<TransactionPlan | null>, now = Date.now()):
+  Promise<{status: "fresh" | "refreshed" | "changed"; plan: TransactionPlan} | {status: "gone"}> {
+  if (!planIsStale(receivedAt, now)) return {status: "fresh", plan};
+  const next = await refresh();
+  if (!next) return {status: "gone"};
+  return {status: refreshKeepsReview(plan, next) ? "refreshed" : "changed", plan: next};
 }
 /**
  * The next step for a signed transaction the server did not broadcast, from the stage read back afterwards: "prepare"

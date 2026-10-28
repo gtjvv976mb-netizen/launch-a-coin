@@ -66,6 +66,12 @@ export const prepareLiveCreatorNft = createServerFn({method: "POST"}).validator(
 export const confirmLiveCreatorNft = createServerFn({method: "POST"}).validator(z.object({intentId, signature, messageSha256: sha256.optional()})).handler(({data}) => attempt(async () => {
   sameOrigin(); return service.confirmLiveCreatorNft((await wallet()).wallet, data);
 }));
-export const submitLiveTransaction = createServerFn({method: "POST"}).validator(z.object({intentId, kind: z.enum(["token", "nft"]), messageSha256: sha256, transactionBase64: z.string().min(80).max(4000)})).handler(({data}) => attempt(async () => {
+// walletName and signingOrder only label the server log line; no check depends on them.
+const walletName = z.string().min(1).max(64);
+export const submitLiveTransaction = createServerFn({method: "POST"}).validator(z.object({intentId, kind: z.enum(["token", "nft"]), messageSha256: sha256, transactionBase64: z.string().min(80).max(4000),
+  walletName: walletName.optional(), signingOrder: z.enum(["wallet-first", "page-first"]).optional()})).handler(({data}) => attempt(async () => {
   sameOrigin(); return service.submitLiveTransaction((await wallet()).wallet, data);
+}));
+export const reportLiveWalletChange = createServerFn({method: "POST"}).validator(z.object({intentId, kind: z.enum(["token", "nft"]), messageSha256: sha256, walletName, transactionBase64: z.string().min(1).max(4000)})).handler(({data}) => attempt(async () => {
+  sameOrigin(); return service.reportLiveWalletChange((await wallet()).wallet, data);
 }));

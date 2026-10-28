@@ -71,6 +71,8 @@ The owner saved the active app-specific Helius endpoint as the encrypted, server
 
 Two switches in `app/wrangler.production.jsonc` control the live flow. `CARDDEX_LIVE_LAUNCH_ENABLED="true"` opens new launches (card composition, a new launch and its coin transaction). `CARDDEX_LIVE_RECOVERY_ENABLED` stays on unless it is `"false"`; it covers sign-in, saved launches, confirmations, the card stage and discards. To stop new launches, turn off only the first switch: creators with a coin already sent can still finish their card. `/api/live/health` reports both.
 
+Signing order. For wallets named in `CARDDEX_LIVE_WALLET_FIRST` (unset means Phantom only; a comma list of wallet names, `"*"` for all, or `"none"`), the wallet signs the unsigned coin or card transaction first and the page then adds the new address's signature, the order Phantom documents for multi-signer transactions. Every other wallet keeps the page-first order. If a wallet returns a different message, the page sends nothing and the server logs `Live wallet changed the prepared transaction` with what changed (sizes, blockhash, compute budget, programs added). Set `"none"` to restore the page-first order everywhere without a code change. Every launch transaction also logs `Live launch transaction prepared` and `... signed` with its byte size and headroom under the 1,232-byte limit. A plan older than about 30 seconds is prepared again before the wallet opens.
+
 Current provider reference, reviewed 28 October 2026: [official pump.fun coin creation](https://github.com/pump-fun/pump-public-docs/blob/main/docs/instructions/COIN_CREATION.md). Historical accounts and fees are not assumed current.
 
 ## Generated assets
