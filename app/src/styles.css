@@ -139,7 +139,7 @@
     background-color: var(--color-wall);
     color: var(--color-ink);
     font-family: var(--font-sans);
-    font-size: 15px;
+    font-size: var(--text-body);
     line-height: 1.5;
   }
 

@@ -1,6 +1,6 @@
 /* Shared card-stage chrome (foundation-owned): the HeroTurntable stage and its control row (Launch preview, Designs
- * preview). Moved out of carddex-cards.css, which keeps only card internals. The controls read as the secondary
- * button recipe at sm size (.mdx-btn--outline.mdx-btn--sm): a quiet nested pill, ink label, reaching the hit size.
+ * preview). Moved out of carddex-cards.css, which keeps only card internals. The controls are the secondary button
+ * primitive at sm size (.mdx-btn--outline.mdx-btn--sm, a glyph and its word), the same row as the coin page's case.
  * A screen that wants another spacing tunes `.cdx-hero-turntable__controls` from its own sheet. */
 .cdx-hero-turntable { position: relative; width: 100%; }
 .cdx-hero-turntable__controls {
@@ -10,32 +10,4 @@
   justify-content: center;
   gap: 8px;
   padding-top: 16px;
-}
-.cdx-hero-turntable__controls button {
-  position: relative;
-  display: inline-flex;
-  height: var(--btn-h-sm);
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: var(--color-nested);
-  color: var(--color-ink);
-  font: 600 var(--text-body) / 1 var(--font-sans);
-  white-space: nowrap;
-  transition: background-color var(--t-hover) ease, transform var(--t-press) var(--ease-out);
-}
-.cdx-hero-turntable__controls button::after {
-  content: "";
-  position: absolute;
-  inset: calc((var(--btn-h-sm) - var(--hit)) / 2) 0;
-}
-@media (hover: hover) and (pointer: fine) {
-  .cdx-hero-turntable__controls button:hover { background: var(--color-raised); }
-}
-.cdx-hero-turntable__controls button:active { transform: scale(0.96); }
-@media (prefers-reduced-motion: reduce) {
-  .cdx-hero-turntable__controls button:active { transform: none; }
 }

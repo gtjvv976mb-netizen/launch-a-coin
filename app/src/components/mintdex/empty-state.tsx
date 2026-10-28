@@ -37,18 +37,13 @@ export function EmptyState({
       <div className="flex max-w-[360px] flex-col items-center text-center">
         {inline ? null : hero ? (
           <div ref={fanRef} className="mdx-fan">
-            <div aria-hidden className="mdx-fan__aura">
-              <i />
-            </div>
+            {/* Operate screen: the fan holds still (no drifting side cards, no aura); the held back keeps the
+                card engine's own idle. */}
             <div aria-hidden className="mdx-fan__card mdx-fan__card--l">
-              <div className="mdx-fan__float">
-                <CardBack />
-              </div>
+              <CardBack />
             </div>
             <div aria-hidden className="mdx-fan__card mdx-fan__card--r">
-              <div className="mdx-fan__float">
-                <CardBack />
-              </div>
+              <CardBack />
             </div>
             <Pocket className="mdx-fan__hero [--pocket:6px]">
               <CardBack depth="hand" />

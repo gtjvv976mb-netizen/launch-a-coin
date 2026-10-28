@@ -134,14 +134,12 @@
   position: relative;
   min-width: 0;
 }
-/* The cards' surroundings, quieter on a browse grid (the card itself is untouched): the design-coloured edge glow at
- * about a third of its strength, and no turning prism ring, so the cards stay the only colour and a grid of ten never reads as neon. */
-.cdx-token-grid .mdx-card3d__halo {
-  opacity: 0.35;
-}
-.cdx-token-grid .mdx-card3d__halo > b,
-.cdx-archive__vitrine .mdx-card3d__halo > b {
-  /* !important: card3d.css is unlayered and shows the ring per metal (display:block); this sheet is layered. */
+/* The cards' surroundings on the flat ground (the card itself is untouched): no design-coloured glow and no turning
+ * prism ring behind the grid or the Designs preview, as on Home, Launch, Coin and Portfolio, so the cards stay the
+ * only colour. */
+.cdx-token-grid .mdx-card3d__halo,
+.cdx-archive__vitrine .mdx-card3d__halo {
+  /* !important: the halo is painted by the unlayered card3d.css, which a layered rule cannot beat. */
   display: none !important;
 }
 .cdx-token-cell__caption {

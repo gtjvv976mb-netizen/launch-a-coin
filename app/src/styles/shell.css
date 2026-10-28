@@ -190,6 +190,13 @@
   .cdx-topbar__searchbtn {
     display: none;
   }
+  /* Discover: its own field under the title takes over; the bar keeps the icon, which focuses that field. */
+  .cdx-topbar__tools[data-page-search] .cdx-topbar__search {
+    display: none;
+  }
+  .cdx-topbar__tools[data-page-search] .cdx-topbar__searchbtn {
+    display: inline-flex;
+  }
 }
 .cdx-search {
   position: relative;

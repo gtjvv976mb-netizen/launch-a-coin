@@ -1180,7 +1180,6 @@
     flex: none;
     border-radius: var(--radius-pill);
     background: var(--color-up);
-    box-shadow: 0 0 8px var(--color-up);
   }
   .mdx-live__ping {
     position: absolute;
@@ -1192,7 +1191,6 @@
   /* Live updates paused (P1-17): the dot is slate and still. */
   .mdx-live[data-paused] {
     background: var(--color-slate);
-    box-shadow: none;
   }
   /* Pause or resume live updates: a small slate text button in a live list's header. */
   .mdx-livepause {
@@ -2384,7 +2382,8 @@ a:focus-visible .mdx-lift {
   @media (min-width: 1024px) {
     .mdx-toasts {
       left: auto;
-      right: var(--page-gutter);
+      /* On the column's right edge, like the top bar's last control. */
+      right: max(var(--page-gutter), calc((100vw - var(--column)) / 2));
       bottom: var(--page-gutter);
       width: min(400px, calc(100vw - 2 * var(--page-gutter)));
     }

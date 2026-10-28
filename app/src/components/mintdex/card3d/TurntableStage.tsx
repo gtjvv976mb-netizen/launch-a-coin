@@ -636,16 +636,16 @@ export default function TurntableStage({
 
           <div className="mdx-v3d__cap">
             <div className="mdx-v3d__controls" role="group" aria-label="Card controls">
+              <button type="button" className="mdx-v3d__btn" onClick={() => flip(1)} data-v3d="flip">
+                <Icon name="turn-over" strokeWidth={2} />
+                Turn over
+              </button>
               {calm ? null : (
                 <button type="button" className="mdx-v3d__btn" onClick={() => setPaused((v) => !v)} data-v3d="play">
                   <Icon name={paused ? "play" : "pause"} strokeWidth={2} />
                   {paused ? "Resume spin" : "Pause spin"}
                 </button>
               )}
-              <button type="button" className="mdx-v3d__btn" onClick={() => flip(1)} data-v3d="flip">
-                <Icon name="turn-over" strokeWidth={2} />
-                Turn over
-              </button>
               {/* Hidden when the viewer shows the coin of the page underneath: it would lead back to itself. */}
               {coinId && !onCoinPage ? (
                 <Link

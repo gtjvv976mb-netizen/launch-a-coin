@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cardLabel, useCardSlots, type CardData } from "../mintdex/MintCard";
 import { Card3DView } from "../mintdex/card3d/Card3D";
-import { Engine, motionLevel, type Body } from "../mintdex/card3d/motion3d";
+import { Engine, motionLevel, useMotionLevel, type Body } from "../mintdex/card3d/motion3d";
+import { Icon } from "../mintdex/icons";
 import type { Card3DHandle } from "../mintdex/card3d/types";
 
 /** A full revolution in the shared engine, with the same rounded slab, both-face lighting and touch input. */
@@ -11,6 +12,7 @@ export function HeroTurntable({ card, className = "", playing: controlled, onPla
   controls?: ReactNode;
 }) {
   const [localPlaying, setLocalPlaying] = useState(true);
+  const level = useMotionLevel();
   const playing = controlled ?? localPlaying;
   const slots = useCardSlots(card, { ascend: "ascend", art: "fade", priority: true, sizes: "(max-width: 767px) 72vw, 400px", hand: true });
   useEffect(() => {
@@ -60,9 +62,11 @@ export function HeroTurntable({ card, className = "", playing: controlled, onPla
   const setRef = (handle: Card3DHandle | null) => { slots.handle.current = handle; };
   return <div className={`cdx-hero-turntable ${viewportFit ? "cdx-hero-turntable--viewport" : ""} ${className}`}>
     <Card3DView depth="hand" label={cardLabel(card)} faces={slots.faces} front={slots.front} swap={slots.swap} flippable tapTurns drag="turn" idle={playing ? "breathe" : "none"} ground="shadow" gyro focusable arrowsTurn seed={card.dexNo} backSizes="(max-width: 767px) 72vw, 400px" ctlRef={slots.ctl} ref={setRef} frame={frame} onInteract={() => { lastInput.current = performance.now(); }} onSwapped={slots.onSwapped} onSettled={slots.onSettled} />
+    {/* The same row as the coin page's case (CardCase): secondary sm pills, a glyph and its word. Only full motion
+        turns the card, so calm and reduced motion leave Pause out. Pause swaps its word, so it is not a toggle. */}
     <div className="cdx-hero-turntable__controls">
-      <button type="button" onClick={() => { lastInput.current = performance.now(); slots.handle.current?.turnOver(); }} aria-label="Turn card over">Turn over</button>
-      <button type="button" onClick={toggle} aria-pressed={!playing}>{playing ? "Pause rotation" : "Resume rotation"}</button>
+      <button type="button" className="mdx-btn mdx-btn--outline mdx-btn--sm" title="Turn the card over. You can also drag it to turn." onClick={() => { lastInput.current = performance.now(); slots.handle.current?.turnOver(); }}><Icon name="turn-over" />Turn over</button>
+      {level === "full" ? <button type="button" className="mdx-btn mdx-btn--outline mdx-btn--sm" aria-label={playing ? "Pause spin" : "Resume spin"} onClick={toggle}><Icon name={playing ? "pause" : "play"} />{playing ? "Pause" : "Resume"}</button> : null}
       {controls}
     </div>
   </div>;

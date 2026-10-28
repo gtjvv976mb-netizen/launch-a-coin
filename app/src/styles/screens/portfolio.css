@@ -123,8 +123,6 @@
   .cdx-portfolio__card:hover .cdx-portfolio__capname { text-decoration-line: underline; text-decoration-color: var(--color-control-border); text-underline-offset: 3px; }
 }
 .cdx-portfolio__card:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 4px; border-radius: var(--radius-row); }
-/* !important: viewer.css (unlayered) hides the 3D chip until hover; one card per tile, so it shows at rest. */
-.cdx-portfolio .mdx-v3dbtn { opacity: 1 !important; }
 /* !important: the card's coloured glow and prism ring come from the unlayered card3d.css; on this flat ground the
  * card itself is the colour. */
 .cdx-portfolio .mdx-card3d__halo { display: none !important; }

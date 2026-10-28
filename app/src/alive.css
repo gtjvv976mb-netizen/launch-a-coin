@@ -32,11 +32,6 @@
       0 0;
   }
 }
-@keyframes mdx-aura {
-  to {
-    transform: rotate(360deg);
-  }
-}
 @keyframes mdx-ghost-float {
   from {
     transform: translate3d(0, 3px, 0);
@@ -323,49 +318,6 @@
   left: calc(var(--W) * 0.56);
   transform: rotate(13deg);
   transform-origin: 0 100%;
-}
-.mdx-fan__aura {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  width: calc(var(--W) * 2.3);
-  aspect-ratio: 1;
-  translate: -50% -50%;
-  z-index: 0;
-  overflow: clip;
-  border-radius: 50%;
-  pointer-events: none;
-}
-.mdx-fan__aura > i {
-  position: absolute;
-  inset: 0;
-  display: block;
-  border-radius: 50%;
-  /* No glow behind the held card back on the flat ground: the card's own foil carries the light. */
-  background: none;
-}
-@keyframes mdx-fan-float {
-  from {
-    transform: translate3d(0, 5px, 0) rotate(-2.5deg);
-  }
-  to {
-    transform: translate3d(0, -9px, 0) rotate(3deg);
-  }
-}
-:root:not([data-motion]) .mdx-fan__aura > i {
-  animation: mdx-aura 30s linear infinite;
-}
-:root:not([data-motion="calm"]) .mdx-fan__float {
-  animation: mdx-fan-float 7s var(--ease-drift, ease-in-out) infinite alternate;
-}
-:root:not([data-motion="calm"]) .mdx-fan__card--r .mdx-fan__float {
-  animation-duration: 8.6s;
-  animation-delay: -3.4s;
-}
-@media (forced-colors: active) {
-  .mdx-fan__aura {
-    display: none;
-  }
 }
 
 /* The live trade ticker strip (Ticker.tsx) is not mounted by the shell; its rules retired with the hype arcade look. */

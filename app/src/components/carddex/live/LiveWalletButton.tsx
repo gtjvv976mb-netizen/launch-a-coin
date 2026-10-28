@@ -10,7 +10,7 @@ export function LiveWalletButton({ compact = false, quiet = false, buttonRef }: 
   const address = wallet.address;
   const short = address ? `${address.slice(0, 4)}…${address.slice(-4)}` : null;
   return <>
-    <Button ref={buttonRef} variant={quiet ? "outline" : "primary"} size={compact ? "sm" : "md"} block={!compact} onClick={() => setOpen(true)} aria-haspopup="dialog" aria-label={address ? `Mainnet wallet ${short}` : "Connect mainnet wallet"}>
+    <Button ref={buttonRef} variant={quiet ? "outline" : "primary"} size={compact ? "sm" : "md"} block={!compact} onClick={() => setOpen(true)} aria-haspopup="dialog" aria-label={address ? `Mainnet wallet ${short}` : compact ? "Connect wallet for Solana mainnet" : "Connect mainnet wallet"}>
       {address ? short : compact ? "Connect wallet" : "Connect mainnet wallet"}
     </Button>
     <WalletConnectDialog open={open} onOpenChange={setOpen} />

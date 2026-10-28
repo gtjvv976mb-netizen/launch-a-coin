@@ -263,6 +263,11 @@ button.cdx-launch-step-head__count { text-decoration: underline; text-decoration
 .cdx-launch-total .mdx-unit { font-size: var(--text-body); font-weight: 500; }
 .cdx-launch-step-footer__end { display: flex; min-width: 0; align-items: center; justify-content: flex-end; gap: 16px; }
 .cdx-launch-skip { font-size: var(--text-body); white-space: nowrap; }
+/* The narrowest phones (360): on Links the row holds Back, Skip to review and "Next: Initial buy", 10px past the
+ * panel; the link folds onto two lines instead (40px, inside the footer's 44px row). */
+@media (max-width: 399.98px) {
+  .cdx-launch-skip { min-width: 0; white-space: normal; text-align: right; text-wrap: balance; }
+}
 @media (max-width: 1023.98px) {
   /* The page grows with its step (no clipped fields), and the footer stays in reach at the bottom of the screen
    * while a long step scrolls under it. */
@@ -346,7 +351,6 @@ button.cdx-launch-step-head__count { text-decoration: underline; text-decoration
 /* The calm stage: no rainbow pool or prism ring behind the launch card; it stands on the ground with its own
  * contact shadow. !important: the halo is painted by the unlayered card3d.css, which a layered rule cannot beat. */
 .cdx-launch-card .mdx-card3d__halo { display: none !important; }
-.cdx-launch-card__inspect > svg { flex: none; }
 .cdx-create-preview__note { font-size: var(--text-caption); line-height: 16px; color: var(--color-placeholder); text-align: center; }
 
 /* ------------------------------------------------ the design picker (Card design step) and its library dialog */
@@ -549,11 +553,7 @@ button.cdx-launch-step-head__count { text-decoration: underline; text-decoration
 .cdx-live-saved__list { display: grid; width: 100%; gap: 8px; }
 .cdx-live-saved__list .mdx-btn { justify-content: space-between; }
 
-/* The wallet chooser and the guide (dialogs and sheets). */
-.cdx-live-wallet { display: grid; min-width: 0; gap: 16px; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
-.cdx-live-wallet__list { display: grid; gap: 8px; max-height: min(320px, 50dvh); margin: -4px; padding: 4px; overflow-y: auto; }
-.cdx-live-wallet__list .mdx-btn { justify-content: flex-start; gap: 12px; }
-.cdx-live-wallet__list .mdx-btn img { flex: none; border-radius: 6px; outline: 1px solid var(--image-outline); outline-offset: -1px; }
+/* The guide (dialog or sheet). The wallet chooser is mintdex/wallet-connect.tsx, styled in overlays.css. */
 .cdx-live-guide { display: grid; gap: 12px; padding-left: 20px; list-style: decimal; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
 .cdx-live-guide li::marker { color: var(--color-ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 

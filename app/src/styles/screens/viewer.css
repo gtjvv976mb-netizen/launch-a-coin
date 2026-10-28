@@ -297,7 +297,12 @@
 }
 
 /* Cards float freely: remove circular bases and floor pools throughout the site (owner, 2026-10-18).
- * Ordinary cast shadows, card halos, foil lighting and the 3D motion stay with the cards. */
+ * Ordinary cast shadows, foil lighting and the 3D motion stay with the cards. The design-colour halo and prism ring
+ * are off in both viewers, as on every screen of the true-black-flat restyle: the card is the only colour. */
+.mdx-v3d .mdx-card3d__halo,
+.mdx-inspect .mdx-card3d__halo {
+  display: none;
+}
 .mdx-card3d__pedestal,
 .mdx-tt__plinth,
 .mdx-v3d__pedestal,

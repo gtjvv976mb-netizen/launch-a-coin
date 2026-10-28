@@ -9,7 +9,7 @@
  *   ConfirmDialog  open (req), onOpenChange (req), title (req), children (req), confirmLabel (req), cancelLabel,
  *                  pending, pendingLabel, onConfirm (req). A Modal with a secondary cancel and a primary confirm.
  *                  Used by Start over now; the devnet Disconnect and pre-sign reviews reuse it.
- *   ShareButton    title (req), text (req), path (req), address, label, className. A round icon button: the
+ *   ShareButton    title (req), text (req), path (req), address, label, className. The quiet 36px IconButton look: the
  *                  native share sheet on touch devices, else a popover with Copy link and Post on X (and Copy
  *                  mint address once MODE is not sim). Share text never carries a simulated $ figure.
  *   LaunchedDialog coin, open (req), onOpenChange (req). "Your card is live": the new card, Post on X, Copy link.
@@ -187,20 +187,6 @@ function canNativeShare() {
   );
 }
 
-function ShareGlyph() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
-      <path
-        d="M8 10V2.5M5 5.25 8 2.25l3 3M4.5 7.5H4a1.5 1.5 0 0 0-1.5 1.5v3.5A1.5 1.5 0 0 0 4 14h8a1.5 1.5 0 0 0 1.5-1.5V9A1.5 1.5 0 0 0 12 7.5h-.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 /** Copy link with the P1-26 fallback; returns true when the link reached the clipboard. */
 function useCopyLink() {
   const toast = useToast();
@@ -251,13 +237,9 @@ export function ShareButton({
             e.preventDefault();
             navigator.share({ title, text, url }).catch(() => {});
           }}
-          className={cx(
-            "relative grid h-7 w-7 flex-none place-items-center rounded-pill text-ink transition-colors duration-(--t-fast) ease-room hover:bg-track data-[state=open]:bg-track",
-            "before:absolute before:-inset-1.5 before:content-[''] max-lg:before:-inset-2",
-            className,
-          )}
+          className={cx("mdx-btn mdx-btn--icon mdx-btn--ghost data-[state=open]:bg-track", className)}
         >
-          <ShareGlyph />
+          <Icon name="share" />
         </button>
       </Popover.Trigger>
       <Popover.Portal>

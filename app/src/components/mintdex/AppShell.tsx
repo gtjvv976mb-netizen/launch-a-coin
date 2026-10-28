@@ -513,6 +513,8 @@ export function WalletButton({ me, ...rest }: { me: NonNullable<Me> } & Componen
     <button
       type="button"
       aria-label={`Wallet, @${me.handle}, ${sol(me.balance, 2)} ${MODE_COPY.walletUnit}`}
+      // Where focus lands when "Try the demo" leaves with the sign-in it opened (focus.ts focusNear).
+      data-focus-home=""
       {...rest}
       className="cdx-wallet"
     >
@@ -695,6 +697,9 @@ function TopBar({
   const { openEnter, openGuide } = useSessionUi();
   const [menu, setMenu] = useState(false);
   const unread = unreadOf(me);
+  // Discover has its own search field under its title: the bar hands over to it (the icon and "/" focus that
+  // field), so a desktop screen never shows two search fields (browse-13, chrome-13).
+  const pageSearch = useRouterState({ select: (s) => s.location.pathname === "/discover" });
   return (
     <header className="cdx-topbar" data-topbar>
       <div className="cdx-topbar__inner">
@@ -703,7 +708,7 @@ function TopBar({
           {liveLaunch ? null : <ModeBadge className="cdx-demo-pill" />}
         </div>
         <TopNav pending={pending} />
-        <div className="cdx-topbar__tools">
+        <div className="cdx-topbar__tools" data-page-search={pageSearch || undefined}>
           <div className="cdx-topbar__search">
             <SearchBox inputRef={searchRef} />
           </div>
@@ -732,6 +737,7 @@ function TopBar({
                 onClick={() => setMenu(true)}
                 aria-haspopup="dialog"
                 aria-label={`Menu, @${me.handle}, ${sol(me.balance, 2)} ${MODE_COPY.walletUnit}${unread ? `, ${unread} new` : ""}`}
+                data-focus-home=""
                 className="cdx-wallet cdx-only-phone"
               >
                 <span className="relative">
@@ -979,7 +985,9 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented) return;
       if (isTypingTarget(e.target) || isDialogOpen()) return;
-      const el = searchRef.current;
+      // The bar's field, or the page's own (Discover hides the bar's).
+      const page = document.getElementById("token-search");
+      const el = searchRef.current?.offsetParent ? searchRef.current : page instanceof HTMLInputElement ? page : null;
       if (!el || el.offsetParent === null) return;
       e.preventDefault();
       el.focus();

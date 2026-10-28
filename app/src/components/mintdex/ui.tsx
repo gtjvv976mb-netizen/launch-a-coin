@@ -1491,7 +1491,7 @@ export function Avatar({
         "grid flex-none place-items-center rounded-pill font-semibold leading-none text-on-cta",
         className,
       )}
-      style={{ width: size, height: size, fontSize: Math.round(size * 0.44), background: stop }}
+      style={{ width: size, height: size, fontSize: size < 32 ? 12 : size < 40 ? 14 : 16, background: stop }}
     >
       {handle.slice(0, 1).toUpperCase()}
     </span>
