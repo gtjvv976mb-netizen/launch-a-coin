@@ -7,7 +7,6 @@ import {
   useEffect,
   useId,
   useMemo,
-  useRef,
   useState,
   type FormEvent,
   type ReactNode,
@@ -278,23 +277,20 @@ function EnterDialog({
 
 // ---------------------------------------------------------------- guide (every figure from copy.ts and tiers.ts)
 
-type GuideStep = { title: string; body: string; visual: ReactNode; phoneVisual?: boolean };
+type GuideStep = { title: string; body: string };
 /** While mainnet launches are off, the guide describes the test mode people can actually use, test funds first. */
 const DEMO_STEPS: GuideStep[] = [
   {
     title: "Launch your coin",
     body: "Launches run in test mode with test SOL. Real mainnet launches are not open yet. Give your token a name, ticker and artwork, and choose its quote asset.",
-    visual: null,
   },
   {
     title: "Choose its permanent card",
     body: "Pick a premium design before launch. Your coin launches on a simulated pump.fun curve and its one-of-one card goes into your demo collection.",
-    visual: null,
   },
   {
     title: "Trade the token. Keep the card.",
     body: "Trade your test token with test funds and keep its card in your collection. No real token or NFT is minted.",
-    visual: null,
   },
 ];
 /** The wallet-launch guide, used only once the owner turns mainnet launches on. */
@@ -302,17 +298,14 @@ const LIVE_STEPS: GuideStep[] = [
   {
     title: "Launch your coin",
     body: "Give your coin a name, ticker and artwork. Choose its supported quote asset, then review the pump.fun launch in your wallet.",
-    visual: null,
   },
   {
     title: "Choose its permanent card",
     body: "Pick a premium design before launch. After the coin is verified, approve the separate one-of-one NFT card delivery to your creator wallet.",
-    visual: null,
   },
   {
     title: "Trade the coin. Keep the card.",
     body: "Open your real coin on pump.fun and keep the separate card NFT in your wallet. The demo lets you explore with test SOL.",
-    visual: null,
   },
 ];
 
@@ -321,10 +314,9 @@ const feeRows = (liveOpen: boolean): Array<{ label: string; value: string }> => 
   : [{ label: "Coin trading", value: "Review the fee and price impact shown before confirming a trade." }];
 
 /**
- * The guide: the three steps, then costs and risks, then Calm motion, one step at a time. Every step sits in the
- * same grid cell (the hidden ones invisible and inert), so the dialog keeps the tallest step's height and never
- * jumps. "Step 2 of 5" on the left; Previous from step 2; Next, then Done (or Try the demo, signed out) as the one
- * primary. The same deck in desktop dialogs and phone sheets. Linkable with ?guide=1.
+ * The guide, one page (density R4): the three steps, then costs and risks beside Calm motion, then one primary:
+ * Done, or (signed out) Try the demo beside Not now. Desktop dialogs show the steps as three wells in a row; phone
+ * sheets as a numbered list. Linkable with ?guide=1.
  */
 function GuideDialog({
   open,
@@ -339,91 +331,62 @@ function GuideDialog({
   const liveOpen = useLiveLaunchOpen(open);
   const STEPS = liveOpen || !IS_SIM ? LIVE_STEPS : DEMO_STEPS;
   const FEE_ROWS = feeRows(liveOpen);
-  const [step, setStep] = useState(0);
-  const forward = useRef<HTMLButtonElement>(null);
   const idBase = useId();
-  useEffect(() => {
-    if (open) setStep(0);
-  }, [open]);
   const close = () => onOpenChange(false);
-  const pages: Array<{ key: string; title: string; body: ReactNode }> = [
-    ...STEPS.map((s) => ({ key: s.title, title: s.title, body: <p>{s.body}</p> })),
-    {
-      key: "fees",
-      title: "Costs and risks",
-      body: (
-        <>
-          {MODE_COPY.guideNote ? <p>{MODE_COPY.guideNote}</p> : null}
-          <dl className="cdx-guide__facts">
-            {FEE_ROWS.map((r) => (
-              <div key={r.label}>
-                <dt>{r.label}</dt>
-                <dd>{r.value}</dd>
-              </div>
-            ))}
-          </dl>
-          <TextLink to="/legal" hash="fees" onClick={close}>
-            Fees, terms and risks
-          </TextLink>
-        </>
-      ),
-    },
-    {
-      key: "settings",
-      title: "Make it yours",
-      body: (
-        <>
-          <p>Calm motion holds the cards still. Buttons and menus still respond.</p>
-          <CalmSwitch size="md" />
-        </>
-      ),
-    },
-  ];
-  const last = step === pages.length - 1;
-  const invite = last && !me;
-  const back = () => {
-    const next = step - 1;
-    setStep(next);
-    // Previous leaves with the first step: keep focus on the forward button, never <body>.
-    if (next === 0) requestAnimationFrame(() => forward.current?.focus({ preventScroll: true }));
-  };
-  const next = () => {
-    if (!last) return setStep(step + 1);
+  const invite = () => {
     close();
     // The demo dialog rises once the guide has left and handed focus back to its opener (so Escape returns there).
-    if (invite) window.setTimeout(onEnter, 260);
+    window.setTimeout(onEnter, 260);
   };
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="How Launch a Card works" width={560}>
+    <Modal open={open} onOpenChange={onOpenChange} title="How Launch a Card works" width={720}>
       <div className="cdx-guide">
-        <div className="cdx-guide__steps">
-          {pages.map((p, i) => (
-            <section
-              key={p.key}
-              className="cdx-guide__step cdx-overlay-copy"
-              aria-labelledby={`${idBase}-${i}`}
-              aria-hidden={i !== step || undefined}
-              inert={i !== step}
-              data-current={i === step || undefined}
-            >
-              <h3 id={`${idBase}-${i}`}>{p.title}</h3>
-              {p.body}
-            </section>
+        <ol className="cdx-guide__steps" role="list">
+          {STEPS.map((s, i) => (
+            <li key={s.title} className="cdx-guide__step">
+              <span className="cdx-guide__n num" aria-hidden>
+                {i + 1}
+              </span>
+              <h3 id={`${idBase}-${i}`}>{s.title}</h3>
+              <p>{s.body}</p>
+            </li>
           ))}
+        </ol>
+        <div className="cdx-guide__more">
+          <div className="cdx-overlay-copy">
+            <h3>Costs and risks</h3>
+            {MODE_COPY.guideNote ? <p>{MODE_COPY.guideNote}</p> : null}
+            <dl className="cdx-guide__facts">
+              {FEE_ROWS.map((r) => (
+                <div key={r.label}>
+                  <dt>{r.label}</dt>
+                  <dd>{r.value}</dd>
+                </div>
+              ))}
+            </dl>
+            <TextLink to="/legal" hash="fees" onClick={close}>
+              Fees, terms and risks
+            </TextLink>
+          </div>
+          <div className="cdx-overlay-copy">
+            <h3>Make it yours</h3>
+            <div className="cdx-guide__calm">
+              <p>Calm motion holds the cards still. Buttons and menus still respond.</p>
+              <CalmSwitch size="md" />
+            </div>
+          </div>
         </div>
         <div className="cdx-overlay-actions mdx-sheet-foot">
-          <p className="cdx-overlay-actions__note num" aria-live="polite">
-            Step {step + 1} of {pages.length}
-            <span className="sr-only">: {pages[step].title}</span>
-          </p>
-          {step > 0 ? (
-            <Button variant="outline" onClick={back}>
-              Previous
-            </Button>
-          ) : null}
-          <Button ref={forward} onClick={next}>
-            {invite ? (IS_SIM ? "Try the demo" : CONNECT_COPY.connect) : last ? "Done" : "Next"}
-          </Button>
+          {me ? (
+            <Button onClick={close}>Done</Button>
+          ) : (
+            <>
+              <Button variant="outline" onClick={close}>
+                Not now
+              </Button>
+              <Button onClick={invite}>{IS_SIM ? "Try the demo" : CONNECT_COPY.connect}</Button>
+            </>
+          )}
         </div>
       </div>
     </Modal>

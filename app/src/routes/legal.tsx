@@ -290,11 +290,12 @@ const SECTIONS: Section[] = [
 const HEADINGS = SECTIONS.flatMap((s) => [s.id as string, ...s.items.map((i) => i.id)]);
 
 /**
- * One readable document (a Read screen): the title row, then from 1024px three columns on the column's grid: the
- * contents (every section and topic, the one you are reading marked), the text in a ~65-character measure, and the
- * short version beside it. Under 1024px: the four section links stay pinned under the top bar, then the short
- * version, then the text. Every heading is a linkable anchor; the [TO FILL] slots stay marked until the operator
- * supplies the facts.
+ * One readable document (a Read screen, one scroller): the title row, then from 1024px three columns across the
+ * column (styles/screens/legal.css): the contents (each section one click away, the one you are reading marked, its
+ * topics listed; every topic on tall screens), the text in a ~65-character measure, and the short version beside it.
+ * From 768px the four section links stay pinned under the top bar over the text and the short version beside it;
+ * under 768px the links, then the short version, then the text. Every heading is a linkable anchor; the [TO FILL]
+ * slots stay marked until the operator supplies the facts.
  */
 function Legal() {
   const { tab } = Route.useSearch();

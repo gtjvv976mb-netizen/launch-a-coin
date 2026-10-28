@@ -1,17 +1,20 @@
 /* Legal (/legal) screen sheet. Owned by the "overlays" screen group (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css).
- * A Read screen on the dark ground (routes/legal.tsx). From 1280px, three columns on the 1152px column's grid:
- * contents 220 + 64 + text 1fr (540, capped at a 65-character measure) + 64 + the short version 264 = 1152. From
- * 1024px, contents 200 + 48 + the short version over the text. Under 1024px one column: the section links pinned
- * under the top bar, the short version, the text.
+ * A Read screen on the dark ground (routes/legal.tsx), one document that grows with its text (main is the one
+ * scroller). The text keeps a ~65-character measure (46ch); the space beside it carries the contents and the short
+ * version (density R3), never nothing:
+ *   from 1024px  contents | text | the short version across the column, the spare width shared by the two gaps;
+ *                both side columns sticky where the screen is tall enough to hold them whole (never scrolling on
+ *                their own). Contents 200 / 264 from 1280, the short version 220 / 264 up to 400.
+ *   768-1023px   the four section links pinned under the top bar across both columns, then the text beside the
+ *                short version (sticky under the links).
+ *   under 768px  the section links pinned, the short version, the text.
  * Tokens: carddex-theme.css. */
-
-/* The page grows with its text (carddex-viewport.css lets .cdx-legal take height:auto in main). */
 
 .cdx-legal__layout {
   --legal-measure: 46ch; /* about 65 characters a line: Instrument Sans averages ~0.69ch a glyph */
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--gap-section);
 }
 
 /* ---- the four section links (phones and tablets): pinned under the top bar while the text scrolls */
@@ -129,8 +132,8 @@
 .cdx-legal__summary li::marker { color: var(--color-placeholder); }
 
 /* ---- the text */
-.cdx-legal__doc { min-width: 0; padding-bottom: 32px; }
-.cdx-legal__doc > section + section { margin-top: 48px; }
+.cdx-legal__doc { min-width: 0; padding-bottom: 16px; }
+.cdx-legal__doc > section + section { margin-top: 32px; }
 .cdx-legal__doc h2 {
   font-size: var(--text-title);
   line-height: var(--text-title--line-height);
@@ -141,7 +144,7 @@
 }
 .cdx-legal__doc h3 {
   max-width: var(--legal-measure);
-  margin-top: 24px;
+  margin-top: 16px;
   font-size: var(--text-lead);
   line-height: var(--text-lead--line-height);
   font-weight: 600;
@@ -149,7 +152,7 @@
   text-wrap: balance;
   scroll-margin-top: calc(var(--hit) + 16px);
 }
-.cdx-legal__doc h2 + h3 { margin-top: 16px; }
+.cdx-legal__doc h2 + h3 { margin-top: 8px; }
 /* Headings take focus after a jump (screen readers land on them); the scroll is the visible answer. */
 .cdx-legal__doc :is(h2, h3):focus { outline: none; }
 .cdx-legal__doc p {
@@ -193,47 +196,76 @@
   .cdx-legal__fees tbody th { width: 44%; }
 }
 
-/* ---- from 1024px: contents | the short version over the text; from 1280px: contents | text | the short version */
-@media (min-width: 1024px) {
+/* ---- from 768px: the text beside the short version, the section links pinned across both. The layout's own font
+ * size is the text's, so the 46ch track equals the paragraphs' 46ch measure. The links' grid area spans every row
+ * (a sticky box never leaves its area) while their box stays in the first row. */
+@media (min-width: 768px) {
   .cdx-legal__layout {
     display: grid;
-    grid-template-columns: 200px minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
+    grid-template-columns: min(var(--legal-measure), 100% - 224px) minmax(200px, 400px);
+    grid-template-rows: calc(var(--hit) + 1px) auto;
     grid-template-areas:
-      "toc summary"
-      "toc doc";
+      ". ."
+      "doc summary";
+    justify-content: space-between;
     align-items: start;
-    gap: 24px 48px;
+    gap: var(--gap-section) 24px;
+    font-size: var(--text-lead);
+  }
+  .cdx-legal__jump {
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+    align-self: start;
+  }
+  .cdx-legal__doc { grid-area: doc; }
+  .cdx-legal__summary { grid-area: summary; }
+}
+@media (min-width: 768px) and (min-height: 600px) {
+  .cdx-legal__summary {
+    position: sticky;
+    top: calc(var(--hit) + 1px); /* 16px under the pinned links */
+  }
+}
+
+/* ---- from 1024px: contents | text | the short version */
+@media (min-width: 1024px) {
+  .cdx-legal__layout {
+    --toc-w: 200px;
+    --sum-min: 220px;
+    --gap-x: 32px;
+    grid-template-columns:
+      var(--toc-w)
+      min(var(--legal-measure), 100% - var(--toc-w) - var(--sum-min) - 2 * var(--gap-x))
+      minmax(var(--sum-min), 400px);
+    grid-template-rows: auto;
+    grid-template-areas: "toc doc summary";
+    column-gap: var(--gap-x);
   }
   .cdx-legal__jump { display: none; }
-  /* The contents column: sticky where the screen is tall enough to hold it whole (it never scrolls on its own). */
   .cdx-legal__toc {
     grid-area: toc;
     display: block;
   }
-  .cdx-legal__summary {
-    grid-area: summary;
-    max-width: calc(var(--legal-measure) + 2 * var(--pad-panel));
-  }
-  .cdx-legal__doc { grid-area: doc; }
-  .cdx-legal__doc :is(h2, h3) { scroll-margin-top: 24px; }
+  .cdx-legal__doc :is(h2, h3) { scroll-margin-top: 16px; }
 }
 @media (min-width: 1280px) {
   .cdx-legal__layout {
-    grid-template-columns: 220px minmax(0, 1fr) 264px;
-    grid-template-rows: auto;
-    grid-template-areas: "toc doc summary";
-    column-gap: 64px;
+    --toc-w: 264px;
+    --sum-min: 264px;
+    --gap-x: 48px;
   }
-  .cdx-legal__summary {
-    position: sticky;
-    top: 24px;
-    max-width: none;
-  }
+}
+/* Sticky side columns, each only where the screen holds it whole (16px under the top bar). */
+@media (min-width: 1024px) and (min-height: 600px) {
+  .cdx-legal__summary { top: 0; }
 }
 @media (min-width: 1024px) and (min-height: 760px) {
   .cdx-legal__toc {
     position: sticky;
-    top: 24px;
+    top: 0;
   }
+}
+/* Tall screens list every topic (22 rows); shorter ones the current section's, every other section one click away. */
+@media (min-width: 1024px) and (min-height: 1040px) {
+  .cdx-legal__toc-section:not([data-open]) + ol { display: block; }
 }

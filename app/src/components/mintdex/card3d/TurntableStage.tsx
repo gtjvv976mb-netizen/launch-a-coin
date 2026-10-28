@@ -26,7 +26,7 @@ import { tierForLevel } from "../../../lib/mintdex/tiers";
 import { MintCardFace, cardLabel, cardDesign, cardBackTheme, designedCard } from "../MintCard";
 import { getMemeIcon } from "../../../lib/mintdex/meme-icons";
 import { getEdition } from "../../../lib/mintdex/editions";
-import { ChevronButton, Icon } from "../ui";
+import { Icon } from "../ui";
 import { CardControlButton, CardControls } from "../../carddex/CardControls";
 import { BackFace } from "./backface";
 import { CARD_BOX, extrude, paintAcrylic, paintEdge } from "./extrude";
@@ -47,7 +47,7 @@ const AUTO = 36;
 const TILT = 6;
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 2.2;
-const SIZES = "(max-width: 767px) 72vw, 380px";
+const SIZES = "(max-width: 767px) 84vw, 560px";
 
 type Sim = {
   angle: number;
@@ -547,8 +547,8 @@ export default function TurntableStage({
             {many ? ", Page Up and Page Down step to the other cards" : ""}. Escape closes.
           </p>
           {/* The viewer shell (styles/screens/viewer.css): the card's name on the left, Close on the right, the card
-              on the flat ground, then its controls in one centred row. Same words as every card row: Turn over,
-              Pause spin or Resume spin, Close. */}
+              as large as the window allows on the flat ground, then its controls in one centred row. Same words as
+              every card row: Turn over, Pause spin or Resume spin, Close. */}
           <div className="mdx-v3d__bar">
             <div className="mdx-v3d__title">
               <h2 className="mdx-v3d__name">{card.name}</h2>
@@ -617,32 +617,19 @@ export default function TurntableStage({
                 </div>
               </div>
             </div>
-            {many ? (
-              <>
-                <ChevronButton
-                  dir="left"
-                  label="Previous card"
-                  onClick={() => onStep(index - 1)}
-                  className="mdx-v3d__step mdx-v3d__step--prev"
-                />
-                <ChevronButton
-                  dir="right"
-                  label="Next card"
-                  onClick={() => onStep(index + 1)}
-                  className="mdx-v3d__step mdx-v3d__step--next"
-                />
-              </>
-            ) : null}
           </div>
 
           <div className="mdx-v3d__cap">
             {/* The compact card-controls row (CardControls, shared with HeroTurntable): icon pills named by their
-                tooltips; View coin keeps its words (it leaves the viewer). */}
+                tooltips, Previous and Next card at its ends when the viewer has neighbours; View coin keeps its words
+                (it leaves the viewer). */}
             <CardControls className="mdx-v3d__controls">
+              {many ? <CardControlButton icon="chevron-left" label="Previous card" onClick={() => onStep(index - 1)} data-v3d="prev" /> : null}
               <CardControlButton icon="turn-over" label="Turn over" onClick={() => flip(1)} data-v3d="flip" />
               {calm ? null : (
                 <CardControlButton icon={paused ? "play" : "pause"} label={paused ? "Resume spin" : "Pause spin"} onClick={() => setPaused((v) => !v)} data-v3d="play" />
               )}
+              {many ? <CardControlButton icon="chevron-right" label="Next card" onClick={() => onStep(index + 1)} data-v3d="next" /> : null}
               {/* Hidden when the viewer shows the coin of the page underneath: it would lead back to itself. */}
               {coinId && !onCoinPage ? (
                 <Link
@@ -652,7 +639,6 @@ export default function TurntableStage({
                   onClick={onClose}
                 >
                   View coin
-                  <Icon name="chevron-right" strokeWidth={2} />
                 </Link>
               ) : null}
             </CardControls>

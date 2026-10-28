@@ -1,13 +1,15 @@
 /**
  * The Inspect stage (spec 4.10, 5.3), a lazy chunk, in the same shell as the 3D viewer (styles/screens/viewer.css):
- * the flat ground, Close at the top right, Turn over (and Tilt to shine) in the bottom row. The labeled case unboxes
- * on open, breathes and turns slowly (25 deg/s) until someone touches it; Esc closes and focus returns to the opener
- * (Radix). Built on Radix Dialog, so isDialogOpen() sees it and the page's bodies sleep underneath.
+ * the flat ground, Close at the top right, the case as large as the window allows, Turn over (the compact icon pill)
+ * and Tilt to shine in the bottom row. The labeled case unboxes on open, breathes and turns slowly (25 deg/s) until
+ * someone touches it; Esc closes and focus returns to the opener (Radix). Built on Radix Dialog, so isDialogOpen()
+ * sees it and the page's bodies sleep underneath.
  */
 import * as Dialog from "@radix-ui/react-dialog";
 import { useRef, type CSSProperties } from "react";
 
 import { tierForLevel } from "../../../lib/mintdex/tiers";
+import { CardControlButton, CardControls } from "../../carddex/CardControls";
 import { Icon } from "../icons";
 import { cardDesign, type CardData } from "../MintCard";
 import { CaseScene } from "./CardCase";
@@ -56,18 +58,15 @@ export default function InspectStage({
               unbox
               gyroChip={false}
               turntable
-              sizes="(max-width: 1023px) 70vw, 300px"
+              sizes="(max-width: 1023px) 78vw, 540px"
               ref={handle}
             />
           </div>
-          <div className="mdx-inspect__bar">
-            <button type="button" className="mdx-inspect__btn" onClick={() => handle.current?.turnOver(1)}>
-              <Icon name="turn-over" strokeWidth={2} />
-              Turn over
-            </button>
+          <CardControls className="mdx-inspect__bar">
+            <CardControlButton icon="turn-over" label="Turn over" onClick={() => handle.current?.turnOver(1)} />
             {/* "Tilt to shine" (iOS) in the bar, beside Turn over: never over the case or the bar. */}
             <GyroChip className="mdx-inspect__btn" />
-          </div>
+          </CardControls>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

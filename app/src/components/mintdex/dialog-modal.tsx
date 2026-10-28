@@ -7,8 +7,8 @@ import { ancestry, focusNear } from "./focus";
 import { IconButton, type ModalProps } from "./ui";
 
 /**
- * One panel (styles/screens/overlays.css .cdx-overlay): the title and a quiet Close on one row, then the body, which
- * grows with its content up to the window and scrolls inside past that. A `.mdx-sheet-foot` in the body stays on
+ * One panel (styles/screens/overlays.css .cdx-overlay), the compact anatomy with 16px padding: the title and a quiet
+ * Close on one row, then the body, which grows with its content up to the window and scrolls inside past that. A `.mdx-sheet-foot` in the body stays on
  * the panel's bottom edge while the body scrolls. A control marked data-autofocus takes focus on open (the safe
  * answer of a destructive confirm); otherwise Radix focuses the first control.
  */
