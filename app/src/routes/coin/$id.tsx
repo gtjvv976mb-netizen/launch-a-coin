@@ -1,30 +1,30 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { num, oneOf, searchSchema } from "../../lib/mintdex/search";
 
 import {
+  BackToDiscover,
+  CardFacts,
+  CoinAbout,
   CoinCase,
-  DeedPanel,
-  TradePanel,
-  CoinCardPane,
-  CoinObject,
-  CoinDetails,
-  CoinHeader,
-  CoinPhoneHero,
-  CoinStats,
+  CoinFigures,
+  CoinMarket,
   LoreEditor,
   McapChart,
+  TradePanel,
   TradesList,
+  useCoinBand,
 } from "../../components/mintdex/coin";
 import { revPoll } from "../../components/mintdex/hooks";
-import { LaunchedDialog } from "../../components/mintdex/trust";
-import { Ledge, Modal, Tabs, TextLink, prefersReducedMotion } from "../../components/mintdex/ui";
+import { LaunchedDialog, ShareButton, SimTag, coinShare } from "../../components/mintdex/trust";
+import { Modal, PageHeader, Tabs, TextLink } from "../../components/mintdex/ui";
 import { EmptyState } from "../../components/mintdex/empty-state";
 import { ChainCoinNotFound } from "../../components/chain/pages/ChainCoinNotFound";
 import { ChainCoinView } from "../../components/chain/pages/ChainCoinPage";
 import { chainCoinHead, chainCoinLoader, type ChainCoinRoute } from "../../lib/chain/data";
 import { getCoin, getCoinRoute } from "../../lib/mintdex/api";
+import { atName } from "../../lib/mintdex/format";
 import { COIN_NOT_FOUND, IS_SIM, MODE_COPY } from "../../lib/mintdex/copy";
 import {
   NOINDEX_COINS,
@@ -36,22 +36,29 @@ import {
   shareArt,
 } from "../../lib/mintdex/seo";
 import { getCardDesign } from "../../lib/carddex/designs";
-import { ViewTabs, tabPanelProps } from "../../components/carddex/ViewTabs";
+import { tabPanelProps } from "../../components/carddex/ViewTabs";
 import type { CoinDetail } from "../../lib/mintdex/types";
 
-/** Phone sections (P1-5): one at a time under the hero, kept in ?tab= so a notification can link to the card. */
+/**
+ * The ?tab= sections. Phones (under 768) show one at a time, Card first. From 768 the card stays beside one pane
+ * (Trade first; ?tab=card falls back to Trade without rewriting the URL). From 1024 everything shows at once and
+ * the tabs go. "trades" keeps its URL value; its label is Activity, so it never reads next to "Trade".
+ */
 type CoinTab = "trade" | "card" | "chart" | "trades" | "details";
-const TAB_OPTIONS: Array<{ value: CoinTab; label: string }> = [
+const PHONE_TABS: Array<{ value: CoinTab; label: string }> = [
   { value: "card", label: "Card" },
   { value: "chart", label: "Chart" },
   { value: "trade", label: "Trade" },
-  { value: "trades", label: "Trades" },
+  { value: "trades", label: "Activity" },
   { value: "details", label: "Details" },
 ];
+const TABLET_TABS = PHONE_TABS.filter((t) => t.value !== "card");
+/** The coin's card art as an img sizes value: the case column is 240 to 300px wide at every width. */
+const CASE_SIZES = "(max-width: 767px) 280px, 300px";
 
 /**
  * ?minted=1: the launcher just minted this card, so the page opens "Your card is live" once (P1-12).
- * ?tab=card|chart|trades: the phone section that shows (Trade when absent). Desktop shows everything.
+ * ?tab=card|chart|trade|trades|details: the section phones and tablets show (see CoinTab).
  */
 const coinSearch = searchSchema({
   minted: num(true),
@@ -91,7 +98,7 @@ function coinHead(coin: CoinDetail) {
   const design = getCardDesign(coin.cardTemplate);
   const head = pageHead({
     path: canonicalCoinPath(coin),
-    title: `${coin.name} ($${coin.ticker}) on Launch a Card`,
+    title: `${coin.name} ($${coin.ticker}) | Launch a Card`,
     description: sentences(clip(coin.lore, 140), `${design.name}, creator-selected NFT card`, MODE_COPY.coinQualifier),
     image: shareArt(coin.image),
     imageAlt: `${coin.name} card art`,
@@ -117,26 +124,25 @@ function CoinNotFound() {
 }
 
 /*
- * Layout (spec 8.3). One grid, three arrangements:
- * - 1280 and up: object column (wall, sleeved card on the ledge, caption) | market column (header row,
- *   stats, one plinth block with chart and trades) | action column (plinth, full height, bleeds to
- *   the content edges). Fits one screen; lists and bids fit to the height.
- * - 1024 to 1279: the object column folds away. A 96px card stands on a short ledge left of the header
- *   and stats, the caption details move under the stats, and main may scroll.
- * - Phones (P1-5, decision C11): the column wrappers dissolve (`contents`). A compact hero (112px card, name,
- *   market cap, address) and four segmented tabs, then one section at a time: Trade (the ticket), Card (the
- *   full card, its caption and progress, the card panel, links), Chart (stats, chart), Trades. The section
- *   lives in ?tab=, rendered by the server, and CSS (.mdx-coin[data-tab]) hides the others.
+ * Layout (styles/screens/coin.css). The DOM order is the reading and Tab order: the title, the market strip, the
+ * section tabs, the ticket and the details, the chart, the activity, then the card; CSS grid areas place them.
+ * - 1024 and up, one screen: card column (case, controls, the card's owner and edition) | market strip over the
+ *   chart and the activity | the ticket with the details under it. Activity and details scroll in their panes.
+ * - 768 to 1023: the market strip, then the card column beside one tabbed pane (Trade, Chart, Activity, Details).
+ * - Phones: the market cap and the curve, the five tabs, then one section that fills the rest of the screen.
  */
 function CoinView() {
   const initial = Route.useLoaderData();
   const { id } = Route.useParams();
   const { minted, tab: tabParam } = Route.useSearch();
-  const tab: CoinTab = tabParam ?? "card";
   const navigate = Route.useNavigate();
-  const [detailTab,setDetailTab] = useState("token");
-  const tabsId = useId(), detailsId = useId();
-  const setTab = (next: CoinTab) => void navigate({search:p=>({...p,tab:next==="card"?undefined:next}),replace:true,resetScroll:false});
+  const band = useCoinBand();
+  const tabsId = useId();
+  const raw: CoinTab = tabParam ?? "card";
+  // What the tabs show as selected: a ?tab= the band has no tab for falls back to its first tab.
+  const tab: CoinTab = band === "tablet" && raw === "card" ? "trade" : raw;
+  const setTab = (next: CoinTab) =>
+    void navigate({ search: (p) => ({ ...p, tab: next === "card" ? undefined : next }), replace: true, resetScroll: false });
   // "Your card is live" opens after mount (never in the server HTML) and only for the coin's launcher, so a
   // pasted ?minted=1 link shows nothing to anyone else. Closing it drops ?minted from the URL.
   const isLauncher = !!initial?.viewer?.isCreator;
@@ -171,32 +177,67 @@ function CoinView() {
   }
 
   const { coin, trades } = page;
-  const isOwner = !!page.viewer?.isOwner;
+  const design = getCardDesign(coin.cardTemplate);
   // The newest trade (trades run oldest first): each new one jolts the case.
   const latestTradeId = trades.length ? trades[trades.length - 1].id : null;
-
-  const ownershipRows = [
-    ["Owner",`@${coin.ownerHandle}${page.viewer?.isOwner ? " (you)" : ""}`],
-    ["Design",getCardDesign(coin.cardTemplate).name],
-    ["Edition","One of one"],
-    ["Trading pair",coin.tradingPair],
-    ["Quote asset",coin.quoteSymbol],
-    ["Collection","Separate creator-owned NFT card"],
-  ];
+  // Phones and tablets: the shown section is the tab panel; from 1024 there are no tabs.
+  const panel = (section: CoinTab) => (band !== "wide" && section === tab ? tabPanelProps(tabsId, tab) : {});
+  const share = <ShareButton {...coinShare(coin)} label={`Share ${coin.name}`} />;
   return (
-    <div key={coin.id} data-tab={tab} className="cdx-coin-screen">
-      <header className="cdx-coin-screen__head"><CoinHeader coin={coin} /><span className="text-[12px] text-slate">Demo coin · {coin.tradingPair}</span></header>
-      <div className="cdx-coin-screen__tabs"><Tabs panels idBase={tabsId} value={tab} options={TAB_OPTIONS} onChange={setTab} label="Coin sections" className="mdx-tabs--fill" /></div>
-      <div className="cdx-coin-screen__body">
-        <section className="cdx-coin-screen__object" aria-label={`${coin.name} collectible card`}>
-          <div className="cdx-coin-screen__case"><CoinCase coin={coin} latestTradeId={latestTradeId} priority /></div>
-        </section>
-        <section className="cdx-coin-screen__pane" {...tabPanelProps(tabsId, tab)}>
-          {tab==="card" ? <><h2 className="text-lg font-semibold">The creator’s card</h2><div className="cdx-coin-screen__ownership"><dl>{ownershipRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div><p className="text-[12px] text-slate">Fixed design. Its token trades separately.</p></> : null}
-          {tab==="chart" ? <><CoinStats coin={coin} /><McapChart trades={trades} tradeCount={coin.trades} currentUsd={coin.mcapUsd} currentQuote={coin.mcapQuote} quoteAssetKey={coin.quoteAssetKey} createdAt={coin.createdAt} level={coin.level} className="cdx-coin-screen__chart" /></> : null}
-          {tab==="trade" ? <TradePanel page={page} compact hideQuick hideAfter className="cdx-coin-screen__trade" /> : null}
-          {tab==="trades" ? <TradesList trades={trades} count={coin.trades} className="cdx-coin-screen__trades" /> : null}
-          {tab==="details" ? <><ViewTabs className="cdx-view-tabs" label="Coin details" idBase={detailsId} tabs={[{id:"token",label:"Coin",selected:detailTab==="token",onSelect:()=>setDetailTab("token")},{id:"story",label:"Story",selected:detailTab==="story",onSelect:()=>setDetailTab("story")},{id:"owner",label:"Ownership",selected:detailTab==="owner",onSelect:()=>setDetailTab("owner")}]} /><div className="contents" {...tabPanelProps(detailsId, detailTab)}>{detailTab==="token" ? <CoinDetails coin={coin} isOwner={isOwner} onEdit={()=>setLoreOpen(true)} /> : detailTab==="story" ? <p className="cdx-coin-screen__story">{coin.lore || "The creator has not added a description."}</p> : <div className="cdx-coin-screen__ownership"><dl>{ownershipRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div>}</div></> : null}
+    <div key={coin.id} data-tab={raw} className="mdx-frame cdx-coin-screen">
+      <PageHeader
+        title={coin.name}
+        context={
+          <>
+            ${coin.ticker} · {design.name} design · launched by {atName(coin.creatorHandle)}
+            {coin.creatorIsBot ? " (bot)" : ""}
+          </>
+        }
+        back={<><BackToDiscover /><span className="cdx-coin-screen__utils"><SimTag />{share}</span></>}
+        right={<><SimTag />{share}</>}
+      />
+      <div className="cdx-coin-screen__grid">
+        <CoinMarket coin={coin} />
+        <div className="cdx-coin-screen__tabs">
+          <Tabs
+            panels
+            idBase={tabsId}
+            value={tab}
+            options={band === "tablet" ? TABLET_TABS : PHONE_TABS}
+            onChange={setTab}
+            label="Coin sections"
+            className="mdx-tabs--fill"
+          />
+        </div>
+        <div className="cdx-coin-screen__side">
+          <section data-section="trade" className="cdx-coin-screen__ticket" aria-label={`Trade $${coin.ticker}`} {...panel("trade")}>
+            <TradePanel page={page} />
+          </section>
+          <div data-section="details" className="cdx-coin-screen__details" {...panel("details")}>
+            <CardFacts page={page} className="cdx-coin-screen__facts--phone" />
+            <CoinAbout page={page} onEdit={() => setLoreOpen(true)} />
+          </div>
+        </div>
+        <div data-section="chart" className="cdx-coin-screen__chart" {...panel("chart")}>
+          <CoinFigures coin={coin} />
+          <McapChart
+            trades={trades}
+            tradeCount={coin.trades}
+            currentUsd={coin.mcapUsd}
+            currentQuote={coin.mcapQuote}
+            quoteAssetKey={coin.quoteAssetKey}
+            createdAt={coin.createdAt}
+            level={coin.level}
+          />
+        </div>
+        <div data-section="trades" className="cdx-coin-screen__activity" {...panel("trades")}>
+          <TradesList trades={trades} count={coin.trades} />
+        </div>
+        <section data-section="card" className="cdx-coin-screen__object" aria-label={`${coin.name} collectible card`} {...panel("card")}>
+          <div className="cdx-coin-screen__case">
+            <CoinCase coin={coin} latestTradeId={latestTradeId} priority inspect={false} sizes={CASE_SIZES} />
+          </div>
+          <CardFacts page={page} className="cdx-coin-screen__facts" />
         </section>
       </div>
       <Modal open={loreOpen} onOpenChange={setLoreOpen} title="Edit description">
