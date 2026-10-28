@@ -98,9 +98,9 @@ const SIM_COPY: ModeCopy = {
     "Launch a Card runs as a demo for now, so coins on Solana devnet or mainnet do not have cards here yet. Only demo coins live in this collection.",
   hero: "Try it with test SOL on a simulated pump.fun curve.",
   launchContext:
-    "Choose a permanent card design, add your token, and try the pump.fun launch flow with test SOL.",
+    "Choose a permanent card design, add your coin, and try the pump.fun launch flow with test SOL.",
   guideLaunch:
-    "Choose a design, add your token art and launch. The demo creates a simulated token and one-of-one card in your collection.",
+    "Choose a design, add your coin art and launch. The demo creates a simulated coin and one-of-one card in your collection.",
   guideNote: "Demo: separate test balances and a simulated bonding curve. No real coin or NFT is minted.",
   curveComplete: "Curve complete (simulated)",
   botsNote: "Includes demo bots.",
@@ -305,7 +305,7 @@ export const WORDS = {
         ? "Bid on any coin's one-of-one card. Its owner collects the coin's creator fees at pump.fun's current rates."
         : `Bid on any coin's one-of-one card. Its owner collects ${FEES.vault} of every trade as card fees.`,
   /** Launch, under Mint and launch. */
-  launcherLine: "Your selected design belongs to your token from the first card.",
+  launcherLine: "Your selected design belongs to your coin from the first card.",
   /** Home, the second line under the headline (P1-27). */
   heroBid: "Launch a coin on pump.fun. Give it a card worth collecting.",
   /** Trade ticket fee row. */

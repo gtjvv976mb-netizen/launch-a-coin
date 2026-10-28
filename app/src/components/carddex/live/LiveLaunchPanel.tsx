@@ -1,8 +1,7 @@
 import { useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   abandonLiveLaunchIntent, confirmLiveCreatorNft, confirmLiveToken, createLiveWalletChallenge, getLiveLaunchIntent,
-  getLiveLaunchReadiness, getLiveWallet, listLiveLaunchIntents, prepareLiveCreatorNft,
+  getLiveWallet, listLiveLaunchIntents, prepareLiveCreatorNft,
   prepareLiveLaunch, submitLiveTransaction, verifyLiveWallet,
   type LiveLaunchIntent, type LivePrepareInput, type LiveResult,
 } from "../../../lib/carddex/live/api";
@@ -14,6 +13,7 @@ import { Button, Modal } from "../../mintdex/ui";
 import { LiveWalletButton } from "./LiveWalletButton";
 import { formatLiveAmount } from "./amounts";
 import { PagedMessage } from "./PagedMessage";
+import { useLiveReadiness } from "./readiness";
 import { getLiveWalletSnapshot, signLiveMessage, signLiveTransaction, useLiveWallet } from "./wallet";
 import {
   createEphemeralSigner, destroyEphemeralSigner, partiallySignPlan, toBase64, validateLivePlan,
@@ -29,7 +29,7 @@ export type LiveLaunchHandle = { submit(): void };
 type Busy = "ownership" | "artwork" | "preparing" | "wallet" | "submitting" | "confirming" | "recovering" | null;
 const BUSY_COPY: Record<NonNullable<Busy>, string> = {
   ownership: "Approve the ownership message in your wallet. This message spends no funds.",
-  artwork: "Preparing your permanent token artwork and complete card image…",
+  artwork: "Preparing your permanent coin artwork and complete card image…",
   preparing: "Checking the current quote asset, balances and exact transaction costs…",
   wallet: "Review the transaction in your wallet. You can reject it there.",
   submitting: "Submitting the transaction you approved…",
@@ -56,7 +56,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, onInvalid, onLockedC
   ref?: Ref<LiveLaunchHandle>;
 }) {
   const wallet = useLiveWallet();
-  const readiness = useQuery({ queryKey: ["live-launch-readiness"], queryFn: () => getLiveLaunchReadiness(), staleTime: 30_000, retry: 1 });
+  const readiness = useLiveReadiness();
   const [busy, setBusy] = useState<Busy>(null), [error, setError] = useState("");
   const [terms, setTerms] = useState(false), [slippageBps, setSlippageBps] = useState(100);
   const [intent, setIntent] = useState<LiveLaunchIntent | null>(null);
@@ -186,11 +186,11 @@ export function LiveLaunchPanel({ draft, card, pairPending, onInvalid, onLockedC
         setBusy("recovering"); await authenticate(address, version);
         const previous = unwrap(await getLiveLaunchIntent({ data: { intentId: saved } })).intent;
         assertCurrent(version, address); retain(previous);
-        setError("Your saved launch was restored. Finish or verify it before starting another token.");
+        setError("Your saved launch was restored. Finish or verify it before starting another coin.");
         return;
       }
       if (pendingIntent.current && pendingIntent.current.status !== "complete" && !tokenKey.current) {
-        setError("This saved launch needs recovery. Check its existing token before preparing anything new."); return;
+        setError("This saved launch needs recovery. Check its existing coin before preparing anything new."); return;
       }
       if (creator.current && creator.current !== address) throw new Error("Reconnect the wallet that owns this prepared launch.");
       await authenticate(address, version);
@@ -254,7 +254,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, onInvalid, onLockedC
       if (kind === "token" ? response.intent.status === "nft_pending" || response.intent.status === "complete" : response.intent.status === "complete") { setUncertain(false); setPlan(null); return; }
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
-    setError("The transaction is still being verified. Your saved launch can be checked again without creating another token.");
+    setError("The transaction is still being verified. Your saved launch can be checked again without creating another coin.");
   }
   async function approveInWallet() {
     const current = pendingIntent.current, currentPlan = plan;
@@ -299,7 +299,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, onInvalid, onLockedC
   }
   useImperativeHandle(ref, () => ({ submit: () => { if (intent?.status === "nft_pending") void prepareNft(); else if (intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current) void checkConfirmation(); else if (intent?.status !== "complete") void prepareDraft(); } }));
   const selected = intent ? getPairAsset(intent.quoteAssetKey) : getPairAsset(card.quoteAssetKey);
-  const currentTitle = intent?.status === "complete" ? "Your token and card are on mainnet" : intent?.status === "nft_pending" ? "Token verified. Your card is next." : intent?.status === "token_pending" ? "Token transaction submitted" : "Create through your wallet";
+  const currentTitle = intent?.status === "complete" ? "Your coin and card are on mainnet" : intent?.status === "nft_pending" ? "Coin verified. Your card is next." : intent?.status === "token_pending" ? "Coin transaction submitted" : "Create through your wallet";
   const reviewIntent = intent;
   const recoveryItems = recoverable.filter(i => i.status !== "complete" && i.status !== "abandoned");
   const reviewPages = ["Identity", "Network costs", "Total & initial buy", "Quote & issuance", "Wallet approval"];
@@ -310,7 +310,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, onInvalid, onLockedC
       {!wallet.address ? <LiveWalletButton buttonRef={connectButton} quiet /> : <p className="cdx-live-address">Creator · {brief(wallet.address)}{!wallet.mainnet ? " · Switch to mainnet" : ""}</p>}
       {!available ? <button type="button" className="mdx-link cdx-live-readiness-link" onClick={() => setPane("status")}>{readiness.isPending ? "Checking mainnet readiness…" : "Mainnet setup required · view status"}</button> : null}
       {!intent ? <><button type="button" className="mdx-link" onClick={() => setPane("terms")}>Read transaction terms</button><label className="cdx-live-check"><input ref={termsRef} type="checkbox" disabled={!termsSeen} checked={terms} onChange={e => setTerms(e.target.checked)} /><span>I have artwork rights and accept paid mainnet transactions.{!termsSeen ? " Read the terms first." : ""}</span></label></> : null}
-      {intent?.status === "nft_pending" ? <p>The token is verified. Issue its separate one-of-one card to the same creator wallet.</p> : null}
+      {intent?.status === "nft_pending" ? <p>The coin is verified. Issue its separate one-of-one card to the same creator wallet.</p> : null}
       {pairPending ? <p role="status">Confirm or cancel the quote change before preparing a transaction.</p> : null}
       {busy ? <PagedMessage text={BUSY_COPY[busy]} /> : null}
       <div className="cdx-live-actions">
@@ -319,28 +319,28 @@ export function LiveLaunchPanel({ draft, card, pairPending, onInvalid, onLockedC
       </div>
     </div>
     <div className="cdx-live-pane" hidden={pane !== "terms"}>
-      <p>Token creation and card issuance are separate paid mainnet transactions. Exact costs appear before each wallet approval. Your selected quote funds only the optional initial buy.</p>
+      <p>Coin creation and card issuance are separate paid mainnet transactions. Exact costs appear before each wallet approval. Your selected quote funds only the optional initial buy.</p>
       <dl className="cdx-live-review"><div><dt>Platform fee per launch</dt><dd>[TO FILL: platform fee per launch]</dd></div></dl>
-      {selected.kind === "stock" ? <p>A tokenized-stock quote does not make your creator token company shares.</p> : null}
+      {selected.kind === "stock" ? <p>A tokenized-stock quote does not make your creator coin company shares.</p> : null}
       <label className="cdx-live-check cdx-live-slippage"><span>Initial-buy slippage</span><select className="mdx-input" value={slippageBps} disabled={!!intent} onChange={e => setSlippageBps(Number(e.target.value))}><option value={50}>0.5%</option><option value={100}>1%</option><option value={300}>3%</option></select></label>
       <button type="button" className="mdx-link cdx-live-back" onClick={() => setPane("launch")}>Back to launch</button>
     </div>
     <div ref={recoveryBody} tabIndex={-1} role="region" aria-label="Saved launch recovery" className="cdx-live-pane" hidden={pane !== "recovery"}>
-      {intent && (intent.status === "prepared" || intent.status === "token_pending") ? <><p>An unused launch can be discarded only after every prepared transaction expires and the server verifies no token exists.</p><button type="button" className="mdx-link" disabled={!!busy} onClick={() => void discardExpiredDraft()}>Discard expired unused draft</button></> : null}
+      {intent && (intent.status === "prepared" || intent.status === "token_pending") ? <><p>An unused launch can be discarded only after every prepared transaction expires and the server verifies no coin exists.</p><button type="button" className="mdx-link" disabled={!!busy} onClick={() => void discardExpiredDraft()}>Discard expired unused draft</button></> : null}
       {wallet.address && available && !intent ? <><button type="button" className="mdx-link" disabled={!!busy} onClick={() => void recover(savedIntent(wallet.address!) ?? undefined)}>Find / resume saved launch</button>{recoveryItems.slice(recoveryPage * 2, recoveryPage * 2 + 2).map(i => <button key={i.id} type="button" className="mdx-btn mdx-btn--outline" disabled={!!busy} onClick={() => void recover(i.id)}>{brief(i.tokenMint)} · {i.status === "nft_pending" ? "Card pending" : "Check launch"}</button>)}{recoveryItems.length > 2 ? <nav className="cdx-launch-subtabs" aria-label="Saved launch pages"><button type="button" disabled={recoveryPage === 0} onClick={() => goRecovery(recoveryPage - 1)}>Previous</button><span>{recoveryPage + 1} / {Math.ceil(recoveryItems.length / 2)}</span><button type="button" disabled={(recoveryPage + 1) * 2 >= recoveryItems.length} onClick={() => goRecovery(recoveryPage + 1)}>Next</button></nav> : null}</> : !intent ? <p>Connect the creator wallet after mainnet setup is ready to find a saved launch.</p> : <p>This launch is saved. Use Launch to check its current stage.</p>}
     </div>
     <div className="cdx-live-pane" hidden={pane !== "saved"}>
-      {intent ? <><dl className="cdx-live-review"><div><dt>Token mint</dt><dd><a href={`https://solscan.io/token/${intent.tokenMint}`} target="_blank" rel="noreferrer">{brief(intent.tokenMint)}</a></dd></div><div><dt>Quote asset</dt><dd>{selected.symbol}</dd></div><div><dt>Permanent finish</dt><dd>{getCardDesign(intent.cardTemplate).name}</dd></div></dl><p>These launch details are locked to this saved request.</p><div className="cdx-live-links">{intent.status === "complete" ? <><a href={`https://pump.fun/coin/${intent.tokenMint}`} target="_blank" rel="noreferrer">Token on pump.fun</a><a href={`https://solscan.io/account/${intent.nftMint}`} target="_blank" rel="noreferrer">Card NFT</a><a href={intent.nftMetadataUri} target="_blank" rel="noreferrer">Metadata</a></> : null}{intent.tokenSignature ? <a href={`https://solscan.io/tx/${intent.tokenSignature}`} target="_blank" rel="noreferrer">Token transaction</a> : null}{intent.nftSignature ? <a href={`https://solscan.io/tx/${intent.nftSignature}`} target="_blank" rel="noreferrer">Card transaction</a> : null}</div></> : <p>No saved launch is loaded. Complete your token details or use Recover launch.</p>}
+      {intent ? <><dl className="cdx-live-review"><div><dt>Coin mint</dt><dd><a href={`https://solscan.io/token/${intent.tokenMint}`} target="_blank" rel="noreferrer">{brief(intent.tokenMint)}</a></dd></div><div><dt>Quote asset</dt><dd>{selected.symbol}</dd></div><div><dt>Permanent finish</dt><dd>{getCardDesign(intent.cardTemplate).name}</dd></div></dl><p>These launch details are locked to this saved request.</p><div className="cdx-live-links">{intent.status === "complete" ? <><a href={`https://pump.fun/coin/${intent.tokenMint}`} target="_blank" rel="noreferrer">Coin on pump.fun</a><a href={`https://solscan.io/account/${intent.nftMint}`} target="_blank" rel="noreferrer">Card NFT</a><a href={intent.nftMetadataUri} target="_blank" rel="noreferrer">Metadata</a></> : null}{intent.tokenSignature ? <a href={`https://solscan.io/tx/${intent.tokenSignature}`} target="_blank" rel="noreferrer">Coin transaction</a> : null}{intent.nftSignature ? <a href={`https://solscan.io/tx/${intent.nftSignature}`} target="_blank" rel="noreferrer">Card transaction</a> : null}</div></> : <p>No saved launch is loaded. Complete your coin details or use Recover launch.</p>}
     </div>
     <div className="cdx-live-pane" hidden={pane !== "status"}>
       {error ? <PagedMessage text={error} alert /> : busy ? <PagedMessage text={BUSY_COPY[busy]} /> : readiness.isPending ? <p role="status">Checking mainnet readiness…</p> : readiness.isError ? <p>Launch readiness could not be checked.</p> : !available ? <PagedMessage text={[...(readiness.data?.blockers ?? []), "No transaction or charge is requested while setup is incomplete."].join(" ")} /> : <p>Mainnet setup is ready. Each transaction still needs your wallet approval.</p>}
       <div className="cdx-live-actions"><button type="button" className="mdx-btn mdx-btn--outline" onClick={() => void readiness.refetch()}>Check readiness</button><button type="button" className="mdx-btn mdx-btn--ghost" onClick={() => setPane("launch")}>Back to launch</button></div>
     </div>
-    <Modal open={reviewOpen} onOpenChange={value => { if (!busy) setReviewOpen(value); }} title={plan?.kind === "nft" ? "Review your card NFT" : "Review your token launch"} description="Review exact mainnet costs and asset identities before opening your wallet.">
+    <Modal open={reviewOpen} onOpenChange={value => { if (!busy) setReviewOpen(value); }} title={plan?.kind === "nft" ? "Review your card NFT" : "Review your coin launch"} description="Review exact mainnet costs and asset identities before opening your wallet.">
       {plan && reviewIntent ? <div className="cdx-live-review-modal">
         <p className="cdx-live-review-progress">{reviewPage + 1} / {reviewPages.length} · {reviewPages[reviewPage]}</p>
         <div ref={reviewBody} tabIndex={-1} role="region" aria-label={reviewPages[reviewPage]} className="cdx-live-review-page">
-        {reviewPage === 0 ? <><p><strong>Solana mainnet · real funds</strong><br />{plan.kind === "token" ? getTradingPair(draftAtPrepare.current?.symbol ?? card.ticker, reviewIntent.quoteAssetKey) : "One-of-one creator card · no NFT royalties"}</p><dl className="cdx-live-review"><div><dt>Creator / fee payer</dt><dd className="cdx-live-address">{reviewIntent.creatorWallet}</dd></div><div><dt>{plan.kind === "token" ? "New token mint" : "New NFT asset"}</dt><dd className="cdx-live-address">{plan.kind === "token" ? reviewIntent.tokenMint : reviewIntent.nftMint}</dd></div></dl></> : reviewPage === 1 ? <dl className="cdx-live-review"><div><dt>Network fee</dt><dd>{formatLiveAmount(plan.review.networkFeeLamports, 9)} SOL</dd></div><div><dt>Priority fee</dt><dd>{formatLiveAmount(plan.review.priorityFeeLamports, 9)} SOL</dd></div><div><dt>Rent / program costs</dt><dd>{formatLiveAmount(plan.review.rentAndProgramCostLamports, 9)} SOL</dd></div></dl> : reviewPage === 2 ? <dl className="cdx-live-review"><div><dt>Total SOL debit</dt><dd><strong>{formatLiveAmount(plan.review.totalDebitLamports, 9)} SOL</strong></dd></div>{typeof plan.review.walletBalanceLamports === "string" ? <div><dt>Wallet SOL available</dt><dd>{formatLiveAmount(plan.review.walletBalanceLamports, 9)} SOL</dd></div> : null}{plan.kind === "token" && plan.review.initialBuyQuoteBaseUnits !== "0" ? <><div><dt>Initial buy</dt><dd>{formatLiveAmount(plan.review.initialBuyQuoteBaseUnits, selected.decimals)} {selected.symbol}</dd></div><div><dt>Minimum tokens received</dt><dd>{formatLiveAmount(plan.review.minimumTokensOut, typeof plan.review.tokenDecimals === "number" ? plan.review.tokenDecimals : 6)}</dd></div></> : <p>No initial buy.</p>}</dl> : reviewPage === 3 ? <><p className="cdx-live-address">Quote mint · {reviewIntent.quoteMint}</p>{plan.kind === "token" ? <p>{selected.key === "sol" ? "Any SOL initial buy is included in the SOL total. " : `Any ${selected.symbol} initial buy is separate from the SOL total. `}Card NFT issuance is a separate paid transaction after token verification.</p> : <p>This issues the card for your existing token. It does not launch or buy another token.</p>}</> : <><p>Verified at slot {plan.verifiedSlot.toLocaleString()}. If preparation expires, review a fresh transaction before signing.</p><p>Opening your wallet does not approve payment. Review and approve there, or reject. Closing this review submits nothing.</p>{error ? <PagedMessage text={error} alert /> : null}<Button block disabled={reviewSeen < 4} pending={!!busy} pendingLabel={busy === "wallet" ? "Waiting for wallet…" : busy === "submitting" ? "Submitting…" : "Checking…"} onClick={() => void approveInWallet()}>Continue to wallet review</Button></>}
+        {reviewPage === 0 ? <><p><strong>Solana mainnet · real funds</strong><br />{plan.kind === "token" ? getTradingPair(draftAtPrepare.current?.symbol ?? card.ticker, reviewIntent.quoteAssetKey) : "One-of-one creator card · no NFT royalties"}</p><dl className="cdx-live-review"><div><dt>Creator / fee payer</dt><dd className="cdx-live-address">{reviewIntent.creatorWallet}</dd></div><div><dt>{plan.kind === "token" ? "New coin mint" : "New NFT asset"}</dt><dd className="cdx-live-address">{plan.kind === "token" ? reviewIntent.tokenMint : reviewIntent.nftMint}</dd></div></dl></> : reviewPage === 1 ? <dl className="cdx-live-review"><div><dt>Network fee</dt><dd>{formatLiveAmount(plan.review.networkFeeLamports, 9)} SOL</dd></div><div><dt>Priority fee</dt><dd>{formatLiveAmount(plan.review.priorityFeeLamports, 9)} SOL</dd></div><div><dt>Rent / program costs</dt><dd>{formatLiveAmount(plan.review.rentAndProgramCostLamports, 9)} SOL</dd></div></dl> : reviewPage === 2 ? <dl className="cdx-live-review"><div><dt>Total SOL debit</dt><dd><strong>{formatLiveAmount(plan.review.totalDebitLamports, 9)} SOL</strong></dd></div>{typeof plan.review.walletBalanceLamports === "string" ? <div><dt>Wallet SOL available</dt><dd>{formatLiveAmount(plan.review.walletBalanceLamports, 9)} SOL</dd></div> : null}{plan.kind === "token" && plan.review.initialBuyQuoteBaseUnits !== "0" ? <><div><dt>Initial buy</dt><dd>{formatLiveAmount(plan.review.initialBuyQuoteBaseUnits, selected.decimals)} {selected.symbol}</dd></div><div><dt>Minimum coins received</dt><dd>{formatLiveAmount(plan.review.minimumTokensOut, typeof plan.review.tokenDecimals === "number" ? plan.review.tokenDecimals : 6)}</dd></div></> : <p>No initial buy.</p>}</dl> : reviewPage === 3 ? <><p className="cdx-live-address">Quote mint · {reviewIntent.quoteMint}</p>{plan.kind === "token" ? <p>{selected.key === "sol" ? "Any SOL initial buy is included in the SOL total. " : `Any ${selected.symbol} initial buy is separate from the SOL total. `}Card NFT issuance is a separate paid transaction after coin verification.</p> : <p>This issues the card for your existing coin. It does not launch or buy another coin.</p>}</> : <><p>Verified at slot {plan.verifiedSlot.toLocaleString()}. If preparation expires, review a fresh transaction before signing.</p><p>Opening your wallet does not approve payment. Review and approve there, or reject. Closing this review submits nothing.</p>{error ? <PagedMessage text={error} alert /> : null}<Button block disabled={reviewSeen < 4} pending={!!busy} pendingLabel={busy === "wallet" ? "Waiting for wallet…" : busy === "submitting" ? "Submitting…" : "Checking…"} onClick={() => void approveInWallet()}>Continue to wallet review</Button></>}
         </div>
         <nav className="cdx-live-review-nav" aria-label="Transaction review pages"><button type="button" className="mdx-btn mdx-btn--outline" disabled={reviewPage === 0 || !!busy} onClick={() => goReview(reviewPage - 1)}>Previous</button><button type="button" className="mdx-btn mdx-btn--primary" disabled={reviewPage === 4 || !!busy} onClick={() => goReview(reviewPage + 1)}>Next</button></nav>
         <Button variant="ghost" block disabled={!!busy} onClick={() => setReviewOpen(false)}>Back without signing</Button>
