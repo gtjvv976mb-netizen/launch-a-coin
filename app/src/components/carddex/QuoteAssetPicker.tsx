@@ -5,6 +5,7 @@ import {
   getPairAsset, getTradingPair, preferredDesignForQuote, type PairAsset, type PairAssetKey,
 } from "../../lib/carddex/pairs";
 import "../../carddex-pairs.css";
+import { ViewTabs } from "./ViewTabs";
 
 export const pairKindLabel = (asset: Readonly<PairAsset>) => ({ native: "Native quote", stable: "Stablecoin quote", stock: "Tokenized stock quote", meme: "Memecoin quote" })[asset.kind];
 
@@ -78,7 +79,7 @@ export function QuoteAssetPicker({ value, designKey, ticker, onChange, onPending
   };
   const pending = pendingQuote ? getPairAsset(pendingQuote) : null;
   if (viewport) return <div className="cdx-pair-picker cdx-pair-picker--viewport">
-    {!pending ? <nav className="cdx-launch-subtabs" aria-label="Quote information">{[["pair", "Pair"], ["mint", "Mint"], ["terms", "Terms"]].map(([key,label]) => <button key={key} type="button" aria-pressed={pane === key} onClick={() => setPane(key)}>{label}</button>)}</nav> : null}
+    {!pending ? <ViewTabs className="cdx-launch-subtabs" label="Quote information" tabs={[["pair", "Pair"], ["mint", "Mint"], ["terms", "Terms"]].map(([key,label]) => ({ id: key, label, selected: pane === key, onSelect: () => setPane(key) }))} /> : null}
     {pending ? <div ref={confirmationRef} tabIndex={-1} className="cdx-pair-change" role="group" aria-label="Change quote and finish">
       <p role="status"><strong>Switch to {pending.symbol}?</strong> {getCardDesign(designKey).name} uses {bound?.symbol}. Choose a compatible finish.</p>
       <label htmlFor={`${id}-finish`}>Compatible card finish</label>

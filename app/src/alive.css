@@ -652,8 +652,8 @@ body:has(.mdx-inspect) .mdx-sky {
   width: 36px;
   height: 22px;
   border-radius: var(--radius-pill);
-  background: rgb(148 178 220 / 0.18);
-  box-shadow: inset 0 0 0 1px rgb(150 180 230 / 0.16);
+  background: var(--color-track);
+  box-shadow: inset 0 0 0 1px var(--color-control-border);
   transition: background-color var(--t-fast) var(--ease-room);
 }
 /* The pill draws 36x22; its touch target is 44x44 (MOT-7). The row around it is the switch's label too. */
@@ -664,7 +664,7 @@ body:has(.mdx-inspect) .mdx-sky {
 }
 .mdx-switch[data-on] {
   background: var(--color-neon);
-  box-shadow: 0 0 12px rgb(61 255 181 / 0.5);
+  box-shadow: inset 0 0 0 1px var(--color-neon);
 }
 .mdx-switch[aria-disabled="true"] {
   cursor: default;

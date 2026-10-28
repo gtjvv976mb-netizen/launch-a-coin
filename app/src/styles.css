@@ -41,6 +41,7 @@
 @import "./meme-icons-studio.css";
 @import "./carddex-theme.css";
 @import "./carddex-gallery.css";
+@import "./carddex-a11y.css";
 
 @custom-variant dark (&:where([data-theme="default-dark"], [data-theme="default-dark"] *));
 

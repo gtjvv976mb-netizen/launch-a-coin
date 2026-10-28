@@ -36,6 +36,7 @@ import {
 } from "../../lib/mintdex/seo";
 import { PageControls, PagedText } from "../../components/carddex/Viewport";
 import { getCardDesign } from "../../lib/carddex/designs";
+import { ViewTabs } from "../../components/carddex/ViewTabs";
 import type { CoinDetail } from "../../lib/mintdex/types";
 
 /** Phone sections (P1-5): one at a time under the hero, kept in ?tab= so a notification can link to the card. */
@@ -185,7 +186,7 @@ function CoinView() {
   return (
     <div key={coin.id} data-tab={tab} className="cdx-coin-screen">
       <header className="cdx-coin-screen__head"><CoinHeader coin={coin} /><span className="text-[12px] text-slate">Demo token · {coin.tradingPair}</span></header>
-      <div className="cdx-coin-screen__tabs"><Tabs value={tab} options={TAB_OPTIONS} onChange={setTab} label="Coin sections" className="mdx-tabs--fill" /></div>
+      <div className="cdx-coin-screen__tabs"><Tabs panels value={tab} options={TAB_OPTIONS} onChange={setTab} label="Coin sections" className="mdx-tabs--fill" /></div>
       <div className="cdx-coin-screen__body">
         <section className="cdx-coin-screen__object" aria-label={`${coin.name} collectible card`}>
           <div className="cdx-coin-screen__case"><CoinCase coin={coin} latestTradeId={latestTradeId} priority /></div>
@@ -195,7 +196,7 @@ function CoinView() {
           {tab==="chart" ? <><CoinStats coin={coin} /><McapChart trades={trades} tradeCount={coin.trades} currentUsd={coin.mcapUsd} currentQuote={coin.mcapQuote} quoteAssetKey={coin.quoteAssetKey} createdAt={coin.createdAt} level={coin.level} className="cdx-coin-screen__chart" /></> : null}
           {tab==="trade" ? <TradePanel page={page} compact hideQuick hideAfter className="cdx-coin-screen__trade" /> : null}
           {tab==="trades" ? <TradesList trades={trades} count={coin.trades} className="cdx-coin-screen__trades" /> : null}
-          {tab==="details" ? <><div className="cdx-view-tabs" aria-label="Token details"><button type="button" aria-pressed={detailTab==="token"} onClick={()=>setDetailTab("token")}>Token</button><button type="button" aria-pressed={detailTab==="story"} onClick={()=>setDetailTab("story")}>Story</button><button type="button" aria-pressed={detailTab==="owner"} onClick={()=>setDetailTab("owner")}>Ownership</button></div>{detailTab==="token" ? <CoinDetails coin={coin} isOwner={isOwner} onEdit={()=>setLoreOpen(true)} /> : detailTab==="story" ? <PagedText text={coin.lore || "The creator has not added a description."} label="Token story" /> : <div className="cdx-coin-screen__ownership"><dl>{ownershipRows.slice(ownershipPage*3,ownershipPage*3+3).map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><PageControls page={ownershipPage} pages={2} onPage={setOwnershipPage} label="Creator card" /></div>}</> : null}
+          {tab==="details" ? <><ViewTabs className="cdx-view-tabs" label="Token details" tabs={[{id:"token",label:"Token",selected:detailTab==="token",onSelect:()=>setDetailTab("token")},{id:"story",label:"Story",selected:detailTab==="story",onSelect:()=>setDetailTab("story")},{id:"owner",label:"Ownership",selected:detailTab==="owner",onSelect:()=>setDetailTab("owner")}]} />{detailTab==="token" ? <CoinDetails coin={coin} isOwner={isOwner} onEdit={()=>setLoreOpen(true)} /> : detailTab==="story" ? <PagedText text={coin.lore || "The creator has not added a description."} label="Token story" /> : <div className="cdx-coin-screen__ownership"><dl>{ownershipRows.slice(ownershipPage*3,ownershipPage*3+3).map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl><PageControls page={ownershipPage} pages={2} onPage={setOwnershipPage} label="Creator card" /></div>}</> : null}
         </section>
       </div>
       <Modal open={loreOpen} onOpenChange={setLoreOpen} title="Edit description">

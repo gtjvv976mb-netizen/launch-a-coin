@@ -55,6 +55,7 @@ import "../home-motion.css";
 import { Card3DView } from "../components/mintdex/card3d/Card3D";
 import { Engine, motionLevel, type Body } from "../components/mintdex/card3d/motion3d";
 import type { SceneCtl } from "../components/mintdex/card3d/scene";
+import { ViewTabs } from "../components/carddex/ViewTabs";
 
 /**
  * Back keeps your place (P1-14): the featured card on the ledge is mirrored in the URL (/?card=glorb), so
@@ -385,7 +386,7 @@ function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
         </div>
       </dl>
       <div className="mt-4 max-lg:col-start-2 max-lg:row-span-2 max-lg:row-start-1 max-lg:mt-0">
-        <ButtonLink to="/coin/$id" params={{ id: c.id }} size="sm">
+        <ButtonLink to="/coin/$id" params={{ id: c.id }} size="sm" variant="outline">
           {HOME_COPY.viewCoin}
         </ButtonLink>
       </div>
@@ -769,7 +770,7 @@ function Home() {
       data-ambient-paused={still || undefined}
       className="mdx-page mdx-home cdx-home grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_calc(var(--aside)_-_var(--main-pad))] lg:gap-5 lg:max-xl:[--aside:300px] xl:[--aside:340px] wide:[--aside:360px] fit:h-full fit:grid-rows-[minmax(0,1fr)]"
     >
-      <div className="cdx-view-tabs cdx-home-mobile-tabs" aria-label="Home views"><button type="button" aria-pressed={homeView==="card"} onClick={()=>setHomeView("card")}>Featured card</button><button type="button" aria-pressed={homeView==="pulse"} onClick={()=>setHomeView("pulse")}>Collection pulse</button></div>
+      <ViewTabs className="cdx-view-tabs cdx-home-mobile-tabs" label="Home views" tabs={[{id:"card",label:"Featured card",selected:homeView==="card",onSelect:()=>setHomeView("card")},{id:"pulse",label:"Collection pulse",selected:homeView==="pulse",onSelect:()=>setHomeView("pulse")}]} />
       {/* ------------------------------------------------ stage (wall) */}
       <section className="cdx-home-stage relative isolate flex min-w-0 flex-col fit:min-h-0">
         {/* The vitrine's light, bokeh and dust behind the whole stage (the beam falls from the top edge). */}
@@ -942,7 +943,7 @@ function Home() {
         aria-label="Trending and activity"
         className="cdx-home__aside mdx-plinth mdx-aside flex min-w-0 flex-col gap-6 lg:pt-[calc(2rem_-_var(--gutter))] short:gap-5 short:pt-6 fit:min-h-0 fit:overflow-hidden"
       >
-        <div className="cdx-view-tabs" aria-label="Collection pulse sections"><button type="button" aria-pressed={sideTab==="trending"} onClick={()=>{setSideTab("trending");setSideIndex(0);}}>Trending</button><button type="button" aria-pressed={sideTab==="activity"} onClick={()=>{setSideTab("activity");setSideIndex(0);}}>Activity</button></div>
+        <ViewTabs className="cdx-view-tabs" label="Collection pulse sections" tabs={[{id:"trending",label:"Trending",selected:sideTab==="trending",onSelect:()=>{setSideTab("trending");setSideIndex(0);}},{id:"activity",label:"Activity",selected:sideTab==="activity",onSelect:()=>{setSideTab("activity");setSideIndex(0);}}]} />
         <div className="flex flex-none items-center justify-between gap-2"><p className="text-[12px] leading-4 text-slate">{sideTab==="trending" ? trendingBasis : MODE_COPY.botsNote}</p>{sideTab==="activity" ? <LivePause paused={live.paused} onChange={live.setPaused} /> : <TextLink to="/discover">See all</TextLink>}</div>
         <div ref={sideGrid.ref} className="cdx-home-pulse-list">
           {sideTab === "trending" ? trending.slice(Math.min(sideIndex,Math.max(0,Math.ceil(trending.length/sideGrid.count)-1))*sideGrid.count,(Math.min(sideIndex,Math.max(0,Math.ceil(trending.length/sideGrid.count)-1))+1)*sideGrid.count).map((c,i)=><CoinRow key={c.id} coin={c} rank={sideIndex*sideGrid.count+i+1} flipId={c.id} />) : activity.slice(Math.min(sideIndex,Math.max(0,Math.ceil(activity.length/sideGrid.count)-1))*sideGrid.count,(Math.min(sideIndex,Math.max(0,Math.ceil(activity.length/sideGrid.count)-1))+1)*sideGrid.count).map(e=><EventItem key={e.id} e={e} now={now} isNew={live.fresh.has(e.id)} />)}

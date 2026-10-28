@@ -660,7 +660,7 @@
     align-items: center;
     justify-content: center;
     gap: 4px;
-    font-size: 11px;
+    font-size: var(--type-min, 12px);
     font-weight: 500;
     line-height: 1;
     color: var(--color-slate);
@@ -748,7 +748,7 @@
       color: var(--color-ink);
     }
   }
-  .mdx-tabs__tab[aria-pressed="true"] {
+  .mdx-tabs__tab[data-selected] {
     color: var(--color-ink);
     font-weight: 600;
   }
@@ -756,7 +756,7 @@
     color: var(--color-slate);
     opacity: 0.6;
   }
-  .mdx-tabs:not([data-measured]) .mdx-tabs__tab[aria-pressed="true"] {
+  .mdx-tabs:not([data-measured]) .mdx-tabs__tab[data-selected] {
     background: var(--color-sheet);
     box-shadow: var(--shadow-raise), 0 0 0 1px rgb(61 255 181 / 0.35);
   }
@@ -1368,7 +1368,7 @@
     width: 18px;
     height: 6px;
     border-radius: var(--radius-pill);
-    background: rgb(220 235 255 / 0.28);
+    background: var(--color-control-border);
     clip-path: inset(0 6px round 3px);
     transition:
       clip-path 240ms var(--ease-room),
@@ -1377,7 +1377,8 @@
   .mdx-step-dot[data-active] {
     clip-path: inset(-12px round 15px);
     background: var(--holo);
-    box-shadow: 0 0 10px rgb(61 255 181 / 0.6);
+    outline: 1px solid var(--color-neon);
+    outline-offset: -1px;
   }
 
   /* Skeletons: the shimmer is the only infinite animation, and only while a skeleton is mounted. */
@@ -1668,16 +1669,17 @@
     padding: 0 18px;
     border-radius: var(--radius-pill);
     background: var(--color-neon);
-    color: var(--color-neon-ink);
+    color: var(--color-on-neon, var(--color-neon-ink));
     font-size: 14px;
     font-weight: 600;
-    box-shadow: var(--shadow-float);
+    /* No shadow while parked above the viewport (only on focus): its blur leaked a smudge into the top left (RL-07). */
     transform: translateY(calc(-100% - 24px));
     transition: transform var(--t-base) var(--ease-spring);
   }
   .mdx-skip:focus,
   .mdx-skip:focus-visible {
     transform: none;
+    box-shadow: var(--shadow-float);
     outline-offset: 3px;
   }
   /* The skip target takes focus without a ring around the whole page. */
@@ -2344,7 +2346,7 @@ a:focus-visible .mdx-lift {
     opacity: 0;
   }
   .mdx-tabs__thumb,
-  .mdx-tabs:not([data-measured]) .mdx-tabs__tab[aria-pressed="true"] {
+  .mdx-tabs:not([data-measured]) .mdx-tabs__tab[data-selected] {
     box-shadow: 0 0 0 1px var(--color-ink);
   }
   .mdx-plinth,
