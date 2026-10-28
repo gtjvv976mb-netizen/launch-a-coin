@@ -68,6 +68,7 @@ function Discover() {
   const visible = coins.slice(0, shownBatches * BATCH);
   // "Show more tokens" moves focus to the first token it added, so keyboard users carry on from there.
   const gridRef = useRef<HTMLUListElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
   const focusFrom = useRef<number | null>(null);
   useEffect(() => {
     const from = focusFrom.current;
@@ -79,8 +80,9 @@ function Discover() {
   return (
     <PageFrame className="cdx-discover">
       <header className="cdx-archive__head">
-        <div className="flex items-center gap-2">
-          <h1 className="mdx-h1">The collection.</h1>
+        {/* The chip wraps under the title when the row is narrow, and keeps a clear 12px gap beside it. */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <h1 className="mdx-h1 cdx-discover__title">The collection.</h1>
           <SimTag className="mt-1.5" />
         </div>
         <Link to="/launch" className="mdx-link min-h-11 inline-flex items-center">
@@ -92,6 +94,7 @@ function Discover() {
           Search coins
         </label>
         <input
+          ref={searchRef}
           id="token-search"
           className="mdx-input"
           type="search"
@@ -163,7 +166,11 @@ function Discover() {
           <p>{query ? `No coins match “${query}”.` : "No coins yet."}</p>
           <div className="cdx-empty__actions">
             {query ? (
-              <Button variant="outline" onClick={() => setQuery("")}>
+              <Button variant="outline" onClick={() => {
+                // The button unmounts once the list fills again; carry focus to the search box it cleared.
+                setQuery("");
+                searchRef.current?.focus();
+              }}>
                 Clear search
               </Button>
             ) : null}

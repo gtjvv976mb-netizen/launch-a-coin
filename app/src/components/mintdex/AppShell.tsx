@@ -36,7 +36,7 @@ import "../../royal-motion.css";
 import "../../carddex-viewport.css";
 import { GyroChip } from "./card3d/GyroChip";
 import { ConfirmDialog } from "./trust";
-import { ViewTabs } from "../carddex/ViewTabs";
+import { ViewTabs, tabPanelProps } from "../carddex/ViewTabs";
 import {
   Avatar,
   Button,
@@ -752,6 +752,7 @@ function AccountSheet({
 }) {
   const { openGuide } = useSessionUi();
   const [accountTab,setAccountTab] = useState("account");
+  const accountTabsId = useId();
   const [confirm, setConfirm] = useState(false);
   const close = () => onOpenChange(false);
   const { faucet, leave, busy, leaving } = useWalletActions(close);
@@ -759,8 +760,8 @@ function AccountSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange} title="Your account">
-        <ViewTabs className="cdx-view-tabs" label="Account sections" tabs={[{id:"account",label:"Account",selected:accountTab==="account",onSelect:()=>setAccountTab("account")},{id:"help",label:"Help & settings",selected:accountTab==="help",onSelect:()=>setAccountTab("help")}]} />
-        {accountTab === "account" ? <>
+        <ViewTabs className="cdx-view-tabs" label="Account sections" idBase={accountTabsId} tabs={[{id:"account",label:"Account",selected:accountTab==="account",onSelect:()=>setAccountTab("account")},{id:"help",label:"Help & settings",selected:accountTab==="help",onSelect:()=>setAccountTab("help")}]} />
+        {accountTab === "account" ? <div className="contents" {...tabPanelProps(accountTabsId, accountTab)}>
         <div className="flex items-center gap-3 rounded-pop bg-sheet p-3 shadow-raise">
           <Avatar handle={me.handle} size={40} />
           <div className="min-w-0">
@@ -796,7 +797,7 @@ function AccountSheet({
           >
             {busy ? "Claiming..." : faucetLabelOf(me)}
           </button>
-        </nav></> : <><nav aria-label="Help and settings" className="mt-3 flex flex-col">
+        </nav></div> : <div className="contents" {...tabPanelProps(accountTabsId, accountTab)}><nav aria-label="Help and settings" className="mt-3 flex flex-col">
           <button
             type="button"
             className="mdx-menu-item text-[15px]"
@@ -821,7 +822,7 @@ function AccountSheet({
             Start over
           </button>
         </nav>
-        <CalmSwitch size="md" className="mt-2 border-t border-rule pt-3" /></>}
+        <CalmSwitch size="md" className="mt-2 border-t border-rule pt-3" /></div>}
       </Sheet>
       <StartOverDialog
         handle={me.handle}
@@ -851,7 +852,7 @@ function MobileHeader({ liveLaunch = false }: { liveLaunch?: boolean }) {
       </Link>
       <div className="-mr-1.5 ml-auto flex items-center gap-1">
         <SearchButton />
-        {liveLaunch ? <><LiveLaunchGuide compact /><LiveWalletButton compact /></> : !IS_SIM ? (
+        {liveLaunch ? <><LiveLaunchGuide compact /><LiveWalletButton compact quiet /></> : !IS_SIM ? (
           <ChainHeaderAccount />
         ) : me ? (
           <button

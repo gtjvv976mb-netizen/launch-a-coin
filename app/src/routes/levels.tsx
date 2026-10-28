@@ -1,5 +1,5 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState, type CSSProperties } from "react";
+import { useId, useMemo, useState, type CSSProperties } from "react";
 import { z } from "zod";
 import { HeroTurntable } from "../components/carddex/HeroTurntable";
 import { MintCard, type CardData } from "../components/mintdex/MintCard";
@@ -16,7 +16,7 @@ import { pageHead } from "../lib/mintdex/seo";
 import { allowedQuotesForDesign, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, isPairAssetKey } from "../lib/carddex/pairs";
 import { initialQuoteReserves, quoteMetrics } from "../lib/carddex/quote-simulation";
 import { PairBadge, QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
-import { ViewTabs } from "../components/carddex/ViewTabs";
+import { ViewTabs, tabPanelProps } from "../components/carddex/ViewTabs";
 import "../carddex.css";
 
 export const Route = createFileRoute("/levels")({
@@ -55,6 +55,7 @@ function Designs() {
   const setCategory = (collection: string) => { setPageIndex(0); void navigate({search: {...search, collection: collection === "all" ? undefined : collection}, replace: true, resetScroll: false}); };
   const [query, setQuery] = useState("");
   const [view, setView] = useState("preview");
+  const viewsId = useId();
   const [libraryTab, setLibraryTab] = useState("designs");
   const [pageIndex, setPageIndex] = useState(0);
   const grid = usePageCapacity({rowHeight:185,minWidth:120,maxColumns:3,maxRows:3});
@@ -110,9 +111,9 @@ function Designs() {
           Use this design
         </Link>
       </header>
-      <ViewTabs className="cdx-view-tabs cdx-archive-mobile-tabs" label="Design views" tabs={[{id:"preview",label:"Card preview",selected:view==="preview",onSelect:()=>setView("preview")},{id:"designs",label:"Designs",selected:view==="library" && libraryTab==="designs",onSelect:()=>{setView("library");setLibraryTab("designs");}},{id:"pair",label:"Pair",selected:view==="library" && libraryTab==="pair",onSelect:()=>{setView("library");setLibraryTab("pair");}}]} />
+      <ViewTabs className="cdx-view-tabs cdx-archive-mobile-tabs" label="Design views" idBase={`${viewsId}-m`} tabs={[{id:"preview",label:"Card preview",selected:view==="preview",onSelect:()=>setView("preview"),panel:`${viewsId}-preview`},{id:"designs",label:"Designs",selected:view==="library" && libraryTab==="designs",onSelect:()=>{setView("library");setLibraryTab("designs");},panel:`${viewsId}-library`},{id:"pair",label:"Pair",selected:view==="library" && libraryTab==="pair",onSelect:()=>{setView("library");setLibraryTab("pair");},panel:`${viewsId}-library`}]} />
       <div className="cdx-archive__body" data-view={view}>
-        <section className="cdx-archive__vitrine" aria-label="Selected card design preview">
+        <section id={`${viewsId}-preview`} className="cdx-archive__vitrine" aria-label="Selected card design preview">
           <div
             className="cdx-archive__halo"
             style={{ "--cdx-accent": design.palette[1] } as CSSProperties}
@@ -129,9 +130,9 @@ function Designs() {
             </span>
           </div>
         </section>
-        <section className="cdx-library" aria-label="Card design library">
-          <ViewTabs className="cdx-view-tabs cdx-library-desktop-tabs" label="Library sections" tabs={[{id:"designs",label:"Designs",selected:libraryTab==="designs",onSelect:()=>setLibraryTab("designs")},{id:"pair",label:"Trading pair",selected:libraryTab==="pair",onSelect:()=>setLibraryTab("pair")}]} />
-          {libraryTab === "pair" ? <div className="cdx-fit-region"><QuoteAssetPicker value={quote.key} designKey={design.key} ticker="GLORB" compact viewport onChange={(nextQuote,nextDesign)=>void navigate({ search:{...search,design:nextDesign,quote:nextQuote},replace:true,resetScroll:false })} /></div> : <>
+        <section id={`${viewsId}-library`} className="cdx-library" aria-label="Card design library">
+          <ViewTabs className="cdx-view-tabs cdx-library-desktop-tabs" label="Library sections" idBase={viewsId} tabs={[{id:"designs",label:"Designs",selected:libraryTab==="designs",onSelect:()=>setLibraryTab("designs")},{id:"pair",label:"Trading pair",selected:libraryTab==="pair",onSelect:()=>setLibraryTab("pair")}]} />
+          {libraryTab === "pair" ? <div className="cdx-fit-region" {...tabPanelProps(viewsId, "pair")}><QuoteAssetPicker value={quote.key} designKey={design.key} ticker="GLORB" compact viewport onChange={(nextQuote,nextDesign)=>void navigate({ search:{...search,design:nextDesign,quote:nextQuote},replace:true,resetScroll:false })} /></div> : <div className="contents" {...tabPanelProps(viewsId, "designs")}>
           <div className="cdx-library__tools">
             <label className="sr-only" htmlFor="design-search">
               Search card designs
@@ -208,7 +209,7 @@ function Designs() {
             )}
           </div>
           <PageControls page={page} pages={pages} onPage={setPageIndex} label={`${shown.length} designs`} />
-          </>}
+          </div>}
           <p className="cdx-library__foot">
             Stock pairs use tokenized quote assets; they do not grant equity.
           </p>

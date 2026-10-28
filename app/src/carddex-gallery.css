@@ -6,7 +6,8 @@
 .cdx-app .mdx-rail .mdx-tab__foil { opacity:.35; }
 .cdx-app .mdx-rail .mdx-input { min-height:36px; height:36px; font-size:12px; background:#40372a; color:#fff8df; border-color:#796740; }
 .cdx-app .mdx-rail .mdx-input::placeholder { color:#dfd0ac; }
-.cdx-app .mdx-card3d__chip { background:#342c20; color:#fff4d8; border-color:#9e8150; box-shadow:none; }
+/* Phone tilt is optional: a quiet outline chip, so it never competes with the page's primary action (VD-05). */
+.cdx-app .mdx-card3d__chip { background:var(--color-sheet); color:var(--color-ink); border:1px solid var(--color-control-border); box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none; }
 .cdx-app .mdx-rail .mdx-link, .cdx-app .mdx-rail .mdx-btn { font-size:12px; }
 .cdx-app .mdx-rail .mdx-btn { padding-inline:12px; }
 .cdx-app .mdx-mhead { background:#28231d; border-bottom:1px solid #76623e; }
@@ -141,6 +142,8 @@
  .cdx-app .cdx-archive__head > div { flex:1; }
  .cdx-app .cdx-use-design { flex:none; width:auto; min-height:44px; padding:9px 12px; font-size:var(--type-min); }
  .cdx-app .cdx-archive__head .mdx-h1 { font-size:var(--type-page-title-sm); max-width:9ch; }
+ /* Discover's title is one line: a 9ch box let "The collection." spill onto its Simulated chip. */
+ .cdx-app .cdx-archive__head .cdx-discover__title { max-width:none; }
  .cdx-app .cdx-archive__head .cdx-muted { max-width:24ch; font-size:12px; }
  .cdx-app .cdx-library__list { grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
  .cdx-app .cdx-token-grid { grid-template-columns:1fr; gap:30px; padding:12px 26px 24px; }

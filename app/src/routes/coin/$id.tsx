@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { z } from "zod";
 
 import {
@@ -35,7 +35,7 @@ import {
   shareArt,
 } from "../../lib/mintdex/seo";
 import { getCardDesign } from "../../lib/carddex/designs";
-import { ViewTabs } from "../../components/carddex/ViewTabs";
+import { ViewTabs, tabPanelProps } from "../../components/carddex/ViewTabs";
 import type { CoinDetail } from "../../lib/mintdex/types";
 
 /** Phone sections (P1-5): one at a time under the hero, kept in ?tab= so a notification can link to the card. */
@@ -134,6 +134,7 @@ function CoinView() {
   const tab: CoinTab = tabParam ?? "card";
   const navigate = Route.useNavigate();
   const [detailTab,setDetailTab] = useState("token");
+  const tabsId = useId(), detailsId = useId();
   const setTab = (next: CoinTab) => void navigate({search:p=>({...p,tab:next==="card"?undefined:next}),replace:true,resetScroll:false});
   // "Your card is live" opens after mount (never in the server HTML) and only for the coin's launcher, so a
   // pasted ?minted=1 link shows nothing to anyone else. Closing it drops ?minted from the URL.
@@ -184,17 +185,17 @@ function CoinView() {
   return (
     <div key={coin.id} data-tab={tab} className="cdx-coin-screen">
       <header className="cdx-coin-screen__head"><CoinHeader coin={coin} /><span className="text-[12px] text-slate">Demo coin · {coin.tradingPair}</span></header>
-      <div className="cdx-coin-screen__tabs"><Tabs panels value={tab} options={TAB_OPTIONS} onChange={setTab} label="Coin sections" className="mdx-tabs--fill" /></div>
+      <div className="cdx-coin-screen__tabs"><Tabs panels idBase={tabsId} value={tab} options={TAB_OPTIONS} onChange={setTab} label="Coin sections" className="mdx-tabs--fill" /></div>
       <div className="cdx-coin-screen__body">
         <section className="cdx-coin-screen__object" aria-label={`${coin.name} collectible card`}>
           <div className="cdx-coin-screen__case"><CoinCase coin={coin} latestTradeId={latestTradeId} priority /></div>
         </section>
-        <section className="cdx-coin-screen__pane" aria-label={TAB_OPTIONS.find(option=>option.value===tab)?.label}>
+        <section className="cdx-coin-screen__pane" {...tabPanelProps(tabsId, tab)}>
           {tab==="card" ? <><h2 className="text-lg font-semibold">The creator’s card</h2><div className="cdx-coin-screen__ownership"><dl>{ownershipRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div><p className="text-[12px] text-slate">Fixed design. Its token trades separately.</p></> : null}
           {tab==="chart" ? <><CoinStats coin={coin} /><McapChart trades={trades} tradeCount={coin.trades} currentUsd={coin.mcapUsd} currentQuote={coin.mcapQuote} quoteAssetKey={coin.quoteAssetKey} createdAt={coin.createdAt} level={coin.level} className="cdx-coin-screen__chart" /></> : null}
           {tab==="trade" ? <TradePanel page={page} compact hideQuick hideAfter className="cdx-coin-screen__trade" /> : null}
           {tab==="trades" ? <TradesList trades={trades} count={coin.trades} className="cdx-coin-screen__trades" /> : null}
-          {tab==="details" ? <><ViewTabs className="cdx-view-tabs" label="Coin details" tabs={[{id:"token",label:"Coin",selected:detailTab==="token",onSelect:()=>setDetailTab("token")},{id:"story",label:"Story",selected:detailTab==="story",onSelect:()=>setDetailTab("story")},{id:"owner",label:"Ownership",selected:detailTab==="owner",onSelect:()=>setDetailTab("owner")}]} />{detailTab==="token" ? <CoinDetails coin={coin} isOwner={isOwner} onEdit={()=>setLoreOpen(true)} /> : detailTab==="story" ? <p className="cdx-coin-screen__story">{coin.lore || "The creator has not added a description."}</p> : <div className="cdx-coin-screen__ownership"><dl>{ownershipRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div>}</> : null}
+          {tab==="details" ? <><ViewTabs className="cdx-view-tabs" label="Coin details" idBase={detailsId} tabs={[{id:"token",label:"Coin",selected:detailTab==="token",onSelect:()=>setDetailTab("token")},{id:"story",label:"Story",selected:detailTab==="story",onSelect:()=>setDetailTab("story")},{id:"owner",label:"Ownership",selected:detailTab==="owner",onSelect:()=>setDetailTab("owner")}]} /><div className="contents" {...tabPanelProps(detailsId, detailTab)}>{detailTab==="token" ? <CoinDetails coin={coin} isOwner={isOwner} onEdit={()=>setLoreOpen(true)} /> : detailTab==="story" ? <p className="cdx-coin-screen__story">{coin.lore || "The creator has not added a description."}</p> : <div className="cdx-coin-screen__ownership"><dl>{ownershipRows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div>}</div></> : null}
         </section>
       </div>
       <Modal open={loreOpen} onOpenChange={setLoreOpen} title="Edit description">

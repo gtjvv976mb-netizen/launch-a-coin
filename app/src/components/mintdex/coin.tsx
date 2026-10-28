@@ -6,6 +6,7 @@
  */
 import {
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -61,7 +62,7 @@ import { formatQuoteAmount, parseQuoteAmount, quoteMetrics } from "../../lib/car
 import { aggregateCandles, candleInterval, candleIntervalLabel } from "../../lib/carddex/candles";
 import "../../carddex-chart.css";
 import { PageControls, usePageCapacity } from "../carddex/Viewport";
-import { ViewTabs } from "../carddex/ViewTabs";
+import { ViewTabs, tabDomId } from "../carddex/ViewTabs";
 import type { CoinDetail, CoinPage, TradeRow } from "../../lib/mintdex/types";
 import { CardBack, CardCase, View3DButton, useView3DGestures, type Card3DHandle } from "./card3d";
 import { useClaimable } from "./cases";
@@ -1017,6 +1018,8 @@ export function TradePanel({
   const { run, pending, feedback, errorOf, reset } = useAction();
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [ticketStep,setTicketStep] = useState("amount");
+  const stepsId = useId();
+  const stepPanel = (step: string) => compact ? { id: `${stepsId}-${step}`, role: "tabpanel" as const, "aria-labelledby": tabDomId(stepsId, step) } : {};
   const [input, setInput] = useState("");
   // A blocked submit with nothing typed asks for an amount; typing clears it.
   const [attempted, setAttempted] = useState(false);
@@ -1223,8 +1226,8 @@ export function TradePanel({
       data-pane={pane}
       noValidate
     >
-      {compact ? <ViewTabs className="cdx-view-tabs" label="Trade steps" tabs={[{id:"amount",label:"Amount",selected:ticketStep==="amount",onSelect:()=>setTicketStep("amount")},{id:"review",label:"Review trade",selected:ticketStep==="review",onSelect:()=>setTicketStep("review")}]} /> : null}
-      <div className="cdx-trade-ticket__amount">
+      {compact ? <ViewTabs className="cdx-view-tabs" label="Trade steps" idBase={stepsId} tabs={[{id:"amount",label:"Amount",selected:ticketStep==="amount",onSelect:()=>setTicketStep("amount"),panel:`${stepsId}-amount`},{id:"review",label:"Review trade",selected:ticketStep==="review",onSelect:()=>setTicketStep("review"),panel:`${stepsId}-review`}]} /> : null}
+      <div className="cdx-trade-ticket__amount" {...stepPanel("amount")}>
       <SideToggle
         side={side}
         onChange={(s) => {
@@ -1312,7 +1315,7 @@ export function TradePanel({
 
       {compact ? <Button type="button" block className="mt-4" onClick={()=>setTicketStep("review")}>Review {side}</Button> : null}
       </div>
-      <div className="cdx-trade-ticket__review">
+      <div className="cdx-trade-ticket__review" {...stepPanel("review")}>
       {compact ? <p className="text-[13px] text-slate">{side==="buy"?"Buy":"Sell"} · {input || "0"} {suffix}</p> : null}
       <dl className="mdx-leaders mt-4">
         <QuoteRow label="You receive">

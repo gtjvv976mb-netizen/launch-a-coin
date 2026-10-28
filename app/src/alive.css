@@ -627,7 +627,8 @@ body:has(.mdx-inspect) .mdx-sky {
   display: none;
 }
 
-/* The Stepper's Pause/Play (an auto-advancing carousel only): hidden under calm, where nothing advances. */
+/* The Stepper's Pause/Play (an auto-advancing carousel only): hidden under calm, where nothing advances. It keeps
+ * its box (the Stepper swaps in a same-size empty slot after hydration), so the row never shifts. */
 .mdx-playbtn {
   transition:
     background-color var(--t-fast) var(--ease-room),
@@ -642,7 +643,7 @@ body:has(.mdx-inspect) .mdx-sky {
   transform: scale(0.94);
 }
 :root[data-motion="calm"] .mdx-playbtn {
-  display: none;
+  visibility: hidden;
 }
 
 /* ---------------------------------------------------------------- Calm motion switch (10.2) */
