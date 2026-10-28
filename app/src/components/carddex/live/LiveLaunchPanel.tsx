@@ -324,7 +324,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, onInva
     </div>
     <div className="cdx-live-pane" hidden={pane !== "terms"}>
       <p>Coin creation and card issuance are separate paid mainnet transactions. Exact costs appear before each wallet approval. Your selected quote funds only the optional initial buy.</p>
-      <dl className="cdx-live-review"><div><dt>Platform fee per launch</dt><dd>[TO FILL: platform fee per launch]</dd></div></dl>
+      <dl className="cdx-live-review"><div><dt>Platform fee</dt><dd>None. Launch a Card charges no platform fee. You pay Solana network and priority fees, account rent for the new coin and card, and pump.fun's protocol and creator fees inside any initial buy.</dd></div></dl>
       {selected.kind === "stock" ? <p>A tokenized-stock quote does not make your creator coin company shares.</p> : null}
       <label className="cdx-live-check cdx-live-slippage"><span>Initial-buy slippage</span><select className="mdx-input" value={slippageBps} disabled={!!intent} onChange={e => setSlippageBps(Number(e.target.value))}><option value={50}>0.5%</option><option value={100}>1%</option><option value={300}>3%</option></select></label>
       <button type="button" className="mdx-link cdx-live-back" onClick={() => setPane("launch")}>Back to launch</button>

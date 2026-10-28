@@ -149,9 +149,7 @@ const SECTIONS: Section[] = [
               <tbody>
                 <tr>
                   <th scope="row">Launch a Card fee per launch</th>
-                  <td>
-                    <Fill>platform fee per launch</Fill>
-                  </td>
+                  <td>Launch a Card currently adds no fee to launch or card transactions.</td>
                 </tr>
                 <tr>
                   <th scope="row">Launch a Card share of trading fees</th>
