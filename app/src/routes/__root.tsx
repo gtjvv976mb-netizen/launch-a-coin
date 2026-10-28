@@ -29,7 +29,7 @@ import { readViewport } from "../lib/mintdex/viewport";
 
 declare const __HF_DESIGN_INSPECTOR__: boolean;
 
-const DEFAULT_TITLE = "CardDex";
+const DEFAULT_TITLE = "Launch a Card";
 
 type AppMeta = {
   og_title?: string | null;
@@ -85,11 +85,11 @@ function buildHead(meta: AppMeta, devnetSite = false) {
       { title },
       { name: "description", content: description },
       { name: "theme-color", content: "#29231d" },
-      { name: "application-name", content: "CardDex" },
+      { name: "application-name", content: "Launch a Card" },
       // Which build this is (launch-plan D4 and E checks: curl the HTML and read it). sim, devnet or mainnet.
       { name: "carddex-mode", content: MODE },
       ...(devnetSite ? [{ name: "robots", content: "noindex" }] : []),
-      { property: "og:site_name", content: "CardDex" },
+      { property: "og:site_name", content: "Launch a Card" },
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
@@ -157,6 +157,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
+async function loadRootData({location}:{location:{pathname:string;searchStr:string}}):Promise<{me:Awaited<ReturnType<typeof getMe>>|null;now:number;vp:ReturnType<typeof readViewport>;devnetSite:boolean}> {
+  return {
+    me: IS_SIM && !(location.pathname === "/launch" && new URLSearchParams(location.searchStr).get("mode") !== "demo") ? await getMe() : null,
+    now: Date.now(), vp: readViewport(), devnetSite: isDevnetTestSite(),
+  };
+}
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: ({ loaderData }) => buildHead(appMeta, loaderData?.devnetSite ?? false),
   // `now` is the page's clock for its first frame (see useNow in hooks.ts): it is dehydrated with the
@@ -165,12 +172,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   // Devnet: the wallet is the identity (client only), so there is no session to read on the server.
   // `devnetSite`: this devnet build is answering as the devnet test site (lib/mintdex/site-host.ts); always false in the
   // sim and mainnet builds.
-  loader: async () => ({
-    me: IS_SIM ? await getMe() : null,
-    now: Date.now(),
-    vp: readViewport(),
-    devnetSite: isDevnetTestSite(),
-  }),
+  loader: loadRootData,
   staleTime: 10_000,
   shellComponent: RootShell,
   component: RootComponent,

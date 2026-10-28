@@ -10,7 +10,7 @@ import { IS_DEVNET, IS_SIM } from "./mode";
 import { DEVNET_SITE_ORIGIN, MAINNET_SITE_LIVE, MAIN_SITE_ORIGIN } from "./site-host";
 
 export const SITE_ORIGIN = IS_DEVNET && MAINNET_SITE_LIVE ? DEVNET_SITE_ORIGIN : MAIN_SITE_ORIGIN;
-export const SITE_NAME = "CardDex";
+export const SITE_NAME = "Launch a Card";
 
 /**
  * The site description (root default, Home, og:description). It overrides app-meta.json, which the marketplace
@@ -18,14 +18,13 @@ export const SITE_NAME = "CardDex";
  */
 export const SITE_DESCRIPTION = sentences(
   "Choose a premium design. Launch a pump.fun token paired with its own one-of-one NFT trading card",
-  MODE_COPY.metaSuffix,
 );
 
 /** Static pages listed in the sitemap. */
 export const STATIC_PATHS = ["/", "/discover", "/launch", "/levels", "/legal"] as const;
 
 /** When the static pages last changed in a way search engines should notice. Bump by hand, never per request. */
-export const STATIC_LASTMOD = "2026-10-03";
+export const STATIC_LASTMOD = "2026-10-28";
 
 /** Coin pages and /portfolio stay out of search while coins are simulated (decision C4). */
 export const NOINDEX_COINS = IS_SIM;

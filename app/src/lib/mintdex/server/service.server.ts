@@ -227,7 +227,7 @@ export async function currentRev(): Promise<string> {
   return revString(rev[0]?.value);
 }
 
-/** Compatibility helper for retired marketplace views. CardDex does not price or sell NFT cards. */
+/** Compatibility helper for retired marketplace views. Launch a Card does not price or sell NFT cards. */
 export function deedGuide(_c: { level: number; volume: number }) { return 0; }
 
 export type CoinFilter = { q?: string; tier?: number; sort?: "trending" | "mcap" | "new" | "next" };
@@ -273,7 +273,7 @@ function seenKey(userId: string) {
   return `seen:${userId}`;
 }
 
-/** CardDex has no NFT offers, sales or royalty notifications. */
+/** Launch a Card has no NFT offers, sales or royalty notifications. */
 export async function getInbox(user: { id: string; created_at: number }): Promise<Inbox> {
   const seen = await one<{ value: string }>("SELECT value FROM meta WHERE key = ?", seenKey(user.id));
   return { offers: 0, won: 0, outbid: 0, sold: 0, latest: null, seenAt: Number(seen?.value ?? user.created_at) || 0 };
@@ -896,7 +896,7 @@ export async function launchCoin(user: SessionUser, input: LaunchInput): Promise
 }
 
 /** These compatibility exports always refuse before any database read or write. */
-export const NFT_TRADING_REMOVED = "CardDex does not support NFT sales, bids, auctions or royalties.";
+export const NFT_TRADING_REMOVED = "Launch a Card does not support NFT sales, bids, auctions or royalties.";
 function rejectNftTrading(): never { throw new UserError(NFT_TRADING_REMOVED); }
 export async function placeBid(_user: { id: string }, _coinId: string, _amount: number): Promise<Settled> { return rejectNftTrading(); }
 export async function cancelBid(_user: { id: string }, _bidId: string): Promise<Settled> { return rejectNftTrading(); }

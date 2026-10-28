@@ -12,6 +12,27 @@ import { MAINNET_ANCHORS } from "./src/lib/chain/anchors.mainnet";
 import { manifestFileName, manifestModeOf, webManifestText, type ManifestMode } from "./src/lib/mintdex/manifest";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+
+/** Keep WebAssembly a static Worker module; runtime compilation is unavailable on Cloudflare. */
+function creatorRendererWasm(): Plugin {
+  const wasmPath=fileURLToPath(new URL("./node_modules/@resvg/resvg-wasm/index_bg.wasm",import.meta.url));
+  return {
+    name:"launchacard-renderer-wasm",
+    resolveId(id) { if(id==="virtual:launchacard-resvg-wasm")return {id:"launchacard-resvg.wasm",external:true}; },
+    generateBundle(_options,bundle) {
+      if(this.environment?.name==="client")return;
+      const emitted=new Set<string>();
+      for(const chunk of Object.values(bundle)) {
+        if(chunk.type!=="chunk"||!chunk.code.includes("launchacard-resvg.wasm"))continue;
+        chunk.code=chunk.code.replace(/(["'])launchacard-resvg\.wasm\1/g,'"./launchacard-resvg.wasm"');
+        const fileName=path.posix.join(path.posix.dirname(chunk.fileName),"launchacard-resvg.wasm");
+        if(!emitted.has(fileName)){this.emitFile({type:"asset",fileName,source:readFileSync(wasmPath)});emitted.add(fileName);}
+      }
+    },
+  };
+}
 
 // The vendored @higgsfield/quanta components import their glyphs from the private
 // Nexus-only `@higgsfield-ai/icons`. Generated sites build on the PUBLIC npm
@@ -67,6 +88,8 @@ export default defineConfig(({ mode }) => {
   return {
     resolve: {
       alias: [
+        // The Worker has no filesystem wallet or Anchor workspace. Use Anchor's official browser build.
+        { find: /^@coral-xyz\/anchor$/, replacement: fileURLToPath(new URL("../integrations/pumpfun/node_modules/@coral-xyz/anchor/dist/browser/index.js",import.meta.url)) },
         { find: /^@higgsfield-ai\/icons(\/.*)?$/, replacement: QUANTA_ICONS_SHIM },
         { find: /^@mintdex\/chain-sdk\/api$/, replacement: CHAIN_SDK("api/index.ts") },
         { find: /^@mintdex\/chain-sdk\/quote$/, replacement: CHAIN_SDK("quote.ts") },
@@ -99,6 +122,7 @@ export default defineConfig(({ mode }) => {
       ssr: { build: { rollupOptions: { preserveEntrySignatures: "strict" } } },
     },
     plugins: [
+      creatorRendererWasm(),
       // Material Symbols SVGs (the app icon set) import as React components via
       // `?react`. `icon: true` sizes them 1em; fill is forced to currentColor so
       // they color like text (the raw SVGs have no fill attribute). Keep the

@@ -6,7 +6,7 @@ export const Route = createFileRoute("/legal")({
   validateSearch: z.object({
     tab: z.enum(["terms", "privacy", "risks"]).optional().catch(undefined),
   }),
-  head: () => pageHead({ path: "/legal", title: "Terms and privacy | CardDex" }),
+  head: () => pageHead({ path: "/legal", title: "Terms and privacy | Launch a Card" }),
   component: Legal,
 });
 const CONTENT = {
@@ -14,12 +14,12 @@ const CONTENT = {
     title: "Terms",
     sections: [
       [
-        "Local demo",
-        "This CardDex build simulates token launches, NFT cards and pump.fun token trading. Test SOL has no cash value. No real token or NFT is minted, and nothing is sent to Solana or pump.fun.",
+        "Wallet launches and demo trading",
+        "The wallet launch flow, when configured and enabled, creates a real pump.fun token and a separate collectible NFT on Solana mainnet. Each transaction requires your wallet approval and real network costs. Pages labelled demo use simulated tokens, balances and trading; test funds have no cash value.",
       ],
       [
         "Your card",
-        "A creator chooses one permanent design at launch. Market-cap changes never replace it. The card is a collectible record paired with the token. CardDex has no NFT marketplace, bids or resale royalties.",
+        "A creator chooses one permanent design at launch. Market-cap changes never replace it. After the token launch is verified, a separate immutable one-of-one card NFT is created in the creator’s wallet. NFT ownership does not convey token ownership or stock rights. Launch a Card has no NFT marketplace, bids or resale royalties.",
       ],
       [
         "Content rules",
@@ -36,11 +36,11 @@ const CONTENT = {
     sections: [
       [
         "Browser session",
-        "A session cookie remembers your local demo account. Clearing browser data ends access to that session. No wallet private keys are requested or stored.",
+        "Separate session cookies remember your demo account and wallet-authenticated launch session. Wallet authentication uses a clearly labelled message, not a transaction. No wallet private keys are requested or stored by the server.",
       ],
       [
-        "Local storage",
-        "Token details, trades and uploaded card images are stored in this project’s isolated local database and image storage. CardDex does not share MintDex accounts or data.",
+        "Launch records and public assets",
+        "Launch details, wallet addresses, recovery records and images are stored in this platform’s own database and object storage. Published token and NFT metadata, images and blockchain records are public. Confirmed blockchain data cannot be removed by clearing browser data. Launch a Card does not share MintDex accounts or data.",
       ],
       [
         "External links",
@@ -57,12 +57,13 @@ const CONTENT = {
       ],
       [
         "Live launches",
-        "Future real launches through pump.fun require wallet approval, current launch costs and an independently configured CardDex NFT integration. A design preview is not proof of an on-chain NFT.",
+        "Real launches require wallet approval, current network costs and an admitted pump.fun quote asset. Token creation and NFT delivery are separate wallet transactions. If NFT delivery is interrupted after token creation, resume the existing launch rather than creating another token. A design preview is not proof of an on-chain NFT.",
       ],
       [
         "Token risk",
         "Real memecoins can lose all value. A collectible design does not guarantee token demand, returns or liquidity.",
       ],
+      ["Stock and memecoin pairs", "A stock-themed design selects a specific admitted tokenized quote asset. It does not make the new token a stock, grant equity or promise backing. Quote assets have their own issuer terms, availability and risks. Pump.fun admission is rechecked before each wallet transaction."],
     ],
   },
 };
@@ -71,7 +72,7 @@ function Legal() {
     content = CONTENT[tab];
   return (
     <PageFrame className="mdx-scroll overflow-y-auto pb-10">
-      <PageHeader title={content.title} context="CardDex · Updated 28 October 2026" />
+      <PageHeader title={content.title} context="Launch a Card · Updated 28 October 2026" />
       <nav className="flex gap-5">
         {(["terms", "privacy", "risks"] as const).map((t) => (
           <Link

@@ -43,7 +43,7 @@ export interface PrepareLaunchInput {
   };
 }
 
-function hash(value: string): string {
+export function hash(value: string): string {
   return createHash("sha256").update(value).digest("hex");
 }
 
@@ -56,7 +56,7 @@ function publicUri(value: string, label: string): string {
   throw new Error(`${label}: use a public HTTPS or IPFS URI`);
 }
 
-function publicKey(value: string, label: string): PublicKey {
+export function publicKey(value: string, label: string): PublicKey {
   const key = new PublicKey(value);
   if (key.equals(PublicKey.default) || !PublicKey.isOnCurve(key.toBytes())) {
     throw new Error(`${label}: an on-curve signer public key is required`);
@@ -64,7 +64,7 @@ function publicKey(value: string, label: string): PublicKey {
   return key;
 }
 
-function immutable<T>(value: T): T {
+export function immutable<T>(value: T): T {
   if (value && typeof value === "object") {
     Object.values(value).forEach(immutable);
     Object.freeze(value);
@@ -77,10 +77,7 @@ function immutable<T>(value: T): T {
  * No transaction, blockhash, signature, initial buy, upload or NFT is submitted.
  * Signing integration must refresh this plan, review costs and verify confirmation.
  */
-export async function preparePumpLaunchPlan(
-  input: PrepareLaunchInput,
-  options: { connection?: PairReadConnection; now?: () => Date } = {},
-) {
+export function reviewLaunchInput(input: PrepareLaunchInput) {
   const asset = PAIR_ASSETS.find((candidate) => candidate.key === input.quoteKey);
   if (!asset) throw new Error("Choose a verified CardDex pair asset");
   const creator = publicKey(input.creator, "creator");
@@ -114,6 +111,14 @@ export async function preparePumpLaunchPlan(
     backSha256: input.card.backSha256,
     nftMetadataUri: publicUri(input.card.nftMetadataUri, "NFT metadata"),
   };
+  return { asset, creator, mint, quoteMint, tokenMetadataUri, card };
+}
+
+export async function preparePumpLaunchPlan(
+  input: PrepareLaunchInput,
+  options: { connection?: PairReadConnection; now?: () => Date } = {},
+) {
+  const { asset, creator, mint, quoteMint, tokenMetadataUri, card } = reviewLaunchInput(input);
   const connection = options.connection ?? new Connection(PUBLIC_MAINNET_RPC, "confirmed");
   const keys = [GLOBAL_PDA, QUOTE_CONTROL_PDA, quoteMint, mint];
   const [genesisHash, snapshot] = await Promise.all([

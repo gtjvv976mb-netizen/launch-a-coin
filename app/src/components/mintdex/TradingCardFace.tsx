@@ -94,7 +94,7 @@ export function TradingCardFace({ card, design, priority = false, sizes, compact
       <div className="cdx-trading-card__stats"><span>Market cap <b>{quote}</b></span><span>Holders <b>{sample || card.dexNo > 0 || card.mintAddress ? card.holders : "—"}</b></span></div>
       <div className="cdx-trading-card__address"><span>Token</span><b>{address}</b></div>
     </div>
-    <div className="cdx-trading-card__footer"><span>{card.ownerHandle ? `@${card.ownerHandle}` : "CardDex"}</span><span>{card.dexLabel ?? (card.dexNo > 0 || card.mintAddress ? dexNo(card.dexNo) : "Preview")}</span></div>
+    <div className="cdx-trading-card__footer"><span>{card.ownerHandle ? `@${card.ownerHandle}` : "Launch a Card"}</span><span>{card.dexLabel ?? (card.dexNo > 0 || card.mintAddress ? dexNo(card.dexNo) : "Preview")}</span></div>
     <div className="mdx-card__lights cdx-trading-card__lights" aria-hidden><i className="cdx-trading-card__foil" /><i className="cdx-trading-card__reflection" /><div className="mdx-card__gloss" /></div>
   </div>;
 }

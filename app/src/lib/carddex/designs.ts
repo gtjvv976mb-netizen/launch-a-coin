@@ -66,7 +66,7 @@ export const CARD_DESIGNS: readonly CardDesign[] = [
   ...STOCKS,
   ...TIERS.map((tier): CardDesign => ({ key: tier.key, name: tier.name, description: PREMIUM_COPY[tier.key], category: "premium", materialLevel: tier.level, palette: [tier.ring, tier.sheen[0], "#f3e8cd"], finish: tier.level >= 13 ? tier.finish : tier.level >= 11 ? "holo" : "foil" })),
   ...MEME_ICON_CATALOG.map((icon): CardDesign => ({ key: icon.key, name: icon.name, description: icon.description, category: "limited", materialLevel: 14, palette: icon.palette, finish: "gold", memeIcon: icon.key, ...(icon.key === "gamestop" ? { stock: { ticker: "GME", name: "GameStop", pair: "GME / SOL" } } : icon.key === "blackberry" ? { stock: { ticker: "BB", name: "BlackBerry", pair: "BB / SOL" } } : {}) })),
-  ...EDITION_CATALOG.map((edition): CardDesign => ({ key: edition.key, name: edition.name, description: edition.description.replaceAll("MintDex", "CardDex"), category: "limited", materialLevel: edition.key === "astral" ? 13 : 14, palette: edition.palette, finish: edition.key === "astral" ? "prism" : "gold", edition: edition.key })),
+  ...EDITION_CATALOG.map((edition): CardDesign => ({ key: edition.key, name: edition.name, description: edition.description.replaceAll("MintDex", "Launch a Card"), category: "limited", materialLevel: edition.key === "astral" ? 13 : 14, palette: edition.palette, finish: edition.key === "astral" ? "prism" : "gold", edition: edition.key })),
 ];
 
 const BY_KEY = new Map(CARD_DESIGNS.map((design) => [design.key, design]));

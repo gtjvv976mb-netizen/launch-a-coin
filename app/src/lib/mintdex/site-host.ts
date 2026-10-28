@@ -20,7 +20,7 @@ import { IS_DEVNET } from "./mode";
  */
 export const MAINNET_SITE_LIVE = false;
 
-export const MAIN_SITE_ORIGIN = "http://127.0.0.1:5310";
+export const MAIN_SITE_ORIGIN = "https://launchacard.fun";
 export const DEVNET_SITE_HOST = "carddex.invalid";
 export const DEVNET_SITE_ORIGIN = `https://${DEVNET_SITE_HOST}`;
 

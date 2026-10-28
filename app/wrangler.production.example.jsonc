@@ -1,0 +1,19 @@
+{
+  // Review and copy to wrangler.production.jsonc after creating this platform's own resources.
+  // Never substitute MintDex bindings. The placeholder D1 ID is intentionally undeployable.
+  "name": "launch-a-card",
+  "main": "dist/server/server.js",
+  "compatibility_date": "2025-05-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {"directory": "./dist/client", "binding": "ASSETS", "not_found_handling": "none"},
+  "routes": [{"pattern": "launchacard.fun", "custom_domain": true}],
+  "vars": {
+    "HF_ENV": "production", "APP_SLUG": "launch-a-card",
+    "CARDDEX_PUBLIC_ORIGIN": "https://launchacard.fun",
+    "CARDDEX_DEPLOYMENT_ENV": "production",
+    "CARDDEX_MAINNET_RPC_URL": "https://api.mainnet-beta.solana.com",
+    "CARDDEX_LIVE_LAUNCH_ENABLED": "false"
+  },
+  "d1_databases": [{"binding": "DB", "database_name": "launch-a-card", "database_id": "REPLACE_WITH_OWN_D1_ID", "migrations_dir": "migrations"}],
+  "r2_buckets": [{"binding": "STORAGE", "bucket_name": "launch-a-card"}]
+}

@@ -24,7 +24,7 @@ export const Route = createFileRoute("/discover")({
   head: () =>
     pageHead({
       path: "/discover",
-      title: "Discover tokens | CardDex",
+      title: "Discover tokens | Launch a Card",
       description:
         "Explore tokens and their creator-selected NFT trading cards. Local demo with simulated pump.fun trading.",
     }),

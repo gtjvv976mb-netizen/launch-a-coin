@@ -221,7 +221,7 @@ function EnterDialog({
   }
 
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="Enter CardDex">
+    <Modal open={open} onOpenChange={onOpenChange} title="Enter Launch a Card">
       <form onSubmit={submit} className="flex flex-col gap-5" noValidate>
         <p className="text-[15px] leading-[1.5] text-slate">
           {reason ?? "Pick a handle to launch tokens and build your collection."}
@@ -261,7 +261,7 @@ function EnterDialog({
             pending={busy}
             pendingLabel="Entering..."
           >
-            {intent ? intent.label : "Enter CardDex"}
+            {intent ? intent.label : "Enter Launch a Card"}
           </Button>
         </div>
         {/* Sign out would strand the account (P0-7): say where it lives, up front. */}
@@ -278,27 +278,27 @@ function EnterDialog({
 const STEPS: Array<{ title: string; body: string; visual: ReactNode; phoneVisual?: boolean }> = [
   {
     title: "Launch your token",
-    body: "Give your token a name, ticker and artwork. CardDex's production flow is designed for token launches through pump.fun.",
+    body: "Give your token a name, ticker and artwork. Choose its supported quote asset, then review the pump.fun launch in your wallet.",
     visual: null,
   },
   {
     title: "Choose its permanent card",
-    body: "Pick a premium design before launch. Your one-of-one NFT card uses your token's artwork and keeps that design.",
+    body: "Pick a premium design before launch. After the token is verified, approve the separate one-of-one NFT card delivery to your creator wallet.",
     visual: null,
   },
   {
     title: "Trade the token. Keep the card.",
-    body: "Buy and sell tokens, follow the market and view your creator card in your collection.",
+    body: "Open your real token on pump.fun and keep the separate card NFT in your wallet. The demo collection lets you explore with test funds.",
     visual: null,
   },
 ];
 
 const FEE_ROWS: Array<{ label: string; value: string }> = IS_SIM
-  ? [{ label: "Local demo", value: "All balances and trades are simulated. No real token or NFT is minted." }]
+  ? [{ label: "Demo collection", value: "Demo balances and trades are simulated. Wallet launches show real network costs separately before you sign." }]
   : [{ label: "Token trading", value: "Review the fee and price impact shown before confirming a trade." }];
 
 /**
- * How CardDex works (P1-7): the three steps stacked, so all of it can be scanned at once, then the fees and the
+ * How Launch a Card works (P1-7): the three steps stacked, so all of it can be scanned at once, then the fees and the
  * Terms link. Desktop: a 560px dialog that fits a 1280x720 screen with no inner scroll. Phones: a bottom sheet with
  * the same column, the site-wide motion switch and Connect pinned to the bottom. Linkable with ?guide=1.
  */
@@ -313,7 +313,7 @@ function GuideDialog({
 }) {
   const me = useMe();
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="How CardDex works" width={560}>
+    <Modal open={open} onOpenChange={onOpenChange} title="How Launch a Card works" width={560}>
       <ol className="flex flex-col gap-5 short:gap-4">
         {STEPS.map((s, i) => (
           <li key={s.title} className="grid grid-cols-[28px_minmax(0,1fr)] gap-3">
@@ -360,7 +360,7 @@ function GuideDialog({
               onEnter();
             }}
           >
-            {IS_SIM ? "Enter CardDex" : CONNECT_COPY.connect}
+            {IS_SIM ? "Enter Launch a Card" : CONNECT_COPY.connect}
           </Button>
         </div>
       )}

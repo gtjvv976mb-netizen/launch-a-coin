@@ -11,12 +11,14 @@ export function CardDesignPicker({
   className = "",
   quoteAssetKey,
   ticker,
+  disabled = false,
 }: {
   value: string;
   onChange: (key: string) => void;
   className?: string;
   quoteAssetKey?: string;
   ticker?: string;
+  disabled?: boolean;
 }) {
   const id = useId();
   const quoteKey = quoteAssetKey ?? defaultQuoteForDesign(value).key;
@@ -37,6 +39,7 @@ export function CardDesignPicker({
       <select
         id={id}
         value={value}
+        disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
         className="mdx-input min-h-11 w-full text-[16px]"
       >

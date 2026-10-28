@@ -29,6 +29,9 @@ import { useMe, useSessionUi } from "./session";
 import { Sheet } from "./sheet";
 import { Ticker } from "./Ticker";
 import { RoyalMotion } from "../carddex/RoyalMotion";
+import { LiveWalletButton } from "../carddex/live/LiveWalletButton";
+import { LiveLaunchGuide } from "../carddex/live/LiveLaunchGuide";
+import { useLiveWallet } from "../carddex/live/wallet";
 import "../../royal-motion.css";
 import { GyroChip } from "./card3d/GyroChip";
 import { ConfirmDialog } from "./trust";
@@ -164,7 +167,7 @@ function unreadOf(me: Me) {
 /** A sculpted card-and-crown symbol anchors the original navigation rail. */
 function Lockup() {
   return (
-    <Link to="/" aria-label="CardDex home" className="flex h-[52px] w-[52px] flex-none items-center self-start">
+    <Link to="/" aria-label="Launch a Card home" className="flex h-[52px] w-[52px] flex-none items-center self-start">
       <Hallmark size={52} />
     </Link>
   );
@@ -532,7 +535,7 @@ function WalletBlock() {
     return (
       <div className="flex flex-col gap-2">
         <Button block onClick={() => openEnter()}>
-          Enter CardDex
+          Enter Launch a Card
         </Button>
         {MODE_COPY.railStart ? (
           <p className="text-[12px] leading-[1.3] text-slate">{MODE_COPY.railStart}</p>
@@ -608,9 +611,11 @@ function WalletBlock() {
 function Rail({
   searchRef,
   pending,
+  liveLaunch = false,
 }: {
   searchRef: RefObject<HTMLInputElement | null>;
   pending: boolean;
+  liveLaunch?: boolean;
 }) {
   const me = useMe();
   const { openGuide } = useSessionUi();
@@ -629,13 +634,13 @@ function Rail({
       <div className="mt-auto flex flex-col gap-3 pt-6">
         {/* Two quiet links, each at least 24px tall (WCAG 2.5.8 target size). */}
         <div className="flex flex-col items-start gap-0.5">
-          <button
+          {liveLaunch ? <LiveLaunchGuide /> : <button
             type="button"
             onClick={openGuide}
             className="mdx-link inline-flex min-h-6 items-center text-[14px]"
           >
-            How CardDex works
-          </button>
+            How Launch a Card works
+          </button>}
           <Link
             to="/legal"
             className="mdx-link inline-flex min-h-6 items-center text-[13px] font-normal text-slate"
@@ -643,8 +648,8 @@ function Rail({
             Terms, privacy and risks
           </Link>
         </div>
-        {IS_SIM ? <WalletBlock /> : <ChainRailWallet />}
-        {me && MODE_COPY.walletNote ? (
+        {liveLaunch ? <LiveWalletButton /> : IS_SIM ? <WalletBlock /> : <ChainRailWallet />}
+        {!liveLaunch && me && MODE_COPY.walletNote ? (
           <p className="text-[12px] leading-[1.3] text-slate">{MODE_COPY.walletNote}</p>
         ) : null}
         {/* Under the wallet block: the site-wide Calm motion switch (10.2). */}
@@ -730,7 +735,7 @@ function GuideGlyph() {
 }
 
 /**
- * The account sheet (P1-6): handle and wallet, then Portfolio, the faucet with its timer, How CardDex works,
+ * The account sheet (P1-6): handle and wallet, then Portfolio, the faucet with its timer, How Launch a Card works,
  * Terms, privacy and risks, and Start over. On devnet this is where wallet connect, disconnect, the address
  * copy and the network badge go.
  */
@@ -794,7 +799,7 @@ function AccountSheet({
               afterSheet(openGuide);
             }}
           >
-            How CardDex works
+            How Launch a Card works
           </button>
           <Link to="/legal" className="mdx-menu-item text-[15px]" onClick={close}>
             Terms, privacy and risks
@@ -824,23 +829,23 @@ function AccountSheet({
 }
 
 /**
- * Phone header (P1-6): the CardDex mark and the test-mode pill, then one-tap search and either the wallet button
+ * Phone header (P1-6): the Launch a Card mark and the test-mode pill, then one-tap search and either the wallet button
  * (balance and avatar: opens the account sheet, with a dot for unread notifications) or the guide icon and
- * Enter CardDex. 44px targets; the side insets clear a notch held sideways.
+ * Enter Launch a Card. 44px targets; the side insets clear a notch held sideways.
  */
-function MobileHeader() {
+function MobileHeader({ liveLaunch = false }: { liveLaunch?: boolean }) {
   const me = useMe();
   const { openEnter, openGuide } = useSessionUi();
   const [account, setAccount] = useState(false);
   const unread = unreadOf(me);
   return (
     <header className="mdx-mhead sticky top-0 z-30 flex h-14 flex-none items-center gap-3 bg-wall px-4 lg:hidden">
-      <Link to="/" aria-label="CardDex home" className="-ml-2 grid h-11 w-11 place-items-center">
+      <Link to="/" aria-label="Launch a Card home" className="-ml-2 grid h-11 w-11 place-items-center">
         <Hallmark size={28} />
       </Link>
       <div className="-mr-1.5 ml-auto flex items-center gap-1">
         <SearchButton />
-        {!IS_SIM ? (
+        {liveLaunch ? <><LiveLaunchGuide compact /><LiveWalletButton compact /></> : !IS_SIM ? (
           <ChainHeaderAccount />
         ) : me ? (
           <button
@@ -871,19 +876,19 @@ function MobileHeader() {
             <button
               type="button"
               onClick={openGuide}
-              aria-label="How CardDex works"
+              aria-label="How Launch a Card works"
               className="grid h-11 w-11 place-items-center rounded-pill text-ink transition-colors duration-(--t-fast) ease-room hover:bg-track"
             >
               <GuideGlyph />
             </button>
             <Button size="sm" className="ml-1" onClick={() => openEnter()}>
-              <span className="max-[359px]:hidden">Enter CardDex</span>
+              <span className="max-[359px]:hidden">Enter Launch a Card</span>
               <span className="hidden max-[359px]:inline">Enter</span>
             </Button>
           </>
         )}
       </div>
-      {IS_SIM && me ? <AccountSheet me={me} open={account} onOpenChange={setAccount} /> : null}
+      {!liveLaunch && IS_SIM && me ? <AccountSheet me={me} open={account} onOpenChange={setAccount} /> : null}
     </header>
   );
 }
@@ -960,7 +965,7 @@ function MobileTabs({ pending }: { pending: boolean }) {
 // ---------------------------------------------------------------- shell
 
 /**
- * Desktop: a 224px rail on the canvas (CardDex lockup, pill search, five tabs with one sliding pill, guide,
+ * Desktop: a 224px rail on the canvas (Launch a Card lockup, pill search, five tabs with one sliding pill, guide,
  * wallet card) and the canvas content area. No top bar, no rail panel, no edge line.
  * At 1280x720 and up `main` never scrolls; 1024 to 1279 may scroll as a fallback. `mdx-main` gives full
  * height asides their --gutter (12px float above 820px tall, flush below) and --bleed.
@@ -969,7 +974,7 @@ function MobileTabs({ pending }: { pending: boolean }) {
  */
 /**
  * The devnet test site's one line (launch-plan §6 APP, lib/mintdex/site-host.ts): above the page on every width,
- * one row of slate text, so nobody mistakes devnet.mintdex.fun for the real-money site.
+ * one row of slate text identifying its configured network.
  */
 function DevnetSiteNote() {
   const n = DEVNET_SITE_NOTE;
@@ -1024,13 +1029,15 @@ function Sky() {
 }
 
 function LocalDemoNote() {
-  return <p role="note" data-testid="local-demo-note" className="flex-none border-b border-hairline bg-plinth px-4 py-1.5 text-center text-[12px] leading-5 text-slate"><span className="font-semibold text-ink">Local demo</span><span aria-hidden> · </span>Token and NFT launches are simulated.</p>;
+  return <p role="note" data-testid="local-demo-note" className="flex-none border-b border-hairline bg-plinth px-4 py-1.5 text-center text-[12px] leading-5 text-slate"><span className="font-semibold text-ink">Demo collection</span><span aria-hidden> · </span>Balances and trading are simulated.</p>;
 }
 
 export function AppShell({ children, devnetSite = false }: { children: ReactNode; devnetSite?: boolean }) {
+  useLiveWallet();
   const searchRef = useRef<HTMLInputElement>(null);
   const pending = useRoutePending();
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const liveLaunch = useRouterState({ select: s => s.location.pathname === "/launch" && (s.location.search as { mode?: string }).mode !== "demo" });
   const tableCards = /^\/(discover|market|levels|portfolio)(\/|$)/.test(path);
 
   // The viewport cookie (P1-20): the next server render lays out fitted grids for this screen.
@@ -1081,16 +1088,16 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
       >
         Skip to content
       </a>
-      <Rail searchRef={searchRef} pending={pending} />
+      <Rail searchRef={searchRef} pending={pending} liveLaunch={liveLaunch} />
       <div className="flex min-w-0 flex-1 flex-col">
         <RouteProgress loading={pending} />
         <RouteAnnouncer />
         {/* IS_DEVNET is a literal: the note and its words are not in the mainnet or sim bundle. */}
         {IS_DEVNET && devnetSite ? <DevnetSiteNote /> : null}
-        {IS_SIM ? <LocalDemoNote /> : null}
-        <MobileHeader />
+        {liveLaunch ? <p role="note" data-testid="live-launch-note" className="flex-none border-b border-hairline bg-plinth px-4 py-1.5 text-center text-[12px] leading-5 text-slate"><span className="font-semibold text-ink">Solana mainnet</span><span aria-hidden> · </span>Review real costs before approving each wallet transaction.</p> : IS_SIM ? <LocalDemoNote /> : null}
+        <MobileHeader liveLaunch={liveLaunch} />
         {/* The live trade ticker (hype arcade): the real activity feed, scrolling. */}
-        <Ticker />
+        {!liveLaunch ? <Ticker /> : null}
         {/* Deep-linked card grids need the same explicit permission option as the Home display. */}
         {tableCards ? (
           <div className="mdx-phone-tilt lg:hidden">

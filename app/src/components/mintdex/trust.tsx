@@ -83,7 +83,7 @@ export function ModeBadge({ className = "" }: { className?: string }) {
               else openGuide();
             }}
           >
-            How CardDex works
+            How Launch a Card works
           </button>
         )}
         <Link to="/legal" search={{ tab: "risks" }} className="mdx-link mdx-hit" onClick={close}>
@@ -336,7 +336,7 @@ export function ShareButton({
 /** Share props for a coin page: canonical path, a title and text with no $ figure (decision C5). */
 export function coinShare(coin: { id: string; name: string; ticker: string; mintAddress?: string | null }) {
   return {
-    title: `${coin.name} ($${coin.ticker}) on CardDex`,
+    title: `${coin.name} ($${coin.ticker}) on Launch a Card`,
     text: shareCoinText(coin),
     path: canonicalCoinPath(coin),
     address: coin.mintAddress ?? null,

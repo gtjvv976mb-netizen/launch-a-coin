@@ -7,7 +7,9 @@ import { fileURLToPath } from "node:url";
 const APP_ROOT = fileURLToPath(new URL("../", import.meta.url));
 const INPUT_PATHS = [
   "src", "public", "packages", "scripts", "../chain/sdk/src",
-  "vite.config.ts", "package.json", "tsconfig.json",
+  "vite.config.ts", "package.json", "bun.lock", "tsconfig.json",
+  "../integrations/pumpfun/src", "../integrations/pumpfun/package.json", "../integrations/pumpfun/bun.lock",
+  "../reports/pump-pair-assets-2026-10-28.json",
 ];
 const SKIP_DIRECTORIES = new Set(["node_modules", "dist", ".git"]);
 

@@ -1,6 +1,6 @@
 import type { FrameLayout } from "../mintdex/tiers";
 
-/** The original MintDex/Spark print grid, shared by every creator-selected CardDex skin. */
+/** The original MintDex/Spark print grid, shared by every creator-selected Launch a Card skin. */
 const layout: FrameLayout = {
   aspect: 63 / 88,
   radius: .0504,

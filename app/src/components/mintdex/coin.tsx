@@ -514,7 +514,7 @@ export function CoinDetails({
         ) : (
           <TextLink
             className="text-slate"
-            onClick={() => require(() => setReportOpen(true), "Enter CardDex to report a card.")}
+            onClick={() => require(() => setReportOpen(true), "Enter Launch a Card to report a card.")}
           >
             Report
           </TextLink>
@@ -1238,7 +1238,7 @@ export function TradePanel({
         ? side === "buy"
           ? `Enter and buy ${input} ${asset.symbol} of $${coin.ticker}`
           : `Enter and sell $${coin.ticker}`
-        : "Enter CardDex";
+        : "Enter Launch a Card";
       require(
         quote?.ok ? doTrade : () => inputRef.current?.focus(),
         "Pick a handle to trade.",

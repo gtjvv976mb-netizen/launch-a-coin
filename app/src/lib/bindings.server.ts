@@ -12,11 +12,13 @@ import type {
   DurableObjectNamespace,
   KVNamespace,
   R2Bucket,
+  Fetcher,
 } from "@cloudflare/workers-types";
 
 type AppEnv = {
   DB?: D1Database;
   STORAGE?: R2Bucket;
+  ASSETS?: Fetcher;
   KV?: KVNamespace;
   // The container's Durable Object — present only when "container" is set in
   // the manifest. Reach an instance with env.CONTAINER.getByName(id), then
@@ -24,6 +26,10 @@ type AppEnv = {
   CONTAINER?: DurableObjectNamespace;
   HF_ENV?: string;
   APP_SLUG?: string;
+  CARDDEX_LIVE_LAUNCH_ENABLED?: string;
+  CARDDEX_DEPLOYMENT_ENV?: string;
+  CARDDEX_PUBLIC_ORIGIN?: string;
+  CARDDEX_MAINNET_RPC_URL?: string;
 };
 
 export function bindings(): AppEnv {

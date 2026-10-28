@@ -1,4 +1,4 @@
-// CardDex's isolated demo world. Token history is simulated; every creator keeps
+// Launch a Card's isolated demo world. Token history is simulated; every creator keeps
 // one fixed-design card. No real mint addresses, NFT sales, bids or royalties.
 import type { D1PreparedStatement } from "@cloudflare/workers-types";
 import { CARD_DESIGNS } from "../../carddex/designs";
@@ -97,7 +97,7 @@ export function kickAmbient() {
   const now = Date.now();
   if (now < nextAmbientCheck) return;
   nextAmbientCheck = now + AMBIENT_EVERY_MS;
-  runInBackground("CardDex demo token tick", maybeAmbient);
+  runInBackground("Launch a Card demo token tick", maybeAmbient);
 }
 export async function maybeAmbient() {
   const row = await one<{ value: string }>("SELECT value FROM meta WHERE key = 'ambient_at'");

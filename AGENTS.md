@@ -1,4 +1,4 @@
-# CardDex
+# Launch a Card (internal project: CardDex)
 
 Read HANDOFF.md and README.md before work. This is an independent project forked from MintDex. Do not change or deploy MintDex.
 
@@ -8,4 +8,4 @@ Product: token launches with one creator-selected NFT card design. No automatic 
 
 Default is isolated local simulation. Never sign transactions, move SOL, publish or deploy without specific authorization. No MintDex bindings, wallets, sessions, APIs or shared data. Never read private wallet/secret files or copy credentials.
 
-App checks: `cd app && bun x tsc --noEmit -p . && bun test tests/chain && bun x vite build`. Use local-only D1/R2 for preview. Chain source is an unconfigured integration reference; no chain deployment is active.
+App checks: `cd app && bun x tsc --noEmit -p . && bun test tests/chain tests/carddex && bun x vite build`. Use local-only D1/R2 for preview. The new pump.fun + Core wallet launch integration is separate from the inherited MintDex chain reference. It remains disabled locally; deployment readiness is documented in README.md. Never enable inherited MintDex chain mode.

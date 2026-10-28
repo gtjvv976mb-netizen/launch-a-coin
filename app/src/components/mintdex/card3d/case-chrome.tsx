@@ -28,7 +28,7 @@ export function CasePlate({ card, side }: { card: CardData; side: "front" | "bac
       <i className="mdx-case__rail mdx-case__rail--right" />
       <div className={`mdx-case__label${side === "back" ? " mdx-case__label--back" : ""}`}>
         <div className="mdx-case__name">
-          <b>CardDex</b>
+          <b>Launch a Card</b>
           <span>{caseIdentifier(card)}</span>
         </div>
         <div className="mdx-case__no">

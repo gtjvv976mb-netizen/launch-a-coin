@@ -74,7 +74,7 @@ export const Route = createFileRoute("/")({
   head: () =>
     pageHead({
       path: "/",
-      title: "CardDex: every coin is a one-of-one card",
+      title: "Launch a Card: every coin is a one-of-one card",
       description: SITE_DESCRIPTION,
     }),
   component: Home,

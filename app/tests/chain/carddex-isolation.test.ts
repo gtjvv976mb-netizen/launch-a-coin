@@ -12,7 +12,7 @@ describe("CardDex has no inherited live deployment", () => {
   test("runtime and manifest select simulation, with empty operational anchors", () => {
     expect(MODE).toBe("sim"); expect(IS_SIM).toBe(true); expect(IS_CHAIN).toBe(false);
     for (const requested of [undefined, "mainnet", "devnet", "sim", "other"]) expect(manifestModeOf(requested)).toBe("sim");
-    expect(JSON.parse(webManifestText("sim")).name).toBe("CardDex");
+    expect(JSON.parse(webManifestText("sim")).name).toBe("Launch a Card");
     for (const anchors of [DEVNET_ANCHORS, MAINNET_ANCHORS]) {
       for (const key of ["programId", "configAddress", "altA", "altB", "altC", "altTreasury"] as const) expect(anchors[key]).toBe("");
       expect(anchors.chainApiOrigin).toBe("http://127.0.0.1:8788");

@@ -1,5 +1,5 @@
 /**
- * CardDex chrome primitives: Holo Soft (refs/soft-modern-delta.md, on top of refs/vintage-delta.md and spec
+ * Launch a Card chrome primitives: Holo Soft (refs/soft-modern-delta.md, on top of refs/vintage-delta.md and spec
  * sections 6, 7 and 12.2). A warm pearl canvas, paper panels with large radii, and every control a pill or a
  * soft rounded rectangle. Radius roles: chip 6, row 12, field 14, pop 18, panel 24, aside 28, pill. One foil
  * from the Holo Seal, in four meanings only (logo, where you are, level up, the primary sheen). Cards stay the

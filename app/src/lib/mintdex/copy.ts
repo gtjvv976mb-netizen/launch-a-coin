@@ -95,7 +95,7 @@ const SIM_COPY: ModeCopy = {
   copyAddress: "Copy test address",
   addressCopied: "Test address copied.",
   addressNotFound:
-    "CardDex runs in test mode for now, so coins on Solana devnet or mainnet do not have cards here yet. Only demo tokens live in this local collection.",
+    "Launch a Card runs in test mode for now, so coins on Solana devnet or mainnet do not have cards here yet. Only demo tokens live in this local collection.",
   hero: "Try it with test SOL on a simulated pump.fun curve.",
   launchContext:
     "Choose a permanent card design, add your token, and try the pump.fun launch flow with test SOL.",
@@ -105,7 +105,7 @@ const SIM_COPY: ModeCopy = {
   curveComplete: "Curve complete (simulated)",
   botsNote: "Includes demo bots in test mode.",
   walletUnit: "test SOL",
-  enterForSol: `Enter CardDex for ${START_SOL} test SOL`,
+  enterForSol: `Enter Launch a Card for ${START_SOL} test SOL`,
   accountNote: "Your test account lives in this browser. Clearing site data ends access to it.",
   enterGift: `You get ${START_SOL} test SOL. Test mode uses no real funds.`,
   enterWelcome: `${START_SOL} test SOL is in your wallet.`,
@@ -117,7 +117,7 @@ const SIM_COPY: ModeCopy = {
 };
 const DEVNET_COPY: ModeCopy = {
   badge: "Devnet",
-  explainer: "CardDex runs on Solana devnet, a free test network. Devnet SOL has no real value.",
+  explainer: "Launch a Card runs on Solana devnet, a free test network. Devnet SOL has no real value.",
   metaSuffix: "Live on Solana devnet.",
   coinQualifier: "Solana devnet coin, no real value.",
   usdNote: "USD figures: devnet ×100 at $118 per SOL",
@@ -125,7 +125,7 @@ const DEVNET_COPY: ModeCopy = {
   copyAddress: "Copy mint address",
   addressCopied: "Mint address copied.",
   addressNotFound:
-    "No CardDex card uses that mint address. Only coins launched on CardDex have cards.",
+    "No Launch a Card card uses that mint address. Only coins launched on Launch a Card have cards.",
   hero: "Try it on Solana devnet, where SOL has no real value.",
   launchContext:
     "Launch on pump.fun (Solana devnet) with an address ending in mint, and get its one-of-one card.",
@@ -155,7 +155,7 @@ const MAINNET_COPY: ModeCopy = {
   copyAddress: "Copy mint address",
   addressCopied: "Mint address copied.",
   addressNotFound:
-    "No CardDex card uses that mint address. Only coins launched on CardDex have cards.",
+    "No Launch a Card card uses that mint address. Only coins launched on Launch a Card have cards.",
   hero: "Launch on pump.fun with an address ending in mint.",
   launchContext: "Launch on pump.fun with an address ending in mint, and get its one-of-one card.",
   guideLaunch:
@@ -292,7 +292,7 @@ export const WORDS = {
   /** Market context line. */
   marketContext:
     !IS_SIM && CARD_BIDDING_SUSPENDED
-      ? "Explore every coin's one-of-one card. New bids are paused until CardDex is funded."
+      ? "Explore every coin's one-of-one card. New bids are paused until Launch a Card is funded."
       : IS_MAINNET
         ? "Bid on any coin's one-of-one card. Its owner collects the coin's creator fees at pump.fun's current rates."
         : `Bid on any coin's one-of-one card. Its owner collects ${FEES.vault} of every trade as card fees.`,
@@ -327,7 +327,7 @@ export const MARKET_COPY = {
       title: !IS_SIM && CARD_BIDDING_SUSPENDED ? "Bidding is paused" : "No bids yet",
       body:
         !IS_SIM && CARD_BIDDING_SUSPENDED
-          ? "New bids are paused until CardDex is funded. You can still explore every card."
+          ? "New bids are paused until Launch a Card is funded. You can still explore every card."
           : "Open any card to place the first bid.",
       action: "See all cards",
     },
@@ -357,7 +357,7 @@ export const DISCOVER_COPY = {
  * intent adds the coin page link and via @mintdexdotfun. Mainnet adds what the card does, in the glossary's words.
  */
 export function shareCoinText(coin: { name: string; ticker: string }): string {
-  const base = `${coin.name} ($${coin.ticker}) has a one-of-one card on CardDex${MODE_COPY.shareSuffix}`;
+  const base = `${coin.name} ($${coin.ticker}) has a one-of-one card on Launch a Card${MODE_COPY.shareSuffix}`;
   return MODE === "mainnet"
     ? `${base}. Whoever holds the card collects the coin's ${GLOSSARY.cardFees}.`
     : base;
@@ -368,7 +368,7 @@ export function shareCoinText(coin: { name: string; ticker: string }): string {
  * after the external audit, and bump the Terms date in routes/legal.tsx.
  */
 export const AUDIT_LINE =
-  "The CardDex card program has not had an external security audit yet. This line will be removed after one.";
+  "The Launch a Card card program has not had an external security audit yet. This line will be removed after one.";
 
 /** The official X account. */
 export const X_HANDLE = "mintdexdotfun";
@@ -411,8 +411,8 @@ export const FLOW = {
   highImpact: (side: "buy" | "sell", pctText: string) =>
     `High price impact: this ${side} moves the price ${pctText}.`,
   /** Signed-out CTAs (P1-11 step 3). On devnet the wallet is the identity. */
-  enterToTrade: IS_SIM ? "Enter CardDex to trade" : "Connect a wallet to trade",
-  enterToLaunch: IS_SIM ? "Enter CardDex to launch" : "Connect a wallet to launch",
+  enterToTrade: IS_SIM ? "Enter Launch a Card to trade" : "Connect a wallet to trade",
+  enterToLaunch: IS_SIM ? "Enter Launch a Card to launch" : "Connect a wallet to launch",
 } as const;
 
 /**
@@ -493,7 +493,7 @@ export function inboxSummary(counts: {
  */
 export const PORTFOLIO_COPY = {
   signedOutTitle: "See your cards here",
-  /** Chain builds; the sim build keeps MODE_COPY.portfolioSignedOut (Enter CardDex). */
+  /** Chain builds; the sim build keeps MODE_COPY.portfolioSignedOut (Enter Launch a Card). */
   signedOutBody: "Connect a wallet to see your tokens and cards.",
   explore: "Explore coins",
   tabCoins: "Coins",
@@ -528,7 +528,7 @@ export const NETWORK_NOTICE_COPY =
         walletHow: "Turn off the testnet setting in your wallet.",
         server: "Signing is paused for now",
         serverHow:
-          "The CardDex server is on another network. You can still look around. Try again later.",
+          "The Launch a Card server is on another network. You can still look around. Try again later.",
       }
     : {
         wallet: "Switch your wallet to devnet",
@@ -536,14 +536,14 @@ export const NETWORK_NOTICE_COPY =
           "Phantom: Settings, Developer Settings, Testnet Mode, Solana Devnet. Solflare and Backpack have a devnet setting too.",
         server: "Signing is paused for now",
         serverHow:
-          "The CardDex server is on another network. You can still look around. Try again later.",
+          "The Launch a Card server is on another network. You can still look around. Try again later.",
       };
 
 // ---------------------------------------------------------------- devnet pages (refs/chain/m3-contract.md §2.2)
 // Read only by the devnet components (components/chain/**), so a sim build drops all of it.
 
 /**
- * Public devnet faucets. CardDex has no in-app faucet on devnet: devnet SOL is free from these. Empty in the mainnet and
+ * Public devnet faucets. Launch a Card has no in-app faucet on devnet: devnet SOL is free from these. Empty in the mainnet and
  * sim builds (MODE is a literal, so the links are not even in the mainnet bundle): every faucet link renders from here.
  */
 export const DEVNET_FAUCETS: ReadonlyArray<{ label: string; href: string }> =
@@ -655,7 +655,7 @@ export const FIXPACK_COPY = {
   devBuySecond:
     "The dev buy did not fit in the launch transaction, so it is a second step right after the launch.",
   devBuyNow: (sol: string) => `Buy ${sol} SOL of your coin now`,
-  inCollection: "In the CardDex Cards collection",
+  inCollection: "In the Launch a Card Cards collection",
 } as const;
 
 /**
@@ -665,7 +665,7 @@ export const FIXPACK_COPY = {
  */
 const COMMON_CHAIN_ERRORS: Record<string, string> = {
   VERIFY_FAILED:
-    "CardDex stopped this transaction because it did not match what you asked for. Nothing was signed.",
+    "Launch a Card stopped this transaction because it did not match what you asked for. Nothing was signed.",
   WALLET_NOT_CONNECTED: "Connect a wallet first.",
   WALLET_REJECTED: "You declined in your wallet. Nothing was sent.",
   CONFIRM_TIMEOUT: "Not confirmed in time. It may still land: the page updates when it does.",
@@ -693,7 +693,7 @@ const COMMON_CHAIN_ERRORS: Record<string, string> = {
   ALT_UNAVAILABLE:
     "A launch with a dev buy is unavailable right now. Set the dev buy to 0 and try again.",
   WALLET_REWROTE_TX:
-    "Your wallet changed the transaction in a way CardDex cannot accept. Nothing was sent.",
+    "Your wallet changed the transaction in a way Launch a Card cannot accept. Nothing was sent.",
   INTENT_EXPIRED: "That took too long. Try again.",
   INTENT_USED: "That transaction was already sent.",
   SIMULATION_FAILED:
@@ -709,13 +709,13 @@ const COMMON_CHAIN_ERRORS: Record<string, string> = {
   INVALID_AMOUNT: "Check the amount and try again.",
   AUTH_EXPIRED: "Your sign-in expired. Try again to sign in with your wallet.",
   UNAUTHORIZED: "Sign in with your wallet, then try again.",
-  COIN_NOT_FOUND: "This coin has no CardDex card.",
+  COIN_NOT_FOUND: "This coin has no Launch a Card card.",
   CARD_FROZEN:
     "This card is locked by another app. It can still withdraw fees; unlock it in that app to sell or list it.",
   TX_VERSION_UNSUPPORTED:
-    "Your wallet sent the transaction in a newer format CardDex cannot read yet. Nothing was sent. Try again or use another wallet.",
+    "Your wallet sent the transaction in a newer format Launch a Card cannot read yet. Nothing was sent. Try again or use another wallet.",
   LAUNCH_COIN_CHECK_FAILED:
-    "pump.fun changed how new coins are created, so CardDex paused launches. Nothing was signed.",
+    "pump.fun changed how new coins are created, so Launch a Card paused launches. Nothing was signed.",
   /** Launch gate (launch-plan §1.6, LAUNCHES allowlist or closed, or the switch:launches flag). */
   LAUNCHES_NOT_OPEN: "Launches open soon. Trading, bids and listings already work.",
   /** Exposure caps of the first weeks (launch-plan §4.5); the amount comes from the error's details when present. */
@@ -727,7 +727,7 @@ const DEVNET_ONLY_CHAIN_ERRORS: Record<string, string> = {
   BID_TOO_LOW: "Bids start at 0.03 SOL.",
   PRICE_TOO_LOW: "Listings start at 0.03 SOL.",
   ENGINE_OFF: "Devnet transactions are not switched on yet. Reading works; trading opens soon.",
-  CLUSTER_MISMATCH: "CardDex is not connected to Solana devnet right now. Try again later.",
+  CLUSTER_MISMATCH: "Launch a Card is not connected to Solana devnet right now. Try again later.",
   RPC_UNAVAILABLE: "Solana devnet did not answer. Try again.",
   SEND_FAILED: "Solana devnet did not take the transaction. Try again.",
 };
@@ -737,8 +737,8 @@ const MAINNET_ONLY_CHAIN_ERRORS: Record<string, string> = {
   INSUFFICIENT_FUNDS: "Not enough SOL in this wallet for that.",
   BID_TOO_LOW: "Bids start at 0.05 SOL.",
   PRICE_TOO_LOW: "Listings start at 0.05 SOL.",
-  ENGINE_OFF: "CardDex paused transactions for now. Reading works.",
-  CLUSTER_MISMATCH: "CardDex is not connected to Solana right now. Try again later.",
+  ENGINE_OFF: "Launch a Card paused transactions for now. Reading works.",
+  CLUSTER_MISMATCH: "Launch a Card is not connected to Solana right now. Try again later.",
   RPC_UNAVAILABLE: "Solana did not answer. Try again.",
   SEND_FAILED: "Solana did not take the transaction. Try again.",
 };
@@ -790,7 +790,7 @@ export const SWITCH_COPY = {
   /** Launch page, LAUNCHES=allowlist (from D1 until Phase H): the form stays, the button works for the allowlist only. */
   launchesSoon: "Launches open soon",
   launchesSoonHelp:
-    "CardDex is checking its first launches. Trading, bids and listings already work.",
+    "Launch a Card is checking its first launches. Trading, bids and listings already work.",
   /** Launch page, LAUNCHES=closed or the switch:launches flag. */
   launchesPaused: "Launches are paused for now",
   launchesPausedHelp: "Trading, bids and listings still work. Check @mintdexdotfun on X for news.",

@@ -1,4 +1,4 @@
-// CardDex is an independent local simulation until its own pump.fun + NFT adapter is configured.
+// Launch a Card is an independent local simulation until its own pump.fun + NFT adapter is configured.
 // Inherited MintDex chain implementations are source references, never active defaults.
 export type Mode = "sim" | "devnet" | "mainnet";
 export const MODE: Mode = "sim" as Mode;

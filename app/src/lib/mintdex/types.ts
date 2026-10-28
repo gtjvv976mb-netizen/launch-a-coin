@@ -20,7 +20,7 @@ export type CoinSummary = QuoteIdentity & {
   ticker: string;
   image: string;
   lore: string;
-  /** Creator-selected design identity. Fixed for the lifetime of this CardDex card. */
+  /** Creator-selected design identity. Fixed for the lifetime of this Launch a Card card. */
   cardTemplate?: string;
   /** Associated stock reference derived from the fixed design; never equity backing or ownership. */
   stockTicker?: string | null;

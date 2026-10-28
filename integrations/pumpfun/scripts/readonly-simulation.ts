@@ -1,0 +1,28 @@
+import { createHash } from 'node:crypto';
+import { Connection, PublicKey, ComputeBudgetProgram, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { GLOBAL_PDA, PUMP_SDK } from '@pump-fun/pump-sdk';
+import { prepareTokenTransaction, creatorNftInstructions, CORE_PROGRAM_ID, type LiveLaunchInput } from '../src/live.ts';
+import { deserializeAssetV1 } from '@metaplex-foundation/mpl-core';
+import { publicKey as umiKey, lamports } from '@metaplex-foundation/umi';
+import art from '../src/design-assets.json';
+const connection = new Connection('https://api.mainnet-beta.solana.com','confirmed');
+const globalInfo = await connection.getAccountInfo(GLOBAL_PDA,'confirmed');
+if(!globalInfo) throw new Error('Global missing');
+const global = PUMP_SDK.decodeGlobal(globalInfo);
+const candidates = [global.feeRecipient,...global.feeRecipients,...global.reservedFeeRecipients,...global.buybackFeeRecipients,global.authority,global.withdrawAuthority,global.setCreatorAuthority,global.adminSetCreatorAuthority].filter(k=>PublicKey.isOnCurve(k.toBytes()));
+const infos = await connection.getMultipleAccountsInfo(candidates,'confirmed');
+const creator = candidates.find((key,index)=>infos[index] && infos[index]!.lamports > 25_000_000);
+if(!creator) throw new Error('No funded public simulation identity found');
+function publicIdentity(label:string){for(let i=0;;i++){const bytes=createHash('sha256').update(label+String(i)).digest();if(PublicKey.isOnCurve(bytes))return new PublicKey(bytes).toBase58();}}
+const face=art['stock-tsla'];
+const input: LiveLaunchInput = {creator:creator.toBase58(),mint:publicIdentity('Launch a Card read-only create simulation October28v2'),nftMint:publicIdentity('Launch a Card read-only NFT simulation October28v2'),name:'Readonly simulation',symbol:'READONLY',tokenMetadataUri:'https://launchacard.fun/m/'+'x'.repeat(43),quoteKey:'tslax',card:{designKey:'stock-tsla',frontUri:'https://launchacard.fun/assets/front.webp',backUri:'https://launchacard.fun/assets/back.webp',frontSha256:face.front.sha256,backSha256:face.back.sha256,nftMetadataUri:'https://launchacard.fun/m/'+'y'.repeat(43)},renderedCardSha256:'a'.repeat(64),nftMetadataSha256:'b'.repeat(64),initialBuyQuoteBaseUnits:'0'};
+const plan=await prepareTokenTransaction(input,{connection});
+const latest=await connection.getLatestBlockhash('confirmed');
+const nftTx=new VersionedTransaction(new TransactionMessage({payerKey:creator,recentBlockhash:latest.blockhash,instructions:[ComputeBudgetProgram.setComputeUnitLimit({units:1_400_000}),...creatorNftInstructions(input)]}).compileToV0Message());
+const nftSimulation=await connection.simulateTransaction(nftTx,{sigVerify:false,replaceRecentBlockhash:false,commitment:'confirmed',accounts:{encoding:'base64',addresses:[input.nftMint]}});
+if(nftSimulation.value.err) throw new Error('Read-only Core simulation failed: '+JSON.stringify(nftSimulation.value.err));
+const simulatedAsset=nftSimulation.value.accounts?.[0];
+if(!simulatedAsset) throw new Error('Missing simulated Core asset');
+const asset=deserializeAssetV1({publicKey:umiKey(input.nftMint),owner:umiKey(CORE_PROGRAM_ID.toBase58()),executable:false,lamports:lamports(BigInt(simulatedAsset.lamports)),data:Buffer.from(simulatedAsset.data[0],'base64')});
+if(asset.owner!==input.creator||asset.updateAuthority.type!=='None'||asset.attributes?.authority.type!=='None'||asset.royalties) throw new Error('Core simulation result differs from creator/immutability policy');
+console.log(JSON.stringify({readOnly:true,signed:false,sent:false,token:{kind:plan.kind,verifiedSlot:plan.verifiedSlot,bytes:Buffer.from(plan.transactionBase64,'base64').length,quoteMint:plan.review.quoteMint,networkFeeLamports:plan.review.networkFeeLamports,priorityFeeLamports:plan.review.priorityFeeLamports,rentAndProgramCostLamports:plan.review.rentAndProgramCostLamports,totalDebitLamports:plan.review.totalDebitLamports,computeUnitLimit:plan.review.computeUnitLimit},core:{verifiedSlot:nftSimulation.context.slot,bytes:nftTx.serialize().length,unitsConsumed:nftSimulation.value.unitsConsumed,ownerMatchesCreator:asset.owner===input.creator,updateAuthority:asset.updateAuthority.type,attributesAuthority:asset.attributes.authority.type,attributeCount:asset.attributes.attributeList.length,royalties:false},note:'Independent unsigned program simulations only; no finalized token exists and no NFT was issued.'},null,2));

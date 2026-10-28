@@ -27,7 +27,7 @@ export const Route = createFileRoute("/portfolio")({
   }),
   loader: () => IS_SIM ? getPortfolio() : null,
   shouldReload: ({ cause }) => cause !== "stay",
-  head: () => pageHead({ path: "/portfolio", title: "Your collection | CardDex", noindex: NOINDEX_PORTFOLIO }),
+  head: () => pageHead({ path: "/portfolio", title: "Your collection | Launch a Card", noindex: NOINDEX_PORTFOLIO }),
   component: Portfolio,
 });
 
@@ -75,7 +75,7 @@ function SignedOut() {
   return (
     <PageFrame className="mdx-page">
       <PageHeader title="Your collection" context="Your tokens. Your cards." />
-      <EmptyState hero className="flex-1" title="Start your collection" body="Enter the local demo to launch a token, choose its permanent card design and keep both in your portfolio." action={<div className="flex flex-col items-center gap-3"><Button onClick={() => openEnter()}>Enter CardDex</Button><TextLink to="/discover">Explore the tokens</TextLink></div>} />
+      <EmptyState hero className="flex-1" title="Start your collection" body="Enter the local demo to launch a token, choose its permanent card design and keep both in your portfolio." action={<div className="flex flex-col items-center gap-3"><Button onClick={() => openEnter()}>Enter Launch a Card</Button><TextLink to="/discover">Explore the tokens</TextLink></div>} />
     </PageFrame>
   );
 }

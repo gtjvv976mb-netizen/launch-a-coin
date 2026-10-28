@@ -18,9 +18,12 @@ import { Route as LegalRouteImport } from './routes/legal'
 import { Route as LaunchRouteImport } from './routes/launch'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MDigestRouteImport } from './routes/m/$digest'
 import { Route as CoinIdRouteImport } from './routes/coin/$id'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
+import { Route as ApiLiveComposeRouteImport } from './routes/api/live/compose'
 import { Route as ApiImgSplatRouteImport } from './routes/api/img/$'
+import { Route as ApiLiveAssetsSplatRouteImport } from './routes/api/live/assets/$'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -67,6 +70,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MDigestRoute = MDigestRouteImport.update({
+  id: '/m/$digest',
+  path: '/m/$digest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoinIdRoute = CoinIdRouteImport.update({
   id: '/coin/$id',
   path: '/coin/$id',
@@ -77,9 +85,19 @@ const ApiUploadRoute = ApiUploadRouteImport.update({
   path: '/api/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiLiveComposeRoute = ApiLiveComposeRouteImport.update({
+  id: '/api/live/compose',
+  path: '/api/live/compose',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiImgSplatRoute = ApiImgSplatRouteImport.update({
   id: '/api/img/$',
   path: '/api/img/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLiveAssetsSplatRoute = ApiLiveAssetsSplatRouteImport.update({
+  id: '/api/live/assets/$',
+  path: '/api/live/assets/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -95,7 +113,10 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/upload': typeof ApiUploadRoute
   '/coin/$id': typeof CoinIdRoute
+  '/m/$digest': typeof MDigestRoute
   '/api/img/$': typeof ApiImgSplatRoute
+  '/api/live/compose': typeof ApiLiveComposeRoute
+  '/api/live/assets/$': typeof ApiLiveAssetsSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -109,7 +130,10 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/upload': typeof ApiUploadRoute
   '/coin/$id': typeof CoinIdRoute
+  '/m/$digest': typeof MDigestRoute
   '/api/img/$': typeof ApiImgSplatRoute
+  '/api/live/compose': typeof ApiLiveComposeRoute
+  '/api/live/assets/$': typeof ApiLiveAssetsSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -124,7 +148,10 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/upload': typeof ApiUploadRoute
   '/coin/$id': typeof CoinIdRoute
+  '/m/$digest': typeof MDigestRoute
   '/api/img/$': typeof ApiImgSplatRoute
+  '/api/live/compose': typeof ApiLiveComposeRoute
+  '/api/live/assets/$': typeof ApiLiveAssetsSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -140,7 +167,10 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/api/upload'
     | '/coin/$id'
+    | '/m/$digest'
     | '/api/img/$'
+    | '/api/live/compose'
+    | '/api/live/assets/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -154,7 +184,10 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/api/upload'
     | '/coin/$id'
+    | '/m/$digest'
     | '/api/img/$'
+    | '/api/live/compose'
+    | '/api/live/assets/$'
   id:
     | '__root__'
     | '/'
@@ -168,7 +201,10 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/api/upload'
     | '/coin/$id'
+    | '/m/$digest'
     | '/api/img/$'
+    | '/api/live/compose'
+    | '/api/live/assets/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -183,7 +219,10 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiUploadRoute: typeof ApiUploadRoute
   CoinIdRoute: typeof CoinIdRoute
+  MDigestRoute: typeof MDigestRoute
   ApiImgSplatRoute: typeof ApiImgSplatRoute
+  ApiLiveComposeRoute: typeof ApiLiveComposeRoute
+  ApiLiveAssetsSplatRoute: typeof ApiLiveAssetsSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -251,6 +290,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/m/$digest': {
+      id: '/m/$digest'
+      path: '/m/$digest'
+      fullPath: '/m/$digest'
+      preLoaderRoute: typeof MDigestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/coin/$id': {
       id: '/coin/$id'
       path: '/coin/$id'
@@ -265,11 +311,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/live/compose': {
+      id: '/api/live/compose'
+      path: '/api/live/compose'
+      fullPath: '/api/live/compose'
+      preLoaderRoute: typeof ApiLiveComposeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/img/$': {
       id: '/api/img/$'
       path: '/api/img/$'
       fullPath: '/api/img/$'
       preLoaderRoute: typeof ApiImgSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/live/assets/$': {
+      id: '/api/live/assets/$'
+      path: '/api/live/assets/$'
+      fullPath: '/api/live/assets/$'
+      preLoaderRoute: typeof ApiLiveAssetsSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -287,7 +347,10 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiUploadRoute: ApiUploadRoute,
   CoinIdRoute: CoinIdRoute,
+  MDigestRoute: MDigestRoute,
   ApiImgSplatRoute: ApiImgSplatRoute,
+  ApiLiveComposeRoute: ApiLiveComposeRoute,
+  ApiLiveAssetsSplatRoute: ApiLiveAssetsSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

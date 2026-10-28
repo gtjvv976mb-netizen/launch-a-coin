@@ -1,6 +1,6 @@
 # Pump custom pairs — 28 October 2026
 
-Pump supports real quote assets for new fungible coins. Choosing a stock or meme card can therefore bind the token’s **actual quote mint**, rather than merely printing a stock reference. This does not make the new coin, card or NFT an equity share. The working CardDex app remains a local simulation; the separately implemented unsigned preparer does not sign, submit or issue an NFT.
+Pump supports real quote assets for new fungible coins. Choosing a stock or meme card can therefore bind the token’s **actual quote mint**, rather than merely printing a stock reference. This does not make the new coin, card or NFT an equity share. The original research began with a simulation-only app; the later authorized wallet flow now has real transaction preparation, independent confirmation, separate Core NFT preparation and authenticated relay code. This research did not sign, submit or issue anything against real funds.
 
 ## Verified sources and account evidence
 
@@ -47,3 +47,10 @@ Validation: 11 tests pass with 337 assertions; TypeScript passes. A separate rea
 The package’s output explicitly says `unsigned-review-only` and `not-issued`. Real activation still requires public metadata content verification, final rendered NFT artwork, costs/balance/eligibility review, complete-transaction simulation, creator/new-mint signatures, confirmed quote verification, separate NFT issuance and retry/duplicate recovery. Pump creates a fungible coin; it does not automatically create CardDex’s separate NFT.
 
 The public documentation recommends SDK 4.1.0, whereas npm advertised 4.3.1 during installation. The adapter deliberately pins 4.1.0 and is not described as production-ready. Future signing work must review the current package/program contract and simulate against current state. No paid generation, real launch, account change or deployment was performed.
+
+
+## Later authorized wallet integration
+
+`integrations/pumpfun/src/live.ts` now prepares actual unsigned v0 transactions, binds final rendered card/metadata commitments, validates exact wallet signatures, supports authenticated relay of persisted signed bytes, verifies finalized token/quote/metadata state and prepares a separate immutable creator-owned Core NFT. App activation is separately gated on production storage, public origin, RPC and a live-enable setting. The caller persists deterministic signatures before relay and uses atomic intent/plan-set guards around recovery.
+
+Latest validation: **23 tests / 415 assertions and TypeScript pass**. Actual SDK plans pass the separate browser verifier for all 16 quotes and Core NFT issuance. Independent unsigned mainnet simulations passed for TSLAX creation (slot 462361248, 1011 bytes) and Core creation plus update-authority removal (slot 462361249, 885 bytes). Deserialized Core simulation state confirms creator ownership, immutable Attributes and no Royalties plugin. No token/NFT was issued and no transaction was sent. See `integrations/pumpfun/README.md` and `integrations/pumpfun/AUDIT-2026-10-28.md` for the current API and resolved concurrency findings.

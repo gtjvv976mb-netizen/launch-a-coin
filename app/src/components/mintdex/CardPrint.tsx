@@ -57,7 +57,7 @@ export function CardPrint({ card, layout, tier, preview = false }: { card: CardD
       </div>
     </div>
     {footA ? <div className="mdx-card__foot" data-card-slot="creator" style={boxStyle(footA)}>
-      <span className="mdx-card__clip">{ownerHandle ? <><span className="mdx-card__long">Owner </span>@{ownerHandle}</> : "CardDex"}</span>
+      <span className="mdx-card__clip">{ownerHandle ? <><span className="mdx-card__long">Owner </span>@{ownerHandle}</> : "Launch a Card"}</span>
       {ownerHandle && card.ownerIsBot ? <span className="mdx-card__bot">bot</span> : null}
     </div> : null}
     {footB ? <div className="mdx-card__foot mdx-card__foot--end" data-card-slot="serial" style={boxStyle(footB)}>

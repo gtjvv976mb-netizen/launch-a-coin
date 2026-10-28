@@ -19,7 +19,7 @@ export function manifestFileName(mode: ManifestMode): string {
 }
 
 const DESCRIPTION: Record<ManifestMode, string> = {
-  sim: "The vintage card launchpad. Every coin is a one-of-one card. Live in test mode with test SOL.",
+  sim: "Choose a premium card design and launch through pump.fun. Explore the separate demo collection with test funds.",
   devnet: "The vintage card launchpad. Every coin is a one-of-one card. Live on Solana devnet.",
   mainnet: "The vintage card launchpad. Every coin is a one-of-one card.",
 };
@@ -27,8 +27,8 @@ const DESCRIPTION: Record<ManifestMode, string> = {
 /** The manifest JSON text for a mode. */
 export function webManifestText(mode: ManifestMode): string {
   const manifest = {
-    name: "CardDex",
-    short_name: "CardDex",
+    name: "Launch a Card",
+    short_name: "Launch a Card",
     description: DESCRIPTION[mode],
     start_url: "/",
     display: "standalone",

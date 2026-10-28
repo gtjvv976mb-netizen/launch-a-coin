@@ -1,6 +1,6 @@
-# CardDex
+# Launch a Card
 
-Independent local project based on MintDex. Creators choose one permanent premium card design for their token and its one-of-one NFT trading card. The intended live token launch provider is **pump.fun**.
+Independent project based on MintDex, publicly branded **Launch a Card** at **https://launchacard.fun**. The recoverable folder and internal carddex identifiers remain stable. Creators choose one permanent premium card design for their token and its one-of-one NFT trading card. The token launch provider is **pump.fun**.
 
 ## Included
 
@@ -15,14 +15,16 @@ Independent local project based on MintDex. Creators choose one permanent premiu
 - Exact quote mint, decimals and token program persist with the permanent design. Local launches, buys/sells, balances, fees, charts and portfolio values use the selected asset's units; stock/memecoin quantities are not treated as SOL or given an invented USD price.
 - No NFT sales, listings, bids or royalties. Removed endpoints reject before database writes; SQL triggers provide another boundary.
 
-The interface retains MintDex's original composition, desktop navigation rail and compact phone navigation. Launch has token details on the left and a full preview on the right. The current CardDex chrome uses a Pokémon-card-inspired gold, cream, charcoal and scarlet palette, with no blue chrome. Individual card artworks retain their own themed colors. Stock quotes add wordless market engraving while retaining the common print grid. The current brand mark is a wordless gold-foil trading card and crown, without a letter or CD monogram.
+The interface retains MintDex's original composition, desktop navigation rail and compact phone navigation. Launch has token details on the left and a full preview on the right. The current Launch a Card chrome uses a Pokémon-card-inspired gold, cream, charcoal and scarlet palette, with no blue chrome. Individual card artworks retain their own themed colors. Stock quotes add wordless market engraving while retaining the common print grid. The current brand mark is a wordless gold-foil trading card and crown, without a letter or CD monogram.
 
 ## Run locally
 
 Requires Node22+, Bun and Chrome for optional QA.
 
 ```sh
-cd app
+cd integrations/pumpfun
+bun install --frozen-lockfile
+cd ../../app
 bun install --frozen-lockfile
 bun run dev
 ```
@@ -40,21 +42,25 @@ See `HANDOFF.md` and the dated reports for the latest build/test counts and brow
 
 ## Current status and real pump.fun launches
 
-The working local build is **simulation**, with test SOL and demo NFT records. No real token or NFT is minted, and no funds are sent. Real launches are intentionally unavailable until CardDex has its own configured launch/NFT adapter and durable public artwork/metadata storage. Both inherited `VITE_MINTDEX_MODE` and new `VITE_CARDDEX_MODE` chain activation attempts are rejected at build time.
+The default `/launch` route is the **real creator-wallet flow**, with an explicit **Test demo** option. Real actions fail closed locally until this platform has durable public storage, a mainnet RPC, wallet authentication and an enabled production deployment. The directory, portfolio and token trading catalogue remain clearly marked demo; they do not invent on-chain balances. Both inherited `VITE_MINTDEX_MODE` and `VITE_CARDDEX_MODE` activation remain rejected. The new wallet integration is separate from the inherited MintDex program.
 
-`integrations/pumpfun` now contains an isolated, tested **unsigned create_v2 instruction preparer** using the reviewed official SDK 4.1.0. It resolves fresh mainnet quote admission, verifies exact mint/program/decimals and binds the selected design to approved frame hashes. It is not imported by the app and does not sign, send, upload metadata, buy tokens or issue an NFT. See its README for the contract and checks.
+`integrations/pumpfun` uses the pinned official pump.fun SDK to prepare a complete create_v2 transaction with the selected admitted quote and optional exact-amount initial buy. It revalidates mainnet genesis, quote admission, mint/program/decimals, balances, rent and fresh transaction simulation. Native SOL and 15 custom quote assets are supported subject to current on-chain admission and packet limits. A requested initial buy is never silently dropped.
 
-The production wallet flow must create the fungible token through pump.fun with the selected quote, verify confirmation, then issue the creator's separate NFT with metadata binding the token mint, quote mint, design and rendered front/back. pump.fun token creation alone does not issue the NFT. Wallet review, live complete-transaction simulation, issuer eligibility, public metadata verification, duplicate prevention and issuance recovery still need implementation and signed integration verification before activation.
+The browser generates ephemeral token/NFT signers in memory, authenticates wallet ownership with a labelled message, and checks the exact immutable transaction before wallet approval. The server validates every signature and the exact prepared bytes, simulates and relays those same wallet-signed bytes. Token finalization is independently verified before a separate **Metaplex Core NFT** transaction is prepared. The NFT is owned by the creator, has immutable metadata and binding attributes, and has no royalties plugin. Durable intents, concurrency guards and recovery prevent an interrupted NFT stage from creating another token or duplicate NFT.
 
-Current provider reference, reviewed28October2026: [official pump.fun coin creation](https://github.com/pump-fun/pump-public-docs/blob/main/docs/instructions/COIN_CREATION.md). This project does not assume historic pump.fun account layouts or fees remain current.
+The trusted server image composer uses the same canonical card layout and preflattened approved skins, actual creator artwork and a premium rounded case. Content-addressed public metadata binds creator, token mint, quote mint, design, original frame/back hashes and rendered image hashes. Client-provided finished images cannot qualify as an attested composition.
 
-No production Worker/account/route/database/bucket/program/wallet is copied. MintDex’s historical program is retained only under `reference/mintdex-chain`; `chain/sdk` supports offline verifier/math reference tests. Inherited MintDex URL strings remain in reference SDK metadata helpers, comments and hostname comparisons, but are not the simulation's API/RPC targets. No deployment has occurred.
+No real transaction was signed or submitted. Public-mainnet read-only simulations verified create_v2 and Core creation against the actual programs. These are simulations, not completed token/NFT issuance. A first owner-approved launch is still required after public deployment.
+
+The domain currently remains on registrar parking DNS. No production resources, DNS updates or deployment occurred. Follow [the public readiness checklist](reports/launch-a-card-public-readiness-2026-10-28.md) and review `app/wrangler.production.example.jsonc`; it is disabled with an intentionally invalid D1 placeholder. Create this platform's own D1/R2 resources, never MintDex resources.
+
+Current provider reference, reviewed 28 October 2026: [official pump.fun coin creation](https://github.com/pump-fun/pump-public-docs/blob/main/docs/instructions/COIN_CREATION.md). Historical accounts and fees are not assumed current.
 
 ## Generated assets
 
 The approved Higgsfield work produced 99 completed images: 96 card faces, two website visuals and one logo that the owner rejected. The quoted total was 272.25 credits; the tools did not provide an itemized actual-charge reconciliation. No paid regeneration was submitted. The current logo is a separate native vector refinement, created without further generation spend; the rejected generated logo is retained in `brand/logo/archive/`.
 
-Card WebPs and 320px previews live in `app/public/assets/carddex/higgsfield/`. `creative/higgsfield/` retains the indexed prompts, provider job IDs and verification ledger. Unchanged original card PNGs and diagnostic contact sheets are retained under ignored `output/higgsfield/`. Website concepts generated before the final palette decision are references, not authority to change the retained MintDex layout.
+83 trusted flattened PNG skins for 48 designs and their admitted stock variants live in `app/public/assets/carddex/render/`, pinned in `render-assets.json`. Regenerate them with `bun scripts/prepare-card-skins.ts` (Python/Pillow and Playwright CLI required); this performs lossless local rendering without paid generation. Card WebPs and 320px previews live in `app/public/assets/carddex/higgsfield/`. `creative/higgsfield/` retains the indexed prompts, provider job IDs and verification ledger. Unchanged original card PNGs and diagnostic contact sheets are retained under ignored `output/higgsfield/`. Website concepts generated before the final palette decision are references, not authority to change the retained MintDex layout.
 
 ## Sources and QA
 

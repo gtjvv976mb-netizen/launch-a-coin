@@ -29,7 +29,7 @@ export const Route = createFileRoute("/levels")({
   head: () =>
     pageHead({
       path: "/levels",
-      title: "The design archive | CardDex",
+      title: "The design archive | Launch a Card",
       description: `${CARD_DESIGNS.length} premium card designs. Pick the permanent design for your own token, from trading-card classics to limited-edition foil artwork.`,
     }),
   component: Designs,

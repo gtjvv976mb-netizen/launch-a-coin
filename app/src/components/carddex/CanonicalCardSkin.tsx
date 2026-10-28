@@ -23,28 +23,37 @@ function BorderSlice({source,from,to,sourceInset,targetInset}:{source:string;fro
   return <>{[0,1,2].flatMap(y=>[0,1,2].filter(x=>x!==1||y!==1).map(x=><svg key={`${x}-${y}`} x={tx[x]*1000} y={ty[y]*1000} width={(tx[x+1]-tx[x])*1000} height={(ty[y+1]-ty[y])*1000} viewBox={`${sx[x]*1000} ${sy[y]*1000} ${(sx[x+1]-sx[x])*1000} ${(sy[y+1]-sy[y])*1000}`} preserveAspectRatio="none" overflow="hidden"><use href={`#${source}`} /></svg>))}</>;
 }
 
-/** Untouched Higgsfield pixels are an inline decoration atlas around one permanent print grid. */
+/** Untouched Higgsfield pixels decorate the same permanent print grid in browser and exported NFTs. */
 export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,sizes}:{cardTemplate:string;quoteAssetKey?:string;priority?:boolean;sizes?:string}) {
-  const id=useId().replaceAll(":","");
-  const design=getCardDesign(cardTemplate);
-  const quote=quoteAssetKey?getPairAsset(quoteAssetKey):defaultQuoteForDesign(cardTemplate);
+  const id=useId().replaceAll(":", "");
   const assets=generatedCardAssets(cardTemplate);
   const imageRef=useRef<HTMLImageElement>(null);
   const image=useReadyImage(imageRef,assets.front ?? null);
+  const ready=image.ready && !!image.decodedSource && !!generatedSkinSource(cardTemplate);
+  const quote=quoteAssetKey?getPairAsset(quoteAssetKey):defaultQuoteForDesign(cardTemplate);
+  return <div className="cdx-canonical-skin" data-market-finish={quote.kind} data-card-skin-ready={ready?"":undefined} data-card-skin-source={ready?cardTemplate:undefined} aria-hidden>
+    {assets.front?<img ref={imageRef} className="cdx-canonical-skin__loader" src={assets.front} srcSet={assets.front320?`${assets.front320} 320w, ${assets.front} 1260w`:undefined} sizes={sizes??(priority?"300px":"auto, 300px")} alt="" draggable={false} loading={priority?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":undefined} onLoad={image.onLoad} onError={image.onError} />:null}
+    <CanonicalSkinSurface cardTemplate={cardTemplate} quoteAssetKey={quoteAssetKey} sourceUri={ready?image.decodedSource:undefined} id={id} />
+  </div>;
+}
+
+/** Pure SVG surface shared with the trusted PNG compositor; no loading hooks or alternate print geometry. */
+export function CanonicalSkinSurface({cardTemplate,quoteAssetKey,sourceUri,id="canonical"}:{cardTemplate:string;quoteAssetKey?:string;sourceUri?:string|null;id?:string}) {
+  const design=getCardDesign(cardTemplate);
+  const quote=quoteAssetKey?getPairAsset(quoteAssetKey):defaultQuoteForDesign(cardTemplate);
   const source=generatedSkinSource(cardTemplate);
-  const ready=image.ready && !!image.decodedSource && !!source;
+  const ready=!!sourceUri && !!source;
   const dark=design.key==="neon-circuit";
   const raster=`${id}raster`,material=`${id}material`,mask=`${id}gray`;
   const paper=dark?"#102b30":design.palette[2];
-  return <div className="cdx-canonical-skin" data-market-finish={quote.kind} data-card-skin-ready={ready?"":undefined} data-card-skin-source={ready?cardTemplate:undefined} aria-hidden>
-    {assets.front?<img ref={imageRef} className="cdx-canonical-skin__loader" src={assets.front} srcSet={assets.front320?`${assets.front320} 320w, ${assets.front} 1260w`:undefined} sizes={sizes??(priority?"300px":"auto, 300px")} alt="" draggable={false} loading={priority?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":undefined} onLoad={image.onLoad} onError={image.onError} />:null}
+  return (
     <svg className="cdx-canonical-skin__surface" viewBox="0 0 1000 1000" preserveAspectRatio="none" focusable="false">
       <defs>
         <linearGradient id={`${id}base`} x1="0" y1="0" x2="1" y2="1"><stop stopColor={design.palette[0]} /><stop offset=".5" stopColor="#121820" /><stop offset="1" stopColor={design.palette[0]} /></linearGradient>
         <linearGradient id={`${id}metal`}><stop stopColor={design.palette[2]} /><stop offset=".24" stopColor={design.palette[1]} /><stop offset=".49" stopColor={design.palette[0]} /><stop offset=".74" stopColor={design.palette[1]} /><stop offset="1" stopColor={design.palette[2]} /></linearGradient>
         <linearGradient id={`${id}paper`} x1="0" y1="0" x2="1" y2="1"><stop stopColor={paper} /><stop offset=".5" stopColor={dark?"#1d363a":"#fff9e8"} /><stop offset="1" stopColor={paper} /></linearGradient>
         {ready&&source?<>
-          <image id={raster} href={image.decodedSource!} x="0" y="0" width="1000" height="1000" preserveAspectRatio="none" />
+          <image id={raster} href={sourceUri!} x="0" y="0" width="1000" height="1000" preserveAspectRatio="none" />
           <mask id={mask} x="0" y="0" width="1000" height="1000" maskUnits="userSpaceOnUse" style={{maskType:"luminance"}}><rect width="1000" height="1000" fill="white" /><g transform={`translate(${source.art.x*1000} ${source.art.y*1000}) scale(${source.art.w*1000/source.mask.width} ${source.art.h*1000/source.mask.height})`}><path d={source.mask.path} fill="black" /></g></mask>
           <g id={material}><use href={`#${raster}`} mask={`url(#${mask})`} /></g>
         </>:null}
@@ -71,5 +80,5 @@ export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,siz
       </g>
       <rect x="22" y="16" width="956" height="968" rx="34" fill="none" stroke={design.palette[2]} opacity=".35" strokeWidth="1.5" />
     </svg>
-  </div>;
+  );
 }

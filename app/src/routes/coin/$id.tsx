@@ -76,7 +76,7 @@ export const Route = createFileRoute("/coin/$id")({
       ? chainCoinHead(loaderData as unknown as ChainCoinRoute, coinHead)
       : loaderData
         ? coinHead(loaderData.coin)
-        : { meta: [{ title: "Card not found | CardDex" }, { name: "robots", content: "noindex" }] },
+        : { meta: [{ title: "Card not found | Launch a Card" }, { name: "robots", content: "noindex" }] },
   notFoundComponent: IS_SIM ? CoinNotFound : ChainCoinNotFound,
   component: IS_SIM ? CoinView : ChainCoinView,
 });
@@ -86,7 +86,7 @@ function coinHead(coin: CoinDetail) {
   const design = getCardDesign(coin.cardTemplate);
   const head = pageHead({
     path: canonicalCoinPath(coin),
-    title: `${coin.name} ($${coin.ticker}) on CardDex`,
+    title: `${coin.name} ($${coin.ticker}) on Launch a Card`,
     description: sentences(clip(coin.lore, 140), `${design.name}, creator-selected NFT card`, MODE_COPY.coinQualifier),
     image: shareArt(coin.image),
     imageAlt: `${coin.name} card art`,
