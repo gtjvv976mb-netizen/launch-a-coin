@@ -17,6 +17,7 @@ async function attempt<T extends object>(fn: () => Promise<T>): Promise<LiveResu
   }
 }
 function noStore() { try { setResponseHeader("Cache-Control", "no-store"); } catch { /* No request context in isolated tests. */ } }
+function revalidate() { try { setResponseHeader("Cache-Control", "no-cache"); } catch { /* No request context in isolated tests. */ } }
 function sameOrigin() { assertLiveOrigin(getRequestHeader("origin") ?? null); }
 const wallet = () => requireLiveWallet(getCookie(LIVE_SESSION_COOKIE));
 const publicKey = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/);
@@ -24,7 +25,9 @@ const intentId = z.string().uuid();
 const sha256 = z.string().regex(/^[a-f0-9]{64}$/);
 const asset = z.object({sha256, url: z.string().max(2048), mimeType: z.string().max(40), bytes: z.number().int().positive().max(12 * 1024 * 1024)});
 const signature = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{64,90}$/);
-export const getLiveLaunchReadiness = createServerFn({method: "GET"}).handler(() => { noStore(); return liveReadiness(); });
+// Readiness is site-wide configuration, not per-user data, and /launch reads it during page SSR: revalidate it on every
+// use (no-cache) rather than no-store, which would also keep the /launch page out of the back/forward cache.
+export const getLiveLaunchReadiness = createServerFn({method: "GET"}).handler(() => { revalidate(); return liveReadiness(); });
 export const getLiveWallet = createServerFn({method: "GET"}).handler(() => { noStore(); return liveReadiness().ready ? liveWalletFromToken(getCookie(LIVE_SESSION_COOKIE)) : null; });
 export const createLiveWalletChallenge = createServerFn({method: "POST"}).validator(z.object({wallet: publicKey})).handler(({data}) => attempt(async () => {
   sameOrigin(); return createWalletChallenge(data.wallet);

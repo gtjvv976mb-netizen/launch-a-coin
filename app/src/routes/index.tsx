@@ -336,7 +336,8 @@ function Plinth({ level, paused }: { level: number | null; paused: boolean }) {
 
 /**
  * The previous and next featured coins far behind the card, out of focus (the depth-of-field ghosts). Decorative:
- * hidden from assistive tech and never focusable; a click steps to that coin.
+ * hidden from assistive tech and never focusable; a click steps to that coin. Their art loads now at low priority at
+ * a small size (the 320 px copy), so a blurred ghost never waits on lazy loading or becomes the page's largest paint.
  */
 function Ghosts({
   prev,
@@ -355,7 +356,7 @@ function Ghosts({
         <div className="mdx-tt__ghost mdx-tt__ghost--prev" onClick={() => onStep(-1)}>
           <div className="mdx-tt__float">
             <div className="mdx-tt__lens">
-              <MintCardFace card={featuredCard(prev)} lite />
+              <MintCardFace card={featuredCard(prev)} lite eager sizes="160px" />
             </div>
           </div>
         </div>
@@ -364,7 +365,7 @@ function Ghosts({
         <div className="mdx-tt__ghost mdx-tt__ghost--next" onClick={() => onStep(1)}>
           <div className="mdx-tt__float">
             <div className="mdx-tt__lens">
-              <MintCardFace card={featuredCard(next)} lite />
+              <MintCardFace card={featuredCard(next)} lite eager sizes="160px" />
             </div>
           </div>
         </div>
@@ -809,8 +810,9 @@ function Home() {
         <Vitrine hold={!playing} onLive={setAmbientLive} />
         {/* Headline block: Home's header. */}
         <div className="cdx-home__intro flex-none">
-          {/* "card." wears a deep holo ink and catches a white sheen once on load. */}
-          <h1 className="mdx-display mdx-home-arrival mdx-home-arrival--title">
+          {/* "card." wears a deep holo ink and catches a white sheen once on load. The h1 is the LCP text, so it has
+              no arrival: it paints fully visible and in place on the first frame; only the copy and actions arrive. */}
+          <h1 className="mdx-display">
             Every coin is a <span className={cx("mdx-holo-ink", still && "is-paused")}>card.</span>
           </h1>
           {/* What is real first (P0-5), then why anyone bids (P1-27). On the devnet test site the banner above

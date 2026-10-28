@@ -1,6 +1,6 @@
 import { useId, useRef } from "react";
 import { getCardDesign } from "../../lib/carddex/designs";
-import { generatedCardAssets } from "../../lib/carddex/generated-assets";
+import { generatedCardAssets, generatedSrcSet } from "../../lib/carddex/generated-assets";
 import { CANONICAL_CARD_LAYOUT } from "../../lib/carddex/card-template";
 import { generatedSkinSource, phoneCopy, useDeferredPlate, useReadyImage } from "./GeneratedCardArt";
 import { defaultQuoteForDesign, getPairAsset } from "../../lib/carddex/pairs";
@@ -41,7 +41,7 @@ export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,eag
   const ready=image.ready && !!image.decodedSource && !!generatedSkinSource(cardTemplate);
   const quote=quoteAssetKey?getPairAsset(quoteAssetKey):defaultQuoteForDesign(cardTemplate);
   return <div ref={box} className="cdx-canonical-skin" data-market-finish={quote.kind} data-card-skin-ready={ready?"":undefined} data-card-skin-source={ready?cardTemplate:undefined} aria-hidden>
-    {assets.front&&wanted?<img ref={imageRef} className="cdx-canonical-skin__loader" src={small?assets.front320:assets.front} srcSet={assets.front320&&!small?`${assets.front320} 320w, ${assets.front} 1260w`:undefined} sizes={assets.front320&&!small?sizes??(priority||eager?"300px":"auto, 300px"):undefined} alt="" draggable={false} loading={priority||eager?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":eager?"low":undefined} onLoad={image.onLoad} onError={image.onError} />:null}
+    {assets.front&&wanted?<img ref={imageRef} className="cdx-canonical-skin__loader" src={small?assets.front320:assets.front} srcSet={assets.front320&&!small?generatedSrcSet(assets.front320,assets.front):undefined} sizes={assets.front320&&!small?sizes??(priority||eager?"300px":"auto, 300px"):undefined} alt="" draggable={false} loading={priority||eager?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":eager?"low":undefined} onLoad={image.onLoad} onError={image.onError} />:null}
     <CanonicalSkinSurface cardTemplate={cardTemplate} quoteAssetKey={quoteAssetKey} sourceUri={ready?image.decodedSource:undefined} id={id} />
   </div>;
 }

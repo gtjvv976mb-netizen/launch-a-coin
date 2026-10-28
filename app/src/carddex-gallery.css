@@ -52,6 +52,15 @@
 .cdx-home__caption .mdx-name { font-size:23px; margin:0; }
 .cdx-home__caption .mdx-leaders { grid-column:1; margin-top:2px; gap:0; min-height:auto !important; }
 .cdx-home__caption .mdx-leaders dt { font-size:12px; }
+/* The label stays whole: the dotted leader gives way first (the shared rule lets the dt truncate). */
+.cdx-home__caption .mdx-leaders dt { flex:none; }
+.cdx-home__caption .mdx-leaders dd { flex:1 1 auto; }
+/* Phones: too narrow for label, leader and figures on one line, so the label sits above the figures. */
+@media(max-width:479px) {
+ .cdx-home__caption .mdx-leaders > div { flex-direction:column; align-items:flex-start; }
+ .cdx-home__caption .mdx-leaders dd { justify-content:flex-start; }
+ .cdx-home__caption .mdx-leaders dd::before { display:none; }
+}
 .cdx-home__caption .mdx-caption > div:last-child { grid-column:2; grid-row:1 / 3; margin:0; }
 .cdx-home__touchtools { display:flex; justify-content:center; align-items:center; gap:10px; min-height:22px; margin-top:9px; }
 .cdx-home__touchtools p { font-size:var(--type-min); }
