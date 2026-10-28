@@ -9,16 +9,20 @@ import {
   useState,
   type DragEvent,
   type FormEvent,
+  type ReactNode,
   type RefObject,
 } from "react";
 
 import { useAction } from "../components/mintdex/hooks";
 import { type CardData } from "../components/mintdex/MintCard";
 import { useMe, useRequireMe } from "../components/mintdex/session";
+import { SimTag } from "../components/mintdex/trust";
 import {
   Button,
   Field,
+  Icon,
   Input,
+  Modal,
   PageFrame,
   PageHeader,
   TextLink,
@@ -26,15 +30,14 @@ import {
 } from "../components/mintdex/ui";
 import { launch } from "../lib/mintdex/api";
 import { LAUNCH_FEE, TICKER_RE } from "../lib/mintdex/constants";
-import { WORDS } from "../lib/mintdex/copy";
 import { quoteBuy } from "../lib/mintdex/curve";
 import { sol, tokens } from "../lib/mintdex/format";
 import { pageHead, sentences } from "../lib/mintdex/seo";
 import { oneOf, searchSchema, text } from "../lib/mintdex/search";
-import { LaunchCardPreview } from "../components/carddex/live/LaunchCardPreview";
+import { LaunchCardPreview, LaunchCardThumb } from "../components/carddex/live/LaunchCardPreview";
 import { CardDesignPicker } from "../components/carddex/CardDesignPicker";
 import { DEFAULT_CARD_DESIGN, getCardDesign, isCardDesignKey } from "../lib/carddex/designs";
-import { allowedQuotesForDesign, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, isPairAssetKey, type PairAssetKey } from "../lib/carddex/pairs";
+import { allowedQuotesForDesign, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, getTradingPair, isPairAssetKey, type PairAssetKey } from "../lib/carddex/pairs";
 import { formatQuoteAmount, initialQuoteReserves, maxInitialBuyQuoteAtoms, parseQuoteAmount, quoteMetrics } from "../lib/carddex/quote-simulation";
 import { QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
 import type { LiveLaunchHandle } from "../components/carddex/live/LiveLaunchPanel";
@@ -43,7 +46,6 @@ import { parseLiveAmount } from "../components/carddex/live/amounts";
 import { BUY_DOES_NOT_FIT, BUY_FIT_AFTER_SIGN_IN, useLiveBuyFit } from "../components/carddex/live/buy-fit";
 import { PagedMessage } from "../components/carddex/live/PagedMessage";
 import type { LiveLaunchIntent } from "../lib/carddex/live/types";
-import { ViewTabs } from "../components/carddex/ViewTabs";
 
 // The mainnet launch panel (wallet signing, ed25519) loads only in live mode, so the test-mode studio skips it.
 const LiveLaunchPanel = lazy(() => import("../components/carddex/live/LiveLaunchPanel").then((m) => ({ default: m.LiveLaunchPanel })));
@@ -62,7 +64,7 @@ export const Route = createFileRoute("/launch")({
       title: "Launch a coin | Launch a Card",
       description: sentences(
         "Choose a permanent card design, add your coin details and preview its one-of-one card",
-        "Try the full launch in test mode with test SOL",
+        "Try the full launch as a demo with test SOL",
       ),
     }),
   component: Launch,
@@ -70,14 +72,72 @@ export const Route = createFileRoute("/launch")({
 
 // ---------------------------------------------------------------- copy
 
-/** What really happens to the coin, per mode (P0-5): in test mode, a simulated curve. */
-const CONTEXT = "A pump.fun coin and your one-of-one card.";
+/** The header's one line before anything is typed: what the visitor needs, and that the rest has defaults. */
+const CONTEXT = "Name, ticker and artwork are all you need. Everything else has a default.";
 const ENTER_TO_UPLOAD = "Try the demo to upload card art and launch.";
-/** Shown in place of the Mainnet switch while the owner keeps real launches off. */
-const MAINNET_CLOSED = "Test mode · Real mainnet launches are not open yet.";
+/** Under the art field while signed out in the demo: the upload waits, the other steps do not. */
+const ART_GATED = "Start the demo to upload. You can fill in the other steps first.";
 /** Mainnet mode while new launches are off: a creator can still finish a saved launch. */
 const MAINNET_RECOVERY = "New mainnet launches are not open right now. You can still finish a saved launch.";
 const TICKER_HELP = "2 to 8 letters or numbers (A to Z, 0 to 9).";
+
+/** The eight steps. Only Coin and Artwork have no default; the review step is where the coin is created. */
+const STEPS = ["Coin", "Artwork", "Card design", "Pair", "Description", "Links", "Initial buy", "Review"];
+const OPTIONAL_STEPS = new Set([4, 5, 6]);
+/** One plain line under each step's title: what the step is for. */
+const STEP_INTRO = [
+  "Name your coin and choose its ticker.",
+  "One square image for your coin and your card's art window.",
+  "The frame your card is printed in. You can change it until you launch.",
+  "The asset people trade your coin against. SOL suits most coins.",
+  "A line or two, printed on your card.",
+  "Where people can find your coin. Both are optional.",
+  "Buy some of your own coin as it launches. Leave it empty to skip.",
+  "Check your coin and card, then launch.",
+];
+
+type StepState = "done" | "todo" | "problem";
+type StepInfo = { title: string; sub: ReactNode; state: StepState; optional: boolean };
+
+/**
+ * The step list: a numbered list of buttons (desktop rail, and the phone's step sheet). The current step is
+ * aria-current="step"; each row names its value or what is missing, so the list doubles as progress.
+ */
+function StepList({ steps, current, onPick }: { steps: StepInfo[]; current: number; onPick: (n: number) => void }) {
+  return (
+    <ol className="cdx-launch-steps__list">
+      {steps.map((s, i) => (
+        <li key={s.title}>
+          <button
+            type="button"
+            className="cdx-launch-steps__item"
+            data-state={i === current ? "current" : s.state}
+            aria-current={i === current ? "step" : undefined}
+            onClick={() => onPick(i)}
+          >
+            <span className="cdx-launch-steps__mark" aria-hidden>
+              {i !== current && s.state === "done" ? <Icon name="check" size={14} strokeWidth={2} /> : i !== current && s.state === "problem" ? <Icon name="warning" size={14} /> : <span className="num">{i + 1}</span>}
+            </span>
+            <span className="cdx-launch-steps__text">
+              <span className="cdx-launch-steps__title">{s.title}</span>
+              <span className="cdx-launch-steps__sub">{s.sub}</span>
+            </span>
+            <span className="sr-only">{i === current ? ", current step" : s.state === "done" ? ", done" : s.state === "problem" ? ", needs attention" : ""}</span>
+          </button>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/** "Step 3 of 8" over a segmented bar: the segments up to the current step are filled (decorative). */
+function StepProgress({ current, total, className = "" }: { current: number; total: number; className?: string }) {
+  return (
+    <div className={`cdx-launch-progress ${className}`} aria-hidden>
+      {Array.from({ length: total }, (_, i) => <i key={i} data-on={i <= current || undefined} />)}
+    </div>
+  );
+}
 
 // ---------------------------------------------------------------- draft
 
@@ -212,10 +272,13 @@ function Launch() {
   const [checked, setChecked] = useState<number[]>([]);
   const [tickerNote, setTickerNote] = useState("");
   const [draftReady, setDraftReady] = useState(false);
-  const [mobileView, setMobileView] = useState<"card" | "details">("card");
   const [confirmReset, setConfirmReset] = useState(false);
+  // Phones and tablets open the step list in a sheet; desktop shows it as the left rail.
+  const [stepsOpen, setStepsOpen] = useState(false);
+  // A jump past a step with a problem stops there and says so (the field's own error says what to fix).
+  const [blockedJump, setBlockedJump] = useState<string | null>(null);
   const viewId = useId();
-  const steps = ["Coin", "Artwork", "Design", "Pair", "Story", "Links", "Initial buy", "Launch"];
+  const steps = STEPS;
   // A creator's permanent design choice is independent of the token's market data.
   const search = Route.useSearch();
   // Test mode is the default. Mainnet needs both an explicit choice and the owner's switch (CARDDEX_LIVE_LAUNCH_ENABLED).
@@ -261,7 +324,7 @@ function Launch() {
     setDesignKey(nextDesign);
     setQuoteKey(nextQuote);
     setDevBuy("");
-    setPairNotice(search.quote && !isPairAssetKey(search.quote) ? `That quote asset is unavailable. ${getPairAsset(nextQuote).symbol} is selected; review the quote before creating the coin.` : bound && requested && requested !== bound.key ? `${getCardDesign(nextDesign).name} is paired with ${bound.symbol}; the quote has been matched to this finish.` : "");
+    setPairNotice(search.quote && !isPairAssetKey(search.quote) ? `That quote asset is unavailable. ${getPairAsset(nextQuote).symbol} is selected; review the quote before creating the coin.` : bound && requested && requested !== bound.key ? `${getCardDesign(nextDesign).name} is paired with ${bound.symbol}; the quote has been matched to this design.` : "");
   }, [search.design, search.quote]);
 
   // Restore the saved draft once, after the URL's design and quote are applied. A design in the URL wins.
@@ -453,12 +516,14 @@ function Launch() {
         if (!problem) continue;
         setChecked(c => (c.includes(n) ? c : [...c, n]));
         setStep(n);
-        setMobileView("details");
+        setBlockedJump(target > n + 1 ? `Finish ${steps[n]} first, then go on to ${steps[target]}.` : null);
         requestAnimationFrame(() => problem.current?.focus({ preventScroll: true }));
         return;
       }
     }
+    setBlockedJump(null);
     setStep(target);
+    // The step's title takes focus, so a screen reader hears where it is and Tab reaches the first field.
     if (focusStep) requestAnimationFrame(() => document.getElementById("launch-step")?.focus({ preventScroll: true }));
   }
   // A restored draft opens on its saved step only when every step before it still passes; otherwise it opens on
@@ -474,7 +539,7 @@ function Launch() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftReady]);
   // Recovery-only mainnet mode opens on the wallet panel, where a saved launch is found and finished.
-  useEffect(() => { if (recoveryOnly && draftReady) { setStep(7); setMobileView("details"); } }, [recoveryOnly, draftReady]);
+  useEffect(() => { if (recoveryOnly && draftReady) setStep(7); }, [recoveryOnly, draftReady]);
 
   /** Start over asks first, in the page: the safe answer is focused, and Escape or Keep editing returns to the trigger. */
   function askStartOver() {
@@ -492,13 +557,13 @@ function Launch() {
     if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview);
     setName(""); setTicker(""); setLore(""); setWebsite(""); setXUrl(""); setDevBuy("");
     setPreview(null); setImageUrl(null); setPreparedArt(null); setTickerNote("");
-    setTouched({}); setChecked([]); setShowErrors(false); setStep(0); setMobileView("details");
+    setTouched({}); setChecked([]); setShowErrors(false); setStep(0); setBlockedJump(null);
     reset("launch");
     requestAnimationFrame(() => nameRef.current?.focus({ preventScroll: true }));
   }
 
   function focusFirstProblem() {
-    setMobileView("details");
+    setBlockedJump(null);
     if (pairPending) {
       setStep(3);
       requestAnimationFrame(() => pairConfirmationRef.current?.focus({ preventScroll: true }));
@@ -603,44 +668,125 @@ function Launch() {
     changePair(boundQuoteForDesign(key)?.key ?? quoteKey, key);
   };
 
+  // ------------------------------------------------ the step list's rows (value, or what is missing)
+  const locked = live && liveLocked;
+  const linkCount = (website.trim() ? 1 : 0) + (xUrl.trim() ? 1 : 0);
+  const buyText = live
+    ? liveDev && liveDev !== "0" ? `${devBuy} ${quoteAsset.symbol}` : null
+    : devQuote?.ok ? `${formatQuoteAmount(devQuote.solIn, quoteKey)} ${quoteAsset.symbol}` : null;
+  const shownProblem = (n: number) => stepChecked(n) && !!stepProblem(n);
+  const stepInfo: StepInfo[] = steps.map((title, n) => {
+    const optional = OPTIONAL_STEPS.has(n);
+    const problem = shownProblem(n);
+    const state: StepState = problem ? "problem"
+      : n === 0 ? nameOk && tickerOk ? "done" : "todo"
+        : n === 1 ? hasArt ? "done" : "todo"
+          : n === 2 ? "done"
+            : n === 3 ? pairPending ? "problem" : "done"
+              : n === 4 ? lore.trim() ? "done" : "todo"
+                : n === 5 ? linkCount && !websiteError && !xError ? "done" : websiteError || xError ? "problem" : "todo"
+                  : n === 6 ? devError ? "problem" : buyText ? "done" : "todo"
+                    : "todo";
+    const sub = n === 0 ? nameOk && tickerOk ? `${name.trim()} · $${ticker}` : "Name and ticker"
+      : n === 1 ? uploading ? "Uploading…" : hasArt ? "Added" : "Required"
+        : n === 2 ? design.name
+          : n === 3 ? pairPending ? "Confirm the change" : ticker ? getTradingPair(ticker, quoteKey) : `${quoteAsset.symbol} pair`
+            : n === 4 ? lore.trim() ? "Added" : "Optional"
+              : n === 5 ? websiteError || xError ? "Check the link" : linkCount ? `${linkCount} ${linkCount === 1 ? "link" : "links"}` : "Optional"
+                : n === 6 ? devError ? "Check the amount" : buyText ?? "Optional"
+                  : "Check and launch";
+    return { title, sub, state, optional };
+  });
+  const pickStep = (n: number) => { setStepsOpen(false); goTo(n); };
+
+  // ------------------------------------------------ the review summary
+  const missing = (text: string) => <span className="cdx-launch-summary__missing">{text}</span>;
+  const none = <span className="cdx-launch-summary__none">None</span>;
+  const firstLine = lore.trim().split(/\n/)[0];
+  const summary: Array<{ label: string; step: number; value: ReactNode; required?: boolean; ok: boolean }> = [
+    { label: "Name", step: 0, value: nameOk ? name.trim() : missing(name.trim() ? "Too short" : "Missing"), required: true, ok: nameOk },
+    { label: "Ticker", step: 0, value: tickerOk ? `$${ticker}` : missing(ticker ? "Too short" : "Missing"), required: true, ok: tickerOk },
+    { label: "Artwork", step: 1, value: preview ? <img className="cdx-launch-summary__thumb" src={preview} alt="Your artwork" width={40} height={40} /> : missing("Missing"), required: true, ok: hasArt },
+    { label: "Card design", step: 2, value: design.name, ok: true },
+    { label: "Pair", step: 3, value: ticker ? getTradingPair(ticker, quoteKey) : `${quoteAsset.symbol} pair`, ok: !pairPending },
+    { label: "Description", step: 4, value: firstLine ? <span className="cdx-launch-summary__clip">{firstLine}</span> : none, ok: true },
+    { label: "Links", step: 5, value: websiteError || xError ? missing("Check the link") : linkCount ? <span className="cdx-launch-summary__clip">{[website.trim(), xUrl.trim()].filter(Boolean).map(u => u.replace(/^https:\/\//, "")).join(" · ")}</span> : none, ok: !websiteError && !xError },
+    { label: "Initial buy", step: 6, value: devError ? missing("Check the amount") : buyText ? <span className="num">{buyText}</span> : none, ok: !devError },
+  ];
+  const showSummary = !recoveryOnly || liveLocked;
+
+  // ------------------------------------------------ the header's one line
+  const draftLine = dirty && !locked && !recoveryOnly;
+  const context = recoveryOnly ? MAINNET_RECOVERY : draftLine ? (
+    <span className="cdx-launch-draft">
+      <span>Draft saved in this browser</span>
+      <span aria-hidden> · </span>
+      <button ref={startOverRef} type="button" className="mdx-link mdx-hit" aria-expanded={confirmReset} aria-controls={confirmReset ? `${viewId}-reset` : undefined} onClick={() => (confirmReset ? keepDraft() : askStartOver())}>Start over</button>
+    </span>
+  ) : CONTEXT;
+  const stepCount = `Step ${step + 1} of ${steps.length}`;
+  const optionalNow = OPTIONAL_STEPS.has(step);
+
   return (
-    <PageFrame className={`mdx-page cdx-launch cdx-launch--${mobileView}`}>
-      <PageHeader title="Launch a coin" context={recoveryOnly ? MAINNET_RECOVERY : live ? CONTEXT : liveOpen ? "Demo only · no real coin or NFT." : MAINNET_CLOSED} wrapContext right={liveOpen || recoveryOpen ? (
-        <nav className="cdx-launch-mode" aria-label="Launch environment">
+    <PageFrame className="mdx-page cdx-launch">
+      <PageHeader title="Launch a coin" context={context} wrapContext right={liveOpen || recoveryOpen ? (
+        <nav className="cdx-launch-mode" aria-label="Launch mode">
           <Link to="/launch" search={{ design: designKey, quote: quoteKey, mode: "live" }} aria-label={liveOpen ? "Mainnet wallet launch" : "Finish a saved mainnet launch"} aria-current={live ? "page" : undefined}>{liveOpen ? "Mainnet" : "Saved launch"}</Link>
           <Link to="/launch" search={{ design: designKey, quote: quoteKey, mode: "demo" }} aria-current={!live ? "page" : undefined}>Demo</Link>
         </nav>
       ) : undefined} />
+      {/* Announced once, when the draft first starts saving (the visible words sit in the header line). */}
+      <p className="sr-only" aria-live="polite">{draftLine ? "Draft saved in this browser." : ""}</p>
 
-      <ViewTabs className="cdx-launch-mobile-tabs" label="Create view" idBase={viewId} tabs={[{ id: "card", label: "Your card", selected: mobileView === "card", onSelect: () => setMobileView("card"), panel: `${viewId}-card` }, { id: "details", label: "Coin details", selected: mobileView === "details", onSelect: () => setMobileView("details"), panel: `${viewId}-details` }]} />
-      <div className="cdx-create-layout">
-        {/* ------------------------------------------------ the form (plinth) */}
+      <div className="cdx-launch-grid">
+        {/* ------------------------------------------------ the step rail (desktop) */}
+        <nav className="cdx-launch-steps" aria-label="Launch steps">
+          <p className="cdx-launch-steps__count">{stepCount}</p>
+          <StepProgress current={step} total={steps.length} />
+          <StepList steps={stepInfo} current={step} onPick={goTo} />
+        </nav>
+
+        {/* ------------------------------------------------ the form (the one panel) */}
         <form
           id={`${viewId}-details`}
           onSubmit={submit}
           noValidate
           aria-label="New coin"
           className="cdx-create-form mdx-plinth"
+          data-step={step}
         >
           <div className="cdx-launch-step-head">
-            <label htmlFor="launch-step">{step + 1} / {steps.length}</label>
-            <select id="launch-step" aria-label="Launch step" value={step} onChange={e => goTo(Number(e.target.value))}>{steps.map((title, i) => <option key={title} value={i}>{title}</option>)}</select>
-            {dirty && !(live && liveLocked) && !recoveryOnly ? <button ref={startOverRef} type="button" className="mdx-link cdx-launch-start-over" aria-expanded={confirmReset} aria-controls={confirmReset ? `${viewId}-reset` : undefined} onClick={() => (confirmReset ? keepDraft() : askStartOver())}>Start over</button> : null}
-            <p className="sr-only" aria-live="polite">{`Step ${step + 1} of ${steps.length}: ${steps[step]}`}</p>
+            <div className="cdx-launch-step-head__text">
+              <button type="button" className="cdx-launch-step-head__count" aria-haspopup="dialog" onClick={() => setStepsOpen(true)}>
+                <span>{stepCount}{optionalNow ? " · Optional" : ""}</span>
+                <Icon name="chevron-down" size={14} />
+                <span className="sr-only">: all steps</span>
+              </button>
+              <h2 id="launch-step" tabIndex={-1} className="cdx-launch-step-head__title">{steps[step]}</h2>
+              <p className="cdx-launch-step-head__intro">{STEP_INTRO[step]}</p>
+            </div>
+            <LaunchCardThumb card={previewCard} />
           </div>
-          {confirmReset && dirty && !(live && liveLocked) ? (
+          <StepProgress current={step} total={steps.length} className="cdx-launch-progress--form" />
+          <p className="sr-only" aria-live="polite">{`${stepCount}: ${steps[step]}`}</p>
+          {blockedJump ? <p className="cdx-launch-blocked" role="status">{blockedJump}</p> : null}
+
+          {confirmReset && dirty && !locked ? (
             <div id={`${viewId}-reset`} role="group" aria-labelledby={`${viewId}-reset-q`} className="cdx-launch-reset" onKeyDown={e => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); keepDraft(); } }}>
-              <p id={`${viewId}-reset-q`}>Clear every field and the uploaded art?</p>
-              <button ref={keepDraftRef} type="button" className="mdx-btn mdx-btn--outline" onClick={keepDraft}>Keep editing</button>
-              <button type="button" className="mdx-btn mdx-btn--primary" onClick={startOver}>Clear draft</button>
+              <p id={`${viewId}-reset-q`} className="cdx-launch-reset__q">Clear every field and the uploaded art?</p>
+              <p className="cdx-launch-reset__note">Your draft lives only in this browser, so this cannot be undone.</p>
+              <div className="cdx-launch-reset__actions">
+                <Button ref={keepDraftRef} onClick={keepDraft}>Keep editing</Button>
+                <Button variant="danger" onClick={startOver}>Clear draft</Button>
+              </div>
             </div>
           ) : null}
-          <div className="cdx-launch-content">
-          <div className="cdx-launch-fields" hidden={step === 7}>
-          <div className="cdx-launch-identity" hidden={step !== 0}>
-              <Field label="Name (required)" htmlFor="name" error={nameMsg} help="2 to 24 characters." className="min-w-0">
+
+          <div className="cdx-launch-content" hidden={confirmReset && dirty && !locked}>
+            <div className="cdx-launch-step cdx-launch-identity" hidden={step !== 0}>
+              <Field label="Name" htmlFor="name" error={nameMsg} help="2 to 24 characters." className="min-w-0">
                 <Input
-                  disabled={live && liveLocked}
+                  disabled={locked}
                   ref={nameRef}
                   id="name"
                   value={name}
@@ -649,15 +795,15 @@ function Launch() {
                   aria-required="true"
                   onChange={(e) => setName(e.target.value)}
                   onBlur={() => { setName(n => n.trim()); touch("name")(); }}
-                  placeholder="Glorb"
+                  placeholder="e.g. Glorb"
                   autoComplete="off"
                   aria-invalid={nameMsg ? true : undefined}
                   aria-describedby="name-help"
                 />
               </Field>
-              <Field label="Ticker (required)" htmlFor="ticker" error={tickerMsg ? `${tickerMsg}${tickerNote ? ` ${tickerNote}` : ""}` : null} help={<span aria-live="polite">{tickerNote || TICKER_HELP}</span>} className="min-w-0">
+              <Field label="Ticker" htmlFor="ticker" error={tickerMsg ? `${tickerMsg}${tickerNote ? ` ${tickerNote}` : ""}` : null} help={<span aria-live="polite">{tickerNote || TICKER_HELP}</span>} className="min-w-0">
                 <Input
-                  disabled={live && liveLocked}
+                  disabled={locked}
                   ref={tickerRef}
                   id="ticker"
                   prefix="$"
@@ -674,7 +820,7 @@ function Launch() {
                       : clean.length > 8 ? "Tickers are up to 8 characters, so the rest was left out." : "");
                   }}
                   onBlur={touch("ticker")}
-                  placeholder="GLORB"
+                  placeholder="e.g. GLORB"
                   autoComplete="off"
                   autoCapitalize="characters"
                   spellCheck={false}
@@ -682,51 +828,58 @@ function Launch() {
                   aria-describedby="ticker-help"
                 />
               </Field>
-          </div>
+            </div>
 
-          <div className="cdx-launch-step" hidden={step !== 1}>
-          <Field label="Card art (required)" htmlFor="art" error={artMsg} className="min-w-0">
-            <button
-              ref={artRef}
-              disabled={live && liveLocked}
-              id="art"
-              type="button"
-              data-over={dragging ? "true" : undefined}
-              aria-label={preview ? "Card art. Click to replace the image" : "Card art. Drop an image or click to upload"}
-              aria-describedby={artMsg ? "art-help" : undefined}
-              aria-invalid={artMsg ? true : undefined}
-              aria-busy={uploading || undefined}
-              onClick={() => live || me ? fileRef.current?.click() : require(() => artRef.current?.focus(), ENTER_TO_UPLOAD, "Start the demo")}
-              onDragOver={(e) => { e.preventDefault(); if (!dragging) setDragging(true); }}
-              onDragLeave={() => setDragging(false)}
-              onDrop={onDrop}
-              className={`mdx-drop cdx-launch-art ${artMsg ? "border-down" : ""}`}
-            >
-              {preview ? <img src={preview} alt="" draggable={false} className="cdx-launch-art__image" /> : <span className="cdx-launch-art__add" aria-hidden>+</span>}
-              <span className="cdx-launch-art__copy"><strong>{uploading ? "Preparing artwork…" : preview ? "Replace artwork" : "Upload artwork"}</strong><span>Square image · drop or browse</span></span>
-            </button>
-            <input disabled={live && liveLocked} ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="sr-only" tabIndex={-1} aria-hidden onChange={(e) => { handleFile(e.target.files?.[0]); e.target.value = ""; }} />
-          </Field>
-
-          </div>
-          <div className="cdx-launch-step" hidden={step !== 2}>
-          <CardDesignPicker value={designKey} onChange={pick} onPairChange={changePair} quoteAssetKey={quoteKey} ticker={ticker} previewCard={previewCard} disabled={live && liveLocked} compact />
-          <p className="cdx-launch-step-copy">One permanent finish. Every design uses the same card layout.</p>
-          </div>
-          <div className="cdx-launch-step" hidden={step !== 3}>
-          <QuoteAssetPicker viewport value={quoteKey} designKey={designKey} ticker={ticker || "YOUR COIN"} onChange={changePair} onPendingChange={setPairPending} confirmationRef={pairConfirmationRef} live={live} disabled={live && liveLocked} balance={!live && me ? formatQuoteAmount(quoteBalance, quoteKey) : undefined} compact />
-          {pairNotice && !pairPending ? <p className="cdx-pair-notice" role="status">{pairNotice}</p> : null}
-
-          </div>
-          <div className="cdx-launch-step" hidden={step !== 4}>
-              <Field label="Description" htmlFor="lore" className="min-w-0" help={<span className="flex items-baseline justify-between gap-3"><span>{live ? "Permanent once issued." : "Printed on the card."}</span><span className="num flex-none">{lore.length}/280</span></span>}>
-                <textarea disabled={live && liveLocked} id="lore" maxLength={280} value={lore} onChange={e => setLore(e.target.value)} placeholder="Tell your card’s story." aria-describedby="lore-help" className="mdx-input cdx-launch-description" />
+            <div className="cdx-launch-step" hidden={step !== 1}>
+              <Field label="Artwork" htmlFor="art" error={artMsg} help={artGated && !preview ? ART_GATED : undefined} className="min-w-0">
+                <button
+                  ref={artRef}
+                  disabled={locked}
+                  id="art"
+                  type="button"
+                  data-over={dragging ? "true" : undefined}
+                  data-filled={preview ? "true" : undefined}
+                  aria-label={preview ? "Artwork. Choose another image to replace it" : "Artwork. Drop an image or choose one to upload"}
+                  aria-describedby={artMsg || (artGated && !preview) ? "art-help" : "art-spec"}
+                  aria-invalid={artMsg ? true : undefined}
+                  aria-busy={uploading || undefined}
+                  onClick={() => live || me ? fileRef.current?.click() : require(() => artRef.current?.focus(), ENTER_TO_UPLOAD, "Start the demo")}
+                  onDragOver={(e) => { e.preventDefault(); if (!dragging) setDragging(true); }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={onDrop}
+                  className={`mdx-drop cdx-launch-art ${artMsg ? "border-down" : ""}`}
+                >
+                  <span className="cdx-launch-art__frame" aria-hidden data-busy={uploading || undefined}>
+                    {preview && !uploading ? <img src={preview} alt="" draggable={false} className="cdx-launch-art__image" /> : uploading ? null : <Icon name="plus" size={20} />}
+                  </span>
+                  <span className="cdx-launch-art__copy">
+                    <strong>{uploading ? "Preparing artwork…" : preview ? "Replace artwork" : "Upload artwork"}</strong>
+                    <span id="art-spec">PNG, JPG, WEBP or GIF up to 12 MB. Square works best; other shapes are cropped to the centre.</span>
+                  </span>
+                </button>
+                <input disabled={locked} ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="sr-only" tabIndex={-1} aria-hidden onChange={(e) => { handleFile(e.target.files?.[0]); e.target.value = ""; }} />
               </Field>
-          </div>
-          <div className="cdx-launch-step cdx-launch-links" hidden={step !== 5}>
-              <Field label="Website" htmlFor="website" error={websiteMsg} className="min-w-0">
+            </div>
+
+            <div className="cdx-launch-step" hidden={step !== 2}>
+              <CardDesignPicker value={designKey} onChange={pick} onPairChange={changePair} quoteAssetKey={quoteKey} ticker={ticker} previewCard={previewCard} disabled={locked} compact />
+            </div>
+
+            <div className="cdx-launch-step" hidden={step !== 3}>
+              <QuoteAssetPicker viewport value={quoteKey} designKey={designKey} ticker={ticker || "YOUR COIN"} onChange={changePair} onPendingChange={setPairPending} confirmationRef={pairConfirmationRef} live={live} disabled={locked} balance={!live && me ? formatQuoteAmount(quoteBalance, quoteKey) : undefined} compact />
+              {pairNotice && !pairPending ? <p className="cdx-pair-notice" role="status">{pairNotice}</p> : null}
+            </div>
+
+            <div className="cdx-launch-step" hidden={step !== 4}>
+              <Field label="Description (optional)" htmlFor="lore" className="min-w-0" right={<span className="num">{lore.length}/280</span>} help={live ? "Permanent once your coin is created." : "Printed on your card."}>
+                <textarea disabled={locked} id="lore" maxLength={280} value={lore} onChange={e => setLore(e.target.value)} placeholder="e.g. The first frog to reach the moon." aria-describedby="lore-help" className="mdx-input cdx-launch-description" />
+              </Field>
+            </div>
+
+            <div className="cdx-launch-step" hidden={step !== 5}>
+              <Field label="Website (optional)" htmlFor="website" error={websiteMsg} className="min-w-0">
                 <Input
-                  disabled={live && liveLocked}
+                  disabled={locked}
                   ref={websiteRef}
                   id="website"
                   value={website}
@@ -740,9 +893,9 @@ function Launch() {
                   aria-describedby={websiteMsg ? "website-help" : undefined}
                 />
               </Field>
-              <Field label="X link" htmlFor="x" error={xMsg} className="min-w-0">
+              <Field label="X link (optional)" htmlFor="x" error={xMsg} className="min-w-0">
                 <Input
-                  disabled={live && liveLocked}
+                  disabled={locked}
                   ref={xRef}
                   id="x"
                   value={xUrl}
@@ -757,10 +910,11 @@ function Launch() {
                 />
               </Field>
             </div>
-            <div className="cdx-launch-initial cdx-launch-step" hidden={step !== 6}>
+
+            <div className="cdx-launch-step" hidden={step !== 6}>
               <Field label="Initial buy (optional)" htmlFor="dev">
                 <Input
-                  disabled={live && liveLocked || buyBlocked}
+                  disabled={locked || buyBlocked}
                   ref={devRef}
                   id="dev"
                   numeric
@@ -769,23 +923,21 @@ function Launch() {
                   autoComplete="off"
                   value={devBuy}
                   onChange={(e) => setDevBuy(e.target.value.replace(/[^0-9.]/g, ""))}
-                  placeholder="0.0"
+                  placeholder="0"
                   aria-invalid={devError ? true : undefined}
                   aria-describedby="dev-note"
                 />
               </Field>
-              {/* Only the estimate is announced as it changes (the total by the button is the other live line). */}
-              <p id="dev-note" className="min-w-0 text-[13px] leading-[1.45] text-slate sm:pb-1">
+              {/* Only the estimate is announced as it changes. */}
+              <div id="dev-note" className="cdx-launch-note">
                 {devError ? (
-                  <span role="alert" className="block text-down">
-                    {devError}
-                  </span>
+                  <p role="alert" className="cdx-launch-note__error">{devError}</p>
                 ) : buyBlocked ? (
-                  <span role="status" className="block text-ink">{BUY_DOES_NOT_FIT}</span>
+                  <p role="status">{BUY_DOES_NOT_FIT}</p>
                 ) : !devQuote?.ok ? (
-                  <span className="block">{live ? `Optional real ${quoteAsset.symbol} buy with coin creation.${buyFits === null ? ` ${BUY_FIT_AFTER_SIGN_IN}` : ""} Exact amounts and slippage appear before wallet review.` : `Optional test-asset buy. Maximum ${formatQuoteAmount(maxDev, quoteKey)} ${quoteAsset.symbol}.`}</span>
+                  <p>{live ? `Paid in real ${quoteAsset.symbol} with your coin's creation.${buyFits === null ? ` ${BUY_FIT_AFTER_SIGN_IN}` : ""} The exact amount and slippage show before your wallet opens.` : `Paid in test ${quoteAsset.symbol}. Up to ${formatQuoteAmount(maxDev, quoteKey)} ${quoteAsset.symbol} in this demo.`}</p>
                 ) : null}
-                <span aria-live="polite" className="block empty:hidden">
+                <p aria-live="polite" className="empty:hidden">
                   {devQuote?.ok && !devError ? (
                     <>
                       You get{" "}
@@ -795,62 +947,99 @@ function Launch() {
                       first.
                     </>
                   ) : null}
-                </span>
-              </p>
+                </p>
+              </div>
             </div>
 
+            {/* ------------------------------------------------ review: everything you chose, then the cost */}
+            <div className="cdx-launch-step cdx-launch-commit" hidden={step !== 7}>
+              {showSummary ? (
+                <section className="cdx-launch-review" aria-labelledby={`${viewId}-summary`}>
+                  <h3 id={`${viewId}-summary`} className="sr-only">Your coin and card</h3>
+                  <dl className="cdx-launch-summary">
+                    {summary.map(row => (
+                      <div key={row.label} data-missing={!row.ok || undefined}>
+                        <dt>{row.label}</dt>
+                        <dd>{row.value}</dd>
+                        {!locked ? (
+                          <dd className="cdx-launch-summary__edit">
+                            <button type="button" className="mdx-link mdx-hit" onClick={() => goTo(row.step, true)} aria-label={`${row.ok || !row.required ? "Edit" : "Add"} ${row.label.toLowerCase()}`}>{row.ok || !row.required ? "Edit" : "Add"}</button>
+                          </dd>
+                        ) : null}
+                      </div>
+                    ))}
+                  </dl>
+                </section>
+              ) : null}
 
+              {live ? <Suspense fallback={<div className="mdx-skeleton cdx-launch-live-skeleton" aria-hidden />}><LiveLaunchPanel ref={liveRef} launchesOpen={liveOpen} notice={buyDropped ? BUY_DOES_NOT_FIT : null} card={previewCard} draft={ready && preparedArt && liveDev !== null ? { name: name.trim(), symbol: ticker, description: lore.trim(), website: website.trim(), xUrl: xUrl.trim(), cardTemplate: designKey, quoteAssetKey: quoteKey, quoteMint: quoteAsset.mint, initialBuyQuoteBaseUnits: liveDev, artwork: preparedArt } : null} pairPending={pairPending} onLockedChange={setLiveLocked} onIntentLoaded={restoreLiveIntent} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /></Suspense> : (
+                <section className="cdx-launch-review" aria-labelledby={`${viewId}-cost`}>
+                  <div className="cdx-launch-section-row">
+                    <h3 id={`${viewId}-cost`} className="cdx-launch-section">Cost</h3>
+                    <SimTag />
+                  </div>
+                  {/* The line items; their total sits on the footer beside the button that pays it. */}
+                  <dl className="cdx-launch-cost">
+                    <div><dt>Launch cost</dt><dd><span className="num">{sol(LAUNCH_FEE, 3)}</span> <span className="mdx-unit">test SOL</span></dd></div>
+                    <div><dt>Initial buy</dt><dd>{devQuote?.ok ? <><span className="num">{quoteKey === "sol" ? sol(devQuote.solIn, 3) : formatQuoteAmount(devQuote.solIn, quoteKey)}</span> <span className="mdx-unit">test {quoteAsset.symbol}</span></> : none}</dd></div>
+                    <div><dt>Platform fee</dt><dd>None</dd></div>
+                  </dl>
+                  <p className="cdx-launch-fee-note">Launch a Card charges no platform fee. The launch cost stands in for the network fees and account rent a mainnet launch pays.</p>
+                  <p className="cdx-launch-demo-note">{liveOpen ? "" : "Mainnet launches are not open yet. "}This demo uses test SOL{quoteKey === "sol" ? "" : ` and test ${quoteAsset.symbol}`}: no real coin or card is created.</p>
+                  <p className="cdx-launch-rules">By creating this coin you agree to the <TextLink to="/legal" hash="terms">content rules</TextLink>.</p>
+                </section>
+              )}
+            </div>
           </div>
-          <div className="cdx-launch-commit" hidden={step !== 7}>
-            {/* The content rule (P1-28), right where people commit. */}
-            <p className="cdx-launch-rules">
-              <TextLink to="/legal" hash="terms">
-                Content rules
-              </TextLink>
-            </p>
-            {live ? <Suspense fallback={null}><LiveLaunchPanel ref={liveRef} launchesOpen={liveOpen} notice={buyDropped ? BUY_DOES_NOT_FIT : null} card={previewCard} draft={ready && preparedArt && liveDev !== null ? { name: name.trim(), symbol: ticker, description: lore.trim(), website: website.trim(), xUrl: xUrl.trim(), cardTemplate: designKey, quoteAssetKey: quoteKey, quoteMint: quoteAsset.mint, initialBuyQuoteBaseUnits: liveDev, artwork: preparedArt } : null} pairPending={pairPending} onLockedChange={setLiveLocked} onIntentLoaded={restoreLiveIntent} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /></Suspense> : <>
-            <dl className="cdx-launch-cost" aria-label="Demo launch cost" aria-live="polite">
-              <div><dt>Demo launch fee</dt><dd>{sol(LAUNCH_FEE, 3)} test SOL</dd></div>
-              {devQuote?.ok ? <div><dt>Initial buy</dt><dd>{formatQuoteAmount(devQuote.solIn, quoteKey)} test {quoteAsset.symbol}</dd></div> : null}
-              {quoteKey === "sol" && devQuote?.ok ? <div><dt>Total</dt><dd>{sol(nativeCost, 3)} test SOL</dd></div> : null}
-              <small>{liveOpen ? "" : "Real mainnet launches are not open yet. "}{quoteKey === "sol" ? "Demo amounts only; no real coin or NFT is minted." : `The native SOL fee and ${quoteAsset.symbol} initial buy are separate test assets. No real coin or NFT is minted.`}</small>
-            </dl>
-            {balanceError ? (
-              <PagedMessage text={balanceError} alert />
+
+          {/* ------------------------------------------------ one primary per step, always at the right */}
+          <div className="cdx-launch-step-footer" hidden={confirmReset && dirty && !locked}>
+            {/* What stops the launch, said beside the button: the balance check, a pending pair change, the server's reason. */}
+            {step === 7 && !live && balanceError ? <PagedMessage text={balanceError} alert /> : null}
+            {step === 7 && !live && pairPending ? <p className="cdx-pair-notice" role="status">Confirm or cancel the pair change on the Pair step before creating this demo coin.</p> : null}
+            {step === 7 && !live && launchError ? <PagedMessage text={launchError} alert /> : null}
+            {step === 7 && !live ? (
+              <p className="cdx-launch-total">
+                <span>Total</span>
+                <span><span className="num">{sol(nativeCost, 3)}</span> <span className="mdx-unit">test SOL</span>{quoteKey !== "sol" && devQuote?.ok ? <span className="cdx-launch-cost__plus"> + <span className="num">{formatQuoteAmount(devQuote.solIn, quoteKey)}</span> test {quoteAsset.symbol}</span> : null}</span>
+              </p>
             ) : null}
-            {pairPending ? <p className="cdx-pair-notice mb-2" role="status">Confirm or cancel the quote change before creating this demo coin.</p> : null}
-            <Button
-              type="submit"
-              size="lg"
-              block
-              pending={pending === "launch"}
-              pendingLabel="Minting your card..."
-              disabled={pairPending || (!!me && uploading)}
-              onBlocked={pairPending ? focusFirstProblem : undefined}
-              feedback={feedback("launch")}
-              successLabel="Minted"
-            >
-              {!me ? "Try the demo to launch" : uploading ? "Uploading art..." : "Create demo coin and card"}
-            </Button>
-            {/* The server's reason for a failed launch takes the launcher line's place (no new row, P1-8). */}
-            {launchError ? (
-              <PagedMessage text={launchError} alert />
-            ) : (
-              <p className="mt-2 text-[13px] leading-[1.45] text-slate">{WORDS.launcherLine}</p>
-            )}
-            </>}
+            <div className="cdx-launch-step-footer__row">
+            {step > 0 ? <Button variant="outline" onClick={() => goTo(Math.max(0, step - 1), true)}>Back</Button> : <span aria-hidden />}
+            <div className="cdx-launch-step-footer__end">
+              {optionalNow && step < 6 ? <button type="button" className="mdx-link mdx-hit cdx-launch-skip" onClick={() => goTo(7, true)}>Skip to review</button> : null}
+              {step < 7 ? (
+                <Button type="submit">Next: {steps[step + 1]}</Button>
+              ) : !live ? (
+                <Button
+                  type="submit"
+                  pending={pending === "launch"}
+                  pendingLabel="Creating your coin…"
+                  disabled={pairPending || (!!me && uploading)}
+                  onBlocked={pairPending ? focusFirstProblem : undefined}
+                  feedback={feedback("launch")}
+                  successLabel="Created"
+                >
+                  {!me ? "Try the demo to launch" : uploading ? "Uploading art…" : "Create demo coin and card"}
+                </Button>
+              ) : null}
+            </div>
+            </div>
           </div>
-          </div>
-          <nav className="cdx-launch-step-footer" aria-label="Launch steps">
-            <button type="button" className="mdx-btn mdx-btn--outline" disabled={step === 0} onClick={() => goTo(Math.max(0, step - 1), true)}>Back</button>
-            {step < 7 ? <button type="button" className="mdx-btn mdx-btn--primary" onClick={() => goTo(Math.min(7, step + 1), true)}>Next: {steps[step + 1]}</button> : <button type="button" className="mdx-btn mdx-btn--ghost cdx-launch-show-card" onClick={() => setMobileView("card")}>View card</button>}
-          </nav>
         </form>
 
+        {/* ------------------------------------------------ the live card on its stage */}
         <section id={`${viewId}-card`} aria-label="Your card preview" className="cdx-create-preview">
           <LaunchCardPreview card={previewCard} />
+          <p className="cdx-create-preview__note">Live preview. It changes as you edit.</p>
         </section>
       </div>
+
+      <Modal open={stepsOpen} onOpenChange={setStepsOpen} title="Launch steps" description={`${stepCount}. Choose a step to go to it.`}>
+        <nav className="cdx-launch-steps cdx-launch-steps--sheet" aria-label="Launch steps">
+          <StepList steps={stepInfo} current={step} onPick={pickStep} />
+        </nav>
+      </Modal>
     </PageFrame>
   );
 }

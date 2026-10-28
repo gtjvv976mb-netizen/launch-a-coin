@@ -1,509 +1,614 @@
-/* Launch (/launch): the studio, the live launch panel UI, the design and pair pickers (QuoteAssetPicker is also shown on Designs; browse consumes it unchanged) screen sheet. Owned by the "launch" screen group (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css).
- * The blocks below were moved here unchanged from the shared sheets, in their old cascade order; tokens: carddex-theme.css. */
+/* Launch (/launch): the builder, the live launch panel UI, the design and pair pickers (QuoteAssetPicker is also
+ * shown on Designs; browse styles its placement only). Owned by the "launch" screen group
+ * (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css). Tokens: carddex-theme.css.
+ *
+ * The one question: "Is my coin and its card ready, and what will it cost?"
+ *   desktop (>=1024): the step rail | the form (the one panel) | the live card on its stage, inside the 1152 column:
+ *     200 + 24 + 452 + 24 + 452 = 1152 (the two 1fr tracks share what the rail leaves).
+ *   tablet (768-1023): form | stage; the steps open in a sheet from "Step 3 of 8".
+ *   phone (<768): the form alone, one step per page, a small live card beside the step title (tap: 3D), Back and
+ *     Next on a footer that stays at the bottom of the screen while a long step scrolls.
+ * Elevation by lightness alone: the form panel is the only surface; the rail and the card's stage sit on the
+ * ground. No gold here: the card is the only colour. */
 
-/* ---- moved from carddex-theme.css (same order as there) */
-@media (forced-colors: active) {
-.cdx-app .cdx-create-preview { box-shadow: none; }
+/* ------------------------------------------------ the page */
+.cdx-launch { gap: var(--gap-page); }
+.cdx-launch .mdx-pagehead__context { min-height: 20px; }
+/* The header (and the Mainnet | Demo switch) paints above the turning card, whose projection can swing past its stage. */
+.cdx-launch > .mdx-pagehead { position: relative; z-index: 1; }
+.cdx-launch-draft { display: inline; }
+.cdx-launch-draft .mdx-link { font-weight: 500; color: var(--color-ink); }
+
+/* Mainnet | Demo: the segmented look (a track pill, the current mode on the nested thumb). Links, not tabs: each
+ * mode is its own address. */
+.cdx-launch-mode { display: inline-flex; flex: none; gap: 0; padding: 4px; border-radius: var(--radius-pill); background: var(--color-track); }
+.cdx-launch-mode a {
+  position: relative;
+  display: inline-flex;
+  height: calc(var(--control-h) - 8px);
+  align-items: center;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  color: var(--color-slate);
+  font-size: var(--text-body);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color var(--t-hover) ease, background-color var(--t-hover) ease;
 }
+.cdx-launch-mode a::before { content: ""; position: absolute; inset: -4px 0; }
+.cdx-launch-mode a[aria-current] { background: var(--color-nested); color: var(--color-ink); font-weight: 600; }
+.cdx-launch-mode a:focus-visible { outline-offset: -2px; }
+@media (hover: hover) and (pointer: fine) { .cdx-launch-mode a:not([aria-current]):hover { color: var(--color-ink); } }
 
-/* ---- moved from carddex-gallery.css (same order as there) */
-.cdx-app .cdx-library .cdx-pair-picker { min-width:0; }
-
-/* ---- moved from carddex-a11y.css (same order as there) */
-@media (pointer: fine) {
-  .cdx-app .cdx-launch .cdx-launch-mode a,
-  .cdx-app .cdx-launch-step-head select { min-height: 40px; }
-}@media (pointer: coarse) {
-.cdx-launch-mobile-tabs > button, .cdx-app .cdx-launch .cdx-launch-mode a, .cdx-launch-subtabs button { min-height: 44px; }
-}
-
-/* ---- moved from carddex-live.css (whole file, same order) */
-.cdx-live-wallet,.cdx-live-panel { min-width:0; font-size:13px; line-height:1.5; }
-.cdx-live-wallet { display:grid; gap:14px; }
-.cdx-live-wallet ul { display:grid; gap:8px; }
-.cdx-live-wallet li button { justify-content:flex-start; gap:10px; }
-.cdx-live-address { overflow-wrap:anywhere; font:12px/1.6 var(--font-mono); }
-.cdx-live-error { color:var(--color-down); }
-.cdx-launch-mode { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
-.cdx-launch-mode a { display:inline-flex; min-height:36px; align-items:center; padding:6px 12px; border:1px solid var(--color-hairline); border-radius:999px; font-size:12px; }
-.cdx-launch-mode a[aria-current] { color:var(--color-ink); background:var(--color-raised); border-color:var(--color-control-border); font-weight:600; }
-.cdx-live-panel { display:grid; gap:10px; }
-.cdx-live-panel h2 { font-size:15px; font-weight:650; }
-.cdx-live-panel__status { padding:10px 12px; border:1px solid var(--color-hairline); border-radius:12px; background:var(--color-nested); }
-.cdx-live-panel__status p + p { margin-top:4px; }
-.cdx-live-review { display:grid; gap:6px; font-size:12px; }
-.cdx-live-review > div { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
-.cdx-live-review dt { color:var(--color-slate); }
-.cdx-live-review dd { text-align:right; overflow-wrap:anywhere; }
-.cdx-live-check { display:flex; gap:8px; align-items:flex-start; font-size:12px; line-height:1.5; }
-.cdx-live-check input { flex:none; width:17px; height:17px; margin-top:2px; accent-color:#a6791d; }
-.cdx-live-actions { display:flex; flex-wrap:wrap; gap:8px; }
-.cdx-live-recovery { display:grid; gap:7px; padding-top:10px; border-top:1px solid var(--color-hairline); }
-.cdx-live-links { display:flex; flex-wrap:wrap; gap:8px 16px; }
-.cdx-live-links a { min-height:32px; display:inline-flex; align-items:center; text-decoration:underline; text-underline-offset:3px; }
-.cdx-live-review-modal { display:grid; gap:14px; }
-.cdx-live-review-modal code { font-size:var(--type-min); overflow-wrap:anywhere; }
-@media(max-width:580px) { .cdx-live-review > div { gap:8px; } .cdx-live-actions > button { flex:1 1 140px; } }
-
-.cdx-live-pane-label { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:10px; font-size:var(--type-min); color:var(--color-slate); }
-.cdx-live-pane-label > select { width:100%; min-width:0; font-size:12px; }
-.cdx-live-pane { display:grid; align-content:start; min-height:0; gap:9px; }
-.cdx-live-pane > p { overflow-wrap:anywhere; }
-.cdx-live-readiness-link { text-align:left; font-size:var(--type-min); color:#73500d; }
-.cdx-live-pane .cdx-live-slippage { display:flex; justify-content:space-between; align-items:center; }
-.cdx-live-pane .cdx-live-slippage select { max-width:90px; }
-.cdx-launch-subtabs { display:flex; min-width:0; align-items:center; justify-content:space-between; gap:5px; }
-.cdx-launch-subtabs button { min-height:36px; padding:5px 9px; border:1px solid var(--color-hairline); border-radius:7px; font-size:var(--type-min); color:var(--color-ink); }
-.cdx-launch-subtabs button:is([aria-pressed=true],[aria-selected=true]) { background:var(--color-raised); border-color:var(--color-control-border); }
-.cdx-launch-subtabs button:disabled { opacity:.45; }
-.cdx-launch-subtabs span { font-size:var(--type-min); font-variant-numeric:tabular-nums; }
-.cdx-paged-message { display:grid; min-width:0; gap:7px; font-size:12px; overflow-wrap:anywhere; }
-.cdx-paged-message nav { display:flex; align-items:center; justify-content:space-between; gap:7px; }
-.cdx-paged-message nav button { min-height:36px; font-size:var(--type-min); text-decoration:underline; text-underline-offset:3px; }
-.cdx-paged-message nav button:disabled { opacity:.4; }
-.cdx-paged-message nav span { font-size:var(--type-min); font-variant-numeric:tabular-nums; }
-.cdx-live-review-modal { min-height:0; gap:12px; }
-.cdx-live-review-progress { font-size:var(--type-min); color:var(--color-slate); font-variant-numeric:tabular-nums; }
-.cdx-live-review-page { display:grid; min-height:230px; align-content:start; gap:14px; font-size:13px; line-height:1.5; }
-.cdx-live-review-page .cdx-live-review > div { display:grid; gap:3px; }
-.cdx-live-review-page .cdx-live-review dd { text-align:left; }
-.cdx-live-review-nav { display:flex; justify-content:space-between; gap:12px; }
-.cdx-live-review-nav > button { min-height:40px; }
-.cdx-live-review-page .cdx-live-address { font-size:var(--type-min); }
-@media(pointer:coarse) { .cdx-live-pane-label > select { font-size:16px; } .cdx-launch-subtabs button { min-height:44px; min-width:44px; } }
-@media(max-width:580px) { .cdx-live-pane-label { grid-template-columns:auto minmax(0,1fr); gap:7px; } .cdx-live-review-page { min-height:220px; gap:10px; } .cdx-live-review-modal { gap:8px; } }
-.cdx-viewport-pages { display:flex; flex:1; min-height:0; flex-direction:column; gap:12px; }
-.cdx-viewport-pages__body { flex:1; min-height:0; display:grid; align-content:start; gap:12px; overflow-wrap:anywhere; }
-.cdx-viewport-pages > nav { flex:none; align-items:center; }
-.cdx-viewport-pages > nav > span { font-size:var(--type-min); color:var(--color-slate); font-variant-numeric:tabular-nums; }
-
-.cdx-hero-turntable--viewport .mdx-card3d { perspective:4000px; }
-.cdx-live-wallet li button { min-width:0; height:auto; min-height:44px; white-space:normal; overflow-wrap:anywhere; text-align:left; }
-.cdx-live-wallet li button img { flex:none; }
-.cdx-live-pane > .mdx-btn { min-width:0; min-height:40px; height:auto; padding-block:8px; white-space:normal; overflow-wrap:anywhere; }
-.cdx-live-pane .cdx-live-review dd { min-width:0; }
-.cdx-launch-subtabs button:focus-visible,.cdx-paged-message button:focus-visible,.cdx-launch-mobile-tabs button:focus-visible,.cdx-launch-step-head select:focus-visible { outline:2px solid var(--color-zap); outline-offset:2px; }
-
-.cdx-live-back { min-height:32px; text-align:left; }
-@media(max-width:580px) { .cdx-live-pane { gap:6px; } .cdx-live-pane .cdx-live-actions { flex-wrap:nowrap; } .cdx-live-pane .cdx-live-actions > button { flex:1 1 0; min-width:0; padding-inline:8px; font-size:var(--type-min); } }
-/* Reuse the landscape control rail for wallet sections; keep consent and review visible. */
-@media(min-width:560px) and (max-width:1023px) and (max-height:440px) {
- .cdx-launch .cdx-create-form:has(.cdx-launch-commit:not([hidden]) .cdx-live-panel) { position:relative; }
- .cdx-launch .cdx-create-form:has(.cdx-launch-commit:not([hidden]) .cdx-live-panel) .cdx-launch-step-footer { flex-direction:row; align-items:flex-end; gap:4px; }
- .cdx-launch .cdx-create-form:has(.cdx-launch-commit:not([hidden]) .cdx-live-panel) .cdx-launch-step-footer > button { flex:1; width:0; min-width:0; white-space:normal; line-height:1.25; font-size:var(--type-min); }
- .cdx-launch .cdx-launch-commit:has(.cdx-live-panel) { height:100%; grid-template-rows:15px minmax(0,1fr); gap:4px; }
- .cdx-launch .cdx-launch-commit .cdx-live-panel { display:contents; }
- .cdx-launch .cdx-live-pane-label { position:absolute; left:8px; top:60px; display:block; width:140px; font-size:0; }
- .cdx-launch .cdx-live-pane-label > select { min-height:44px; font-size:12px; }
- .cdx-launch .cdx-live-pane { grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 8px; font-size:var(--type-min); line-height:1.3; }
- .cdx-launch .cdx-live-pane > p,.cdx-launch .cdx-live-pane > h2,.cdx-launch .cdx-live-pane > dl,.cdx-launch .cdx-live-pane > nav,.cdx-launch .cdx-live-pane > .cdx-paged-message,.cdx-launch .cdx-live-pane > .cdx-live-links,.cdx-launch .cdx-live-pane > .cdx-live-actions { grid-column:1 / -1; }
- .cdx-launch .cdx-live-pane > button,.cdx-launch .cdx-live-pane .cdx-live-actions > button { min-height:44px; padding-block:4px; font-size:var(--type-min); }
- .cdx-launch .cdx-live-pane > .cdx-live-check { min-height:44px; align-items:center; font-size:var(--type-min); line-height:1.3; }
- .cdx-launch .cdx-live-pane[data-launch-pane=launch] > .cdx-live-address { grid-column:auto; display:flex; min-height:44px; align-items:center; font-size:var(--type-min); }
-}
-
-/* ---- moved from carddex-viewport.css (same order as there) */
-/* Landscape phones keep filters in one row so card choices and paging remain usable. */
-@media(min-width:560px) and (max-width:1023px) and (max-height:440px) {
- /* The library and the creation desk have their own landscape layouts below; the 520px floor would push their
-    pager and step buttons under the tab bar. */
- .cdx-app.cdx-viewport .cdx-viewport-main > :first-child:is(.cdx-archive,.cdx-launch) { --cdx-fit-floor:0px; }
-}
-
-/* ---- moved from carddex.css (same order as there) */
-.cdx-create-layout {
+/* ------------------------------------------------ the grid */
+.cdx-launch-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-  grid-template-rows: minmax(0, 1fr);
-  gap: 20px;
-  min-height: 0;
   flex: 1;
-}
-.cdx-create-form {
-  grid-column: 1;
-  grid-row: 1;
   min-height: 0;
-  overflow-y: auto;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
 }
+@media (min-width: 768px) {
+  .cdx-launch-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); }
+}
+@media (min-width: 1024px) {
+  .cdx-launch-grid {
+    grid-template-columns: minmax(176px, 200px) minmax(340px, 1fr) minmax(300px, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+  }
+}
+
+/* ------------------------------------------------ the step rail (desktop) and the step sheet (phones) */
+.cdx-launch-steps { display: none; min-width: 0; }
+@media (min-width: 1024px) {
+  .cdx-launch-steps { display: flex; flex-direction: column; gap: 12px; align-self: start; padding-top: 4px; }
+}
+.cdx-launch-steps--sheet { display: flex; flex-direction: column; margin-inline: -8px; }
+.cdx-launch-steps__count { font-size: var(--text-caption); line-height: 16px; font-weight: 500; color: var(--color-slate); font-variant-numeric: tabular-nums; }
+.cdx-launch-progress { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 4px; }
+.cdx-launch-progress > i { height: 4px; border-radius: var(--radius-pill); background: var(--color-track); }
+.cdx-launch-progress > i[data-on] { background: var(--color-ink); }
+.cdx-launch-steps__list { display: flex; flex-direction: column; gap: 2px; margin-inline: -8px; }
+.cdx-launch-steps__item {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 48px;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: var(--radius-row);
+  color: var(--color-slate);
+  text-align: left;
+  transition: background-color var(--t-hover) ease, color var(--t-hover) ease;
+}
+.cdx-launch-steps__mark {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--color-nested);
+  color: var(--color-slate);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+.cdx-launch-steps__text { display: grid; min-width: 0; gap: 2px; }
+.cdx-launch-steps__title { font-size: var(--text-body); line-height: 18px; font-weight: 500; }
+.cdx-launch-steps__sub { overflow: hidden; font-size: var(--text-caption); line-height: 16px; color: var(--color-placeholder); text-overflow: ellipsis; white-space: nowrap; }
+.cdx-launch-steps__item[data-state="done"] .cdx-launch-steps__mark { color: var(--color-ink); }
+.cdx-launch-steps__item[data-state="done"] .cdx-launch-steps__title { color: var(--color-ink); }
+.cdx-launch-steps__item[data-state="problem"] .cdx-launch-steps__mark { background: var(--color-down-soft); color: var(--color-down-hover); }
+.cdx-launch-steps__item[data-state="problem"] .cdx-launch-steps__sub { color: var(--color-down-hover); }
+.cdx-launch-steps__item[data-state="current"] { background: var(--color-surface); color: var(--color-ink); }
+.cdx-launch-steps__item[data-state="current"] .cdx-launch-steps__mark { background: var(--color-ink); color: var(--color-on-cta); }
+.cdx-launch-steps__item[data-state="current"] .cdx-launch-steps__title { font-weight: 600; }
+.cdx-launch-steps__item[data-state="current"] .cdx-launch-steps__sub { color: var(--color-slate); }
+.cdx-launch-steps__item:focus-visible { outline-offset: -2px; }
+.cdx-launch-steps__item:active { background: var(--color-track); }
+@media (hover: hover) and (pointer: fine) {
+  .cdx-launch-steps__item:not([data-state="current"]):hover { background: var(--color-track); color: var(--color-ink); }
+}
+/* In the sheet the current row sits on the sheet's own surface, so it takes the nested step. */
+.cdx-launch-steps--sheet .cdx-launch-steps__item[data-state="current"] { background: var(--color-nested); }
+.cdx-launch-steps--sheet .cdx-launch-steps__item { min-height: 52px; }
+
+/* ------------------------------------------------ the form: the one panel */
+.cdx-create-form { display: flex; min-width: 0; flex-direction: column; gap: 20px; }
+@media (min-width: 1024px) {
+  /* Content height (the footer follows the fields), up to the row; a long step scrolls inside, the footer stays. */
+  .cdx-create-form { align-self: start; max-height: 100%; min-height: 0; }
+  .cdx-launch-content { min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin: -4px; padding: 4px; }
+}
+.cdx-launch-step-head { display: flex; align-items: flex-start; gap: 16px; }
+.cdx-launch-step-head__text { display: flex; min-width: 0; flex: 1; flex-direction: column; align-items: flex-start; gap: 4px; }
+.cdx-launch-step-head__count {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-slate);
+  font-size: var(--text-caption);
+  line-height: 16px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  transition: color var(--t-hover) ease;
+}
+/* The step sheet's trigger: a caption that reaches the hit size without growing. */
+button.cdx-launch-step-head__count::before { content: ""; position: absolute; inset: calc((16px - var(--hit)) / 2) -8px; }
+button.cdx-launch-step-head__count { text-decoration: underline; text-decoration-color: var(--color-control-border); text-underline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) { button.cdx-launch-step-head__count:hover { color: var(--color-ink); } }
+@media (min-width: 1024px) {
+  button.cdx-launch-step-head__count { display: none; }
+}
+.cdx-launch-step-head__title { font-size: var(--text-title); line-height: 26px; font-weight: 600; color: var(--color-ink); text-wrap: balance; }
+.cdx-launch-step-head__title:focus { outline: none; }
+.cdx-launch-step-head__intro { font-size: var(--text-body); line-height: 20px; color: var(--color-slate); text-wrap: pretty; }
+.cdx-launch-progress--form { margin-top: -8px; }
+@media (min-width: 1024px) { .cdx-launch-progress--form { display: none; } }
+.cdx-launch-blocked { font-size: var(--text-body); line-height: 20px; color: var(--color-ink); }
+
+/* The small live card beside the step title (phones only: tablet and desktop show the stage). */
+.cdx-launch-thumb {
+  position: relative;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--radius-row);
+  color: var(--color-slate);
+  font-size: var(--text-caption);
+  line-height: 16px;
+  font-weight: 500;
+  transition: transform var(--t-press) var(--ease-out), color var(--t-hover) ease;
+}
+.cdx-launch-thumb__card { display: block; width: 64px; }
+.cdx-launch-thumb__card > .mdx-card { width: 100%; }
+.cdx-launch-thumb__label { text-decoration: underline; text-decoration-color: var(--color-control-border); text-underline-offset: 3px; }
+.cdx-launch-thumb:active { transform: scale(0.96); }
+@media (min-width: 768px) { .cdx-launch-thumb { display: none; } }
+
+/* ------------------------------------------------ the steps' fields */
+.cdx-launch-content { display: block; }
+.cdx-launch-step { display: grid; align-content: start; gap: 20px; }
+.cdx-launch .cdx-launch-description { min-height: 112px; }
+.cdx-launch-note { display: grid; gap: 4px; margin-top: -12px; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
+.cdx-launch-note__error { color: var(--color-down); }
+
+/* Artwork: a dropzone with the image (or its slot) and what it takes. */
+.cdx-launch .cdx-launch-art {
+  display: flex;
+  width: 100%;
+  min-height: 120px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  padding: 12px;
+  border-radius: var(--radius-pop);
+  text-align: left;
+  place-items: initial;
+}
+.cdx-launch-art__frame {
+  display: grid;
+  width: 96px;
+  height: 96px;
+  flex: none;
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--radius-row);
+  background: var(--color-track);
+  color: var(--color-ink);
+}
+/* Preparing: the slot is a flat bar at the image's size (no shimmer gradient). */
+.cdx-launch-art__frame[data-busy] { background: var(--color-raised); }
+.cdx-launch-art__image { width: 100%; height: 100%; object-fit: cover; outline: 1px solid var(--image-outline); outline-offset: -1px; border-radius: inherit; }
+.cdx-launch-art__copy { display: grid; min-width: 0; gap: 4px; }
+.cdx-launch-art__copy strong { font-size: var(--text-body); line-height: 20px; font-weight: 600; color: var(--color-ink); }
+.cdx-launch-art__copy > span { font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+.cdx-launch .cdx-launch-art:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; }
+.cdx-launch .cdx-launch-art:disabled { cursor: not-allowed; opacity: 0.6; }
+@media (hover: hover) and (pointer: fine) {
+  .cdx-launch .cdx-launch-art:hover:not(:disabled) { border-color: var(--color-slate); background: var(--color-raised); }
+}
+
+/* ------------------------------------------------ the review: what you chose, then the cost */
+.cdx-launch-commit { gap: 24px; }
+.cdx-launch-review { display: grid; min-width: 0; gap: 12px; }
+.cdx-launch-section { font-size: var(--text-lead); line-height: 24px; font-weight: 600; color: var(--color-ink); }
+.cdx-launch-section-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+/* Key-value rows: label, value (right edge), and the Edit action in one fixed trailing column. */
+.cdx-launch-summary { display: grid; grid-template-columns: minmax(84px, auto) minmax(0, 1fr) auto; column-gap: 16px; }
+.cdx-launch-summary > div { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; min-height: var(--hit); align-items: center; border-bottom: 1px solid var(--color-rule); }
+.cdx-launch-summary > div:last-child { border-bottom: 0; }
+.cdx-launch-summary dt { font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
+.cdx-launch-summary dd { display: flex; min-width: 0; justify-content: flex-end; font-size: var(--text-body); line-height: 20px; color: var(--color-ink); text-align: right; }
+.cdx-launch-summary__clip { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cdx-launch-summary__thumb { display: block; width: 40px; height: 40px; border-radius: 4px; object-fit: cover; outline: 1px solid var(--image-outline); outline-offset: -1px; }
+.cdx-launch-summary > div:has(.cdx-launch-summary__thumb) { min-height: 56px; }
+.cdx-launch-summary__missing { color: var(--color-down); font-weight: 500; }
+.cdx-launch-summary__none { color: var(--color-slate); }
+.cdx-launch-summary__edit .mdx-link { font-size: var(--text-body); }
+
+/* Cost: line items right-aligned on one edge, the total under a hairline. */
+.cdx-launch-cost { display: grid; min-width: 0; }
+.cdx-launch-cost > div { display: flex; min-height: 36px; align-items: baseline; justify-content: space-between; gap: 16px; padding-block: 8px; }
+.cdx-launch-cost dt { min-width: 0; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
+.cdx-launch-cost dd { min-width: 0; flex: none; font-size: var(--text-body); line-height: 20px; color: var(--color-ink); text-align: right; font-variant-numeric: tabular-nums; }
+.cdx-launch-cost > div[data-total] { margin-top: 4px; border-top: 1px solid var(--color-hairline); padding-top: 12px; }
+.cdx-launch-cost > div[data-total] :is(dt, dd) { color: var(--color-ink); font-weight: 600; }
+.cdx-launch-cost__plus { color: var(--color-slate); font-weight: 500; }
+.cdx-launch-fee-note,
+.cdx-launch-demo-note,
+.cdx-launch-rules { font-size: var(--text-body); line-height: 20px; color: var(--color-slate); text-wrap: pretty; }
+.cdx-launch-fee-note { color: var(--color-ink); }
+.cdx-launch-live-skeleton { height: 320px; border-radius: var(--radius-row); }
+
+/* ------------------------------------------------ Start over (asked in place of the step) */
+.cdx-launch-reset { display: grid; gap: 8px; padding: 16px; border-radius: var(--radius-row); background: var(--color-nested); }
+.cdx-launch-reset__q { font-size: var(--text-lead); line-height: 24px; font-weight: 600; color: var(--color-ink); }
+.cdx-launch-reset__note { font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
+.cdx-launch-reset__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+/* The destructive answer sits on the nested box, so its pill takes the next lightness step. */
+.cdx-launch-reset .mdx-btn--danger { background: var(--color-raised); }
+
+/* ------------------------------------------------ the footer: Back left, the step's one primary right */
+.cdx-launch-step-footer { display: grid; flex: none; gap: 12px; padding-top: 16px; border-top: 1px solid var(--color-hairline); }
+.cdx-launch-step-footer__row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+/* The total, on the footer beside the button that pays it, so it is in view on every screen. */
+.cdx-launch-total { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; font-size: var(--text-lead); line-height: 24px; font-weight: 600; color: var(--color-ink); }
+.cdx-launch-total .mdx-unit { font-size: var(--text-body); font-weight: 500; }
+.cdx-launch-step-footer__end { display: flex; min-width: 0; align-items: center; justify-content: flex-end; gap: 16px; }
+.cdx-launch-skip { font-size: var(--text-body); white-space: nowrap; }
+@media (max-width: 1023.98px) {
+  /* The page grows with its step (no clipped fields), and the footer stays in reach at the bottom of the screen
+   * while a long step scrolls under it. */
+  .cdx-app.cdx-viewport .cdx-viewport-main > .cdx-launch { height: auto; min-height: 100%; }
+  .cdx-launch-step-footer {
+    position: sticky;
+    /* A sticky box stops at main's content edge; -16px (main's bottom padding) takes it down to the tab bar. */
+    bottom: -16px;
+    z-index: 1;
+    margin: 0 calc(var(--pad-panel) * -1) calc(var(--pad-panel) * -1);
+    padding: 12px var(--pad-panel) max(12px, env(safe-area-inset-bottom));
+    border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+    background: var(--color-surface);
+  }
+}
+@media (max-width: 767.98px) {
+  /* Phones: one column, and a short step's panel fills the screen so Back and Next sit at its foot. */
+  .cdx-launch-grid { display: flex; flex-direction: column; }
+  .cdx-create-form { flex: 1; }
+  .cdx-launch-content { flex: 1; }
+  .cdx-launch .cdx-create-preview { display: none; }
+}
+/* Landscape phones: the step rail beside the form (the width is there, the height is not); the card stays as the
+ * small face in the step head. */
+@media (min-width: 560px) and (max-width: 1023.98px) and (max-height: 500px) {
+  .cdx-launch-grid { display: grid; grid-template-columns: minmax(168px, 200px) minmax(0, 1fr); }
+  .cdx-launch-steps { display: flex; flex-direction: column; gap: 12px; padding-top: 4px; }
+  .cdx-launch .cdx-create-preview { display: none; }
+  .cdx-launch-thumb { display: flex; }
+  button.cdx-launch-step-head__count { display: none; }
+  .cdx-launch-progress--form { display: none; }
+  .cdx-launch-steps__item { min-height: 44px; }
+  /* Height is what is short: the step head drops its intro line and the card face shrinks. */
+  .cdx-launch { gap: 12px; }
+  .cdx-launch-grid { gap: 16px; }
+  .cdx-create-form { gap: 12px; }
+  .cdx-launch-step-head__intro { display: none; }
+  .cdx-launch-thumb__card { width: 40px; }
+  .cdx-launch-thumb__label { display: none; }
+  .cdx-launch-step-footer { padding-block: 8px; }
+  .cdx-launch-step-footer, .cdx-launch-step-footer__row { gap: 8px; }
+  .cdx-launch-total { font-size: var(--text-body); line-height: 20px; }
+}
+/* The shortest phones held sideways (568x320): the top bar steps aside so a field and the footer fit, as on the
+ * Designs library (carddex-viewport.css). */
+@media (min-width: 560px) and (max-width: 1023.98px) and (max-height: 360px) {
+  .cdx-viewport:has(.cdx-launch) .cdx-topbar { display: none; }
+}
+@media (max-width: 380px) {
+  .cdx-launch-step-footer__end { gap: 12px; }
+  .cdx-launch-summary { column-gap: 12px; }
+}
+
+/* ------------------------------------------------ the card's stage: a calm ground, the card and its controls */
 .cdx-create-preview {
-  --cw: var(--cw-lg);
-  grid-column: 2;
-  grid-row: 1;
+  --cw: min(calc(100cqw - 48px), 300px);
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  container-type: inline-size;
+}
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .cdx-create-preview { position: sticky; top: 0; padding-top: 8px; }
+}
+@media (min-width: 1024px) {
+  .cdx-create-preview {
+    /* Room above and below for the card's turn (its projection swings past its box) and the control row. */
+    --cw: min(calc(100cqw - 64px), calc((100cqh - 150px) * 0.7159), 420px);
+    height: 100%;
+    min-height: 0;
+    justify-content: center;
+    container-type: size;
+  }
+}
+.cdx-launch-card { position: relative; width: 100%; }
+.cdx-launch-card .cdx-hero-turntable { width: 100%; }
+.cdx-launch-card .mdx-card3d { width: var(--cw); margin-inline: auto; }
+.cdx-hero-turntable--viewport .mdx-card3d { perspective: 4000px; }
+/* The calm stage: no rainbow pool or prism ring behind the launch card; it stands on the ground with its own
+ * contact shadow. !important: the halo is painted by the unlayered card3d.css, which a layered rule cannot beat. */
+.cdx-launch-card .mdx-card3d__halo { display: none !important; }
+.cdx-launch-card__inspect > svg { flex: none; }
+.cdx-create-preview__note { font-size: var(--text-caption); line-height: 16px; color: var(--color-placeholder); text-align: center; }
+
+/* ------------------------------------------------ the design picker (Card design step) and its library dialog */
+.cdx-design-picker { display: grid; min-width: 0; justify-items: start; gap: 0; }
+.cdx-design-picker > .mdx-label { margin-bottom: 8px; }
+.cdx-design-picker__help { margin-top: 8px; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); text-wrap: pretty; }
+.cdx-design-picker__browse { margin-top: 16px; }
+.cdx-design-picker .cdx-pair-badge { width: 100%; }
+.mdx-dialog:has(.cdx-design-browser) { height: min(720px, calc(var(--cdx-app-height, 100dvh) - 32px)); }
+.cdx-design-browser { display: flex; flex: 1; min-height: 0; flex-direction: column; gap: 16px; }
+.cdx-design-browser__chips { flex: none; margin-inline: -4px; padding: 4px; }
+.cdx-design-browser__filter { display: grid; flex: none; gap: 0; max-width: 360px; }
+.cdx-design-browser__grid {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  gap: 12px;
+  padding: 4px;
+  grid-template-columns: repeat(var(--design-columns, 1), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--design-rows, 1), minmax(0, 1fr));
+}
+.cdx-design-browser__choice {
+  position: relative;
   display: flex;
   min-width: 0;
   min-height: 0;
   flex-direction: column;
-  container-type: size;
-  padding-top: 24px;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-}
-.cdx-create-preview__card {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  align-items: end;
+  align-items: center;
   justify-content: center;
+  gap: 8px;
+  padding: 12px 8px;
+  border-radius: var(--radius-row);
+  background: transparent;
+  color: var(--color-ink);
+  container-type: size;
+  transition: background-color var(--t-hover) ease;
 }
-.cdx-create-preview__picker {
-  width: min(calc(100% - 32px), 400px);
-  min-height: var(--cap);
-  flex: none;
-  align-self: center;
-  padding-top: 20px;
+.cdx-design-browser__choice[aria-pressed="true"] { background: var(--color-nested); outline: 2px solid var(--color-ink); outline-offset: -2px; }
+.cdx-design-browser__choice:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; }
+.cdx-design-browser__choice:disabled { cursor: not-allowed; opacity: 0.5; }
+@media (hover: hover) and (pointer: fine) {
+  .cdx-design-browser__choice:not([aria-pressed="true"]):hover:not(:disabled) { background: var(--color-track); }
 }
-.cdx-create-preview .cdx-hero-turntable__controls {
+.cdx-design-browser__art { flex: none; width: min(160px, 84cqw, calc((100cqh - 74px) * 0.715909)); }
+.cdx-design-browser__art > .mdx-card { width: 100%; }
+.cdx-design-browser__choice > strong { display: block; flex: none; width: 100%; min-height: 2.6em; color: var(--color-ink); font-size: var(--text-caption); line-height: 16px; font-weight: 600; overflow-wrap: anywhere; text-align: center; }
+.cdx-design-browser__quote { flex: none; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); white-space: nowrap; }
+.cdx-design-browser__quote[data-bound="true"] { color: var(--color-ink); font-weight: 500; }
+.cdx-design-browser__meta { display: flex; flex: none; min-height: 20px; align-items: center; justify-content: center; gap: 6px; }
+.cdx-design-browser .cdx-page-controls { gap: 8px; }
+@media (max-width: 560px) {
+  .cdx-design-browser { gap: 12px; }
+  .cdx-design-browser__grid { gap: 8px; }
+  .cdx-design-browser__choice { padding: 8px 4px; }
+}
+@media (max-height: 440px) {
+  .cdx-design-browser { gap: 8px; }
+  .cdx-design-browser__choice { gap: 4px; padding: 4px; }
+  .cdx-design-browser__art { width: min(100px, 70cqw, calc((100cqh - 68px) * 0.715909)); }
+}
+@media (min-width: 560px) and (max-height: 440px) {
+  .cdx-design-browser__choice { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: 1fr 1fr; align-items: center; gap: 4px 8px; padding: 8px; }
+  .cdx-design-browser__choice:only-child { grid-template-columns: auto auto; justify-content: center; }
+  .cdx-design-browser__art { grid-column: 1; grid-row: 1 / -1; width: min(72px, 36cqw, calc((100cqh - 12px) * 0.715909)); }
+  .cdx-design-browser__choice > strong { grid-column: 2; grid-row: 1; align-self: end; min-height: 0; text-align: left; }
+  .cdx-design-browser__meta { grid-column: 2; grid-row: 2; align-self: start; justify-content: flex-start; max-width: 100%; }
+  .cdx-design-browser__quote { white-space: normal; }
+}
+
+/* ------------------------------------------------ the pair picker (Pair step; also the Designs pair tab) */
+.cdx-app .cdx-library .cdx-pair-picker { min-width: 0; }
+.cdx-pair-picker { display: grid; min-width: 0; gap: 0; }
+.cdx-pair-picker__head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 8px; }
+.cdx-pair-picker__head .mdx-label { margin: 0; }
+.cdx-pair-picker__head > span { font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+.cdx-pair-picker__hint { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin-top: 8px; font-size: var(--text-body); line-height: 20px; }
+.cdx-pair-picker__hint strong { color: var(--color-ink); font-weight: 600; }
+.cdx-pair-picker__hint > span,
+.cdx-pair-picker__binding { color: var(--color-slate); }
+.cdx-pair-picker__binding,
+.cdx-pair-design-match { margin-top: 8px; font-size: var(--text-body); line-height: 20px; }
+.cdx-pair-design-match { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; color: var(--color-slate); }
+.cdx-pair-design-match strong { min-width: 0; overflow-wrap: anywhere; color: var(--color-ink); font-weight: 600; }
+.cdx-pair-matching { min-width: 0; margin-top: 16px; }
+.cdx-pair-matching__toggle {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: var(--hit);
+  align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  padding-top: 10px;
+  border-top: 1px solid var(--color-hairline);
+  color: var(--color-ink);
+  font-size: var(--text-body);
+  font-weight: 500;
+  text-align: left;
+  transition: color var(--t-hover) ease;
 }
-.cdx-create-preview .cdx-design-picker p {
-  font-size: var(--type-min);
-}
-.cdx-create-preview .cdx-design-picker label {
-  font-size: 12px;
-}
-.cdx-create-preview .cdx-design-picker select {
-  font-size: 14px;
-}
-@media (min-width: 1024px) and (max-height: 800px) {
-  .cdx-create-preview {
-    padding-top: 16px;
-  }
-  .cdx-create-preview__picker {
-    padding-top: 14px;
-  }
-}
-@media (max-width: 1023px) {
-  .cdx-create-layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto;
-  }
-  .cdx-create-form {
-    grid-row: 1;
-    grid-column: 1;
-    overflow: visible;
-  }
-  .cdx-create-preview {
-    display: none;
-  }
-}
+.cdx-pair-matching__toggle > svg { flex: none; transition: transform var(--t-fast) var(--ease-in-out); }
+.cdx-pair-matching__toggle[aria-expanded="true"] > svg { transform: rotate(180deg); }
+.cdx-pair-matching__toggle:focus-visible { outline-offset: 2px; }
+.cdx-pair-matching__toggle:disabled { cursor: not-allowed; color: var(--color-slate); }
+.cdx-pair-matching__body { display: grid; justify-items: start; gap: 12px; padding: 4px 0 8px; }
+.cdx-pair-matching__body p { font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
+.cdx-pair-matching__body > button { max-width: 100%; }
+.cdx-pair-picker--viewport { margin: 0; padding: 0; border: 0; }
+.cdx-pair-picker--viewport .cdx-pair-design-match,
+.cdx-pair-picker--viewport .cdx-pair-matching { margin-top: 12px; }
 
-/* ---- moved from carddex-launch.css (whole file, same order) */
-/* The launch desk: compact particulars beside one complete, full-size trading card. */
-.cdx-launch { gap:18px; }
-.cdx-launch > header { min-height:50px; }
-.cdx-launch .cdx-launch-mode { margin:0; gap:2px; padding:3px; border:1px solid var(--color-hairline); border-radius:10px; background:var(--color-nested); }
-.cdx-launch .cdx-launch-mode a { min-height:32px; padding:5px 12px; border:0; border-radius:7px; white-space:nowrap; }
-.cdx-launch .cdx-launch-mode a[aria-current] { box-shadow:0 1px 3px rgb(72 47 9 / .12); }
-.cdx-launch .cdx-create-layout { grid-template-columns:minmax(300px,1fr) minmax(0,2fr); gap:24px; }
-.cdx-launch .cdx-create-form { display:flex; flex-direction:column; gap:16px; padding:20px; }
-.cdx-launch-fields { display:grid; gap:12px; }
-.cdx-launch-identity { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.7fr); gap:12px; }
-.cdx-launch .mdx-input { min-height:40px; height:40px; padding-block:8px; font-size:14px; line-height:1.4; }
-.cdx-launch .cdx-launch-description { min-height:84px; height:84px; resize:vertical; }
-.cdx-launch .cdx-launch-art { position:relative; display:flex; align-items:center; gap:12px; width:100%; min-height:68px; padding:7px; text-align:left; }
-.cdx-launch-art__image,.cdx-launch-art__add { flex:none; width:50px; height:50px; border-radius:6px; object-fit:cover; }
-.cdx-launch-art__add { display:grid; place-items:center; background:rgb(212 165 52 / .12); font-size:27px; font-weight:300; }
-.cdx-launch-art__copy { display:grid; min-width:0; gap:3px; }
-.cdx-launch-art__copy strong { font-size:12px; font-weight:600; }
-.cdx-launch-art__copy > span { font-size:var(--type-min); color:var(--color-slate); }
-.cdx-launch .cdx-design-picker--compact > div { margin-bottom:4px; }
-.cdx-launch .cdx-design-picker--compact a { min-height:24px; }
-.cdx-launch .cdx-pair-picker { margin-top:0; padding-top:10px; }
-.cdx-launch .cdx-pair-picker__head { margin-bottom:5px; }
-.cdx-launch .cdx-pair-picker__hint { margin-top:5px; }
-.cdx-launch .cdx-pair-details { margin-top:0; }
-.cdx-launch .cdx-pair-details summary { min-height:30px; }
-.cdx-launch .cdx-pair-picker--compact .cdx-pair-picker__hint > span { display:inline; font-size:var(--type-min); }
-.cdx-launch-options { min-width:0; border-top:1px solid var(--color-hairline); }
-.cdx-launch-options > summary,.cdx-live-options > summary { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:38px; font-size:12px; font-weight:600; cursor:pointer; list-style:none; }
-.cdx-launch-options > summary::-webkit-details-marker,.cdx-live-options > summary::-webkit-details-marker,.cdx-live-readiness > summary::-webkit-details-marker { display:none; }
-.cdx-launch-options[open] > summary > span,.cdx-live-options[open] > summary > span { transform:rotate(45deg); }
-.cdx-launch-options__body { display:grid; gap:14px; padding:8px 0 6px; }
-.cdx-launch-initial { display:grid; gap:6px; }
-.cdx-launch #dev-note { font-size:var(--type-min); }
-.cdx-launch-commit { display:grid; gap:9px; margin-top:auto; }
-.cdx-launch-rules { font-size:var(--type-min); line-height:1.5; color:var(--color-slate); }
-.cdx-launch .cdx-live-panel { gap:8px; font-size:12px; }
-.cdx-launch .cdx-live-actions > button,.cdx-launch .cdx-launch-commit > .mdx-btn { min-height:40px; height:auto; padding-block:9px; }
-.cdx-launch .cdx-live-check { font-size:var(--type-min); }
-.cdx-launch .cdx-live-check input { width:16px; height:16px; }
-.cdx-launch .cdx-live-slippage { align-items:center; justify-content:space-between; }
-.cdx-launch .cdx-live-slippage select { width:90px; }
-.cdx-launch .cdx-live-options > summary { min-height:30px; font-weight:400; color:var(--color-slate); font-size:var(--type-min); }
-.cdx-launch .cdx-live-options > div { display:grid; gap:10px; padding:5px 0 8px; }
-.cdx-launch .cdx-live-readiness { border:1px solid var(--color-control-border); border-radius:8px; background:var(--color-nested); }
-.cdx-launch .cdx-live-readiness > summary { display:flex; align-items:center; justify-content:space-between; min-height:34px; padding:6px 10px; list-style:none; cursor:pointer; font-size:var(--type-min); font-weight:600; }
-.cdx-launch .cdx-live-readiness > div { display:grid; gap:6px; padding:2px 10px 10px; font-size:var(--type-min); overflow-wrap:anywhere; }
-.cdx-launch .cdx-create-preview { --cw:min(calc(100cqw - 64px),calc((100cqh - 72px) * .715909),540px); display:flex; justify-content:center; padding:14px 0 10px; container-type:size; }
-.cdx-launch-card { position:relative; width:min(100%,max(var(--cw),340px)); margin-inline:auto; padding:0; }
-.cdx-launch-card .cdx-hero-turntable { width:100%; }
-.cdx-launch-card .mdx-card3d { width:var(--cw); margin-inline:auto; }
-.cdx-launch .cdx-launch-card .cdx-hero-turntable__controls { flex-wrap:nowrap; justify-content:center; width:min(100%,320px); margin-inline:auto; gap:8px; padding:18px 0 0; }
-.cdx-launch .cdx-launch-card .cdx-hero-turntable__controls button,.cdx-launch-card__inspect { min-height:40px; padding:7px 11px; border:1px solid var(--color-hairline); border-radius:8px; background:var(--color-nested); color:var(--color-ink); font-size:var(--type-min); line-height:1.4; white-space:nowrap; }
-.cdx-launch-card__inspect:focus-visible { outline:2px solid var(--color-zap); outline-offset:3px; }
-@media(hover:hover) {
-  .cdx-launch-card__inspect:hover { background:var(--color-raised); border-color:var(--color-control-border); }
+/* The mint and the terms behind one disclosure. */
+.cdx-pair-details { min-width: 0; margin-top: 16px; }
+.cdx-pair-disclosure { min-width: 0; margin-top: 16px; border-top: 1px solid var(--color-hairline); }
+.cdx-pair-details > .cdx-pair-disclosure { margin-top: 0; }
+.cdx-pair-disclosure > summary {
+  display: flex;
+  min-height: var(--hit);
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--color-ink);
+  font-size: var(--text-body);
+  font-weight: 500;
+  list-style: none;
+  cursor: pointer;
 }
-@media(min-width:1024px) and (max-width:1200px) {
-  .cdx-launch .cdx-create-layout { grid-template-columns:minmax(300px,1fr) minmax(0,1.65fr); gap:18px; }
-  .cdx-launch .cdx-create-form { padding:16px; }
-}
-@media(max-width:1023px) {
-  .cdx-launch { gap:18px; }
-  .cdx-launch .cdx-create-layout { grid-template-columns:1fr; grid-template-rows:auto auto; gap:18px; }
-  .cdx-launch .cdx-create-form { grid-column:1; grid-row:2; overflow:visible; gap:18px; padding:18px; }
-  .cdx-launch .cdx-create-preview { --cw:clamp(220px,58vw,290px); grid-column:1; grid-row:1; display:block; container-type:normal; padding:8px 0 0; }
-  .cdx-launch-card { width:min(100%,340px); max-width:340px; padding-inline:0; }
-  .cdx-launch .mdx-input { min-height:44px; height:44px; font-size:16px; }
-  .cdx-launch .cdx-launch-description { min-height:84px; height:84px; }
-  .cdx-launch .cdx-launch-card .cdx-hero-turntable__controls { padding-top:14px; gap:8px; }
-  .cdx-launch .cdx-launch-card .cdx-hero-turntable__controls button,.cdx-launch-card__inspect { min-height:44px; padding:9px 10px; }
-  .cdx-launch .cdx-live-actions > button { min-height:44px; }
-  .cdx-launch .cdx-pair-details summary { min-height:38px; }
-  .cdx-launch .cdx-launch-mode a { min-height:36px; }
-  .cdx-launch-options > summary { min-height:44px; }
-}
-@media(max-width:380px) {
-  .cdx-launch .cdx-create-form { padding:14px; }
-  .cdx-launch > header { gap:10px; }
-  .cdx-launch > header h1 { font-size:27px; }
-  .cdx-launch .cdx-pair-picker__head > span { font-size:var(--type-min); }
-  .cdx-launch-art__copy > span { font-size:var(--type-min); }
-}
+.cdx-pair-disclosure > summary::-webkit-details-marker { display: none; }
+.cdx-pair-disclosure > summary > svg { flex: none; transition: transform var(--t-fast) var(--ease-in-out); }
+.cdx-pair-disclosure[open] > summary > svg { transform: rotate(180deg); }
+.cdx-pair-details__body { display: grid; gap: 8px; padding: 12px; border-radius: var(--radius-row); background: var(--color-nested); font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
+.cdx-pair-details__label { margin-top: 4px; font-size: var(--text-caption); line-height: 16px; }
+.cdx-pair-mint { display: inline-flex; max-width: 100%; align-items: flex-start; gap: 4px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.cdx-pair-mint > span { min-width: 0; }
+.cdx-pair-mint > svg,
+.cdx-pair-details__links .mdx-link > svg { flex: none; margin-top: 4px; }
+.cdx-pair-details__links { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-block: 4px; }
+.cdx-pair-details__links .mdx-link,
+.cdx-live-stage__links .mdx-link,
+.cdx-live-block .mdx-link { display: inline-flex; align-items: center; gap: 4px; }
+.cdx-pair-details__links .mdx-link > svg,
+.cdx-live-stage__links .mdx-link > svg { margin-top: 0; }
 
-/* A creation desk fits the available screen; each field and review has an explicit page. */
-.cdx-launch { height:100%; min-height:0; gap:12px; }
-.cdx-launch [hidden],.cdx-live-panel [hidden] { display:none!important; }
-.cdx-launch .cdx-create-layout { flex:1; min-height:0; overflow:clip; }
-.cdx-launch .cdx-create-form { min-height:0; padding:18px; gap:12px; overflow:clip; }
-.cdx-launch-step-head { display:flex; flex:none; align-items:center; gap:12px; padding-bottom:10px; border-bottom:1px solid var(--color-hairline); }
-.cdx-launch-step-head > label { color:var(--color-slate); font-size:var(--type-min); white-space:nowrap; font-variant-numeric:tabular-nums; }
-.cdx-launch-step-head select { width:100%; min-width:0; min-height:36px; background:transparent; color:var(--color-ink); font-size:15px; font-weight:600; }
-.cdx-launch-step-head .cdx-launch-start-over { flex:none; min-height:44px; padding-inline:4px; font-size:13px; white-space:nowrap; }
-@media (pointer: fine) { .cdx-launch-step-head .cdx-launch-start-over { min-height:40px; } }
-/* The in-page Start over check: a question and two answers on the form's paper, no extra panel. */
-.cdx-launch-reset { display:flex; flex:none; flex-wrap:wrap; align-items:center; gap:8px; padding:10px 12px; border-radius:var(--radius-row); background:var(--color-plinth); }
-.cdx-launch-reset > p { flex:1 1 100%; margin:0; font-size:13px; line-height:1.4; color:var(--color-ink); }
-.cdx-launch-reset > button { min-height:44px; padding-inline:12px; font-size:12px; }
-@media (pointer: fine) { .cdx-launch-reset > button { min-height:40px; } }
-.cdx-launch-content { flex:1; min-height:0; }
-.cdx-launch-fields,.cdx-launch-step,.cdx-launch-links { display:grid; align-content:start; gap:14px; }
-.cdx-launch .cdx-launch-identity { grid-template-columns:1fr; gap:14px; }
-.cdx-launch-step-copy { font-size:12px; line-height:1.5; color:var(--color-slate); }
-.cdx-launch .cdx-launch-description { height:120px; min-height:80px; max-height:120px; resize:none; }
-.cdx-launch-step-footer { display:flex; flex:none; justify-content:space-between; gap:8px; padding-top:10px; border-top:1px solid var(--color-hairline); }
-.cdx-launch-step-footer > button { min-height:40px; padding-inline:12px; font-size:12px; }
-.cdx-launch .cdx-launch-commit { margin-top:0; gap:8px; }
-.cdx-launch .cdx-launch-rules { display:block; margin:0; font-size:var(--type-min); }
-.cdx-launch-show-card { display:none; }
-.cdx-launch .cdx-live-panel { gap:8px; }
-.cdx-launch .cdx-create-preview { height:100%; min-height:0; align-items:center; --cw:min(calc(100cqw - 60px),calc((100cqh - 110px) * .66),500px); padding:20px 0 30px; }
-.cdx-launch .cdx-launch-card { width:min(100%,max(var(--cw),300px)); max-width:none; }
-.cdx-launch .cdx-launch-card .cdx-hero-turntable { padding-block:0; }
-.cdx-launch-mobile-tabs { display:none; }
-.cdx-pair-picker--viewport { display:grid; gap:8px; margin:0; padding:0; border:0; font-size:12px; }
-.cdx-pair-picker--viewport .cdx-pair-details__body { display:grid; gap:8px; font-size:12px; }
-.cdx-pair-picker--viewport .cdx-pair-mint { white-space:normal; overflow-wrap:anywhere; font-size:var(--type-min); }
-.cdx-pair-picker--viewport .cdx-pair-change { margin:0; padding:10px; gap:8px; }
-.cdx-pair-picker--viewport .cdx-pair-change__actions { flex-wrap:nowrap; gap:5px; }
-.cdx-pair-picker--viewport .cdx-pair-change__actions button { min-height:40px; padding:7px 8px; font-size:var(--type-min); }
-.cdx-pair-picker--viewport .cdx-pair-picker__hint { margin:0; }
-.cdx-pair-picker--viewport .cdx-pair-picker__binding { margin:0; font-size:var(--type-min); }
-@media(max-width:1023px) {
-  .cdx-launch { gap:8px; }
-  .cdx-launch > header { min-height:0; gap:6px; align-items:center; }
-  .cdx-launch > header h1 { font-size:24px; }
-  .cdx-launch > header p { display:none; }
-  .cdx-launch > header > div:last-child { width:auto; }
-  .cdx-launch .cdx-launch-mode a { min-height:32px; padding:5px 8px; font-size:var(--type-min); }
-  .cdx-launch-show-card { display:inline-flex; }
-  .cdx-launch-mobile-tabs { display:flex; flex:none; align-items:center; gap:6px; }
-  .cdx-launch-mobile-tabs > button { flex:1; min-height:44px; border-radius:8px; border:1px solid var(--color-hairline); background:var(--color-nested); color:var(--color-slate); font-size:12px; }
-  .cdx-launch-mobile-tabs > button[aria-selected=true] { color:var(--color-ink); background:var(--color-raised); border-color:var(--color-control-border); font-weight:600; }
-  .cdx-launch .cdx-create-layout { display:flex; min-height:0; height:100%; gap:0; }
-  .cdx-launch .cdx-create-form { width:100%; min-height:0; gap:10px; padding:12px; overflow:clip; }
-  .cdx-launch--card .cdx-create-form,.cdx-launch--details .cdx-create-preview { display:none; }
-  .cdx-launch .cdx-create-preview { display:flex; flex:1; width:100%; min-height:0; padding:10px 0 20px; container-type:size; --cw:min(calc(100cqw - 55px),calc((100cqh - 96px) * .66),330px); }
-  .cdx-launch .cdx-launch-card { width:min(100%,max(var(--cw),300px)); }
-  .cdx-launch-step-head { padding-bottom:4px; }
-  .cdx-launch-step-head select { min-height:36px; font-size:16px; }
-  .cdx-launch-step-footer { padding-top:6px; }
-  .cdx-launch-step-footer > button { min-height:40px; }
-  .cdx-launch .cdx-launch-identity { gap:10px; }
-  .cdx-launch .cdx-launch-fields,.cdx-launch .cdx-launch-step { gap:10px; }
-  .cdx-launch .cdx-live-check { font-size:var(--type-min); }
-  .cdx-launch .cdx-live-actions > button { min-height:40px; }
-  .cdx-launch .cdx-launch-commit { gap:6px; }
-}
-@media(max-width:380px) {
-  .cdx-launch > header h1 { font-size:21px; }
-  .cdx-launch .cdx-create-form { padding:9px; gap:7px; }
-  .cdx-launch .cdx-launch-mode a { min-height:30px; padding:4px 7px; }
-  .cdx-launch .cdx-launch-description { height:90px; }
-}
-@media(max-height:650px) and (min-width:1024px) { .cdx-launch .cdx-create-form { padding:12px; gap:8px; } }
-/* Hide the alternate phone view after all preview layout rules. */
-@media(max-width:1023px) {
-  .cdx-launch.cdx-launch--card .cdx-create-form,.cdx-launch.cdx-launch--details .cdx-create-preview { display:none; }
-  .cdx-launch .cdx-live-pane > .mdx-btn { min-height:40px; height:auto; padding-block:8px; }
-}
-/* Landscape phones keep the design browser entry within the creation desk. */
-@media(min-width:560px) and (max-width:1023px) and (max-height:440px) {
- .cdx-viewport:has(.cdx-launch) .cdx-topbar { display:none; }
- .cdx-launch { position:relative; }
- .cdx-launch > header { min-height:44px; flex-wrap:nowrap; align-items:center; }
- .cdx-launch > header h1 { font-size:22px; white-space:nowrap; }
- .cdx-launch-mobile-tabs { position:absolute; top:0; left:150px; right:150px; }
- .cdx-launch-mobile-tabs > button { min-height:44px; }
- .cdx-launch .cdx-create-form { display:grid; grid-template-columns:140px minmax(0,1fr); grid-template-rows:auto minmax(0,1fr); padding:8px; gap:6px 12px; }
- .cdx-launch-step-head { grid-column:1; grid-row:1; min-width:0; flex-wrap:wrap; gap:4px 6px; padding:0; border:0; }
- .cdx-launch-step-head select { flex:1 1 0; width:auto; min-height:44px; }
- /* Start over takes its own line under the step menu, so the step name keeps the column's width. */
- .cdx-launch-step-head .cdx-launch-start-over { flex:1 1 100%; text-align:left; }
- .cdx-launch-content { grid-column:2; grid-row:1 / -1; }
- /* The reset question takes the content column's place until it is answered. */
- .cdx-launch .cdx-launch-reset { grid-column:2; grid-row:1 / -1; align-self:start; position:relative; z-index:1; }
- .cdx-launch .cdx-create-form:has(> .cdx-launch-reset) > .cdx-launch-content { visibility:hidden; }
- .cdx-launch-step-footer { grid-column:1; grid-row:2; flex-direction:column; justify-content:flex-end; padding:0; border:0; }
- .cdx-launch-step-footer > button { flex:none; width:100%; min-height:44px; padding-inline:8px; }
- .cdx-launch .cdx-launch-identity,.cdx-launch .cdx-launch-links { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
- .cdx-launch .cdx-launch-description { height:80px; min-height:60px; max-height:80px; }
- .cdx-launch .cdx-launch-fields,.cdx-launch .cdx-launch-step { gap:6px; }
- .cdx-launch .cdx-launch-cost { padding:0; font-size:var(--type-min); line-height:1.35; }
- .cdx-launch .cdx-launch-cost small { font-size:var(--type-min); line-height:1.3; }
- .cdx-launch .cdx-launch-commit { gap:4px; }
- .cdx-launch .cdx-launch-commit > .mdx-btn { min-height:44px; }
- .cdx-launch .cdx-launch-commit > p:last-child { margin:0; font-size:var(--type-min); line-height:1.35; }
- .cdx-launch .cdx-pair-picker--viewport { grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:4px 8px; padding:0; }
- .cdx-launch .cdx-pair-picker--viewport > .cdx-launch-subtabs { grid-column:1 / -1; }
- .cdx-launch .cdx-pair-picker--viewport > .cdx-launch-subtabs button { min-height:44px; }
- /* The Pair pane's controls sit in a display:contents tabpanel, so they are grid items of the picker too. */
- .cdx-launch :is(.cdx-pair-picker--viewport,.cdx-pair-picker--viewport > [role=tabpanel]) > .cdx-pair-picker__head { grid-column:1; margin:0; }
- .cdx-launch :is(.cdx-pair-picker--viewport,.cdx-pair-picker--viewport > [role=tabpanel]) > select { grid-column:1; }
- .cdx-launch :is(.cdx-pair-picker--viewport,.cdx-pair-picker--viewport > [role=tabpanel]) > .cdx-pair-picker__hint { grid-column:2; grid-row:2 / 4; align-content:center; }
- .cdx-launch :is(.cdx-pair-picker--viewport,.cdx-pair-picker--viewport > [role=tabpanel]) > .cdx-pair-design-match { grid-column:1 / -1; }
- .cdx-launch :is(.cdx-pair-picker--viewport,.cdx-pair-picker--viewport > [role=tabpanel]) > .cdx-pair-matching,.cdx-launch .cdx-pair-picker--viewport > .cdx-pair-details__body,.cdx-launch .cdx-pair-picker--viewport > .cdx-pair-change { grid-column:1 / -1; }
- .cdx-launch .cdx-pair-picker--viewport .cdx-pair-change { padding:6px; gap:4px; font-size:var(--type-min); }
- .cdx-launch .cdx-pair-picker--viewport .cdx-pair-change > label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
- .cdx-launch .cdx-pair-picker--viewport .cdx-pair-change > select,.cdx-launch .cdx-pair-picker--viewport .cdx-pair-change__actions { margin:0; }
- .cdx-launch .cdx-pair-picker--viewport .cdx-pair-change__actions > button { min-height:44px; }
- .cdx-launch .cdx-design-picker--compact { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:8px; }
- .cdx-launch .cdx-design-picker--compact > div:first-child { display:contents; }
- .cdx-launch .cdx-design-picker--compact label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
- .cdx-launch .cdx-design-picker--compact > select { grid-column:1; grid-row:1; min-height:44px; }
- .cdx-launch .cdx-design-picker--compact .cdx-design-picker__browse { grid-column:2; grid-row:1; min-height:44px; }
- .cdx-launch-step-copy { display:none; }
-}
-/* Below 360px of height the step column cannot stack Start over and both step buttons, so Back and Next share a row. */
-@media(min-width:560px) and (max-width:1023px) and (max-height:359px) {
- .cdx-launch .cdx-create-form:has(.cdx-launch-start-over) .cdx-launch-step-footer { flex-direction:row; align-items:flex-end; gap:4px; }
- .cdx-launch .cdx-create-form:has(.cdx-launch-start-over) .cdx-launch-step-footer > button { flex:1; width:0; min-width:0; white-space:normal; line-height:1.25; font-size:var(--type-min); }
-}
+/* Switching to a quote the design cannot use: the question, the compatible design, two answers. */
+.cdx-pair-change { display: grid; gap: 8px; padding: 16px; border-radius: var(--radius-row); background: var(--color-nested); font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
+.cdx-pair-change > p strong { color: var(--color-ink); }
+.cdx-pair-change > .mdx-label { margin: 8px 0 0; }
+.cdx-pair-change__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.cdx-pair-notice { font-size: var(--text-body); line-height: 20px; color: var(--color-ink); }
 
-/* ---- moved from carddex-pairs.css (whole file, same order) */
-/* Quote identity belongs to the surrounding collector interface, never a different card template. */
-.cdx-pair-picker { min-width:0; padding-top:14px; margin-top:4px; border-top:1px solid var(--color-hairline); }
-.cdx-pair-picker__head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px 12px; margin-bottom:7px; }
-.cdx-pair-picker__head label { font-size:13px; font-weight:600; }
-.cdx-pair-picker__head > span { font-size:var(--type-min); text-transform:uppercase; letter-spacing:.055em; color:var(--color-slate); }
-/* The viewport picker's Pair pane wraps its select in a display:contents tabpanel. */
-.cdx-pair-picker > select,.cdx-pair-picker > [role=tabpanel] > select { width:100%; min-height:44px; font-size:16px; text-overflow:ellipsis; }
-.cdx-pair-picker__hint { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:4px 12px; margin-top:8px; font-size:var(--type-min); line-height:1.5; }
-.cdx-pair-picker__hint strong { color:var(--color-ink); font-size:12px; }
-.cdx-pair-picker__hint > span,.cdx-pair-picker__binding { color:var(--color-slate); }
-.cdx-pair-picker__binding { margin-top:5px; font-size:var(--type-min); line-height:1.5; }
-.cdx-pair-design-match { display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 10px; margin-top:5px; font-size:var(--type-min); line-height:1.5; color:var(--color-slate); }
-.cdx-pair-design-match strong { min-width:0; overflow-wrap:anywhere; color:var(--color-ink); font-weight:600; }
-.cdx-pair-matching { min-width:0; margin-top:6px; }
-.cdx-pair-matching__toggle { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; min-height:44px; padding:5px 0; border-top:1px solid var(--color-hairline); color:var(--color-neon); font-size:12px; text-align:left; cursor:pointer; }
-.cdx-pair-matching__toggle svg { flex:none; }
-.cdx-pair-matching__toggle:hover:not(:disabled) { color:var(--color-ink); }
-.cdx-pair-matching__toggle:active:not(:disabled) { color:var(--color-slate); }
-.cdx-pair-matching__toggle[aria-expanded=true] svg { transform:rotate(180deg); }
-.cdx-pair-matching__toggle:focus-visible { outline:2px solid var(--color-neon); outline-offset:3px; }
-.cdx-pair-matching__toggle:disabled { opacity:.5; cursor:not-allowed; }
-.cdx-pair-matching__body { display:grid; gap:8px; padding-bottom:4px; }
-.cdx-pair-matching__body p { color:var(--color-slate); font-size:var(--type-min); line-height:1.5; }
-.cdx-pair-matching__body select { width:100%; min-width:0; min-height:44px; font-size:16px; }
-.cdx-pair-matching__body > button { justify-self:start; max-width:100%; min-height:44px; font-size:12px; white-space:normal; text-align:left; }
-/* Touch keeps 44px targets; a desktop pointer gets 40px in this dense panel (phone widths stay 44px below). */
-@media (pointer: fine) { .cdx-pair-matching__toggle,.cdx-pair-matching__body > button { min-height:40px; } }
-.cdx-pair-picker--viewport .cdx-pair-design-match,.cdx-pair-picker--viewport .cdx-pair-matching { margin:0; }
-.cdx-pair-details { min-width:0; margin-top:6px; font-size:var(--type-min); line-height:1.5; color:var(--color-slate); }
-.cdx-pair-details__qualification { margin-top:4px; }
-.cdx-pair-details summary { cursor:pointer; display:inline-flex; align-items:center; min-height:30px; gap:8px; color:var(--color-neon); }
-.cdx-pair-details__body { padding:8px 10px; border-left:2px solid var(--color-control-border); background:var(--color-nested); }
-.cdx-pair-details__body > span { display:block; font-size:var(--type-min); }
-.cdx-pair-mint { display:block; overflow-wrap:anywhere; font-family:var(--font-mono); color:var(--color-ink); margin-top:4px; }
-.cdx-pair-details__links { display:flex; flex-wrap:wrap; gap:2px 16px; margin-top:5px; }
-.cdx-pair-details__links a { display:inline-flex; min-height:30px; align-items:center; color:var(--color-neon); text-decoration:underline; text-underline-offset:3px; }
-.cdx-pair-badge { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:center; gap:4px 12px; margin-top:10px; border-block:1px solid var(--color-hairline); padding:9px 0; font-size:var(--type-min); line-height:1.5; color:var(--color-slate); }
-.cdx-pair-badge strong { color:var(--color-ink); font-size:14px; overflow-wrap:anywhere; }
-.cdx-pair-badge__label { font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
-.cdx-pair-badge--compact { gap:3px 8px; padding:7px 0; }
-.cdx-pair-badge--compact strong { font-size:12px; }
-.cdx-pair-change { margin-top:10px; padding:12px; border:1px solid var(--color-control-border); border-radius:10px; background:var(--color-surface); font-size:12px; line-height:1.5; }
-.cdx-pair-change > label { display:block; margin-top:8px; font-size:var(--type-min); }
-.cdx-pair-change > select { margin-top:4px; width:100%; font-size:16px; }
-.cdx-pair-change__actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
-.cdx-pair-row-label { color:var(--color-neon); }
-.cdx-launch-cost { font-size:13px; line-height:1.5; padding-block:8px; }
-.cdx-launch-cost > div { display:flex; justify-content:space-between; gap:10px; }
-.cdx-launch-cost dt { color:var(--color-slate); }
-.cdx-launch-cost dd { text-align:right; font-weight:600; }
-.cdx-launch-cost small { display:block; margin-top:4px; color:var(--color-slate); font-size:var(--type-min); }
-.cdx-pair-notice { font-size:var(--type-min); line-height:1.5; color:var(--color-neon); margin-top:6px; }
-@media(max-width:580px) { .cdx-pair-picker__head > span { font-size:var(--type-min); } .cdx-pair-details summary,.cdx-pair-details__links a { min-height:38px; } .cdx-pair-matching__toggle,.cdx-pair-matching__body > button { min-height:44px; } }
+/* The pair line beside a design (Designs; the non-compact picker). */
+.cdx-pair-badge { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 4px 12px; margin-top: 12px; padding: 8px 0; border-block: 1px solid var(--color-hairline); font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+.cdx-pair-badge strong { color: var(--color-ink); font-size: var(--text-body); line-height: 20px; font-weight: 600; overflow-wrap: anywhere; }
+.cdx-pair-badge--compact { gap: 4px 8px; }
 
-.cdx-pair-picker--compact .cdx-pair-picker__hint > span,
-.cdx-pair-picker--compact .cdx-pair-picker__binding,
-.cdx-pair-picker--compact .cdx-pair-details > p { display:none; }
-.cdx-pair-picker--compact { padding-top:10px; }
+/* Field selects in these pickers: 16px on touch, as the inputs are (no iOS zoom). */
+@media (pointer: coarse), (max-width: 1023.98px) {
+  :is(.cdx-launch, .cdx-pair-picker, .cdx-design-browser, .cdx-live-panel) .mdx-select--field { font-size: var(--text-lead); }
+}
+.cdx-pair-picker .mdx-select--field,
+.cdx-design-picker .mdx-select--field,
+.cdx-live-panel .mdx-select--field { text-overflow: ellipsis; }
 
-/* ---- moved from carddex-design-picker.css (whole file, same order) */
-.cdx-design-picker__browse:disabled { cursor:not-allowed; opacity:.5; }
-.mdx-dialog:has(.cdx-design-browser) { height:min(720px,calc(var(--cdx-app-height,100dvh) - 32px)); }
-.cdx-design-browser { display:flex; flex:1; min-height:0; flex-direction:column; gap:12px; }
-.cdx-design-browser__intro { flex:none; margin:0; color:var(--color-slate); font-size:13px; line-height:1.45; }
-.cdx-design-browser__filter { display:grid; flex:none; grid-template-columns:minmax(0,1fr); align-items:end; gap:12px; }
-.cdx-design-browser__filter[data-paired=true] { grid-template-columns:repeat(2,minmax(0,1fr)); }
-.cdx-design-browser__field { display:flex; min-width:0; flex-direction:column; gap:4px; }
-.cdx-design-browser__filter label { color:var(--color-ink); font-size:13px; font-weight:550; }
-.cdx-design-browser__filter select { width:100%; min-width:0; min-height:44px; color:var(--color-ink); background:var(--color-surface); }
-.cdx-design-browser__grid { display:grid; flex:1; min-height:0; gap:10px; padding:3px; grid-template-columns:repeat(var(--design-columns,1),minmax(0,1fr)); grid-template-rows:repeat(var(--design-rows,1),minmax(0,1fr)); }
-.cdx-design-browser__choice { display:flex; min-width:0; min-height:0; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:9px 6px; border:1px solid transparent; border-radius:10px; background:transparent; color:var(--color-ink); container-type:size; }
-.cdx-design-browser__choice:hover { background:var(--color-surface); border-color:#d9c9a8; }
-.cdx-design-browser__choice[aria-pressed=true] { border-color:#a58a54; background:var(--color-raised); }
-.cdx-design-browser__choice:focus-visible { outline:2px solid #8d291f; outline-offset:1px; }
-.cdx-design-browser__choice:disabled { cursor:not-allowed; opacity:.5; }
-.cdx-design-browser__art { flex:none; width:min(160px,84cqw,calc((100cqh - 74px)*.715909)); }
-.cdx-design-browser__art > .mdx-card { width:100%; }
-.cdx-design-browser__choice > strong { display:block; flex:none; width:100%; min-height:2.7em; color:var(--color-ink); font-size:12px; font-weight:550; line-height:1.35; overflow-wrap:anywhere; text-align:center; }
-.cdx-design-browser__quote { flex:none; display:inline-flex; align-items:center; min-height:23px; padding:2px 7px; border-radius:5px; color:var(--color-slate); background:var(--color-surface); font-size:var(--type-min); line-height:1.2; white-space:nowrap; }
-.cdx-design-browser__quote[data-bound=true] { color:#4c3820; background:#e4d3ab; font-weight:600; }
-.cdx-design-browser .cdx-page-controls { gap:6px; font-size:var(--type-min); }
-@media(max-width:560px) {
-  .cdx-design-browser { gap:10px; }
-  .cdx-design-browser__filter { gap:8px; }
-  .cdx-design-browser__grid { gap:8px; }
-  .cdx-design-browser__choice { padding:8px 4px; }
-  .cdx-design-browser__intro { font-size:12px; }
+/* ------------------------------------------------ the mainnet panel (live mode, the Review step) */
+.cdx-live-panel { display: grid; min-width: 0; gap: 24px; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
+.cdx-live-panel p { overflow-wrap: anywhere; text-wrap: pretty; }
+.cdx-live-block { display: grid; min-width: 0; gap: 12px; }
+.cdx-live-callout { display: grid; justify-items: start; gap: 12px; padding: 12px 16px; border-radius: var(--radius-row); background: var(--color-nested); color: var(--color-ink); }
+.cdx-live-later { color: var(--color-slate); font-weight: 400; white-space: normal; max-width: 22ch; }
+.cdx-live-slippage { display: flex; align-items: center; justify-content: space-between; gap: 16px; color: var(--color-ink); }
+.cdx-live-slippage > select { width: 104px; flex: none; }
+.cdx-live-check { position: relative; display: flex; min-height: var(--hit); align-items: flex-start; gap: 12px; padding-block: 4px; color: var(--color-ink); cursor: pointer; }
+.cdx-live-check input { width: 20px; height: 20px; flex: none; margin-top: 0; accent-color: var(--color-ink); }
+.cdx-live-check input:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; }
+.cdx-live-address { overflow-wrap: anywhere; font-variant-numeric: tabular-nums; color: var(--color-ink); }
+.cdx-live-error { color: var(--color-down); }
+.cdx-live-meta { font-size: var(--text-caption); line-height: 16px; color: var(--color-placeholder); }
+.cdx-live-wallet-row { display: grid; min-width: 0; }
+.cdx-live-actions { display: grid; gap: 8px; }
+/* Progress: two transactions, each a row with its stage in words (Preparing, Waiting for your wallet, Sending,
+ * Confirmed) and its links once there is something to open. */
+.cdx-live-stages { display: grid; gap: 0; }
+.cdx-live-stage { display: flex; gap: 12px; padding-block: 12px; border-bottom: 1px solid var(--color-rule); }
+.cdx-live-stage:last-child { border-bottom: 0; }
+.cdx-live-stage__mark { display: grid; width: 24px; height: 24px; flex: none; place-items: center; border-radius: var(--radius-pill); background: var(--color-nested); color: var(--color-slate); font-size: var(--text-caption); font-weight: 600; }
+.cdx-live-stage[data-state="active"] .cdx-live-stage__mark { background: var(--color-ink); color: var(--color-on-cta); }
+.cdx-live-stage[data-state="done"] .cdx-live-stage__mark { color: var(--color-up); background: var(--color-up-soft); }
+.cdx-live-stage[data-state="stopped"] .cdx-live-stage__mark { color: var(--color-down-hover); background: var(--color-down-soft); }
+.cdx-live-stage__body { display: grid; min-width: 0; gap: 2px; }
+.cdx-live-stage__title { color: var(--color-ink); font-weight: 500; }
+.cdx-live-stage[data-state="todo"] .cdx-live-stage__title { color: var(--color-slate); }
+.cdx-live-stage__status { color: var(--color-slate); }
+.cdx-live-stage__links { display: flex; flex-wrap: wrap; gap: 4px 20px; margin-top: 6px; }
+/* Saved launches (recovery) behind one disclosure. */
+.cdx-live-saved { min-width: 0; border-top: 1px solid var(--color-hairline); }
+.cdx-live-saved > summary { display: flex; min-height: var(--hit); align-items: center; justify-content: space-between; gap: 12px; color: var(--color-ink); font-weight: 500; list-style: none; cursor: pointer; }
+.cdx-live-saved > summary::-webkit-details-marker { display: none; }
+.cdx-live-saved > summary > svg { flex: none; transition: transform var(--t-fast) var(--ease-in-out); }
+.cdx-live-saved[open] > summary > svg { transform: rotate(180deg); }
+.cdx-live-saved__body { display: grid; justify-items: start; gap: 12px; padding-bottom: 8px; }
+.cdx-live-saved__list { display: grid; width: 100%; gap: 8px; }
+.cdx-live-saved__list .mdx-btn { justify-content: space-between; }
+
+/* The wallet chooser and the guide (dialogs and sheets). */
+.cdx-live-wallet { display: grid; min-width: 0; gap: 16px; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
+.cdx-live-wallet__list { display: grid; gap: 8px; max-height: min(320px, 50dvh); margin: -4px; padding: 4px; overflow-y: auto; }
+.cdx-live-wallet__list .mdx-btn { justify-content: flex-start; gap: 12px; }
+.cdx-live-wallet__list .mdx-btn img { flex: none; border-radius: 6px; outline: 1px solid var(--image-outline); outline-offset: -1px; }
+.cdx-live-guide { display: grid; gap: 12px; padding-left: 20px; list-style: decimal; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
+.cdx-live-guide li::marker { color: var(--color-ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* The wallet review dialog: three pages (Summary, What your wallet will show, Addresses), Continue on every one. */
+/* The dialog is a fixed-height deck: it takes the height the review needs (up to the screen), and the page region
+ * is the one part that scrolls when a short screen cannot hold it, so nothing ever overlaps. */
+.mdx-dialog:has(.cdx-live-review-modal) { height: min(760px, calc(var(--cdx-app-height, 100dvh) - 32px)); }
+.mdx-sheet:has(.cdx-live-review-modal) { height: calc(var(--cdx-app-height, 100dvh) - 12px); }
+.cdx-live-review-modal { display: flex; flex: 1; min-width: 0; min-height: 0; flex-direction: column; gap: 12px; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
+.cdx-live-review-modal > * { flex: none; }
+.cdx-live-review-modal > .cdx-live-review-page { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin: -4px; padding: 4px; }
+.cdx-live-review-modal .cdx-launch-cost > div { min-height: 32px; padding-block: 6px; }
+.cdx-live-review-actions { display: flex; flex-direction: row-reverse; gap: 8px; }
+.cdx-live-review-actions > .mdx-btn { flex: 1 1 0; width: auto; min-width: 0; }
+@media (max-width: 1023.98px) { .cdx-live-review-actions { flex-direction: column; } .cdx-live-review-actions > .mdx-btn { flex: none; width: 100%; } }
+.cdx-live-review-progress { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+.cdx-live-review-progress > span:first-child { color: var(--color-ink); font-weight: 600; }
+.cdx-live-review-page { display: grid; align-content: start; gap: 12px; }
+.cdx-live-review-page:focus { outline: none; }
+.cdx-live-network { display: grid; gap: 2px; }
+.cdx-live-network strong { color: var(--color-ink); font-weight: 600; }
+.cdx-live-review > div[data-total] dd { font-weight: 600; }
+.cdx-live-review[data-stack] > div { display: grid; gap: 2px; }
+.cdx-live-review[data-stack] dd { text-align: left; flex: initial; }
+.cdx-live-review-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cdx-live-review-nav > span { font-size: var(--text-caption); color: var(--color-slate); font-variant-numeric: tabular-nums; }
+
+/* "What your wallet will show" (LiveWalletNotice, unstyled hooks): a calm list, then the one safety line. */
+.cdx-live-wallet-notice { display: grid; gap: 12px; }
+.cdx-live-wallet-notice-title { font-size: var(--text-lead); line-height: 24px; font-weight: 600; color: var(--color-ink); }
+.cdx-live-wallet-notice-list { display: grid; gap: 8px; }
+.cdx-live-wallet-notice-list > li { position: relative; padding-left: 16px; color: var(--color-ink); }
+.cdx-live-wallet-notice-list > li::before { content: ""; position: absolute; left: 2px; top: 8px; width: 4px; height: 4px; border-radius: var(--radius-pill); background: var(--color-slate); }
+.cdx-live-wallet-notice-safety { padding: 12px 16px; border-radius: var(--radius-row); background: var(--color-nested); color: var(--color-ink); }
+
+/* Paged dialogs (ViewportPages: the guide, the launched card) share the review's Previous / Next row. */
+.cdx-viewport-pages { display: flex; flex: 1; min-height: 0; flex-direction: column; gap: 16px; }
+.cdx-viewport-pages__body { display: grid; flex: 1; min-height: 0; align-content: start; gap: 12px; overflow-wrap: anywhere; }
+.cdx-viewport-pages__body:focus { outline: none; }
+.cdx-viewport-pages > nav { flex: none; }
+
+/* Messages (PagedMessage): whole, never paged. */
+.cdx-paged-message { display: grid; min-width: 0; overflow-wrap: anywhere; }
+.cdx-paged-message > p { font-size: var(--text-body); line-height: 20px; }
+.cdx-paged-message[data-kind="error"] > p { padding: 12px 16px; border-radius: var(--radius-row); background: var(--color-down-soft); color: var(--color-down-hover); }
+.cdx-paged-message[data-kind="status"] > p { color: var(--color-ink); }
+
+/* ------------------------------------------------ reduced motion and Calm: no scale on press, fades only */
+@media (prefers-reduced-motion: reduce) {
+  .cdx-launch-thumb:active { transform: none; }
+  .cdx-pair-matching__toggle > svg,
+  .cdx-pair-disclosure > summary > svg,
+  .cdx-live-saved > summary > svg { transition: none; }
 }
-@media(max-height:440px) {
-  .cdx-design-browser { gap:6px; }
-  .cdx-design-browser__intro { display:none; }
-  .cdx-design-browser__choice { gap:4px; padding:4px; }
-  .cdx-design-browser__art { width:min(100px,70cqw,calc((100cqh - 68px)*.715909)); }
-}
-/* Short screens: a desktop pointer gets 40px filters; touch keeps 44px. */
-@media(max-height:440px) and (pointer: fine) { .cdx-design-browser__filter select { min-height:40px; } }
-@media(min-width:560px) and (max-height:440px) {
-  .cdx-design-browser__choice { display:grid; grid-template-columns:auto minmax(0,1fr); grid-template-rows:1fr 1fr; align-items:center; gap:4px 8px; padding:6px; }
-  .cdx-design-browser__choice:only-child { grid-template-columns:auto auto; justify-content:center; }
-  .cdx-design-browser__art { grid-column:1; grid-row:1 / -1; width:min(72px,36cqw,calc((100cqh - 12px)*.715909)); }
-  .cdx-design-browser__choice > strong { grid-column:2; grid-row:1; align-self:end; min-height:0; text-align:left; }
-  .cdx-design-browser__quote { grid-column:2; grid-row:2; align-self:start; justify-self:start; max-width:100%; white-space:normal; }
-}
+:root[data-motion="calm"] .cdx-launch-thumb:active { transform: none; }
+
+/* Last, so no display rule above can show a hidden step. */
+.cdx-launch [hidden] { display: none; }
