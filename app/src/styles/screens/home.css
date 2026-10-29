@@ -435,24 +435,40 @@
   padding: 8px 0 0 !important;
 }
 
-/* Phones held sideways: the card beside its caption, picks and tilt chip, the stage as tall as the view between the
- * top bar and the tab bar (less main's padding), so the card and its market line are in view together. */
+/* Phones held sideways (the 29 October landscape card fix, in the one-scroller layout): the card has its own column
+ * from the top of the view, beside the header row, its market line, picks and tilt chip, and is sized from the height
+ * between the top bar and the tab bar (less main's padding), so the whole turning card is in the first screen even at
+ * 568x320. The view still grows with its content: the pulse follows full width below and main scrolls. The stage is
+ * a subgrid of the view's grid (its role and handlers stay on it); only the plain body wrapper steps aside. */
 @media (min-width: 560px) and (max-width: 1023.98px) and (max-height: 500px) {
+  .cdx-home {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    align-content: start;
+    gap: 0 24px;
+  }
+  .cdx-home > .mdx-pagehead {
+    grid-row: 1;
+    grid-column: 2;
+  }
+  .cdx-home__body {
+    display: contents;
+  }
   .cdx-home__stage {
     display: grid;
-    min-height: calc(var(--cdx-app-height, 100dvh) - var(--topbar-h) - var(--tabbar-h) - 32px);
-    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-    grid-template-rows: minmax(0, 1fr) auto auto auto minmax(0, 1fr);
-    column-gap: 24px;
+    grid-row: 1 / span 4;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    grid-template-rows: subgrid;
   }
   .cdx-home__display {
     grid-row: 1 / -1;
     grid-column: 1;
+    align-self: start;
   }
   .cdx-home__caption {
     grid-row: 2;
     grid-column: 2;
-    margin-top: 0;
   }
   .cdx-home__picks-row {
     grid-row: 3;
@@ -462,9 +478,13 @@
     grid-row: 4;
     grid-column: 2;
   }
+  .cdx-home__body > :not(.cdx-home__stage) {
+    grid-column: 1 / -1;
+    margin-top: var(--gap-section);
+  }
   .cdx-home__lot {
     --W: max(
-      140px,
+      120px,
       min(320px, 80cqw, calc((100svh - var(--topbar-h) - var(--tabbar-h) - 32px) / 1.497))
     );
   }
