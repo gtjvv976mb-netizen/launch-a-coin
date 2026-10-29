@@ -530,6 +530,22 @@
   color: var(--color-placeholder);
   cursor: not-allowed;
 }
+/* Upright phones: the preview stacks, the card at 260px so its face reads (the pair label on it too), its controls
+ * under it, then its name and the pair picker across the column, then the library. The action bar keeps the primary
+ * on screen (density R7). */
+@media (max-width: 559.98px) {
+  .cdx-archive {
+    --preview-cw: 260px;
+  }
+  .cdx-archive__vitrine {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+  .cdx-archive__info {
+    justify-self: stretch;
+    max-width: none;
+  }
+}
 
 /* The preview: the card wrapper takes the width (card3d.css sets the card to 100% of its stage). */
 .cdx-archive__card {

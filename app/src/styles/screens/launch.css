@@ -342,6 +342,9 @@
 .cdx-design-picker__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
 .cdx-design-picker__head .mdx-label { margin: 0; }
 .cdx-design-picker__kept { font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+/* A stock, meme or collector quote: its matched designs by name, over the row that holds them. */
+.cdx-design-picker__matched { margin-bottom: 8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); text-wrap: pretty; }
+.cdx-design-picker__matched strong { color: var(--color-ink); font-weight: 500; }
 /* A fixed count of cells by width (4, 6 or 7, the last is All designs), so no empty track is left at the end; the
  * suggestions past the count are not rendered for the eye or for focus. */
 .cdx-design-picker__swatches { --swatch-n: 4; display: grid; grid-template-columns: repeat(var(--swatch-n), minmax(0, 96px)); gap: 8px; }
@@ -360,6 +363,9 @@
   position: relative;
   display: grid;
   width: 100%;
+  /* The row's cells share one height, so a matched swatch's extra line leaves no ragged outline. */
+  height: 100%;
+  align-content: start;
   gap: 4px;
   padding: 4px;
   border-radius: var(--radius-row);
@@ -371,6 +377,11 @@
 .cdx-design-picker__face > .mdx-card { width: 100%; }
 /* Two lines at most ("Yu-Gi-Oh! Monster" and "Yu-Gi-Oh! Spell" must not read the same), the full name in the label. */
 .cdx-design-picker__name { display: -webkit-box; min-height: 32px; overflow: hidden; font-size: var(--text-caption); line-height: 16px; font-weight: 500; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; }
+/* A design matched to the quote (in the ink of the library's "CHILLHOUSE pair" line); one line. */
+.cdx-design-picker__match { overflow: hidden; color: var(--color-ink); font-size: var(--text-caption); line-height: 16px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+/* It reads straight under the name: a one-line name gives the caption its second line, so the row keeps its height. */
+.cdx-design-picker__name:has(+ .cdx-design-picker__match) { min-height: 0; }
+.cdx-design-picker__name + .cdx-design-picker__match { margin-top: -4px; }
 .cdx-design-picker__swatch[aria-pressed="true"] { background: var(--color-nested); color: var(--color-ink); outline: 2px solid var(--color-ink); outline-offset: -2px; }
 .cdx-design-picker__swatch[aria-pressed="true"] .cdx-design-picker__name { font-weight: 600; }
 .cdx-design-picker__swatch:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; }
@@ -408,6 +419,14 @@
 .cdx-design-browser__collection .mdx-label,
 .cdx-design-browser__filter .mdx-label { margin-bottom: 4px; }
 .cdx-design-browser__filter { display: grid; gap: 0; max-width: 360px; }
+/* Short screens (a phone held sideways): Collection and Pair asset share one row, so the tiles keep the room. */
+@media (max-height: 500px) {
+  .cdx-design-browser__filters { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; column-gap: 12px; }
+  .cdx-design-browser__filter { max-width: none; }
+  .cdx-design-browser__collection .mdx-label,
+  .cdx-design-browser__filter .mdx-label { margin-bottom: 2px; }
+  .cdx-overlay--sheet .cdx-design-browser__filters { padding-top: 12px; }
+}
 .cdx-design-browser__grid { padding: 4px 0; }
 .cdx-design-browser__choice {
   position: relative;
@@ -439,10 +458,22 @@
 @media (max-width: 560px) {
   .cdx-design-browser__choice { padding: 8px 4px; }
 }
-/* Short screens held sideways: smaller art, so two rows of tiles show at once. */
+/* Short screens held sideways: each tile is one row (a 64px card beside its name and pair), so whole tiles show
+ * under the filters and the first stays clear of them. */
 @media (max-height: 440px) {
-  .cdx-design-browser__choice { gap: 4px; padding: 6px 4px; }
-  .cdx-design-browser__art { width: min(100px, 70cqw); }
+  .cdx-design-browser__choice {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: center;
+    justify-items: start;
+    gap: 4px 8px;
+    padding: 6px;
+    text-align: left;
+  }
+  .cdx-design-browser__art { grid-row: 1 / span 2; width: 64px; }
+  .cdx-design-browser__choice > strong { min-height: 0; align-self: end; text-align: left; }
+  .cdx-design-browser__meta { align-self: start; justify-content: flex-start; }
 }
 
 /* ------------------------------------------------ the pair picker (Launch's Pair field; also the Designs preview) */
@@ -538,10 +569,15 @@
 .cdx-live-panel .mdx-select--field { text-overflow: ellipsis; }
 
 
-/* Launch's inline picker: the mint and terms on one visible line that wraps, then what the quote does and does not do. */
-.cdx-pair-meta { display: grid; gap: 2px; margin-top: 8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+/* Launch's inline picker: the asset and issuer, the full mint (it wraps anywhere), the review date, the terms on one
+ * line that wraps, then what the quote does and does not do. */
+.cdx-pair-meta { display: grid; min-width: 0; gap: 2px; margin-top: 8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); overflow-wrap: anywhere; }
+.cdx-pair-meta__asset strong { color: var(--color-ink); font-weight: 500; }
 .cdx-pair-meta__links { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 12px; }
 .cdx-pair-meta .mdx-link { display: inline-flex; align-items: center; gap: 2px; font-size: var(--text-caption); font-variant-numeric: tabular-nums; }
+/* The mint starts beside its label and fills each line (break-all), rather than dropping whole to the next one. */
+.cdx-pair-meta .cdx-pair-mint { display: inline; word-break: break-all; }
+.cdx-pair-meta .cdx-pair-mint > svg { display: inline-block; margin: 0 0 0 2px; vertical-align: -1px; }
 .cdx-pair-picker--inline .cdx-pair-change { margin-top: 8px; }
 .cdx-pair-picker--inline .cdx-pair-picker__hint { margin-top: 6px; }
 

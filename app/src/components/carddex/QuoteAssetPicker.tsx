@@ -48,22 +48,34 @@ function AssetDisclosure({ asset, live }: { asset: Readonly<PairAsset>; live: bo
 }
 
 /**
- * The mint and the terms on one visible line that wraps (Launch's Pair field; no disclosure): the short mint linked
- * to Solscan (its name starts with the visible short mint, WCAG 2.5.3), then each terms link, then what the quote does
- * and does not do.
+ * The quote's identity, exact mint and terms, all visible (Launch's Pair field; no disclosure): the asset and its
+ * issuer, the full mint linked to Solscan (its name starts with the visible mint, WCAG 2.5.3), when the mint was
+ * reviewed, each terms link, then what the quote does and does not do.
  */
-export function QuoteAssetMeta({ quoteAssetKey, live = false }: { quoteAssetKey: string; live?: boolean }) {
+export function QuoteAssetMeta({ quoteAssetKey, live = false, named = false }: {
+  quoteAssetKey: string; live?: boolean;
+  /** The picker already names the asset (its design-match line), so only the issuer is added here. */
+  named?: boolean;
+}) {
   const asset = getPairAsset(quoteAssetKey);
-  const short = `${asset.mint.slice(0, 4)}…${asset.mint.slice(-4)}`;
-  const external = (href: string, label: string, name?: string) => <a className="mdx-link mdx-hit" href={href} target="_blank" rel="noreferrer" aria-label={name}>{label}<Icon name="external" size={12} /></a>;
+  const external = (href: string, label: string) => <a className="mdx-link mdx-hit" href={href} target="_blank" rel="noreferrer">{label}<Icon name="external" size={12} /></a>;
+  const mintKind = asset.kind === "native" ? "Wrapped SOL" : "quote asset";
   return <div className="cdx-pair-meta">
+    {!named || asset.issuer ? <p className="cdx-pair-meta__asset">
+      {named ? null : <strong>{asset.name}</strong>}
+      {asset.issuer ? `${named ? "" : " · "}Issuer: ${asset.issuer}` : null}
+    </p> : null}
+    <p className="cdx-pair-meta__mint">
+      <span>{asset.kind === "native" ? "Wrapped SOL mint" : "Mint"}</span>{" "}
+      <a className="cdx-pair-mint mdx-link" href={`https://solscan.io/token/${asset.mint}`} target="_blank" rel="noreferrer" aria-label={`${asset.mint}, ${mintKind} mint on Solscan (opens in a new tab)`}><span>{asset.mint}</span><Icon name="external" size={12} /></a>
+    </p>
+    {/* A line of text between the mint and the terms row, so the terms links' 44px hit areas stay off the mint. */}
+    <p>Mint reviewed {asset.verifiedAt}.{asset.kind !== "native" ? " SOL also pays network and account costs." : ""}</p>
     <p className="cdx-pair-meta__links">
-      <span>{asset.kind === "native" ? "Wrapped SOL mint" : "Mint"} {external(`https://solscan.io/token/${asset.mint}`, short, `${short}, ${asset.kind === "native" ? "Wrapped SOL" : "quote asset"} mint on Solscan (opens in a new tab)`)}</span>
       {asset.issuerTerms ? external(asset.issuerTerms, "Issuer terms") : null}
       {asset.listingProviderTerms ? external(asset.listingProviderTerms, `${asset.listingProvider ?? "Listing"} terms`) : null}
       {external(PAIR_ASSETS_SOURCE, "Pump.fun pairs")}
     </p>
-    {asset.kind !== "native" ? <p>SOL also pays network and account costs.</p> : null}
     {asset.kind === "stock" ? <p>A tokenized-stock quote does not make your coin company shares.</p> : null}
     {live ? <p>The exact mint is checked again before wallet review.</p> : null}
   </div>;
@@ -179,7 +191,7 @@ export function QuoteAssetPicker({ value, designKey, ticker, onChange, onPending
   if (variant === "inline") return <div className="cdx-pair-picker cdx-pair-picker--inline">
     {pairControls}
     {confirmChange}
-    <QuoteAssetMeta quoteAssetKey={asset.key} live={live} />
+    <QuoteAssetMeta quoteAssetKey={asset.key} live={live} named={!!designMatch} />
   </div>;
   // The viewport picker (Launch's Pair step, the Designs pair tab): one panel, no sub-tabs. The quote, its pair line,
   // matching designs, then the mint and terms behind one disclosure (LAUNCH-04, browse-16).

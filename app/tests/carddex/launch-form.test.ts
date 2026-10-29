@@ -1,8 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { DESIGN_ROW_SIZE, designRow, enterTarget, firstProblem, quickBuyAmounts, sameAmount } from "../../src/components/carddex/launch-form";
+import { DESIGN_ROW_SIZE, designRow, enterTarget, firstProblem, matchFamily, matchedDesignKeys, quickBuyAmounts, sameAmount } from "../../src/components/carddex/launch-form";
 import { walletNoticeItems, walletNoticePreview, WALLET_NOTICE_COPY } from "../../src/components/carddex/live/wallet-notice";
 import { CARD_DESIGNS, isCardDesignKey } from "../../src/lib/carddex/designs";
-import { allowedQuotesForDesign, boundQuoteForDesign } from "../../src/lib/carddex/pairs";
+import { MEME_PAIR_PRESETS } from "../../src/lib/carddex/design-pairings";
+import { PAIR_ASSETS, allowedQuotesForDesign, boundQuoteForDesign, preferredDesignForQuote } from "../../src/lib/carddex/pairs";
 import { maxInitialBuyQuoteAtoms } from "../../src/lib/carddex/quote-simulation";
 
 // The one-page Launch form (routes/launch.tsx): the suggested-design row, the quick initial-buy amounts, and where
@@ -42,6 +43,65 @@ describe("the suggested-design row", () => {
     expect(tsla.quote).toBe("tslax");
     expect(tsla.keys[0]).toBe("stock-tsla");
     for (const key of tsla.keys) expect(allowedQuotesForDesign(key).some(a => a.key === "tslax")).toBe(true);
+  });
+});
+
+// Codex's "Matching meme designs" (the meme-pair chooser), carried by Launch's suggestion row: a stock, meme or
+// collector quote names its matched designs over the row, its preferred finish comes right after the current design,
+// and each matched swatch is labelled with the quote.
+describe("designs matched to the quote", () => {
+  const paired = PAIR_ASSETS.filter(a => a.kind === "stock" || a.kind === "meme" || a.kind === "collector");
+  test("every stock, meme and collector quote has matched designs, its preferred finish first", () => {
+    expect(paired.length).toBe(35);
+    expect(paired.filter(a => a.kind === "meme" || a.kind === "collector").length).toBe(28);
+    for (const asset of paired) {
+      const keys = matchedDesignKeys(asset.key);
+      expect(matchFamily(asset.key)).toBe(asset.kind as "stock" | "meme" | "collector");
+      expect(keys.length).toBeGreaterThan(0);
+      expect(keys[0]).toBe(preferredDesignForQuote(asset.key)!);
+      expect(new Set(keys).size).toBe(keys.length);
+      for (const key of keys) {
+        expect(isCardDesignKey(key)).toBe(true);
+        expect(allowedQuotesForDesign(key).some(a => a.key === asset.key)).toBe(true);
+        // Bound to the quote, or one of its explicit meme-pair presets; never a guess.
+        expect(boundQuoteForDesign(key)?.key === asset.key || MEME_PAIR_PRESETS.some(p => p.design === key && p.quote === asset.key)).toBe(true);
+      }
+    }
+  });
+  test("SOL, USDC and unknown quotes have none", () => {
+    for (const key of ["sol", "usdc", "not-a-quote"]) {
+      expect(matchFamily(key)).toBeNull();
+      expect(matchedDesignKeys(key)).toEqual([]);
+    }
+  });
+  test("the matches the meme-pair chooser offered", () => {
+    expect(matchedDesignKeys("chillhouse")).toEqual(["abyssal"]);
+    expect(matchedDesignKeys("cate")).toEqual(["ronin"]);
+    expect(matchedDesignKeys("ansem")).toEqual(["sovereign"]);
+    expect(matchedDesignKeys("usduc")).toEqual(["surge"]);
+    expect(matchedDesignKeys("cards")).toEqual(["obsidian-archive", "pokemon-classic", "pokemon-full-art"]);
+    expect(matchedDesignKeys("sv151")).toEqual(["pokemon-classic", "pokemon-full-art"]);
+    expect(matchedDesignKeys("doge")).toEqual(["doge"]);
+    expect(matchedDesignKeys("tslax")).toEqual(["stock-tsla"]);
+    expect(matchFamily("cards")).toBe("collector");
+    expect(matchFamily("chillhouse")).toBe("meme");
+    expect(matchFamily("tslax")).toBe("stock");
+  });
+  test("from a design matched to nothing, the row offers every matched design right after it, preferred first", () => {
+    const neutral = CARD_DESIGNS.find(d => !boundQuoteForDesign(d.key) && !MEME_PAIR_PRESETS.some(p => p.design === d.key))!.key;
+    for (const asset of paired) {
+      const keys = matchedDesignKeys(asset.key);
+      const row = designRow(null, neutral, asset.key);
+      expect(row.keys[0]).toBe(neutral);
+      // Slot 2 shows at every width (the row shows 3, 5 or 6 designs).
+      expect(row.keys[1]).toBe(preferredDesignForQuote(asset.key)!);
+      expect(row.keys.slice(1, 1 + keys.length)).toEqual(keys);
+      for (const key of row.keys) expect(allowedQuotesForDesign(key).some(a => a.key === asset.key)).toBe(true);
+    }
+  });
+  test("a matched design already chosen keeps the first slot, and the other matches follow it", () => {
+    const row = designRow(null, "pokemon-classic", "cards");
+    expect(row.keys.slice(0, 3)).toEqual(["pokemon-classic", "obsidian-archive", "pokemon-full-art"]);
   });
 });
 

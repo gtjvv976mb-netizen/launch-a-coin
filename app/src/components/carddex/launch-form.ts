@@ -1,11 +1,31 @@
 import { CARD_DESIGNS, isCardDesignKey } from "../../lib/carddex/designs";
-import { allowedQuotesForDesign, getPairAsset, matchingDesignsForQuote } from "../../lib/carddex/pairs";
+import { allowedQuotesForDesign, getPairAsset, isPairAssetKey, matchingDesignsForQuote, preferredDesignForQuote } from "../../lib/carddex/pairs";
 
 /**
- * Pure helpers for the one-page Launch form (routes/launch.tsx): the suggested-design row, the quick initial-buy
- * amounts, and where focus goes when the form is incomplete. No React, no DOM; tested in
- * tests/carddex/launch-form.test.ts.
+ * Pure helpers for the one-page Launch form (routes/launch.tsx): the suggested-design row and the designs matched to
+ * its quote, the quick initial-buy amounts, and where focus goes when the form is incomplete. No React, no DOM;
+ * tested in tests/carddex/launch-form.test.ts.
  */
+
+/** Which matched designs a quote has ("Matching meme designs"): stock, meme and collector quotes; none for SOL or USDC. */
+export type MatchFamily = "stock" | "meme" | "collector";
+
+export function matchFamily(quoteKey: string): MatchFamily | null {
+  if (!isPairAssetKey(quoteKey)) return null;
+  const { kind } = getPairAsset(quoteKey);
+  return kind === "stock" || kind === "meme" || kind === "collector" ? kind : null;
+}
+
+/**
+ * The designs matched to a stock, meme or collector quote (the designs bound to it and its explicit meme-pair
+ * presets, design-pairings.ts), the quote's preferred finish first. Empty for SOL, USDC and unknown keys.
+ */
+export function matchedDesignKeys(quoteKey: string): string[] {
+  if (!matchFamily(quoteKey)) return [];
+  const keys: string[] = matchingDesignsForQuote(quoteKey).map((design) => design.key);
+  const preferred = preferredDesignForQuote(quoteKey);
+  return preferred && keys.includes(preferred) ? [preferred, ...keys.filter((key) => key !== preferred)] : keys;
+}
 
 /** The suggested designs beside the chosen one: the quote they were picked for, and the keys in their slots. */
 export type DesignRow = { quote: string; keys: readonly string[] };
@@ -16,8 +36,8 @@ export const DESIGN_ROW_SIZE = 6;
 /**
  * The row of designs a creator can pick with one tap. It stays still while they pick inside it (only the pressed
  * state moves), so a swatch never jumps under the pointer:
- *   - seeded from the current design, then the designs matched to the quote, then the trading-card classics that
- *     take the quote (no duplicates);
+ *   - seeded from the current design, then the designs matched to the quote (its preferred finish first), then the
+ *     trading-card classics that take the quote (no duplicates);
  *   - re-seeded when the quote changes;
  *   - a current design that is not in the row (picked from All designs, or arriving in the URL) takes the first slot.
  */
@@ -29,7 +49,7 @@ export function designRow(prev: DesignRow | null, current: string, quoteKey: str
   const keys: string[] = [];
   const add = (key: string) => { if (keys.length < n && isCardDesignKey(key) && !keys.includes(key)) keys.push(key); };
   add(current);
-  for (const design of matchingDesignsForQuote(quoteKey)) add(design.key);
+  for (const key of matchedDesignKeys(quoteKey)) add(key);
   for (const design of CARD_DESIGNS) if (design.category === "classic" && allowedQuotesForDesign(design.key).some(a => a.key === quoteKey)) add(design.key);
   return { quote: quoteKey, keys };
 }

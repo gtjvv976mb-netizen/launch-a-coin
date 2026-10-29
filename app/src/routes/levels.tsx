@@ -45,7 +45,8 @@ function DesignStage({ card }: { card: CardData }) {
   const view3d = useViewIn3D(card);
   return (
     <>
-      <HeroTurntable card={card} viewportFit controls={view3d.control} />
+      {/* Upright phones stack the preview at 260px (browse.css --preview-cw); wider, HeroTurntable's own sizes. */}
+      <HeroTurntable card={card} viewportFit controls={view3d.control} sizes="(max-width: 559px) 260px, (max-width: 767px) 40vw, (max-width: 1279px) 260px, 400px" />
       {view3d.viewer}
     </>
   );

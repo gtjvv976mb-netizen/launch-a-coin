@@ -9,7 +9,7 @@ import { AutoGrid, Badge, Button, Chip, Icon, Modal } from "../mintdex/ui";
 import type { CardData } from "../mintdex/MintCard";
 import { CanonicalCardFace } from "./CanonicalCardFace";
 import { PairBadge } from "./QuoteAssetPicker";
-import { designRow, type DesignRow } from "./launch-form";
+import { designRow, matchFamily, matchedDesignKeys, type DesignRow } from "./launch-form";
 
 const memePairKeys = new Set<string>(MEME_PAIR_PRESETS.map(preset => preset.quote));
 const memePairAssets = PAIR_ASSETS.filter(asset => memePairKeys.has(asset.key));
@@ -135,22 +135,36 @@ export function CardDesignPicker({
 
   if (variant === "inline") {
     const keys = (row ?? designRow(null, value, quoteKey)).keys;
+    // A stock, meme or collector quote names its matched designs (design-pairings.ts) above the row, and each matched
+    // swatch carries the quote, so the suggestion reads as the match it is. Picking one keeps the quote.
+    const family = matchFamily(quoteKey);
+    const matched = matchedDesignKeys(quoteKey);
+    const symbol = getPairAsset(quoteKey).symbol;
     return (
       <div className={`cdx-design-picker cdx-design-picker--inline ${className}`}>
         <div className="cdx-design-picker__head">
           <span id={`${id}-label`} className="mdx-label">Card design</span>
           <span className="cdx-design-picker__kept">Kept for good</span>
         </div>
+        {family && matched.length ? (
+          <p className="cdx-design-picker__matched">
+            Matching {family} {matched.length === 1 ? "design" : "designs"} for {symbol}:{" "}
+            <strong>{matched.map(key => getCardDesign(key).name).join(", ")}</strong>
+          </p>
+        ) : null}
         <ul className="cdx-design-picker__swatches" aria-labelledby={`${id}-label`}>
           {keys.map(key => {
             const design = getCardDesign(key);
             const bound = boundQuoteForDesign(key);
+            const isMatch = !!family && matched.includes(key);
             return <li key={key}>
               {/* Named by its visible name (label in name, WCAG 2.5.3); the pair it launches with is sr-only text. */}
               <button type="button" className="cdx-design-picker__swatch" aria-pressed={value === key} disabled={disabled} onClick={() => { if (!disabled && value !== key) onChange(key); }}>
                 <span className="cdx-design-picker__face" aria-hidden><CanonicalCardFace card={cardIn(baseCard, design, quoteKey)} design={design} compact lite sizes="96px" /></span>
                 <span className="cdx-design-picker__name">{design.name}</span>
-                <span className="sr-only">, {bound ? `${bound.symbol} pair` : "any pair"}</span>
+                {/* "Match" (the line above names the quote): a symbol such as CHILLHOUSE is wider than a swatch. */}
+                {isMatch ? <span className="cdx-design-picker__match" aria-hidden>Match</span> : null}
+                <span className="sr-only">, {isMatch ? `matched to ${symbol}` : bound ? `${bound.symbol} pair` : "any pair"}</span>
               </button>
             </li>;
           })}

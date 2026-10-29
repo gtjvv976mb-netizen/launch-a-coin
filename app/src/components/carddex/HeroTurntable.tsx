@@ -6,16 +6,18 @@ import type { Card3DHandle } from "../mintdex/card3d/types";
 import { CardControlButton, CardControls } from "./CardControls";
 
 /** A full revolution in the shared engine, with the same rounded slab, both-face lighting and touch input. */
-export function HeroTurntable({ card, className = "", playing: controlled, onPlayingChange, followEdits = false, viewportFit = false, controls }: {
+export function HeroTurntable({ card, className = "", playing: controlled, onPlayingChange, followEdits = false, viewportFit = false, controls, sizes = "(max-width: 767px) 40vw, (max-width: 1279px) 260px, 400px" }: {
   card: CardData; className?: string; playing?: boolean; onPlayingChange?: (playing: boolean) => void; followEdits?: boolean; viewportFit?: boolean;
   /** More CardControlButtons for the end of the row (Launch's View in 3D), so the row keeps one even gap. */
   controls?: ReactNode;
+  /** The card's laid-out width as an img sizes value. The default: 140-172px on phones (Launch), about 250px to
+   * 1279px, up to 420px wider. */
+  sizes?: string;
 }) {
   const [localPlaying, setLocalPlaying] = useState(true);
   const level = useMotionLevel();
   const playing = controlled ?? localPlaying;
-  // As laid out: 140-172px on phones (Launch, Designs), about 250px to 1279px, up to 420px wider.
-  const slots = useCardSlots(card, { ascend: "ascend", art: "fade", priority: true, sizes: "(max-width: 767px) 40vw, (max-width: 1279px) 260px, 400px", hand: true });
+  const slots = useCardSlots(card, { ascend: "ascend", art: "fade", priority: true, sizes, hand: true });
   useEffect(() => {
     const body = slots.ctl.current?.body;
     if (!body || !viewportFit) return;
