@@ -30,6 +30,7 @@ import { setMe } from "./hooks";
 import { useMe, useSessionUi } from "./session";
 import { Sheet } from "./sheet";
 import { afterLoadIdle } from "./opened-once";
+import { useMotionLevel } from "./card3d/motion3d";
 import { Ticker } from "./Ticker";
 // The live launch sheet stays here (lazy chrome below) so the global CSS keeps its order.
 import "../../carddex-live.css";
@@ -979,13 +980,28 @@ function DevnetSiteNote() {
   );
 }
 
+/** The D1 stage loops (Higgsfield, creative/higgsfield/jobs-site-d1.json): 5-second seamless loops of the logo's
+ *  chocolate suede wall, landscape for desktop and tablets (and phones held sideways), portrait for phones. */
+const STAGE_LOOPS = {
+  wide: ["/assets/site/d1/stage-loop-1344.webm", "/assets/site/d1/stage-loop-1344.mp4"],
+  tall: ["/assets/site/d1/stage-loop-phone-768.webm", "/assets/site/d1/stage-loop-phone-768.mp4"],
+} as const;
+/** The breathing glow is strong at full speed (jobs-site-d1.json notes): the loop plays at half speed. */
+const STAGE_RATE = 0.5;
+const TALL_QUERY = "(orientation: portrait) and (max-width: 1023.98px)";
+
 /**
- * The night sky behind every page (MintDex): still stars and scanlines, a perspective grid floor whose lines run
- * toward you, and two aurora layers that drift, in antique gold, light gold and card red. Hidden documents, an open
- * dialog, Calm motion and reduced motion (mapped to Calm) keep it still.
+ * The stage behind every page (MintDex's sky, D1): the moving suede wall, then still dust and scanlines, a perspective
+ * grid floor of thin gold lines that run toward you, and two drifting amber aurora layers. The loop's poster is the
+ * sky's own CSS background, so it paints at once; the video gets its source only after load and idle (afterLoadIdle),
+ * so it never becomes or delays the LCP, and it fades in once it truly plays. It plays only at full motion, in a
+ * visible tab, on screen (an IntersectionObserver: the Inspect stage hides the sky) and with no dialog open; Calm
+ * motion and reduced motion (mapped to Calm) keep the still poster. Data Saver skips the video.
  */
 function Sky() {
   const ref = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const level = useMotionLevel();
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -994,8 +1010,88 @@ function Sky() {
     document.addEventListener("visibilitychange", sync);
     return () => document.removeEventListener("visibilitychange", sync);
   }, []);
+  useEffect(() => {
+    const el = ref.current;
+    const v = videoRef.current;
+    if (!el || !v || level !== "full") return;
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+    if (saveData) return;
+    let attached = "";
+    let onScreen = true;
+    const tall = window.matchMedia(TALL_QUERY);
+    const want = () => !document.hidden && onScreen && !document.body.hasAttribute("data-scroll-locked");
+    const attach = () => {
+      const kind = tall.matches ? "tall" : "wide";
+      if (attached === kind) return;
+      attached = kind;
+      v.removeAttribute("data-playing");
+      v.replaceChildren(
+        ...STAGE_LOOPS[kind].map((src) => {
+          const source = document.createElement("source");
+          source.src = src;
+          source.type = src.endsWith(".webm") ? "video/webm" : "video/mp4";
+          return source;
+        }),
+      );
+      v.load();
+    };
+    const update = () => {
+      if (!attached) return;
+      if (want()) {
+        v.defaultPlaybackRate = STAGE_RATE;
+        v.playbackRate = STAGE_RATE;
+        v.play().catch(() => {});
+      } else v.pause();
+    };
+    const onPlaying = () => {
+      v.playbackRate = STAGE_RATE;
+      v.setAttribute("data-playing", "");
+    };
+    const onLoaded = () => update();
+    const onOrientation = () => {
+      if (!attached) return;
+      attach();
+    };
+    v.addEventListener("playing", onPlaying);
+    v.addEventListener("loadeddata", onLoaded);
+    tall.addEventListener("change", onOrientation);
+    document.addEventListener("visibilitychange", update);
+    const io = new IntersectionObserver((entries) => {
+      onScreen = entries.some((e) => e.isIntersecting);
+      update();
+    });
+    io.observe(el);
+    const mo = new MutationObserver(update);
+    mo.observe(document.body, { attributes: true, attributeFilter: ["data-scroll-locked"] });
+    const cancel = afterLoadIdle(() => {
+      attach();
+      update();
+    });
+    return () => {
+      cancel();
+      io.disconnect();
+      mo.disconnect();
+      tall.removeEventListener("change", onOrientation);
+      document.removeEventListener("visibilitychange", update);
+      v.removeEventListener("playing", onPlaying);
+      v.removeEventListener("loadeddata", onLoaded);
+      v.pause();
+    };
+  }, [level]);
   return (
     <div ref={ref} aria-hidden className="mdx-sky">
+      <video
+        ref={videoRef}
+        className="mdx-sky__stage"
+        muted
+        loop
+        playsInline
+        disablePictureInPicture
+        disableRemotePlayback
+        preload="none"
+        tabIndex={-1}
+      />
+      <i className="mdx-sky__veil" />
       <i className="mdx-sky__stars" />
       <i className="mdx-sky__floor">
         <i>
@@ -1098,6 +1194,10 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
     window.addEventListener("resize",sync);
     return()=>{vv?.removeEventListener("resize",sync);window.removeEventListener("resize",sync);root.style.removeProperty("--cdx-app-height");};
   },[]);
+
+  // D1's second-state art (the primary's hover skin and glint, the secondary's pressed skin) loads after the page
+  // has, so it never competes with the first paint; until then a hover keeps the rest skin.
+  useEffect(() => afterLoadIdle(() => document.documentElement.setAttribute("data-skins", "")), []);
 
   // The viewport cookie (P1-20): the next server render lays out fitted grids for this screen.
   useEffect(() => {

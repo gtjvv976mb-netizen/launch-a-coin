@@ -164,10 +164,77 @@
   "app/public/assets/site/d1/toggle-on.webp": {
    "bytes": 10216,
    "sha256": "e3b7570c1ddaecd014c33d65be5f32f58c88c998c8607691ab1fb1f32ea4acc0"
+  },
+  "app/public/assets/site/d1/btn-icon-96.webp": {
+   "bytes": 3692,
+   "sha256": "a2d30374c0bbe6c74d2ed05b9a78e82b792a5f02b0ff38d5efa88e13fc38ca48",
+   "from": "app/public/assets/site/d1/btn-icon.webp",
+   "how": "display-size copy (Pillow LANCZOS, WebP) for the page weight; same art, no generation"
+  },
+  "app/public/assets/site/d1/btn-primary-h96.webp": {
+   "bytes": 5340,
+   "sha256": "2b7b82ff7c72b3c3827c18fb4f42b9ae30057479936fbf8cb757322e30e3b31d",
+   "from": "app/public/assets/site/d1/btn-primary.webp",
+   "how": "display-size copy (Pillow LANCZOS, WebP) for the page weight; same art, no generation"
+  },
+  "app/public/assets/site/d1/btn-primary-hover-h96.webp": {
+   "bytes": 5786,
+   "sha256": "dfa5ccc6a612aa09b0ef037bc4d385a675d7a549297f7755f892abdc6e264311",
+   "from": "app/public/assets/site/d1/btn-primary-hover.webp",
+   "how": "display-size copy (Pillow LANCZOS, WebP) for the page weight; same art, no generation"
+  },
+  "app/public/assets/site/d1/btn-secondary-h96.webp": {
+   "bytes": 5188,
+   "sha256": "52a4e001b3684e6ced048ce4f4aea50c48fef5eadcf85b0fbc8b0ff990a07d63",
+   "from": "app/public/assets/site/d1/btn-secondary.webp",
+   "how": "display-size copy (Pillow LANCZOS, WebP) for the page weight; same art, no generation"
+  },
+  "app/public/assets/site/d1/btn-secondary-pressed-h96.webp": {
+   "bytes": 4674,
+   "sha256": "a1b6296ab5b8f0b87fa626b949c5da9ea21db65570175988081219e1db43bd6e",
+   "from": "app/public/assets/site/d1/btn-secondary-pressed.webp",
+   "how": "display-size copy (Pillow LANCZOS, WebP) for the page weight; same art, no generation"
+  },
+  "app/public/assets/site/d1/chip-h96.webp": {
+   "bytes": 6510,
+   "sha256": "321a41d7c04a7f31919bb6a3133d17b354d0a72219e44d37996a6024c75525f6",
+   "from": "app/public/assets/site/d1/chip.webp",
+   "how": "display-size copy (Pillow LANCZOS, WebP) for the page weight; same art, no generation"
+  },
+  "app/public/assets/site/d1/corner-tab-72.webp": {
+   "bytes": 1318,
+   "sha256": "0592dcc1842f34246d02644841cdf7af2c73f4a9fe12090c98462ac1ad3e4e23",
+   "from": "app/public/assets/site/d1/corner-tab.webp",
+   "how": "display-size copy (Pillow LANCZOS, WebP) for the page weight; same art, no generation"
+  },
+  "app/public/assets/site/d1/glint-320.webp": {
+   "bytes": 11782,
+   "sha256": "68f5e25bedcdeaeb7662c23b21a297e729d80f32020b6c7be6f45dc616de3f3d",
+   "from": "app/public/assets/site/d1/glint.webp",
+   "how": "display-size copy (Pillow LANCZOS, WebP) for the page weight; same art, no generation"
+  },
+  "app/public/assets/site/d1/stage-loop-phone-poster-light.webp": {
+   "bytes": 11078,
+   "sha256": "1a230776ab9fddcba476bdd44bc1b828c892700e5c1fb28b5b609dc43bb72d32",
+   "from": "app/public/assets/site/d1/stage-loop-phone-poster.webp",
+   "how": "lighter WebP re-encode (q78) of the same frame for the phone first paint"
+  },
+  "app/public/assets/site/d1/toggle-off-h48.webp": {
+   "bytes": 2222,
+   "sha256": "5a03ca6936f211a94885dfee7cc9bb116603ddd91f7ddefd2ed5e0053c83e403",
+   "from": "app/public/assets/site/d1/toggle-off.webp",
+   "how": "display-size copy (Pillow LANCZOS, WebP) for the page weight; same art, no generation"
+  },
+  "app/public/assets/site/d1/toggle-on-h48.webp": {
+   "bytes": 2240,
+   "sha256": "a619961fb64cfcde65c52dda1c959b3016843598d30dcb4c0251377ce3b348dc",
+   "from": "app/public/assets/site/d1/toggle-on.webp",
+   "how": "display-size copy (Pillow LANCZOS, WebP) for the page weight; same art, no generation"
   }
  },
  "notes": [
   "Loops: seam (first vs last frame) mean diff ~1 of 255; glow breathes strongly, so play at playbackRate 0.5.",
-  "Button skins were cut from the kits by alpha column runs and clipped to their pill silhouettes (the primary kit carried a faint grey box)."
+  "Button skins were cut from the kits by alpha column runs and clipped to their pill silhouettes (the primary kit carried a faint grey box).",
+  "Display-size copies (29 Oct, premium stage): the site serves 96px-tall skins, a 72px corner tab, a 320px glint and an 11 KB phone poster, all resized or re-encoded from the approved files above with no new generation; the originals stay as the masters."
  ]
 }

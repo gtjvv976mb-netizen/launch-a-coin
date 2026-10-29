@@ -16,8 +16,8 @@
   gap: 12px 24px;
   padding: 16px 20px;
   border-radius: var(--radius-panel);
-  background: color-mix(in srgb, var(--color-plinth) 90%, transparent);
-  box-shadow: var(--shadow-ring);
+  background: var(--surface-suede), var(--color-plinth);
+  box-shadow: var(--rim-gold);
 }
 .cdx-portfolio__summary > div { min-width: 0; }
 .cdx-portfolio__summary dd { display: flex; align-items: baseline; gap: 4px; margin-top: 4px; }
@@ -41,7 +41,7 @@
 
 /* ---- coins: one plinth of whole-row links. Wide: Coin · Held · Value · 24h · Design under a head row; narrow:
  * name over ticker and amount, value over the 24h change. */
-.cdx-holdings { overflow: hidden; padding: 8px; border-radius: var(--radius-panel); background: color-mix(in srgb, var(--color-plinth) 90%, transparent); box-shadow: var(--shadow-ring); }
+.cdx-holdings { overflow: hidden; padding: 8px; border-radius: var(--radius-panel); background: var(--surface-suede), var(--color-plinth); box-shadow: var(--rim-gold); }
 .cdx-holdings__head,
 .cdx-holding {
   display: grid;
@@ -118,7 +118,7 @@
   gap: 2px 12px;
   padding: 12px 16px;
   border-radius: var(--radius-row);
-  background: var(--color-plinth);
+  background: var(--surface-suede), var(--color-plinth);
   box-shadow: var(--shadow-ring);
 }
 .cdx-balance-grid dt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

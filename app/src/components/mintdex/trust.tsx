@@ -322,7 +322,10 @@ export function LaunchedDialog({
     if (!open) return;
     const t = window.setTimeout(() => {
       if (!cardRef.current) return;
-      void import("./arcade").then((m) => m.launchBurst(m.centerOf(cardRef.current)));
+      void import("./arcade").then((m) => {
+        m.launchBurst(m.centerOf(cardRef.current));
+        m.sparkBurst(cardRef.current);
+      });
     }, 1500);
     return () => window.clearTimeout(t);
   }, [open]);

@@ -207,10 +207,10 @@ function featuredCard(c: CoinSummary): CardData {
   return { ...c, ownerHandle: undefined };
 }
 
-/** Exhibition light belongs to the site palette (lit gold, antique gold, ivory, card red); each card keeps its own
- *  foil colours. */
+/** Exhibition light belongs to the site palette (D1: a soft amber halo of amber, antique gold, warm cream and deep
+ *  amber); each card keeps its own foil colours. */
 function auraColors(_level: number): string[] {
-  return ["var(--light-1)", "var(--light-2)", "var(--light-3)", "var(--light-4)"];
+  return ["var(--halo-1)", "var(--halo-2)", "var(--halo-3)", "var(--halo-4)"];
 }
 
 /** The pool of light on the plinth: the tier's sheen (its second color for many-color tiers), else its ring. */
@@ -221,11 +221,11 @@ function poolColor(level: number) {
 
 /** Bokeh, beam and dust for the vitrine: fixed positions (no randomness in render, SSR safe). */
 const BOKEH = [
-  { x: "8%", y: "18%", sz: 110, c: "var(--light-4)", d: 18, del: -3, dx: "26px", dy: "-18px" },
+  { x: "8%", y: "18%", sz: 110, c: "var(--halo-4)", d: 18, del: -3, dx: "26px", dy: "-18px" },
   { x: "62%", y: "8%", sz: 80, c: "var(--light-1)", d: 22, del: -9, dx: "-20px", dy: "16px" },
   { x: "30%", y: "60%", sz: 64, c: "var(--light-2)", d: 16, del: -5, dx: "18px", dy: "-22px" },
   { x: "78%", y: "46%", sz: 96, c: "var(--light-5)", d: 20, del: -12, dx: "-24px", dy: "-12px" },
-  { x: "46%", y: "28%", sz: 40, c: "var(--light-4)", d: 14, del: -2, dx: "14px", dy: "20px" },
+  { x: "46%", y: "28%", sz: 40, c: "var(--halo-1)", d: 14, del: -2, dx: "14px", dy: "20px" },
   { x: "18%", y: "78%", sz: 72, c: "var(--light-3)", d: 19, del: -7, dx: "22px", dy: "-14px" },
 ];
 /** Dust in three drifts of five motes each: a drift rises and fades as one (three layers, not fourteen). */

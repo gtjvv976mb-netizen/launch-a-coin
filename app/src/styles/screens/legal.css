@@ -45,8 +45,9 @@
   min-height: 0;
   padding: 24px;
   border-radius: var(--radius-panel);
-  background: color-mix(in srgb, var(--color-plinth) 90%, transparent);
-  box-shadow: var(--shadow-ring);
+  /* D1: a reading panel wears the suede, the gold rim and the logo's red corner. */
+  background: var(--corner-tab) right top / var(--corner-tab-size) no-repeat, var(--surface-suede), var(--color-plinth);
+  box-shadow: var(--rim-gold);
   outline: none;
 }
 @media (min-width: 1024px) {
@@ -64,7 +65,7 @@
   .cdx-legal__cols { column-count: 2; column-gap: 40px; }
 }
 .cdx-legal__item { break-inside: avoid; padding-bottom: 20px; }
-.cdx-legal__item h3 { font-size: 17px; font-weight: 600; line-height: 1.3; color: var(--color-ink); scroll-margin-top: 8px; }
+.cdx-legal__item h3 { font-family: var(--font-title); font-size: 17px; font-weight: 900; line-height: 1.3; color: var(--color-ink); scroll-margin-top: 8px; }
 .cdx-legal__item h3:focus { outline: none; }
 .cdx-legal__item p,
 .cdx-legal__item li { max-width: 34em; margin-top: 6px; font-size: 15px; line-height: 1.5; color: var(--color-slate); text-wrap: pretty; }

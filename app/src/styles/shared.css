@@ -65,13 +65,15 @@
   .mdx-tabs__tab[data-selected] .mdx-tabs__count {
     color: var(--color-ink);
   }
+  /* Danger (Start over): the secondary suede skin with a red label. */
   .mdx-btn--danger {
-    background: var(--color-nested);
+    background: none;
+    border-image: var(--skin-secondary) var(--skin-secondary-slice) / calc(var(--skin-h) * 0.34) calc(var(--skin-h) * 0.5) stretch;
     color: var(--color-down-hover);
   }
   @media (hover: hover) and (pointer: fine) {
     .mdx-btn--danger:hover:not(:disabled, [aria-disabled="true"]) {
-      background: var(--color-raised);
+      filter: brightness(1.12);
     }
   }
   .mdx-select--field {
@@ -634,7 +636,7 @@
 .cdx-overlay {
   display: flex;
   flex-direction: column;
-  background: var(--color-surface);
+  background: var(--surface-suede), var(--color-surface);
   color: var(--color-ink);
   box-shadow: var(--shadow-modal); /* taste-skill-ignore: a dialog or sheet floats (the one ring and its drop) */
   outline: none;
@@ -652,7 +654,7 @@
   /* MintDex: 24px padding, the 28px aside radius (24 under 1024px). */
   padding: 24px;
   border-radius: var(--radius-aside);
-  background: var(--color-plinth);
+  background: var(--surface-suede), var(--color-plinth);
 }
 @media (max-width: 1023.98px) {
   .cdx-overlay--dialog {
@@ -735,7 +737,7 @@
   position: sticky;
   bottom: 0;
   z-index: 1;
-  background: var(--color-surface);
+  background: var(--surface-suede), var(--color-surface);
   box-shadow: 0 4px 0 var(--color-surface); /* taste-skill-ignore: a flat band in the panel's own colour, not a lift */
 }
 .cdx-overlay--sheet .cdx-overlay__body .mdx-sheet-foot {

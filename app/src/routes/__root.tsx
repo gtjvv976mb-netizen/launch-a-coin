@@ -93,7 +93,7 @@ function buildHead(meta: AppMeta, devnetSite = false, notFound = false) {
       },
       { title },
       { name: "description", content: description },
-      { name: "theme-color", content: "#14110d" },
+      { name: "theme-color", content: "#26120b" },
       { name: "application-name", content: "Launch a Card" },
       // Which build this is (launch-plan D4 and E checks: curl the HTML and read it). sim, devnet or mainnet.
       { name: "carddex-mode", content: MODE },
@@ -116,8 +116,11 @@ function buildHead(meta: AppMeta, devnetSite = false, notFound = false) {
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      // No font preload (F17): Instrument Sans is not used early enough for one to pay off, and Chrome warned on
-      // every route that the preloaded file went unused. Its @font-face (font-display: swap) loads it on use.
+      // No Instrument Sans preload (F17): it is not used early enough for one to pay off, and Chrome warned on every
+      // route that the preloaded file went unused. Its @font-face (font-display: swap) loads it on use.
+      // The D1 heading serif is preloaded: every route paints a heading in it in the first screen (Home's display
+      // line, each page title, the 404's screen-reader title), so the request starts with the HTML, not after the CSS.
+      { rel: "preload", href: "/fonts/roboto-serif-900-wdth80-latin.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" as const },
       // The owner's logo (creative/brand/README.md): the wordless card as the favicon, the whole logo as app icons.
       { rel: "icon", href: "/assets/brand/carddex.svg", type: "image/svg+xml" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/assets/brand/carddex-180.png" },

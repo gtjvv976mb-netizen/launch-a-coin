@@ -239,17 +239,25 @@ body[data-scroll-locked] .mdx-tt__charge > b {
  * design chip is a desktop line there. */
 @media (max-width: 1023.98px) {
   .mdx-lot.cdx-home__lot {
-    --W: min(260px, calc(100vw - 32px), max(170px, calc((100dvh - 520px) / 1.85)));
-    margin-top: 12px;
+    /* The sway room (--sway-room) comes out of the card's own height budget, so the dots and Pause keep their place
+     * above the tab bar while the swaying card stays under the supporting line. */
+    --W: min(260px, calc(100vw - 32px), max(164px, calc((100dvh - 520px) / (1.85 + var(--sway-room)))));
+    margin-top: max(12px, calc(var(--W) * var(--sway-room)));
   }
   .cdx-home__design {
     display: none;
   }
 }
-/* From 1024px the stage starts a little under the actions, so a card swaying toward you clears them. */
+/* From 1024px the stage starts a little under the actions, so a card swaying toward you clears them. Under the fit
+ * template the lot's own top padding holds the sway room (alive.css); below it the lot gets the same room here. */
 @media (min-width: 1024px) {
   .cdx-home .mdx-stage {
     margin-top: 16px;
+  }
+}
+@media (min-width: 1024px) and (not ((min-width: 1280px) and (min-height: 720px))) {
+  .mdx-lot.cdx-home__lot {
+    padding-top: calc(var(--W) * var(--sway-room));
   }
 }
 /* The chevrons on the card's edges, centred on them at the card's mid-height (88/63 W tall: 44/63 W down). */

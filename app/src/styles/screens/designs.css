@@ -213,7 +213,7 @@
   line-height: 1;
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: var(--color-neon);
+  color: var(--color-neon-text);
 }
 
 /* ------------------------------------------------ the aside: the design table, then the selected design */

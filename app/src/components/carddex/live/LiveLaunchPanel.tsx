@@ -151,6 +151,16 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
   useEffect(() => { onBusyChange?.(!!busy); }, [busy, onBusyChange]);
   useEffect(() => () => onBusyChange?.(false), [onBusyChange]);
   useEffect(() => { onIntentLoaded(intent); }, [intent, onIntentLoaded]);
+  // D1 spark burst: once, over the visible preview card, when this visit's launch lands (a launch that was already
+  // complete when it loaded never plays it: that is a page load, not a success).
+  const lastStatus = useRef(intent?.status);
+  useEffect(() => {
+    const was = lastStatus.current;
+    lastStatus.current = intent?.status;
+    if (intent?.status !== "complete" || !was || was === "complete") return;
+    const stage = [...document.querySelectorAll(".cdx-launch-stage")].find((el) => el.getBoundingClientRect().width > 0);
+    void import("../../mintdex/arcade").then((m) => m.sparkBurst(stage));
+  }, [intent?.status]);
   useEffect(() => () => onLockedChange(false), [onLockedChange]);
   useEffect(() => {
     mounted.current = true;

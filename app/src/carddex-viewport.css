@@ -31,7 +31,7 @@ html .cdx-viewport .cdx-library__tools .cdx-filter { flex-wrap:wrap; overflow-x:
 .cdx-viewport .cdx-design-row { min-height:0; padding:8px 5px; overflow:clip; container-type:size; gap:6px; justify-content:center; }
 .cdx-viewport .cdx-design-row__preview { width:min(118px,calc((100cqh - 58px)*.63),78cqw); flex:none; }
 .cdx-viewport .cdx-design-row__text small { display:none; }
-.cdx-viewport .cdx-design-row__pair { display:block; margin-top:3px; font-size:var(--type-min); line-height:1.2; color:var(--color-neon); font-weight:600; white-space:nowrap; }
+.cdx-viewport .cdx-design-row__pair { display:block; margin-top:3px; font-size:var(--type-min); line-height:1.2; color:var(--color-neon-text); font-weight:600; white-space:nowrap; }
 .cdx-viewport .cdx-library__foot { margin:0; flex:none; }
 .cdx-archive-mobile-tabs { display:none; }
 @media(max-width:1023px) {

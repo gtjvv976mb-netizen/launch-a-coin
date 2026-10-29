@@ -12,7 +12,7 @@
 .cdx-pair-design-match { display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 10px; margin-top:5px; font-size:var(--type-min); line-height:1.5; color:var(--color-slate); }
 .cdx-pair-design-match strong { min-width:0; overflow-wrap:anywhere; color:var(--color-ink); font-weight:600; }
 .cdx-pair-matching { min-width:0; margin-top:6px; }
-.cdx-pair-matching__toggle { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; min-height:44px; padding:5px 0; border-top:1px solid var(--color-hairline); color:var(--color-neon); font-size:12px; text-align:left; cursor:pointer; }
+.cdx-pair-matching__toggle { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; min-height:44px; padding:5px 0; border-top:1px solid var(--color-hairline); color:var(--color-neon-text); font-size:12px; text-align:left; cursor:pointer; }
 .cdx-pair-matching__toggle svg { flex:none; }
 .cdx-pair-matching__toggle:hover:not(:disabled) { color:var(--color-ink); }
 .cdx-pair-matching__toggle:active:not(:disabled) { color:var(--color-slate); }
@@ -28,12 +28,12 @@
 .cdx-pair-picker--viewport .cdx-pair-design-match,.cdx-pair-picker--viewport .cdx-pair-matching { margin:0; }
 .cdx-pair-details { min-width:0; margin-top:6px; font-size:var(--type-min); line-height:1.5; color:var(--color-slate); }
 .cdx-pair-details__qualification { margin-top:4px; }
-.cdx-pair-details summary { cursor:pointer; display:inline-flex; align-items:center; min-height:30px; gap:8px; color:var(--color-neon); }
+.cdx-pair-details summary { cursor:pointer; display:inline-flex; align-items:center; min-height:30px; gap:8px; color:var(--color-neon-text); }
 .cdx-pair-details__body { padding:8px 10px; border-left:2px solid #c49b45; background:rgb(244 230 188 / .45); }
 .cdx-pair-details__body > span { display:block; font-size:var(--type-min); }
 .cdx-pair-mint { display:block; overflow-wrap:anywhere; font-family:var(--font-mono); color:var(--color-ink); margin-top:4px; }
 .cdx-pair-details__links { display:flex; flex-wrap:wrap; gap:2px 16px; margin-top:5px; }
-.cdx-pair-details__links a { display:inline-flex; min-height:30px; align-items:center; color:var(--color-neon); text-decoration:underline; text-underline-offset:3px; }
+.cdx-pair-details__links a { display:inline-flex; min-height:30px; align-items:center; color:var(--color-neon-text); text-decoration:underline; text-underline-offset:3px; }
 .cdx-pair-badge { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:center; gap:4px 12px; margin-top:10px; border-block:1px solid var(--color-hairline); padding:9px 0; font-size:var(--type-min); line-height:1.5; color:var(--color-slate); }
 .cdx-pair-badge strong { color:var(--color-ink); font-size:14px; overflow-wrap:anywhere; }
 .cdx-pair-badge__label { font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
@@ -43,13 +43,13 @@
 .cdx-pair-change > label { display:block; margin-top:8px; font-size:var(--type-min); }
 .cdx-pair-change > select { margin-top:4px; width:100%; font-size:16px; }
 .cdx-pair-change__actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
-.cdx-pair-row-label { color:var(--color-neon); }
+.cdx-pair-row-label { color:var(--color-neon-text); }
 .cdx-launch-cost { font-size:13px; line-height:1.5; padding-block:8px; }
 .cdx-launch-cost > div { display:flex; justify-content:space-between; gap:10px; }
 .cdx-launch-cost dt { color:var(--color-slate); }
 .cdx-launch-cost dd { text-align:right; font-weight:600; }
 .cdx-launch-cost small { display:block; margin-top:4px; color:var(--color-slate); font-size:var(--type-min); }
-.cdx-pair-notice { font-size:var(--type-min); line-height:1.5; color:var(--color-neon); margin-top:6px; }
+.cdx-pair-notice { font-size:var(--type-min); line-height:1.5; color:var(--color-neon-text); margin-top:6px; }
 @media(max-width:580px) { .cdx-pair-picker__head > span { font-size:var(--type-min); } .cdx-pair-details summary,.cdx-pair-details__links a { min-height:38px; } .cdx-pair-matching__toggle,.cdx-pair-matching__body > button { min-height:44px; } }
 
 .cdx-pair-picker--compact .cdx-pair-picker__hint > span,

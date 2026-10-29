@@ -24,11 +24,14 @@ body[data-scroll-locked] .mdx-holo-ink {
   animation-play-state: paused !important;
 }
 
-/* ---------------------------------------------------------------- sky (L9, hype arcade)
- * Behind every page: a fixed layer with a slow aurora (three soft neon glows that drift and turn), a starfield that
- * twinkles and a neon grid floor that scrolls toward you. Everything moves by transform or opacity only, on a handful
- * of layers; the whole sky pauses while the tab is hidden (data-paused, AppShell) and under an open dialog. Lite
- * keeps the still picture, calm too (nothing moves). */
+/* ---------------------------------------------------------------- sky (L9, hype arcade; D1 moving stage)
+ * Behind every page: a fixed layer. At its foot the D1 stage, a muted 5-second Higgsfield loop of the logo's
+ * chocolate suede wall with a breathing amber glow and drifting gold dust, played at half speed (AppShell's Sky
+ * attaches its source after load, so the still poster underneath is what paints first and the video never becomes
+ * the LCP). Over it MintDex's layers in the logo's colours: faint warm-gold dust (the stars), a grid floor of thin
+ * antique-gold lines that fade into the chocolate, and a slow amber aurora. Everything moves by transform or
+ * opacity only, on a handful of layers; the whole sky pauses while the tab is hidden (data-paused) and under an open
+ * dialog. Calm motion and reduced motion (mapped to Calm) show the still poster and start nothing. */
 .mdx-sky {
   position: fixed;
   inset: 0;
@@ -36,46 +39,77 @@ body[data-scroll-locked] .mdx-holo-ink {
   overflow: clip;
   pointer-events: none;
   contain: strict;
-  background: var(--color-wall);
+  background: var(--color-wall) var(--stage-poster) center / cover no-repeat;
+}
+@media (orientation: portrait) and (max-width: 1023.98px) {
+  .mdx-sky {
+    background-image: var(--stage-poster-phone);
+  }
 }
 .mdx-sky > i,
 .mdx-sky > b {
   position: absolute;
   display: block;
 }
-/* The aurora: two layers of soft neon glows (radial gradients, no filter) that drift and turn slowly. Two layers,
+/* The moving stage: the loop over its own poster, faded in once it really plays (opacity only). */
+.mdx-sky__stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 600ms var(--ease-room);
+}
+.mdx-sky__stage[data-playing] {
+  opacity: 1;
+}
+:root[data-motion] .mdx-sky__stage {
+  display: none;
+}
+/* The veil: the loop's breathing glow peaks bright in the upper middle of the frame, right where page titles, Home's
+ * headline and its actions sit. A still wash of the wall over the poster and the loop (darkest at the top, lightest
+ * at the foot where the card stands) keeps every line of text on the stage at 4.5:1 or better through the whole
+ * loop, and leaves a soft amber glow, as in the D1 mock-up. */
+.mdx-sky__veil {
+  inset: 0;
+  background:
+    radial-gradient(56% 40% at 52% 16%, rgb(var(--rgb-wall) / var(--stage-veil-glow)), rgb(var(--rgb-wall) / 0) 72%),
+    linear-gradient(to bottom, rgb(var(--rgb-wall) / var(--stage-veil-top)) 0%, rgb(var(--rgb-wall) / var(--stage-veil-mid)) 46%, rgb(var(--rgb-wall) / var(--stage-veil-foot)) 100%);
+}
+/* The aurora: two layers of soft amber glows (radial gradients, no filter) that drift and turn slowly. Two layers,
  * not one per glow: each moving layer costs its full size in raster memory (spec 9.1 layer budget). */
 .mdx-sky__a--1 {
   inset: -12%;
   background:
-    radial-gradient(42% 46% at 18% 14%, rgb(var(--rgb-gold) / 0.2), rgb(var(--rgb-gold) / 0.06) 55%, transparent 75%),
-    radial-gradient(40% 44% at 86% 22%, rgb(var(--rgb-zap) / 0.18), rgb(var(--rgb-bronze) / 0.06) 55%, transparent 75%);
+    radial-gradient(42% 46% at 18% 14%, rgb(var(--rgb-amber) / 0.12), rgb(var(--rgb-amber) / 0.035) 55%, transparent 75%),
+    radial-gradient(40% 44% at 86% 22%, rgb(var(--rgb-gold-hi) / 0.1), rgb(var(--rgb-bronze) / 0.04) 55%, transparent 75%);
 }
 .mdx-sky__a--2 {
   left: 18%;
   bottom: -34%;
   width: 70%;
   height: 80%;
-  background: radial-gradient(closest-side, rgb(var(--rgb-red) / 0.16), rgb(var(--rgb-red) / 0.06) 55%, transparent 78%);
+  background: radial-gradient(closest-side, rgb(var(--rgb-amber) / 0.1), rgb(var(--rgb-bronze) / 0.05) 55%, transparent 78%);
 }
-/* Stars: two still tiles of tiny dots at different pitches (painted with the sky, no layer). */
+/* Stars, now faint warm-gold dust: two still tiles of tiny motes at different pitches (painted with the sky). */
 .mdx-sky__stars {
   inset: 0;
-  opacity: 0.55;
+  opacity: 0.4;
   background-image:
-    radial-gradient(1px 1px at 12% 18%, var(--color-ink-hover) 50%, transparent 52%),
-    radial-gradient(1px 1px at 68% 42%, var(--color-ink) 50%, transparent 52%),
-    radial-gradient(1.2px 1.2px at 32% 76%, var(--color-ink-hover) 50%, transparent 52%),
-    radial-gradient(1px 1px at 86% 84%, var(--color-neon-hi) 50%, transparent 52%),
-    radial-gradient(1px 1px at 48% 8%, var(--color-ink) 50%, transparent 52%),
-    radial-gradient(1.6px 1.6px at 22% 52%, rgb(var(--rgb-light) / 0.7) 50%, transparent 55%),
-    radial-gradient(1.4px 1.4px at 74% 14%, rgb(var(--rgb-zap) / 0.7) 50%, transparent 55%);
+    radial-gradient(1px 1px at 12% 18%, rgb(var(--rgb-gold-hi) / 0.9) 50%, transparent 52%),
+    radial-gradient(1px 1px at 68% 42%, rgb(var(--rgb-zap) / 0.8) 50%, transparent 52%),
+    radial-gradient(1.2px 1.2px at 32% 76%, rgb(var(--rgb-gold-hi) / 0.85) 50%, transparent 52%),
+    radial-gradient(1px 1px at 86% 84%, rgb(var(--rgb-gold) / 0.9) 50%, transparent 52%),
+    radial-gradient(1px 1px at 48% 8%, rgb(var(--rgb-zap) / 0.75) 50%, transparent 52%),
+    radial-gradient(1.6px 1.6px at 22% 52%, rgb(var(--rgb-light) / 0.5) 50%, transparent 55%),
+    radial-gradient(1.4px 1.4px at 74% 14%, rgb(var(--rgb-gold-hi) / 0.6) 50%, transparent 55%);
   background-size: 260px 260px;
 }
-/* The grid floor: a plane laid back in perspective at the foot of the screen; its lines scroll toward you by one
- * cell (transform). It fades into the night toward the horizon and the sides under a still fog in the sky's own
- * color (::after), not a mask: a mask over a moving layer re-renders the whole masked surface every frame. It sits
- * under the aurora, so the glows still wash over it. */
+/* The grid floor: a plane laid back in perspective at the foot of the screen; its thin antique-gold lines scroll
+ * toward you by one cell (transform). It fades into the chocolate toward the horizon and the sides under a still fog
+ * in the wall's own colour (::after), not a mask: a mask over a moving layer re-renders the whole masked surface
+ * every frame. It sits under the aurora, so the glows still wash over it. */
 .mdx-sky__floor {
   left: 0;
   right: 0;
@@ -90,7 +124,7 @@ body[data-scroll-locked] .mdx-holo-ink {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to bottom, var(--color-wall) 0%, rgb(var(--rgb-wall) / 0) 48%),
+    linear-gradient(to bottom, var(--color-wall) 0%, rgb(var(--rgb-wall) / 0) 52%),
     linear-gradient(to right, var(--color-wall) 0%, rgb(var(--rgb-wall) / 0) 24%, rgb(var(--rgb-wall) / 0) 76%, var(--color-wall) 100%);
 }
 .mdx-sky__floor > i {
@@ -108,8 +142,8 @@ body[data-scroll-locked] .mdx-holo-ink {
   inset: -64px 0 0;
   display: block;
   background-image:
-    linear-gradient(to right, rgb(var(--rgb-gold) / 0.17) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(var(--rgb-zap) / 0.16) 1px, transparent 1px);
+    linear-gradient(to right, rgb(var(--rgb-gold) / 0.2) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--rgb-gold) / 0.17) 1px, transparent 1px);
   background-size: 64px 64px;
 }
 /* A faint scanline sheen over the whole sky (static). */
@@ -117,7 +151,7 @@ body[data-scroll-locked] .mdx-holo-ink {
   content: "";
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(to bottom, rgb(var(--rgb-light) / 0.018) 0 1px, transparent 1px 3px);
+  background: repeating-linear-gradient(to bottom, rgb(var(--rgb-light) / 0.012) 0 1px, transparent 1px 3px);
 }
 @keyframes mdx-aurora-1 {
   from {
@@ -232,7 +266,7 @@ body:has(.mdx-inspect) .mdx-sky {
 .mdx-holo-ink {
   background-image:
     linear-gradient(100deg, rgb(var(--rgb-light) / 0) 38%, rgb(var(--rgb-light) / 0.85) 50%, rgb(var(--rgb-light) / 0) 62%),
-    linear-gradient(100deg, var(--color-neon) 0%, var(--color-zap) 45%, var(--color-hype-ink) 100%);
+    linear-gradient(100deg, var(--color-neon-text) 0%, var(--color-zap) 45%, var(--color-neon-hi) 100%);
   background-size:
     300% 100%,
     100% 100%;
@@ -245,7 +279,7 @@ body:has(.mdx-inspect) .mdx-sky {
   color: transparent;
   -webkit-text-fill-color: transparent;
   text-shadow: none;
-  filter: drop-shadow(0 0 18px rgb(var(--rgb-gold) / 0.35));
+  filter: drop-shadow(0 0 18px rgb(var(--rgb-amber) / 0.3));
 }
 @keyframes mdx-ink-once {
   from {
@@ -311,9 +345,11 @@ body:has(.mdx-inspect) .mdx-sky {
 }
 @media (min-width: 1280px) and (min-height: 720px) {
   .mdx-lot {
-    --W: min(calc((100cqh - 8px) / 1.597), calc((100cqw - 290px) / 1.26));
+    /* The card (1.397W), its plinth room (0.2W) and the sway room above it (--sway-room-fit, theme) share the height. */
+    --W: min(calc((100cqh - 8px) / (1.597 + var(--sway-room-fit))), calc((100cqw - 290px) / 1.26), var(--tt-max));
     justify-content: center;
     padding-left: calc(var(--W) * 0.24);
+    padding-top: calc(var(--W) * var(--sway-room-fit));
     padding-bottom: calc(var(--W) * 0.2);
   }
 }
@@ -361,7 +397,7 @@ body:has(.mdx-inspect) .mdx-sky {
   height: calc(var(--W) * 0.14);
   border-radius: 0 0 50% 50% / 0 0 calc(var(--W) * 0.13) calc(var(--W) * 0.13);
   background: linear-gradient(to bottom, var(--color-sheet) 0%, var(--color-wall) 60%, var(--color-sleeve) 100%);
-  box-shadow: 0 10px 30px -10px rgb(var(--rgb-gold) / 0.35);
+  box-shadow: 0 10px 30px -10px rgb(var(--rgb-amber) / 0.35);
 }
 .mdx-tt__rim {
   left: -3px;
@@ -369,8 +405,8 @@ body:has(.mdx-inspect) .mdx-sky {
   top: -3px;
   height: calc(var(--W) * 0.26 + 6px);
   border-radius: 50%;
-  background: conic-gradient(from 200deg, var(--color-neon), var(--color-zap), var(--light-5), var(--color-hype), var(--light-1), var(--color-neon));
-  box-shadow: 0 0 22px rgb(var(--rgb-gold) / 0.55), 0 0 60px -10px rgb(var(--rgb-red) / 0.45);
+  background: conic-gradient(from 200deg, var(--color-neon), var(--color-zap), var(--light-5), var(--color-neon-hi), var(--light-1), var(--color-neon));
+  box-shadow: 0 0 22px rgb(var(--rgb-amber) / 0.45), 0 0 60px -10px rgb(var(--rgb-amber) / 0.35);
 }
 .mdx-tt__top {
   left: 0;
@@ -676,26 +712,40 @@ body:has(.mdx-inspect) .mdx-sky {
   visibility: hidden;
 }
 
-/* ---------------------------------------------------------------- Calm motion switch (10.2) */
+/* ---------------------------------------------------------------- Calm motion switch (10.2; D1 skins)
+ * The track is the D1 toggle art (suede off, red enamel on), 46x22 at the art's own 2.1:1. The gold knob is a window
+ * onto the same art at the knob's spot, so it slides with MintDex's spring and lands exactly on the knob painted in
+ * the next skin, which cross-fades in under it. */
 .mdx-switch {
+  --sw-w: 46px;
+  --sw-h: 22px;
+  --knob: 14.6px; /* 0.664 of the height, the art's knob */
+  --knob-off: 3.5px; /* the knob's left edge in toggle-off (centre at 0.234 of the width) */
+  --knob-on: 28.1px; /* and in toggle-on (centre at 0.769) */
   position: relative;
   display: inline-block;
-  width: 36px;
-  height: 22px;
+  width: var(--sw-w);
+  height: var(--sw-h);
   border-radius: var(--radius-pill);
-  background: var(--color-track);
-  box-shadow: inset 0 0 0 1px var(--color-control-border);
-  transition: background-color var(--t-fast) var(--ease-room);
+  background: var(--skin-toggle-off) center / 100% 100% no-repeat;
 }
-/* The pill draws 36x22; its touch target is 44x44 (MOT-7). The row around it is the switch's label too. */
+.mdx-switch::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--skin-toggle-on) center / 100% 100% no-repeat;
+  opacity: 0;
+  transition: opacity var(--t-base) var(--ease-room);
+}
+/* The pill draws 46x22; its touch target is 54x44 (MOT-7). The row around it is the switch's label too. */
 .mdx-switch::after {
   content: "";
   position: absolute;
   inset: -11px -4px;
 }
-.mdx-switch[data-on] {
-  background: var(--color-neon);
-  box-shadow: inset 0 0 0 1px var(--color-neon);
+.mdx-switch[data-on]::before {
+  opacity: 1;
 }
 .mdx-switch[aria-disabled="true"] {
   cursor: default;
@@ -706,18 +756,20 @@ body:has(.mdx-inspect) .mdx-sky {
 }
 .mdx-switch__thumb {
   position: absolute;
-  left: 3px;
-  top: 3px;
-  width: 16px;
-  height: 16px;
+  z-index: 1;
+  left: var(--knob-off);
+  top: calc((var(--sw-h) - var(--knob)) / 2);
+  width: var(--knob);
+  height: var(--knob);
   border-radius: 50%;
-  background: var(--color-ink);
-  box-shadow: 0 1px 2px rgb(var(--rgb-shade) / 0.5);
+  background: var(--skin-toggle-off) calc(var(--knob-off) * -1) calc((var(--sw-h) - var(--knob)) / -2) / var(--sw-w) var(--sw-h) no-repeat;
+  box-shadow: 0 1px 2px rgb(var(--rgb-shade) / 0.55);
   transition: transform var(--t-base) var(--ease-spring);
 }
 .mdx-switch[data-on] .mdx-switch__thumb {
-  transform: translateX(14px);
-  background: var(--color-neon-ink);
+  transform: translateX(calc(var(--knob-on) - var(--knob-off)));
+  background-image: var(--skin-toggle-on);
+  background-position: calc(var(--knob-on) * -1) calc((var(--sw-h) - var(--knob)) / -2);
 }
 
 /* ---------------------------------------------------------------- odometer (M19)
@@ -1035,8 +1087,8 @@ body:has(.mdx-inspect) .mdx-sky {
   display: block;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 32% 30%, var(--color-hype) 0%, rgb(var(--rgb-red) / 0) 36%),
-    radial-gradient(circle at 70% 34%, var(--color-zap) 0%, rgb(var(--rgb-zap) / 0) 34%),
+    radial-gradient(circle at 32% 30%, var(--halo-4) 0%, rgb(var(--rgb-amber) / 0) 36%),
+    radial-gradient(circle at 70% 34%, var(--halo-1) 0%, rgb(var(--rgb-amber) / 0) 34%),
     radial-gradient(circle at 64% 72%, var(--color-neon) 0%, rgb(var(--rgb-gold) / 0) 34%),
     radial-gradient(circle at 30% 68%, var(--light-5) 0%, rgb(var(--rgb-bronze) / 0) 36%);
   opacity: 0.42;
@@ -1080,14 +1132,15 @@ body:has(.mdx-inspect) .mdx-sky {
   gap: 10px;
   padding-left: 12px;
   overflow: clip;
-  border-bottom: 1px solid rgb(var(--rgb-gold) / 0.14);
-  background: linear-gradient(90deg, rgb(var(--rgb-gold) / 0.07), rgb(var(--rgb-plinth) / 0.82) 18%, rgb(var(--rgb-plinth) / 0.82) 82%, rgb(var(--rgb-red) / 0.07));
-  box-shadow: 0 1px 0 rgb(var(--rgb-shade) / 0.4), 0 10px 24px -18px rgb(var(--rgb-gold) / 0.6);
+  border-block: 1px solid rgb(var(--rgb-gold) / 0.5);
+  /* D1: the suede strip between two gold hairlines. */
+  background: var(--surface-suede), var(--color-plinth);
+  box-shadow: 0 1px 0 rgb(var(--rgb-shade) / 0.45), 0 10px 24px -18px rgb(var(--rgb-amber) / 0.45);
   font-size: 12.5px;
   line-height: 1;
 }
 .mdx-ticker[data-empty] {
-  background: rgb(var(--rgb-plinth) / 0.6);
+  background: var(--surface-suede), var(--color-plinth);
 }
 .mdx-ticker__live {
   display: inline-flex;
@@ -1098,10 +1151,10 @@ body:has(.mdx-inspect) .mdx-sky {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-neon);
+  color: var(--color-neon-text);
 }
 .mdx-ticker[data-activity="past"] {
-  border-bottom-color: var(--color-hairline);
+  border-bottom-color: rgb(var(--rgb-gold) / 0.36);
   box-shadow: 0 1px 0 rgb(var(--rgb-shade) / 0.4);
 }
 .mdx-ticker[data-activity="past"] .mdx-ticker__live {
@@ -1231,6 +1284,19 @@ body:has(.mdx-inspect) .mdx-sky {
   .mdx-ticker__pause {
     width: 44px;
   }
+}
+
+/* ---------------------------------------------------------------- launch spark (D1)
+ * arcade.ts sparkBurst: the 3-second gold burst on black, screen-blended over the new card (black drops out), once. */
+.mdx-spark {
+  position: fixed;
+  z-index: 2147482991;
+  object-fit: cover;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+:root[data-motion] .mdx-spark {
+  display: none;
 }
 
 /* ---------------------------------------------------------------- forced colors, more contrast */

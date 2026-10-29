@@ -70,7 +70,7 @@
 .cdx-coin-details__actions .mdx-link { display: inline-flex; align-items: center; gap: 4px; }
 /* Phones: the details are a panel of their own in the Card section. */
 @media (max-width: 1023.98px) {
-  .cdx-coin-details { border-radius: var(--radius-panel); background: var(--color-plinth); padding: 16px; }
+  .cdx-coin-details { border-radius: var(--radius-panel); background: var(--surface-suede), var(--color-plinth); box-shadow: var(--rim-gold-soft); padding: 16px; }
   .cdx-coin-details__more { margin-top: 0; }
 }
 

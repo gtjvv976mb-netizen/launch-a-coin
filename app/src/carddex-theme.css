@@ -1,54 +1,60 @@
-/* Launch a Card tokens: the ONE source of truth for colour, radius, type, shadow and motion (foundation-owned).
+/* Launch a Card tokens: the ONE source of truth for colour, radius, type, shadow, materials and motion.
  *
- * Direction (owner, 29 Oct 2026): mintdex.fun's format and motion, re-paletted "Classic dark": a dark stage for a
- * collector's cards. Deep ink ground, walnut panels, antique gold as the one accent (MintDex's neon mint), card red
- * as the second (MintDex's hot pink), ivory text. Every other step below is derived from those five.
+ * Direction "D1 Logo Ground" (owner, 29 Oct 2026: "pair the site with the logo, a classic but premium look", dark):
+ * mintdex.fun's format and motion, dressed in the owner's logo. The logo's chocolate ground is the page, a step up
+ * is every raised panel, the logo's cream is the text, antique gold draws every rim and line, and the logo's card red
+ * is the one standout: primary buttons, the active nav item's corner tab and the top-right corner of panels. Every
+ * other step below is derived from those five. Materials (suede, button skins, the moving stage) are Higgsfield
+ * art under /assets/site/d1 (creative/higgsfield/jobs-site-d1.json), referenced here only.
  *
  * The role names are MintDex's (wall, plinth, sheet, tint, neon, zap, hype...), so every restored rule and utility
- * (bg-plinth, text-slate, rounded-panel, ease-room) follows the palette. The names the 29 Oct release candidate
- * introduced (ground, surface, nested, raised, cta, text-body...) stay as aliases, so components kept from it render
- * in the same palette. Sheets and components read these names; they never write a colour of their own.
+ * (bg-plinth, text-slate, rounded-panel, ease-room) follows the palette: neon is the gold line and fill, zap the
+ * light gold of focus and links, hype the card red. The names the 29 Oct release candidate introduced (ground,
+ * surface, nested, raised, cta, text-body...) stay as aliases. Sheets and components read these names; they never
+ * write a colour of their own.
  *
- * Channel tokens (--rgb-*) are for alpha steps: rgb(var(--rgb-gold) / 0.2). */
+ * Channel tokens (--rgb-*) are for alpha steps: rgb(var(--rgb-gold) / 0.2). Contrast figures are WCAG ratios on the
+ * flat colour; tools/contrast measures them again on the textured surfaces. */
 
 @theme static {
-  /* ---- surfaces (dark ramp, warm) */
-  --color-wall: #14110d; /* deep ink: the canvas behind everything (the sky's ground) */
-  --color-plinth: #1f1a14; /* walnut: asides, panels, dialogs, menus, phone bars */
-  --color-sheet: #2b241b; /* raised walnut: fields, segmented thumb, secondary buttons, wallet card */
-  --color-tint: #332a20; /* row hover on a panel, chip buttons, key hint */
-  --color-sleeve: #0e0c09; /* the tray behind every minted card, nowhere else */
-  --color-wall-deep: #261f17; /* skeletons on the canvas */
-  --color-track: rgb(243 234 214 / 0.08); /* segmented tracks, select pills, ghost hover, progress tracks */
-  --color-wash: rgb(212 166 74 / 0.16); /* arrival wash on a new feed row, start colour only */
+  /* ---- surfaces (the logo's chocolate ramp) */
+  --color-wall: #26120b; /* the logo's chocolate ground: the canvas behind everything (the stage's ground) */
+  --color-plinth: #33190f; /* raised panels: rail, asides, dialogs, menus, phone bars (under the suede) */
+  --color-sheet: #40211a; /* a step up: fields, segmented thumb, secondary fills, the wallet card */
+  --color-tint: #4b2a1d; /* row hover on a panel, chip buttons, key hint */
+  --color-sleeve: #1b0c07; /* the tray behind every minted card, nowhere else */
+  --color-wall-deep: #321a10; /* skeletons on the canvas */
+  --color-track: rgb(243 231 207 / 0.08); /* segmented tracks, select pills, ghost hover, progress tracks */
+  --color-wash: rgb(179 132 58 / 0.18); /* arrival wash on a new feed row, start colour only */
 
-  /* ---- text and lines (ink 14.4:1, slate 7.9:1, placeholder 5.2:1 on sheet) */
-  --color-ink: #f3ead6; /* ivory: text, focus fallback, chart line */
-  --color-ink-hover: #fffaf0;
-  --color-slate: #bdae92; /* secondary text, inactive tabs, column heads (7.9:1 on plinth, 7.0:1 on sheet) */
-  --color-placeholder: #a39479; /* placeholder inside sheet fields only (5.2:1 on sheet) */
-  --color-field: #4d4234; /* decorative rules and leader dots */
-  --color-control-border: #8a7859; /* interactive boundaries: 3.6:1 on sheet, 4.0:1 on plinth */
-  --color-hairline: #3b3227; /* chart grid, table header rule, ledge line, panel edges */
-  --color-rule: #2a231b; /* row dividers on a panel */
+  /* ---- text and lines (ink 13.3:1, slate 6.9:1, placeholder 4.8:1 on sheet; all on plinth unless named) */
+  --color-ink: #f3e7cf; /* the logo's cream: text, focus fallback, chart line */
+  --color-ink-hover: #fff6e4;
+  --color-slate: #c7b393; /* muted cream: secondary text, inactive tabs, column heads (8.0:1, 7.1:1 on sheet; 4.5:1 or better over the brightest moment of the stage loop) */
+  --color-placeholder: #ad9673; /* placeholder inside sheet fields only (5.1:1 on sheet) */
+  --color-field: #5c3a22; /* decorative rules and leader dots */
+  --color-control-border: #a07a40; /* interactive boundaries: 3.7:1 on sheet, 4.2:1 on plinth */
+  --color-hairline: #4e2f1d; /* chart grid, table header rule, ledge line, inner panel edges */
+  --color-rule: #43251a; /* row dividers on a panel */
 
-  /* ---- accents: antique gold leads, card red backs it up, light gold marks focus and links */
-  --color-neon: #d4a64a; /* antique gold: primary buttons, active nav, the brand glow (7.7:1 on plinth) */
-  --color-neon-hi: #e6c06e; /* the primary's hover fill */
-  --color-neon-ink: #14110d; /* labels on a gold fill (8.4:1) */
-  --color-on-neon: #14110d;
-  --color-zap: #f0d48c; /* light gold: focus rings, links on hover, secondary glow (11.9:1 on plinth) */
-  --color-hype: #9e2b25; /* card red: launches, the hot accent (fills and glows; text uses hype-ink) */
-  --color-hype-ink: #e2766a; /* card red lifted for text on the dark ramp (5.8:1 on plinth) */
-  --color-on-hype: #f3ead6; /* ivory on a card-red fill */
+  /* ---- accents: antique gold draws, card red stands out, light gold marks focus and links */
+  --color-neon: #b3843a; /* antique gold: rims, lines, active marks and gold fills (4.9:1 on plinth) */
+  --color-neon-hi: #cf9f55; /* lit gold: a gold fill's hover */
+  --color-neon-text: #d4ab64; /* gold as text on the dark ramp: the active tab, figures that glow (7.6:1) */
+  --color-neon-ink: #26120b; /* labels on a gold fill (5.4:1) */
+  --color-on-neon: #26120b;
+  --color-zap: #e3c07c; /* light gold: focus rings, links on hover, the second glow (9.4:1) */
+  --color-hype: #b10407; /* the logo's card red: primary buttons, corner tabs, launches (fills only) */
+  --color-hype-ink: #f2715f; /* card red lifted for text on the dark ramp (5.7:1, 5.0:1 on sheet) */
+  --color-on-hype: #f3e7cf; /* cream on the card-red fill (5.9:1) */
 
   /* ---- market: green and red only ever mean the market, always with a sign or a triangle */
-  --color-up: #7fc493; /* 8.4:1 on plinth */
-  --color-up-hover: #9bd3aa;
-  --color-up-soft: rgb(127 196 147 / 0.14);
-  --color-down: #e8786c; /* 6.0:1 on plinth */
-  --color-down-hover: #ee9286;
-  --color-down-soft: rgb(232 120 108 / 0.14);
+  --color-up: #8cc79a; /* 8.4:1 */
+  --color-up-hover: #a6d6b0;
+  --color-up-soft: rgb(140 199 154 / 0.14);
+  --color-down: #f08a7c; /* 6.7:1 */
+  --color-down-hover: #f4a296;
+  --color-down-soft: rgb(240 138 124 / 0.14);
   --color-warn: #e0b456;
   --color-warn-soft: rgb(224 180 86 / 0.14);
 
@@ -69,7 +75,7 @@
   --color-cta-hover: var(--color-neon-hi);
   --color-on-cta: var(--color-neon-ink);
   --color-gold: var(--color-neon);
-  --color-gold-soft: rgb(212 166 74 / 0.14);
+  --color-gold-soft: rgb(179 132 58 / 0.16);
   --color-red: var(--color-hype);
 
   /* ---- radius roles (MintDex): buttons are pills */
@@ -83,9 +89,12 @@
   --radius-btn: var(--radius-pill);
   --radius-sheet: var(--radius-panel);
 
-  /* ---- type: the same free families mintdex.fun ships (self-hosted under /fonts) */
+  /* ---- type: MintDex's free sans for body and UI; headings in a heavy classic serif that matches the logo's
+   * lettering (Roboto Serif Black, wdth 80, opsz 36: the closest OFL match to wordmark.webp's condensed, wedge-serif
+   * capitals). All self-hosted under /fonts, each with a metric-matched local fallback so the swap does not shift. */
   --font-sans: "Instrument Sans", "Instrument Sans Fallback", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-title: var(--font-sans);
+  --font-serif-head: "Roboto Serif", "Roboto Serif Fallback", Georgia, "Times New Roman", serif;
+  --font-title: var(--font-serif-head); /* display, page titles, section titles, caption names, plates */
   --font-addr: "Fragment Mono", ui-monospace, "SF Mono", Menlo, monospace; /* addresses and hashes */
   --font-card-serif: "Libre Caslon Text", Georgia, "Times New Roman", serif;
   --font-card-mono: "Courier Prime", ui-monospace, Menlo, monospace;
@@ -119,51 +128,92 @@
 @property --tier {
   syntax: "<color>";
   inherits: true;
-  initial-value: #d4a64a;
+  initial-value: #b3843a;
 }
 
 :root {
   color-scheme: dark;
 
   /* ---- colour channels for alpha steps */
-  --rgb-wall: 20 17 13;
-  --rgb-plinth: 31 26 20;
-  --rgb-ink: 243 234 214; /* ivory */
-  --rgb-gold: 212 166 74; /* antique gold */
-  --rgb-gold-hi: 232 196 120; /* lit gold (glow cores, the neon-hi ring) */
-  --rgb-zap: 240 212 140; /* light gold (focus) */
-  --rgb-red: 158 43 37; /* card red */
-  --rgb-red-hi: 226 118 106; /* card red lifted (glows on the dark ramp) */
-  --rgb-bronze: 150 96 44; /* the deep stop between gold and red (aurora, holo) */
-  --rgb-up: 127 196 147;
-  --rgb-down: 232 120 108;
-  --rgb-shade: 0 0 0;
-  --rgb-light: 255 250 235; /* warm white: sheens, highlights, scanlines */
+  --rgb-wall: 38 18 11; /* chocolate */
+  --rgb-plinth: 51 25 15;
+  --rgb-ink: 243 231 207; /* cream */
+  --rgb-gold: 179 132 58; /* antique gold */
+  --rgb-gold-hi: 214 168 96; /* lit gold (glow cores, the amber halo) */
+  --rgb-zap: 227 192 124; /* light gold (focus) */
+  --rgb-red: 177 4 7; /* card red */
+  --rgb-red-hi: 242 113 95; /* card red lifted (glows on the dark ramp) */
+  --rgb-bronze: 140 90 40; /* the deep stop between gold and chocolate (aurora, holo) */
+  --rgb-amber: 222 150 62; /* the stage's breathing glow (the loop's own amber) */
+  --rgb-up: 140 199 154;
+  --rgb-down: 240 138 124;
+  --rgb-shade: 10 4 2; /* warm black */
+  --rgb-light: 255 246 228; /* warm white: sheens, highlights, scanlines */
 
-  /* ---- the chrome foil and its sheen (MintDex: neon to cyan to violet to pink; here gold to ivory to card red) */
-  --holo: linear-gradient(125deg, #d4a64a 0%, #f3ead6 38%, #e0b45c 66%, #9e2b25 100%);
+  /* ---- the gilt foil and its sheen (MintDex's neon-to-pink foil, here gold to cream to gold to bronze) */
+  --holo: linear-gradient(125deg, #b3843a 0%, #f3e7cf 40%, #d4ab64 68%, #8c5a28 100%);
   --holo-flat: var(--color-neon); /* forced colours and print */
-  --sheen: linear-gradient(105deg, transparent 30%, rgb(255 250 235 / 0.5) 46%, rgb(var(--rgb-gold-hi) / 0.55) 52%, rgb(255 250 235 / 0.5) 58%, transparent 74%);
+  --sheen: linear-gradient(105deg, transparent 30%, rgb(var(--rgb-light) / 0.5) 46%, rgb(var(--rgb-gold-hi) / 0.55) 52%, rgb(var(--rgb-light) / 0.5) 58%, transparent 74%);
 
-  /* ---- glows (box-shadow lists): primary buttons, active nav, focus */
-  --glow-neon: 0 0 0 1px rgb(var(--rgb-gold) / 0.9), 0 0 14px rgb(var(--rgb-gold) / 0.42), 0 0 34px -6px rgb(var(--rgb-gold) / 0.48);
-  --glow-neon-hi: 0 0 0 1px rgb(var(--rgb-gold-hi) / 1), 0 0 18px rgb(var(--rgb-gold) / 0.62), 0 0 48px -4px rgb(var(--rgb-gold) / 0.56);
-  --glow-zap: 0 0 0 1px rgb(var(--rgb-zap) / 0.55), 0 0 16px -2px rgb(var(--rgb-zap) / 0.42);
-  --glow-focus: 0 0 0 4px rgb(var(--rgb-zap) / 0.22), 0 0 18px rgb(var(--rgb-zap) / 0.32);
-  --glow-hype: 0 0 0 1px rgb(var(--rgb-red-hi) / 0.7), 0 0 16px -2px rgb(var(--rgb-red) / 0.6);
+  /* ---- glows (box-shadow lists): soft amber, never neon */
+  --glow-neon: 0 0 0 1px rgb(var(--rgb-gold) / 0.85), 0 0 12px rgb(var(--rgb-amber) / 0.22), 0 0 30px -8px rgb(var(--rgb-amber) / 0.3);
+  --glow-neon-hi: 0 0 0 1px rgb(var(--rgb-gold-hi) / 1), 0 0 16px rgb(var(--rgb-amber) / 0.32), 0 0 40px -6px rgb(var(--rgb-amber) / 0.36);
+  --glow-zap: 0 0 0 1px rgb(var(--rgb-zap) / 0.55), 0 0 14px -2px rgb(var(--rgb-amber) / 0.32);
+  --glow-focus: 0 0 0 4px rgb(var(--rgb-zap) / 0.18), 0 0 16px rgb(var(--rgb-amber) / 0.26);
+  --glow-hype: 0 0 0 1px rgb(var(--rgb-red-hi) / 0.6), 0 0 16px -2px rgb(var(--rgb-red) / 0.55);
 
-  /* ---- shadows (warm black), plus a hairline of light on the top edge of raised things */
-  --shadow-ring: 0 0 0 1px rgb(var(--rgb-ink) / 0.09);
-  --shadow-rest: inset 0 1px 0 rgb(var(--rgb-ink) / 0.04), 0 0 0 1px rgb(var(--rgb-ink) / 0.08), 0 1px 2px rgb(var(--rgb-shade) / 0.4), 0 10px 30px -12px rgb(var(--rgb-shade) / 0.7);
-  --shadow-raise: inset 0 1px 0 rgb(var(--rgb-ink) / 0.06), 0 0 0 1px rgb(var(--rgb-ink) / 0.1), 0 3px 8px -2px rgb(var(--rgb-shade) / 0.5);
-  --shadow-lift: 0 2px 4px rgb(var(--rgb-shade) / 0.4), 0 12px 24px -10px rgb(var(--rgb-shade) / 0.7);
-  --shadow-float: 0 0 0 1px rgb(var(--rgb-ink) / 0.12), 0 6px 14px -4px rgb(var(--rgb-shade) / 0.5), 0 22px 44px -16px rgb(var(--rgb-shade) / 0.8);
-  --shadow-modal: 0 0 0 1px rgb(var(--rgb-ink) / 0.14), 0 10px 30px -8px rgb(var(--rgb-shade) / 0.6), 0 44px 90px -30px rgb(var(--rgb-shade) / 0.9), 0 0 80px -20px rgb(var(--rgb-gold) / 0.18);
+  /* ---- rims: the logo's gold edge on every raised surface (a hairline outside, a faint lit line inside) */
+  --rim-gold: 0 0 0 1px rgb(var(--rgb-gold) / 0.62), inset 0 1px 0 rgb(var(--rgb-light) / 0.05);
+  --rim-gold-soft: 0 0 0 1px rgb(var(--rgb-gold) / 0.34);
+
+  /* ---- shadows (warm black), plus the gold rim on raised things */
+  --shadow-ring: var(--rim-gold-soft);
+  --shadow-rest: var(--rim-gold), 0 1px 2px rgb(var(--rgb-shade) / 0.45), 0 12px 32px -14px rgb(var(--rgb-shade) / 0.75);
+  --shadow-raise: inset 0 1px 0 rgb(var(--rgb-light) / 0.06), 0 0 0 1px rgb(var(--rgb-gold) / 0.3), 0 3px 8px -2px rgb(var(--rgb-shade) / 0.55);
+  --shadow-lift: 0 2px 4px rgb(var(--rgb-shade) / 0.45), 0 12px 24px -10px rgb(var(--rgb-shade) / 0.75);
+  --shadow-float: 0 0 0 1px rgb(var(--rgb-gold) / 0.5), 0 6px 14px -4px rgb(var(--rgb-shade) / 0.55), 0 22px 44px -16px rgb(var(--rgb-shade) / 0.85);
+  --shadow-modal: 0 0 0 1px rgb(var(--rgb-gold) / 0.6), 0 10px 30px -8px rgb(var(--rgb-shade) / 0.65), 0 44px 90px -30px rgb(var(--rgb-shade) / 0.9), 0 0 80px -20px rgb(var(--rgb-amber) / 0.16);
   --shadow-border: 0 0 0 1px rgb(var(--rgb-ink) / 0.08);
   --shadow-pop: var(--shadow-float);
   --card-shadow: rgb(var(--rgb-shade) / 0.55); /* the card's contact shadow (card3d.css) */
-  --overlay: rgb(10 8 6 / 0.74); /* dialog backdrop, no blur */
+  --overlay: rgb(14 6 3 / 0.76); /* dialog backdrop, no blur */
   --image-outline: rgb(var(--rgb-ink) / 0.1); /* MIFB image outline on thumbnails, dark */
+
+  /* ---- materials (Higgsfield D1, app/public/assets/site/d1). The suede tile sits under raised surfaces at
+   * --suede-veil opacity of the panel colour over it, so text contrast stays within 3% of the flat panel. */
+  --material-suede: url("/assets/site/d1/panel-suede-768.webp");
+  --suede-size: 384px 384px;
+  --suede-veil: 0.82; /* how much of the panel colour lies over the tile (the tile shows at 18%) */
+  --surface-suede:
+    linear-gradient(rgb(var(--rgb-plinth) / var(--suede-veil)), rgb(var(--rgb-plinth) / var(--suede-veil))),
+    var(--material-suede) 0 0 / var(--suede-size) repeat;
+  --corner-tab: url("/assets/site/d1/corner-tab-72.webp"); /* the logo's own red corner (72px copy of corner-tab.webp) */
+  --corner-tab-size: 34px; /* on a panel's top-right corner */
+  --corner-tab-nav: 18px; /* on the active nav item's right end */
+  /* Button and control skins: 96px-tall copies (2x the largest 48px control) of the Higgsfield kits, cut with
+   * percentage slices so any copy keeps the same caps. The hover, pressed and glint art load after the page does
+   * (html[data-skins], AppShell), so they never compete with the first paint. */
+  --skin-primary: url("/assets/site/d1/btn-primary-h96.webp"); /* red enamel pill, gold rim */
+  --skin-primary-hover: url("/assets/site/d1/btn-primary-hover-h96.webp");
+  --skin-primary-slice: 34% 16% fill;
+  --skin-secondary: url("/assets/site/d1/btn-secondary-h96.webp"); /* chocolate suede pill, gold rim */
+  --skin-secondary-pressed: url("/assets/site/d1/btn-secondary-pressed-h96.webp");
+  --skin-secondary-slice: 34% 15% fill;
+  --skin-chip: url("/assets/site/d1/chip-h96.webp");
+  --skin-chip-slice: 34% 19.6% fill;
+  --skin-icon: url("/assets/site/d1/btn-icon-96.webp"); /* a gold-rimmed suede circle */
+  --skin-toggle-on: url("/assets/site/d1/toggle-on-h48.webp");
+  --skin-toggle-off: url("/assets/site/d1/toggle-off-h48.webp");
+  --glint: url("/assets/site/d1/glint-320.webp"); /* the gold light streak a primary's hover sweeps once */
+  --stage-poster: url("/assets/site/d1/stage-loop-poster.webp"); /* first frame of the stage loop, 1344 x 768 */
+  --stage-poster-phone: url("/assets/site/d1/stage-loop-phone-poster-light.webp"); /* 768 x 1344, a lighter encode (11 KB) of stage-loop-phone-poster.webp for the phone first paint */
+  --stage-rate: 0.5; /* the loop's playbackRate (AppShell's Sky plays it at this speed) */
+  --stage-veil-top: 0.76; /* the wall over the stage at the top (titles and Home's actions sit here) */
+  --stage-veil-mid: 0.66;
+  --stage-veil-glow: 0.42; /* an extra wash over the glow's peak, upper middle of the loop's frame */
+  --stage-veil-foot: 0.48; /* at the foot, where the card and its glow stand */
+  --t-skin: 150ms; /* a button skin's hover cross-fade */
+  --t-btn-glint: 600ms; /* the button glint's one sweep */
 
   /* ---- durations (MintDex). Stagger is capped at 10 items. */
   --t-press: 100ms;
@@ -216,6 +266,12 @@
   --gap-grid: 16px; /* between tiles in a grid */
   --pad-panel: 20px; /* plinth padding (16px on short screens and phones) */
   --tile-min: 150px; /* the smallest tile track in an auto-fill grid */
+  /* Home's turntable: the card's idle sway and a drag lift its projected top edge by up to about 0.2 of its width
+   * (measured 0.13W at 1280x720 to 0.21W at 1920x1080), so the stage keeps that much room above it and the card never
+   * rises into the action row. */
+  --sway-room: 0.22; /* phones and the 1024 to 1279 desktop */
+  --sway-room-fit: 0.17; /* the fit template, where the stage's own 16px gap and the card's rest margin add to it */
+  --tt-max: 450px; /* the sway grows with the square of the card's size: past 450px wide it would reach the actions */
   --tile-min-design: 150px;
   --actionbar-h: 64px; /* a phone sticky action bar (kept components) */
 
@@ -244,11 +300,17 @@
   --v3d-control-hover: var(--color-zap);
 
   /* ---- the confetti and exhibition light (arcade.ts, Home's aura and bokeh read these) */
-  --light-1: #e8c478; /* lit gold */
-  --light-2: #d4a64a; /* antique gold */
-  --light-3: #f3ead6; /* ivory */
-  --light-4: #9e2b25; /* card red */
-  --light-5: #b8743a; /* bronze */
+  --light-1: #d6a860; /* lit gold */
+  --light-2: #b3843a; /* antique gold */
+  --light-3: #f3e7cf; /* cream */
+  --light-4: #b10407; /* card red */
+  --light-5: #9a6430; /* bronze */
+
+  /* The stage's amber halo behind the featured card (Home's aura and bokeh read these; never neon). */
+  --halo-1: #e0a252; /* amber */
+  --halo-2: #b3843a; /* antique gold */
+  --halo-3: #e2ac62; /* warm light amber */
+  --halo-4: #c26a2b; /* deep amber */
 
   /* Avatar stops: pale warm tints (a dark initial reads 10:1 or better on each). */
   --avatar-1: #f3d27a;

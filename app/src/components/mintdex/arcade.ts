@@ -151,6 +151,38 @@ export function launchBurst(at?: { x: number; y: number }) {
   bigBurst(lights(1, 2, 3, 4, 5), at, { confetti: true });
 }
 
+/**
+ * D1's launch spark (Higgsfield spark-burst.mp4: a 3-second gold burst on black, 16:9, no audio): played once,
+ * screen-blended over the new card on a launch's success state (demo and live), then removed. Never on load (callers
+ * fire it on the success transition only), never under Calm motion or the device's reduced-motion setting (unless the
+ * visitor chose full motion), never in a hidden tab.
+ */
+export function sparkBurst(target: Element | null | undefined) {
+  if (typeof window === "undefined" || !target || calm()) return;
+  const root = document.documentElement;
+  if (root.dataset.motion || (window.matchMedia("(prefers-reduced-motion: reduce)").matches && root.dataset.motionPref !== "full")) return;
+  const card = target.matches(".mdx-card") ? target : (target.querySelector(".mdx-card") ?? target);
+  const r = card.getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  const w = Math.max(r.width, r.height) * 1.9;
+  const h = (w * 9) / 16;
+  const v = document.createElement("video");
+  v.className = "mdx-spark";
+  v.setAttribute("aria-hidden", "true");
+  v.muted = true;
+  v.playsInline = true;
+  v.preload = "auto";
+  v.disablePictureInPicture = true;
+  v.style.cssText = `left:${r.left + r.width / 2 - w / 2}px;top:${r.top + r.height / 2 - h / 2}px;width:${w}px;height:${h}px;`;
+  v.src = "/assets/site/d1/spark-burst.mp4";
+  const remove = () => v.remove();
+  v.addEventListener("ended", remove, { once: true });
+  v.addEventListener("error", remove, { once: true });
+  window.setTimeout(remove, 5000);
+  document.body.appendChild(v);
+  v.play().catch(remove);
+}
+
 /** The center of an element on screen (for a burst from a card). */
 export function centerOf(el: Element | null | undefined): { x: number; y: number } | undefined {
   if (!el) return undefined;

@@ -101,6 +101,30 @@
   line-gap-override: 0%;
 }
 
+/* Headings (D1): Roboto Serif Black, instanced at wdth 80 / opsz 36 / GRAD 0 and cut to Latin (26 KB, OFL: see
+ * /fonts/roboto-serif-OFL.txt). The closest free match to the logo's lettering (creative/brand, wordmark.webp):
+ * heavy, slightly condensed capitals with wedge serifs. Only the 900 face exists, so every heading weight maps to it
+ * and nothing is synthesized. */
+@font-face {
+  font-family: "Roboto Serif";
+  src: url("/fonts/roboto-serif-900-wdth80-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Metric-matched fallback so the swap does not shift headings: Georgia Bold is 5.3% wider than the cut (measured on
+ * the site's own headings), with the cut's 0.927 / 0.244 ascent and descent. */
+@font-face {
+  font-family: "Roboto Serif Fallback";
+  src: local("Georgia Bold"), local("Georgia-Bold"), local("Noto Serif Bold"), local("NotoSerif-Bold");
+  font-weight: 100 900;
+  size-adjust: 95%;
+  ascent-override: 97.6%;
+  descent-override: 25.7%;
+  line-gap-override: 0%;
+}
+
 /* Card only (unchanged faces). */
 @font-face {
   font-family: "Libre Caslon Text";
@@ -247,57 +271,55 @@
  * @media (hover: hover), so a tap never leaves a hover style behind (backlog P0-1). */
 
 @layer components {
-  /* Type roles (delta section 5). Newsreader (--font-title) sets only the display line, page titles, the
-   * wordmark and plates: never under 15px, never italic, never a control, row, stat, caption name or section
-   * title. Everything you work in is Instrument Sans. */
+  /* Type roles (delta section 5; D1). The heading serif (--font-title, Roboto Serif Black) sets the display line,
+   * page titles, section titles and the featured caption name: never under 15px, never italic, never a control,
+   * row, stat or label. Everything you work in is Instrument Sans. */
   .mdx-display {
     font-family: var(--font-title);
     font-size: clamp(36px, 6.4vh, 54px);
     line-height: 1;
-    font-weight: 700;
-    font-stretch: 78%;
-    letter-spacing: -0.015em;
+    font-weight: 900;
+    letter-spacing: -0.012em;
     color: var(--color-ink);
     text-wrap: balance;
-    text-shadow: 0 0 28px rgb(var(--rgb-gold) / 0.18);
+    text-shadow: 0 0 28px rgb(var(--rgb-amber) / 0.16);
   }
   .mdx-h1 {
     font-family: var(--font-title);
     font-size: 30px;
     line-height: 1;
-    font-weight: 700;
-    font-stretch: 80%;
-    letter-spacing: -0.01em;
+    font-weight: 900;
+    letter-spacing: -0.008em;
     color: var(--color-ink);
     /* Accent guard: room for accented capitals and descenders inside truncate, layout neutral. Newsreader's
      * ring on A reaches 0.90em against a 0.735em ascent, so at 30px on a 1.0 line it needs 5px above the line box. */
     padding-block: 6px 4px;
     margin-block: -6px -4px;
   }
-  /* Section title: sans 16/600 (was serif 18). */
+  /* Section title (D1): the heading serif at 17/900, on MintDex's 20px line. */
   .mdx-h2 {
-    font-family: var(--font-sans);
-    font-size: 16px;
-    line-height: 1.25;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-family: var(--font-title);
+    font-size: 17px;
+    line-height: 1.18;
+    font-weight: 900;
+    letter-spacing: 0;
     color: var(--color-ink);
   }
   /* Featured caption name (Home, Levels, Launch preview): sans 26/600. Coin names are user entered and the
    * Caption truncates, so it keeps a 4px accent guard. */
   .mdx-name {
-    font-family: var(--font-sans);
+    font-family: var(--font-title);
     font-size: 26px;
     line-height: 1.15;
-    font-weight: 600;
-    letter-spacing: -0.015em;
+    font-weight: 900;
+    letter-spacing: -0.008em;
     color: var(--color-ink);
     padding-block: 4px;
     margin-block: -4px;
   }
   /* Identifiers, not data: "No. 004", Roman design numerals, guide step numbers. */
   .mdx-plate {
-    font-family: var(--font-title);
+    font-family: var(--font-sans); /* identifiers stay in MintDex's sans; the serif is for headings only */
     font-weight: 600;
     font-stretch: 85%;
     font-variant-numeric: lining-nums tabular-nums;
@@ -409,12 +431,22 @@
     background: radial-gradient(circle, var(--color-field) 0.9px, transparent 1.15px) 0 50% / 5px 2px repeat-x;
     transform: translateY(-3px);
   }
-  /* Paper panel. Content panels carry a 1px ring only; full height asides add .mdx-aside (below). */
+  /* Raised panel (D1): the plinth colour over the suede tile, a gold hairline rim. Full height asides add
+   * .mdx-aside (below), which also wears the logo's red corner tab at its top right. */
   .mdx-plinth {
-    background: color-mix(in srgb, var(--color-plinth) 90%, transparent);
+    background: var(--surface-suede), var(--color-plinth);
     padding: 20px;
     border-radius: var(--radius-aside);
-    box-shadow: var(--shadow-ring);
+    box-shadow: var(--rim-gold);
+  }
+  /* The one material utility: suede under the rail, the ticker and any raised surface that is not a plinth. */
+  .mdx-suede {
+    background: var(--surface-suede), var(--color-plinth);
+  }
+  /* The logo's red corner, used sparingly: the rail, full-height asides and the reading panels. It is a background
+   * layer, so the panel's own rounded corner clips it and it never adds a box. */
+  .mdx-cornered {
+    background: var(--corner-tab) right top / var(--corner-tab-size) no-repeat, var(--surface-suede), var(--color-plinth);
   }
   /* main sets these: --gutter is the float inset of an aside, --bleed how far it runs through main's padding. */
   .mdx-main {
@@ -429,6 +461,10 @@
       margin-block: calc(var(--bleed) * -1);
       margin-right: calc(var(--bleed) * -1);
       border-radius: var(--radius-aside);
+      background-image: var(--corner-tab), linear-gradient(rgb(var(--rgb-plinth) / var(--suede-veil)), rgb(var(--rgb-plinth) / var(--suede-veil))), var(--material-suede);
+      background-position: right top, 0 0, 0 0;
+      background-size: var(--corner-tab-size), auto, var(--suede-size);
+      background-repeat: no-repeat, no-repeat, repeat;
       box-shadow: var(--shadow-rest);
     }
   }
@@ -504,9 +540,9 @@
     }
   }
   .mdx-tab[data-active="true"] {
-    color: var(--color-neon);
+    color: var(--color-ink);
     font-weight: 600;
-    text-shadow: 0 0 12px rgb(var(--rgb-gold) / 0.45);
+    text-shadow: 0 0 12px rgb(var(--rgb-amber) / 0.35);
   }
   .mdx-tab:focus-visible {
     outline-offset: -2px; /* inset ring: never clipped by the rail's overflow */
@@ -555,10 +591,15 @@
     height: 40px;
     pointer-events: none;
     border-radius: var(--radius-field);
-    background: linear-gradient(90deg, rgb(var(--rgb-gold) / 0.14), rgb(var(--rgb-gold) / 0.04));
+    /* D1: a gold-rimmed pill with the logo's red corner tab at its right end (it slides with the pill). */
+    background:
+      var(--corner-tab) right top / var(--corner-tab-nav) no-repeat,
+      linear-gradient(90deg, rgb(var(--rgb-gold) / 0.2), rgb(var(--rgb-gold) / 0.06)),
+      rgb(var(--rgb-wall) / 0.55);
     box-shadow:
-      inset 0 0 0 1px rgb(var(--rgb-gold) / 0.45),
-      0 0 18px -4px rgb(var(--rgb-gold) / 0.45);
+      inset 0 0 0 1px rgb(var(--rgb-gold) / 0.78),
+      inset 0 1px 0 rgb(var(--rgb-light) / 0.08),
+      0 0 18px -6px rgb(var(--rgb-amber) / 0.4);
     transform: translateY(calc(var(--i, 0) * 40px));
     transition:
       transform var(--t-slow) var(--ease-spring),
@@ -581,7 +622,7 @@
     transition: color var(--t-fast) var(--ease-room);
   }
   .mdx-mtab[data-active="true"] {
-    color: var(--color-neon);
+    color: var(--color-neon-text);
     font-weight: 600;
   }
   .mdx-mtab[data-active="true"] .mdx-mtab__icon > .mdx-icon {
@@ -637,7 +678,9 @@
     gap: 0;
     padding: 4px;
     border-radius: var(--radius-pill);
-    background: var(--color-track);
+    /* D1: a raised suede track with a soft gold rim, so its labels keep their contrast over the moving stage. */
+    background: var(--surface-suede), var(--color-plinth);
+    box-shadow: var(--rim-gold-soft);
   }
   .mdx-tabs__tab {
     position: relative;
@@ -767,8 +810,10 @@
 
   /* ------------------------------------------------ buttons and links */
 
-  /* Every button is a pill. Heights 44 (md), 32 (sm), 48 (lg); Accept stays 28 (h-7). */
+  /* Every button is a pill. Heights 44 (md), 32 (sm), 48 (lg); Accept stays 28 (h-7). --skin-h follows the
+   * height so a D1 skin's caps stay round at every size. */
   .mdx-btn {
+    --skin-h: 44px;
     position: relative;
     isolation: isolate;
     display: inline-flex;
@@ -778,7 +823,7 @@
     justify-content: center;
     gap: 8px;
     padding: 0 22px;
-    border: 0;
+    border: 0 solid transparent;
     border-radius: var(--radius-pill);
     font-family: var(--font-sans);
     font-size: 15px;
@@ -791,14 +836,17 @@
       background-color var(--t-fast) var(--ease-room),
       color var(--t-fast) var(--ease-room),
       box-shadow var(--t-base) var(--ease-room),
+      filter var(--t-fast) var(--ease-room),
       transform var(--t-base) var(--ease-spring);
   }
   .mdx-btn--sm {
+    --skin-h: 32px;
     height: 32px;
     padding: 0 14px;
     font-size: 13px;
   }
   .mdx-btn--lg {
+    --skin-h: 48px;
     height: 48px;
     padding: 0 26px;
   }
@@ -806,63 +854,108 @@
     width: 100%;
   }
 
-  /* Primary: a clean ink pill at rest. Foil only on touch, as one sheen per hover. */
-  .mdx-btn--primary {
-    background: var(--color-neon);
-    color: var(--color-neon-ink);
-    box-shadow: var(--glow-neon);
+  /* D1 premium skins (Higgsfield, /assets/site/d1): each pill is a 9-slice border-image, cut at its caps and
+   * filled, so it stretches to the live label at any width while the text stays real. The caps are drawn at half
+   * the button's height, the top and bottom bands at a third, so every size keeps the art's proportions. A second
+   * skin on ::before cross-fades in 150ms for hover (primary) or press (secondary); the primary's ::after carries
+   * the gold glint. Both sit under the label (the button isolates, z-index -1). */
+  .mdx-btn:is(.mdx-btn--primary, .mdx-btn--outline, .mdx-btn--chip),
+  .mdx-btn:is(.mdx-btn--primary, .mdx-btn--outline, .mdx-btn--chip)::before {
+    border-image-width: calc(var(--skin-h) * 0.34) calc(var(--skin-h) * 0.5);
+    border-image-repeat: stretch;
   }
-  .mdx-btn--primary::after {
+  .mdx-btn:is(.mdx-btn--primary, .mdx-btn--outline)::before {
     content: "";
     position: absolute;
     inset: 0;
-    z-index: -1; /* above the fill, under the label (the button isolates) */
+    z-index: -1;
     border-radius: inherit;
     pointer-events: none;
     opacity: 0;
-    background: var(--sheen) 125% 0 / 250% 100% no-repeat;
+    transition: opacity var(--t-skin) var(--ease-room);
   }
-  /* Secondary. The class keeps the name "outline" so no call site changes. */
+  /* Primary: red enamel with a gold rim (cream label 5.9:1 on the enamel). */
+  .mdx-btn--primary {
+    background: none;
+    border-image-source: var(--skin-primary);
+    border-image-slice: var(--skin-primary-slice);
+    color: var(--color-on-hype);
+    text-shadow: 0 1px 1px rgb(var(--rgb-shade) / 0.55);
+    box-shadow: 0 8px 18px -10px rgb(var(--rgb-red) / 0.7);
+  }
+  :root[data-skins] .mdx-btn--primary::before {
+    border-image-source: var(--skin-primary-hover);
+    border-image-slice: var(--skin-primary-slice);
+  }
+  /* The glint: one gold streak swept across on hover by a background-position transition (never a loop; leaving
+   * snaps it back unseen, because only the hover state carries the transition). */
+  .mdx-btn--primary::after {
+    --glint-w: calc(var(--skin-h) * 3.6);
+    content: "";
+    position: absolute;
+    inset: 3px;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: none calc(var(--glint-w) * -1.6) 50% / var(--glint-w) 150% no-repeat;
+    mix-blend-mode: screen;
+    opacity: 0.9;
+  }
+  :root[data-skins] .mdx-btn--primary::after {
+    background-image: var(--glint);
+  }
+  /* Secondary (the class keeps the name "outline" so no call site changes): chocolate suede with a gold rim. */
   .mdx-btn--outline {
-    background: var(--color-sheet);
+    background: none;
+    border-image-source: var(--skin-secondary);
+    border-image-slice: var(--skin-secondary-slice);
     color: var(--color-ink);
-    box-shadow:
-      0 0 0 1px rgb(var(--rgb-zap) / 0.32),
-      var(--shadow-raise);
+    box-shadow: 0 6px 14px -10px rgb(var(--rgb-shade) / 0.8);
+  }
+  :root[data-skins] .mdx-btn--outline::before {
+    border-image-source: var(--skin-secondary-pressed);
+    border-image-slice: var(--skin-secondary-slice);
   }
   /* Ghost: text button with a pill hover. */
   .mdx-btn--ghost {
     background: transparent;
     color: var(--color-ink);
   }
-  /* Chip: quick amounts. Soft rect, not a pill, so it sits well under the 14px field. */
+  /* Chip: quick amounts, on the small suede skin. */
   .mdx-btn--chip {
+    --skin-h: 32px;
     height: 32px;
     padding: 0;
-    border-radius: var(--radius-row);
-    background: var(--color-tint);
+    border-radius: var(--radius-pill);
+    background: none;
+    border-image-source: var(--skin-chip);
+    border-image-slice: var(--skin-chip-slice);
     color: var(--color-ink);
   }
   /* Market fills: never foil. */
   .mdx-btn--buy {
     background: var(--color-up);
     color: var(--color-neon-ink);
-    box-shadow: 0 0 0 1px rgb(var(--rgb-up) / 0.8), 0 0 16px -2px rgb(var(--rgb-up) / 0.55);
+    box-shadow: 0 0 0 1px rgb(var(--rgb-up) / 0.8), 0 0 16px -4px rgb(var(--rgb-up) / 0.45);
   }
   .mdx-btn--sell {
     background: var(--color-down);
     color: var(--color-neon-ink);
-    box-shadow: 0 0 0 1px rgb(var(--rgb-down) / 0.8), 0 0 16px -2px rgb(var(--rgb-down) / 0.55);
+    box-shadow: 0 0 0 1px rgb(var(--rgb-down) / 0.8), 0 0 16px -4px rgb(var(--rgb-down) / 0.45);
   }
-  /* Icon: 32px circle in the secondary recipe (pager and stepper chevrons). */
+  /* Icon: a round gold-rimmed suede button (pager and stepper chevrons). */
   .mdx-btn--icon {
     width: 32px;
     height: 32px;
     padding: 0;
+    border-image: none;
+    background: var(--skin-icon) center / 100% 100% no-repeat;
+    color: var(--color-ink);
+    box-shadow: none;
   }
 
   @media (hover: hover) {
-    .mdx-btn:hover:not(:disabled, [aria-disabled="true"], .mdx-btn--ghost, .mdx-btn--chip, .mdx-btn--primary, .mdx-btn--buy, .mdx-btn--sell, .mdx-btn--outline) {
+    .mdx-btn:hover:not(:disabled, [aria-disabled="true"], .mdx-btn--ghost, .mdx-btn--chip, .mdx-btn--primary, .mdx-btn--buy, .mdx-btn--sell, .mdx-btn--outline, .mdx-btn--icon) {
       transform: translateY(-1px);
       box-shadow: var(--shadow-lift);
     }
@@ -870,42 +963,49 @@
       transform: translateY(-1px);
     }
     .mdx-btn--primary:hover:not(:disabled, [aria-disabled="true"]) {
-      background: var(--color-neon-hi);
-      box-shadow: var(--glow-neon-hi);
+      box-shadow: 0 10px 22px -10px rgb(var(--rgb-red) / 0.8), 0 0 18px -6px rgb(var(--rgb-amber) / 0.45);
+    }
+    .mdx-btn--primary:hover:not(:disabled, [aria-disabled="true"])::before {
+      opacity: 1;
     }
     .mdx-btn--primary:hover:not(:disabled, [aria-disabled="true"])::after {
-      animation: mdx-sheen var(--t-sheen) var(--ease-sheen) both;
+      background-position: calc(100% + var(--glint-w) * 1.6) 50%;
+      transition: background-position var(--t-btn-glint) var(--ease-sheen);
     }
     .mdx-btn--outline:hover:not(:disabled, [aria-disabled="true"]) {
-      box-shadow:
-        var(--glow-zap),
-        var(--shadow-lift);
+      filter: brightness(1.12);
+      box-shadow: 0 8px 18px -10px rgb(var(--rgb-shade) / 0.85), 0 0 16px -6px rgb(var(--rgb-amber) / 0.4);
     }
     .mdx-btn--ghost:hover:not(:disabled, [aria-disabled="true"]) {
       background: var(--color-track);
     }
     .mdx-btn--chip:hover:not(:disabled, [aria-disabled="true"]) {
-      background: var(--color-sheet);
-      box-shadow: var(--shadow-raise);
+      filter: brightness(1.15);
+    }
+    .mdx-btn--icon:hover:not(:disabled, [aria-disabled="true"]) {
+      filter: brightness(1.18);
     }
     .mdx-btn--buy:hover:not(:disabled, [aria-disabled="true"]) {
       background: var(--color-up-hover);
-      box-shadow: 0 0 0 1px rgb(var(--rgb-up) / 1), 0 0 24px rgb(var(--rgb-up) / 0.6);
+      box-shadow: 0 0 0 1px rgb(var(--rgb-up) / 1), 0 0 22px rgb(var(--rgb-up) / 0.45);
     }
     .mdx-btn--sell:hover:not(:disabled, [aria-disabled="true"]) {
       background: var(--color-down-hover);
-      box-shadow: 0 0 0 1px rgb(var(--rgb-down) / 1), 0 0 24px rgb(var(--rgb-down) / 0.6);
+      box-shadow: 0 0 0 1px rgb(var(--rgb-down) / 1), 0 0 22px rgb(var(--rgb-down) / 0.45);
     }
   }
 
-  /* Press: scale in 100ms, then spring back over 220ms on release. After the hover rules so it wins
-   * while the pointer is still over the button. */
+  /* Press: scale to 0.96 in 100ms, then spring back over 220ms on release. After the hover rules so it wins
+   * while the pointer is still over the button. A secondary also takes its pressed skin. */
   /* The :is() matches every button but carries a class's weight, so this ties the 0,4,0 hover lift above and,
    * coming later, wins on mouse devices too (calm's !important transform: none still overrides it). */
   .mdx-btn:is(.mdx-btn--primary, .mdx-btn--buy, .mdx-btn--sell, .mdx-btn--outline, *):active:not(:disabled, [aria-disabled="true"]) {
     transform: scale(0.96);
     transition-duration: var(--t-press);
     transition-timing-function: var(--ease-room);
+  }
+  .mdx-btn--outline:active:not(:disabled, [aria-disabled="true"])::before {
+    opacity: 1;
   }
   .mdx-btn--ghost:active:not(:disabled, [aria-disabled="true"]) {
     background: rgb(var(--rgb-ink) / 0.16);
@@ -915,28 +1015,35 @@
   }
 
   /* Disabled (native or aria-disabled, which Button uses so focus survives a busy or disabled state) keeps
-   * the label, often the reason, readable: track fill, slate label, no shadow, no motion. */
+   * the label, often the reason, readable: the skin desaturated and dimmer, no glow, no motion. */
   .mdx-btn:disabled,
   .mdx-btn[aria-disabled="true"] {
-    background: var(--color-track);
+    background-color: var(--color-track);
     color: var(--color-slate);
+    text-shadow: none;
     box-shadow: none;
     transform: none;
     cursor: not-allowed;
+  }
+  .mdx-btn:is(.mdx-btn--primary, .mdx-btn--outline, .mdx-btn--chip, .mdx-btn--icon):is(:disabled, [aria-disabled="true"]) {
+    background-color: transparent;
+    color: var(--color-ink);
+    filter: saturate(0.25) brightness(0.72);
   }
   .mdx-btn[aria-busy="true"] {
     cursor: progress;
   }
   .mdx-btn:disabled::after,
-  .mdx-btn[aria-disabled="true"]::after {
+  .mdx-btn[aria-disabled="true"]::after,
+  .mdx-btn:disabled::before,
+  .mdx-btn[aria-disabled="true"]::before {
     display: none;
   }
   /* After the generic disabled rule (same specificity, later wins). */
   .mdx-btn--icon:disabled,
   .mdx-btn--icon[aria-disabled="true"] {
-    background: transparent;
-    box-shadow: 0 0 0 1px rgb(var(--rgb-ink) / 0.12);
-    color: var(--color-field);
+    box-shadow: none;
+    color: var(--color-slate);
   }
   /* An input and a button side by side share the field radius. */
   .mdx-pair .mdx-btn {
@@ -996,6 +1103,7 @@
   @media (max-width: 1023.98px) {
     .mdx-btn--sm,
     .mdx-btn--chip {
+      --skin-h: 44px;
       min-height: 44px;
     }
     .mdx-btn--icon {
@@ -1397,7 +1505,7 @@
   .mdx-menu {
     padding: 6px;
     border-radius: var(--radius-pop);
-    background: var(--color-plinth);
+    background: var(--surface-suede), var(--color-plinth);
     box-shadow: var(--shadow-float);
     transform-origin: var(--radix-dropdown-menu-content-transform-origin, var(--radix-popover-content-transform-origin, center top));
   }
@@ -1646,12 +1754,11 @@
       opacity var(--t-base) var(--ease-room) var(--t-fast);
   }
 
-  /* Focus on a button keeps its own glow and adds the cyan one. */
+  /* Focus on a button: the 2px light-gold ring 2px out (base :focus-visible) plus a soft amber halo. */
   .mdx-btn:focus-visible {
+    outline: 2px solid var(--color-zap);
+    outline-offset: 2px;
     box-shadow: var(--glow-focus);
-  }
-  .mdx-btn--primary:focus-visible {
-    box-shadow: var(--glow-neon), var(--glow-focus);
   }
 
   .mdx-icon {
@@ -2219,12 +2326,55 @@ a:focus-visible .mdx-lift {
   justify-content: center;
   column-gap: 0.25em;
   padding: 4px 24px;
-  border-bottom: 1px solid var(--color-hairline);
-  background: var(--color-plinth);
+  border-bottom: 0;
+  /* D1: the strip lies on the stage itself, behind a veil of the wall so its line keeps its contrast over the
+   * moving glow; the ticker's gold hairline under it draws the edge. */
+  background: rgb(var(--rgb-wall) / 0.78);
   color: var(--color-slate);
   font-size: 13px;
   line-height: 20px;
   text-align: center;
+}
+
+/* ---------------------------------------------------------------- shell materials (D1)
+ * The rail is a raised suede panel with a gold hairline on its inner edge, a rounded foot and the logo's red corner
+ * at its top right; the phone header and tab bar wear the same suede. Unlayered, so they beat the bg-wall and
+ * bg-plinth utilities on the same elements. */
+@media (min-width: 1024px) {
+  .mdx-rail {
+    background: var(--corner-tab) right top / var(--corner-tab-size) no-repeat, var(--surface-suede), var(--color-plinth);
+    border-bottom-right-radius: var(--radius-aside);
+    box-shadow:
+      inset -1px 0 0 rgb(var(--rgb-gold) / 0.62),
+      inset 0 -1px 0 rgb(var(--rgb-gold) / 0.62),
+      12px 0 30px -22px rgb(var(--rgb-shade) / 0.9);
+  }
+}
+/* Panels drawn with the bg-plinth utility (the coin page's market panel and its phone panels) take the suede too; a
+ * panel that turns transparent inside a desktop aside drops it there. The utility keeps the colour; this adds the
+ * texture layers only. */
+.bg-plinth:not(.mdx-aside) {
+  background-image: linear-gradient(rgb(var(--rgb-plinth) / var(--suede-veil)), rgb(var(--rgb-plinth) / var(--suede-veil))), var(--material-suede);
+  background-size: auto, var(--suede-size);
+}
+@media (min-width: 1024px) {
+  .lg\:bg-plinth:not(.mdx-aside) {
+    background-image: linear-gradient(rgb(var(--rgb-plinth) / var(--suede-veil)), rgb(var(--rgb-plinth) / var(--suede-veil))), var(--material-suede);
+    background-size: auto, var(--suede-size);
+  }
+  .bg-plinth[class~="lg:bg-transparent"] {
+    background-image: none;
+  }
+}
+.mdx-mhead {
+  background: var(--surface-suede), var(--color-plinth);
+  box-shadow: inset 0 -1px 0 rgb(var(--rgb-gold) / 0.4);
+}
+.mdx-mobile-tabs {
+  background: var(--surface-suede), var(--color-plinth);
+  box-shadow:
+    inset 0 1px 0 rgb(var(--rgb-gold) / 0.62),
+    0 -10px 30px -14px rgb(var(--rgb-shade) / 0.75);
 }
 @media (max-width: 1023.98px) {
   .mdx-status {
@@ -2279,10 +2429,23 @@ a:focus-visible .mdx-lift {
 :root[data-motion="calm"] .mdx-skeleton--wall::after {
   display: none;
 }
+/* The glint never sweeps under calm (nor under reduced motion, below); the hover and press skins still swap,
+ * with the same 150ms fade as the colors. */
+:root[data-motion="calm"] .mdx-btn--primary::after {
+  display: none;
+}
+:root[data-motion="calm"] :is(.mdx-btn--primary, .mdx-btn--outline)::before {
+  transition: opacity 150ms ease !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion-pref="full"]) .mdx-btn--primary::after {
+    display: none;
+  }
+}
 /* Button feedback stays under calm: no lift or press scale, but the hover and press colors fade in 150ms and a
  * press dims the button, so a tap still answers. */
 :root[data-motion="calm"] :is(.mdx-btn, .mdx-case__btn, .cdx-filter button) {
-  transition-property: background-color, color, border-color, opacity !important;
+  transition-property: background-color, color, border-color, opacity, filter !important;
   transition-duration: 150ms !important;
   transition-timing-function: ease !important;
 }
