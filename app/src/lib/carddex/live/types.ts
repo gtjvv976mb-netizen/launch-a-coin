@@ -6,6 +6,11 @@ export type LivePrepareInput = {
   name: string; symbol: string; description: string; website?: string; xUrl?: string; cardTemplate: string;
   quoteAssetKey: string; quoteMint: string; initialBuyQuoteBaseUnits: string; slippageBps: number;
   assets: LiveAssets; termsAcknowledged: true;
+  /**
+   * Also prepare the card transaction now, for a wallet that approves the coin and its card in one prompt. Not part of
+   * the launch's identity: the same request with or without it is the same launch.
+   */
+  withCard?: boolean;
 };
 export type LiveComposeInput = Pick<LivePrepareInput, "tokenMint" | "name" | "symbol" | "description" | "website" | "xUrl" | "cardTemplate" | "quoteAssetKey" | "quoteMint">;
 export type { WalletTransactionPlan } from "../../../../../integrations/pumpfun/src/live";
@@ -18,6 +23,8 @@ export type LiveReadiness = {
   network: "solana-mainnet-beta"; publicOrigin: string | null; blockers: string[];
   /** Wallet names (Wallet Standard `name`, any case) that sign before this page co-signs; "*" is every wallet. */
   walletFirst: string[];
+  /** Wallet names that approve the coin and its card in one prompt (multi-input solana:signTransaction). Never Phantom. */
+  walletBatch: string[];
 };
 export type LiveWallet = { wallet: string; expiresAt: number };
 export type LiveLaunchIntent = {
@@ -28,7 +35,27 @@ export type LiveLaunchIntent = {
   tokenMetadataUri: string; nftMetadataUri: string; assets: LiveAssets;
   tokenSignature: string | null; nftSignature: string | null;
   createdAt: number; updatedAt: number;
+  /**
+   * The card the wallet approved together with the coin, saved before the coin was sent (getLiveLaunchIntent only):
+   * the plan id and the exact signed bytes the relay sends once the coin is verified. Null when none is saved for the
+   * current card address; absent from other responses.
+   */
+  approvedCard?: LiveApprovedCard | null;
+  /**
+   * Set by getLiveLaunchIntent when the saved launch could not be confirmed as it stands (it never throws for a chain
+   * problem, so a saved launch always loads and can be discarded or prepared again). Absent when the check found nothing
+   * to say or was not run.
+   */
+  chainCheck?: LiveChainCheck;
 };
+/**
+ * What the last chain check of a saved launch found. "failed-on-chain": its transaction landed and failed, so nothing
+ * was created. "expired-unlanded": its saved transaction can no longer land and never did. Both can be prepared again
+ * with the same keys (or discarded) once the server proves nothing can still land. "unchecked": Solana could not be
+ * checked now; the launch is unchanged.
+ */
+export type LiveChainCheck = { state: "failed-on-chain" | "expired-unlanded" | "unchecked"; kind: "token" | "nft"; reason: string };
+export type LiveApprovedCard = { messageSha256: string; transactionBase64: string; nftMint: string };
 /**
  * `unsendable`: the server did not send this signed transaction and never will, so its stage is prepared again.
  * `expired`: that refusal was the wallet approval's blockhash running out, so the page can prepare and ask once more.

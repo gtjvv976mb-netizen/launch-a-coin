@@ -10,6 +10,7 @@ import {
   type ArtWidth,
 } from "../../lib/mintdex/server/art.server";
 import { userFromRequest } from "../../lib/mintdex/server/auth.server";
+import { clientKey, enforceLimit, LIMITS, SITE } from "../../lib/carddex/live/limits.server";
 
 const TYPES: Record<string, string> = {
   "image/webp": "webp",
@@ -49,6 +50,16 @@ export const Route = createFileRoute("/api/upload")({
         if (!user) return json({ ok: false, error: "Try the demo first to upload art." }, 401);
         const { STORAGE } = bindings();
         if (!STORAGE) return json({ ok: false, error: "Uploads are not available right now." }, 503);
+        // Public art on the site's own domain: limited per account, per connecting address (an IPv6 /64) and for the
+        // whole site (SEC-3, SEC-R1, SEC-R5), before the body is read. The Worker entry already refused anything over
+        // the upload size.
+        try {
+          await enforceLimit(LIMITS.demoUploadUser, user.id);
+          await enforceLimit(LIMITS.demoUploadIp, clientKey(request.headers.get("cf-connecting-ip")));
+          await enforceLimit(LIMITS.demoUploadSite, SITE);
+        } catch {
+          return json({ ok: false, error: "That's a lot of uploads. Wait a while, then try again." }, 429);
+        }
 
         let form: FormData;
         try {

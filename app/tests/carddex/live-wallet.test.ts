@@ -7,46 +7,14 @@ import { CARD_DESIGNS } from "../../src/lib/carddex/designs";
 import { base58, fromBase58, hexHash, LIVE_PROGRAMS, parseLiveTransaction, partiallySignPlan, toBase64, unsentStageNext, validateLivePlan, validateWalletResult, destroyEphemeralSigner, type ExpectedPlan, type TransactionPlan,
   addEphemeralSignature, fromBase64, oversizedPlanError, planForWallet, planIsStale, refreshKeepsReview, signingOrderFor, signPlanWithWallet, validateWalletFirstResult, WALLET_CHANGED_TRANSACTION, WalletChangedTransaction } from "../../src/components/carddex/live/transaction";
 import { liveModeOpen } from "../../src/components/carddex/live/mode";
+import { signForLaunch, WALLET_RETRY_NOTICE } from "../../src/components/carddex/live/launch-flow";
+import { BUY_DOES_NOT_FIT, liveBuyRefusal, STOCK_BUY_WARNS } from "../../src/components/carddex/live/buy-fit";
+import { messageOf, payerGuardData, phantomGuarded, tokenGuardData, unsignedTransaction } from "../../../integrations/pumpfun/tests/message-fixtures";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
 import { LiveWalletNotice } from "../../src/components/carddex/live/LiveWalletNotice";
 import { WALLET_NOTICE_COPY, WALLET_NOTICE_TITLE, WALLET_OPEN_COPY, walletNoticeItems } from "../../src/components/carddex/live/wallet-notice";
-
-// Deterministic, unfunded test-only signers. No wallet, RPC or network is used.
-const creatorSeed = new Uint8Array(32).fill(3), assetSeed = new Uint8Array(32).fill(4);
-const creator = base58(ed25519.getPublicKey(creatorSeed)), mint = base58(ed25519.getPublicKey(assetSeed));
-const encodeText = (text: string) => { const data = new TextEncoder().encode(text); return [data.length & 255, data.length >> 8 & 255, 0, 0, ...data]; };
-const computeInstructions = [4,0,5,2,32,161,7,0,4,0,9,3,232,3,0,0,0,0,0,0];
-const tokenUri = "https://launchacard.fun/m/test-token";
-function short(n: number) { return n < 128 ? [n] : [(n & 127) | 128, n >> 7]; }
-function fixture(cardTemplate = "pokemon-classic", quoteKey = "sol") {
-  const asset = getPairAsset(quoteKey), custom = quoteKey !== "sol";
-  const blockhashBytes = new Uint8Array(32).fill(7);
-  const data = [214,144,76,236,95,139,49,180, ...encodeText("Test"), ...encodeText("TEST"), ...encodeText(tokenUri), ...fromBase58(creator), ...new Uint8Array(11)];
-  const accounts = Array.from({length:custom?20:16},(_,i)=>i===0?1:i===5?0:custom&&i===18?5:2);
-  const message = Uint8Array.from([128, 2, 0, custom?4:3, custom?6:5,
-    ...fromBase58(creator), ...fromBase58(mint), ...fromBase58(asset.mint), ...fromBase58(LIVE_PROGRAMS.pump), ...fromBase58(LIVE_PROGRAMS.compute),
-    ...(custom ? fromBase58(asset.tokenProgram) : []),
-    ...blockhashBytes, 3, ...computeInstructions, 3, accounts.length, ...accounts, ...short(data.length), ...data, 0]);
-  const bytes = Uint8Array.from([2, ...new Uint8Array(128), ...message]);
-  const plan: TransactionPlan = { kind: "token", network: "solana:mainnet", transactionBase64: toBase64(bytes), messageSha256: hexHash(message), blockhash: base58(blockhashBytes), lastValidBlockHeight: 10_000, requiredSigners: [creator, mint], feePayer: creator, bindingSha256: "a".repeat(64), instructionPrograms: [LIVE_PROGRAMS.compute,LIVE_PROGRAMS.pump], verifiedSlot: 100,
-    review: { networkFeeLamports: "10000", priorityFeeLamports: "500", rentAndProgramCostLamports: "1000000", totalDebitLamports: "1010500", initialBuyQuoteBaseUnits: "0", launchInitialBuyQuoteBaseUnits: "0", quoteKey: asset.key, quoteMint: asset.mint, quoteDecimals: asset.decimals, minimumTokensOut: "0", computeUnitLimit:500000,microLamportsPerComputeUnit:1000 } };
-  const expected: ExpectedPlan = { kind: "token", creator, mint, tokenMint: mint, name: "Test", symbol: "TEST", tokenMetadataUri: tokenUri, nftMetadataUri: "https://launchacard.fun/m/test-nft", cardTemplate, cardImageSha256: "c".repeat(64), nftMetadataSha256: "d".repeat(64), quoteTokenProgram: asset.tokenProgram, bindingSha256: plan.bindingSha256, quoteKey: asset.key, quoteMint: asset.mint, quoteDecimals: asset.decimals, initialBuyQuoteBaseUnits: "0", launchInitialBuyQuoteBaseUnits: "0" };
-  return { plan, expected, bytes };
-}
-
-function nftFixture(cardTemplate = "pokemon-classic", quoteKey = "sol") {
-  const {plan: tokenPlan, expected: tokenExpected} = fixture(cardTemplate, quoteKey);
-  const nft = base58(ed25519.getPublicKey(new Uint8Array(32).fill(5)));
-  const expected: ExpectedPlan = {...tokenExpected, kind:"nft", mint:nft};
-  const attributes = {token_mint:mint,quote_mint:expected.quoteMint,card_design:expected.cardTemplate,binding_sha256:expected.bindingSha256,card_sha256:expected.cardImageSha256,metadata_sha256:expected.nftMetadataSha256};
-  const createData = [20,0,...encodeText(expected.name),...encodeText(expected.nftMetadataUri),1,1,0,0,0,6,6,0,0,0,...Object.entries(attributes).flatMap(([key,value])=>[...encodeText(key),...encodeText(value)]),1,0,1,0,0,0,0];
-  const blockhashBytes = new Uint8Array(32).fill(7);
-  const message = Uint8Array.from([128,2,0,3,5,...fromBase58(creator),...fromBase58(nft),...fromBase58(LIVE_PROGRAMS.core),...new Uint8Array(32),...fromBase58(LIVE_PROGRAMS.compute),...blockhashBytes,4,...computeInstructions,2,8,1,2,0,0,0,0,3,2,...short(createData.length),...createData,2,6,1,2,0,0,3,2,5,15,0,0,1,0,0]);
-  const bytes = Uint8Array.from([2,...new Uint8Array(128),...message]);
-  const plan:TransactionPlan = {...tokenPlan,kind:"nft",requiredSigners:[creator,nft],transactionBase64:toBase64(bytes),messageSha256:hexHash(message),instructionPrograms:[LIVE_PROGRAMS.compute,LIVE_PROGRAMS.core]};
-  return {plan,expected,bytes};
-}
+import { assetSeed, creator, creatorSeed, fixture, mint, nftFixture } from "./live-plan-fixtures";
 
 describe("real quote amount precision", () => {
   test("parses every base unit without floating-point rounding", () => {
@@ -229,8 +197,6 @@ describe("wallet-first signing order", () => {
     const changes: Array<(bytes: Uint8Array) => Uint8Array> = [
       // A different priority fee: the SetComputeUnitPrice data (9 bytes, 3 then u64 1000) gets another price.
       unsigned => { const out = unsigned.slice(), at = out.findIndex((_, i) => out[i] === 9 && out[i + 1] === 3 && out[i + 2] === 232 && out[i + 3] === 3); out[at + 2] = 233; return out; },
-      // A refreshed blockhash.
-      unsigned => { const wire = parseLiveTransaction(unsigned), out = unsigned.slice(), at = wire.signatureOffset + 128 + 4 + 1 + wire.keys.length * 32; out.set(new Uint8Array(32).fill(9), at); return out; },
     ];
     for (const change of changes) {
       const wallet = fakeWallet(change);
@@ -308,15 +274,15 @@ describe("what your wallet will show", () => {
   const sol = { symbol: "SOL", decimals: 9, kind: "native" }, stock = { symbol: "TSLAx", decimals: 8, kind: "stock" };
   test("lists the fee, any initial buy, the token account and the second signer from the plan", () => {
     const { plan } = fixture();
-    expect(walletNoticeItems(plan, sol, "launchacard.fun").map(item => item.key)).toEqual(["networkFee", "coinSigner", "newSite"]);
-    expect(walletNoticeItems(plan, sol)[0].text).toBe("A network fee of about 0.0000105 SOL.");
+    expect(walletNoticeItems(plan, sol, "launchacard.fun").map(item => item.key)).toEqual(["approvalsCoin", "networkFee", "coinSigner", "newSite"]);
+    expect(walletNoticeItems(plan, sol)[1].text).toBe("A network fee of about 0.0000105 SOL.");
     const buy = { ...plan, review: { ...plan.review, initialBuyQuoteBaseUnits: "100000000" } };
     const items = walletNoticeItems(buy, sol, "launchacard.fun");
-    expect(items.map(item => item.key)).toEqual(["networkFee", "initialBuy", "tokenAccount", "unverified", "coinSigner", "newSite"]);
-    expect(items[1].text).toBe("Your initial buy: 0.1 SOL.");
+    expect(items.map(item => item.key)).toEqual(["approvalsCoin", "networkFee", "initialBuy", "tokenAccount", "unverified", "coinSigner", "newSite"]);
+    expect(items[2].text).toBe("Your initial buy: 0.1 SOL.");
     expect(items.at(-1)!.text).toBe("Phantom may show a notice that this site is new. Check that the address bar reads launchacard.fun.");
     expect(walletNoticeItems(buy, stock).map(item => item.key)).toContain("stockQuote");
-    expect(walletNoticeItems(nftFixture().plan, sol).map(item => item.key)).toEqual(["networkFee", "cardSigner", "cardLock", "newSite"]);
+    expect(walletNoticeItems(nftFixture().plan, sol).map(item => item.key)).toEqual(["approvalsCard", "networkFee", "cardSigner", "cardLock", "newSite"]);
     expect(WALLET_NOTICE_COPY.coinSigner).toContain("A second signer for the new coin's address");
   });
   test("is calm, plain and never tells anyone to click through a warning", () => {
@@ -327,5 +293,109 @@ describe("what your wallet will show", () => {
     expect(html).toContain("don&#x27;t approve");
     const copy = [WALLET_OPEN_COPY, WALLET_NOTICE_TITLE, ...Object.values(WALLET_NOTICE_COPY).map(value => typeof value === "function" ? value("1", "SOL") : value)];
     for (const text of copy) { expect(text).not.toMatch(/[\u2013\u2014]/); expect(text).not.toMatch(/ignore|anyway|click through|safe to proceed/i); }
+  });
+});
+
+// What a guard-adding wallet returns: its own version of the message (a test-side rewrite), signed in the creator slot.
+const walletRewrites = (rewrite: (message: Uint8Array) => Uint8Array) => fakeWallet(unsigned => unsignedTransaction(rewrite(messageOf(unsigned))));
+const LIGHTHOUSE_V0 = "L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK";
+describe("Phantom's Lighthouse assertions in the browser", () => {
+  for (const [kind, make, seed] of [["coin", fixture, assetSeed], ["card", nftFixture, nftSeed]] as const) test(`the page co-signs a ${kind} message with appended read-only assertions, recompiled mid-way through the readonly keys`, async () => {
+    const { plan, expected } = make(), wallet = walletRewrites(message => phantomGuarded(message, [{ target: creator, data: payerGuardData(10_000_000n) }, { target: expected.mint, data: tokenGuardData(1n) }]));
+    const signed = await signPlanWithWallet(plan, expected, { address: expected.mint, seed: seed.slice() }, "wallet-first", wallet.sign);
+    expect(wallet.shown).toHaveLength(1);
+    const final = parseLiveTransaction(signed);
+    expect(hexHash(final.message)).not.toBe(plan.messageSha256);
+    expect(final.programs.slice(-2)).toEqual([LIVE_PROGRAMS.lighthouse, LIVE_PROGRAMS.lighthouse]);
+    expect(final.signers).toEqual([creator, expected.mint]);
+    // Both signatures cover the message the wallet returned, not the plan's.
+    expect(ed25519.verify(final.signatures[0], final.message, fromBase58(creator))).toBe(true);
+    expect(ed25519.verify(final.signatures[1], final.message, fromBase58(expected.mint))).toBe(true);
+  });
+  test("a refreshed blockhash goes through to the server, which re-checks it before relaying anything", () => {
+    const { plan } = fixture(), unsigned = fromBase64(plan.transactionBase64);
+    const refreshed = phantomGuarded(messageOf(unsigned), [{ target: creator, data: payerGuardData() }], { blockhash: base58(new Uint8Array(32).fill(9)) });
+    const signed = unsignedTransaction(refreshed); signed.set(ed25519.sign(refreshed, creatorSeed), 1);
+    expect(validateWalletFirstResult(unsigned, signed, creator)).toEqual(signed);
+  });
+  test("assertions outside the rule are refused and never co-signed", async () => {
+    const { plan, expected } = fixture(), payer = { target: creator, data: payerGuardData() };
+    const stranger = base58(new Uint8Array(32).fill(66));
+    for (const rewrite of [
+      (message: Uint8Array) => phantomGuarded(message, [{ ...payer, program: LIGHTHOUSE_V0 }]),
+      (message: Uint8Array) => phantomGuarded(message, [{ target: creator, data: Uint8Array.from([0, 0, 0]) }]),
+      (message: Uint8Array) => phantomGuarded(message, [payer], { writableProgram: true }),
+      (message: Uint8Array) => phantomGuarded(message, [payer], { at: 1 }),
+      (message: Uint8Array) => phantomGuarded(message, [{ target: stranger, data: payerGuardData() }], { newKeys: [stranger] }),
+      (message: Uint8Array) => phantomGuarded(message, [{ ...payer, extraAccounts: [mint] }]),
+    ]) {
+      const wallet = walletRewrites(rewrite);
+      const refused = await signPlanWithWallet(plan, expected, { address: mint, seed: assetSeed.slice() }, "wallet-first", wallet.sign).then(() => null, (error: unknown) => error);
+      expect(refused).toBeInstanceOf(WalletChangedTransaction);
+      expect(parseLiveTransaction((refused as WalletChangedTransaction).returned).signatures[1].every(byte => byte === 0)).toBe(true);
+    }
+  });
+  test("a page-first plan must come back byte for byte: the page's signature covers the exact message", async () => {
+    const { plan, expected } = fixture(), wallet = walletRewrites(message => phantomGuarded(message, [{ target: creator, data: payerGuardData() }]));
+    const refused = await signPlanWithWallet(plan, expected, { address: mint, seed: assetSeed.slice() }, "page-first", wallet.sign).then(() => null, (error: unknown) => error);
+    expect(refused).toBeInstanceOf(WalletChangedTransaction);
+  });
+  test("the parser takes up to 32 instructions, enough for nine or more assertions", () => {
+    const { plan } = fixture(), message = messageOf(fromBase64(plan.transactionBase64));
+    // Three plan instructions here; the decoder takes 32 in all.
+    expect(parseLiveTransaction(unsignedTransaction(phantomGuarded(message, Array.from({ length: 16 }, () => ({ target: creator, data: payerGuardData() }))))).instructions).toHaveLength(19);
+    expect(parseLiveTransaction(unsignedTransaction(phantomGuarded(message, Array.from({ length: 29 }, () => ({ target: creator, data: Uint8Array.from([6, 0]) }))))).instructions).toHaveLength(32);
+    expect(() => parseLiveTransaction(unsignedTransaction(phantomGuarded(message, Array.from({ length: 30 }, () => ({ target: creator, data: Uint8Array.from([6, 0]) })))))).toThrow("instruction count");
+  });
+});
+
+describe("the wallet step with one page-first retry", () => {
+  const signer = () => ({ address: mint, seed: assetSeed.slice() });
+  const feeChange = (unsigned: Uint8Array) => { const out = unsigned.slice(), at = out.findIndex((_, i) => out[i] === 9 && out[i + 1] === 3 && out[i + 2] === 232 && out[i + 3] === 3); out[at + 2] = 233; return out; };
+  test("a wallet that appends accepted assertions signs once, wallet first", async () => {
+    const { plan, expected } = fixture(), wallet = walletRewrites(message => phantomGuarded(message, [{ target: creator, data: payerGuardData() }]));
+    const changed: Uint8Array[] = [], opened: boolean[] = [];
+    const step = await signForLaunch({ plan, receivedAt: 1_000, now: () => 2_000, expected, signer: signer(), order: "wallet-first", refresh: async () => { throw new Error("not stale"); },
+      walletSign: wallet.sign, onWalletChanged: (_plan, returned) => changed.push(returned), onWalletOpen: retry => opened.push(retry) });
+    expect(step).toMatchObject({ status: "signed", order: "wallet-first", fellBack: false });
+    expect(wallet.shown).toHaveLength(1); expect(changed).toHaveLength(0); expect(opened).toEqual([false]);
+  });
+  test("a wallet-first wallet that changes the fee is logged, then asked once more with the page signing first", async () => {
+    const { plan, expected } = fixture(); let calls = 0;
+    const wallet = fakeWallet(unsigned => ++calls === 1 ? feeChange(unsigned) : unsigned);
+    const changed: Uint8Array[] = [], opened: boolean[] = [];
+    const step = await signForLaunch({ plan, receivedAt: 1_000, now: () => 2_000, expected, signer: signer(), order: "wallet-first", refresh: async () => { throw new Error("not stale"); },
+      walletSign: wallet.sign, onWalletChanged: (_plan, returned) => changed.push(returned), onWalletOpen: retry => opened.push(retry) });
+    expect(step).toMatchObject({ status: "signed", order: "page-first", fellBack: true });
+    expect(changed).toHaveLength(1); expect(opened).toEqual([false, true]);
+    // The second prompt carried the page's signature already; the result is the reviewed message, both signed.
+    expect(ed25519.verify(parseLiveTransaction(wallet.shown[1]).signatures[1], parseLiveTransaction(wallet.shown[1]).message, fromBase58(mint))).toBe(true);
+    if (step.status !== "signed") throw new Error("Expected signed");
+    expect(hexHash(parseLiveTransaction(step.signed).message)).toBe(plan.messageSha256);
+    expect(WALLET_RETRY_NOTICE).toContain("nothing was sent");
+  });
+  test("a page-first wallet that changes the message is not retried", async () => {
+    const { plan, expected } = fixture(), wallet = fakeWallet(feeChange), changed: Uint8Array[] = [];
+    const refused = await signForLaunch({ plan, receivedAt: 1_000, now: () => 2_000, expected, signer: signer(), order: "page-first", refresh: async () => { throw new Error("not stale"); },
+      walletSign: wallet.sign, onWalletChanged: (_plan, returned) => changed.push(returned) }).then(() => null, (error: unknown) => error);
+    expect(refused).toBeInstanceOf(WalletChangedTransaction);
+    expect(wallet.shown).toHaveLength(1); expect(changed).toHaveLength(1);
+  });
+  test("a stale plan is prepared again before the retry, and a moved cost returns to the review", async () => {
+    const { plan, expected } = fixture(); let clock = 1_000, calls = 0, refreshes = 0;
+    const wallet = fakeWallet(unsigned => { clock += 40_000; return ++calls === 1 ? feeChange(unsigned) : unsigned; });
+    const step = await signForLaunch({ plan, receivedAt: 1_000, now: () => clock, expected, signer: signer(), order: "wallet-first",
+      refresh: async () => { refreshes++; return { ...plan, review: { ...plan.review, totalDebitLamports: "9999999" } }; }, walletSign: wallet.sign });
+    expect(refreshes).toBe(1); expect(wallet.shown).toHaveLength(1);
+    expect(step).toMatchObject({ status: "changed" });
+  });
+});
+
+describe("the initial-buy refusal copy", () => {
+  test("names a tokenized-stock quote's own reason, the size reason otherwise, and nothing when the buy fits", () => {
+    expect(liveBuyRefusal({ buyFits: true, buyBlocked: null })).toBeNull();
+    expect(liveBuyRefusal({ buyFits: false, buyBlocked: "issuer-controls" })).toBe(STOCK_BUY_WARNS);
+    expect(liveBuyRefusal({ buyFits: false, buyBlocked: null })).toBe(BUY_DOES_NOT_FIT);
+    expect(liveBuyRefusal({ buyFits: false })).toBe(BUY_DOES_NOT_FIT);
   });
 });

@@ -32,7 +32,8 @@ function withNextStep(message: string) {
   return /try again|reconnect|switch|install|open /i.test(text) ? text : `${text} Choose a wallet to try again.`;
 }
 
-export function WalletConnectDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+/** `connect` replaces connectLiveWallet for a chosen wallet (the launch panel passes its connect-and-sign-in). */
+export function WalletConnectDialog({ open, onOpenChange, connect = connectLiveWallet }: { open: boolean; onOpenChange: (o: boolean) => void; connect?: (walletName: string) => Promise<unknown> }) {
   const wallet = useLiveWallet();
   const [error, setError] = useState("");
   const id = useId();
@@ -118,7 +119,7 @@ export function WalletConnectDialog({ open, onOpenChange }: { open: boolean; onO
                             if (wallet.connecting) return;
                             setError("");
                             try {
-                              await connectLiveWallet(w.name);
+                              await connect(w.name);
                               close();
                             } catch (e) {
                               setError(

@@ -2,6 +2,12 @@
 # (src/server.ts), which sets its own Cache-Control. Rules here must not overlap: a header set by two
 # matching rules is joined with a comma.
 
+# Every static file (scripts, styles, fonts, images) gets the hardening headers the Worker adds to its own responses.
+# Only these two names here, so no other rule's header is joined with them.
+/*
+  X-Content-Type-Options: nosniff
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+
 # Vite output: every .js and .css file directly under /assets/ is content-hashed (index-DBl4CYSZ.js).
 /assets/*.js
   Cache-Control: public, max-age=31536000, immutable

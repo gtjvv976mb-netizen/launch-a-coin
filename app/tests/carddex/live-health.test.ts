@@ -29,6 +29,19 @@ describe("sanitized read-only mainnet release health", () => {
     for (const call of rpc.calls) { expect(call.init.method).toBe("POST"); expect(call.init.redirect).toBe("manual"); }
     expect(JSON.stringify(body)).not.toContain(SECRET);
   });
+  test("reports D1 migrations this build needs that the database lacks, and is not ok until they are applied (REG-2)", async () => {
+    const answer = async (schema: () => Promise<string[]>) => {
+      const handler = createLiveHealthHandler({ readiness, rpcUrl: () => ENDPOINT, schema,
+        fetch: async (_url, init) => { const payload = JSON.parse(init.body as string); return Response.json({ jsonrpc: "2.0", id: payload.id, result: payload.method === "getGenesisHash" ? MAINNET_GENESIS_HASH : { absoluteSlot: 20, blockHeight: 10 } }); } });
+      const response = await handler();
+      return { status: response.status, body: await response.json() };
+    };
+    expect(await answer(async () => [])).toMatchObject({ status: 200, body: { ok: true, schema: { ok: true, missing: [] } } });
+    expect(await answer(async () => ["0014", "0015"])).toMatchObject({ status: 503, body: { ok: false, schema: { ok: false, missing: ["0014", "0015"] } } });
+    const down = await answer(async () => { throw new Error(`D1 down ${SECRET}`); });
+    expect(down).toMatchObject({ status: 503, body: { ok: false, schema: { ok: false, status: "unavailable" } } });
+    expect(JSON.stringify(down.body)).not.toContain(SECRET);
+  });
   test("reports the new-launch and recovery switches separately", async () => {
     for (const [enabled, recoveryEnabled] of [[false, true], [true, true], [false, false]]) {
       const handler = createLiveHealthHandler({ readiness: () => ({ ...readiness(), enabled, ready: enabled && recoveryEnabled, recoveryEnabled, recoveryReady: recoveryEnabled }), rpcUrl: () => ENDPOINT,

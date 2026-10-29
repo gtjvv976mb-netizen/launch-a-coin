@@ -34,13 +34,26 @@ const objects = new Map<string, {bytes: Uint8Array; mime: string}>();
 const storage = {
   async put(key: string, bytes: Uint8Array, options: {httpMetadata: {contentType: string}}) { objects.set(key, {bytes: new Uint8Array(bytes), mime: options.httpMetadata.contentType}); },
   async get(key: string) { const value = objects.get(key); return value ? {arrayBuffer: async () => value.bytes.slice().buffer, body: value.bytes, httpMetadata: {contentType: value.mime}, httpEtag: '"fixture"'} : null; },
+  async head(key: string) { return objects.has(key) ? {key} : null; },
 };
+let storagePuts = 0;
+const countingPut = storage.put.bind(storage);
+storage.put = async (...args: Parameters<typeof storage.put>) => { storagePuts++; return countingPut(...args); };
 let env: Record<string, unknown>;
-mock.module("../../src/lib/bindings.server", () => ({bindings: () => env}));
+// keepAlive stands for waitUntil: it records each promise the Worker would keep running after a closed tab.
+let keptAlive = 0;
+mock.module("../../src/lib/bindings.server", () => ({bindings: () => env, keepAlive: <T,>(promise: Promise<T>) => { keptAlive++; return promise; }}));
 let tokenVerified = false, nftVerified = false, replaceable = false, uncertain = false, prepareCalls = 0, nftPrepareCalls = 0, sendCalls = 0, receiptCreator: string | null = null;
 let tokenInputs: any[] = [], nftInputs: any[] = [];
-let sizes = {createBytes: 950, buyBytes: 1200}, measured: any[] = [];
+// The card prepared with its coin (withCard): what it was prepared from, whether that fails, and the wallet's balance.
+let aheadInputs: any[] = [], aheadFails = false, walletLamports = "10000000000";
+let sizes: {createBytes: number; buyBytes: number; buyBlocked?: string | null} = {createBytes: 950, buyBytes: 1200}, measured: any[] = [];
+// What the mocked chain saw: the expected message hash each verification used, and each expiry gate's height.
+let verifyHashes: (string | undefined)[] = [], nftTokenHashes: (string | undefined)[] = [], expiryGates: (number | undefined)[] = [], checkedHeight: number | null = null;
 let preSend: "ready" | "landed" | "expired" | "simulation" | "error" = "ready", savedAtCheck: (string | null)[] = [];
+// The coin landed and failed on chain; a verification that throws for another reason; how a re-send of saved bytes
+// answers, and what it was asked to send; whether the RPC refused the first broadcast.
+let tokenFailed = false, verifyThrows: string | null = null, resendAnswer: "resent" | "expired" | "landed" = "resent", resends: any[] = [], refusedSend = false;
 class SignedTransactionNotSent extends Error { constructor(readonly reason: string, message: string) { super(message); } }
 let tokenVerifyHook: (() => Promise<void>) | undefined, nftVerifyHook: (() => Promise<void>) | undefined, nftPrepareHook: (() => Promise<void>) | undefined, nftReplaceHook: (() => Promise<void>) | undefined;
 const binding = "b".repeat(64);
@@ -49,52 +62,73 @@ function plan(input: any, kind: "token" | "nft") {
   const counter = kind === "token" ? ++prepareCalls : ++nftPrepareCalls;
   return {kind, transactionBase64: `${kind}-unsigned-${counter}`, messageSha256: (kind === "token" ? "a" : "c").repeat(62) + String(counter).padStart(2, "0"),
     blockhash: "fixture", lastValidBlockHeight: 100, requiredSigners: [input.creator, kind === "token" ? input.mint : input.nftMint], feePayer: input.creator,
-    bindingSha256: binding, verifiedSlot: 50, review: {quoteKey: input.quoteKey, initialBuyQuoteBaseUnits: input.initialBuyQuoteBaseUnits}};
+    bindingSha256: binding, verifiedSlot: 50, review: {quoteKey: input.quoteKey, initialBuyQuoteBaseUnits: input.initialBuyQuoteBaseUnits,
+      walletBalanceLamports: walletLamports, totalDebitLamports: kind === "token" ? "30000000" : "6000000", reserveBufferLamports: "50000"}};
 }
 function signedSignature(prepared: {kind: string; messageSha256: string}) { return prepared.kind === "token" ? "s".repeat(88) : String.fromCharCode(115 + Number(prepared.messageSha256.slice(-2))).repeat(88); }
+// "-guarded" bytes stand for what a wallet returns with appended Lighthouse assertions: another message, so another
+// signature and signed hash, within the shared wallet rule.
+const guarded = (bytes: string) => bytes.endsWith("-guarded");
+// "-refreshed" bytes stand for a wallet-refreshed blockhash within the shared wallet rule.
+const refreshed = (bytes: string) => bytes.endsWith("-refreshed");
+function signatureFor(prepared: {kind: string; messageSha256: string}, bytes: string) { const signature = signedSignature(prepared); return guarded(bytes) ? signature.slice(0, 87) + "G" : signature; }
+const signedHash = (prepared: {messageSha256: string}, bytes: string) => guarded(bytes) ? "e".repeat(62) + prepared.messageSha256.slice(-2) : prepared.messageSha256;
 mock.module("../../../integrations/pumpfun/src/live", () => ({
   createMainnetConnection: () => ({}),
   measureTokenTransaction: async (input: any) => { measured.push(input); return {limit: 1232, ...sizes}; },
   prepareTokenTransaction: async (input: any) => { tokenInputs.push(input); return plan(input, "token"); },
-  verifyTokenLaunch: async (input: any, options: any) => { const result = {status: tokenVerified ? "verified" : "pending", ...identity(input), signature: options.signature, slot: 101, messageSha256: options.expectedMessageSha256}; const hook = tokenVerifyHook; tokenVerifyHook = undefined; await hook?.(); return result; },
-  verifyCreatorNft: async (input: any, options: any) => { const result = {status: nftVerified ? "verified" : "pending", ...identity(input), signature: options.signature, slot: 102, messageSha256: options.expectedMessageSha256}; const hook = nftVerifyHook; nftVerifyHook = undefined; await hook?.(); return result; },
-  prepareCreatorNftTransaction: async (input: any) => { if (!tokenVerified) throw new Error("Token is not finalized"); nftInputs.push(input); const hook = nftPrepareHook; nftPrepareHook = undefined; await hook?.(); return nftVerified ? {status: "already-created", receipt: {status: "verified", ...identity(input)}} : plan(input, "nft"); },
-  assertNftMintReplaceable: async () => { if (!replaceable || nftVerified) throw new Error("Prior NFT blockhash has not expired or its account exists"); const hook = nftReplaceHook; nftReplaceHook = undefined; await hook?.(); return {replaceable: true}; },
-  assertTokenMintReplaceable: async () => { if (!replaceable || tokenVerified) throw new Error("Prior token blockhash has not expired or its account exists"); return {replaceable: true}; },
+  verifyTokenLaunch: async (input: any, options: any) => { verifyHashes.push(options.expectedMessageSha256);
+    if (tokenFailed && options.signature) throw Object.assign(new Error('Transaction failed: {"InstructionError":[2,{"Custom":6001}]}'), {name: "TransactionFailedOnChain"});
+    if (verifyThrows) throw new Error(verifyThrows);
+    const result = {status: tokenVerified ? "verified" : "pending", ...identity(input), signature: options.signature, slot: 101, messageSha256: options.expectedMessageSha256}; const hook = tokenVerifyHook; tokenVerifyHook = undefined; await hook?.(); return result; },
+  verifyCreatorNft: async (input: any, options: any) => { if (options.signature) verifyHashes.push(options.expectedMessageSha256); const result = {status: nftVerified ? "verified" : "pending", ...identity(input), signature: options.signature, slot: 102, messageSha256: options.expectedMessageSha256}; const hook = nftVerifyHook; nftVerifyHook = undefined; await hook?.(); return result; },
+  prepareCreatorNftAheadOfCoin: async (input: any) => { aheadInputs.push(input); if (aheadFails) throw new Error("429 Too Many Requests from https://rpc.example.test"); return plan(input, "nft"); },
+  prepareCreatorNftTransaction: async (input: any, options: any) => { if (!tokenVerified) throw new Error("Token is not finalized"); nftInputs.push(input); nftTokenHashes.push(options.tokenMessageSha256); const hook = nftPrepareHook; nftPrepareHook = undefined; await hook?.(); return nftVerified ? {status: "already-created", receipt: {status: "verified", ...identity(input)}} : plan(input, "nft"); },
+  assertNftMintReplaceable: async (_input: any, options: any) => { expiryGates.push(options.lastValidBlockHeight); if (!replaceable || nftVerified) throw new Error("Prior NFT blockhash has not expired or its account exists"); const hook = nftReplaceHook; nftReplaceHook = undefined; await hook?.(); return {replaceable: true}; },
+  assertTokenMintReplaceable: async (_input: any, options: any) => { expiryGates.push(options.lastValidBlockHeight); if (!replaceable || tokenVerified) throw new Error("Prior token blockhash has not expired or its account exists"); return {replaceable: true}; },
   validateSignedWalletTransaction: (prepared: any, bytes: string) => {
-    if (bytes !== `${prepared.transactionBase64}-signed`) throw new Error("Prepared message or required signatures changed");
-    return {signature: signedSignature(prepared), transactionBase64: bytes, messageSha256: prepared.messageSha256};
+    if (![`${prepared.transactionBase64}-signed`, `${prepared.transactionBase64}-guarded`, `${prepared.transactionBase64}-refreshed`].includes(bytes)) throw new Error("Prepared message or required signatures changed");
+    return {signature: signatureFor(prepared, bytes), transactionBase64: bytes, messageSha256: prepared.messageSha256, signedMessageSha256: signedHash(prepared, bytes),
+      blockhash: "fixture", blockhashChanged: refreshed(bytes), walletGuards: guarded(bytes) ? 2 : 0};
   },
   SignedTransactionNotSent,
   describeWalletChange: (prepared: any, bytes: string) => ({bytesBefore: 900, bytesAfter: 944, limit: 1232, parsed: true, blockhashChanged: false, programsAdded: ["L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95"], planned: prepared.messageSha256, returnedLength: bytes.length}),
-  checkSignedWalletTransaction: async ({plan: prepared}: any) => {
+  checkSignedWalletTransaction: async ({plan: prepared, transactionBase64: bytes}: any) => {
     savedAtCheck.push((sqlite.query("SELECT signature FROM live_launch_transactions WHERE message_sha256 = ?").get(prepared.messageSha256) as {signature: string | null}).signature);
     if (preSend === "expired") throw new SignedTransactionNotSent("expired", "The signed transaction blockhash expired before it was sent; prepare a fresh transaction");
     if (preSend === "simulation") throw new SignedTransactionNotSent("simulation", 'Signed transaction simulation failed: {"InstructionError":[2,"InsufficientFunds"]}');
     if (preSend === "error") throw new Error("429 Too Many Requests from https://rpc.example.test");
-    return preSend === "landed" ? {status: "landed", signature: signedSignature(prepared), err: null} : {status: "ready", signature: signedSignature(prepared), blocksLeft: 50};
+    const checked = {signature: signatureFor(prepared, bytes), signedMessageSha256: signedHash(prepared, bytes), walletGuards: guarded(bytes) ? 2 : 0, blockhashChanged: false, lastValidBlockHeight: checkedHeight ?? prepared.lastValidBlockHeight};
+    return preSend === "landed" ? {status: "landed", ...checked, err: null} : {status: "ready", ...checked, blocksLeft: 50};
   },
   broadcastSignedWalletTransaction: async ({plan: prepared, transactionBase64}: any) => {
     sendCalls++;
     const persisted = sqlite.query("SELECT signature, signed_transaction_base64 FROM live_launch_transactions WHERE message_sha256 = ?").get(prepared.messageSha256) as {signature: string; signed_transaction_base64: string};
-    expect(persisted.signature).toBe(signedSignature(prepared));
+    expect(persisted.signature).toBe(signatureFor(prepared, transactionBase64));
     expect(persisted.signed_transaction_base64).toBe(transactionBase64);
+    if (refusedSend) return {status: "refused", signature: persisted.signature, reason: "Transaction simulation failed: Error processing Instruction 2: custom program error: 0x1 (https://rpc.example.test)"};
     return {status: uncertain ? "submission-uncertain" : "submitted", signature: persisted.signature};
+  },
+  resendSignedWalletTransaction: async (request: any) => {
+    resends.push(request);
+    return resendAnswer === "resent" ? {status: "resent", signature: "r", blocksLeft: 10} : {status: resendAnswer, signature: "r", ...(resendAnswer === "landed" ? {err: null} : {})};
   },
 }));
 const {publicOrigin, liveReadiness} = await import("../../src/lib/carddex/live/config.server");
-const {LIVE_SIGN_IN_CHAIN_ID, liveSignInProblem} = await import("../../src/lib/carddex/live/sign-in");
+const {LIVE_SIGN_IN_CHAIN_ID, LIVE_SIGN_IN_STATEMENT: LIVE_SIGN_IN_STATEMENT_TEXT, liveSignInProblem} = await import("../../src/lib/carddex/live/sign-in");
 const auth = await import("../../src/lib/carddex/live/auth.server");
 const assets = await import("../../src/lib/carddex/live/assets.server");
 const service = await import("../../src/lib/carddex/live/service.server");
 const {compositionBinding} = await import("../../src/lib/carddex/live/validation.server");
 const {COMPOSITION_VERSION, loadRendererAsset} = await import("../../src/lib/carddex/live/composition.server");
 const nativeFetch = globalThis.fetch;
-globalThis.fetch = (async (request: Request | string | URL) => {
+globalThis.fetch = (async (request: Request | string | URL, init?: RequestInit) => {
   const url = new URL(typeof request === "string" ? request : request instanceof URL ? request : request.url);
   if (url.origin !== "https://launchacard.fun") throw new Error("A test attempted external network access");
   if (url.pathname.startsWith("/assets/")) return new Response(readFileSync(resolve(import.meta.dir, "../../public", `.${url.pathname}`)));
-  const metadata = url.pathname.startsWith("/m/") ? await assets.serveLiveMetadata(url.pathname.slice(3)) : await assets.serveLiveAsset(url.pathname.split("/").pop()!);
+  // The routes as the Worker serves them: the request (its headers decide what an unpublished asset answers).
+  const routed = new Request(url, init);
+  const metadata = url.pathname.startsWith("/m/") ? await assets.serveLiveMetadata(url.pathname.slice(3), routed) : await assets.serveLiveAsset(url.pathname.split("/").pop()!, routed);
   return metadata;
 }) as typeof fetch;
 const migrations = resolve(import.meta.dir, "../../migrations");
@@ -106,6 +140,9 @@ beforeEach(() => {
   tokenInputs = []; nftInputs = [];
   tokenVerifyHook = nftVerifyHook = nftPrepareHook = nftReplaceHook = undefined;
   sizes = {createBytes: 950, buyBytes: 1200}; measured = []; preSend = "ready"; savedAtCheck = [];
+  verifyHashes = []; nftTokenHashes = []; expiryGates = []; checkedHeight = null;
+  aheadInputs = []; aheadFails = false; walletLamports = "10000000000"; storagePuts = 0; keptAlive = 0;
+  tokenFailed = false; verifyThrows = null; resendAnswer = "resent"; resends = []; refusedSend = false;
 });
 afterAll(() => { globalThis.fetch = nativeFetch; sqlite.close(); });
 function image(width: number, height: number) { const bytes = new Uint8Array(40); bytes.set([0x89, 0x50, 0x4e, 0x47]); new DataView(bytes.buffer).setUint32(16, width); new DataView(bytes.buffer).setUint32(20, height); return bytes; }
@@ -213,9 +250,15 @@ describe("isolated real-launch server lifecycle", () => {
     expect(liveReadiness()).toMatchObject({ready: true, enabled: true, recoveryEnabled: true, recoveryReady: true});
     env.CARDDEX_LIVE_LAUNCH_ENABLED = "false";
     expect(liveReadiness()).toMatchObject({ready: false, enabled: false, recoveryEnabled: true, recoveryReady: true});
-    for (const value of ["false", "true", "", "0"]) {
+    // Both switches read trimmed and in any case: an operator's "False" or "0" pauses recovery (it used to stay on).
+    for (const [value, on] of [["false", false], ["False", false], [" FALSE ", false], ["0", false], ["off", false], ["no", false], ["true", true], ["", true], ["1", true], ["typo", true]] as const) {
       env.CARDDEX_LIVE_LAUNCH_ENABLED = "true"; env.CARDDEX_LIVE_RECOVERY_ENABLED = value;
-      expect(liveReadiness()).toMatchObject({ready: value !== "false", recoveryReady: value !== "false"});
+      expect(liveReadiness()).toMatchObject({ready: on, recoveryReady: on});
+    }
+    delete env.CARDDEX_LIVE_RECOVERY_ENABLED;
+    for (const [value, on] of [["true", true], [" TRUE ", true], ["True", true], ["yes", false], ["1", false], ["", false]] as const) {
+      env.CARDDEX_LIVE_LAUNCH_ENABLED = value;
+      expect(liveReadiness()).toMatchObject({enabled: on, ready: on, recoveryReady: true});
     }
     env.CARDDEX_DEPLOYMENT_ENV = "local"; env.CARDDEX_LIVE_LAUNCH_ENABLED = "false"; delete env.CARDDEX_LIVE_RECOVERY_ENABLED;
     expect(liveReadiness().implemented).toBe(true); expect(liveReadiness().ready).toBe(false); expect(liveReadiness().configured).toBe(false); expect(liveReadiness().recoveryReady).toBe(false);
@@ -336,7 +379,7 @@ describe("isolated real-launch server lifecycle", () => {
     const expired = await submit().then(() => null, (error: Error) => error);
     // An expired approval is also marked expired, so the page prepares again and asks once more.
     expect(service.liveFailure(expired)).toEqual({ok: false, error: expired!.message, unsendable: true, expired: true});
-    expect(service.liveFailure(new Error("provider detail"))).toEqual({ok: false, error: "The real launch could not proceed. Your demo balances were not used."});
+    expect(service.liveFailure(new Error("provider detail"))).toEqual({ok: false, error: "The launch paused. Nothing was sent unless your saved launch says so."});
     preSend = "ready";
     const sent = await submit();
     expect(sent.submission).toBe("submitted"); expect(sent.intent.status).toBe("token_pending"); expect(sendCalls).toBe(1);
@@ -421,7 +464,7 @@ describe("isolated real-launch server lifecycle", () => {
   test("the size check measures the final URI length and reports the buy and the coin alone", async () => {
     const prepared = await service.prepareLiveLaunch(creator, await input());
     const check = (initialBuyQuoteBaseUnits: string) => service.checkLiveLaunchSize(creator, {name: "  Launch   Fixture ", symbol: "fix", quoteAssetKey: "sol", initialBuyQuoteBaseUnits});
-    expect(await check("1000")).toEqual({limit: 1232, bytes: 1200, fits: true, buyBytes: 1200, buyFits: true, createBytes: 950, createFits: true});
+    expect(await check("1000")).toEqual({limit: 1232, bytes: 1200, fits: true, buyBytes: 1200, buyFits: true, createBytes: 950, createFits: true, buyBlocked: null});
     expect(measured[0]).toMatchObject({creator, name: "Launch Fixture", symbol: "FIX", quoteKey: "sol"});
     expect(measured[0].tokenMetadataUri).toMatch(/^https:\/\/launchacard\.fun\/m\/[A-Za-z0-9_-]{43}$/);
     expect(measured[0].tokenMetadataUri.length).toBe(prepared.intent.tokenMetadataUri.length);
@@ -441,6 +484,50 @@ describe("isolated real-launch server lifecycle", () => {
     measured = [];
     expect((await service.prepareLiveLaunch(creator, original)).intent.status).toBe("prepared");
     expect(measured).toHaveLength(0);
+  });
+  test("a tokenized-stock first buy is refused with its own reason before anything is written", async () => {
+    const original = await input(), stored = objects.size;
+    sizes = {createBytes: 950, buyBytes: 1000, buyBlocked: "issuer-controls"};
+    const check = (initialBuyQuoteBaseUnits: string) => service.checkLiveLaunchSize(creator, {name: "Fixture", symbol: "FIX", quoteAssetKey: original.quoteAssetKey, initialBuyQuoteBaseUnits});
+    expect(await check("1")).toMatchObject({fits: false, buyFits: false, createFits: true, buyBlocked: "issuer-controls"});
+    expect(await check("0")).toMatchObject({fits: true, buyFits: false, buyBlocked: "issuer-controls"});
+    await expect(service.prepareLiveLaunch(creator, {...original, initialBuyQuoteBaseUnits: "1000"})).rejects.toThrow("Wallets warn when a first buy spends a tokenized-stock quote");
+    expect(objects.size).toBe(stored); expect(prepareCalls).toBe(0);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 0});
+  });
+  test("a wallet's assertions: the signed message hash and expiry bound are saved with the bytes, never change, and every later check uses them", async () => {
+    const first = await service.prepareLiveLaunch(creator, await input()), tx = first.transaction!;
+    const coinHash = "e".repeat(62) + tx.messageSha256.slice(-2);
+    // The page sends the plan's hash (the plan id) with the bytes the wallet returned; the bound is a refreshed one.
+    checkedHeight = 400;
+    const sent = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: `${tx.transactionBase64}-guarded`, walletName: "Phantom", signingOrder: "wallet-first"});
+    expect(sqlite.query("SELECT signature, signed_message_sha256, effective_last_valid_block_height FROM live_launch_transactions WHERE message_sha256 = ?").get(tx.messageSha256))
+      .toEqual({signature: sent.signature, signed_message_sha256: coinHash, effective_last_valid_block_height: 400});
+    for (const change of [`signed_message_sha256 = '${"f".repeat(64)}'`, "effective_last_valid_block_height = 401", "signed_message_sha256 = NULL"]) {
+      expect(() => sqlite.exec(`UPDATE live_launch_transactions SET ${change} WHERE message_sha256 = '${tx.messageSha256}'`)).toThrow("immutable");
+    }
+    // Confirmation by the plan's hash verifies the landed transaction against the signed hash.
+    await service.confirmLiveToken(creator, {intentId: first.intent.id, signature: sent.signature, messageSha256: tx.messageSha256});
+    await service.getLiveLaunchIntent(creator, first.intent.id);
+    expect(verifyHashes).toEqual([coinHash, coinHash]);
+    // Abandon waits past the signed bytes' bound (400), not the plan's (100).
+    replaceable = true;
+    expect((await service.abandonLiveLaunchIntent(creator, {intentId: first.intent.id})).intent.status).toBe("abandoned");
+    expect(expiryGates).toEqual([400]);
+  });
+  test("the card is prepared under the coin's signed hash, and a card key rotation waits past the signed card's bound", async () => {
+    const first = await service.prepareLiveLaunch(creator, await input()), tx = first.transaction!;
+    const sent = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: `${tx.transactionBase64}-guarded`});
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: first.intent.id, signature: sent.signature, messageSha256: tx.messageSha256});
+    const card = (await service.prepareLiveCreatorNft(creator, {intentId: first.intent.id})).transaction!;
+    expect(nftTokenHashes).toEqual(["e".repeat(62) + tx.messageSha256.slice(-2)]);
+    checkedHeight = 500;
+    const cardSent = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-guarded`});
+    expect(sqlite.query("SELECT signed_message_sha256, effective_last_valid_block_height FROM live_launch_transactions WHERE signature = ?").get(cardSent.signature)).toEqual({signed_message_sha256: "e".repeat(62) + card.messageSha256.slice(-2), effective_last_valid_block_height: 500});
+    replaceable = true;
+    await service.prepareLiveCreatorNft(creator, {intentId: first.intent.id, nftMint: replacementNft});
+    expect(expiryGates).toEqual([500]);
   });
   test("prepare checks the composition before it spends an RPC read on the size", async () => {
     const original = await input();
@@ -640,5 +727,518 @@ describe("wallet warning fixes on the server", () => {
     expect(liveReadiness().walletFirst).toEqual([]);
     env.CARDDEX_LIVE_WALLET_FIRST = "";
     expect(liveReadiness().walletFirst).toEqual([]);
+  });
+});
+
+describe("one wallet approval for the coin and its card, on the server", () => {
+  const rows = (id: string) => sqlite.query("SELECT kind, signature, signed_transaction_base64 AS bytes, signed_message_sha256 AS hash, effective_last_valid_block_height AS bound FROM live_launch_transactions WHERE intent_id = ? ORDER BY kind, created_at").all(id) as {kind: string; signature: string | null; bytes: string | null; hash: string | null; bound: number | null}[];
+  test("withCard prepares the card plan with the coin's, saved together, before the coin exists", async () => {
+    const first = await service.prepareLiveLaunch(creator, {...await input(), withCard: true});
+    expect(first.intent.status).toBe("prepared");
+    expect(first.card).toMatchObject({kind: "nft", requiredSigners: [creator, nftMint], bindingSha256: binding});
+    expect(aheadInputs).toHaveLength(1); expect(aheadInputs[0]).toMatchObject({creator, mint, nftMint, card: {nftMetadataUri: first.intent.nftMetadataUri}});
+    expect(rows(first.intent.id).map(row => row.kind)).toEqual(["nft", "token"]);
+    // Without it, nothing extra is prepared; a stale re-prepare with it adds a fresh pair for the same launch and keys.
+    const plain = await service.prepareLiveLaunch(creator, await input());
+    expect(plain.card).toBeNull(); expect(aheadInputs).toHaveLength(1);
+    const again = await service.prepareLiveLaunch(creator, {...await input(), withCard: true});
+    expect(again.intent.id).toBe(first.intent.id); expect(again.card!.messageSha256).not.toBe(first.card!.messageSha256);
+    expect(rows(first.intent.id).map(row => row.kind)).toEqual(["nft", "nft", "token", "token", "token"]);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 1});
+    expect(sendCalls).toBe(0);
+  });
+  test("the card stays out of the coin's prompt when the wallet cannot cover both, or it cannot be prepared now", async () => {
+    walletLamports = "36000000"; // the coin's 30,000,000 and its 50,000 reserve fit; the card's 6,000,000 more does not
+    const short = await service.prepareLiveLaunch(creator, {...await input(), withCard: true});
+    expect(short.card).toBeNull(); expect(short.transaction!.kind).toBe("token");
+    expect(rows(short.intent.id).map(row => row.kind)).toEqual(["token"]);
+    walletLamports = "10000000000"; aheadFails = true;
+    const {result, lines} = await captured("info", async () => service.prepareLiveLaunch(creator, {...await input(), withCard: true}));
+    expect(result.card).toBeNull(); expect(result.transaction!.kind).toBe("token");
+    const skipped = lines.filter(line => line[0] === "Live launch card not prepared with its coin").map(line => String(line[1]));
+    expect(skipped).toHaveLength(1); expect(skipped[0]).toContain("[provider]"); expect(skipped[0]).not.toContain("rpc.example.test");
+  });
+  test("the approved card is saved before the coin is sent, never relayed before the coin is verified, and a closed tab can send it", async () => {
+    const first = await service.prepareLiveLaunch(creator, {...await input(), withCard: true}), coin = first.transaction!, card = first.card!;
+    const cardBytes = `${card.transactionBase64}-signed`;
+    // Never before the coin is verified, held or not.
+    await expect(service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: card.messageSha256, transactionBase64: cardBytes})).rejects.toThrow("sent once its coin is verified");
+    expect(await service.holdLiveCard(creator, {intentId: first.intent.id, messageSha256: card.messageSha256, transactionBase64: cardBytes, walletName: "Backpack", signingOrder: "page-first"})).toEqual({held: true, lastValidBlockHeight: 100});
+    expect(rows(first.intent.id).find(row => row.kind === "nft")).toEqual({kind: "nft", signature: null, bytes: cardBytes, hash: card.messageSha256, bound: 100});
+    // The same bytes again are accepted; other bytes for that plan are refused, and the saved bytes never change.
+    await service.holdLiveCard(creator, {intentId: first.intent.id, messageSha256: card.messageSha256, transactionBase64: cardBytes});
+    await expect(service.holdLiveCard(creator, {intentId: first.intent.id, messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-guarded`})).rejects.toThrow("other approved bytes");
+    expect(() => sqlite.exec(`UPDATE live_launch_transactions SET signed_transaction_base64 = 'other' WHERE message_sha256 = '${card.messageSha256}'`)).toThrow("immutable");
+    expect((await service.getLiveLaunchIntent(creator, first.intent.id)).approvedCard).toEqual({messageSha256: card.messageSha256, transactionBase64: cardBytes, nftMint});
+    await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: coin.messageSha256, transactionBase64: `${coin.transactionBase64}-signed`});
+    expect(sendCalls).toBe(1);
+    // The tab closes. A fresh page reads the saved launch: the coin is pending, the card still approved.
+    const resumed = await service.getLiveLaunchIntent(creator, first.intent.id);
+    expect(resumed).toMatchObject({status: "token_pending", approvedCard: {messageSha256: card.messageSha256}});
+    await expect(service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: card.messageSha256, transactionBase64: cardBytes})).rejects.toThrow("sent once its coin is verified");
+    tokenVerified = true;
+    const verified = await service.getLiveLaunchIntent(creator, first.intent.id);
+    expect(verified.status).toBe("nft_pending"); expect(verified.approvedCard!.transactionBase64).toBe(cardBytes);
+    await expect(service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-guarded`})).rejects.toThrow("already approved with other signed bytes");
+    const sent = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: verified.approvedCard!.messageSha256, transactionBase64: verified.approvedCard!.transactionBase64});
+    expect(sent.intent.nftSignature).toBe(sent.signature); expect(sendCalls).toBe(2);
+    expect((await service.getLiveLaunchIntent(creator, first.intent.id)).approvedCard).toBeNull();
+    nftVerified = true;
+    expect((await service.confirmLiveCreatorNft(creator, {intentId: first.intent.id, signature: sent.signature, messageSha256: card.messageSha256})).intent.status).toBe("complete");
+    expect(verifyHashes.at(-1)).toBe(card.messageSha256);
+    expect((await service.getLiveLaunchIntent(creator, first.intent.id)).approvedCard).toBeUndefined();
+  });
+  test("an approved card that ran out of time while the coin confirmed is prepared again on its own, with the same card key", async () => {
+    const first = await service.prepareLiveLaunch(creator, {...await input(), withCard: true}), card = first.card!;
+    await service.holdLiveCard(creator, {intentId: first.intent.id, messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-signed`});
+    const coinSent = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: first.transaction!.messageSha256, transactionBase64: `${first.transaction!.transactionBase64}-signed`});
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: first.intent.id, signature: coinSent.signature, messageSha256: first.transaction!.messageSha256});
+    preSend = "expired";
+    const refused = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-signed`}).then(() => null, (error: unknown) => error);
+    expect(service.liveFailure(refused)).toMatchObject({ok: false, unsendable: true, expired: true});
+    expect(sqlite.query("SELECT status, nft_signature FROM live_launch_intents WHERE id = ?").get(first.intent.id)).toEqual({status: "nft_pending", nft_signature: null});
+    preSend = "ready";
+    const fresh = (await service.prepareLiveCreatorNft(creator, {intentId: first.intent.id, nftMint})).transaction!;
+    expect(fresh.requiredSigners).toEqual([creator, nftMint]); expect(expiryGates).toEqual([]);
+    // The newer card plan replaces the expired approval.
+    expect((await service.getLiveLaunchIntent(creator, first.intent.id)).approvedCard).toBeNull();
+    const sent = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: fresh.messageSha256, transactionBase64: `${fresh.transactionBase64}-signed`});
+    expect(sent.intent.nftSignature).toBe(sent.signature); expect(sendCalls).toBe(2);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 1});
+  });
+  test("a card key change waits past the approved card's expiry, and the old approval is never used for the new key", async () => {
+    const first = await service.prepareLiveLaunch(creator, {...await input(), withCard: true}), card = first.card!;
+    await service.holdLiveCard(creator, {intentId: first.intent.id, messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-signed`});
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: first.intent.id, signature: "s".repeat(88), messageSha256: first.transaction!.messageSha256});
+    await expect(service.prepareLiveCreatorNft(creator, {intentId: first.intent.id, nftMint: replacementNft})).rejects.toThrow("not expired");
+    expect(expiryGates).toEqual([100]);
+    replaceable = true;
+    const rotated = await service.prepareLiveCreatorNft(creator, {intentId: first.intent.id, nftMint: replacementNft});
+    expect(rotated.intent.nftMint).toBe(replacementNft);
+    expect((await service.getLiveLaunchIntent(creator, first.intent.id)).approvedCard).toBeNull();
+    await expect(service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-signed`})).rejects.toThrow("does not match");
+    expect(sendCalls).toBe(0);
+  });
+  test("a card is saved ahead only within the same check as a send, and only before it is sent", async () => {
+    const first = await service.prepareLiveLaunch(creator, {...await input(), withCard: true}), card = first.card!, coin = first.transaction!;
+    const hold = (messageSha256: string, transactionBase64: string) => service.holdLiveCard(creator, {intentId: first.intent.id, messageSha256, transactionBase64});
+    await expect(hold(card.messageSha256, "modified")).rejects.toThrow("differs from the one you reviewed");
+    await expect(hold(card.messageSha256, `${card.transactionBase64}-refreshed`)).rejects.toThrow("refreshed the card's blockhash");
+    await expect(hold(coin.messageSha256, `${coin.transactionBase64}-signed`)).rejects.toThrow("not prepared for this launch");
+    await expect(service.holdLiveCard(otherWallet, {intentId: first.intent.id, messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-signed`})).rejects.toThrow("does not belong");
+    expect(rows(first.intent.id).every(row => row.bytes === null)).toBe(true);
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: first.intent.id, signature: "s".repeat(88), messageSha256: coin.messageSha256});
+    await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-signed`});
+    await expect(hold(card.messageSha256, `${card.transactionBase64}-signed`)).rejects.toThrow("can no longer be saved");
+  });
+  test("readiness lists the wallets that sign both in one prompt: none unless configured, never Phantom", () => {
+    // Opt-in (WW-5): no wallet takes the untested multi-transaction request on the first mainnet launch.
+    expect(liveReadiness().walletBatch).toEqual([]);
+    env.CARDDEX_LIVE_WALLET_BATCH = "Backpack";
+    expect(liveReadiness().walletBatch).toEqual(["Backpack"]);
+    env.CARDDEX_LIVE_WALLET_BATCH = "Phantom, Backpack, MetaMask";
+    expect(liveReadiness().walletBatch).toEqual(["Backpack", "MetaMask"]);
+    env.CARDDEX_LIVE_WALLET_BATCH = "*";
+    expect(liveReadiness().walletBatch).toEqual(["*"]);
+    env.CARDDEX_LIVE_WALLET_BATCH = "none";
+    expect(liveReadiness().walletBatch).toEqual([]);
+  });
+});
+
+const {liveSignInText} = await import("../../src/lib/carddex/live/sign-in");
+describe("Sign In With Solana on the server (solana:signIn)", () => {
+  const encode = (text: string) => new TextEncoder().encode(text);
+  const b64 = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes));
+  const proof = (challengeId: string, text: string, seed = creatorSeed, wallet = creator) => ({challengeId, wallet, signedMessageBase64: b64(encode(text)), signatureBase64: b64(ed25519.sign(encode(text), seed))});
+  test("a wallet-independent challenge names this site and mainnet, and a canonical sign-in starts the same session as the message", async () => {
+    const challenge = await auth.createSignInChallenge("203.0.113.7");
+    expect(challenge.input).toMatchObject({domain: "launchacard.fun", uri: "https://launchacard.fun", version: "1", chainId: "mainnet", statement: LIVE_SIGN_IN_STATEMENT_TEXT});
+    expect(challenge.input.nonce).toMatch(/^[a-f0-9]{64}$/);
+    expect(Date.parse(challenge.input.expirationTime) - Date.parse(challenge.input.issuedAt)).toBe(5 * 60_000);
+    // The client is stored only as a hash.
+    expect(JSON.stringify(sqlite.query("SELECT * FROM live_sign_in_challenges").all())).not.toContain("203.0.113.7");
+    const session = await auth.verifySignInChallenge(proof(challenge.challengeId, liveSignInText(challenge.input, creator)));
+    expect(session.wallet).toBe(creator);
+    expect((await auth.requireLiveWallet(session.token)).wallet).toBe(creator);
+    expect(sqlite.query("SELECT wallet, consumed_at IS NOT NULL AS used FROM live_sign_in_challenges WHERE id = ?").get(challenge.challengeId)).toEqual({wallet: creator, used: 1});
+    await expect(auth.verifySignInChallenge(proof(challenge.challengeId, liveSignInText(challenge.input, creator)))).rejects.toThrow("already used");
+    expect(() => sqlite.exec(`UPDATE live_sign_in_challenges SET input_json = '{}' WHERE id = '${challenge.challengeId}'`)).toThrow("immutable");
+  });
+  test("another site, chain, wording, account or signature is refused, and nothing starts a session", async () => {
+    const challenge = await auth.createSignInChallenge("203.0.113.8"), text = liveSignInText(challenge.input, creator);
+    const before = (sqlite.query("SELECT COUNT(*) AS n FROM live_wallet_sessions").get() as {n: number}).n;
+    for (const [changed, reason] of [
+      [text.replace("launchacard.fun wants", "www.launchacard.fun wants"), "another site"],
+      [text.replace("URI: https://launchacard.fun", "URI: https://launch-a-card.gtjvv976mb.workers.dev"), "another site"],
+      [text.replace("Chain ID: mainnet", "Chain ID: solana:mainnet"), "not for Solana mainnet"],
+      [text.replace("Authorize Launch a Card", "Authorize"), "changed the sign-in message"],
+      [`${text}\nResources:\n- https://elsewhere.example`, "changed the sign-in message"],
+      [`Sign in\n${text}`, "something other than a sign-in"],
+    ] as const) await expect(auth.verifySignInChallenge(proof(challenge.challengeId, changed))).rejects.toThrow(reason);
+    await expect(auth.verifySignInChallenge(proof(challenge.challengeId, text, new Uint8Array(32).fill(10), otherWallet))).rejects.toThrow("names another wallet");
+    await expect(auth.verifySignInChallenge({...proof(challenge.challengeId, liveSignInText(challenge.input, otherWallet), creatorSeed, otherWallet)})).rejects.toThrow("signature is invalid");
+    expect((sqlite.query("SELECT COUNT(*) AS n FROM live_wallet_sessions").get() as {n: number}).n).toBe(before);
+    // Still unused: the right proof is accepted afterwards.
+    expect((await auth.verifySignInChallenge(proof(challenge.challengeId, text))).wallet).toBe(creator);
+  });
+  test("an expired challenge is refused; challenges are limited per client, not per wallet; recovery off closes sign-in", async () => {
+    const expired = await auth.createSignInChallenge("203.0.113.9");
+    // Its expiry is immutable in the schema; the test lifts that rule only to stand in for the passing of time.
+    sqlite.exec("DROP TRIGGER carddex_live_sign_in_challenge_immutable");
+    sqlite.query("UPDATE live_sign_in_challenges SET expires_at = 0 WHERE id = ?").run(expired.challengeId);
+    await expect(auth.verifySignInChallenge(proof(expired.challengeId, liveSignInText(expired.input, creator)))).rejects.toThrow("expired");
+    const {LIMITS} = await import("../../src/lib/carddex/live/limits.server");
+    for (let i = 1; i < LIMITS.signInIp.max; i++) await auth.createSignInChallenge("203.0.113.9");
+    await expect(auth.createSignInChallenge("203.0.113.9")).rejects.toThrow("Wait a minute");
+    // The address is stored only as a keyed hash.
+    expect(JSON.stringify(sqlite.query("SELECT client_hash FROM live_sign_in_challenges").all())).not.toContain("203.0.113.9");
+    expect((await auth.createSignInChallenge("198.51.100.1")).input.domain).toBe("launchacard.fun");
+    env.CARDDEX_LIVE_RECOVERY_ENABLED = "false";
+    await expect(auth.createSignInChallenge("198.51.100.2")).rejects.toThrow("recovery is paused");
+  });
+  test("end to end: a mock wallet with solana:signIn connects and signs in with one prompt against the real server checks", async () => {
+    const {mountRegistry, signInLiveWallet, connectLiveWallet, signLiveMessage, walletSupportsSignIn, disconnectLiveWallet} = await import("../../src/components/carddex/live/wallet");
+    const {proveOwnership} = await import("../../src/components/carddex/live/launch-flow");
+    const {mockWallet} = await import("./mock-wallets");
+    const release = mountRegistry(), phantom = mockWallet({name: "Phantom", seed: creatorSeed, signIn: true});
+    try {
+      let token = "";
+      const result = await proveOwnership({address: null, canSignIn: walletSupportsSignIn("Phantom"), origin: "https://launchacard.fun",
+        signInChallenge: () => auth.createSignInChallenge("203.0.113.10"),
+        verifySignIn: async signed => { token = (await auth.verifySignInChallenge(signed)).token; },
+        messageChallenge: wallet => auth.createWalletChallenge(wallet), verifyMessage: async signed => { token = (await auth.verifyWalletChallenge(signed)).token; },
+        signIn: input => signInLiveWallet("Phantom", input), connect: () => connectLiveWallet("Phantom"), signMessage: (message, wallet) => signLiveMessage(message, wallet)});
+      expect(result).toEqual({address: creator, method: "sign-in", prompts: 1});
+      expect(phantom.prompts).toEqual(["signIn"]);
+      expect((await auth.requireLiveWallet(token)).wallet).toBe(creator);
+    } finally { await disconnectLiveWallet(); phantom.unregister(); release(); }
+  });
+});
+
+describe("platform hardening on the server", () => {
+  const sign = (message: string) => btoa(String.fromCharCode(...ed25519.sign(new TextEncoder().encode(message), creatorSeed)));
+  const servePublic = (url: string, init?: RequestInit) => {
+    const path = new URL(url).pathname;
+    return path.startsWith("/m/") ? assets.serveLiveMetadata(path.slice(3), new Request(url, init)) : assets.serveLiveAsset(path.split("/").pop()!, new Request(url, init));
+  };
+  const signedTx = (plan: {transactionBase64: string}, guardedBytes = false) => `${plan.transactionBase64}-${guardedBytes ? "guarded" : "signed"}`;
+  test("request limits refuse past the window, per scope and client, and store only hashes (SEC-1)", async () => {
+    const {enforceLimit, purgeRateEvents, LIMITS} = await import("../../src/lib/carddex/live/limits.server");
+    const rule = {scope: "test:rule", max: 3, windowMs: 60_000};
+    for (let i = 0; i < 3; i++) await enforceLimit(rule, "203.0.113.20");
+    await expect(enforceLimit(rule, "203.0.113.20")).rejects.toThrow("Too many requests right now");
+    await enforceLimit(rule, "203.0.113.21");
+    await enforceLimit({...rule, scope: "test:other"}, "203.0.113.20");
+    // A refused request adds nothing; the client is stored only as a hash.
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM rate_events WHERE scope = 'test:rule'").get()).toEqual({n: 4});
+    expect(JSON.stringify(sqlite.query("SELECT * FROM rate_events").all())).not.toContain("203.0.113");
+    await enforceLimit(rule, "203.0.113.20", undefined, Date.now() + 61_000);
+    await purgeRateEvents(Date.now() + 2 * 86_400_000);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM rate_events").get()).toEqual({n: 0});
+    // Every rule sits above one creator's launch: a few prepares, a minute and a half of confirmation polls.
+    expect(LIMITS.prepareWallet.max).toBeGreaterThanOrEqual(10); expect(LIMITS.confirmWallet.max).toBeGreaterThanOrEqual(45);
+  });
+  test("an IPv6 address counts as its /64, so rotating addresses inside one allocation shares one bucket (SEC-R1)", async () => {
+    const {clientKey, enforceLimit, LIMITS} = await import("../../src/lib/carddex/live/limits.server");
+    expect(clientKey("203.0.113.7")).toBe("203.0.113.7");
+    expect(clientKey(" 2001:DB8:1:2::1 ")).toBe("2001:db8:1:2::/64");
+    expect(clientKey("2001:0db8:0001:0002:abcd:ef01:2345:6789")).toBe("2001:db8:1:2::/64");
+    expect(clientKey("2001:db8:1:2:3::9")).toBe("2001:db8:1:2::/64");
+    expect(clientKey("2001:db8::")).toBe("2001:db8:0:0::/64");
+    expect(clientKey("fe80::1%eth0")).toBe("fe80:0:0:0::/64");
+    expect(clientKey("::ffff:198.51.100.4")).toBe("198.51.100.4");
+    expect(clientKey("2001:db8:1:2:0:0:198.51.100.4")).toBe("2001:db8:1:2::/64");
+    expect(clientKey("")).toBeNull(); expect(clientKey(null)).toBeNull(); expect(clientKey(undefined)).toBeNull();
+    // The review's reproduction, inverted: one /64 is refused like one address.
+    for (let i = 0; i < LIMITS.demoEnterIp.max; i++) await enforceLimit(LIMITS.demoEnterIp, clientKey(`2001:db8:1:2::${(i + 1).toString(16)}`));
+    let accepted = 0;
+    for (let i = 2; i < 50; i++) await enforceLimit(LIMITS.demoEnterIp, clientKey(`2001:db8:1:2:${i.toString(16)}:${(i * 7).toString(16)}::${i.toString(16)}`)).then(() => accepted++, () => undefined);
+    expect(accepted).toBe(0);
+    await enforceLimit(LIMITS.demoEnterIp, clientKey("2001:db8:1:3::1"));
+    for (let i = 0; i < LIMITS.signInIp.max; i++) await auth.createSignInChallenge(clientKey(`2001:db8:9:9::${(i + 1).toString(16)}`));
+    await expect(auth.createSignInChallenge(clientKey("2001:db8:9:9:ffff::1"))).rejects.toThrow("Wait a minute");
+  });
+  test("a burst of sign-in challenges in parallel takes exactly the limit (SEC-R3); clients are stored as keyed hashes (SEC-R4)", async () => {
+    const {clientHash, LIMITS} = await import("../../src/lib/carddex/live/limits.server");
+    const results = await Promise.allSettled(Array.from({length: LIMITS.signInIp.max + 20}, () => auth.createSignInChallenge("198.51.100.77")));
+    expect(results.filter(result => result.status === "fulfilled")).toHaveLength(LIMITS.signInIp.max);
+    // An unsalted hash of a constant scope and an IPv4 address could be reversed by hashing every address; these are keyed.
+    const plain = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${LIMITS.signInIp.scope}|198.51.100.77`))).subarray(0, 16), byte => byte.toString(16).padStart(2, "0")).join("");
+    const stored = (sqlite.query("SELECT DISTINCT key_hash FROM rate_events WHERE scope = ?").all(LIMITS.signInIp.scope) as {key_hash: string}[]).map(row => row.key_hash);
+    expect(stored).toEqual([await clientHash(LIMITS.signInIp.scope, "198.51.100.77")]);
+    expect(stored).not.toContain(plain);
+  });
+  test("a database without this build's migrations is reported, and the limits let requests through rather than fail them (REG-2)", async () => {
+    const {enforceLimit, missingMigrations} = await import("../../src/lib/carddex/live/limits.server");
+    expect(await missingMigrations()).toEqual([]);
+    sqlite.exec("DROP TABLE rate_events");
+    const errors: unknown[][] = [], original = console.error;
+    console.error = (...args: unknown[]) => { errors.push(args); };
+    try {
+      for (let i = 0; i < 5; i++) await enforceLimit({scope: "test:missing", max: 1, windowMs: 60_000}, "203.0.113.50");
+    } finally { console.error = original; }
+    expect(errors).toHaveLength(1); expect(String(errors[0][0])).toContain("apply the D1 migrations");
+    expect(await missingMigrations()).toEqual(["0014"]);
+    sqlite.exec("ALTER TABLE live_assets DROP COLUMN public_until");
+    expect(await missingMigrations()).toEqual(["0014", "0015"]);
+  });
+  test("every connecting-address read goes through clientKey, and the size check and sessions are limited per address (SEC-R1, SEC-R2)", () => {
+    const sources = (dir: string): string[] => readdirSync(dir, {withFileTypes: true}).flatMap(entry => entry.isDirectory() ? sources(resolve(dir, entry.name)) : /\.(ts|tsx)$/.test(entry.name) ? [resolve(dir, entry.name)] : []);
+    const reads = sources(resolve(import.meta.dir, "../../src")).flatMap(file => readFileSync(file, "utf8").split("\n").filter(line => /cf-connecting-ip/i.test(line) && !/^\s*(\/\/|\*)/.test(line)).map(line => [file, line] as const));
+    expect(reads.length).toBeGreaterThanOrEqual(4);
+    for (const [file, line] of reads) expect([file, /clientKey\(/.test(line)]).toEqual([file, true]);
+    const api = readFileSync(resolve(import.meta.dir, "../../src/lib/carddex/live/api.ts"), "utf8");
+    const handler = (name: string) => api.slice(api.indexOf(`export const ${name} =`), api.indexOf("\nexport const", api.indexOf(`export const ${name} =`) + 1));
+    expect(handler("checkLiveLaunchSize")).toContain("perAddress(LIMITS.sizeIp)");
+    for (const name of ["verifyLiveWallet", "verifyLiveSignIn"]) expect(handler(name)).toContain("LIMITS.sessionIp");
+  });
+  test("anyone can ask for a wallet's challenge, but its owner is never locked out (SEC-2)", async () => {
+    // Someone without the creator's key asks for the creator's challenges, up to the per-wallet limit.
+    const issued: {challengeId: string; message: string}[] = [];
+    for (let i = 0; i < auth.WALLET_CHALLENGES_PER_MINUTE; i++) issued.push(await auth.createWalletChallenge(creator, "198.51.100.66"));
+    // The creator still gets a challenge (the newest open one, no new row) and signs in with their own key.
+    const mine = await auth.createWalletChallenge(creator, "203.0.113.30");
+    expect(mine.challengeId).toBe(issued.at(-1)!.challengeId);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_wallet_challenges WHERE wallet = ?").get(creator)).toEqual({n: auth.WALLET_CHALLENGES_PER_MINUTE});
+    const session = await auth.verifyWalletChallenge({challengeId: mine.challengeId, wallet: creator, signatureBase64: sign(mine.message)});
+    expect((await auth.requireLiveWallet(session.token)).wallet).toBe(creator);
+    // A used challenge is never handed out again.
+    expect((await auth.createWalletChallenge(creator, "203.0.113.30")).challengeId).toBe(issued.at(-2)!.challengeId);
+    // The flood itself is limited per connecting address.
+    const {LIMITS} = await import("../../src/lib/carddex/live/limits.server");
+    for (let i = 0; i < LIMITS.challengeIp.max - auth.WALLET_CHALLENGES_PER_MINUTE; i++) await auth.createWalletChallenge(otherWallet, "198.51.100.66");
+    await expect(auth.createWalletChallenge(otherWallet, "198.51.100.66")).rejects.toThrow("Too many requests");
+  });
+  test("an upload is not public until a launch uses it: for its approval while unsigned, for good once its coin is signed (SEC-3, SEC-R5)", async () => {
+    const original = await input(), art = original.assets.artwork;
+    for (const init of [undefined, {headers: {"x-launch-a-card-asset-check": "0".repeat(64)}}]) {
+      const hidden = await servePublic(art.url, init);
+      expect(hidden.status).toBe(404); expect(hidden.headers.get("cache-control")).toBe("no-store");
+    }
+    // A prepare refused before the chain (a buy that cannot fit) publishes nothing.
+    sizes = {createBytes: 1032, buyBytes: 1289};
+    await expect(service.prepareLiveLaunch(creator, {...original, initialBuyQuoteBaseUnits: "1000"})).rejects.toThrow("doesn't fit");
+    expect((await servePublic(art.url)).status).toBe(404);
+    sizes = {createBytes: 950, buyBytes: 1200};
+    const prepared = await service.prepareLiveLaunch(creator, original);
+    const tokenJson = await (await servePublic(prepared.intent.tokenMetadataUri)).json() as any;
+    const nftJson = await (await servePublic(prepared.intent.nftMetadataUri)).json() as any;
+    const urls = new Set<string>([prepared.intent.tokenMetadataUri, prepared.intent.nftMetadataUri, tokenJson.image, nftJson.image,
+      ...nftJson.properties.files.map((file: {uri: string}) => file.uri), nftJson.properties.launchACard.sourceFront, nftJson.properties.launchACard.sourceBack]);
+    expect(urls.size).toBe(7);
+    // The permanent URL contract every launched coin and card depends on (REL-7): never change these formats.
+    for (const url of urls) expect(url).toMatch(/^https:\/\/launchacard\.fun\/(?:m\/[A-Za-z0-9_-]{43}|api\/live\/assets\/[a-f0-9]{64}\.(?:png|jpg|webp))$/);
+    // Prepared but not signed (preparing costs no SOL): public for the wallet approval, so the prompt can show the coin,
+    // with a short cache; once that window ends, only its uploader and the Worker's own check read it.
+    for (const url of urls) {
+      const served = await servePublic(url);
+      expect(served.status).toBe(200);
+      expect(served.headers.get("cache-control")).toBe("public, max-age=300");
+      expect(served.headers.get("access-control-allow-origin")).toBe("*");
+    }
+    const later = (url: string, init?: RequestInit) => assets.serveLiveAsset(new URL(url).pathname.startsWith("/m/") ? `${assets.metadataShaFromUri(url)}.json` : url.split("/").pop()!, new Request(url, init), Date.now() + assets.PREVIEW_MS + 1);
+    for (const url of urls) expect((await later(url)).status).toBe(404);
+    const {token} = await auth.verifyWalletChallenge(await (async () => { const challenge = await auth.createWalletChallenge(creator); return {challengeId: challenge.challengeId, wallet: creator, signatureBase64: sign(challenge.message)}; })());
+    const own = await later(art.url, {headers: {cookie: `carddex_live_session=${token}`}});
+    expect(own.status).toBe(200); expect(own.headers.get("cache-control")).toBe("no-store"); expect(own.headers.get("access-control-allow-origin")).toBeNull();
+    // Another wallet's session reads nothing it did not upload.
+    const otherToken = (await auth.verifyWalletChallenge(await (async () => { const challenge = await auth.createWalletChallenge(otherWallet); return {challengeId: challenge.challengeId, wallet: otherWallet, signatureBase64: btoa(String.fromCharCode(...ed25519.sign(new TextEncoder().encode(challenge.message), new Uint8Array(32).fill(10))))}; })())).token;
+    expect((await later(art.url, {headers: {cookie: `carddex_live_session=${otherToken}`}})).status).toBe(404);
+    // The signed coin is saved (before it is sent): from then on everything is public for good.
+    await service.submitLiveTransaction(creator, {intentId: prepared.intent.id, kind: "token", messageSha256: prepared.transaction!.messageSha256, transactionBase64: signedTx(prepared.transaction!)});
+    for (const url of urls) {
+      const served = await later(url);
+      expect(served.status).toBe(200);
+      expect(served.headers.get("cache-control")).toBe("public, max-age=31536000, immutable");
+      expect(served.headers.get("access-control-allow-origin")).toBe("*");
+      expect(served.headers.get("content-security-policy")).toBe("default-src 'none'; sandbox");
+    }
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_assets WHERE published_at > 0").get()).toEqual({n: 7});
+  });
+  test("a launch an older Worker saved while the migrations ran ahead of the deploy keeps its metadata public (F2)", async () => {
+    const prepared = await service.prepareLiveLaunch(creator, await input());
+    // What the deployed Worker writes between `migrations apply` and the deploy: rows without published_at.
+    sqlite.query("UPDATE live_assets SET published_at = NULL, public_until = NULL").run();
+    for (const url of [prepared.intent.tokenMetadataUri, prepared.intent.nftMetadataUri, prepared.intent.assets.artwork.url]) {
+      const served = await servePublic(url);
+      expect(served.status).toBe(200); expect(served.headers.get("cache-control")).toBe("public, max-age=31536000, immutable");
+    }
+    // A coin recorded from the chain publishes its assets too, however its bytes got there.
+    sqlite.query("UPDATE live_assets SET published_at = 0").run();
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: prepared.intent.id, signature: "s".repeat(88), messageSha256: prepared.transaction!.messageSha256});
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_assets WHERE published_at > 0").get()).toEqual({n: 7});
+  });
+  test("the same bytes are stored once, and every asset stored before the gate stays public", async () => {
+    const bytes = image(200, 200), first = await assets.putPublicAsset(creator, bytes, "image/png"), puts = storagePuts;
+    expect((await assets.putPublicAsset(otherWallet, bytes, "image/png")).sha256).toBe(first.sha256);
+    expect(storagePuts).toBe(puts);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_asset_grants WHERE sha256 = ?").get(first.sha256)).toEqual({n: 2});
+    // Lost from R2 (but still listed): written again.
+    objects.clear(); await assets.putPublicAsset(creator, bytes, "image/png"); expect(storagePuts).toBe(puts + 1);
+    const before = new Database(":memory:");
+    for (const name of readdirSync(migrations).filter(name => name.endsWith(".sql") && name < "0014").sort()) { const sql = readFileSync(resolve(migrations, name), "utf8"); if (sql.replace(/--[^\n]*/g, "").trim()) before.exec(sql); }
+    before.query("INSERT INTO live_assets (sha256, storage_key, mime_type, byte_length, created_at) VALUES (?, ?, 'image/png', 1, 42)").run("a".repeat(64), `live/${"a".repeat(64)}.png`);
+    before.exec(readFileSync(resolve(migrations, "0014_platform_limits.sql"), "utf8"));
+    expect(before.query("SELECT published_at FROM live_assets").get()).toEqual({published_at: 42});
+    before.close();
+  });
+  const fillPlans = (intentId: string, kind: "token" | "nft", count: number, at = Date.now()) => {
+    for (let i = 0; i < count; i++) sqlite.query("INSERT INTO live_launch_transactions (id, intent_id, kind, message_sha256, plan_json, status, created_at, updated_at) VALUES (?, ?, ?, ?, '{}', 'prepared', ?, ?)").run(crypto.randomUUID(), intentId, kind, `cap-${kind}-${i}`, at, at);
+  };
+  test("a launch's plan rows are capped per stage, refused before any RPC call, then slowed rather than closed (F1)", async () => {
+    const original = await input(), first = await service.prepareLiveLaunch(creator, original);
+    fillPlans(first.intent.id, "token", service.MAX_PLANS_PER_STAGE - 1);
+    const calls = prepareCalls;
+    await expect(service.prepareLiveLaunch(creator, original)).rejects.toThrow("prepared many times in a row");
+    expect(prepareCalls).toBe(calls);
+    // Card rows never count against the coin stage.
+    sqlite.query("DELETE FROM live_launch_transactions WHERE intent_id = ? AND message_sha256 LIKE 'cap-token-%'").run(first.intent.id);
+    fillPlans(first.intent.id, "nft", 3 * service.MAX_PLANS_PER_STAGE);
+    expect((await service.prepareLiveLaunch(creator, original)).transaction).not.toBeNull();
+    // Past the cap, one more plan once the newest is a few minutes old: never a dead end.
+    fillPlans(first.intent.id, "token", service.MAX_PLANS_PER_STAGE, Date.now() - service.PLAN_SLOW_LANE_MS - 1_000);
+    sqlite.query("UPDATE live_launch_transactions SET created_at = ? WHERE intent_id = ? AND kind = 'token'").run(Date.now() - service.PLAN_SLOW_LANE_MS - 1_000, first.intent.id);
+    expect((await service.prepareLiveLaunch(creator, original)).transaction).not.toBeNull();
+    await expect(service.prepareLiveLaunch(creator, original)).rejects.toThrow("Wait a few minutes");
+  });
+  test("a coin that landed after many prepares can always prepare its card (F1)", async () => {
+    const original = await input(), first = await service.prepareLiveLaunch(creator, original);
+    // A long session: the coin was prepared again many times (stale plans, expiries) before the last one landed.
+    fillPlans(first.intent.id, "token", service.MAX_PLANS_PER_STAGE - 2);
+    const last = await service.prepareLiveLaunch(creator, original);
+    await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: last.transaction!.messageSha256, transactionBase64: signedTx(last.transaction!)});
+    tokenVerified = true;
+    expect((await service.confirmLiveToken(creator, {intentId: first.intent.id, signature: "s".repeat(88), messageSha256: last.transaction!.messageSha256})).intent.status).toBe("nft_pending");
+    const card = await service.prepareLiveCreatorNft(creator, {intentId: first.intent.id});
+    expect(card.transaction).not.toBeNull();
+    // Even a card stage past its own cap only waits a few minutes, and its words never tell the creator to discard.
+    fillPlans(first.intent.id, "nft", 2 * service.MAX_PLANS_PER_STAGE);
+    const slowed = await service.prepareLiveCreatorNft(creator, {intentId: first.intent.id}).then(() => "", (error: Error) => error.message);
+    expect(slowed).toContain("Wait a few minutes"); expect(slowed).not.toMatch(/discard/i);
+    sqlite.query("UPDATE live_launch_transactions SET created_at = ? WHERE intent_id = ? AND kind = 'nft'").run(Date.now() - service.PLAN_SLOW_LANE_MS - 1_000, first.intent.id);
+    expect((await service.prepareLiveCreatorNft(creator, {intentId: first.intent.id})).transaction).not.toBeNull();
+  });
+  test("expired challenges and sessions are purged; anything still counted or valid stays (SEC-4)", async () => {
+    const now = Date.now(), hour = 3_600_000;
+    sqlite.query("INSERT INTO live_wallet_challenges (id, wallet, origin, message, created_at, expires_at) VALUES ('old', ?, 'https://launchacard.fun', 'm', ?, ?)").run(creator, now - 3 * hour, now - 3 * hour + 300_000);
+    sqlite.query("INSERT INTO live_wallet_challenges (id, wallet, origin, message, created_at, expires_at) VALUES ('fresh', ?, 'https://launchacard.fun', 'm', ?, ?)").run(creator, now, now + 300_000);
+    sqlite.query("INSERT INTO live_sign_in_challenges (id, client_hash, origin, input_json, created_at, expires_at) VALUES ('old', 'h', 'https://launchacard.fun', '{}', ?, ?)").run(now - 3 * hour, now - 3 * hour + 300_000);
+    sqlite.query("INSERT INTO live_wallet_sessions (token_hash, wallet, created_at, expires_at) VALUES ('ended', ?, ?, ?), ('live', ?, ?, ?)").run(creator, now - 3 * hour, now - hour, creator, now, now + hour);
+    await auth.purgeExpiredLiveRows(now);
+    expect(sqlite.query("SELECT id FROM live_wallet_challenges").all()).toEqual([{id: "fresh"}]);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_sign_in_challenges").get()).toEqual({n: 0});
+    expect(sqlite.query("SELECT token_hash FROM live_wallet_sessions").all()).toEqual([{token_hash: "live"}]);
+  });
+  test("sign-out's origin check does not depend on the switches (SEC-7)", async () => {
+    const {assertSiteOrigin} = await import("../../src/lib/carddex/live/config.server");
+    env.CARDDEX_LIVE_RECOVERY_ENABLED = "false";
+    expect(() => assertSiteOrigin("https://launchacard.fun")).not.toThrow();
+    for (const origin of [null, "https://edge.launchacard.com", "https://evil.example"]) expect(() => assertSiteOrigin(origin)).toThrow("configured Launch a Card site");
+  });
+  test("a coin that landed and failed still loads, says so plainly, and is prepared again with the same mint (REL-1)", async () => {
+    const original = await input(), first = await service.prepareLiveLaunch(creator, original), tx = first.transaction!;
+    const sent = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: signedTx(tx)});
+    tokenFailed = true;
+    // Readable, never thrown: the page can show it and offer the next step.
+    const loaded = await service.getLiveLaunchIntent(creator, first.intent.id);
+    expect(loaded).toMatchObject({status: "token_pending", chainCheck: {state: "failed-on-chain", kind: "token"}});
+    expect(loaded.chainCheck!.reason).toContain("no coin was created");
+    await expect(service.confirmLiveToken(creator, {intentId: first.intent.id, signature: sent.signature, messageSha256: tx.messageSha256})).rejects.toBeInstanceOf(service.LaunchFailedOnChain);
+    // Prepared again only once nothing it signed can still land (the abandon gate), with the same mint and card key.
+    await expect(service.prepareLiveLaunch(creator, original)).rejects.toThrow("Prior token blockhash");
+    replaceable = true;
+    const again = await service.prepareLiveLaunch(creator, original);
+    expect(again.intent).toMatchObject({id: first.intent.id, status: "prepared", tokenMint: mint, nftMint, tokenSignature: null});
+    expect(again.transaction!.messageSha256).not.toBe(tx.messageSha256);
+    // The old signature cannot pull the launch back to pending.
+    tokenFailed = false;
+    await service.confirmLiveToken(creator, {intentId: first.intent.id, signature: sent.signature, messageSha256: tx.messageSha256});
+    expect((sqlite.query("SELECT status FROM live_launch_intents WHERE id = ?").get(first.intent.id) as {status: string}).status).toBe("prepared");
+    const retry = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: again.transaction!.messageSha256, transactionBase64: signedTx(again.transaction!, true)});
+    expect(retry.intent.status).toBe("token_pending"); expect(retry.signature).not.toBe(sent.signature);
+    // Reading the launch checks only the current submission: the old signature never replaces it.
+    resendAnswer = "expired";
+    const reread = await service.getLiveLaunchIntent(creator, first.intent.id);
+    expect(reread).toMatchObject({status: "token_pending", tokenSignature: retry.signature, chainCheck: {state: "expired-unlanded"}});
+    expect(resends.map(request => request.transactionBase64)).toEqual([signedTx(again.transaction!, true)]);
+    tokenVerified = true;
+    expect((await service.getLiveLaunchIntent(creator, first.intent.id))).toMatchObject({status: "nft_pending", tokenSignature: retry.signature});
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 1});
+  });
+  test("a chain check that cannot finish leaves the saved launch readable and unchanged (REL-1)", async () => {
+    const first = await service.prepareLiveLaunch(creator, await input()), tx = first.transaction!;
+    await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: signedTx(tx)});
+    for (const problem of ["429 Too Many Requests from https://rpc.example.test", "The finalized transaction message differs from the approved plan"]) {
+      verifyThrows = problem;
+      const loaded = await service.getLiveLaunchIntent(creator, first.intent.id);
+      expect(loaded).toMatchObject({status: "token_pending", chainCheck: {state: "unchecked", kind: "token"}});
+      expect(loaded.chainCheck!.reason).not.toContain("rpc.example");
+    }
+    verifyThrows = null;
+    expect((await service.getLiveLaunchIntent(creator, first.intent.id)).chainCheck).toBeUndefined();
+  });
+  test("saved signed bytes are sent again while pending, and an expired coin is reported and prepared again (REL-3)", async () => {
+    const original = await input(), first = await service.prepareLiveLaunch(creator, {...original, withCard: true}), tx = first.transaction!, card = first.card!;
+    await service.holdLiveCard(creator, {intentId: first.intent.id, messageSha256: card.messageSha256, transactionBase64: signedTx(card)});
+    uncertain = true;
+    const submitted = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: signedTx(tx)});
+    expect(submitted.submission).toBe("unknown");
+    // The first broadcast is kept alive past a closed tab.
+    expect(keptAlive).toBe(1);
+    const pending = await service.confirmLiveToken(creator, {intentId: first.intent.id, signature: submitted.signature, messageSha256: tx.messageSha256});
+    expect(pending).toMatchObject({delivery: "resent"});
+    // Only the submitted coin, with its saved bound; never the card held for it.
+    expect(resends).toHaveLength(1);
+    expect(resends[0]).toMatchObject({transactionBase64: signedTx(tx), lastValidBlockHeight: 100, plan: {messageSha256: tx.messageSha256}});
+    resendAnswer = "expired";
+    const expired = await service.getLiveLaunchIntent(creator, first.intent.id);
+    expect(expired).toMatchObject({status: "token_pending", chainCheck: {state: "expired-unlanded", kind: "token"}});
+    expect(resends.every(request => request.transactionBase64 === signedTx(tx))).toBe(true);
+    replaceable = true;
+    expect((await service.prepareLiveLaunch(creator, original)).intent).toMatchObject({status: "prepared", tokenMint: mint});
+  });
+  test("a send the RPC refused is saved, reported plainly and sent again later", async () => {
+    const first = await service.prepareLiveLaunch(creator, await input()), tx = first.transaction!;
+    refusedSend = true;
+    const result = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: signedTx(tx)});
+    expect(result).toMatchObject({submission: "unknown", intent: {status: "token_pending"}});
+    expect(result.warning).toContain("did not accept this transaction yet"); expect(result.warning).not.toContain("rpc.example");
+    await service.confirmLiveToken(creator, {intentId: first.intent.id, signature: result.signature, messageSha256: tx.messageSha256});
+    expect(resends).toHaveLength(1);
+  });
+  test("one coin in flight per wallet: another device cannot start a second coin while one is sent (REL-5)", async () => {
+    const first = await service.prepareLiveLaunch(creator, await input()), tx = first.transaction!;
+    await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: signedTx(tx)});
+    const other = {...await input({tokenMint: otherWallet}), idempotencyKey: "second-device", nftMint: replacementNft}, written = storagePuts;
+    await expect(service.prepareLiveLaunch(creator, other)).rejects.toThrow("Finish or discard your saved launch first");
+    expect(storagePuts).toBe(written);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 1});
+    tokenVerified = true;
+    await service.getLiveLaunchIntent(creator, first.intent.id);
+    tokenVerified = false;
+    expect((await service.prepareLiveLaunch(creator, other)).intent.tokenMint).toBe(otherWallet);
+  });
+  test("a database failure while saving a new launch is not called a reservation, and a retry saves it (REL-10)", async () => {
+    const original = await input(), batch = localD1.batch;
+    let failed = false;
+    localD1.batch = async (statements: Prepared[]) => { if (!failed && statements.some(statement => statement.sql.startsWith("INSERT INTO live_launch_intents"))) { failed = true; throw new Error("D1_ERROR: network connection lost"); } return batch(statements); };
+    try {
+      await expect(service.prepareLiveLaunch(creator, original)).rejects.toThrow("The launch could not be saved. Nothing was sent. Try again.");
+      expect((await service.prepareLiveLaunch(creator, original)).intent.status).toBe("prepared");
+    } finally { localD1.batch = batch; }
+  });
+  test("launch event logs carry stage names and reasons, never keys, addresses, hashes or URLs (REL-6)", () => {
+    const lines: string[] = [], info = console.info;
+    console.info = (...args: unknown[]) => { lines.push(args.map(String).join(" ")); };
+    try { service.logLaunchEvent("refused", {intentId: "0332fd55-e84e-47ad-a448-053670043c59", kind: "token", reason: `Missing or invalid signature for ${creator} at https://rpc.example.test/key ${"ab".repeat(32)}`}); }
+    finally { console.info = info; }
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toStartWith("live_launch_event ");
+    expect(lines[0]).toContain('"event":"refused"'); expect(lines[0]).toContain("0332fd55");
+    for (const secret of [creator, "rpc.example", "abab".repeat(8)]) expect(lines[0]).not.toContain(secret);
   });
 });
