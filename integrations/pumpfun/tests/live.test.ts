@@ -11,7 +11,7 @@ import { getAssetV1AccountDataSerializer as rawAssetSerializer } from "@metaplex
 import { getPluginRegistryV1AccountDataSerializer as rawRegistrySerializer } from "@metaplex-foundation/mpl-core/dist/src/generated/types/pluginRegistryV1AccountData.js";
 import { publicKey as umiKey } from "@metaplex-foundation/umi";
 import { MAINNET_GENESIS_HASH, PAIR_ASSETS } from "../src/index.ts";
-import { RPC_TIMEOUT_MS, TransactionFailedOnChain, resendSignedWalletTransaction, rpcFetchWithTimeout } from "../src/live.ts";
+import { RENT_EXEMPT_MINIMUM_LAMPORTS, RPC_TIMEOUT_MS, TransactionFailedOnChain, resendSignedWalletTransaction, rpcFetchWithTimeout } from "../src/live.ts";
 import { CORE_PROGRAM_ID, PACKET_LIMIT, PUMP_LOOKUP_TABLE, REFRESHED_BLOCKHASH_MARGIN, WALLET_SIZE_TARGET, pinnedLookupTable, SignedTransactionNotSent, assertNftMintReplaceable, broadcastSignedWalletTransaction, checkSignedWalletTransaction, assertTokenMintReplaceable, creatorNftInstructions, describeWalletChange, measureTokenTransaction, prepareCreatorNftAheadOfCoin, prepareCreatorNftTransaction, prepareTokenTransaction, recoverCreatorLaunch, sendSignedWalletTransaction, transactionBytes, validateSignedWalletTransaction, verifyCreatorNft, verifyTokenLaunch, type LiveConnection, type LiveLaunchInput, type WalletTransactionPlan } from "../src/live.ts";
 import fixture from "./fixtures/mainnet-pair-accounts-2026-10-28.json";
 import feeFixture from "./fixtures/mainnet-fee-account-2026-10-28.json";
@@ -199,17 +199,41 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     expect(rpc.sent()).toBe(0);
   });
 
-  test("token transaction is unsigned v0 with no lookup tables and exact cost/pair review", async () => {
+  test("token transaction is unsigned v0 against pump.fun's checked table (or none without it) with exact cost/pair review", async () => {
     const input = defaultInput(), rpc = mockRpc();
     const plan = await prepareTokenTransaction(input, { connection: rpc.connection, now });
     const tx = VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64"));
-    expect(tx.message.addressTableLookups).toEqual([]);
+    // Every coin transaction loads pump.fun's own create table, as pump.fun's creates do (WW-4); the create alone too.
+    expect(tx.message.addressTableLookups.map((lookup) => lookup.accountKey.toBase58())).toEqual([PUMP_LOOKUP_TABLE.address]);
+    expect(plan.review.lookupTable).toBe(PUMP_LOOKUP_TABLE.address);
+    // The wallet must keep Solana's rent minimum, not a smaller buffer (WW-3).
+    expect(plan.review.reserveBufferLamports).toBe(RENT_EXEMPT_MINIMUM_LAMPORTS.toString());
+    const bare = mockRpc(); bare.accounts.delete(PUMP_LOOKUP_TABLE.address);
+    const plain = await prepareTokenTransaction(input, { connection: bare.connection, now });
+    expect(VersionedTransaction.deserialize(Buffer.from(plain.transactionBase64, "base64")).message.addressTableLookups).toEqual([]);
+    expect(plain.review.lookupTable).toBeNull();
+    expect(plain.review.transactionBytes).toBeGreaterThan(plan.review.transactionBytes);
     expect(tx.signatures.every((sig) => sig.every((byte) => byte === 0))).toBe(true);
     expect(plan.requiredSigners).toEqual([input.creator, input.mint]);
     expect(plan.messageSha256).toBe(createHash("sha256").update(tx.message.serialize()).digest("hex"));
     expect(plan.review.quoteKey).toBe("tslax"); expect(plan.review.quoteDecimals).toBe(8); expect(plan.review.tokenDecimals).toBe(6);
     expect(BigInt(plan.review.totalDebitLamports)).toBeGreaterThan(BigInt(plan.review.networkFeeLamports));
     expect(rpc.sent()).toBe(0);
+  });
+
+  test("a wallet short of SOL gets one plain sentence, and a table that cannot be read leaves the coin without it", async () => {
+    const input = defaultInput(), rpc = mockRpc();
+    for (const err of [{ InsufficientFundsForRent: { account_index: 0 } }, "InsufficientFundsForFee"]) {
+      rpc.simulationError(err);
+      await expect(prepareTokenTransaction(input, { connection: rpc.connection })).rejects.toThrow(`Insufficient SOL: add SOL to this wallet. Solana requires it to keep at least ${RENT_EXEMPT_MINIMUM_LAMPORTS} lamports`);
+    }
+    // Rent short on another account is not the wallet's balance: the raw failure stays.
+    rpc.simulationError({ InsufficientFundsForRent: { account_index: 3 } });
+    await expect(prepareTokenTransaction(input, { connection: rpc.connection })).rejects.toThrow("Transaction simulation failed");
+    const flaky = mockRpc();
+    (flaky.connection as { getAccountInfo: unknown }).getAccountInfo = async () => { throw new Error("429 Too Many Requests"); };
+    expect((await prepareTokenTransaction(input, { connection: flaky.connection })).review.lookupTable).toBeNull();
+    expect(rpc.sent() + flaky.sent()).toBe(0);
   });
 
   test("initial buy uses exact quote units, current price and fees, minimum output and actual quote balance", async () => {
@@ -336,7 +360,8 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
       expect(plain.buyBytes).toBeGreaterThan(WALLET_SIZE_TARGET); expect(plain.createBytes).toBeLessThanOrEqual(WALLET_SIZE_TARGET); expect(plain.lookupTable).toBe(false);
       // No name is short enough for this buy without the table, so the error only offers launching without it.
       await expect(prepareTokenTransaction(input, { connection: withoutTable().connection })).rejects.toThrow(`${plain.buyBytes} bytes and exceeds the ${WALLET_SIZE_TARGET}-byte wallet limit (Solana's 1232-byte packet limit less 160 bytes for wallet safety checks); launch without an initial buy`);
-      expect(wire(await prepareTokenTransaction({ ...input, initialBuyQuoteBaseUnits: "0" }, { connection: withoutTable().connection }))).toBe(size.createBytes);
+      expect(wire(await prepareTokenTransaction({ ...input, initialBuyQuoteBaseUnits: "0" }, { connection: withoutTable().connection }))).toBe(plain.createBytes);
+      expect(size.createBytes).toBeLessThan(plain.createBytes);
     });
     test("USDC with a buy fits with pump.fun's table; without it, the coin alone does", async () => {
       const input = sized("usdc"), rpc = mockRpc(); rpc.addQuoteBalance(input, 1_000_000n);
@@ -656,12 +681,14 @@ function walletSigns(change?: (tx: VersionedTransaction) => VersionedTransaction
   } };
 }
 const LIGHTHOUSE = new PublicKey("L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95");
+/** pump.fun's create table as a compile input, for a wallet that decompiles and recompiles a coin message with it. */
+const pumpTables = () => [pinnedLookupTable(accountFromFixture(tableFixture.value))!];
 // What a guard-adding wallet would do: append one read-only assertion instruction and refresh the blockhash.
 function withGuard(tx: VersionedTransaction) {
-  const decompiled = TransactionMessage.decompile(tx.message);
+  const decompiled = TransactionMessage.decompile(tx.message, { addressLookupTableAccounts: pumpTables() });
   decompiled.instructions.push(new TransactionInstruction({ programId: LIGHTHOUSE, keys: [], data: Buffer.from([1, 2, 3]) }));
   decompiled.recentBlockhash = new PublicKey(new Uint8Array(32).fill(45)).toBase58();
-  return new VersionedTransaction(decompiled.compileToV0Message());
+  return new VersionedTransaction(decompiled.compileToV0Message(pumpTables()));
 }
 
 describe("wallet-first signing against the server's checks", () => {
@@ -697,7 +724,7 @@ describe("wallet-first signing against the server's checks", () => {
     expect(VersionedTransaction.deserialize(Buffer.from(returned, "base64")).signatures[1].every((byte) => byte === 0)).toBe(true);
     expect(() => validateSignedWalletTransaction(plan, returned)).toThrow("approved message (guard)");
     const change = describeWalletChange(plan, returned);
-    expect(change).toMatchObject({ parsed: true, version: 0, lookupTables: 0, blockhashChanged: true, signersChanged: false, walletSigned: true,
+    expect(change).toMatchObject({ parsed: true, version: 0, lookupTables: 1, blockhashChanged: true, signersChanged: false, walletSigned: true,
       planInstructionsKept: true, computeBudgetChanged: false, programsAdded: [LIGHTHOUSE.toBase58()], programsRemoved: [], limit: PACKET_LIMIT,
       rule: { accepted: false, reason: "guard" } });
     if (!change.parsed) throw new Error("Expected a readable changed transaction");
@@ -774,9 +801,9 @@ describe("Phantom's Lighthouse assertions under the shared wallet rule, end to e
     const global = GLOBAL_PDA.toBase58(), payer = { target: input.creator, data: payerGuardData() };
     // Real web3.js recompiles: a Lighthouse instruction whose account meta is writable or a signer moves that key's flags.
     const recompiled = (extra: TransactionInstruction) => (message: Uint8Array) => {
-      const decompiled = TransactionMessage.decompile(VersionedTransaction.deserialize(unsignedTransaction(message)).message);
+      const decompiled = TransactionMessage.decompile(VersionedTransaction.deserialize(unsignedTransaction(message)).message, { addressLookupTableAccounts: pumpTables() });
       decompiled.instructions.push(extra);
-      return new VersionedTransaction(decompiled.compileToV0Message()).message.serialize();
+      return new VersionedTransaction(decompiled.compileToV0Message(pumpTables())).message.serialize();
     };
     const assertion = (keys: { pubkey: PublicKey; isSigner: boolean; isWritable: boolean }[], data = payerGuardData()) => new TransactionInstruction({ programId: LIGHTHOUSE, keys, data: Buffer.from(data) });
     const changes: Array<[string, (message: Uint8Array) => Uint8Array]> = [
@@ -790,9 +817,9 @@ describe("Phantom's Lighthouse assertions under the shared wallet rule, end to e
       ["an added compute-budget instruction", recompiled(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 2_500_000 }))],
       // Phantom's own fee insertion: the reviewed price replaced by 2,500,000 micro-lamports, plus a payer assertion.
       ["a changed priority fee", (message) => {
-        const decompiled = TransactionMessage.decompile(VersionedTransaction.deserialize(unsignedTransaction(message)).message);
+        const decompiled = TransactionMessage.decompile(VersionedTransaction.deserialize(unsignedTransaction(message)).message, { addressLookupTableAccounts: pumpTables() });
         decompiled.instructions[1] = ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 2_500_000 });
-        return phantomGuarded(new VersionedTransaction(decompiled.compileToV0Message()).message.serialize(), [payer]);
+        return phantomGuarded(new VersionedTransaction(decompiled.compileToV0Message(pumpTables())).message.serialize(), [payer]);
       }],
     ];
     for (const [label, change] of changes) {

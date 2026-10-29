@@ -4,10 +4,10 @@
 CREATE TABLE rate_events (scope TEXT NOT NULL, key_hash TEXT NOT NULL, at INTEGER NOT NULL);
 CREATE INDEX rate_event_window ON rate_events(scope, key_hash, at);
 CREATE INDEX rate_event_age ON rate_events(at);
--- Launch images and metadata are public only once a launch uses them: published_at is set in the same batch that saves
--- the launch (its coin and card metadata URIs are permanent from then on). An upload that never became a launch is
--- served only to this Worker's own verification read, so launchacard.fun never hosts arbitrary images. Everything
--- stored before this migration stays public exactly as before.
+-- Launch images and metadata are public only once a launch uses them (published_at; 0015 adds the approval window and
+-- says when each state applies). An upload that never became a launch is served only to this Worker's own
+-- verification read and its uploader, so a bare upload is never public on launchacard.fun. Everything stored before
+-- this migration stays public exactly as before.
 ALTER TABLE live_assets ADD COLUMN published_at INTEGER;
 UPDATE live_assets SET published_at = created_at;
 -- Server-only values created by the Worker itself (the random key its own asset verification reads carry).

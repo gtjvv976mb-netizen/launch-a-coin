@@ -1,6 +1,7 @@
 import { createStart, createMiddleware } from "@tanstack/react-start";
 
 import { renderErrorPage } from "./lib/error-page";
+import { clientSafeError } from "./lib/server-fn-errors";
 
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
@@ -27,14 +28,8 @@ const serverFunctionErrors = createMiddleware({ type: "function" }).server(async
   try {
     return await next();
   } catch (error) {
-    if (!(error instanceof Error)) throw error;
-    const userFacing = error.name === "UserError";
-    if (!userFacing) console.error("Server function failed", error);
-    const safe = new Error(userFacing ? error.message : "The request could not be completed. Try again.");
-    // No stack trace (bundle paths) for the client.
-    try { delete (safe as { stack?: string }).stack; } catch { /* Not configurable here. */ }
-    if (Object.prototype.hasOwnProperty.call(safe, "stack")) safe.stack = "";
-    throw safe;
+    if (error instanceof Error && error.name !== "UserError") console.error("Server function failed", error);
+    throw clientSafeError(error);
   }
 });
 

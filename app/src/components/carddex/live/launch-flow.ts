@@ -6,7 +6,7 @@ import {
 } from "./transaction";
 import type { LiveChainCheck, LivePrepareInput } from "../../../lib/carddex/live/types";
 import { liveSignInInputProblem, liveSignInOutputProblem, liveSignInProblem, type LiveSignInInput } from "../../../lib/carddex/live/sign-in";
-import { SignInWrongSite, walletRejected } from "./wallet-errors";
+import { SignInOtherAccount, SignInWrongSite, walletRejected } from "./wallet-errors";
 
 /** Shown in the review while the wallet opens a second time after it returned a transaction this page refused. */
 export const WALLET_RETRY_NOTICE = "Your wallet returned a different transaction, so nothing was sent. Approve once more: this time this page signs first.";
@@ -159,7 +159,8 @@ export function cardNext(stage: { status: string; nftMint: string; nftSignature:
  * (when `address` is null) and signs this site's SIWS request; its text is checked here, then by the server
  * (verifySignIn semantics), before the session starts. Without it, or when the wallet signs other text or its sign-in
  * fails for another reason than a refusal: connect (when needed), then the plain ownership message, as before. A
- * refusal in the wallet, or a sign-in for another site, stops here with no further prompt. Nothing here moves funds.
+ * refusal in the wallet, a sign-in for another site, or one with another account than the connected creator stops
+ * here with no further prompt. Nothing here moves funds.
  */
 export async function proveOwnership(step: {
   /** The connected creator, or null when the wallet is not connected yet (a sign-in then connects it in its one prompt). */
@@ -185,7 +186,7 @@ export async function proveOwnership(step: {
     step.onPrompt?.("sign-in"); prompts++;
     let out: Awaited<ReturnType<typeof step.signIn>> | null = null;
     try { out = await step.signIn(address ? { ...challenge.input, address } : challenge.input); }
-    catch (error) { if (walletRejected(error) || error instanceof SignInWrongSite) throw error; }
+    catch (error) { if (walletRejected(error) || error instanceof SignInWrongSite || error instanceof SignInOtherAccount) throw error; }
     if (out) {
       if (address && out.address !== address) throw new Error("Your wallet signed in with another account. Reconnect the creator wallet to continue.");
       address = out.address;
@@ -222,9 +223,12 @@ export type LaunchSession<Draft = unknown> = {
   idempotencyKey: string | null; preparedInput: LivePrepareInput | null; draftAtPrepare: Draft | null;
 };
 let keptSession: LaunchSession | null = null;
-/** Keeps the panel's launch for its next mount; an empty one clears the store. */
+/**
+ * Keeps the panel's launch for its next mount while it can still sign (it holds a coin or card key); anything else
+ * clears the store, so a finished launch never comes back with its creator and request id for another wallet (REG-3).
+ */
 export function keepLaunchSession(session: LaunchSession) {
-  const holds = session.tokenKey || session.nftKey || session.preparedInput || session.idempotencyKey;
+  const holds = !!(session.tokenKey || session.nftKey);
   if (keptSession && (!holds || keptSession.tokenKey !== session.tokenKey)) destroyEphemeralSigner(keptSession.tokenKey);
   if (keptSession && (!holds || keptSession.nftKey !== session.nftKey)) destroyEphemeralSigner(keptSession.nftKey);
   keptSession = holds ? { ...session } : null;

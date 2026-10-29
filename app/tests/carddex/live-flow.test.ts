@@ -5,7 +5,7 @@ import {
   cardNext, proveOwnership, signForLaunch, signLaunchPair, CARD_APPROVAL_EXPIRED,
 } from "../../src/components/carddex/live/launch-flow";
 import {
-  fromBase58, fromBase64, hexHash, parseLiveTransaction, signsBothFor, WalletChangedTransaction, type TransactionPlan,
+  base58, fromBase58, fromBase64, hexHash, parseLiveTransaction, signsBothFor, WalletChangedTransaction, type TransactionPlan,
 } from "../../src/components/carddex/live/transaction";
 import {
   connectLiveWallet, disconnectLiveWallet, getLiveWalletSnapshot, mountRegistry, signInLiveWallet, signLiveMessage, signLiveTransaction,
@@ -16,6 +16,7 @@ import { PAIR_REVIEW_COPY, WALLET_NOTICE_COPY, WALLET_OPEN_PAIR_COPY, walletNoti
 import { liveSignInInput, liveSignInMessage, liveSignInText, type LiveSignInInput } from "../../src/lib/carddex/live/sign-in";
 import { assetSeed, creator, creatorSeed, fixture, mint, nft, nftFixture, nftSeed } from "./live-plan-fixtures";
 import { mockWallet, type MockWalletOptions } from "./mock-wallets";
+import { messageOf, payerGuardData, phantomGuarded, tokenGuardData, unsignedTransaction } from "../../../integrations/pumpfun/tests/message-fixtures";
 
 // Mock Wallet Standard wallets in the real registry, the real wallet.ts calls and synthetic unfunded keys. The site's
 // server is a stand-in here (the real one is covered in live-launch.test.ts). Nothing is sent anywhere.
@@ -99,16 +100,38 @@ describe("connect and ownership in one wallet prompt (solana:signIn)", () => {
       await disconnectLiveWallet(); registered.pop()!();
     }
   });
-  test("a sign-in for another site never opens the wallet, and Phantom's -32000 says which site to open", async () => {
+  test("a sign-in for another site never opens the wallet, and Phantom's -32000 says which site to open only on another host", async () => {
     const phantom = wallet({ name: "Phantom", signIn: true });
     await expect(ownership("Phantom", null, site(), "https://www.launchacard.fun").run()).rejects.toThrow("Open launchacard.fun to sign in");
     expect(phantom.prompts).toEqual([]);
     await disconnectLiveWallet(); registered.pop()!();
+    // On launchacard.fun itself the page already checked the request, so a -32000 there has another cause (Phantom
+    // documents it as invalid input): the ownership message proves ownership instead, never a dead end (WW-2).
     const blocked = wallet({ name: "Phantom", signIn: true, signInError: Object.assign(new Error("Invalid input"), { code: -32000 }) });
-    const refused = await ownership("Phantom", null).run().then(() => null, (error: unknown) => error);
-    expect(refused).toBeInstanceOf(SignInWrongSite);
-    expect((refused as Error).message).toContain("Open launchacard.fun");
-    expect(blocked.prompts).toEqual(["signIn"]);
+    const page = globalThis as { location?: { host: string } };
+    page.location = { host: "launchacard.fun" };
+    try {
+      expect(await ownership("Phantom", null).run()).toMatchObject({ method: "message", prompts: 3 });
+      expect(blocked.prompts).toEqual(["signIn", "connect", "signMessage"]);
+      await disconnectLiveWallet();
+      // A page on another host (a mirror) whose request still named launchacard.fun: the wallet refused that host.
+      page.location = { host: "edge.launchacard.com" };
+      const refused = await signInLiveWallet("Phantom", { domain: "launchacard.fun" }).then(() => null, (error: unknown) => error);
+      expect(refused).toBeInstanceOf(SignInWrongSite);
+      expect((refused as Error).message).toContain("Open launchacard.fun");
+    } finally { delete page.location; }
+  });
+  test("a wallet that signs in with another account than the connected creator is refused, and the page stays on the creator (REG-5)", async () => {
+    const made = wallet({ name: "Phantom", signIn: true });
+    await connectLiveWallet("Phantom");
+    const otherSeed = new Uint8Array(32).fill(21), otherKey = ed25519.getPublicKey(otherSeed);
+    const other = { address: base58(otherKey), publicKey: otherKey, chains: ["solana:mainnet"], features: [] };
+    (made.wallet.features as Record<string, { signIn?: unknown }>)["solana:signIn"].signIn = async (...inputs: unknown[]) =>
+      inputs.map(() => { const signed = new TextEncoder().encode("x"); return { account: other, signedMessage: signed, signature: ed25519.sign(signed, otherSeed) }; });
+    const { server, run } = ownership("Phantom", creator);
+    await expect(run()).rejects.toThrow("signed in with another account");
+    expect(getLiveWalletSnapshot().address).toBe(creator);
+    expect(server.accepted).toEqual([]);
   });
   test("a sign-in that fails for another reason falls back to connect and the message", async () => {
     const broken = wallet({ name: "Broken", signIn: true, signInError: new Error("Method not implemented") });
@@ -171,6 +194,26 @@ describe("one wallet prompt for the coin and its card", () => {
     expect(coin.status).toBe("signed");
     expect(one.prompts).toEqual(["connect", "signTransaction", "signTransaction"]);
   });
+  test("a batch wallet that cannot sign several in one request goes on with the coin alone, never a dead end (REG-1)", async () => {
+    for (const mode of ["throws", "empty-second"] as const) {
+      const made = wallet({ name: "Backpack", batch: "one" }); await connectLiveWallet("Backpack");
+      const feature = (made.wallet.features as Record<string, { signTransaction: (...inputs: { transaction: Uint8Array }[]) => Promise<{ signedTransaction: Uint8Array }[]> }>)["solana:signTransaction"];
+      const original = feature.signTransaction;
+      feature.signTransaction = async (...inputs) => {
+        if (inputs.length > 1 && mode === "throws") throw new Error("Only one transaction can be signed per request");
+        const outputs = await original(...inputs);
+        return inputs.length > 1 ? [outputs[0], { signedTransaction: new Uint8Array() }] : outputs;
+      };
+      const { plans, expected, signers } = pair();
+      const step = await signLaunchPair({ plans, receivedAt: 1_000, now: () => 2_000, expected, signers, order: "page-first", refresh: noRefresh, walletSignAll: transactions => signLiveTransactions(transactions, creator) });
+      expect([mode, step.status, step.status === "single" && step.prompted]).toEqual([mode, "single", true]);
+      if (step.status !== "single") throw new Error("Expected single");
+      const coin = await signForLaunch({ plan: step.coin, receivedAt: step.receivedAt, now: () => 2_000, expected: expected.coin, signer: signers.coin, order: "page-first", refresh: noRefresh,
+        walletSign: transaction => signLiveTransaction(transaction, creator) });
+      expect(coin.status).toBe("signed");
+      await disconnectLiveWallet(); registered.pop()!();
+    }
+  });
   test("a refusal of the one approval stops everything: nothing is co-signed or returned", async () => {
     const backpack = wallet({ name: "Backpack", batch: "one", reject: ["signTransaction"] }); await connectLiveWallet("Backpack");
     const { plans, expected, signers } = pair();
@@ -190,6 +233,31 @@ describe("one wallet prompt for the coin and its card", () => {
     const refused = await signLaunchPair({ ...pair(), receivedAt: 1_000, now: () => 2_000, order: "page-first", refresh: noRefresh, walletSignAll: transactions => signLiveTransactions(transactions, creator) }).then(() => null, (error: unknown) => error);
     expect(refused).toBeInstanceOf(WalletChangedTransaction);
     expect((refused as WalletChangedTransaction).changes.map(change => change.index)).toEqual([1]);
+  });
+  test("a wallet-first batch that changes the coin is logged for the coin, then asked once more page-first", async () => {
+    let calls = 0;
+    wallet({ name: "Rewriter", batch: "one", change: (bytes, index) => index === 0 && calls++ === 0 ? feeChange(bytes) : bytes }); await connectLiveWallet("Rewriter");
+    const { plans, expected, signers } = pair(), changed: string[] = [];
+    const step = await signLaunchPair({ plans, receivedAt: 1_000, now: () => 2_000, expected, signers, order: "wallet-first", refresh: noRefresh,
+      onWalletChanged: plan => changed.push(plan.kind), walletSignAll: transactions => signLiveTransactions(transactions, creator) });
+    expect(changed).toEqual(["token"]);
+    expect(step).toMatchObject({ status: "signed", order: "page-first", fellBack: true });
+  });
+  test("a wallet-first batch whose coin and card both come back with Phantom's appended assertions is co-signed as returned", async () => {
+    const guard = (bytes: Uint8Array, index: number) => unsignedTransaction(phantomGuarded(messageOf(bytes), [{ target: creator, data: payerGuardData(1_000_000n) }, ...(index === 0 ? [{ target: mint, data: tokenGuardData(1n) }] : [])]));
+    wallet({ name: "Guarded", batch: "one", change: guard }); await connectLiveWallet("Guarded");
+    const { plans, expected, signers } = pair(), changed: string[] = [];
+    const step = await signLaunchPair({ plans, receivedAt: 1_000, now: () => 2_000, expected, signers, order: "wallet-first", refresh: noRefresh,
+      onWalletChanged: plan => changed.push(plan.kind), walletSignAll: transactions => signLiveTransactions(transactions, creator) });
+    if (step.status !== "signed") throw new Error(`Expected signed, got ${step.status}`);
+    expect(changed).toEqual([]); expect(step).toMatchObject({ order: "wallet-first", fellBack: false });
+    for (const [bytes, plan, guards] of [[step.coinSigned, plans.coin, 2], [step.cardSigned, plans.card, 1]] as const) {
+      const wire = parseLiveTransaction(bytes);
+      // The returned (guarded) message, not the plan's, signed by both keys.
+      expect(hexHash(wire.message)).not.toBe(plan.messageSha256);
+      expect(wire.instructions.length).toBe(parseLiveTransaction(fromBase64(plan.transactionBase64)).instructions.length + guards);
+      expect(wire.signatures.every((signature, i) => ed25519.verify(signature, wire.message, fromBase58(wire.signers[i])))).toBe(true);
+    }
   });
   test("a stale pair is prepared again first; a moved cost returns to the review, and a refresh without the card goes single", async () => {
     const { plans, expected, signers } = pair();
@@ -272,6 +340,10 @@ describe("sign-in text", () => {
 
 describe("a launch that outlives the page view, and its confirmation (REL-4, REL-9)", () => {
   const signer = () => ({ address: creator, seed: new Uint8Array(32).fill(5) });
+  test("a launch that no longer holds a key is not kept, so a finished launch never comes back for another wallet (REG-3)", () => {
+    flow.keepLaunchSession({ creator, tokenKey: null, nftKey: null, idempotencyKey: "request-1", preparedInput: { idempotencyKey: "request-1" } as never, draftAtPrepare: { name: "x" } });
+    expect(flow.keptLaunchSession()).toBeNull();
+  });
   test("an unfinished launch is kept for the next mount, wiped only once it is over or replaced", () => {
     const tokenKey = signer(), nftKey = signer();
     const session = { creator, tokenKey, nftKey, idempotencyKey: "request-1", preparedInput: null, draftAtPrepare: null };

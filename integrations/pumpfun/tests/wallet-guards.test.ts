@@ -144,4 +144,10 @@ describe("the finalized-transaction form of the rule", () => {
     const memory = phantomGuarded(plan, [{ target: creator, data: Uint8Array.from([0, 0, 0]) }]);
     expect(() => withoutWalletGuards(instructions(memory), true, decodeV0Message(memory).keys)).toThrow(WalletMessageRefused);
   });
+  test("a landed suffix longer than the guard cap is refused, the same cap the signing rule applies (REG-6)", () => {
+    const most = phantomGuarded(plan, Array.from({ length: MAX_WALLET_GUARDS }, () => phantom[0]));
+    expect(withoutWalletGuards(instructions(most), true, decodeV0Message(most).keys)).toHaveLength(4);
+    const over = phantomGuarded(plan, Array.from({ length: MAX_WALLET_GUARDS + 1 }, () => phantom[0]));
+    expect(() => withoutWalletGuards(instructions(over), true, decodeV0Message(over).keys)).toThrow(WalletMessageRefused);
+  });
 });

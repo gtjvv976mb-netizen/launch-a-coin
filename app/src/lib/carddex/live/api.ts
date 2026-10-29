@@ -4,7 +4,7 @@ import { z } from "zod";
 import { UserError } from "../../mintdex/server/db.server";
 import { createSignInChallenge, createWalletChallenge, deleteLiveWalletSession, LIVE_SESSION_COOKIE, liveWalletFromToken, requireLiveWallet, verifySignInChallenge, verifyWalletChallenge } from "./auth.server";
 import { assertLiveOrigin, assertSiteOrigin, liveReadiness } from "./config.server";
-import { enforceAddressGate, enforceLimit, LIMITS, type LimitRule } from "./limits.server";
+import { clientKey, enforceAddressGate, enforceLimit, LIMITS, type LimitRule } from "./limits.server";
 import * as service from "./service.server";
 import type { LiveResult } from "./types";
 export type * from "./types";
@@ -25,8 +25,8 @@ async function attempt<T extends object>(op: string, fn: () => Promise<T>): Prom
 }
 function noStore() { try { setResponseHeader("Cache-Control", "no-store"); } catch { /* No request context in isolated tests. */ } }
 function revalidate() { try { setResponseHeader("Cache-Control", "no-cache"); } catch { /* No request context in isolated tests. */ } }
-/** The connecting address Cloudflare reports, for request limits only (stored as a hash). */
-function clientAddress() { try { return getRequestHeader("cf-connecting-ip") ?? null; } catch { return null; } }
+/** The client Cloudflare's connecting address stands for (an IPv6 address as its /64), for request limits only (stored as a keyed hash). */
+function clientAddress() { try { return clientKey(getRequestHeader("cf-connecting-ip")); } catch { return null; } }
 /** A state-changing live action: this site's Origin (CSRF), then the optional per-address gate. */
 async function sameOrigin() { assertLiveOrigin(getRequestHeader("origin") ?? null); await enforceAddressGate(clientAddress()); }
 /** Counts the request against `rules` for the connecting address. */
@@ -51,14 +51,14 @@ export const createLiveWalletChallenge = createServerFn({method: "POST"}).valida
   await sameOrigin(); return createWalletChallenge(data.wallet, clientAddress());
 }));
 export const verifyLiveWallet = createServerFn({method: "POST"}).validator(z.object({challengeId: intentId, wallet: publicKey, signatureBase64: z.string().max(128)})).handler(({data}) => attempt("verify", async () => {
-  await sameOrigin(); await perAddress(LIMITS.verifyIp); return startCookie(await verifyWalletChallenge(data));
+  await sameOrigin(); await perAddress(LIMITS.verifyIp, LIMITS.sessionIp); return startCookie(await verifyWalletChallenge(data));
 }));
 // solana:signIn: connect and ownership in one wallet prompt. The challenge names no wallet; the session is the same.
 export const createLiveSignInChallenge = createServerFn({method: "POST"}).handler(() => attempt("sign-in-challenge", async () => {
   await sameOrigin(); return createSignInChallenge(clientAddress());
 }));
 export const verifyLiveSignIn = createServerFn({method: "POST"}).validator(z.object({challengeId: intentId, wallet: publicKey, signedMessageBase64: z.string().min(1).max(2048), signatureBase64: z.string().max(128)})).handler(({data}) => attempt("sign-in", async () => {
-  await sameOrigin(); await perAddress(LIMITS.verifyIp); return startCookie(await verifySignInChallenge(data));
+  await sameOrigin(); await perAddress(LIMITS.verifyIp, LIMITS.sessionIp); return startCookie(await verifySignInChallenge(data));
 }));
 // Sign-out checks only this site's Origin, not the switches: a creator can always end a session, even while recovery
 // is paused during an incident (SEC-7).
@@ -73,10 +73,11 @@ export const prepareLiveLaunch = createServerFn({method: "POST"}).validator(z.ob
   initialBuyQuoteBaseUnits: z.string().regex(/^(0|[1-9][0-9]{0,19})$/), slippageBps: z.number().int().min(0).max(1000),
   assets: z.object({artwork: asset, cardImage: asset, caseImage: asset}), termsAcknowledged: z.literal(true), withCard: z.boolean().optional(),
 })).handler(({data}) => attempt("prepare", async () => { await sameOrigin(); await perAddress(LIMITS.prepareIp); return service.prepareLiveLaunch(await signedIn(LIMITS.prepareWallet), data); }));
+// Each check reads the chain on the paid RPC, so it is limited per address too: wallets are free to make (SEC-R2).
 export const checkLiveLaunchSize = createServerFn({method: "POST"}).validator(z.object({
   name: z.string().min(1).max(32), symbol: z.string().regex(/^[A-Za-z0-9]{1,13}$/), quoteAssetKey: z.string().max(30),
   initialBuyQuoteBaseUnits: z.string().regex(/^(0|[1-9][0-9]{0,19})$/),
-})).handler(({data}) => attempt("size", async () => { await sameOrigin(); return service.checkLiveLaunchSize(await signedIn(LIMITS.sizeWallet), data); }));
+})).handler(({data}) => attempt("size", async () => { await sameOrigin(); await perAddress(LIMITS.sizeIp); return service.checkLiveLaunchSize(await signedIn(LIMITS.sizeWallet), data); }));
 export const getLiveLaunchIntent = createServerFn({method: "GET"}).validator(z.object({intentId})).handler(({data}) => attempt("read", async () => ({intent: await service.getLiveLaunchIntent(await signedIn(LIMITS.readWallet), data.intentId)})));
 export const listLiveLaunchIntents = createServerFn({method: "GET"}).handler(() => attempt("list", async () => ({intents: await service.listLiveLaunchIntents(await signedIn(LIMITS.readWallet))})));
 export const abandonLiveLaunchIntent = createServerFn({method: "POST"}).validator(z.object({intentId})).handler(({data}) => attempt("abandon", async () => {

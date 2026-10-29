@@ -5,7 +5,7 @@ import { getCardDesign } from "../designs";
 import { getPairAsset, isPairAssetKey } from "../pairs";
 import * as runtime from "../../bindings.server";
 import { clearGuard, db, guard, one, q, readBatch, stmt, UserError } from "../../mintdex/server/db.server";
-import { fetchPublicBytes, metadataShaFromUri, metadataUriPlaceholder, publishLaunchAssets, putPublicAsset, putPublicJson, validateOwnedAsset, verifyPublicJson } from "./assets.server";
+import { fetchPublicBytes, metadataShaFromUri, metadataUriPlaceholder, previewLaunchAssets, publishLaunchAssets, putPublicAsset, putPublicJson, validateOwnedAsset, verifyPublicJson } from "./assets.server";
 import { sha256, walletBytes } from "./auth.server";
 import { COMPOSITION_VERSION, requireTrustedComposition } from "./composition.server";
 import { BUY_DOES_NOT_FIT, STOCK_BUY_WARNS } from "./copy";
@@ -60,11 +60,19 @@ const redact = (text: string) => text.replace(/https?:\/\/\S+/g, "[provider]").r
 export function logLaunchEvent(event: string, fields: {intentId?: string; kind?: "token" | "nft"; reason?: string} & Record<string, string | number | boolean | undefined>) {
   console.info("live_launch_event", JSON.stringify({event, ...fields, ...(fields.reason ? {reason: redact(fields.reason)} : {})}));
 }
-/** Every plan row a launch may have: far above any real launch, so a loop or abuse cannot grow it without bound. */
-export const MAX_PLANS_PER_INTENT = 120;
-async function assertPlanRoom(intentId: string) {
-  const plans = await one<{n: number}>("SELECT COUNT(*) AS n FROM live_launch_transactions WHERE intent_id = ?", intentId);
-  if ((plans?.n ?? 0) >= MAX_PLANS_PER_INTENT) throw new UserError("This launch was prepared too many times. Discard it once its transactions expire, then start again.");
+/**
+ * Plan rows per launch stage before the slow lane: far above any real launch, so a loop or abuse cannot grow them
+ * quickly. Past it, a stage still gets one more plan every few minutes, never none (F1): a coin that landed can always
+ * get its card, and the rows stay bounded. Each stage counts its own rows; the card stage allows for the card plans
+ * prepared with each coin plan (prepareCardAhead).
+ */
+export const MAX_PLANS_PER_STAGE = 120, PLAN_SLOW_LANE_MS = 3 * 60_000;
+async function assertPlanRoom(intentId: string, kind: "token" | "nft", now = Date.now()) {
+  const plans = await one<{n: number; newest: number | null}>("SELECT COUNT(*) AS n, MAX(created_at) AS newest FROM live_launch_transactions WHERE intent_id = ? AND kind = ?", intentId, kind);
+  const max = kind === "token" ? MAX_PLANS_PER_STAGE : 2 * MAX_PLANS_PER_STAGE;
+  if ((plans?.n ?? 0) < max || now - (plans?.newest ?? 0) >= PLAN_SLOW_LANE_MS) return;
+  throw new UserError(kind === "token" ? "This launch was prepared many times in a row. Wait a few minutes, then prepare it again."
+    : "This card was prepared many times in a row. Wait a few minutes, then prepare it again. Your coin is not affected.");
 }
 async function ownedIntent(wallet: string, id: string): Promise<IntentRow> {
   requireLiveConfig("recovery");
@@ -128,10 +136,17 @@ async function prepareCardAhead(input: LiveLaunchInput): Promise<WalletTransacti
     return null;
   }
 }
-/** The card goes in the coin's prompt only if the wallet holds enough SOL for both, plus the coin's reserve buffer. */
+/** Solana refuses a transaction that leaves its fee payer holding 1 to 890,879 lamports (rent for a 0-byte account). */
+const RENT_EXEMPT_MINIMUM = 890_880n;
+/**
+ * The card goes in the coin's prompt only if the wallet holds enough SOL for both and still keeps the coin's reserve,
+ * never less than the rent minimum (WW-3): the card is simulated before the coin exists, against the whole balance, so
+ * a pair that left less would pass its own checks and then fail once the coin had landed.
+ */
 function cardFits(coin: WalletTransactionPlan, card: WalletTransactionPlan | null) {
   if (!card) return null;
-  const fits = BigInt(coin.review.walletBalanceLamports) >= BigInt(coin.review.totalDebitLamports) + BigInt(card.review.totalDebitLamports) + BigInt(coin.review.reserveBufferLamports);
+  const reserve = BigInt(coin.review.reserveBufferLamports), keep = reserve > RENT_EXEMPT_MINIMUM ? reserve : RENT_EXEMPT_MINIMUM;
+  const fits = BigInt(coin.review.walletBalanceLamports) >= BigInt(coin.review.totalDebitLamports) + BigInt(card.review.totalDebitLamports) + keep;
   if (!fits) console.info("Live launch card not prepared with its coin", JSON.stringify({reason: "balance"}));
   return fits ? card : null;
 }
@@ -201,9 +216,9 @@ export async function checkLiveLaunchSize(wallet: string, raw: {name: string; sy
 }
 /** Every launch asset the coin and card metadata reference: the three images, both design copies and both metadata files. */
 function launchAssetShas(payload: Payload) {
-  return [payload.assets.artwork.sha256, payload.assets.cardImage.sha256, payload.assets.caseImage.sha256,
-    payload.input.card.frontSha256, payload.input.card.backSha256, payload.input.nftMetadataSha256 ?? "",
-    metadataShaFromUri(payload.input.tokenMetadataUri) ?? ""];
+  return [payload.assets?.artwork?.sha256, payload.assets?.cardImage?.sha256, payload.assets?.caseImage?.sha256,
+    payload.input?.card?.frontSha256, payload.input?.card?.backSha256, payload.input?.nftMetadataSha256,
+    metadataShaFromUri(payload.input?.tokenMetadataUri ?? "")].filter((sha): sha is string => typeof sha === "string");
 }
 /**
  * A coin whose submitted transactions can no longer land and never created it (it failed on Solana, or it expired
@@ -238,7 +253,7 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareInput) {
     // nothing it signed can still land (retireUnlandedCoin). The mint is fixed, so this can never make a second coin.
     const existing = found.status === "token_pending" ? await retireUnlandedCoin(wallet, found) : found;
     if (existing.token_signature) throw new UserError("A token transaction was already submitted. Recover its confirmation before preparing another launch.");
-    await assertPlanRoom(existing.id);
+    await assertPlanRoom(existing.id, "token");
     const [transaction, ahead] = await Promise.all([chain(() => sdk.prepareTokenTransaction(adapterInput(existing), {connection: connection()})), raw.withCard ? prepareCardAhead(adapterInput(existing)) : null]);
     const card = cardFits(transaction, ahead);
     await savePlan(existing, transaction, card); return {intent: publicIntent(existing), transaction, card};
@@ -257,8 +272,9 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareInput) {
       stmt("INSERT INTO live_launch_intents (id, idempotency_key, creator_wallet, token_mint, nft_mint, quote_key, quote_mint, design_key, payload_sha256, payload_json, binding_sha256, token_metadata_uri, nft_metadata_uri, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'prepared', ?, ?)", id, raw.idempotencyKey, wallet, fields.tokenMint, raw.nftMint, fields.quoteAssetKey, fields.quoteMint, fields.cardTemplate, requestedHash, JSON.stringify(payload), transaction.bindingSha256, payload.input.tokenMetadataUri, payload.input.card.nftMetadataUri, now, now),
       stmt("INSERT INTO live_launch_transactions (id, intent_id, kind, message_sha256, plan_json, status, created_at, updated_at) VALUES (?, ?, 'token', ?, ?, 'prepared', ?, ?)", crypto.randomUUID(), id, transaction.messageSha256, JSON.stringify(transaction), now, now),
       ...(card ? [insertPlan(id, card, now)] : []),
-      // From here the coin and card metadata URIs are fixed, so what they point to becomes public.
-      publishLaunchAssets(launchAssetShas(payload), now),
+      // From here the coin and card metadata URIs are fixed. What they point to is public for the approval window, so
+      // the wallet prompt can show it, and permanently once the signed coin is saved (submitLiveTransaction).
+      previewLaunchAssets(launchAssetShas(payload), now),
     ]);
   } catch (error) {
     // Only a uniqueness conflict means another request reserved this mint or request id; anything else saved nothing.
@@ -319,6 +335,8 @@ export async function confirmLiveToken(wallet: string, input: {intentId: string;
     guard("EXISTS (SELECT 1 FROM live_launch_transactions WHERE id = ? AND (signature IS NULL OR signature = ?))", plan.id, input.signature), clearGuard(),
     stmt("UPDATE live_launch_transactions SET signature = ?, status = ?, updated_at = ? WHERE id = ?", input.signature, receipt.status === "verified" ? "confirmed" : "pending", Date.now(), plan.id),
     stmt("UPDATE live_launch_intents SET token_signature = ?, token_receipt_json = ?, status = CASE WHEN status IN ('nft_pending','complete') THEN status ELSE ? END, updated_at = ? WHERE id = ?", input.signature, JSON.stringify(receipt), receipt.status === "verified" ? "nft_pending" : "token_pending", Date.now(), row.id),
+    // Idempotent: a coin recorded from the chain keeps its metadata public, however its bytes reached Solana.
+    publishLaunchAssets(launchAssetShas(JSON.parse(row.payload_json) as Payload), Date.now()),
   ]);
   if (receipt.status === "verified") logLaunchEvent("verified", {intentId: row.id, kind: "token"});
   const delivery = receipt.status === "pending" ? await resendPending(row, plan) : null;
@@ -377,7 +395,7 @@ export async function prepareLiveCreatorNft(wallet: string, input: {intentId: st
     if (row.nft_mint !== nextMint) throw new UserError("The NFT issuance changed in another tab. Refresh this launch.");
     logLaunchEvent("nft_rotated", {intentId: row.id, kind: "nft", keyChanged});
   }
-  await assertPlanRoom(row.id);
+  await assertPlanRoom(row.id, "nft");
   const result = await chain(() => sdk.prepareCreatorNftTransaction(adapterInput(row), {connection: connection(), tokenSignature: row.token_signature!, tokenMessageSha256: landedMessageSha256(tokenPlan)}));
   if ("receipt" in result) { await completeExistingNft(row, result.receipt); return {intent: publicIntent(await ownedIntent(wallet, row.id)), transaction: null}; }
   await savePlan(row, result); return {intent: publicIntent(row), transaction: result};
@@ -536,6 +554,9 @@ export async function submitLiveTransaction(wallet: string, input: {intentId: st
     input.kind === "token"
       ? stmt("UPDATE live_launch_intents SET token_signature = ?, status = 'token_pending', updated_at = ? WHERE id = ? AND status IN ('prepared','token_pending')", signed.signature, now, row.id)
       : stmt("UPDATE live_launch_intents SET nft_signature = ?, updated_at = ? WHERE id = ? AND status = 'nft_pending'", signed.signature, now, row.id),
+    // The coin's metadata URI is on its way to the chain: everything the coin and card metadata reference is public from
+    // here on, before the broadcast, for wallets, pump.fun and explorers.
+    publishLaunchAssets(launchAssetShas(JSON.parse(row.payload_json) as Payload), now),
   ]);
   try {
     if (checked.status === "landed") { logLaunchEvent("landed_before_send", {intentId: row.id, kind: input.kind}); return {intent: publicIntent(await ownedIntent(wallet, row.id)), signature: signed.signature, submission: "submitted" as const}; }

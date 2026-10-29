@@ -2,17 +2,12 @@ import { ed25519 } from "@noble/curves/ed25519";
 import type { D1PreparedStatement } from "@cloudflare/workers-types";
 import { db, one, stmt, UserError } from "../../mintdex/server/db.server";
 import { requireLiveConfig } from "./config.server";
-import { enforceLimit, LIMITS } from "./limits.server";
+import { clientHash, enforceLimit, LIMITS } from "./limits.server";
 import { liveSignInInput, liveSignInMessage, liveSignInOutputProblem, liveSignInProblem, type LiveSignInInput } from "./sign-in";
 import type { LiveWallet } from "./types";
 
 export const LIVE_SESSION_COOKIE = "carddex_live_session";
 const CHALLENGE_MS = 5 * 60_000, SESSION_MS = 2 * 3_600_000;
-/**
- * Wallet-independent sign-in challenges one client may request per minute. A client is a connecting address, and many
- * phones can share one carrier address (CGNAT), so this stays well above one person's sign-ins.
- */
-export const SIGN_IN_CHALLENGES_PER_MINUTE = 30;
 /** Ownership-message challenges per wallet per minute; past it, the newest open challenge is handed back instead. */
 export const WALLET_CHALLENGES_PER_MINUTE = 5;
 const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
@@ -102,18 +97,18 @@ const base64Bytes = (value: string, label: string) => {
 };
 /**
  * A solana:signIn challenge (connect and ownership in one wallet prompt). It names no wallet, so it is rate-limited per
- * client: `client` is the connecting address, stored only as a hash. Every request field is set here, bound to this
- * site's public origin and Solana mainnet, single-use and short-lived.
+ * client with the same atomic limiter as every other rule (SEC-R3): `client` is the connecting address's clientKey,
+ * stored only as a keyed hash. Every request field is set here, bound to this site's public origin and Solana mainnet,
+ * single-use and short-lived.
  */
 export async function createSignInChallenge(client: string | null) {
   const { origin } = requireLiveConfig("recovery");
-  const now = Date.now(), expiresAt = now + CHALLENGE_MS, clientHash = await sha256(`${origin}|${client ?? "unknown"}`);
+  await enforceLimit(LIMITS.signInIp, client, "Wait a minute before signing in again.");
+  const now = Date.now(), expiresAt = now + CHALLENGE_MS;
   await maybePurge(now);
-  const recent = await one<{n: number}>("SELECT COUNT(*) AS n FROM live_sign_in_challenges WHERE client_hash = ? AND created_at > ?", clientHash, now - 60_000);
-  if ((recent?.n ?? 0) >= SIGN_IN_CHALLENGES_PER_MINUTE) throw new UserError("Wait a minute before signing in again.");
   const challengeId = crypto.randomUUID();
   const input = liveSignInInput({ origin, nonce: randomToken(), issuedAt: new Date(now), expiresAt: new Date(expiresAt) });
-  await stmt("INSERT INTO live_sign_in_challenges (id, client_hash, origin, input_json, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)", challengeId, clientHash, origin, JSON.stringify(input), now, expiresAt).run();
+  await stmt("INSERT INTO live_sign_in_challenges (id, client_hash, origin, input_json, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)", challengeId, await clientHash(`sign-in|${origin}`, client ?? "unknown").catch(() => "unrecorded"), origin, JSON.stringify(input), now, expiresAt).run();
   return { challengeId, input, expiresAt };
 }
 /**

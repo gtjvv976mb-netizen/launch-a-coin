@@ -351,7 +351,8 @@ for (const item of coinCases) {
     ...(BigInt(item.buy) > 0n && item.quoteKey !== "sol" ? [tokenGuard(quoteAta, 0n)] : [])];
   const guarded = withGuards(plan, guards);
   const guardedSimulation = guarded.transaction ? await simulate(`${item.id} + Phantom-shaped guards`, guarded.transaction, [payer]) : null;
-  const stress = ["B-sol-create-buy", "E-usdc-create-buy"].includes(item.id) ? await stressGuards(plan, dump.computeUnitLimit, simulation.unitsConsumed, coinAta) : null;
+  // Every coin case, including create-only (nine payer assertions there: the coin account is not in that plan).
+  const stress = await stressGuards(plan, dump.computeUnitLimit, simulation.unitsConsumed, BigInt(item.buy) > 0n ? coinAta : null);
   const record = {
     input, plan, browserValidateLivePlan: browserAccepts(input, plan), review: plan.review, stressNineGuards: stress, instructionSummary: plan.instructionSummary,
     preparedBlockHeight: plan.preparedBlockHeight, lastValidBlockHeight: plan.lastValidBlockHeight, signingWindowBlocks: plan.lastValidBlockHeight - plan.preparedBlockHeight,

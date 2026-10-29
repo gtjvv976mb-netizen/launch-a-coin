@@ -832,7 +832,10 @@ describe("one wallet approval for the coin and its card, on the server", () => {
     await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-signed`});
     await expect(hold(card.messageSha256, `${card.transactionBase64}-signed`)).rejects.toThrow("can no longer be saved");
   });
-  test("readiness lists the wallets that sign both in one prompt: Backpack unless configured, never Phantom", () => {
+  test("readiness lists the wallets that sign both in one prompt: none unless configured, never Phantom", () => {
+    // Opt-in (WW-5): no wallet takes the untested multi-transaction request on the first mainnet launch.
+    expect(liveReadiness().walletBatch).toEqual([]);
+    env.CARDDEX_LIVE_WALLET_BATCH = "Backpack";
     expect(liveReadiness().walletBatch).toEqual(["Backpack"]);
     env.CARDDEX_LIVE_WALLET_BATCH = "Phantom, Backpack, MetaMask";
     expect(liveReadiness().walletBatch).toEqual(["Backpack", "MetaMask"]);
@@ -885,8 +888,11 @@ describe("Sign In With Solana on the server (solana:signIn)", () => {
     sqlite.exec("DROP TRIGGER carddex_live_sign_in_challenge_immutable");
     sqlite.query("UPDATE live_sign_in_challenges SET expires_at = 0 WHERE id = ?").run(expired.challengeId);
     await expect(auth.verifySignInChallenge(proof(expired.challengeId, liveSignInText(expired.input, creator)))).rejects.toThrow("expired");
-    for (let i = 1; i < auth.SIGN_IN_CHALLENGES_PER_MINUTE; i++) await auth.createSignInChallenge("203.0.113.9");
+    const {LIMITS} = await import("../../src/lib/carddex/live/limits.server");
+    for (let i = 1; i < LIMITS.signInIp.max; i++) await auth.createSignInChallenge("203.0.113.9");
     await expect(auth.createSignInChallenge("203.0.113.9")).rejects.toThrow("Wait a minute");
+    // The address is stored only as a keyed hash.
+    expect(JSON.stringify(sqlite.query("SELECT client_hash FROM live_sign_in_challenges").all())).not.toContain("203.0.113.9");
     expect((await auth.createSignInChallenge("198.51.100.1")).input.domain).toBe("launchacard.fun");
     env.CARDDEX_LIVE_RECOVERY_ENABLED = "false";
     await expect(auth.createSignInChallenge("198.51.100.2")).rejects.toThrow("recovery is paused");
@@ -933,6 +939,60 @@ describe("platform hardening on the server", () => {
     // Every rule sits above one creator's launch: a few prepares, a minute and a half of confirmation polls.
     expect(LIMITS.prepareWallet.max).toBeGreaterThanOrEqual(10); expect(LIMITS.confirmWallet.max).toBeGreaterThanOrEqual(45);
   });
+  test("an IPv6 address counts as its /64, so rotating addresses inside one allocation shares one bucket (SEC-R1)", async () => {
+    const {clientKey, enforceLimit, LIMITS} = await import("../../src/lib/carddex/live/limits.server");
+    expect(clientKey("203.0.113.7")).toBe("203.0.113.7");
+    expect(clientKey(" 2001:DB8:1:2::1 ")).toBe("2001:db8:1:2::/64");
+    expect(clientKey("2001:0db8:0001:0002:abcd:ef01:2345:6789")).toBe("2001:db8:1:2::/64");
+    expect(clientKey("2001:db8:1:2:3::9")).toBe("2001:db8:1:2::/64");
+    expect(clientKey("2001:db8::")).toBe("2001:db8:0:0::/64");
+    expect(clientKey("fe80::1%eth0")).toBe("fe80:0:0:0::/64");
+    expect(clientKey("::ffff:198.51.100.4")).toBe("198.51.100.4");
+    expect(clientKey("2001:db8:1:2:0:0:198.51.100.4")).toBe("2001:db8:1:2::/64");
+    expect(clientKey("")).toBeNull(); expect(clientKey(null)).toBeNull(); expect(clientKey(undefined)).toBeNull();
+    // The review's reproduction, inverted: one /64 is refused like one address.
+    for (let i = 0; i < LIMITS.demoEnterIp.max; i++) await enforceLimit(LIMITS.demoEnterIp, clientKey(`2001:db8:1:2::${(i + 1).toString(16)}`));
+    let accepted = 0;
+    for (let i = 2; i < 50; i++) await enforceLimit(LIMITS.demoEnterIp, clientKey(`2001:db8:1:2:${i.toString(16)}:${(i * 7).toString(16)}::${i.toString(16)}`)).then(() => accepted++, () => undefined);
+    expect(accepted).toBe(0);
+    await enforceLimit(LIMITS.demoEnterIp, clientKey("2001:db8:1:3::1"));
+    for (let i = 0; i < LIMITS.signInIp.max; i++) await auth.createSignInChallenge(clientKey(`2001:db8:9:9::${(i + 1).toString(16)}`));
+    await expect(auth.createSignInChallenge(clientKey("2001:db8:9:9:ffff::1"))).rejects.toThrow("Wait a minute");
+  });
+  test("a burst of sign-in challenges in parallel takes exactly the limit (SEC-R3); clients are stored as keyed hashes (SEC-R4)", async () => {
+    const {clientHash, LIMITS} = await import("../../src/lib/carddex/live/limits.server");
+    const results = await Promise.allSettled(Array.from({length: LIMITS.signInIp.max + 20}, () => auth.createSignInChallenge("198.51.100.77")));
+    expect(results.filter(result => result.status === "fulfilled")).toHaveLength(LIMITS.signInIp.max);
+    // An unsalted hash of a constant scope and an IPv4 address could be reversed by hashing every address; these are keyed.
+    const plain = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${LIMITS.signInIp.scope}|198.51.100.77`))).subarray(0, 16), byte => byte.toString(16).padStart(2, "0")).join("");
+    const stored = (sqlite.query("SELECT DISTINCT key_hash FROM rate_events WHERE scope = ?").all(LIMITS.signInIp.scope) as {key_hash: string}[]).map(row => row.key_hash);
+    expect(stored).toEqual([await clientHash(LIMITS.signInIp.scope, "198.51.100.77")]);
+    expect(stored).not.toContain(plain);
+  });
+  test("a database without this build's migrations is reported, and the limits let requests through rather than fail them (REG-2)", async () => {
+    const {enforceLimit, missingMigrations} = await import("../../src/lib/carddex/live/limits.server");
+    expect(await missingMigrations()).toEqual([]);
+    sqlite.exec("DROP TABLE rate_events");
+    const errors: unknown[][] = [], original = console.error;
+    console.error = (...args: unknown[]) => { errors.push(args); };
+    try {
+      for (let i = 0; i < 5; i++) await enforceLimit({scope: "test:missing", max: 1, windowMs: 60_000}, "203.0.113.50");
+    } finally { console.error = original; }
+    expect(errors).toHaveLength(1); expect(String(errors[0][0])).toContain("apply the D1 migrations");
+    expect(await missingMigrations()).toEqual(["0014"]);
+    sqlite.exec("ALTER TABLE live_assets DROP COLUMN public_until");
+    expect(await missingMigrations()).toEqual(["0014", "0015"]);
+  });
+  test("every connecting-address read goes through clientKey, and the size check and sessions are limited per address (SEC-R1, SEC-R2)", () => {
+    const sources = (dir: string): string[] => readdirSync(dir, {withFileTypes: true}).flatMap(entry => entry.isDirectory() ? sources(resolve(dir, entry.name)) : /\.(ts|tsx)$/.test(entry.name) ? [resolve(dir, entry.name)] : []);
+    const reads = sources(resolve(import.meta.dir, "../../src")).flatMap(file => readFileSync(file, "utf8").split("\n").filter(line => /cf-connecting-ip/i.test(line) && !/^\s*(\/\/|\*)/.test(line)).map(line => [file, line] as const));
+    expect(reads.length).toBeGreaterThanOrEqual(4);
+    for (const [file, line] of reads) expect([file, /clientKey\(/.test(line)]).toEqual([file, true]);
+    const api = readFileSync(resolve(import.meta.dir, "../../src/lib/carddex/live/api.ts"), "utf8");
+    const handler = (name: string) => api.slice(api.indexOf(`export const ${name} =`), api.indexOf("\nexport const", api.indexOf(`export const ${name} =`) + 1));
+    expect(handler("checkLiveLaunchSize")).toContain("perAddress(LIMITS.sizeIp)");
+    for (const name of ["verifyLiveWallet", "verifyLiveSignIn"]) expect(handler(name)).toContain("LIMITS.sessionIp");
+  });
   test("anyone can ask for a wallet's challenge, but its owner is never locked out (SEC-2)", async () => {
     // Someone without the creator's key asks for the creator's challenges, up to the per-wallet limit.
     const issued: {challengeId: string; message: string}[] = [];
@@ -950,7 +1010,7 @@ describe("platform hardening on the server", () => {
     for (let i = 0; i < LIMITS.challengeIp.max - auth.WALLET_CHALLENGES_PER_MINUTE; i++) await auth.createWalletChallenge(otherWallet, "198.51.100.66");
     await expect(auth.createWalletChallenge(otherWallet, "198.51.100.66")).rejects.toThrow("Too many requests");
   });
-  test("an upload is not public until a launch uses it; then everything its metadata references is (SEC-3)", async () => {
+  test("an upload is not public until a launch uses it: for its approval while unsigned, for good once its coin is signed (SEC-3, SEC-R5)", async () => {
     const original = await input(), art = original.assets.artwork;
     for (const init of [undefined, {headers: {"x-launch-a-card-asset-check": "0".repeat(64)}}]) {
       const hidden = await servePublic(art.url, init);
@@ -969,14 +1029,46 @@ describe("platform hardening on the server", () => {
     expect(urls.size).toBe(7);
     // The permanent URL contract every launched coin and card depends on (REL-7): never change these formats.
     for (const url of urls) expect(url).toMatch(/^https:\/\/launchacard\.fun\/(?:m\/[A-Za-z0-9_-]{43}|api\/live\/assets\/[a-f0-9]{64}\.(?:png|jpg|webp))$/);
+    // Prepared but not signed (preparing costs no SOL): public for the wallet approval, so the prompt can show the coin,
+    // with a short cache; once that window ends, only its uploader and the Worker's own check read it.
     for (const url of urls) {
       const served = await servePublic(url);
+      expect(served.status).toBe(200);
+      expect(served.headers.get("cache-control")).toBe("public, max-age=300");
+      expect(served.headers.get("access-control-allow-origin")).toBe("*");
+    }
+    const later = (url: string, init?: RequestInit) => assets.serveLiveAsset(new URL(url).pathname.startsWith("/m/") ? `${assets.metadataShaFromUri(url)}.json` : url.split("/").pop()!, new Request(url, init), Date.now() + assets.PREVIEW_MS + 1);
+    for (const url of urls) expect((await later(url)).status).toBe(404);
+    const {token} = await auth.verifyWalletChallenge(await (async () => { const challenge = await auth.createWalletChallenge(creator); return {challengeId: challenge.challengeId, wallet: creator, signatureBase64: sign(challenge.message)}; })());
+    const own = await later(art.url, {headers: {cookie: `carddex_live_session=${token}`}});
+    expect(own.status).toBe(200); expect(own.headers.get("cache-control")).toBe("no-store"); expect(own.headers.get("access-control-allow-origin")).toBeNull();
+    // Another wallet's session reads nothing it did not upload.
+    const otherToken = (await auth.verifyWalletChallenge(await (async () => { const challenge = await auth.createWalletChallenge(otherWallet); return {challengeId: challenge.challengeId, wallet: otherWallet, signatureBase64: btoa(String.fromCharCode(...ed25519.sign(new TextEncoder().encode(challenge.message), new Uint8Array(32).fill(10))))}; })())).token;
+    expect((await later(art.url, {headers: {cookie: `carddex_live_session=${otherToken}`}})).status).toBe(404);
+    // The signed coin is saved (before it is sent): from then on everything is public for good.
+    await service.submitLiveTransaction(creator, {intentId: prepared.intent.id, kind: "token", messageSha256: prepared.transaction!.messageSha256, transactionBase64: signedTx(prepared.transaction!)});
+    for (const url of urls) {
+      const served = await later(url);
       expect(served.status).toBe(200);
       expect(served.headers.get("cache-control")).toBe("public, max-age=31536000, immutable");
       expect(served.headers.get("access-control-allow-origin")).toBe("*");
       expect(served.headers.get("content-security-policy")).toBe("default-src 'none'; sandbox");
     }
-    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_assets WHERE published_at IS NOT NULL").get()).toEqual({n: 7});
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_assets WHERE published_at > 0").get()).toEqual({n: 7});
+  });
+  test("a launch an older Worker saved while the migrations ran ahead of the deploy keeps its metadata public (F2)", async () => {
+    const prepared = await service.prepareLiveLaunch(creator, await input());
+    // What the deployed Worker writes between `migrations apply` and the deploy: rows without published_at.
+    sqlite.query("UPDATE live_assets SET published_at = NULL, public_until = NULL").run();
+    for (const url of [prepared.intent.tokenMetadataUri, prepared.intent.nftMetadataUri, prepared.intent.assets.artwork.url]) {
+      const served = await servePublic(url);
+      expect(served.status).toBe(200); expect(served.headers.get("cache-control")).toBe("public, max-age=31536000, immutable");
+    }
+    // A coin recorded from the chain publishes its assets too, however its bytes got there.
+    sqlite.query("UPDATE live_assets SET published_at = 0").run();
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: prepared.intent.id, signature: "s".repeat(88), messageSha256: prepared.transaction!.messageSha256});
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_assets WHERE published_at > 0").get()).toEqual({n: 7});
   });
   test("the same bytes are stored once, and every asset stored before the gate stays public", async () => {
     const bytes = image(200, 200), first = await assets.putPublicAsset(creator, bytes, "image/png"), puts = storagePuts;
@@ -992,12 +1084,41 @@ describe("platform hardening on the server", () => {
     expect(before.query("SELECT published_at FROM live_assets").get()).toEqual({published_at: 42});
     before.close();
   });
-  test("a launch's plan rows are capped, refused before any RPC call", async () => {
+  const fillPlans = (intentId: string, kind: "token" | "nft", count: number, at = Date.now()) => {
+    for (let i = 0; i < count; i++) sqlite.query("INSERT INTO live_launch_transactions (id, intent_id, kind, message_sha256, plan_json, status, created_at, updated_at) VALUES (?, ?, ?, ?, '{}', 'prepared', ?, ?)").run(crypto.randomUUID(), intentId, kind, `cap-${kind}-${i}`, at, at);
+  };
+  test("a launch's plan rows are capped per stage, refused before any RPC call, then slowed rather than closed (F1)", async () => {
     const original = await input(), first = await service.prepareLiveLaunch(creator, original);
-    for (let i = 1; i < service.MAX_PLANS_PER_INTENT; i++) sqlite.query("INSERT INTO live_launch_transactions (id, intent_id, kind, message_sha256, plan_json, status, created_at, updated_at) VALUES (?, ?, 'token', ?, '{}', 'prepared', 0, 0)").run(crypto.randomUUID(), first.intent.id, `cap-${i}`);
+    fillPlans(first.intent.id, "token", service.MAX_PLANS_PER_STAGE - 1);
     const calls = prepareCalls;
-    await expect(service.prepareLiveLaunch(creator, original)).rejects.toThrow("prepared too many times");
+    await expect(service.prepareLiveLaunch(creator, original)).rejects.toThrow("prepared many times in a row");
     expect(prepareCalls).toBe(calls);
+    // Card rows never count against the coin stage.
+    sqlite.query("DELETE FROM live_launch_transactions WHERE intent_id = ? AND message_sha256 LIKE 'cap-token-%'").run(first.intent.id);
+    fillPlans(first.intent.id, "nft", 3 * service.MAX_PLANS_PER_STAGE);
+    expect((await service.prepareLiveLaunch(creator, original)).transaction).not.toBeNull();
+    // Past the cap, one more plan once the newest is a few minutes old: never a dead end.
+    fillPlans(first.intent.id, "token", service.MAX_PLANS_PER_STAGE, Date.now() - service.PLAN_SLOW_LANE_MS - 1_000);
+    sqlite.query("UPDATE live_launch_transactions SET created_at = ? WHERE intent_id = ? AND kind = 'token'").run(Date.now() - service.PLAN_SLOW_LANE_MS - 1_000, first.intent.id);
+    expect((await service.prepareLiveLaunch(creator, original)).transaction).not.toBeNull();
+    await expect(service.prepareLiveLaunch(creator, original)).rejects.toThrow("Wait a few minutes");
+  });
+  test("a coin that landed after many prepares can always prepare its card (F1)", async () => {
+    const original = await input(), first = await service.prepareLiveLaunch(creator, original);
+    // A long session: the coin was prepared again many times (stale plans, expiries) before the last one landed.
+    fillPlans(first.intent.id, "token", service.MAX_PLANS_PER_STAGE - 2);
+    const last = await service.prepareLiveLaunch(creator, original);
+    await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: last.transaction!.messageSha256, transactionBase64: signedTx(last.transaction!)});
+    tokenVerified = true;
+    expect((await service.confirmLiveToken(creator, {intentId: first.intent.id, signature: "s".repeat(88), messageSha256: last.transaction!.messageSha256})).intent.status).toBe("nft_pending");
+    const card = await service.prepareLiveCreatorNft(creator, {intentId: first.intent.id});
+    expect(card.transaction).not.toBeNull();
+    // Even a card stage past its own cap only waits a few minutes, and its words never tell the creator to discard.
+    fillPlans(first.intent.id, "nft", 2 * service.MAX_PLANS_PER_STAGE);
+    const slowed = await service.prepareLiveCreatorNft(creator, {intentId: first.intent.id}).then(() => "", (error: Error) => error.message);
+    expect(slowed).toContain("Wait a few minutes"); expect(slowed).not.toMatch(/discard/i);
+    sqlite.query("UPDATE live_launch_transactions SET created_at = ? WHERE intent_id = ? AND kind = 'nft'").run(Date.now() - service.PLAN_SLOW_LANE_MS - 1_000, first.intent.id);
+    expect((await service.prepareLiveCreatorNft(creator, {intentId: first.intent.id})).transaction).not.toBeNull();
   });
   test("expired challenges and sessions are purged; anything still counted or valid stays (SEC-4)", async () => {
     const now = Date.now(), hour = 3_600_000;

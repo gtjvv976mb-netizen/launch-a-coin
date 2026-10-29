@@ -36,14 +36,16 @@ export function walletFirstWallets(value: string | undefined): string[] { return
 /**
  * Wallets that approve the coin and its card in one prompt: a multi-input solana:signTransaction, then the page relays
  * the card only once the coin is verified. CARDDEX_LIVE_WALLET_BATCH takes the same comma list, "*" or "none"; unset
- * means Backpack only, whose public source shows one approval screen for a multi-transaction request and signs the
- * page-first order without rewriting it. Phantom is never batched, whatever the list says: Phantom blocks requests of
- * two or more transactions from a site it has not reviewed with its red "Request blocked" screen (github.com/orgs/
- * phantom/discussions/520), and Jupiter's "Connect as Phantom" reports the same name. MetaMask signs a multi-input
- * request one confirmation at a time (no saving); Solflare, OKX and Coinbase are undocumented. Every other wallet
- * approves the card in its own prompt once the coin is confirmed.
+ * means no wallet (WW-5): one approval is opt-in, wallet by wallet, after a prompt-and-reject test on the live site
+ * shows a single approval screen, both transactions back byte for byte and no extra warning. Backpack is the
+ * candidate ("Backpack"): its 2024 public source shows one approval screen for a multi-transaction request and signs
+ * the page-first order without rewriting it, but its current build is closed and untested here. Phantom is never
+ * batched, whatever the list says: Phantom blocks requests of two or more transactions from a site it has not reviewed
+ * with its red "Request blocked" screen (github.com/orgs/phantom/discussions/520), and Jupiter's "Connect as Phantom"
+ * reports the same name. MetaMask signs a multi-input request one confirmation at a time (no saving); Solflare, OKX and
+ * Coinbase are undocumented. Every wallet not listed approves the card in its own prompt once the coin is confirmed.
  */
-export const DEFAULT_WALLET_BATCH = ["Backpack"];
+export const DEFAULT_WALLET_BATCH: string[] = [];
 export const NEVER_BATCH_WALLETS = ["phantom"];
 export function walletBatchWallets(value: string | undefined): string[] {
   return walletList(value, DEFAULT_WALLET_BATCH).filter(name => !NEVER_BATCH_WALLETS.includes(name.toLowerCase()));

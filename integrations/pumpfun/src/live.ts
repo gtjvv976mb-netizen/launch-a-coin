@@ -167,9 +167,21 @@ function compileWalletTransaction(payer: PublicKey, blockhash: string, units: nu
     instructions: [ComputeBudgetProgram.setComputeUnitLimit({ units }), ComputeBudgetProgram.setComputeUnitPrice({ microLamports }), ...instructions],
   }).compileToV0Message(table ? [table] : []));
 }
-/** The table only when the plain transaction is over the wallet size target and the table is available. */
-function tableFor(plainBytes: number, table: AddressLookupTableAccount | null) {
-  return plainBytes > WALLET_SIZE_TARGET ? table : null;
+/** The pinned table from one fresh read, or null (the transaction is then built without it) when the read fails. */
+async function readPinnedTable(connection: Pick<LiveConnection, "getAccountInfo">) {
+  return pinnedLookupTable(await connection.getAccountInfo(TABLE_ADDRESS, "confirmed").catch(() => null));
+}
+/**
+ * Solana refuses a transaction that leaves its fee payer holding 1 to 890,879 lamports, the rent for a 0-byte account,
+ * so the wallet must keep at least this much after a launch transaction (WW-3).
+ */
+export const RENT_EXEMPT_MINIMUM_LAMPORTS = 890_880n;
+const SHORT_OF_SOL = `Insufficient SOL: add SOL to this wallet. Solana requires it to keep at least ${RENT_EXEMPT_MINIMUM_LAMPORTS} lamports (0.00089 SOL) after this transaction`;
+/** A simulation that failed only because the fee payer is short of SOL, as plain words; null for any other failure. */
+function shortOfSol(err: unknown): string | null {
+  if (err === "InsufficientFundsForFee") return SHORT_OF_SOL;
+  const rent = (err as { InsufficientFundsForRent?: { account_index?: unknown } } | null)?.InsufficientFundsForRent;
+  return rent && rent.account_index === 0 ? SHORT_OF_SOL : null;
 }
 function oversizeError(kind: "token" | "nft", bytes: number, advice: string[] = []) {
   return new Error(`${kind === "token" ? "Launch" : "Card"} transaction is ${bytes} bytes and exceeds the ${WALLET_SIZE_TARGET}-byte wallet limit (Solana's ${PACKET_LIMIT}-byte packet limit less ${WALLET_GUARD_RESERVE_BYTES} bytes for wallet safety checks)${advice.length ? `; ${advice.join(", or ")}` : ""}`);
@@ -215,12 +227,12 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
   const payerBefore = safeLamports(payerAccount.value?.lamports ?? 0, "Wallet balance");
   const fees = prioritySamples.map((sample) => sample.prioritizationFee).filter((fee) => Number.isSafeInteger(fee) && fee >= 0).sort((a, b) => a - b);
   const microLamports = Math.min(MAX_MICRO_LAMPORTS, Math.max(MIN_MICRO_LAMPORTS, fees[Math.floor(fees.length * 0.75)] ?? MIN_MICRO_LAMPORTS));
-  const plainBytes = (ixs: TransactionInstruction[]) => transactionBytes(compileWalletTransaction(id.creator, latest.blockhash, 1_400_000, microLamports, ixs).message);
-  // A coin transaction over the wallet size target (any initial buy) is compiled against pump.fun's own create
-  // lookup table, as pump.fun's creates are; it is read fresh and checked first, and is never used for the card.
-  const table = kind === "token" && plainBytes(instructions) > WALLET_SIZE_TARGET ? pinnedLookupTable(await connection.getAccountInfo(TABLE_ADDRESS, "confirmed")) : null;
-  const sized = (ixs: TransactionInstruction[]) => transactionBytes(compileWalletTransaction(id.creator, latest.blockhash, 1_400_000, microLamports, ixs, tableFor(plainBytes(ixs), table)).message);
-  const compile = (limit: number) => compileWalletTransaction(id.creator, latest.blockhash, limit, microLamports, instructions, tableFor(plainBytes(instructions), table));
+  // Every coin transaction is compiled against pump.fun's own create lookup table, as pump.fun's own creates are (WW-4):
+  // it keeps the coin far from the packet limit, with room for wallet assertions. The table is read fresh and checked
+  // first; when anything differs the transaction is built without it. Never used for the card.
+  const table = kind === "token" ? await readPinnedTable(connection) : null;
+  const sized = (ixs: TransactionInstruction[]) => transactionBytes(compileWalletTransaction(id.creator, latest.blockhash, 1_400_000, microLamports, ixs, table).message);
+  const compile = (limit: number) => compileWalletTransaction(id.creator, latest.blockhash, limit, microLamports, instructions, table);
   const first = compile(1_400_000);
   // The final guard. measureTokenTransaction lets the app refuse a non-fitting buy before anything is uploaded.
   const packetBytes = transactionBytes(first.message);
@@ -237,7 +249,7 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
     sigVerify: false, replaceRecentBlockhash: false, commitment: "confirmed",
     accounts: { encoding: "base64", addresses: [input.creator] },
   });
-  if (firstSimulation.value.err) throw new Error(`Transaction simulation failed: ${JSON.stringify(firstSimulation.value.err)}`);
+  if (firstSimulation.value.err) throw new Error(shortOfSol(firstSimulation.value.err) ?? `Transaction simulation failed: ${JSON.stringify(firstSimulation.value.err)}`);
   const consumed = firstSimulation.value.unitsConsumed;
   if (!consumed || !Number.isSafeInteger(consumed) || consumed > 1_400_000) throw new Error("RPC did not return a valid compute estimate");
   const computeUnitLimit = Math.min(1_400_000, Math.max(100_000, Math.ceil(consumed * 1.2) + GUARD_COMPUTE_MARGIN));
@@ -247,7 +259,7 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
       accounts: { encoding: "base64", addresses: [input.creator] } }),
     connection.getFeeForMessage(transaction.message, "confirmed"),
   ]);
-  if (simulation.value.err) throw new Error(`Final transaction simulation failed: ${JSON.stringify(simulation.value.err)}`);
+  if (simulation.value.err) throw new Error(shortOfSol(simulation.value.err) ?? `Final transaction simulation failed: ${JSON.stringify(simulation.value.err)}`);
   if (fee.value === null) throw new Error("RPC could not price this transaction");
   const payerAfterAccount = simulation.value.accounts?.[0];
   if (!payerAfterAccount) throw new Error("RPC did not return the simulated wallet balance");
@@ -262,8 +274,9 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
   const balance = outflow !== null ? payerAfter + debit : payerBefore;
   const nativeBuy = kind === "token" && id.asset.key === "sol" ? id.buy : 0n;
   const rentAndProgram = totalDebit > totalFee + nativeBuy ? totalDebit - totalFee - nativeBuy : 0n;
-  const reserveBuffer = 50_000n;
-  if (balance < totalDebit + reserveBuffer) throw new Error(`Insufficient SOL: keep at least ${(totalDebit + reserveBuffer).toString()} lamports for this transaction and its buffer`);
+  // What the wallet must keep afterwards: Solana's rent minimum, so the reviewed balance check agrees with the runtime.
+  const reserveBuffer = RENT_EXEMPT_MINIMUM_LAMPORTS;
+  if (balance < totalDebit + reserveBuffer) throw new Error(`Insufficient SOL: keep at least ${(totalDebit + reserveBuffer).toString()} lamports for this transaction and the minimum Solana requires the wallet to keep`);
   const requiredSigners = transaction.message.staticAccountKeys.slice(0, transaction.message.header.numRequiredSignatures).map((key) => key.toBase58());
   const expectedSigner = kind === "token" ? input.mint : input.nftMint;
   if (requiredSigners.length !== 2 || !requiredSigners.includes(input.creator) || !requiredSigners.includes(expectedSigner)) throw new Error("Unexpected transaction signer set");
@@ -397,9 +410,8 @@ export async function measureTokenTransaction(input: TokenSizeInput, options: { 
   const buy = await withoutExistingSetup(options.connection, [create, ...await firstBuyInstructions({ mint: SIZE_MINT, creator, quoteMint, quoteTokenProgram },
     global, launchCurve(global, quoteControl, quoteMint, creator), 1n, new BN(1), "1")]);
   const table = pinnedLookupTable(tableInfo ?? null);
-  const plain = (instructions: TransactionInstruction[]) => transactionBytes(compileWalletTransaction(creator, SIZE_BLOCKHASH, 1_400_000, 1_000, instructions).message);
-  const bytes = (instructions: TransactionInstruction[]) => transactionBytes(compileWalletTransaction(creator, SIZE_BLOCKHASH, 1_400_000, 1_000, instructions, tableFor(plain(instructions), table)).message);
-  return { limit: WALLET_SIZE_TARGET, packetLimit: PACKET_LIMIT, createBytes: bytes([create]), buyBytes: bytes(buy), lookupTable: !!table && plain(buy) > WALLET_SIZE_TARGET,
+  const bytes = (instructions: TransactionInstruction[]) => transactionBytes(compileWalletTransaction(creator, SIZE_BLOCKHASH, 1_400_000, 1_000, instructions, table).message);
+  return { limit: WALLET_SIZE_TARGET, packetLimit: PACKET_LIMIT, createBytes: bytes([create]), buyBytes: bytes(buy), lookupTable: !!table,
     buyBlocked: issuerControls.permanentDelegate && !ALLOW_PERMANENT_DELEGATE_QUOTE_BUY ? "issuer-controls" as const : null };
 }
 

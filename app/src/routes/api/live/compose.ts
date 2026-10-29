@@ -2,13 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { composeLiveAssets } from "../../../lib/carddex/live/composition.server";
 import { liveTokenFromRequest, requireLiveWallet } from "../../../lib/carddex/live/auth.server";
 import { assertLiveOrigin, requireLiveConfig } from "../../../lib/carddex/live/config.server";
-import { enforceAddressGate, enforceLimit, LIMITS } from "../../../lib/carddex/live/limits.server";
+import { clientKey, enforceAddressGate, enforceLimit, LIMITS } from "../../../lib/carddex/live/limits.server";
 import { UserError } from "../../../lib/mintdex/server/db.server";
 
 export const Route = createFileRoute("/api/live/compose")({server: {handlers: {POST: async ({request}) => {
   try {
     assertLiveOrigin(request.headers.get("origin")); requireLiveConfig("launch");
-    const address = request.headers.get("cf-connecting-ip");
+    const address = clientKey(request.headers.get("cf-connecting-ip"));
     await enforceAddressGate(address);
     const wallet = await requireLiveWallet(liveTokenFromRequest(request));
     // Each composition renders and stores three images: limited per wallet and per address, before the body is read.
