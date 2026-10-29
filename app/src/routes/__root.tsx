@@ -92,7 +92,7 @@ function buildHead(meta: AppMeta, devnetSite = false, notFound = false) {
       },
       { title },
       { name: "description", content: description },
-      { name: "theme-color", content: "#0d0c0b" },
+      { name: "theme-color", content: "#14110d" },
       { name: "application-name", content: "Launch a Card" },
       // Which build this is (launch-plan D4 and E checks: curl the HTML and read it). sim, devnet or mainnet.
       { name: "carddex-mode", content: MODE },

@@ -888,7 +888,7 @@ export function Stepper({
       type="button"
       onClick={onTogglePlay}
       aria-label={playing ? "Pause featured cards" : "Play featured cards"}
-      className="mdx-playbtn grid h-8 w-8 flex-none place-items-center rounded-pill text-ink max-lg:h-11 max-lg:w-11"
+      className="mdx-playbtn grid h-10 w-10 flex-none place-items-center rounded-pill text-ink max-lg:h-11 max-lg:w-11"
     >
       <svg width="12" height="12" viewBox="0 0 10 10" aria-hidden fill="currentColor">
         {playing ? (
@@ -903,7 +903,7 @@ export function Stepper({
     </button>
   ) : playing !== undefined ? (
     // Calm turns the button off after hydration: an empty slot of the same size keeps the row from shifting.
-    <span aria-hidden className="h-8 w-8 flex-none max-lg:h-11 max-lg:w-11" />
+    <span aria-hidden className="h-10 w-10 flex-none max-lg:h-11 max-lg:w-11" />
   ) : null;
   return (
     <div

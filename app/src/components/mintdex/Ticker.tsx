@@ -1,6 +1,7 @@
 /**
- * The live trade ticker (hype arcade): a strip above the page that scrolls the real activity feed (buys, sells,
- * launches, design unlocks, bids and card sales) with the coin's picture, ticker and amount. Fed by the same Home
+ * The activity ticker (MintDex's strip under the status line): it scrolls the real activity feed (buys, sells and
+ * launches; Launch a Card has no design unlocks, bids or card sales, so those rows never show) with the coin's
+ * picture, ticker and amount. Fed by the same Home
  * read the site already polls (GET /home on devnet, the sim's getHome in test mode): no made-up rows. It holds
  * still under the pointer or keyboard focus, pauses offscreen, in a hidden tab and under dialogs, and under calm
  * motion it becomes a still row you can scroll sideways. A design unlock that arrives while you watch plays the
@@ -25,6 +26,8 @@ import { FrameMini, Thumb, solFigure, usePauseGate } from "./ui";
 const SEC_PER_ROW = 3.4;
 const MAX_ROWS = 24;
 const POLL_MS = IS_SIM ? 15_000 : CHAIN_POLL_MS;
+/** The only feed rows a Launch a Card coin has: token trades and launches. */
+const TICKER_KINDS = new Set<EventRow["kind"]>(["buy", "sell", "launch"]);
 
 type HomeLike = { activity: EventRow[]; rev?: string };
 
@@ -58,11 +61,13 @@ function useActivity(enabled: boolean): EventRow[] {
   const home = qc.getQueryState<HomeLike>(["home"]);
   const tickerAt = qc.getQueryState(["ticker"])?.dataUpdatedAt ?? 0;
   // Whichever read is newer: Home's own poll or ours. Nothing before mount (the server rendered an empty strip).
-  const src = !enabled
-    ? []
-    : home?.data && (!data || home.dataUpdatedAt >= tickerAt)
-      ? home.data.activity
-      : (data?.activity ?? []);
+  const src = (
+    !enabled
+      ? []
+      : home?.data && (!data || home.dataUpdatedAt >= tickerAt)
+        ? home.data.activity
+        : (data?.activity ?? [])
+  ).filter((r) => TICKER_KINDS.has(r.kind));
   const ids = src
     .slice(0, MAX_ROWS)
     .map((r) => r.id)

@@ -1,12 +1,624 @@
-/* Overlays screen sheet: dialogs, sheets, the demo-entry, guide, confirm and launched dialogs, the wallet menu and
- * wallet connect dialog, toasts and the 404 / error pages. Owned by the "overlays" screen group
- * (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css). Tokens: carddex-theme.css.
- *
- * Only what floats is lifted (--shadow-modal for dialogs and sheets, --shadow-pop for menus and toasts, each with
- * the one white ring); nothing else here has a border or a lift. Elevation inside a panel is by lightness: the
- * panel is the surface, rows and wells are nested. The motion is the primitives' own (mintdex.css .mdx-dialog,
- * .mdx-pop, .mdx-toast and the vaul sheet timing): opacity and a short rise, instant under reduced motion. */
+/* Shared primitives and overlays (foundation-owned), carried from the 29 Oct release candidate so the components kept
+ * from it (ui.tsx IconButton, Chip, Badge, ActionBar, AutoGrid, KpiGroup, CurveTrack, PageHeader, CardControls, the
+ * Radix dialogs, the phone sheet, the wallet dialog, the demo entry and the guide) render in the MintDex format and the
+ * classic palette. Every value reads carddex-theme.css. Screens tune these from their own sheets; they do not
+ * restructure this file. */
 
+/* ---------------------------------------------------------------- primitives (ui.tsx) */
+@layer components {
+  .mdx-caption__rows {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .mdx-caption__link {
+    margin-top: 16px;
+  }
+  .mdx-frame {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    gap: var(--gap-page, 16px);
+  }
+  .mdx-empty {
+    display: grid;
+    height: 100%;
+    min-height: 320px;
+    place-items: center;
+    padding: 32px 16px;
+  }
+  .mdx-empty--compact {
+    display: flex;
+    height: auto;
+    min-height: var(--row-h);
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+    padding: 8px 0;
+    color: var(--color-slate);
+    font-size: var(--text-body);
+    line-height: 20px;
+  }
+  .mdx-empty--compact .mdx-empty__line {
+    min-width: 0;
+    text-wrap: pretty;
+  }
+  .mdx-empty--compact .mdx-empty__line strong {
+    color: var(--color-ink);
+    font-weight: 500;
+  }
+  .mdx-tabs__count {
+    display: inline-grid;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    place-items: center;
+    border-radius: var(--radius-pill);
+    background: var(--color-track);
+    color: var(--color-slate);
+    font-size: var(--text-caption);
+    font-weight: 500;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .mdx-tabs__tab[data-selected] .mdx-tabs__count {
+    color: var(--color-ink);
+  }
+  .mdx-btn--danger {
+    background: var(--color-nested);
+    color: var(--color-down-hover);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .mdx-btn--danger:hover:not(:disabled, [aria-disabled="true"]) {
+      background: var(--color-raised);
+    }
+  }
+  .mdx-select--field {
+    width: 100%;
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-field);
+    background-color: var(--color-nested);
+    field-sizing: fixed;
+  }
+}
+@layer components {
+  .mdx-glyph {
+    display: inline-block;
+    flex: none;
+    vertical-align: -0.125em;
+  }
+  .mdx-pagehead {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px 24px;
+    min-height: 0;
+  }
+  .mdx-pagehead__back {
+    display: none;
+  }
+  .mdx-pagehead__text {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .mdx-pagehead__title {
+    overflow-wrap: anywhere;
+  }
+  .mdx-pagehead__context {
+    margin-top: 4px;
+    font-size: var(--text-body);
+    line-height: 20px;
+    color: var(--color-slate);
+    text-wrap: pretty;
+  }
+  .mdx-pagehead__right {
+    display: flex;
+    min-width: 0;
+    max-width: 100%;
+    flex: none;
+    align-items: center;
+    gap: 16px;
+  }
+  @media (min-width: 1024px) {
+    .mdx-pagehead {
+      flex-wrap: nowrap;
+      min-height: 56px;
+    }
+    .mdx-pagehead__title, .mdx-pagehead:not([data-wrap]) .mdx-pagehead__context {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  @media (max-width: 1023.98px) {
+    .mdx-pagehead__back {
+      display: flex;
+      width: 100%;
+      min-height: 44px;
+      align-items: center;
+    }
+    .mdx-pagehead__right {
+      width: 100%;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+  }
+  .mdx-pagehead__tools {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  @media (min-width: 1024px) {
+    .mdx-pagehead[data-toolbar] {
+      align-items: center;
+    }
+    .mdx-pagehead[data-toolbar] .mdx-pagehead__right {
+      flex: 1 1 auto;
+      justify-content: flex-end;
+    }
+    .mdx-pagehead__tools {
+      flex-wrap: nowrap;
+    }
+  }
+  @media (max-width: 1023.98px) {
+    .mdx-pagehead__tools {
+      width: 100%;
+      justify-content: flex-start;
+    }
+  }
+  .mdx-actionbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  @media (max-width: 1023.98px) {
+    .mdx-actionbar {
+      position: sticky;
+      bottom: -16px;
+      z-index: 5;
+      min-height: var(--actionbar-h);
+      margin-inline: calc(var(--main-pad) * -1);
+      padding: 10px var(--main-pad);
+      background: var(--color-ground);
+      border-top: 1px solid var(--color-hairline);
+    }
+    .mdx-actionbar > :is(.mdx-btn, a.mdx-btn) {
+      flex: 1 1 auto;
+    }
+    @media (max-height: 500px) {
+      .mdx-actionbar {
+        min-height: var(--actionbar-h);
+        padding-block: 4px;
+      }
+    }
+    html:has(.mdx-actionbar) .mdx-toasts {
+      bottom: calc(var(--tabbar-h) + var(--actionbar-h) + 16px + env(safe-area-inset-bottom));
+    }
+  }
+  @media (min-width: 1024px) {
+    .mdx-actionbar[data-phone-only] {
+      display: none;
+    }
+  }
+  .mdx-autogrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(var(--grid-min, var(--tile-min)), 100%), var(--grid-max, 1fr)));
+    gap: var(--gap-grid);
+    list-style: none;
+  }
+  .mdx-autogrid > li {
+    min-width: 0;
+  }
+  .mdx-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: var(--text-body);
+  }
+  .mdx-table :is(th, td) {
+    height: var(--row-h);
+    padding: 0 8px 0 0;
+    border-bottom: 1px solid var(--color-rule);
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mdx-table th {
+    height: 32px;
+    font-size: var(--text-caption);
+    font-weight: 500;
+    color: var(--color-slate);
+  }
+  .mdx-table :is(th, td)[data-num] {
+    padding: 0 0 0 8px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (max-width: 767.98px) {
+    .mdx-table [data-priority="low"] {
+      display: none;
+    }
+  }
+  @media (max-width: 479.98px) {
+    .mdx-table [data-priority="mid"] {
+      display: none;
+    }
+  }
+  .mdx-kpis {
+    display: grid;
+    grid-template-columns: repeat(var(--kpi-cols, 3), minmax(0, 1fr));
+    border-radius: var(--radius-panel);
+    background: var(--color-surface);
+  }
+  .mdx-kpi {
+    min-width: 0;
+    padding: 12px 16px;
+  }
+  .mdx-kpi + .mdx-kpi {
+    box-shadow: inset 1px 0 0 var(--color-hairline);
+  }
+  .mdx-kpi__label {
+    overflow: hidden;
+    font-size: var(--text-caption);
+    line-height: 16px;
+    font-weight: 500;
+    color: var(--color-slate);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .mdx-kpi__value {
+    display: flex;
+    min-width: 0;
+    margin-top: 4px;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+  }
+  .mdx-kpi__sub {
+    margin-top: 2px;
+    font-size: var(--text-caption);
+    line-height: 16px;
+    color: var(--color-placeholder);
+  }
+  .mdx-kpis[data-strip] {
+    grid-template-columns: repeat(var(--kpi-cols, 3), minmax(0, 1fr));
+  }
+  .mdx-kpis[data-strip] .mdx-kpi {
+    padding: 8px 12px;
+  }
+  @media (max-width: 479.98px) {
+    .mdx-kpis:not([data-strip]) {
+      grid-template-columns: repeat(min(var(--kpi-cols, 3), 2), minmax(0, 1fr));
+    }
+    .mdx-kpis:not([data-strip]) .mdx-kpi + .mdx-kpi {
+      box-shadow: none;
+    }
+    .mdx-kpis:not([data-strip]) .mdx-kpi:nth-child(2n) {
+      box-shadow: inset 1px 0 0 var(--color-hairline);
+    }
+    .mdx-kpis:not([data-strip]) .mdx-kpi:nth-child(n + 3) {
+      box-shadow: inset 0 1px 0 var(--color-hairline);
+    }
+    .mdx-kpis:not([data-strip]) .mdx-kpi:nth-child(2n):nth-child(n + 3) {
+      box-shadow: inset 1px 1px 0 var(--color-hairline);
+    }
+    .mdx-kpis:not([data-strip]) .mdx-kpi:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
+    .mdx-kpis[data-strip] .mdx-kpi {
+      padding: 8px;
+    }
+  }
+  .mdx-dash {
+    color: var(--color-placeholder);
+    font-size: var(--text-body);
+    font-weight: 400;
+  }
+  .mdx-change {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0;
+    white-space: nowrap;
+  }
+  .mdx-change[data-dir="up"] {
+    color: var(--color-up);
+  }
+  .mdx-change[data-dir="down"] {
+    color: var(--color-down);
+  }
+  .mdx-change[data-dir="flat"] {
+    color: var(--color-slate);
+  }
+  .mdx-change[data-pill] {
+    height: 22px;
+    align-items: center;
+    padding: 0 8px;
+    border-radius: var(--radius-pill);
+    background: var(--color-track);
+    font-size: var(--text-caption);
+    font-weight: 600;
+  }
+  .mdx-change[data-pill][data-dir="up"] {
+    background: var(--color-up-soft);
+  }
+  .mdx-change[data-pill][data-dir="down"] {
+    background: var(--color-down-soft);
+    color: var(--color-down-hover);
+  }
+  .mdx-tag {
+    display: inline-flex;
+    height: 20px;
+    flex: none;
+    align-items: center;
+    gap: 4px;
+    padding: 0 8px;
+    border-radius: var(--radius-pill);
+    background: var(--color-track);
+    color: var(--color-slate);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .mdx-tag[data-tone="up"] {
+    background: var(--color-up-soft);
+    color: var(--color-up);
+  }
+  .mdx-tag[data-tone="down"] {
+    background: var(--color-down-soft);
+    color: var(--color-down-hover);
+  }
+  .mdx-tag[data-tone="ink"] {
+    background: var(--color-ink);
+    color: var(--color-on-cta);
+  }
+  .mdx-tag[data-tone="gold"] {
+    background: var(--color-gold-soft);
+    color: var(--color-gold);
+  }
+  .mdx-chip {
+    position: relative;
+    display: inline-flex;
+    height: var(--control-h);
+    flex: none;
+    align-items: center;
+    gap: 6px;
+    padding: 0 14px;
+    border-radius: var(--radius-pill);
+    background: var(--color-track);
+    color: var(--color-ink);
+    font-size: var(--text-body);
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color var(--t-hover) ease, color var(--t-hover) ease;
+  }
+  .mdx-chip__count {
+    color: var(--color-slate);
+    font-size: var(--text-caption);
+  }
+  .mdx-chip[aria-pressed="true"] {
+    background: var(--color-raised);
+    color: var(--color-ink);
+    outline: 2px solid var(--color-ink);
+    outline-offset: -2px;
+  }
+  .mdx-chip[aria-pressed="true"]:focus-visible {
+    outline: 2px solid var(--color-zap);
+    outline-offset: 2px;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .mdx-chip:hover:not([aria-pressed="true"]) {
+      background: var(--color-raised);
+    }
+  }
+  .mdx-chip:active {
+    transform: scale(0.96);
+  }
+  .mdx-chiprow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .mdx-curve {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .mdx-curve__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: var(--text-caption);
+    line-height: 16px;
+  }
+  .mdx-curve__label {
+    font-weight: 600;
+    color: var(--color-ink);
+    white-space: nowrap;
+  }
+  .mdx-curve__note {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--color-placeholder);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .mdx-curve__track {
+    position: relative;
+    height: 6px;
+    overflow: hidden;
+    border-radius: var(--radius-pill);
+    background: var(--color-nested);
+  }
+  .mdx-curve[data-size="sm"] .mdx-curve__track {
+    height: 4px;
+  }
+  .mdx-curve__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: inherit;
+    background: var(--color-gold);
+  }
+  @media (forced-colors: active) {
+    .mdx-curve__track {
+      border: 1px solid CanvasText;
+    }
+    .mdx-curve__fill {
+      background: Highlight;
+      forced-color-adjust: none;
+    }
+  }
+  .mdx-calm {
+    display: flex;
+    min-height: var(--hit);
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+  }
+  .mdx-calm__label {
+    min-width: 0;
+    font-size: var(--text-body);
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+  .mdx-calm--compact {
+    min-height: 36px;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  .mdx-calm--compact .mdx-calm__label {
+    color: var(--color-slate);
+    font-size: var(--text-caption);
+  }
+  .mdx-toasts {
+    position: fixed;
+    inset-inline: 16px;
+    bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom));
+    z-index: var(--z-toast);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    pointer-events: none;
+  }
+  /* Desktop (the pre-restyle shell): bottom left, just right of the rail. */
+  @media (min-width: 1024px) {
+    .mdx-toasts {
+      left: calc(var(--rail-w) + 16px);
+      right: auto;
+      bottom: 16px;
+      width: min(400px, calc(100vw - var(--rail-w) - 32px));
+    }
+  }
+  .mdx-toast__ok {
+    background: var(--color-up);
+    color: var(--color-on-cta);
+  }
+  .mdx-empty__title {
+    margin-top: 16px;
+    font-size: var(--text-lead);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+  .mdx-empty__body {
+    margin-top: 4px;
+    font-size: var(--text-body);
+    line-height: 1.45;
+    color: var(--color-slate);
+    text-wrap: pretty;
+  }
+  .mdx-empty__action {
+    display: flex;
+    margin-top: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 16px 20px;
+  }
+  .mdx-empty--inline {
+    height: auto;
+    min-height: 0;
+    padding: 24px 0;
+  }
+}
+
+/* ---------------------------------------------------------------- the card-controls row and tooltips (CardControls.tsx, useWarmTips) */
+.cdx-hero-turntable { position: relative; width: 100%; }
+
+/* The row: 36px icon pills (secondary, nested surface), 8px apart, centred under the card; 44px on touch. */
+.cdx-card-controls {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 12px;
+}
+@media (pointer: coarse), (max-width: 1023.98px) {
+  .cdx-card-controls .cdx-card-control {
+    width: 44px;
+    height: 44px;
+  }
+}
+/* The tooltip: the control's name on the float surface above it. Hover waits a beat (an Operate surface: a pointer
+ * passing over the row does not flash labels), then its neighbours open at once; keyboard focus shows it at once.
+ * Never on touch (no hover). */
+/* .mdx-tip: any other icon-only control that names itself the same way (ShareButton), never with title=. */
+:is(.cdx-card-control, .mdx-tip)[data-tip]::before {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  z-index: 2;
+  padding: 4px 8px;
+  border-radius: var(--radius-row);
+  background: var(--color-float);
+  box-shadow: var(--shadow-pop);
+  color: var(--color-ink);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-50%);
+  transition: opacity var(--t-fast) ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  :is(.cdx-card-control, .mdx-tip)[data-tip]:hover::before {
+    opacity: 1;
+    transition-delay: 400ms;
+  }
+}
+/* A header control (Share) sits at the column's right edge: its tip ends there too. */
+.mdx-tip[data-tip]::before {
+  right: 0;
+  left: auto;
+  transform: none;
+}
+:is(.cdx-card-control, .mdx-tip)[data-tip]:focus-visible::before {
+  opacity: 1;
+  transition: none;
+}
+/* Warm (AppShell useWarmTips: a tooltip is showing or just closed): a neighbour's opens at once, with no fade. */
+:root[data-tips-warm] :is(.cdx-card-control, .mdx-tip)[data-tip]:hover::before {
+  transition: none;
+}
+
+/* ---------------------------------------------------------------- overlays: dialogs, sheets, demo entry, guide, confirm, wallet connect */
 /* ---------------------------------------------------------------- the panel: desktop dialog and phone sheet
  * Components: dialog-modal.tsx (from 1024px) and sheet-drawer.tsx (phones). The compact anatomy (density R6): the
  * title and a quiet Close on one row, the body (one or two sentences, or the dialog's own content), then the actions
@@ -35,11 +647,17 @@
   /* The separate translate property, so the dialog keyframes (transform) compose with the centring. */
   translate: -50% -50%;
   width: calc(100vw - 32px);
-  max-height: calc(var(--cdx-app-height, 100dvh) - 48px);
-  gap: 12px;
-  /* Dialogs render only from 1024px, where --pad-panel is 16px. */
-  padding: var(--pad-panel);
+  max-height: 88dvh;
+  gap: 16px;
+  /* MintDex: 24px padding, the 28px aside radius (24 under 1024px). */
+  padding: 24px;
   border-radius: var(--radius-aside);
+  background: var(--color-plinth);
+}
+@media (max-width: 1023.98px) {
+  .cdx-overlay--dialog {
+    border-radius: var(--radius-panel);
+  }
 }
 .cdx-overlay--sheet {
   --sheet-pad: max(var(--pad-panel), env(safe-area-inset-left), env(safe-area-inset-right));
@@ -77,11 +695,12 @@
 /* The title's first line centres on the 36px Close (26px line + 5px). */
 .cdx-overlay__title {
   min-width: 0;
-  padding-top: 5px;
+  padding-top: 6px;
   color: var(--color-ink);
-  font-size: var(--text-title);
-  line-height: var(--text-title--line-height);
+  font-size: 18px;
+  line-height: 1.3;
   font-weight: 600;
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 /* Flush with the padding: the ring sits 16/16 from a dialog's corner and 12px from a sheet's edge. It paints above
@@ -205,18 +824,18 @@
 .cdx-guide {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 .cdx-guide__steps {
   display: grid;
-  gap: 12px;
+  gap: 20px;
   list-style: none;
 }
 .cdx-guide__step {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
-  column-gap: 8px;
-  row-gap: 4px;
+  grid-template-columns: 28px minmax(0, 1fr);
+  column-gap: 12px;
+  row-gap: 6px;
   align-content: start;
 }
 .cdx-guide__step > .cdx-guide__n {
@@ -226,71 +845,60 @@
   grid-column: 2;
 }
 .cdx-guide__n {
-  padding-top: 4px; /* the 16px number sits on the 24px heading line */
-  color: var(--color-placeholder);
-  font-size: var(--text-caption);
-  line-height: var(--text-caption--line-height);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 500;
 }
-/* The house dialog heading (.cdx-overlay-copy h3): all five headings in the guide share one style. */
 .cdx-guide__step h3 {
   color: var(--color-ink);
-  font-size: var(--text-lead);
-  line-height: var(--text-lead--line-height);
+  font-size: 17px;
+  line-height: 24px;
   font-weight: 600;
   text-wrap: balance;
 }
 .cdx-guide__step p {
   overflow-wrap: anywhere;
   color: var(--color-slate);
-  font-size: var(--text-body);
-  line-height: var(--text-body--line-height);
+  font-size: 15px;
+  line-height: 1.5;
   text-wrap: pretty;
-}
-.cdx-overlay--dialog .cdx-guide__steps {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-.cdx-overlay--dialog .cdx-guide__step {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px;
-  border-radius: var(--radius-row);
-  background: var(--color-nested);
-}
-.cdx-overlay--dialog .cdx-guide__n {
-  padding-top: 0;
 }
 .cdx-guide__more {
   display: grid;
-  gap: 16px;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-hairline);
+  font-size: 14px;
+  line-height: 1.45;
 }
-.cdx-overlay--dialog .cdx-guide__more {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 24px;
+.cdx-guide__mode {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  color: var(--color-ink);
 }
 .cdx-guide__facts {
   display: grid;
-  gap: 8px;
+  gap: 6px;
+  color: var(--color-slate);
+}
+.cdx-guide__facts > div {
+  display: grid;
+  grid-template-columns: minmax(72px, auto) minmax(0, 1fr);
+  gap: 12px;
 }
 .cdx-guide__facts dt {
   color: var(--color-ink);
-  font-weight: 600;
+  font-weight: 500;
 }
-/* The sentence and the switch (its own "Calm motion" label) on one row. */
 .cdx-guide__calm {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  border-top: 1px solid var(--color-rule);
 }
-.cdx-guide__calm > p {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-.cdx-guide__calm > .mdx-calm {
-  flex: none;
+.cdx-guide__actions .mdx-btn {
+  min-height: 48px;
 }
 
 /* ---------------------------------------------------------------- confirm (confirm.tsx) */

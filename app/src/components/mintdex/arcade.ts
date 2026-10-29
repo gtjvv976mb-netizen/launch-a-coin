@@ -10,12 +10,19 @@ function calm() {
   return document.hidden || document.documentElement.dataset.motion === "calm";
 }
 
-/** The design's burst palette: its sheen, its ring, plus neon where the sheen is plain white. */
+/** The site palette's exhibition light (carddex-theme.css --light-1 to --light-5: lit gold, antique gold, ivory,
+ *  card red, bronze), read at run time so the canvas paints the same colours the sheets do. */
+function lights(...n: number[]): string[] {
+  const css = getComputedStyle(document.documentElement);
+  return n.map((i) => css.getPropertyValue(`--light-${i}`).trim()).filter(Boolean);
+}
+
+/** The design's burst palette: its sheen, its ring, plus the site's gold where the sheen is plain white. */
 export function tierColors(level: number): string[] {
   const t = tierForLevel(level);
   const sheen = t.sheen.filter((c) => c.toUpperCase() !== "#FFFFFF");
-  const base = sheen.length ? sheen : ["#3dffb5", "#38d9ff"];
-  return [...base, t.ring, "#ffffff"];
+  const base = sheen.length ? sheen : lights(1, 2);
+  return [...base, t.ring, ...lights(3)];
 }
 
 function node(css: string) {
@@ -105,7 +112,7 @@ export function bigBurst(
   }
 
   void import("./card3d/fx").then((fx) => {
-    const palette = [...colors, "#ffffff"];
+    const palette = [...colors, ...lights(3)];
     fx.burst(x, y, {
       n: 64,
       colors: palette,
@@ -139,9 +146,9 @@ export function tierBurst(level: number, at?: { x: number; y: number }) {
   bigBurst(tierColors(level), at, { confetti: level >= 7, label: `${t.name} unlocked` });
 }
 
-/** After a successful launch: confetti and the burst in the card's own foil (gold and the holo stops, carddex-theme.css). */
+/** After a successful launch: confetti in the site's gold, ivory and card red (carddex-theme.css --light-*). */
 export function launchBurst(at?: { x: number; y: number }) {
-  bigBurst(["#e8bd62", "#f6c6dd", "#f7eac2", "#c8f0de", "#dccdf5"], at, { confetti: true });
+  bigBurst(lights(1, 2, 3, 4, 5), at, { confetti: true });
 }
 
 /** The center of an element on screen (for a burst from a card). */

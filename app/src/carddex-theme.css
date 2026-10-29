@@ -1,268 +1,297 @@
-/* Launch a Card tokens: the one source of truth (direction: .taste-skill/app/notes.md, style true-black-flat).
+/* Launch a Card tokens: the ONE source of truth for colour, radius, type, shadow and motion (foundation-owned).
  *
- * A warm near-black ground with elevation by lightness alone (ground, surface, nested: no borders or shadows on
- * cards at rest). Foil gold is the ONLY data hue (price line, curve fill, the current period): never a button,
- * tab or nav fill. The primary action is made primary by inversion (a cream-white pill with a near-black label).
- * Instrument Sans for every UI word and figure (tabular); Libre Caslon and Courier Prime live inside the cards.
+ * Direction (owner, 29 Oct 2026): mintdex.fun's format and motion, re-paletted "Classic dark": a dark stage for a
+ * collector's cards. Deep ink ground, walnut panels, antique gold as the one accent (MintDex's neon mint), card red
+ * as the second (MintDex's hot pink), ivory text. Every other step below is derived from those five.
  *
- * Tailwind namespaces (--color-*, --radius-*, --font-*, --text-*, --ease-*) sit in the top-level @theme static
- * block, so utilities such as bg-surface, text-slate, rounded-panel, text-caption and ease-out exist. Runtime values
- * (durations, shadows, z-index, control heights, gutters) sit in :root. Nothing else in the app defines a colour,
- * radius, shadow or motion value: sheets and components read these names. Old names (wall, plinth, sheet, tint,
- * track, neon, zap) are kept as aliases of the new roles so every existing utility follows the new look. */
+ * The role names are MintDex's (wall, plinth, sheet, tint, neon, zap, hype...), so every restored rule and utility
+ * (bg-plinth, text-slate, rounded-panel, ease-room) follows the palette. The names the 29 Oct release candidate
+ * introduced (ground, surface, nested, raised, cta, text-body...) stay as aliases, so components kept from it render
+ * in the same palette. Sheets and components read these names; they never write a colour of their own.
+ *
+ * Channel tokens (--rgb-*) are for alpha steps: rgb(var(--rgb-gold) / 0.2). */
 
 @theme static {
-  /* ---- ground and surfaces: one lightness step each */
-  --color-ground: #0d0c0b; /* the page and the shell (top bar, tab bar) */
-  --color-surface: #171512; /* panels, the trade ticket, dialogs, sheets */
-  --color-nested: #26231f; /* a panel inside a panel, fields, the segmented thumb, secondary buttons */
-  --color-raised: #302c27; /* hover on a nested control, the selected chip track */
-  --color-float: #1f1c19; /* menus, popovers, toasts: one step above the surface, with --shadow-pop */
+  /* ---- surfaces (dark ramp, warm) */
+  --color-wall: #14110d; /* deep ink: the canvas behind everything (the sky's ground) */
+  --color-plinth: #1f1a14; /* walnut: asides, panels, dialogs, menus, phone bars */
+  --color-sheet: #2b241b; /* raised walnut: fields, segmented thumb, secondary buttons, wallet card */
+  --color-tint: #332a20; /* row hover on a panel, chip buttons, key hint */
+  --color-sleeve: #0e0c09; /* the tray behind every minted card, nowhere else */
+  --color-wall-deep: #261f17; /* skeletons on the canvas */
+  --color-track: rgb(243 234 214 / 0.08); /* segmented tracks, select pills, ghost hover, progress tracks */
+  --color-wash: rgb(212 166 74 / 0.16); /* arrival wash on a new feed row, start colour only */
 
-  /* ---- text: two greys far enough apart to read as two (both 4.5:1 or better on every surface above) */
-  --color-ink: #f2f1ee; /* primary text, 13.9:1 on nested: a low-chroma bone (a yellow cream read as a stock palette) */
-  --color-ink-hover: #ffffff;
-  --color-slate: #b8b0a3; /* secondary text, labels, inactive nav and tabs (7.3:1 on nested) */
-  --color-placeholder: #9c9488; /* meta, timestamps, placeholders (5.2:1 on nested, 4.6:1 on raised) */
+  /* ---- text and lines (ink 14.4:1, slate 7.9:1, placeholder 5.2:1 on sheet) */
+  --color-ink: #f3ead6; /* ivory: text, focus fallback, chart line */
+  --color-ink-hover: #fffaf0;
+  --color-slate: #bdae92; /* secondary text, inactive tabs, column heads (7.9:1 on plinth, 7.0:1 on sheet) */
+  --color-placeholder: #a39479; /* placeholder inside sheet fields only (5.2:1 on sheet) */
+  --color-field: #4d4234; /* decorative rules and leader dots */
+  --color-control-border: #8a7859; /* interactive boundaries: 3.6:1 on sheet, 4.0:1 on plinth */
+  --color-hairline: #3b3227; /* chart grid, table header rule, ledge line, panel edges */
+  --color-rule: #2a231b; /* row dividers on a panel */
 
-  /* ---- lines */
-  --color-control-border: #756d62; /* every interactive boundary: 3.6:1 on surface, 3.8:1 on ground */
-  --color-hairline: #2e2a25; /* dividers, chart gridlines, the sticky bar's rule */
-  --color-rule: #23201c; /* row rules inside a surface */
-  --color-field: #4a443d; /* decorative only: leader dots */
+  /* ---- accents: antique gold leads, card red backs it up, light gold marks focus and links */
+  --color-neon: #d4a64a; /* antique gold: primary buttons, active nav, the brand glow (7.7:1 on plinth) */
+  --color-neon-hi: #e6c06e; /* the primary's hover fill */
+  --color-neon-ink: #14110d; /* labels on a gold fill (8.4:1) */
+  --color-on-neon: #14110d;
+  --color-zap: #f0d48c; /* light gold: focus rings, links on hover, secondary glow (11.9:1 on plinth) */
+  --color-hype: #9e2b25; /* card red: launches, the hot accent (fills and glows; text uses hype-ink) */
+  --color-hype-ink: #e2766a; /* card red lifted for text on the dark ramp (5.8:1 on plinth) */
+  --color-on-hype: #f3ead6; /* ivory on a card-red fill */
 
-  /* ---- the one data hue and the market pair */
-  --color-gold: #e8bd62; /* data only: the price line, the curve fill, the current period */
-  --color-gold-soft: rgb(232 189 98 / 0.14); /* a chart area fill under the gold line (14% or less) */
-  --color-up: #3fc07a;
-  --color-up-soft: #172a1d;
-  --color-up-hover: #5ccf8f;
-  --color-down: #e5566f; /* 5.1:1 on surface; on nested panels set it at 600 weight or on --color-down-soft */
-  --color-down-soft: #2c1a20;
-  --color-down-hover: #ec7187;
-  --color-warn: #e5a93b;
-  --color-warn-soft: #2b2414;
+  /* ---- market: green and red only ever mean the market, always with a sign or a triangle */
+  --color-up: #7fc493; /* 8.4:1 on plinth */
+  --color-up-hover: #9bd3aa;
+  --color-up-soft: rgb(127 196 147 / 0.14);
+  --color-down: #e8786c; /* 6.0:1 on plinth */
+  --color-down-hover: #ee9286;
+  --color-down-soft: rgb(232 120 108 / 0.14);
+  --color-warn: #e0b456;
+  --color-warn-soft: rgb(224 180 86 / 0.14);
 
-  /* ---- the primary action: inversion, never gold */
-  --color-cta: #f2f1ee;
-  --color-cta-hover: #ffffff;
-  --color-on-cta: #0d0c0b; /* 17.4:1 on the cream fill */
-
-  /* ---- aliases of the old role names (every existing utility and sheet keeps working) */
-  --color-wall: var(--color-ground);
-  --color-plinth: var(--color-surface);
-  --color-sheet: var(--color-nested);
-  --color-tint: var(--color-raised);
-  --color-sleeve: #12100e; /* the tray behind a minted card */
-  --color-wall-deep: #1d1a17; /* skeleton bars on the ground */
-  --color-track: rgb(242 241 238 / 0.08); /* segmented tracks, chips, ghost hover: one step up on any surface */
-  --color-wash: rgb(232 189 98 / 0.12); /* the arrival wash on a new feed row (start colour only) */
-  --color-neon: var(--color-ink); /* selected outline, active underline, link hover: brightness, not hue */
-  --color-neon-ink: var(--color-on-cta);
-  --color-on-neon: var(--color-on-cta);
-  --color-zap: var(--color-ink); /* focus ring */
-  --color-hype: var(--color-down);
-
-  /* Foil stops sampled from the card holo (card faces only). */
+  /* ---- card-face foil stops (card faces only; the cards keep their own colours) */
   --color-holo-pink: #f6c6dd;
   --color-holo-butter: #f7eac2;
   --color-holo-mint: #c8f0de;
   --color-holo-sky: #c6e0f5;
   --color-holo-lilac: #dccdf5;
 
-  /* ---- radius: concentric, from the 20px card (outer = inner + padding) */
-  --radius-chip: 6px; /* the "/" key hint only */
-  --radius-row: 12px; /* rows and their hover, menu items (in a 16 popover with 4 padding), tiles, tooltips */
-  --radius-field: 8px; /* inputs, field selects, textareas: the 20px panel less its 12px phone padding */
-  --radius-pop: 16px; /* menus, popovers, toasts, search suggestions */
-  --radius-panel: 20px; /* panels and phone sheets (a nested panel with 8px padding takes --radius-row) */
-  --radius-aside: 24px; /* desktop dialogs */
-  --radius-pill: 999px; /* every button, chip, badge, segmented track and thumb, switch */
+  /* ---- aliases of the 29 Oct release-candidate names (kept components read them) */
+  --color-ground: var(--color-wall);
+  --color-surface: var(--color-plinth);
+  --color-nested: var(--color-sheet);
+  --color-raised: var(--color-tint);
+  --color-float: var(--color-plinth);
+  --color-cta: var(--color-neon);
+  --color-cta-hover: var(--color-neon-hi);
+  --color-on-cta: var(--color-neon-ink);
+  --color-gold: var(--color-neon);
+  --color-gold-soft: rgb(212 166 74 / 0.14);
+  --color-red: var(--color-hype);
 
-  /* ---- type: Instrument Sans for every UI word and figure; the card faces keep their own */
+  /* ---- radius roles (MintDex): buttons are pills */
+  --radius-chip: 6px; /* "/" key hint, tiny tags */
+  --radius-row: 12px; /* list row hover, menu items, chips, tooltips, skeletons */
+  --radius-field: 14px; /* inputs, rail tabs and the rail pill */
+  --radius-pop: 18px; /* menus, popovers, toasts, wallet card, dropzone */
+  --radius-panel: 24px; /* content panels, phone panels and dialogs, phone tab bar top corners */
+  --radius-aside: 28px; /* full-height asides, the Launch form panel, desktop dialogs */
+  --radius-pill: 999px; /* every button, segmented tracks and thumbs, chips, dots */
+  --radius-btn: var(--radius-pill);
+  --radius-sheet: var(--radius-panel);
+
+  /* ---- type: the same free families mintdex.fun ships (self-hosted under /fonts) */
   --font-sans: "Instrument Sans", "Instrument Sans Fallback", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-title: var(--font-sans);
-  --font-addr: "Courier Prime", ui-monospace, "SF Mono", Menlo, monospace; /* addresses and hashes */
+  --font-addr: "Fragment Mono", ui-monospace, "SF Mono", Menlo, monospace; /* addresses and hashes */
   --font-card-serif: "Libre Caslon Text", Georgia, "Times New Roman", serif;
   --font-card-mono: "Courier Prime", ui-monospace, Menlo, monospace;
   --font-display: var(--font-card-serif); /* card only: MintCard's "Your art here" placeholder */
 
-  /* Scale 12 / 14 / 16 / 20 / 24, plus one 30px lead figure (Portfolio total, Coin market cap). Nothing at 48. */
-  --text-caption: 12px; /* meta, timestamps, badges, column heads, axis ticks, tab-bar labels */
+  /* MintDex scale: labels 12, small 13-14, body 15, section 17, figure 20, card name 26, display clamp(36-54). */
+  --text-caption: 12px;
   --text-caption--line-height: 16px;
-  --text-body: 14px; /* body, labels, buttons, tabs, table cells, nav links */
+  --text-body: 14px;
   --text-body--line-height: 20px;
-  --text-lead: 16px; /* section and dialog headings; inputs on touch (no iOS zoom) */
+  --text-lead: 17px;
   --text-lead--line-height: 24px;
-  --text-title: 20px; /* the page title on phones, a featured card name */
+  --text-title: 20px;
   --text-title--line-height: 26px;
-  --text-heading: 24px; /* the page title (h1) from 1024px; KPI values */
+  --text-heading: 26px;
   --text-heading--line-height: 30px;
-  --text-figure: 30px; /* the one lead figure on a screen */
-  --text-figure--line-height: 36px;
+  --text-figure: clamp(32px, 5.6vh, 44px);
+  --text-figure--line-height: 1;
 
-  /* ---- motion (website-standard motion-values.md): one easing set */
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* enter, exit, moving hovers */
-  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1); /* movement on screen (an indicator sliding) */
-  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
-  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1); /* sheets (vaul) */
-  /* The card engine's own curves (card3d.css reads them; unchanged so the cards move exactly as before). */
-  --ease-room: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
-  --ease-sheen: cubic-bezier(0.45, 0, 0.25, 1);
+  /* ---- easing (MintDex): no linear() anywhere */
+  --ease-room: cubic-bezier(0.2, 0.8, 0.2, 1); /* entrances, colour, hover */
+  --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1); /* about 6% overshoot: thumbs, rail pill, press release, dialogs */
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1); /* exits only */
+  --ease-sheen: cubic-bezier(0.45, 0, 0.25, 1); /* the primary sheen sweep */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* kept components' enter/exit */
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1); /* the phone sheet (vaul) */
+}
+
+/* A registered colour so tier fills can crossfade (an @property initial value cannot read a variable: gold). */
+@property --tier {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #d4a64a;
 }
 
 :root {
   color-scheme: dark;
 
-  /* ---- durations (state feedback only: Operate screens have no entrances) */
-  --t-press: 140ms; /* press scale(0.96) */
-  --t-hover: 120ms; /* colour, background and border on hover (pointer: fine) */
-  --t-fast: 160ms; /* tab label colour, switch, popover close */
-  --t-base: 220ms; /* menu and popover open, toast in */
-  --t-slow: 300ms; /* dialog open (close 200ms) */
+  /* ---- colour channels for alpha steps */
+  --rgb-wall: 20 17 13;
+  --rgb-plinth: 31 26 20;
+  --rgb-ink: 243 234 214; /* ivory */
+  --rgb-gold: 212 166 74; /* antique gold */
+  --rgb-gold-hi: 232 196 120; /* lit gold (glow cores, the neon-hi ring) */
+  --rgb-zap: 240 212 140; /* light gold (focus) */
+  --rgb-red: 158 43 37; /* card red */
+  --rgb-red-hi: 226 118 106; /* card red lifted (glows on the dark ramp) */
+  --rgb-bronze: 150 96 44; /* the deep stop between gold and red (aurora, holo) */
+  --rgb-up: 127 196 147;
+  --rgb-down: 232 120 108;
+  --rgb-shade: 0 0 0;
+  --rgb-light: 255 250 235; /* warm white: sheens, highlights, scanlines */
+
+  /* ---- the chrome foil and its sheen (MintDex: neon to cyan to violet to pink; here gold to ivory to card red) */
+  --holo: linear-gradient(125deg, #d4a64a 0%, #f3ead6 38%, #e0b45c 66%, #9e2b25 100%);
+  --holo-flat: var(--color-neon); /* forced colours and print */
+  --sheen: linear-gradient(105deg, transparent 30%, rgb(255 250 235 / 0.5) 46%, rgb(var(--rgb-gold-hi) / 0.55) 52%, rgb(255 250 235 / 0.5) 58%, transparent 74%);
+
+  /* ---- glows (box-shadow lists): primary buttons, active nav, focus */
+  --glow-neon: 0 0 0 1px rgb(var(--rgb-gold) / 0.9), 0 0 14px rgb(var(--rgb-gold) / 0.42), 0 0 34px -6px rgb(var(--rgb-gold) / 0.48);
+  --glow-neon-hi: 0 0 0 1px rgb(var(--rgb-gold-hi) / 1), 0 0 18px rgb(var(--rgb-gold) / 0.62), 0 0 48px -4px rgb(var(--rgb-gold) / 0.56);
+  --glow-zap: 0 0 0 1px rgb(var(--rgb-zap) / 0.55), 0 0 16px -2px rgb(var(--rgb-zap) / 0.42);
+  --glow-focus: 0 0 0 4px rgb(var(--rgb-zap) / 0.22), 0 0 18px rgb(var(--rgb-zap) / 0.32);
+  --glow-hype: 0 0 0 1px rgb(var(--rgb-red-hi) / 0.7), 0 0 16px -2px rgb(var(--rgb-red) / 0.6);
+
+  /* ---- shadows (warm black), plus a hairline of light on the top edge of raised things */
+  --shadow-ring: 0 0 0 1px rgb(var(--rgb-ink) / 0.09);
+  --shadow-rest: inset 0 1px 0 rgb(var(--rgb-ink) / 0.04), 0 0 0 1px rgb(var(--rgb-ink) / 0.08), 0 1px 2px rgb(var(--rgb-shade) / 0.4), 0 10px 30px -12px rgb(var(--rgb-shade) / 0.7);
+  --shadow-raise: inset 0 1px 0 rgb(var(--rgb-ink) / 0.06), 0 0 0 1px rgb(var(--rgb-ink) / 0.1), 0 3px 8px -2px rgb(var(--rgb-shade) / 0.5);
+  --shadow-lift: 0 2px 4px rgb(var(--rgb-shade) / 0.4), 0 12px 24px -10px rgb(var(--rgb-shade) / 0.7);
+  --shadow-float: 0 0 0 1px rgb(var(--rgb-ink) / 0.12), 0 6px 14px -4px rgb(var(--rgb-shade) / 0.5), 0 22px 44px -16px rgb(var(--rgb-shade) / 0.8);
+  --shadow-modal: 0 0 0 1px rgb(var(--rgb-ink) / 0.14), 0 10px 30px -8px rgb(var(--rgb-shade) / 0.6), 0 44px 90px -30px rgb(var(--rgb-shade) / 0.9), 0 0 80px -20px rgb(var(--rgb-gold) / 0.18);
+  --shadow-border: 0 0 0 1px rgb(var(--rgb-ink) / 0.08);
+  --shadow-pop: var(--shadow-float);
+  --card-shadow: rgb(var(--rgb-shade) / 0.55); /* the card's contact shadow (card3d.css) */
+  --overlay: rgb(10 8 6 / 0.74); /* dialog backdrop, no blur */
+  --image-outline: rgb(var(--rgb-ink) / 0.1); /* MIFB image outline on thumbnails, dark */
+
+  /* ---- durations (MintDex). Stagger is capped at 10 items. */
+  --t-press: 100ms;
+  --t-fast: 160ms;
+  --t-hover: 160ms;
+  --t-base: 220ms;
+  --t-slow: 300ms;
   --t-progress: 700ms;
   --t-sheen: 900ms;
   --t-wash: 1600ms;
   --t-shimmer: 1600ms;
-  --stagger: 40ms;
-
-  /* ---- elevation: nothing at rest has a shadow; only what floats does */
-  --shadow-border: 0 0 0 1px rgb(255 255 255 / 0.08); /* the one white ring a floating surface wears on dark */
-  --shadow-pop: 0 0 0 1px rgb(255 255 255 / 0.08), 0 12px 32px -12px rgb(0 0 0 / 0.72); /* menus, popovers, toasts */
-  --shadow-modal: 0 0 0 1px rgb(255 255 255 / 0.08), 0 24px 80px -20px rgb(0 0 0 / 0.8); /* dialogs, sheets */
-  /* Retired resting shadows and glows: kept as names so old call sites render flat. */
-  --shadow-ring: none;
-  --shadow-rest: none;
-  --shadow-raise: none;
-  --shadow-lift: var(--shadow-pop);
-  --shadow-float: var(--shadow-pop);
-  --glow-neon: none;
-  --glow-neon-hi: none;
-  --glow-zap: none;
-  --glow-focus: none;
-  --card-shadow: rgb(0 0 0 / 0.55); /* the card's own contact shadow (card3d.css) */
-  --overlay: rgb(5 4 3 / 0.72); /* dialog backdrop, no blur */
-  --image-outline: rgb(255 255 255 / 0.1); /* MIFB image outline on thumbnails, dark */
-  /* The chrome foil retired: a flat fill wherever an old rule still paints --holo. */
-  --holo: linear-gradient(var(--color-ink), var(--color-ink));
-  --holo-flat: var(--color-ink);
-  --sheen: linear-gradient(transparent, transparent);
-
-  /* ---- layout and density (.taste-skill/density/rules.md R3 and R6)
-   * The content column is min(100% - 2 x gutter, --column) at every width: main's padding and the top bar's inner
-   * row both use max(gutter, (100% - --sbw - --column) / 2), so they share one left and one right edge. */
-  --column: 1600px; /* the widest the column gets (was 1152px) */
-  --page-gutter: 16px; /* side padding of the page; 24px from 768px, 32px from 1280px */
-  --main-pad: var(--page-gutter);
-  --sbw: 0px; /* main's scrollbar width, measured by AppShell (0 with overlay scrollbars) */
-  --gap-page: 16px; /* page header to the body */
-  --gap-section: 16px; /* between sections and panels */
-  --gap-head: 8px; /* a section head to its list */
-  --gap-grid: 12px; /* between tiles in an auto-fill grid */
-  --pad-panel: 12px; /* panel padding on phones; 16px from 768px */
-  --row-h: 44px; /* a list or table row on touch; 40px under a fine pointer */
-  --pagehead-h: 56px; /* the page header row at desktop: title 24 + meta 14 + actions on one row */
-  --tile-min: 150px; /* the smallest tile track in an auto-fill grid on phones; 176px from 768px */
-  --tile-min-design: 150px; /* a design tile track (the card art stays legible at 150px) */
-  --actionbar-h: 64px; /* the phone sticky action bar (a 44px control + 2 x 10px) */
-  --topbar-h: 48px;
-  --tabbar-h: 58px;
-  --tabbar-side-h: 45px; /* the tab bar held sideways (a 44px row and its rule); 0 from 740px, where it steps aside */
-
-  /* ---- controls: visible size and the hit area every control reaches (::after) */
-  --hit: 44px; /* 40px under a fine pointer (dense desktop UI) */
-  --control-h: 44px; /* inputs, selects, search, chips, segmented tracks, menu items; 40px under a fine pointer */
-  --btn-h: 36px; /* md pill (the direction's 36px primary) */
-  --btn-h-sm: 32px;
-  --btn-h-lg: 44px; /* the launch commit */
-
-  /* ---- stacking */
-  --z-nav: 30; /* top bar, tab bar */
-  --z-progress: 40; /* route progress line */
-  --z-overlay: 50; /* backdrops, dialogs, sheets, popovers, menus */
-  --z-stage: 60; /* the 3D and Inspect viewers */
-  --z-toast: 70;
-  --z-skip: 80;
-
-  /* ---- the 3D viewer (styles/screens/viewer.css reads these) */
-  --v3d-ink: #f2f1ee;
-  --v3d-muted: #b8b0a3;
-  --v3d-accent: #f2f1ee;
-  --v3d-control: rgb(242 241 238 / 0.08);
-  --v3d-control-border: #756d62;
-  --v3d-control-hover: #f2f1ee;
-
-  /* Avatar stops: pale identity tints (a dark initial reads 10:1 or better on each). */
-  --avatar-1: #f3d27a;
-  --avatar-2: #e9b48f;
-  --avatar-3: #c9cf9a;
-  --avatar-4: #d8c3a0;
-  --avatar-5: #b9c6c9;
-
-  /* Legacy type names (sheets still read them). */
-  --type-min: 0.75rem;
-  --type-page-title: 24px;
-  --type-page-title-sm: 20px;
-  --type-display: 24px;
-
-  /* Legacy duration aliases. */
+  --t-rm: 200ms; /* reduced motion: the one fade a visitor-triggered change keeps */
+  --stagger: 24ms;
   --dur-press: var(--t-press);
   --dur-fast: var(--t-fast);
   --dur-base: var(--t-base);
   --dur-slow: var(--t-slow);
   --dur-celebrate: 1100ms;
-}
-@media (min-width: 768px) {
-  :root {
-    --page-gutter: 24px;
-    --pad-panel: 16px;
-    --tile-min: 176px;
-  }
-}
-@media (min-width: 1280px) {
-  :root {
-    --page-gutter: 32px;
-  }
+
+  /* ---- shell geometry (MintDex) */
+  --rail-w: 224px;
+  --mhead-h: 56px; /* the phone header; 0 when it scrolls away (phones held sideways) */
+  --tabbar-h: 64px;
+  --status-h: 28px; /* the status strip under 1024px: one 13/20 line plus 4px above and below */
+  --ticker-h: 34px; /* 44px under 1024px */
+  --main-pad: 24px;
+  --page-gutter: 16px;
+  --topbar-h: var(--mhead-h); /* release-candidate name for the phone header height */
+  --column: 1600px; /* the widest a page column gets */
+  --sbw: 0px; /* main's scrollbar width (kept components read it) */
+  --gap-page: 24px; /* page header to the body */
+  --gap-section: 24px; /* between sections and panels */
+  --gap-head: 8px; /* a section head to its list */
+  --gap-grid: 16px; /* between tiles in a grid */
+  --pad-panel: 20px; /* plinth padding (16px on short screens and phones) */
+  --tile-min: 150px; /* the smallest tile track in an auto-fill grid */
+  --tile-min-design: 150px;
+  --actionbar-h: 64px; /* a phone sticky action bar (kept components) */
+
+  /* ---- controls: visible size and the hit area every control reaches */
+  --hit: 44px; /* 40px under a fine pointer in dense desktop UI */
+  --control-h: 44px;
+  --btn-h: 44px;
+  --btn-h-sm: 32px;
+  --btn-h-lg: 48px;
+  --row-h: 44px;
+
+  /* ---- stacking */
+  --z-nav: 30;
+  --z-progress: 40;
+  --z-overlay: 50;
+  --z-stage: 60;
+  --z-toast: 70;
+  --z-skip: 80;
+
+  /* ---- the 3D viewer's night stage (light ink on its own dark backdrop) */
+  --v3d-ink: var(--color-ink);
+  --v3d-muted: var(--color-slate);
+  --v3d-accent: var(--color-neon);
+  --v3d-control: rgb(var(--rgb-ink) / 0.08);
+  --v3d-control-border: var(--color-control-border);
+  --v3d-control-hover: var(--color-zap);
+
+  /* ---- the confetti and exhibition light (arcade.ts, Home's aura and bokeh read these) */
+  --light-1: #e8c478; /* lit gold */
+  --light-2: #d4a64a; /* antique gold */
+  --light-3: #f3ead6; /* ivory */
+  --light-4: #9e2b25; /* card red */
+  --light-5: #b8743a; /* bronze */
+
+  /* Avatar stops: pale warm tints (a dark initial reads 10:1 or better on each). */
+  --avatar-1: #f3d27a;
+  --avatar-2: #e9b48f;
+  --avatar-3: #d8cf9a;
+  --avatar-4: #d8c3a0;
+  --avatar-5: #e4c9b0;
+
+  /* Legacy type names (older sheets read them). */
+  --type-min: 0.75rem;
+  --type-page-title: clamp(26px, 2.5vw, 34px);
+  --type-page-title-sm: 25px;
+  --type-display: clamp(36px, 6.4vh, 54px);
 }
 @media (pointer: fine) {
   :root {
     --hit: 40px;
-    --control-h: 40px;
-    --row-h: 40px;
   }
 }
-/* Phones held sideways: the action bar is a 44px control with 4px above and below; 740px and wider, the five links
- * move into the top bar and the tab bar steps aside (shell.css). */
+@media (max-width: 1023.98px) {
+  :root {
+    --ticker-h: 44px;
+    --main-pad: 16px;
+    --pad-panel: 16px;
+  }
+}
+@media (max-width: 1023.98px) and (display-mode: standalone) {
+  :root {
+    --mhead-h: calc(56px + env(safe-area-inset-top)); /* installed: the header clears the status bar */
+  }
+}
 @media (max-width: 1023.98px) and (max-height: 500px) {
   :root {
-    --actionbar-h: 52px;
+    --mhead-h: 0px; /* held sideways: the header scrolls away */
+    --tabbar-h: 44px;
   }
 }
-@media (min-width: 740px) and (max-width: 1023.98px) and (max-height: 500px) {
+@media (min-width: 1024px) and (max-height: 820px) {
   :root {
-    --tabbar-h: 0px;
-    --tabbar-side-h: 0px;
+    --main-pad: 16px;
+    --pad-panel: 16px;
   }
 }
 
-/* The flat ground everywhere: no gradients, no glows, no paper. */
 @layer base {
   html,
   body {
-    background: var(--color-ground);
+    background: var(--color-wall);
     color: var(--color-ink);
   }
   html {
-    scrollbar-color: var(--color-hairline) var(--color-ground);
+    scrollbar-color: var(--color-hairline) var(--color-wall);
   }
   ::selection {
-    background: var(--color-ink);
-    color: var(--color-on-cta);
+    background: var(--color-neon);
+    color: var(--color-neon-ink);
   }
   input,
   textarea {
-    caret-color: var(--color-ink);
+    caret-color: var(--color-neon);
   }
 }

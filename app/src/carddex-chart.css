@@ -1,0 +1,26 @@
+/* Candles keep their values still; only new observations receive a brief opacity cue. */
+.cdx-candles__plot { min-height: 180px; }
+.cdx-candles__svg { border-radius: 5px; outline-offset: 3px; }
+.cdx-candles__svg:focus-visible { outline: 2px solid var(--color-neon); }
+.cdx-candles__tooltip {
+  position: absolute;
+  top: 0;
+  left: 4px;
+  z-index: 1;
+  pointer-events: none;
+  width: min(294px, calc(100% - 8px));
+  padding: 7px 10px 8px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 7px;
+  color: var(--color-ink);
+  background: var(--color-sheet);
+  box-shadow: var(--shadow-raise);
+}
+.cdx-candles__time { display: block; margin-bottom: 4px; color: var(--color-slate); font-size: var(--type-min); line-height: 1.2; }
+.cdx-candles__values { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.cdx-candles__values span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.cdx-candles__values small { font-size: var(--type-min); line-height: 1; color: var(--color-slate); }
+.cdx-candles__values b { font-size: var(--type-min); font-weight: 500; line-height: 1; }
+.cdx-candles__new { animation: cdx-candle-observed 300ms ease-out both; }
+@keyframes cdx-candle-observed { from { opacity: .35; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .cdx-candles__new { animation: none; } }

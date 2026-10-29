@@ -12,25 +12,25 @@ export function renderErrorPage(): string {
     <title>This page did not load | Launch a Card</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
-    <meta name="theme-color" content="#0d0c0b" />
+    <meta name="theme-color" content="#14110d" />
     <style>
       *, *::before, *::after { box-sizing: border-box; }
       html { color-scheme: dark; -webkit-font-smoothing: antialiased; }
-      body { display: grid; place-items: center; min-height: 100dvh; margin: 0; padding: 24px 16px; background: #0d0c0b; color: #f2f1ee; font: 14px/20px "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+      body { display: grid; place-items: center; min-height: 100dvh; margin: 0; padding: 24px 16px; background: #14110d; color: #f3ead6; font: 14px/20px "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
       main { width: 100%; max-width: 360px; text-align: center; overflow-wrap: anywhere; }
       h1 { margin: 0 0 4px; font-size: 16px; line-height: 24px; font-weight: 600; text-wrap: balance; }
-      p { margin: 0 0 16px; color: #b8b0a3; text-wrap: pretty; }
+      p { margin: 0 0 16px; color: #bdae92; text-wrap: pretty; }
       .actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px 20px; }
       button, a { position: relative; font: inherit; font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-      button { height: 36px; padding: 0 16px; border: 0; border-radius: 999px; background: #f2f1ee; color: #0d0c0b; transition: background-color 120ms ease, transform 140ms cubic-bezier(.22,1,.36,1); }
+      button { height: 36px; padding: 0 16px; border: 0; border-radius: 999px; background: #d4a64a; color: #14110d; transition: background-color 120ms ease, transform 140ms cubic-bezier(.22,1,.36,1); }
       button::after { content: ""; position: absolute; inset: -4px; border-radius: inherit; }
-      a { color: #f2f1ee; font-weight: 500; text-decoration: underline 1px #756d62; text-underline-offset: 3px; transition: text-decoration-color 120ms ease; }
+      a { color: #f3ead6; font-weight: 500; text-decoration: underline 1px #8a7859; text-underline-offset: 3px; transition: text-decoration-color 120ms ease; }
       a::before { content: ""; position: absolute; inset: -12px -8px; }
       button:active { transform: scale(.96); }
-      :focus-visible { outline: 2px solid #f2f1ee; outline-offset: 2px; }
+      :focus-visible { outline: 2px solid #f0d48c; outline-offset: 2px; }
       @media (hover: hover) and (pointer: fine) {
-        button:hover { background: #ffffff; }
-        a:hover { text-decoration-color: #f2f1ee; }
+        button:hover { background: #e6c06e; }
+        a:hover { text-decoration-color: #f0d48c; }
       }
       @media (prefers-reduced-motion: reduce) { button { transition: none; } button:active { transform: none; } }
     </style>

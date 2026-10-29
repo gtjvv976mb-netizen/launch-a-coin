@@ -313,9 +313,8 @@ const feeRows = (liveOpen: boolean): Array<{ label: string; value: string }> => 
   : [{ label: "Coin trading", value: "Review the fee and price impact shown before confirming a trade." }];
 
 /**
- * The guide, one page (density R4): the three steps, then costs and risks beside Calm motion, then one primary:
- * Done, or (signed out) Try the demo beside Not now. Desktop dialogs show the steps as three wells in a row; phone
- * sheets as a numbered list. Linkable with ?guide=1.
+ * The guide, one page (MintDex's "How MintDex works"): the three numbered steps, the mode line and terms link, the
+ * costs, Calm motion, then one primary: Done, or (signed out) Try the demo. Linkable with ?guide=1.
  */
 function GuideDialog({
   open,
@@ -338,7 +337,9 @@ function GuideDialog({
     window.setTimeout(onEnter, 260);
   };
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="How Launch a Card works" width={720}>
+    <Modal open={open} onOpenChange={onOpenChange} title="How Launch a Card works" width={560}>
+      {/* MintDex's guide: the three numbered steps, a rule, the mode line with the terms link, the costs, then one
+          full-width primary. Calm motion sits just above it (phones signed out have no other switch). */}
       <div className="cdx-guide">
         <ol className="cdx-guide__steps" role="list">
           {STEPS.map((s, i) => (
@@ -352,39 +353,31 @@ function GuideDialog({
           ))}
         </ol>
         <div className="cdx-guide__more">
-          <div className="cdx-overlay-copy">
-            <h3>Costs and risks</h3>
-            {MODE_COPY.guideNote ? <p>{MODE_COPY.guideNote}</p> : null}
-            <dl className="cdx-guide__facts">
-              {FEE_ROWS.map((r) => (
-                <div key={r.label}>
-                  <dt>{r.label}</dt>
-                  <dd>{r.value}</dd>
-                </div>
-              ))}
-            </dl>
+          <div className="cdx-guide__mode">
+            <p>{MODE_COPY.guideNote || "Costs and risks"}</p>
             <TextLink to="/legal" hash="fees" onClick={close}>
-              Fees, terms and risks
+              Terms, privacy and risks
             </TextLink>
           </div>
-          <div className="cdx-overlay-copy">
-            <h3>Make it yours</h3>
-            <div className="cdx-guide__calm">
-              <p>Calm motion holds the cards still. Buttons and menus still respond.</p>
-              <CalmSwitch size="md" />
-            </div>
-          </div>
+          <dl className="cdx-guide__facts">
+            {FEE_ROWS.map((r) => (
+              <div key={r.label}>
+                <dt>{r.label}</dt>
+                <dd>{r.value}</dd>
+              </div>
+            ))}
+          </dl>
+          <CalmSwitch size="md" className="cdx-guide__calm" />
         </div>
-        <div className="cdx-overlay-actions mdx-sheet-foot">
+        <div className="cdx-guide__actions mdx-sheet-foot">
           {me ? (
-            <Button onClick={close}>Done</Button>
+            <Button block onClick={close}>
+              Done
+            </Button>
           ) : (
-            <>
-              <Button variant="outline" onClick={close}>
-                Not now
-              </Button>
-              <Button onClick={invite}>{IS_SIM ? "Try the demo" : CONNECT_COPY.connect}</Button>
-            </>
+            <Button block onClick={invite}>
+              {IS_SIM ? "Try the demo" : CONNECT_COPY.connect}
+            </Button>
           )}
         </div>
       </div>

@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
   type ComponentProps,
+  type CSSProperties,
   type FormEvent,
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
@@ -18,7 +19,7 @@ import {
 import { chainCoinList } from "../../lib/chain/data";
 import { claimFaucet, listCoins, signOut } from "../../lib/mintdex/api";
 import { IS_DEVNET, IS_SIM } from "../../lib/mintdex/mode";
-import { ChainHeaderAccount } from "../chain/ConnectWallet";
+import { ChainHeaderAccount, ChainRailWallet } from "../chain/ConnectWallet";
 import { FAUCET_AMOUNT, FAUCET_BELOW } from "../../lib/mintdex/constants";
 import { FLOW, MODE_COPY } from "../../lib/mintdex/copy";
 import { sol, untilText } from "../../lib/mintdex/format";
@@ -29,17 +30,17 @@ import { setMe } from "./hooks";
 import { useMe, useSessionUi } from "./session";
 import { Sheet } from "./sheet";
 import { afterLoadIdle } from "./opened-once";
+import { Ticker } from "./Ticker";
+// The live launch sheet stays here (lazy chrome below) so the global CSS keeps its order.
+import "../../carddex-live.css";
 import { useLiveRecoveryOpen } from "../carddex/live/readiness";
 import { ConfirmDialog } from "./confirm";
-import { ModeBadge } from "./trust";
 import {
   Avatar,
   Button,
   CalmSwitch,
   GenIcon,
   Hallmark,
-  Icon,
-  IconButton,
   isDialogOpen,
   isTypingTarget,
   Num,
@@ -168,12 +169,12 @@ function unreadOf(me: Me) {
 
 // ---------------------------------------------------------------- rail pieces
 
-/** The product's mark and name on the column's left edge (the name folds away on narrow phones; the link keeps it). */
-function Brand() {
+/** The rail's logo row (MintDex: mark and wordmark, 32px tall): Launch a Card's own mark and name. */
+function Lockup() {
   return (
-    <Link to="/" aria-label="Launch a Card home" className="cdx-brand">
-      <Hallmark size={24} />
-      <span className="cdx-brand__name" aria-hidden>
+    <Link to="/" aria-label="Launch a Card home" className="mdx-lockup">
+      <Hallmark size={32} />
+      <span aria-hidden className="mdx-lockup__name">
         Launch a Card
       </span>
     </Link>
@@ -289,8 +290,23 @@ function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> 
   const activeId = open && active >= 0 && matches[active] ? `${listId}-${matches[active].id}` : undefined;
 
   return (
-    <form onSubmit={submit} role="search" className="cdx-search">
-      <Icon name="search" className="cdx-search__glyph" />
+    <form onSubmit={submit} role="search" className="relative w-full">
+      <svg
+        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        aria-hidden
+        fill="none"
+      >
+        <circle cx="7" cy="7" r="4.75" stroke="currentColor" strokeWidth="1.5" />
+        <path
+          d="m10.5 10.5 3.5 3.5"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </svg>
       <label htmlFor="rail-search" className="sr-only">
         Search coins
       </label>
@@ -323,12 +339,12 @@ function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> 
         autoComplete="off"
         spellCheck={false}
         maxLength={40}
-        className="cdx-search__input"
+        className="mdx-input h-10 rounded-pill pl-9 pr-9 text-[14px]"
       />
       {!focused && !q && (
         <kbd
           aria-hidden
-          className="cdx-search__key num"
+          className="num pointer-events-none absolute right-2.5 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center rounded-chip bg-tint text-[12px] text-slate"
         >
           /
         </kbd>
@@ -338,7 +354,7 @@ function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> 
         role="listbox"
         aria-label="Matching coins"
         hidden={!open}
-        className="mdx-menu mdx-pop cdx-search__list"
+        className="mdx-menu mdx-pop absolute inset-x-0 top-[calc(100%_+_6px)] z-50"
       >
         {open
           ? matches.map((c, i) => (
@@ -352,11 +368,11 @@ function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> 
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => go(c)}
                 onMouseEnter={() => setActive(i)}
-                className="mdx-menu-item mdx-suggest cursor-pointer gap-3"
+                className="mdx-menu-item mdx-suggest cursor-pointer gap-2.5"
               >
                 <Thumb src={c.image} size={24} />
-                <span className="min-w-0 flex-1 truncate text-body text-ink">{c.name}</span>
-                <span className="flex-none text-caption text-slate">${c.ticker}</span>
+                <span className="min-w-0 flex-1 truncate text-[14px] text-ink">{c.name}</span>
+                <span className="flex-none text-[12px] text-slate">${c.ticker}</span>
               </li>
             ))
           : null}
@@ -366,30 +382,44 @@ function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> 
 }
 
 /**
- * The desktop nav in the top bar (1024px and up): five text links, 14px slate, the current one in ink. Coin pages
- * light Discover. No pill, no icon tile, no hue (true-black-flat: brightness marks the active item).
+ * Six tabs with one sliding sheet pill under the active row; the active tab's icon tile wears the foil
+ * (each row catches it at its own angle, --row). Coin pages light Discover.
  */
-function TopNav({ pending }: { pending: boolean }) {
+function RailNav({ pending }: { pending: boolean }) {
   const active = useActiveTab();
   const unread = unreadOf(useMe());
   return (
-    <nav aria-label="Main" className="cdx-topnav">
+    <nav aria-label="Main" className="relative flex flex-col">
       {TABS.map((t, i) => (
         <Link
           key={t.to}
           to={t.to}
           activeOptions={{ exact: !!t.exact }}
-          className="cdx-topnav__link"
+          className="mdx-tab"
           data-active={i === active}
           // The tab the page belongs to without being its route (coin pages light Discover): the router
           // marks its own route aria-current="page", which wins over this (P1-16).
           aria-current={i === active ? "location" : undefined}
           data-pending={(pending && i === active) || undefined}
+          style={{ "--row": i } as CSSProperties}
         >
+          <span className="mdx-tab__tile">
+            {/* The active tile's foil drifts slowly (L11): an oversized sheet moved by transform. */}
+            <span aria-hidden className="mdx-tab__foil">
+              <i />
+            </span>
+            <GenIcon name={t.icon} size={18} />
+          </span>
           {t.label}
           {t.to === "/portfolio" && unread > 0 ? <UnreadBadge count={unread} /> : null}
         </Link>
       ))}
+      {/* One pill for the whole nav: it springs to the active row (z-index keeps it under the links). */}
+      <span
+        aria-hidden
+        className="mdx-rail-pill"
+        style={{ "--i": Math.max(0, active), opacity: active < 0 ? 0 : 1 } as CSSProperties}
+      />
     </nav>
   );
 }
@@ -486,9 +516,9 @@ export function StartOverDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="Start over with a new handle?"
+      tone="danger"
       confirmLabel={`Leave @${handle}`}
       cancelLabel="Keep playing"
-      tone="danger"
       pending={leaving}
       pendingLabel="Leaving..."
       onConfirm={async () => {
@@ -509,8 +539,7 @@ const WalletMenu = lazy(loadWalletMenu);
 /** The pill shows "99.88 SOL": its name keeps those words together (WCAG 2.5.3) and says the kind after them. */
 const BALANCE_NOTE = MODE_COPY.walletUnit === "SOL" ? "" : `, ${MODE_COPY.walletUnit.replace(/ SOL$/, "")} balance`;
 
-/** The signed-in wallet's face in the top bar: avatar and balance in one 36px pill. The Radix menu around it
- * (wallet-menu.tsx) is a lazy chunk. */
+/** The signed-in rail wallet's face. The Radix menu around it (wallet-menu.tsx) is a lazy chunk. */
 export function WalletButton({ me, ...rest }: { me: NonNullable<Me> } & ComponentProps<"button">) {
   return (
     <button
@@ -519,35 +548,105 @@ export function WalletButton({ me, ...rest }: { me: NonNullable<Me> } & Componen
       // Where focus lands when "Try the demo" leaves with the sign-in it opened (focus.ts focusNear).
       data-focus-home=""
       {...rest}
-      className="cdx-wallet"
+      className="flex h-[52px] items-center gap-3 rounded-pop bg-sheet px-3 text-left shadow-raise transition-[box-shadow,translate] duration-(--t-base) ease-room hover:-translate-y-px hover:shadow-lift data-[state=open]:shadow-lift"
     >
-      <Avatar handle={me.handle} size={24} />
-      <span className="cdx-wallet__balance">
-        <Num size="sm" watch={me.balance} tick>
-          {sol(me.balance, 2)}
-        </Num>
-        <span className="mdx-unit"> SOL</span>
+      <Avatar handle={me.handle} />
+      <span className="min-w-0">
+        <span className="block truncate text-[13px] leading-[1.3] text-slate">
+          @{me.handle}
+        </span>
+        <span className="block leading-[1.2]">
+          <Num size="md" watch={me.balance} tick>
+            {sol(me.balance, 2)}
+          </Num>
+          <span className="text-[13px] font-medium text-slate"> SOL</span>
+        </span>
       </span>
     </button>
   );
 }
 
-/** Desktop account control: "Try the demo" (secondary) or the wallet menu. */
-function AccountControl() {
+function WalletBlock() {
   const me = useMe();
   const { openEnter } = useSessionUi();
+
   if (!me) {
     return (
-      <Button size="sm" variant="outline" onClick={() => openEnter()}>
-        Try the demo
-      </Button>
+      <div className="flex flex-col gap-3">
+        <Button block onClick={() => openEnter()}>
+          Try the demo
+        </Button>
+        {MODE_COPY.railStart ? (
+          <p className="text-[12px] leading-[1.3] text-slate">Test funds. No wallet needed.</p>
+        ) : null}
+      </div>
     );
   }
+
   // Server HTML keeps its menu markup while the chunk loads; a fresh sign-in shows the plain button meanwhile.
   return (
     <Suspense fallback={<WalletButton me={me} />}>
       <WalletMenu me={me} />
     </Suspense>
+  );
+}
+
+function Rail({
+  searchRef,
+  pending,
+  liveLaunch = false,
+}: {
+  searchRef: RefObject<HTMLInputElement | null>;
+  pending: boolean;
+  liveLaunch?: boolean;
+}) {
+  const me = useMe();
+  const { openGuide } = useSessionUi();
+  return (
+    <aside className="mdx-rail mdx-scroll hidden w-[224px] flex-none flex-col overflow-y-auto overflow-x-hidden px-4 pb-4 pt-5 lg:flex">
+      {/* The test-mode pill sits inline beside the wordmark (backlog P0-5), so it adds no rail row. */}
+      <div className="flex items-center gap-1">
+        <Lockup />
+      </div>
+      <div className="mt-5">
+        <SearchBox inputRef={searchRef} />
+      </div>
+      <div className="mt-5">
+        <RailNav pending={pending} />
+      </div>
+      <div className="mt-auto flex flex-col gap-3 pt-6">
+        {/* Two quiet links, each at least 24px tall (WCAG 2.5.8 target size). */}
+        <div className="flex flex-col items-start gap-0.5">
+          {liveLaunch ? <Suspense fallback={null}><LiveLaunchGuide /></Suspense> : <button
+            type="button"
+            onClick={openGuide}
+            className="mdx-link inline-flex min-h-6 items-center text-[14px]"
+          >
+            How Launch a Card works
+          </button>}
+          <Link
+            to="/legal"
+            className="mdx-link inline-flex min-h-6 items-center text-[14px] font-normal text-slate"
+          >
+            Terms, privacy and risks
+          </Link>
+        </div>
+        {liveLaunch ? (
+          <Suspense fallback={null}>
+            <LiveWalletButton />
+          </Suspense>
+        ) : IS_SIM ? (
+          <WalletBlock />
+        ) : (
+          <ChainRailWallet />
+        )}
+        {!liveLaunch && me && MODE_COPY.walletNote ? (
+          <p className="text-[12px] leading-[1.3] text-slate">{MODE_COPY.walletNote}</p>
+        ) : null}
+        {/* Under the wallet block: the site-wide Calm motion switch (10.2). */}
+        <CalmSwitch />
+      </div>
+    </aside>
   );
 }
 
@@ -559,6 +658,15 @@ function AccountControl() {
  */
 function afterSheet(fn: () => void) {
   setTimeout(fn, 260);
+}
+
+function SearchGlyph({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" aria-hidden fill="none">
+      <circle cx="7" cy="7" r="4.75" stroke="currentColor" strokeWidth="1.5" />
+      <path d="m10.5 10.5 3.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
 }
 
 /**
@@ -574,8 +682,8 @@ function SearchButton() {
         to="/discover"
         search={{ focus: 1 }}
         aria-label="Search coins"
-        title="Search coins"
-        className="mdx-btn mdx-btn--ghost mdx-btn--icon cdx-topbar__searchbtn"
+        data-search-btn=""
+        className="grid h-11 w-11 place-items-center rounded-pill text-ink transition-colors duration-(--t-fast) ease-room hover:bg-track"
         onClick={(e) => {
           const field = document.getElementById("token-search") ?? document.getElementById("discover-search");
           if (field instanceof HTMLInputElement && field.offsetParent !== null) {
@@ -586,7 +694,7 @@ function SearchButton() {
           proxy.current?.focus({ preventScroll: true });
         }}
       >
-        <Icon name="search" />
+        <SearchGlyph />
       </Link>
       <input
         ref={proxy}
@@ -603,12 +711,27 @@ function SearchButton() {
   );
 }
 
+function GuideGlyph() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden fill="none">
+      <circle cx="10" cy="10" r="7.75" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M7.9 7.9a2.15 2.15 0 1 1 3.02 1.97c-.55.25-.92.72-.92 1.33v.3"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <circle cx="10" cy="13.9" r="0.95" fill="currentColor" />
+    </svg>
+  );
+}
+
 /**
- * The Menu sheet (phones, signed in; SPEC 3.3): one list, no tabs. The account card (handle and balance), Portfolio
- * and the faucet, How Launch a Card works, Terms, privacy and risks, the Calm motion switch, then Start over last.
- * On devnet this is where wallet connect, disconnect, the address copy and the network badge go.
+ * The account sheet (P1-6): handle and wallet, then Portfolio, the faucet with its timer, How Launch a Card works,
+ * Terms, privacy and risks, and Start over. On devnet this is where wallet connect, disconnect, the address
+ * copy and the network badge go.
  */
-function MenuSheet({
+function AccountSheet({
   me,
   open,
   onOpenChange,
@@ -624,35 +747,45 @@ function MenuSheet({
   const unread = unreadOf(me);
   return (
     <>
-      <Sheet open={open} onOpenChange={onOpenChange} title="Menu">
-        <div className="cdx-menu-account">
+      <Sheet open={open} onOpenChange={onOpenChange} title="Your account">
+        <div className="flex items-center gap-3 rounded-pop bg-sheet p-3 shadow-raise">
           <Avatar handle={me.handle} size={40} />
           <div className="min-w-0">
-            <p className="truncate text-body text-slate">@{me.handle}</p>
-            <p>
+            <p className="truncate text-[14px] leading-[1.3] text-slate">@{me.handle}</p>
+            <p className="leading-[1.2]">
               <Num size="lg" watch={me.balance} tick>
                 {sol(me.balance, 2)}
               </Num>
-              <span className="mdx-unit"> SOL</span>
+              <span className="text-[14px] font-medium text-slate"> SOL</span>
             </p>
           </div>
-          {MODE_COPY.walletNote ? <span className="ml-auto self-start text-caption text-slate">{MODE_COPY.walletNote}</span> : null}
+          {MODE_COPY.walletNote ? (
+            <span className="ml-auto self-start whitespace-nowrap text-[12px] leading-[1.3] text-slate">
+              {MODE_COPY.walletNote}
+            </span>
+          ) : null}
         </div>
-        <nav aria-label="Menu" className="cdx-menu-list">
-          <Link to="/portfolio" className="mdx-menu-item gap-2" onClick={close}>
+        {/* Devnet: wallet connect and disconnect, the address copy and the network badge go here. */}
+        <nav aria-label="Account" className="-mx-3 mt-3 flex flex-col">
+          <Link to="/portfolio" className="mdx-menu-item gap-2 text-[15px]" onClick={close}>
             Portfolio
             {unread > 0 ? (
-              <span className="text-body text-slate">
+              <span className="text-[13px] text-slate">
                 <span className="num">{unread}</span> new
               </span>
             ) : null}
           </Link>
-          <button type="button" className="mdx-menu-item" onClick={faucet} aria-disabled={!me.canFaucet || busy || undefined} disabled={!me.canFaucet || busy}>
+          <button
+            type="button"
+            className="mdx-menu-item text-[15px]"
+            onClick={faucet}
+            disabled={!me.canFaucet || busy}
+          >
             {busy ? "Claiming..." : faucetLabelOf(me)}
           </button>
           <button
             type="button"
-            className="mdx-menu-item"
+            className="mdx-menu-item text-[15px]"
             onClick={() => {
               close();
               afterSheet(openGuide);
@@ -660,13 +793,12 @@ function MenuSheet({
           >
             How Launch a Card works
           </button>
-          <Link to="/legal" className="mdx-menu-item" onClick={close}>
+          <Link to="/legal" className="mdx-menu-item text-[15px]" onClick={close}>
             Terms, privacy and risks
           </Link>
-          <CalmSwitch size="md" className="cdx-menu-calm" />
           <button
             type="button"
-            className="mdx-menu-item cdx-menu-danger"
+            className="mdx-menu-item text-[15px] text-slate"
             onClick={() => {
               close();
               afterSheet(() => setConfirm(true));
@@ -675,124 +807,86 @@ function MenuSheet({
             Start over
           </button>
         </nav>
+        <CalmSwitch size="md" className="mt-2 border-t border-rule pt-3" />
       </Sheet>
-      <StartOverDialog handle={me.handle} open={confirm} onOpenChange={setConfirm} leaving={leaving} leave={leave} />
+      <StartOverDialog
+        handle={me.handle}
+        open={confirm}
+        onOpenChange={setConfirm}
+        leaving={leaving}
+        leave={leave}
+      />
     </>
   );
 }
 
 /**
- * The top bar, one 48px row on the page ground at every width (SHELL DECISION): the mark and name on the column's
- * left edge, the one demo signal (the Demo pill, which opens the explainer), the five nav links from 1024px, then
- * search (a field from 1024px, an icon below), help, Calm motion (from 1024px; phones have it in the footer and
- * the Menu sheet) and the demo or wallet control. It takes a 1px rule once the page scrolls under it.
+ * Phone header (P1-6): the Launch a Card mark and the test-mode pill, then one-tap search and either the wallet button
+ * (balance and avatar: opens the account sheet, with a dot for unread notifications) or the guide icon and
+ * Enter Launch a Card. 44px targets; the side insets clear a notch held sideways.
  */
-function TopBar({
-  searchRef,
-  pending,
-  liveLaunch = false,
-}: {
-  searchRef: RefObject<HTMLInputElement | null>;
-  pending: boolean;
-  liveLaunch?: boolean;
-}) {
+function MobileHeader({ liveLaunch = false }: { liveLaunch?: boolean }) {
   const me = useMe();
   const { openEnter, openGuide } = useSessionUi();
-  const [menu, setMenu] = useState(false);
+  const [account, setAccount] = useState(false);
   const unread = unreadOf(me);
-  // Discover has its own search field under its title: the bar hands over to it (the icon and "/" focus that
-  // field), so a desktop screen never shows two search fields (browse-13, chrome-13).
-  const pageSearch = useRouterState({ select: (s) => s.location.pathname === "/discover" });
   return (
-    <header className="cdx-topbar" data-topbar>
-      <div className="cdx-topbar__inner">
-        <div className="cdx-topbar__lead">
-          <Brand />
-          {liveLaunch ? null : <ModeBadge className="cdx-demo-pill" />}
-        </div>
-        <TopNav pending={pending} />
-        <div className="cdx-topbar__tools" data-page-search={pageSearch || undefined}>
-          <div className="cdx-topbar__search">
-            <SearchBox inputRef={searchRef} />
-          </div>
-          <SearchButton />
-          {liveLaunch ? (
-            <Suspense fallback={null}>
-              <LiveLaunchGuide compact />
-            </Suspense>
-          ) : (
-            <IconButton icon="help" label="How Launch a Card works" onClick={openGuide} />
-          )}
-          <CalmSwitch compact className="cdx-topbar__calm" />
-          {liveLaunch ? (
-            <Suspense fallback={null}>
-              <LiveWalletButton compact quiet />
-            </Suspense>
-          ) : !IS_SIM ? (
-            <ChainHeaderAccount />
-          ) : me ? (
-            <>
-              <div className="cdx-only-desk">
-                <AccountControl />
-              </div>
-              <button
-                type="button"
-                onClick={() => setMenu(true)}
-                aria-haspopup="dialog"
-                aria-label={`Menu, @${me.handle}, ${sol(me.balance, 2)} SOL${BALANCE_NOTE}${unread ? `, ${unread} new` : ""}`}
-                data-focus-home=""
-                className="cdx-wallet cdx-only-phone"
-              >
-                <span className="relative">
-                  <Avatar handle={me.handle} size={24} />
-                  {unread > 0 ? <span aria-hidden className="mdx-badge mdx-badge--dot -right-0.5 -top-0.5" /> : null}
-                </span>
-                <span className="cdx-wallet__balance">
-                  <Num size="sm" watch={me.balance} tick>
-                    {sol(me.balance, 2)}
-                  </Num>
-                  <span className="mdx-unit"> SOL</span>
-                </span>
-              </button>
-            </>
-          ) : (
-            <Button size="sm" variant="outline" onClick={() => openEnter()}>
+    <header className="mdx-mhead sticky top-0 z-30 flex h-14 flex-none items-center gap-3 bg-wall px-4 lg:hidden">
+      <Link to="/" aria-label="Launch a Card home" className="-ml-2 grid h-11 w-11 place-items-center">
+        <Hallmark size={28} />
+      </Link>
+      <div className="-mr-1.5 ml-auto flex items-center gap-1">
+        <SearchButton />
+        {liveLaunch ? (
+          <Suspense fallback={null}>
+            <LiveLaunchGuide compact />
+            <LiveWalletButton compact />
+          </Suspense>
+        ) : !IS_SIM ? (
+          <ChainHeaderAccount />
+        ) : me ? (
+          <button
+            type="button"
+            onClick={() => setAccount(true)}
+            aria-haspopup="dialog"
+            aria-label={`Wallet, @${me.handle}, ${sol(me.balance, 2)} SOL${BALANCE_NOTE}${unread ? `, ${unread} new` : ""}`}
+            className="flex h-11 items-center gap-2 rounded-pill pl-2 pr-1 transition-colors duration-(--t-fast) ease-room hover:bg-track"
+          >
+            <span className="whitespace-nowrap">
+              <Num size="sm" watch={me.balance} tick className="text-[15px]!">
+                {sol(me.balance, 2)}
+              </Num>
+              <span className="text-[13px] font-medium text-slate">&nbsp;SOL</span>
+            </span>
+            <span className="relative">
+              <Avatar handle={me.handle} size={30} />
+              {unread > 0 ? (
+                <span
+                  aria-hidden
+                  className="mdx-badge mdx-badge--dot -right-0.5 -top-0.5 shadow-[0_0_0_2px_var(--color-wall)]"
+                />
+              ) : null}
+            </span>
+          </button>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={openGuide}
+              aria-label="How Launch a Card works"
+              className="grid h-11 w-11 place-items-center rounded-pill text-ink transition-colors duration-(--t-fast) ease-room hover:bg-track"
+            >
+              <GuideGlyph />
+            </button>
+            <Button className="ml-1" onClick={() => openEnter()}>
               <span className="max-[359px]:hidden">Try the demo</span>
               <span className="hidden max-[359px]:inline">Demo</span>
             </Button>
-          )}
-        </div>
-      </div>
-      {!liveLaunch && IS_SIM && me ? <MenuSheet me={me} open={menu} onOpenChange={setMenu} /> : null}
-    </header>
-  );
-}
-
-/**
- * The page foot, at the end of every page's scroll: How Launch a Card works and Terms, privacy and risks, plus the
- * Calm motion switch on phones (the top bar carries it from 1024px).
- */
-function Footer({ liveLaunch = false }: { liveLaunch?: boolean }) {
-  const { openGuide } = useSessionUi();
-  const path = useRouterState({ select: (s) => s.location.pathname });
-  return (
-    <footer className="cdx-footer">
-      <nav aria-label="About Launch a Card" className="cdx-footer__links">
-        {liveLaunch ? (
-          <Suspense fallback={null}>
-            <LiveLaunchGuide />
-          </Suspense>
-        ) : (
-          <button type="button" className="mdx-link mdx-hit" onClick={openGuide}>
-            How Launch a Card works
-          </button>
+          </>
         )}
-        <Link to="/legal" className="mdx-link mdx-hit" aria-current={path === "/legal" ? "page" : undefined}>
-          Terms, privacy and risks
-        </Link>
-      </nav>
-      <CalmSwitch className="cdx-footer__calm" />
-    </footer>
+      </div>
+      {!liveLaunch && IS_SIM && me ? <AccountSheet me={me} open={account} onOpenChange={setAccount} /> : null}
+    </header>
   );
 }
 
@@ -842,14 +936,14 @@ function MobileTabs({ pending }: { pending: boolean }) {
     <nav
       aria-label="Main"
       data-tabbar
-      className="mdx-mobile-tabs cdx-tabbar"
+      className="mdx-mobile-tabs fixed inset-x-0 bottom-0 z-30 flex rounded-t-panel bg-plinth pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_30px_-14px_rgb(var(--rgb-shade)/0.7)] lg:hidden"
     >
       {TABS.map((t, i) => (
         <Link
           key={t.to}
           to={t.to}
           activeOptions={{ exact: !!t.exact }}
-          className="mdx-mtab"
+          className="mdx-mtab h-16"
           data-active={i === active}
           aria-current={i === active ? "location" : undefined}
           data-pending={(pending && i === active) || undefined}
@@ -868,9 +962,12 @@ function MobileTabs({ pending }: { pending: boolean }) {
 // ---------------------------------------------------------------- shell
 
 /**
- * The shell: the 48px top bar, then <main> (the page's one scroller at every width: views grow with their content,
- * nothing inside a page scrolls on its own), then the phone tab bar below 1024px (44px when held sideways).
- * Safe-area insets on every side.
+ * Desktop: a 224px rail on the canvas (Launch a Card lockup, pill search, five tabs with one sliding pill, guide,
+ * wallet card) and the canvas content area. No top bar, no rail panel, no edge line.
+ * At 1280x720 and up `main` never scrolls; 1024 to 1279 may scroll as a fallback. `mdx-main` gives full
+ * height asides their --gutter (12px float above 820px tall, flush below) and --bleed.
+ * Phones (under 1024): 56px canvas header (search, account sheet or guide and Enter), 64px panel tab bar with
+ * rounded top corners (44px when held sideways), natural page scroll, safe-area insets on every side.
  */
 /**
  * The devnet test site's one line (launch-plan §6 APP, lib/mintdex/site-host.ts): above the page on every width,
@@ -879,11 +976,7 @@ function MobileTabs({ pending }: { pending: boolean }) {
 function DevnetSiteNote() {
   const n = DEVNET_SITE_NOTE;
   return (
-    <p
-      role="note"
-      data-testid="devnet-site-note"
-      className="cdx-shellnote"
-    >
+    <p role="note" data-testid="devnet-site-note" className="mdx-status">
       {n.lead}
       {n.link ? (
         <>
@@ -898,15 +991,58 @@ function DevnetSiteNote() {
   );
 }
 
-/** The hover wait before the first tooltip shows (the 400ms in carddex.css, home.css and viewer.css). */
+/**
+ * The night sky behind every page (MintDex): still stars and scanlines, a perspective grid floor whose lines run
+ * toward you, and two aurora layers that drift, in antique gold, light gold and card red. Hidden documents, an open
+ * dialog, Calm motion and reduced motion (mapped to Calm) keep it still.
+ */
+function Sky() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const sync = () => el.toggleAttribute("data-paused", document.hidden);
+    sync();
+    document.addEventListener("visibilitychange", sync);
+    return () => document.removeEventListener("visibilitychange", sync);
+  }, []);
+  return (
+    <div ref={ref} aria-hidden className="mdx-sky">
+      <i className="mdx-sky__stars" />
+      <i className="mdx-sky__floor">
+        <i>
+          <b />
+        </i>
+      </i>
+      <i className="mdx-sky__a mdx-sky__a--1" />
+      <i className="mdx-sky__a mdx-sky__a--2" />
+    </div>
+  );
+}
+
+/**
+ * The status strip (MintDex: "Transactions are paused." above the page): what is real on this screen, in one 13/20
+ * slate line on the walnut panel with a hairline under it. On phones it sits above the header and scrolls away.
+ */
+function StatusStrip({ testId, lead, rest }: { testId: string; lead: string; rest: string }) {
+  return (
+    <p role="note" data-testid={testId} className="mdx-status">
+      <span className="font-semibold text-ink">{lead}</span>
+      <span aria-hidden> · </span>
+      {rest}
+    </p>
+  );
+}
+
+/** The hover wait before the first tooltip shows (the 400ms in styles/shared.css). */
 const TIP_DELAY_MS = 400;
 /** How long the tooltips stay warm after the pointer leaves one. */
 const TIP_COOL_MS = 600;
 
 /**
- * Tooltips ([data-tip]) on an Operate surface: the first one a mouse rests on waits a beat; while one is showing, or
- * just after, its neighbours open at once with no fade (html[data-tips-warm]), so running along a row of card
- * controls reads every name without waiting at each. Touch never shows them; keyboard focus shows them at once.
+ * Tooltips ([data-tip]): the first one a mouse rests on waits a beat; while one is showing, or just after, its
+ * neighbours open at once with no fade (html[data-tips-warm]), so running along a row of card controls reads every
+ * name without waiting at each. Touch never shows them; keyboard focus shows them at once.
  */
 function useWarmTips() {
   useEffect(() => {
@@ -994,7 +1130,7 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
   // page behind it is inert: Radix's aria-hidden skips live regions and their ancestors, so the activity log and its
   // links stayed reachable. Popovers and menus are not modal (no aria-modal) and leave the page alone. The flag
   // drops as soon as the dialog reports data-state="closed", before Radix hands focus back to the opener.
-  const rootRef = useRef<HTMLDivElement | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const root = rootRef.current;
     if (!root || typeof MutationObserver === "undefined") return;
@@ -1011,45 +1147,15 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
     };
   }, []);
 
-  // main's scrollbar width as --sbw: the top bar's row and the toasts add it on their right, so their edges meet the
-  // column's under classic scrollbars (overlay scrollbars measure 0).
-  useEffect(() => {
-    const main = document.getElementById("content");
-    if (!main || typeof ResizeObserver === "undefined") return;
-    const root = document.documentElement;
-    const sync = () => root.style.setProperty("--sbw", `${Math.max(0, main.offsetWidth - main.clientWidth)}px`);
-    sync();
-    const ro = new ResizeObserver(sync);
-    ro.observe(main);
-    return () => {
-      ro.disconnect();
-      root.style.removeProperty("--sbw");
-    };
-  }, []);
-
-  // The top bar takes its 1px rule once the page scrolls under it (main is the one scroller at every width).
-  const shellRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const main = document.getElementById("content");
-    const bar = shellRef.current?.querySelector<HTMLElement>("[data-topbar]");
-    if (!main || !bar) return;
-    const sync = () => bar.toggleAttribute("data-scrolled", main.scrollTop > 0);
-    sync();
-    main.addEventListener("scroll", sync, { passive: true });
-    return () => main.removeEventListener("scroll", sync);
-  }, []);
-
-  // "/" focuses the top bar search from anywhere (not while typing in a field or inside a dialog).
+  // "/" focuses the rail search from anywhere (not while typing in a field or inside a dialog).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented) return;
       if (isTypingTarget(e.target) || isDialogOpen()) return;
-      // The bar's field, or the page's own (Discover hides the bar's).
-      const page = document.getElementById("token-search");
-      const el = searchRef.current?.offsetParent ? searchRef.current : page instanceof HTMLInputElement ? page : null;
+      const el = searchRef.current;
       if (!el || el.offsetParent === null) {
-        // No field on screen (the bar's search is an icon at this width): press the icon, which opens Discover's.
-        const icon = document.querySelector<HTMLElement>(".cdx-topbar__searchbtn");
+        // Phones have no rail field: press the header's search icon, which opens Discover's.
+        const icon = document.querySelector<HTMLElement>("[data-search-btn]");
         if (icon?.offsetParent) {
           e.preventDefault();
           icon.click();
@@ -1064,15 +1170,10 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
   }, []);
 
   return (
-    <div
-      ref={(el) => {
-        rootRef.current = el;
-        shellRef.current = el;
-      }}
-      data-screen={path === "/" ? "home" : path.split("/")[1]}
-      className="cdx-app cdx-viewport"
-    >
-      {/* First stop for keyboard users (P1-24): skips the top bar's links, search and account controls. */}
+    // relative isolate: the sky (L9) sits behind every page on the wall, above this root's own background.
+    <div ref={rootRef} data-screen={path === "/" ? "home" : path.split("/")[1]} className="cdx-app cdx-viewport relative isolate flex min-h-dvh bg-wall text-ink lg:h-dvh lg:overflow-hidden">
+      <Sky />
+      {/* First stop for keyboard users (P1-24): skips the rail's search, six tabs and wallet. */}
       <a
         href="#content"
         className="mdx-skip"
@@ -1086,32 +1187,37 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
       >
         Skip to content
       </a>
-      <RouteProgress loading={pending} />
-      <RouteAnnouncer />
-      {/* IS_DEVNET is a literal: the note and its words are not in the mainnet or sim bundle. */}
-      {IS_DEVNET && devnetSite ? <DevnetSiteNote /> : null}
-      {/* The real-funds warning stays: one row, only on the mainnet launch panel. */}
-      {liveLaunch ? (
-        <p role="note" data-testid="live-launch-note" className="cdx-shellnote">
-          <span className="font-semibold text-ink">Solana mainnet</span>
-          <span aria-hidden> · </span>Wallet approval required.
-        </p>
-      ) : null}
-      <TopBar searchRef={searchRef} pending={pending} liveLaunch={liveLaunch} />
-      {/* main is the one scroller at every width (density R1). Its inline padding centres the column (up to 1600px;
-          the top bar uses the same arithmetic). Views grow with their content, at least main's height, and the
-          footer follows the page. */}
-      <main
-        id="content"
-        data-scroll-restoration-id="content"
-        tabIndex={-1}
-        aria-busy={pending || undefined}
-        className="cdx-viewport-main mdx-main mdx-scroll"
-      >
-        {children}
-        <Footer liveLaunch={liveLaunch} />
-      </main>
-      <MobileTabs pending={pending} />
+      <Rail searchRef={searchRef} pending={pending} liveLaunch={liveLaunch} />
+      <div className="cdx-shell-content flex min-w-0 flex-1 flex-col">
+        <RouteProgress loading={pending} />
+        <RouteAnnouncer />
+        {/* The status strip (MintDex): what is real here. IS_DEVNET is a literal: the devnet line and its words are not
+            in the mainnet or sim bundle. */}
+        {IS_DEVNET && devnetSite ? (
+          <DevnetSiteNote />
+        ) : liveLaunch ? (
+          <StatusStrip testId="live-launch-note" lead="Solana mainnet" rest="Wallet approval required." />
+        ) : IS_SIM ? (
+          <StatusStrip testId="local-demo-note" lead="Demo" rest="Test SOL and simulated trading." />
+        ) : null}
+        <MobileHeader liveLaunch={liveLaunch} />
+        {/* The activity ticker (MintDex): the real feed, scrolling; still and scrollable under Calm motion. */}
+        <Ticker />
+        {/* --main-pad mirrors the padding so full-height asides can bleed to the content edges with
+            calc(var(--main-pad) * -1) instead of copying 24px / 16px.
+            Phones clip sideways (clip, not hidden: no scroll container, sticky still works): before
+            hydration a measured view renders at its desktop fallback size, and the page must never
+            scroll horizontally while it does. Bleeds into the padding stay visible. */}
+        <main
+          id="content"
+          data-scroll-restoration-id="content"
+          tabIndex={-1}
+          aria-busy={pending || undefined}
+          className="cdx-viewport-main mdx-main mdx-scroll min-h-0 flex-1 p-4 pb-[calc(80px_+_env(safe-area-inset-bottom))] [--main-pad:16px] max-lg:overflow-x-clip lg:overflow-x-hidden lg:overflow-y-auto lg:p-6 lg:[--main-pad:24px] short:p-4 short:[--main-pad:16px]">
+          {children}
+        </main>
+        <MobileTabs pending={pending} />
+      </div>
     </div>
   );
 }
