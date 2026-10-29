@@ -8,8 +8,11 @@ body { overflow:clip; }
 .cdx-app.cdx-viewport { height:var(--cdx-app-height,100dvh); min-height:0; overflow:clip; }
 /* main: the one scroller. Its inline padding centres the column, min(100% - 2 x gutter, --column): 100% is the app's
    width and --sbw main's scrollbar (reserved by scrollbar-gutter), so the top bar's inner row, which uses the same
-   arithmetic, ends on the same edge. Phones held sideways keep the notch insets. */
+   arithmetic, ends on the same edge. Phones held sideways keep the notch insets. position:relative makes main the
+   containing block of the visually hidden (.sr-only, position:absolute) labels inside it: without one they hung below
+   the shell and made the document scrollable, so an old ?tab= link's scrollIntoView pushed the top bar off screen. */
 .cdx-viewport .cdx-viewport-main {
+  position:relative;
   flex:1;
   min-height:0;
   --main-pad:max(var(--page-gutter), env(safe-area-inset-left));
