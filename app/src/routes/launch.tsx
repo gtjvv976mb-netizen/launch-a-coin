@@ -42,12 +42,14 @@ import { CardDesignPicker } from "../components/carddex/CardDesignPicker";
 import { DEFAULT_CARD_DESIGN, getCardDesign, isCardDesignKey } from "../lib/carddex/designs";
 import { allowedQuotesForDesign, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, isPairAssetKey, type PairAssetKey } from "../lib/carddex/pairs";
 import { formatQuoteAmount, initialQuoteReserves, maxInitialBuyQuoteAtoms, parseQuoteAmount, quoteMetrics } from "../lib/carddex/quote-simulation";
+import { quoteFixed } from "../lib/carddex/quote-display";
+import { CREATION_MCAP_LABEL } from "../lib/carddex/card-template";
 import { QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
 import type { LiveLaunchHandle, LivePrimary } from "../components/carddex/live/LiveLaunchPanel";
 import { firstProblem, enterTarget, quickBuyAmounts, sameAmount, type FormCheck } from "../components/carddex/launch-form";
 import { liveReadinessQuery, useLiveLaunchOpen, useLiveRecoveryOpen } from "../components/carddex/live/readiness";
 import { formatLiveAmount, parseLiveAmount } from "../components/carddex/live/amounts";
-import { BUY_DOES_NOT_FIT, BUY_FIT_AFTER_SIGN_IN, useLiveBuyFit } from "../components/carddex/live/buy-fit";
+import { BUY_FIT_AFTER_SIGN_IN, liveBuyOff, useLiveBuyFit, useLiveBuyRefusal } from "../components/carddex/live/buy-fit";
 import { PagedMessage } from "../components/carddex/live/PagedMessage";
 import type { LiveLaunchIntent } from "../lib/carddex/live/types";
 
@@ -291,6 +293,8 @@ function Launch() {
   const restoreLiveIntent = useCallback((intent: LiveLaunchIntent | null) => {
     setLiveMint(intent?.tokenMint ?? null); setLiveCreator(intent?.creatorWallet ?? null);
     if (!intent) return;
+    // A finished launch leaves no draft behind: the next visit starts empty, not with this coin's name and ticker.
+    if (intent.status === "complete") writeDraft(null);
     setName(intent.name); setTicker(intent.symbol); setLore(intent.description);
     setWebsite(intent.website ?? ""); setXUrl(intent.xUrl ?? "");
     setDesignKey(getCardDesign(intent.cardTemplate).key);
@@ -372,13 +376,13 @@ function Launch() {
   const devError = devNaN
     ? `Enter a valid ${quoteAsset.symbol} amount with up to ${quoteAsset.decimals} decimals.`
     : devOver
-      ? `Initial buy is capped at ${formatQuoteAmount(maxDev, quoteKey)} ${quoteAsset.symbol} in this demo.`
+      ? `Initial buy is capped at ${quoteFixed(maxDev, quoteKey)} ${quoteAsset.symbol} in this demo.`
       : devQuote && !devQuote.ok ? `${devQuote.reason}.` : null;
   const balanceError = !live && me && !devError
     ? me.balance < nativeCost
       ? `Not enough test SOL for the launch fee${quoteKey === "sol" ? " and initial buy" : ""}. You have ${sol(me.balance)} SOL.`
       : quoteKey !== "sol" && devQuote?.ok && devQuote.solIn > quoteBalance
-        ? `Not enough test ${quoteAsset.symbol}. You have ${formatQuoteAmount(quoteBalance, quoteKey)} ${quoteAsset.symbol}.`
+        ? `Not enough test ${quoteAsset.symbol}. You have ${quoteFixed(quoteBalance, quoteKey)} ${quoteAsset.symbol}.`
         : null
     : null;
 
@@ -389,8 +393,12 @@ function Launch() {
   // for this pair and name is turned off here, and the panel checks again before any artwork is uploaded.
   const fitName = useSettledValue(name.trim(), 500);
   const fitTicker = useSettledValue(ticker, 500);
-  const buyFits = useLiveBuyFit(live && liveOpen && !liveLocked && fitName.length >= 2 && TICKER_RE.test(fitTicker), fitName, fitTicker, quoteKey);
-  const buyBlocked = live && buyFits === false;
+  const fitActive = live && liveOpen && !liveLocked && fitName.length >= 2 && TICKER_RE.test(fitTicker);
+  const buyFits = useLiveBuyFit(fitActive, fitName, fitTicker, quoteKey);
+  // Why the buy is off, in the server's words (one shared query), and off from the start for a tokenized-stock quote.
+  const buyRefusal = useLiveBuyRefusal(fitActive, fitName, fitTicker, quoteKey);
+  const buyOffText = live && liveOpen && !liveLocked ? liveBuyOff(quoteAsset.kind, buyRefusal) : null;
+  const buyBlocked = !!buyOffText;
   // A buy cleared here is also named beside the Launch button: the answer can arrive after the creator has moved on.
   const [buyDropped, setBuyDropped] = useState(false);
   useEffect(() => {
@@ -656,7 +664,7 @@ function Launch() {
     quoteMint: quoteAsset.mint,
     mcapUsd: live ? null : metrics.mcapUsd,
     mcapQuote: live ? undefined : metrics.mcapQuote,
-    mcapLabel: live ? "At launch" : undefined,
+    mcapLabel: live ? CREATION_MCAP_LABEL : undefined,
     holders: devQuote?.ok ? 1 : 0,
     dexNo: 0,
     dexLabel: "New",
@@ -898,7 +906,7 @@ function Launch() {
               </div>
 
               <div className="cdx-launch-f cdx-launch-f--pair">
-                <QuoteAssetPicker variant="inline" value={quoteKey} designKey={designKey} ticker={ticker || "TICKER"} onChange={changePair} onPendingChange={setPairPending} confirmationRef={pairConfirmationRef} live={live} disabled={locked} balance={!live && me ? formatQuoteAmount(quoteBalance, quoteKey) : undefined} />
+                <QuoteAssetPicker variant="inline" value={quoteKey} designKey={designKey} ticker={ticker || "TICKER"} onChange={changePair} onPendingChange={setPairPending} confirmationRef={pairConfirmationRef} live={live} disabled={locked} balance={!live && me ? quoteFixed(quoteBalance, quoteKey) : undefined} />
                 {pairNotice && !pairPending ? <p className="cdx-pair-notice" role="status">{pairNotice}</p> : null}
               </div>
 
@@ -934,9 +942,9 @@ function Launch() {
                   {devError ? (
                     <p role="alert" className="cdx-launch-note__error">{devError}</p>
                   ) : buyBlocked ? (
-                    <p role="status">{BUY_DOES_NOT_FIT}</p>
+                    <p role="status">{buyOffText}</p>
                   ) : !devQuote?.ok ? (
-                    <p>{live ? `Paid in real ${quoteAsset.symbol} with your coin's creation.${buyFits === null ? ` ${BUY_FIT_AFTER_SIGN_IN}` : ""} The exact amount and slippage show before your wallet opens.` : `Paid in test ${quoteAsset.symbol}. Up to ${formatQuoteAmount(maxDev, quoteKey)} ${quoteAsset.symbol} in this demo.`}</p>
+                    <p>{live ? `Paid in real ${quoteAsset.symbol} with your coin's creation.${buyFits === null ? ` ${BUY_FIT_AFTER_SIGN_IN}` : ""} The exact amount and slippage show before your wallet opens.` : `Paid in test ${quoteAsset.symbol}. Up to ${quoteFixed(maxDev, quoteKey)} ${quoteAsset.symbol} in this demo.`}</p>
                   ) : null}
                   <p aria-live="polite" className="empty:hidden">
                     {devQuote?.ok && !devError ? (
@@ -1015,7 +1023,7 @@ function Launch() {
 
           <aside className="cdx-launch-ticket" aria-label="Cost and launch" data-live={live || undefined}>
             <div className="cdx-launch-ticket__panel mdx-plinth">
-              {live ? <Suspense fallback={<div className="mdx-skeleton cdx-launch-live-skeleton" aria-hidden />}><LiveLaunchPanel ref={liveRef} launchesOpen={liveOpen} notice={buyDropped ? BUY_DOES_NOT_FIT : null} card={previewCard} draft={liveDraft} draftKey={draftKey} initialBuy={liveBuyText} slippageBps={slippageBps} ready={readyList} pairPending={pairPending} onLockedChange={setLiveLocked} onBusyChange={setLiveBusy} onTermsNeeded={setTermsNeeded} onIntentLoaded={restoreLiveIntent} onStartAnother={startAnotherLive} onPrimary={setLivePrimary} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /></Suspense> : demoTicket}
+              {live ? <Suspense fallback={<div className="mdx-skeleton cdx-launch-live-skeleton" aria-hidden />}><LiveLaunchPanel ref={liveRef} launchesOpen={liveOpen} notice={buyDropped ? buyOffText : null} card={previewCard} draft={liveDraft} draftKey={draftKey} initialBuy={liveBuyText} slippageBps={slippageBps} ready={readyList} pairPending={pairPending} onLockedChange={setLiveLocked} onBusyChange={setLiveBusy} onTermsNeeded={setTermsNeeded} onIntentLoaded={restoreLiveIntent} onStartAnother={startAnotherLive} onPrimary={setLivePrimary} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /></Suspense> : demoTicket}
             </div>
           </aside>
         </div>

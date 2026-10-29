@@ -15,6 +15,8 @@ Object.freeze(layout.footer);
 export const CANONICAL_CARD_LAYOUT = Object.freeze(layout);
 export const CANONICAL_CARD_TEMPLATE = "launchacard-v2";
 export const CARD_RENDERER_VERSION = "launchacard-canonical-v2.1";
+/** A new coin's market-cap row before it trades, as the minted card prints it (creator-print.tsx, composition.server.ts). */
+export const CREATION_MCAP_LABEL = "At creation";
 
 /** Width-relative print metrics shared by browser CSS and trusted SVG export. */
 export const CANONICAL_CARD_PRINT = Object.freeze({

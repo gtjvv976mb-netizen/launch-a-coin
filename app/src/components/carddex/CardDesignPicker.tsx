@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import { CARD_DESIGNS, getCardDesign, type CardDesign } from "../../lib/carddex/designs";
+import { CREATION_MCAP_LABEL } from "../../lib/carddex/card-template";
 
 import { PAIR_ASSETS, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, recommendedMemeQuoteForDesign, type PairAssetKey } from "../../lib/carddex/pairs";
 import { DESIGN_GROUPS, inDesignGroup as inGroup, type DesignGroup } from "./design-groups";
@@ -18,7 +19,7 @@ function cardIn(base: CardData, design: CardDesign, quoteKey: string, asset = bo
   return {
     ...base, cardTemplate: design.key, level: design.materialLevel,
     quoteAssetKey: asset.key, quoteMint: asset.mint,
-    ...(asset.key !== quoteKey ? { mcapUsd: null, mcapQuote: undefined, mcapLabel: "At launch" } : {}),
+    ...(asset.key !== quoteKey ? { mcapUsd: null, mcapQuote: undefined, mcapLabel: CREATION_MCAP_LABEL } : {}),
   };
 }
 
@@ -81,7 +82,7 @@ export function CardDesignPicker({
   const pickGroup = (key: DesignGroup) => { if (disabled) return; setGroup(key); setMemePairFilter("all"); };
   const baseCard: CardData = previewCard ?? {
     name: "Your coin", ticker: ticker || "TICKER", image: "", level: 1,
-    mcapUsd: null, mcapLabel: "At launch", holders: 0, dexNo: 0, ownerHandle: "you",
+    mcapUsd: null, mcapLabel: CREATION_MCAP_LABEL, holders: 0, dexNo: 0, ownerHandle: "you",
   };
 
   // The library: your coin previewed in every design, in a dialog, so the draft never leaves the page. Every design

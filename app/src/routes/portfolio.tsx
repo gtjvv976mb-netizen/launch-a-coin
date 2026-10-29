@@ -93,7 +93,7 @@ function LoadingRows({ label }: { label: string }) {
 }
 
 /**
- * Holdings: one whole-row link per coin. Wide panes (480px and up) read Coin · Held · Value · 24h on one line
+ * Holdings: one whole-row link per coin. Wide panes (600px and up) read Coin · Held · Value · 24h on one line
  * under a header row, at the list row height; narrow ones two lines (name and value, then ticker and amount held,
  * and the 24h change). Rules sit between rows, square. The first 12, then "Show all".
  */

@@ -18,18 +18,18 @@ import { formatLiveAmount } from "./amounts";
 import { LiveWalletNotice } from "./LiveWalletNotice";
 import { PagedMessage } from "./PagedMessage";
 import { useLiveReadiness } from "./readiness";
-import { connectLiveWallet, getLiveWalletSnapshot, signLiveTransaction, signLiveTransactions, useLiveWallet } from "./wallet";
+import { connectLiveWallet, getLiveWalletSnapshot, signLiveTransaction, signLiveTransactions, useLiveWallet, walletSupportsSignIn } from "./wallet";
 import {
   createEphemeralSigner, destroyEphemeralSigner, signingOrderFor, signsBothFor, toBase64, unsentStageNext,
   validateLivePlan, type EphemeralSigner, type ExpectedPlan, type SigningOrder, type TransactionPlan,
 } from "./transaction";
 import {
   CARD_APPROVAL_EXPIRED, CARD_APPROVED_READY, CARD_APPROVED_WAITING, cardNext, coinRetryable, confirmUntilSettled, dropLaunchSession, keepLaunchSession,
-  keptLaunchSession, PAIR_SINGLE_NOTICE, PREPARED_WITHOUT_KEY, signForLaunch, signLaunchPair, SIGN_IN_COPY, STILL_CONFIRMING,
+  keptLaunchSession, launchSettled, PAIR_SINGLE_NOTICE, PREPARED_WITHOUT_KEY, signForLaunch, signLaunchPair, SIGN_IN_COPY, STILL_CONFIRMING,
   WALLET_RETRY_NOTICE, type PairPlans,
 } from "./launch-flow";
 import { connectForLaunch, signInCreator } from "./ownership";
-import { PAIR_REVIEW_COPY, WALLET_NOTICE_COPY, WALLET_OPEN_COPY, WALLET_OPEN_PAIR_COPY, walletNoticePreview } from "./wallet-notice";
+import { ONE_APPROVAL_NEXT, PAIR_REVIEW_COPY, SEPARATE_APPROVALS_NEXT, WALLET_NOTICE_COPY, WALLET_OPEN_COPY, WALLET_OPEN_PAIR_COPY, walletNoticePreview } from "./wallet-notice";
 
 export type LiveLaunchDraft = {
   name: string; symbol: string; description: string; website: string; xUrl: string;
@@ -66,6 +66,7 @@ function savedIntent(wallet: string): string | null {
 function rememberIntent(wallet: string, id: string | null) {
   try { const all = JSON.parse(localStorage.getItem(INTENT_KEY) ?? "{}"); if (id) all[wallet] = id; else delete all[wallet]; localStorage.setItem(INTENT_KEY, JSON.stringify(all)); } catch { /* Recovery remains available through the authenticated server list. */ }
 }
+const NO_SAVED_LAUNCHES = "No unfinished launches for this wallet.";
 function unwrap<T extends object>(result: LiveResult<T>): T {
   if (!result.ok) throw new Error(result.error);
   return result;
@@ -181,7 +182,8 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
     }
     pendingIntent.current = next;
     creator.current = next.creatorWallet;
-    rememberIntent(next.creatorWallet, next.id);
+    // A finished launch stays on this page until Start another launch, but a later visit starts from a new draft.
+    rememberIntent(next.creatorWallet, next.status === "complete" ? null : next.id);
     if (mounted.current) setIntent(next);
     if (next.status === "nft_pending" || next.status === "complete") {
       destroyEphemeralSigner(tokenKey.current); tokenKey.current = null;
@@ -212,20 +214,27 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
     catch (e) { if (mounted.current) setError(e instanceof Error ? e.message : "The launch paused. Check the saved launch before trying again."); }
     finally { running.current = false; if (mounted.current) setBusy(null); }
   }
+  // Find saved launch's answer when nothing is left to resume (an alert would read as a failure).
+  const [recoverNote, setRecoverNote] = useState("");
   async function recover(id?: string) {
+    setRecoverNote("");
     await operate(async (address, version) => {
       setBusy("recovering"); await authenticate(address, version);
+      let restored = false;
       if (id) {
         const found = unwrap(await getLiveLaunchIntent({ data: { intentId: id } })).intent;
-        assertCurrent(version, address); retain(found); setPlan(null); setUncertain(false);
+        assertCurrent(version, address);
+        if (launchSettled(found)) rememberIntent(address, null);
+        else { retain(found); setPlan(null); setUncertain(false); restored = true; }
       }
       const found = unwrap(await listLiveLaunchIntents()); assertCurrent(version, address);
       setRecoverable(found.intents);
+      if (!restored && !found.intents.some(i => !launchSettled(i))) setRecoverNote(NO_SAVED_LAUNCHES);
     });
   }
   // A connected wallet may already have a valid ownership session. These reads never open a signing prompt.
   useEffect(() => {
-    setRecoverable([]);
+    setRecoverable([]); setRecoverNote("");
     if (!wallet.address || !canRecover) return;
     let canceled = false;
     void getLiveWallet().then(async session => {
@@ -236,7 +245,10 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
       const saved = savedIntent(wallet.address!);
       if (saved) {
         const response = await getLiveLaunchIntent({ data: { intentId: saved } });
-        if (!canceled && response.ok) { retain(response.intent); if (response.intent.chainCheck) setError(response.intent.chainCheck.reason); }
+        if (canceled || !response.ok) return;
+        // A finished or discarded launch is forgotten; the creator's new draft stays as typed.
+        if (launchSettled(response.intent)) rememberIntent(wallet.address!, null);
+        else { retain(response.intent); if (response.intent.chainCheck) setError(response.intent.chainCheck.reason); }
       }
     }).catch(() => undefined);
     return () => { canceled = true; };
@@ -263,9 +275,14 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
       if (saved && saved !== intent?.id) {
         setBusy("recovering"); await authenticate(address, version);
         const previous = unwrap(await getLiveLaunchIntent({ data: { intentId: saved } })).intent;
-        assertCurrent(version, address); retain(previous);
-        setError("Your saved launch was restored. Finish or verify it before starting another coin.");
-        return;
+        assertCurrent(version, address);
+        // Only an unfinished launch is restored; a finished or discarded one is forgotten and this draft goes on.
+        if (launchSettled(previous)) rememberIntent(address, null);
+        else {
+          retain(previous);
+          setError("Your saved launch was restored. Finish or verify it before starting another coin.");
+          return;
+        }
       }
       if (pendingIntent.current && pendingIntent.current.status !== "complete" && !tokenKey.current) {
         setError("This saved launch needs recovery. Check its existing coin before preparing anything new."); return;
@@ -567,12 +584,18 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
   const startAnother = () => { if (intent?.status !== "complete") return; rememberIntent(intent.creatorWallet, null); pendingIntent.current = null; setIntent(null); setPlan(null); setPairCard(null); keepApproved(null); preparedInput.current = null; draftAtPrepare.current = null; idempotencyKey.current = null; creator.current = null; setTerms(false); setError(""); setAttempted(false); onStartAnother?.(); };
   // Find saved launch without a wallet opens the chooser and carries on after the connect, as a launch press does.
   const findSaved = () => { if (!wallet.address) { launchPending.current = "recover"; setConnectOpen(true); return; } void recover(savedIntent(wallet.address) ?? undefined); };
-  useImperativeHandle(ref, () => ({ startAnother, terms: () => termsRef.current, submit: () => { if (resend) void sendAgain(); else if (intent?.status === "nft_pending" && cardApproved && !intent.nftSignature) void sendApprovedCard(); else if (intent?.status === "nft_pending") void prepareNft(); else if (coinRetryable(intent, !!tokenKey.current && !!preparedInput.current)) void prepareDraft(); else if (intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current) void checkConfirmation(); else if (!intent && !canLaunch && canRecover) findSaved(); else if (intent?.status !== "complete") void prepareDraft(); } }));
+  // A prepared launch whose new coin key this browser no longer holds (PREPARED_WITHOUT_KEY): it can never be signed
+  // here, so its one way on is to discard it once it expires; that is the primary.
+  const unsignable = intent?.status === "prepared" && !tokenKey.current && !uncertain && !resend;
+  useImperativeHandle(ref, () => ({ startAnother, terms: () => termsRef.current, submit: () => { if (resend) void sendAgain(); else if (intent?.status === "nft_pending" && cardApproved && !intent.nftSignature) void sendApprovedCard(); else if (intent?.status === "nft_pending") void prepareNft(); else if (coinRetryable(intent, !!tokenKey.current && !!preparedInput.current)) void prepareDraft(); else if (unsignable) void discardExpiredDraft(); else if (intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current) void checkConfirmation(); else if (!intent && !canLaunch && canRecover) findSaved(); else if (intent?.status !== "complete") void prepareDraft(); } }));
   const selected = intent ? getPairAsset(intent.quoteAssetKey) : getPairAsset(card.quoteAssetKey);
   const currentTitle = intent?.status === "complete" ? "Your coin and card are on mainnet" : intent?.status === "nft_pending" ? "Coin verified. Your card is next." : intent?.status === "token_pending" ? "Coin transaction submitted" : "Create through your wallet";
   const reviewIntent = intent;
-  const recoveryItems = recoverable.filter(i => i.status !== "complete" && i.status !== "abandoned");
+  const recoveryItems = recoverable.filter(i => !launchSettled(i));
+  const savedListShown = canRecover && !intent && (canLaunch || recoveryItems.length > 0);
   const siteHost = readiness.data?.publicOrigin ? new URL(readiness.data.publicOrigin).host : undefined;
+  // The connected wallet signs the coin and its card in one prompt (pairMode once the keys exist): the ticket says so.
+  const oneApproval = !!wallet.address && signsBothFor(wallet.name, readiness.data?.walletBatch);
 
   // ------------------------------------------------ the progress view: two transactions, each one stage
   const status = intent?.status;
@@ -603,6 +626,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
       : intent?.status === "nft_pending" && cardApproved && !intent.nftSignature ? { kind: "submit", label: "Send your approved card", pending: !!busy, disabled: !canRecover, blockedByPair: false }
         : intent?.status === "nft_pending" ? { kind: "submit", label: notSent === "nft" ? "Prepare again" : "Review card issuance", pending: !!busy, disabled: !canRecover, blockedByPair: false }
           : coinRetryable(intent, !!tokenKey.current && !!preparedInput.current) ? { kind: "submit", label: "Prepare again", pending: !!busy, disabled: !canLaunch, blockedByPair: false }
+            : unsignable ? { kind: "submit", label: "Discard unused draft", pending: !!busy, disabled: !canRecover, blockedByPair: false }
             : intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current ? { kind: "submit", label: "Check confirmation", pending: !!busy, disabled: !canRecover, blockedByPair: false }
               : !intent && !canLaunch && canRecover ? { kind: "submit", label: "Find saved launch", pending: !!busy, disabled: false, blockedByPair: false }
                 : { kind: "submit", label: !wallet.address ? "Connect wallet to launch" : notSent === "token" ? "Prepare again" : "Review mainnet launch", pendingLabel: "Preparing…", pending: !!busy, disabled: !canLaunch || pairPending, blockedByPair: pairPending };
@@ -625,10 +649,13 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
   // wallet in the same list still continues it; closing the list clears it.
   const connectInPanel = async (walletName: string) => {
     const pending = launchPending.current;
-    if (!(pending === "launch" ? canLaunch : pending === "recover" && canRecover)) return connectLiveWallet(walletName);
+    if (!signsInOnConnect()) return connectLiveWallet(walletName);
     await connectForLaunch(walletName);
     launchPending.current = null; setContinueLaunch(pending);
   };
+  const signsInOnConnect = () => { const pending = launchPending.current; return pending === "launch" ? canLaunch : pending === "recover" && canRecover; };
+  // The wallet list's words while that connect is also the sign-in prompt (one solana:signIn prompt, ownership.ts).
+  const connectCopy = (walletName: string) => signsInOnConnect() && walletSupportsSignIn(walletName) ? SIGN_IN_COPY : null;
   const connectChange = (open: boolean) => { setConnectOpen(open); if (!open) launchPending.current = null; };
   // The press goes on through operate(), which reads the wallet store and stops on another network with its own line.
   useEffect(() => {
@@ -677,7 +704,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
 
     {showFresh ? <section className="cdx-live-block cdx-live-terms" aria-label="Terms">
       {ready}
-      <p>Coin creation and card issuance are separate paid mainnet transactions. Exact costs appear before each wallet approval. Your selected quote funds only the optional initial buy.</p>
+      <p>Coin creation and card issuance are two paid mainnet transactions. Exact costs appear before your wallet asks for approval. Your selected quote funds only the optional initial buy.</p>
       <label className="cdx-live-check"><input ref={termsRef} type="checkbox" checked={terms} onChange={e => { setTerms(e.target.checked); if (e.target.checked && error === TERMS_NEEDED) setError(""); }} /><span>I have the rights to this artwork and accept paid mainnet transactions.</span></label>
     </section> : null}
 
@@ -693,6 +720,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
     {/* What the launch waits on, or why it stopped, right under the primary (the stage rows below say which step). */}
     {busy ? <PagedMessage text={busy === "wallet" && pairCard ? WALLET_OPEN_PAIR_COPY : BUSY_COPY[busy]} /> : null}
     {error ? <PagedMessage text={error} alert /> : null}
+    {recoverNote && !savedListShown ? <p className="cdx-live-meta" role="status">{recoverNote}</p> : null}
     {wallet.address ? <p className="cdx-live-wallet-line">Creator wallet · <span className="cdx-live-address">{brief(wallet.address)}</span>{!wallet.mainnet ? " · Switch to mainnet" : ""}</p> : null}
 
     {showProgress ? <section className="cdx-live-block" aria-labelledby="cdx-live-progress">
@@ -708,14 +736,15 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
         </StageRow>
       </ol>
       {intent?.status === "nft_pending" && !busy && !error ? <p>The coin is verified. Issue its separate one-of-one card to the same creator wallet.</p> : null}
-    </section> : showFresh ? <p className="cdx-live-next">Your wallet opens for a sign-in message that spends nothing, then your coin, then its card.</p> : null}
+    </section> : showFresh ? <p className="cdx-live-next">{oneApproval ? ONE_APPROVAL_NEXT : SEPARATE_APPROVALS_NEXT}</p> : null}
     {pairPending ? <p role="status">Confirm or cancel the quote change under Pair before preparing a transaction.</p> : null}
-    {notice && !intent ? <p role="status">{notice}</p> : null}
+    {/* The page's initial-buy notice, unless the alert above already says the same words. */}
+    {notice && !intent && notice !== error ? <p role="status">{notice}</p> : null}
 
     {/* What the coin's wallet prompt will carry, before anything is prepared (the review shows the exact list). */}
     {showFresh ? <section className="cdx-live-wallet-notice" aria-labelledby="cdx-live-notice">
-      <h3 id="cdx-live-notice" className="cdx-live-wallet-notice-title">What your wallet will show for your coin</h3>
-      <ul className="cdx-live-wallet-notice-list">{walletNoticePreview({ hasBuy: !!initialBuy, quoteKind: selected.kind, siteHost }).map(item => <li key={item.key} data-notice={item.key}>{item.text}</li>)}</ul>
+      <h3 id="cdx-live-notice" className="cdx-live-wallet-notice-title">{oneApproval ? "What your wallet will show for your coin and card" : "What your wallet will show for your coin"}</h3>
+      <ul className="cdx-live-wallet-notice-list">{walletNoticePreview({ hasBuy: !!initialBuy, siteHost, oneApproval }).map(item => <li key={item.key} data-notice={item.key}>{item.text}</li>)}</ul>
       <p className="cdx-live-wallet-notice-safety">{WALLET_NOTICE_COPY.safety}</p>
     </section> : null}
 
@@ -728,24 +757,28 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
         <div><dt>Card design</dt><dd>{getCardDesign(intent.cardTemplate).name}</dd></div>
       </dl>
       <p className="cdx-live-meta">These launch details are locked to this saved request. Reference {intent.id.slice(0, 8)}.</p>
+      {/* A launch this browser cannot sign any more says why; its primary is the discard, so no second control. */}
       {intent.status === "prepared" || intent.status === "token_pending" ? <div className="cdx-live-discard">
-        <p>An unused launch can be discarded only after every prepared transaction expires and the server verifies no coin exists.</p>
-        <button type="button" className="mdx-link mdx-hit" disabled={!!busy} onClick={() => void discardExpiredDraft()}>Discard expired unused draft</button>
+        {unsignable ? <p>{PREPARED_WITHOUT_KEY}</p> : <>
+          <p>An unused launch can be discarded only after every prepared transaction expires and the server verifies no coin exists.</p>
+          <button type="button" className="mdx-link mdx-hit" disabled={!!busy} onClick={() => void discardExpiredDraft()}>Discard expired unused draft</button>
+        </>}
       </div> : null}
     </section> : null}
 
     {/* Saved launches, in the page (no disclosure): find or resume one for the connected wallet. While new launches
         are off, the primary (Find saved launch) and the callout above already ask for this, so only a found list shows. */}
-    {canRecover && !intent && (canLaunch || recoveryItems.length > 0) ? <section className="cdx-live-block cdx-live-saved" aria-labelledby="cdx-live-saved-list">
+    {savedListShown ? <section className="cdx-live-block cdx-live-saved" aria-labelledby="cdx-live-saved-list">
       <h3 id="cdx-live-saved-list" className="cdx-live-subhead">Saved launches</h3>
       {wallet.address ? <>
         {/* While new launches are off the primary is Find saved launch, so this second control would repeat it. */}
         {canLaunch ? <button type="button" className="mdx-link mdx-hit cdx-live-find" disabled={!!busy} onClick={() => void recover(savedIntent(wallet.address!) ?? undefined)}>Find or resume a saved launch</button> : null}
+        {recoverNote ? <p className="cdx-live-meta" role="status">{recoverNote}</p> : null}
         {recoveryItems.length ? <ul className="cdx-live-saved__list" aria-label="Saved launches for this wallet">{recoveryItems.map(i => <li key={i.id}><Button variant="outline" block disabled={!!busy} onClick={() => void recover(i.id)}><span className="cdx-live-address">{brief(i.tokenMint)}</span>{i.status === "nft_pending" ? "Card pending" : "Check launch"}</Button></li>)}</ul> : null}
-      </> : <EmptyState compact title="Connect the creator wallet to find a saved launch." action={<button type="button" className="mdx-link mdx-hit" onClick={() => { launchPending.current = null; setConnectOpen(true); }}>Connect wallet</button>} />}
+      </> : <EmptyState compact title="Connect the creator wallet to find a saved launch." action={<button type="button" className="mdx-link mdx-hit" onClick={() => { launchPending.current = "recover"; setConnectOpen(true); }}>Connect wallet</button>} />}
     </section> : null}
 
-    <WalletConnectDialog open={connectOpen} onOpenChange={connectChange} connect={connectInPanel} />
+    <WalletConnectDialog open={connectOpen} onOpenChange={connectChange} connect={connectInPanel} busyCopy={connectCopy} />
 
     <Modal open={reviewOpen} onOpenChange={value => { if (!busy) setReviewOpen(value); }} width={520} title={plan?.kind === "nft" ? "Review your card NFT" : "Review your coin launch"} description="Check the total, then approve in your wallet. Nothing is sent until you approve there.">
       {plan && reviewIntent ? <div className="cdx-live-review-modal">
@@ -773,6 +806,8 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
           <dl className="cdx-launch-cost cdx-live-review" data-stack><div><dt>Creator / fee payer</dt><dd className="cdx-live-address">{reviewIntent.creatorWallet}</dd></div><div><dt>{plan.kind === "token" ? "New coin mint" : "New NFT asset"}</dt><dd className="cdx-live-address">{plan.kind === "token" ? reviewIntent.tokenMint : reviewIntent.nftMint}</dd></div><div><dt>Quote mint</dt><dd className="cdx-live-address">{reviewIntent.quoteMint}</dd></div></dl>
           <p>Verified at slot <span className="num">{plan.verifiedSlot.toLocaleString()}</span>. If this review stays open longer than 30 seconds, continuing prepares a fresh transaction first.</p>
         </div>
+        {/* While the wallet prompt is open, the dialog says what it shows (the panel's line is behind the overlay). */}
+        {busy === "wallet" ? <PagedMessage text={pairCard ? WALLET_OPEN_PAIR_COPY : WALLET_OPEN_COPY} /> : null}
         {error ? <PagedMessage text={error} alert /> : null}
         <p className="cdx-live-meta">Opening your wallet does not approve payment. Approve there, or reject. Closing this review submits nothing.</p>
         <div className="cdx-live-review-actions">

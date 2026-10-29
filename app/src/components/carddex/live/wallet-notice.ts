@@ -27,6 +27,12 @@ export const WALLET_NOTICE_COPY = {
 export const WALLET_OPEN_COPY = "Approve or reject in your wallet. It shows the costs you reviewed and a second signer for the new address this page created.";
 /** Shown while the wallet prompt with the coin and its card is open. */
 export const WALLET_OPEN_PAIR_COPY = "Approve or reject in your wallet. It shows your coin and its card together, with the costs you reviewed and a second signer for each new address this page created.";
+/**
+ * What the wallet asks for, in order, under the fresh Launch ticket's primary: one prompt for the coin and its card
+ * when the connected wallet is on the server's batch list (signsBothFor), else the card's own prompt after the coin.
+ */
+export const SEPARATE_APPROVALS_NEXT = "Your wallet opens for a sign-in message that spends nothing, then your coin, then its card.";
+export const ONE_APPROVAL_NEXT = "Your wallet opens for a sign-in message that spends nothing, then your coin and its card in one approval.";
 /** The review's line under the costs when the card comes in the same approval (the coin-only line is the panel's). */
 export const PAIR_REVIEW_COPY = "Your wallet approves the coin and its card together. The card is sent once the coin is confirmed on Solana, with no second approval.";
 
@@ -53,16 +59,18 @@ export function walletNoticeItems(plan: NoticePlan, quote: WalletNoticeQuote, si
 }
 
 /**
- * The same list before anything is prepared (the Launch ticket, above the primary): what the coin transaction's
- * wallet prompt will carry, from what the form already knows. It mirrors walletNoticeItems for a coin plan, with the
- * fee amount left to the review and the initial buy's amount left out (the review shows both exactly).
+ * The same list before anything is prepared (the Launch ticket, under the primary): what the coin transaction's
+ * wallet prompt will carry, from what the form already knows. It mirrors walletNoticeItems for a coin plan (and its
+ * card, `oneApproval`: the connected wallet signs both in one prompt), with the fee amount left to the review and the
+ * initial buy's amount left out (the review shows both exactly). A tokenized-stock quote never carries a first buy
+ * (the page says so at the buy), so its issuer note never shows here.
  */
-export function walletNoticePreview({ hasBuy, quoteKind, siteHost }: { hasBuy: boolean; quoteKind: string; siteHost?: string }): WalletNoticeItem[] {
-  const items: WalletNoticeItem[] = [{ key: "networkFeeLater", text: WALLET_NOTICE_COPY.networkFeeLater }];
-  if (hasBuy) {
-    items.push({ key: "tokenAccount", text: WALLET_NOTICE_COPY.tokenAccount }, { key: "unverified", text: WALLET_NOTICE_COPY.unverified });
-    if (quoteKind === "stock") items.push({ key: "stockQuote", text: WALLET_NOTICE_COPY.stockQuote });
-  }
-  items.push({ key: "coinSigner", text: WALLET_NOTICE_COPY.coinSigner }, { key: "newSite", text: WALLET_NOTICE_COPY.newSite(siteHost) });
+export function walletNoticePreview({ hasBuy, siteHost, oneApproval = false }: { hasBuy: boolean; siteHost?: string; oneApproval?: boolean }): WalletNoticeItem[] {
+  const approvals = oneApproval ? "approvalsPair" : "approvalsCoin";
+  const items: WalletNoticeItem[] = [{ key: approvals, text: WALLET_NOTICE_COPY[approvals] }, { key: "networkFeeLater", text: WALLET_NOTICE_COPY.networkFeeLater }];
+  if (hasBuy) items.push({ key: "tokenAccount", text: WALLET_NOTICE_COPY.tokenAccount }, { key: "unverified", text: WALLET_NOTICE_COPY.unverified });
+  items.push({ key: "coinSigner", text: WALLET_NOTICE_COPY.coinSigner });
+  if (oneApproval) items.push({ key: "cardSigner", text: WALLET_NOTICE_COPY.cardSigner }, { key: "cardLock", text: WALLET_NOTICE_COPY.cardLock });
+  items.push({ key: "newSite", text: WALLET_NOTICE_COPY.newSite(siteHost) });
   return items;
 }

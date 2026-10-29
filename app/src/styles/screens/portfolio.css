@@ -78,10 +78,12 @@
 .cdx-holding__chg,
 .cdx-holding__design { display: none; }
 .cdx-holding--loading { pointer-events: none; }
-@container (min-width: 480px) {
+/* One line from 600px, with Value the widest figure column: a quote value with its unit ("9,999.99 CHILLHOUSE") needs
+ * about 170px. Narrower panes (the three-panel row at 1440 and 1920) keep the two-line row. */
+@container (min-width: 600px) {
   .cdx-holdings__head,
   .cdx-holding {
-    grid-template-columns: 24px minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 64px;
+    grid-template-columns: 24px minmax(0, 1.6fr) minmax(0, 0.9fr) minmax(0, 1.5fr) 64px;
     gap: 12px;
   }
   .cdx-holding { min-height: var(--row-h); padding-block: 4px; }

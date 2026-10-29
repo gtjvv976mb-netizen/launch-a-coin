@@ -41,11 +41,23 @@ export class LaunchFailedOnChain extends UserError {
 const COIN_FAILED = "Your coin transaction failed on Solana, so no coin was created (only its network fee was charged). Prepare it again with the same details once it expires, or discard it.";
 const CARD_FAILED = "Your card transaction failed on Solana, so no card was created (only its network fee was charged). Prepare the card again.";
 const STILL_VALID = "Your previous transaction can still land for up to about a minute. Wait a moment, then try again.";
-/** Provider and SDK failures as a creator reads them: no URLs, and plain words for the expiry gates. */
-function plainChainError(error: unknown, kind: "token" | "nft") {
+export const PROVIDER_UNAVAILABLE = "The Solana network provider didn't answer. Try again in a moment.";
+/**
+ * A transport failure from the mainnet RPC rather than a launch check: an HTTP status line or JSON-RPC body (a 403,
+ * 429 or 5xx from the provider), a failed fetch, a dropped connection, a fetch timeout, or the Workers runtime's own
+ * subrequest failure ("internal error; reference = …").
+ */
+const PROVIDER_FAILURE = /\b[1-5]\d\d [A-Z][A-Za-z ]*:|jsonrpc|fetch failed|failed to fetch|network connection lost|network ?error|internal error; reference|ECONNRE(?:SET|FUSED)|ETIMEDOUT|EAI_AGAIN|socket hang up|aborted due to timeout/i;
+/**
+ * Provider and SDK failures as a creator reads them: no URLs, plain words for the expiry gates, and one plain
+ * sentence for a provider that did not answer (its own text goes to the log, redacted). SDK checks keep their words.
+ */
+export function plainChainError(error: unknown, kind: "token" | "nft") {
   if (error instanceof Error && error.name === "TransactionFailedOnChain") return new LaunchFailedOnChain(kind);
   const message = (error instanceof Error ? error.message : "The mainnet provider could not verify this launch.").replace(/https?:\/\/\S+/g, "[provider]");
-  return new UserError(/can still land/.test(message) ? STILL_VALID : message.slice(0, 500));
+  if (/can still land/.test(message)) return new UserError(STILL_VALID);
+  if (PROVIDER_FAILURE.test(message)) { logLaunchEvent("provider_unavailable", {kind, reason: message}); return new UserError(PROVIDER_UNAVAILABLE); }
+  return new UserError(message.slice(0, 500));
 }
 async function chain<T>(fn: () => Promise<T>, kind: "token" | "nft" = "token"): Promise<T> {
   try { return await fn(); }

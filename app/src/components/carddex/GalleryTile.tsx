@@ -50,7 +50,8 @@ export function CoinTile({
             />
           </div>
           <div className="cdx-token-cell__caption">
-            <div className="cdx-token-cell__row">
+            {/* A market cap in its quote ("38.84K DOGE") may take a line of its own under the name (browse.css). */}
+            <div className="cdx-token-cell__row" data-wrap={coin.mcapUsd == null || undefined}>
               <h2 className="cdx-token-cell__name">{coin.name}</h2>
               <span className="cdx-token-cell__mc">
                 <span className="cdx-token-cell__unit" aria-hidden>MC</span>

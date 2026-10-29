@@ -607,7 +607,7 @@ export default function TurntableStage({
                       <div className="mdx-card3d__faces">
                         <FaceDepth.Provider value="hand">
                           <div className="mdx-card3d__slot" data-on="">
-                            <MintCardFace card={card} sizes={SIZES} priority />
+                            <MintCardFace card={card} sizes={SIZES} priority full />
                           </div>
                         </FaceDepth.Provider>
                       </div>

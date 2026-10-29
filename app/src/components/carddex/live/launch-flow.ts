@@ -246,8 +246,13 @@ export function dropLaunchSession() {
 /** About how long a sent transaction can take to land and finalize before its ~150-block approval runs out. */
 export const CONFIRM_POLL_MS = 2_000, CONFIRM_MAX_POLLS = 45;
 export const STILL_CONFIRMING = "Sent. Solana is still finalizing it, which usually takes under a minute. Check again in a moment; nothing more is sent or charged.";
+/**
+ * A saved launch with nothing left to do (finished, or discarded). The page forgets it rather than restoring it over
+ * a new draft: a later visit, a connect or Launch starts from the creator's fields, never the finished coin's.
+ */
+export function launchSettled(saved: { status: string }): boolean { return saved.status === "complete" || saved.status === "abandoned"; }
 /** Shown when this tab no longer holds a prepared launch's new coin key (a reload): it cannot be signed here. */
-export const PREPARED_WITHOUT_KEY = "This browser no longer holds this launch's new coin key, so it can't be signed here. Discard the draft under Saved launches about a minute after it was prepared, then launch again.";
+export const PREPARED_WITHOUT_KEY = "This browser no longer holds this launch's new coin key, so it can't be signed here. Discard the unused draft about a minute after it was prepared, then launch again.";
 /**
  * Polls a sent transaction's confirmation (each check also sends the saved bytes again while they can land, on the
  * server) until it is verified, the server reports the bytes expired unlanded, or about 90 seconds pass, roughly a

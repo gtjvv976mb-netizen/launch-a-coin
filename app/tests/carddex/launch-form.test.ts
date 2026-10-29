@@ -80,22 +80,24 @@ describe("where focus goes", () => {
 
 describe("what your wallet will show, before anything is prepared", () => {
   const coinPlan = (buy: string) => ({ kind: "token" as const, review: { networkFeeLamports: "10000", priorityFeeLamports: "500", initialBuyQuoteBaseUnits: buy } });
-  const sol = { symbol: "SOL", decimals: 9, kind: "native" }, stock = { symbol: "TSLAx", decimals: 8, kind: "stock" };
+  const cardPlan = { kind: "nft" as const, review: { networkFeeLamports: "10000", priorityFeeLamports: "500", initialBuyQuoteBaseUnits: "0" } };
+  const sol = { symbol: "SOL", decimals: 9, kind: "native" };
   const keysOf = (items: { key: string }[]) => items.map(item => item.key);
   // The preview names the fee without its amount; every other line is one the prepared coin plan will also carry.
   const comparable = (keys: string[]) => keys.map(key => (key === "networkFeeLater" ? "networkFee" : key));
-  for (const [label, hasBuy, quote] of [["no buy, SOL", false, sol], ["a buy, SOL", true, sol], ["no buy, stock", false, stock], ["a buy, stock", true, stock]] as const) {
+  for (const [label, hasBuy, oneApproval] of [["no buy", false, false], ["a buy", true, false], ["no buy, one approval", false, true], ["a buy, one approval", true, true]] as const) {
     test(`mirrors the coin plan's list (${label})`, () => {
-      const preview = keysOf(walletNoticePreview({ hasBuy, quoteKind: quote.kind, siteHost: "launchacard.fun" }));
-      const plan = keysOf(walletNoticeItems(coinPlan(hasBuy ? "100000000" : "0") as never, quote, "launchacard.fun"));
-      for (const key of comparable(preview)) expect(plan).toContain(key);
-      expect(preview[0]).toBe("networkFeeLater");
-      expect(preview.includes("stockQuote")).toBe(hasBuy && quote.kind === "stock");
+      const preview = keysOf(walletNoticePreview({ hasBuy, siteHost: "launchacard.fun", oneApproval }));
+      const plan = keysOf(walletNoticeItems(coinPlan(hasBuy ? "100000000" : "0") as never, sol, "launchacard.fun", oneApproval ? cardPlan as never : null));
+      expect(comparable(preview)).toEqual(plan.filter(key => key !== "initialBuy"));
+      expect(preview[0]).toBe(oneApproval ? "approvalsPair" : "approvalsCoin");
       expect(preview.includes("tokenAccount")).toBe(hasBuy);
+      // A tokenized-stock quote never carries a first buy on mainnet (the page turns it off), so no issuer note here.
+      expect(preview.includes("stockQuote")).toBe(false);
     });
   }
   test("is plain: no dashes, and the fee line points at the review", () => {
     expect(WALLET_NOTICE_COPY.networkFeeLater).toBe("A network fee. The exact amount is in your review.");
-    for (const item of walletNoticePreview({ hasBuy: true, quoteKind: "stock", siteHost: "launchacard.fun" })) expect(item.text).not.toMatch(/[–—]/);
+    for (const item of walletNoticePreview({ hasBuy: true, siteHost: "launchacard.fun", oneApproval: true })) expect(item.text).not.toMatch(/[–—]/);
   });
 });

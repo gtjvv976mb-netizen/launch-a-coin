@@ -2,6 +2,8 @@
 
 PLDT (Philippines) blocks the two Cloudflare anycast IPs assigned to zone launchacard.fun. To get around this, launchacard.fun and www become custom hostnames on zone launchacard.com, which has different IPs. Requests still arrive with Host launchacard.fun. These stay the same: the app, `CARDDEX_PUBLIC_ORIGIN` (`https://launchacard.fun`), wallet origin checks and token metadata URLs.
 
+**Status, 29 October 2026 06:59 UTC (public DNS, read-only).** Step 4 is half done. `www.launchacard.fun` is a CNAME to `edge.launchacard.com` and answers 308 to the apex. The apex Custom Domain is gone, but its `CNAME @ -> edge.launchacard.com` was never added: the zone's nameservers answer `launchacard.fun A` with no record, so the canonical site does not resolve. The custom hostname itself is ready (a request pinned to `edge.launchacard.com`'s address with Host `launchacard.fun` returns health `ok`). Finish step 4 by adding the apex CNAME, verify (step 5), then commit Phase 2 (step 6) before any `wrangler deploy`. Until Phase 2 is committed, publish only with `versions upload` and `versions deploy`.
+
 ## Current state (dashboard, account 985281cb00d5f7379896b62a03e0edb7)
 
 - **Zone launchacard.com.** Cloudflare for SaaS is enabled. The fallback origin is `edge.launchacard.com` (proxied A record to `192.0.2.1`). A Workers route `*/*` points to `launch-a-card` and was added in the dashboard. `edge.launchacard.com` serves the app (verified).
@@ -30,7 +32,7 @@ The `*/*` route is the same one already set in the dashboard. A deploy keeps it 
 
 1. **Add the custom hostnames.** In zone launchacard.com, go to SSL/TLS > Custom Hostnames. Add `launchacard.fun` and `www.launchacard.fun`, choosing TXT pre-validation for ownership and TXT validation for the certificate. In zone launchacard.fun, add the TXT records each hostname shows. Do not change the A, AAAA or CNAME records yet.
 2. **Wait for Active.** Both hostnames must show Hostname status Active and Certificate status Active.
-3. **Deploy Phase 1.** This is a production deploy and needs the owner's go-ahead. Run `cd app && bun run build && bunx wrangler@4.147.0 deploy -c wrangler.production.jsonc`. Then check that https://launchacard.fun/api/live/health still returns `"ok": true`.
+3. **Deploy Phase 1.** This is a production deploy and needs the owner's go-ahead. Run `cd app && bun run build && bunx wrangler@4.147.0 versions upload -c wrangler.production.jsonc --strict --keep-vars --tag <tag> --message "<message>"`, then `bunx wrangler@4.147.0 versions deploy <version-id>@100% -c wrangler.production.jsonc --message "<message>" --yes`. Then check that https://launchacard.fun/api/live/health still returns `"ok": true`. Do not use `wrangler deploy` here or later while the config lists the Custom Domains: run without a terminal, it overrides the existing DNS records (see Phase 2).
 4. **Switch DNS.** In zone launchacard.fun, open Workers & Pages > launch-a-card > Settings > Domains & Routes. Remove the Custom Domains `launchacard.fun` and `www.launchacard.fun`, which also deletes their DNS records. Then immediately add these DNS records:
    - `CNAME @ -> edge.launchacard.com`, DNS only, TTL Auto
    - `CNAME www -> edge.launchacard.com`, DNS only, TTL Auto

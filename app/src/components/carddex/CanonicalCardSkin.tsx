@@ -64,7 +64,8 @@ function smallSkin(atlas:RenderAsset) {
 
 const stagedIdle=()=>true;
 
-export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,eager=false,lite=false,sizes}:{cardTemplate:string;quoteAssetKey?:string;priority?:boolean;eager?:boolean;lite?:boolean;sizes?:string}) {
+/** `full`: a viewer opened to look closely (Inspect, the 3D turntable) keeps the 1260 px atlas on phones and tablets too. */
+export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,eager=false,lite=false,full=false,sizes}:{cardTemplate:string;quoteAssetKey?:string;priority?:boolean;eager?:boolean;lite?:boolean;full?:boolean;sizes?:string}) {
   const id=useId().replaceAll(":", "");
   const quote=quoteAssetKey?getPairAsset(quoteAssetKey):defaultQuoteForDesign(cardTemplate);
   const atlas=canonicalSkinAsset(cardTemplate,quoteAssetKey);
@@ -89,7 +90,7 @@ export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,eag
   const skin=atlas&&src?<img ref={imageRef} className="cdx-canonical-skin__image" src={src} srcSet={small?undefined:canonicalSkinSrcSet(atlas)} sizes={imageSizes} style={shown?undefined:{opacity:0}} alt="" hidden={image.failed} draggable={false} loading={priority||eager?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":eager?"low":undefined} onLoad={image.onLoad} onError={image.onError} />:null;
   return <div ref={box} className="cdx-canonical-skin" data-market-finish={quote.kind} data-card-skin-ready={ready?"":undefined} data-card-skin-source={ready?cardTemplate:undefined} aria-hidden>
     <CanonicalSkinSurface cardTemplate={cardTemplate} quoteAssetKey={quoteAssetKey} id={id} />
-    {skin&&atlas?(small?skin:<picture><source media={SKIN_PHONE_MEDIA} srcSet={canonicalSkinSrcSet(atlas,true)} sizes={imageSizes} />{skin}</picture>):null}
+    {skin&&atlas?(small||full?skin:<picture><source media={SKIN_PHONE_MEDIA} srcSet={canonicalSkinSrcSet(atlas,true)} sizes={imageSizes} />{skin}</picture>):null}
   </div>;
 }
 

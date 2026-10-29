@@ -249,6 +249,12 @@
 .cdx-token-cell__link:active .cdx-token-cell__name {
   text-decoration-color: var(--color-ink);
 }
+/* A quote-unit market cap is wider than "$4.2K": when it and the name do not share the line, it drops under the
+ * name (on the left) instead of cutting the name to a few letters. */
+.cdx-token-cell__row[data-wrap] {
+  flex-wrap: wrap;
+  row-gap: 0;
+}
 .cdx-token-cell__mc {
   flex: none;
   font-size: var(--text-body);

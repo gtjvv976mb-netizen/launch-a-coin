@@ -918,6 +918,25 @@ describe("Sign In With Solana on the server (solana:signIn)", () => {
   });
 });
 
+describe("provider failures read as plain words (MW-3)", () => {
+  test("an RPC that refuses or drops a request reads as one sentence; launch checks keep their own words", () => {
+    for (const raw of [
+      '403 Forbidden:  {"jsonrpc":"2.0","error":{"code": 403, "message":"Your IP or provider is blocked from this endpoint"}, "id": "4557d45c" }',
+      'failed to get recent blockhash: Error: 429 Too Many Requests: {"jsonrpc":"2.0","error":{"code":429,"message":"Too many requests"}}',
+      "502 Bad Gateway: <html>upstream</html>",
+      "fetch failed",
+      "Network connection lost.",
+      "The operation was aborted due to timeout",
+      "internal error; reference = pc27opduf86h0jp5mdcd18pu",
+    ]) expect(service.plainChainError(new Error(raw), "token").message).toBe(service.PROVIDER_UNAVAILABLE);
+    for (const raw of ["Current Pump accounts are unavailable", "The pair mint account is unavailable", "Token mint already exists"]) expect(service.plainChainError(new Error(raw), "token").message).toBe(raw);
+    expect(service.plainChainError(new Error("A transaction signed for this mint can still land"), "token").message).toContain("can still land for up to about a minute");
+    expect(service.plainChainError(Object.assign(new Error("x"), {name: "TransactionFailedOnChain"}), "nft")).toBeInstanceOf(service.LaunchFailedOnChain);
+    // No provider URL ever reaches the creator.
+    expect(service.plainChainError(new Error("Simulation failed at https://rpc.example.invalid/?api-key=secret"), "token").message).not.toContain("secret");
+  });
+});
+
 describe("platform hardening on the server", () => {
   const sign = (message: string) => btoa(String.fromCharCode(...ed25519.sign(new TextEncoder().encode(message), creatorSeed)));
   const servePublic = (url: string, init?: RequestInit) => {

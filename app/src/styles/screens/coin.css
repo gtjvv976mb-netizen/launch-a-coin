@@ -103,6 +103,9 @@
 .cdx-coin-screen__market .mdx-kpi { padding: 8px 12px; }
 .cdx-coin-screen__market .mdx-kpi:not([data-lead]) .mdx-kpi__value > .num { font-size: var(--text-lead); line-height: 24px; }
 .cdx-coin-screen__market .mdx-kpi[data-lead] .mdx-kpi__change { flex-basis: 100%; }
+/* A quote with no USD reference (a DOGE pair): its unit goes on its own line under the 30px figure, at the siblings'
+ * size, so "38.84K DOGE" never runs into the curve cell or off a phone. USD figures carry no unit and are unchanged. */
+.cdx-coin-screen__market .mdx-kpi[data-lead] .mdx-kpi__value > .num > .mdx-unit { display: block; font-size: var(--text-lead); line-height: 20px; }
 .cdx-coin-screen__market .mdx-kpi__sub:has(> .mdx-curve) { margin-top: 6px; }
 /* The cell's label and figure stand in for the track's own head (the meter keeps its words). */
 .cdx-coin-screen__market .mdx-curve__head { display: none; }

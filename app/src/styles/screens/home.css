@@ -490,6 +490,7 @@
   .cdx-home__picks-row {
     grid-row: 3;
     grid-column: 2;
+    container: picks-row / inline-size;
   }
   .cdx-home__gyro {
     grid-row: 4;
@@ -504,6 +505,13 @@
       120px,
       min(320px, 80cqw, calc((100svh - var(--topbar-h) - var(--tabbar-h) - 32px) / 1.497))
     );
+  }
+}
+/* Ten picks that cannot share one line beside Pause (10 x 44 + 8 + 44) split five and five, never nine and one. */
+@container picks-row (max-width: 491.98px) {
+  .cdx-home__picks:has(> :nth-child(10)) {
+    display: grid;
+    grid-template-columns: repeat(5, var(--hit));
   }
 }
 

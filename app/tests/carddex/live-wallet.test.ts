@@ -8,7 +8,7 @@ import { base58, fromBase58, hexHash, LIVE_PROGRAMS, parseLiveTransaction, parti
   addEphemeralSignature, fromBase64, oversizedPlanError, planForWallet, planIsStale, refreshKeepsReview, signingOrderFor, signPlanWithWallet, validateWalletFirstResult, WALLET_CHANGED_TRANSACTION, WalletChangedTransaction } from "../../src/components/carddex/live/transaction";
 import { liveModeOpen } from "../../src/components/carddex/live/mode";
 import { signForLaunch, WALLET_RETRY_NOTICE } from "../../src/components/carddex/live/launch-flow";
-import { BUY_DOES_NOT_FIT, liveBuyRefusal, STOCK_BUY_WARNS } from "../../src/components/carddex/live/buy-fit";
+import { BUY_DOES_NOT_FIT, liveBuyOff, liveBuyRefusal, STOCK_BUY_WARNS } from "../../src/components/carddex/live/buy-fit";
 import { messageOf, payerGuardData, phantomGuarded, tokenGuardData, unsignedTransaction } from "../../../integrations/pumpfun/tests/message-fixtures";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
@@ -397,5 +397,17 @@ describe("the initial-buy refusal copy", () => {
     expect(liveBuyRefusal({ buyFits: false, buyBlocked: "issuer-controls" })).toBe(STOCK_BUY_WARNS);
     expect(liveBuyRefusal({ buyFits: false, buyBlocked: null })).toBe(BUY_DOES_NOT_FIT);
     expect(liveBuyRefusal({ buyFits: false })).toBe(BUY_DOES_NOT_FIT);
+  });
+  test("the Launch page's buy is off with the server's reason, and off from the start for a tokenized-stock quote (MW-2)", () => {
+    // A size or issuer refusal from the server is shown as it says.
+    expect(liveBuyOff("meme", BUY_DOES_NOT_FIT)).toBe(BUY_DOES_NOT_FIT);
+    expect(liveBuyOff("stock", STOCK_BUY_WARNS)).toBe(STOCK_BUY_WARNS);
+    // Before sign-in the size check has no answer: a stock quote's buy is off with its own reason, others stay on.
+    expect(liveBuyOff("stock", undefined)).toBe(STOCK_BUY_WARNS);
+    expect(liveBuyOff("native", undefined)).toBeNull();
+    expect(liveBuyOff("meme", undefined)).toBeNull();
+    // The server's answer that the buy fits wins.
+    expect(liveBuyOff("stock", null)).toBeNull();
+    expect(liveBuyOff("native", null)).toBeNull();
   });
 });

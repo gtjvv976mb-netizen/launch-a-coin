@@ -414,6 +414,9 @@
 }
 .mdx-v3d .mdx-card3d__halo > b,
 .mdx-inspect .mdx-card3d__halo > b,
+/* [data-metal]: above card3d.css's prism for frost, regal, celestial and legend cards (0,3,1), which would win. */
+.mdx-v3d .mdx-card3d[data-metal] > .mdx-card3d__halo > b,
+.mdx-inspect .mdx-card3d[data-metal] > .mdx-card3d__halo > b,
 .mdx-v3d .mdx-card3d:not([data-depth="hand"]) > .mdx-card3d__halo,
 .mdx-inspect .mdx-card3d:not([data-depth="hand"]) > .mdx-card3d__halo {
   display: none;

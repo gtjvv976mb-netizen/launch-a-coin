@@ -62,7 +62,7 @@ import {
 } from "../../lib/mintdex/format";
 import { getCardDesign } from "../../lib/carddex/designs";
 import { getPairAsset } from "../../lib/carddex/pairs";
-import { marketCapText, marketCapWatch, quoteNumber } from "../../lib/carddex/quote-display";
+import { marketCapText, marketCapWatch, quoteFixed, quoteNumber } from "../../lib/carddex/quote-display";
 import { formatQuoteAmount, parseQuoteAmount, quoteMetrics } from "../../lib/carddex/quote-simulation";
 import type { CoinDetail, CoinPage, TradeRow } from "../../lib/mintdex/types";
 import { CardBack, CardCase, GyroChip, View3DButton, useView3DGestures, type Card3DHandle } from "./card3d";
@@ -157,21 +157,8 @@ function ago(ms: number, now?: number) {
   return timeAgo(ms, now).replace(/ ago$/, "");
 }
 
-const COMPACT = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
-
-/**
- * An amount in a quote asset for balances and table columns: two fixed decimals so the points line up ("0.30",
- * "122.78"), "<0.01" for dust, compact from 10K ("12.4K"). A real zero is "0.00". Takes the quote's atoms.
- */
-export function quoteFixed(atoms: number | string, key?: string | null): string {
-  const value = Number(atoms) / 10 ** getPairAsset(key).decimals;
-  if (!Number.isFinite(value)) return "—";
-  const size = Math.abs(value);
-  if (size === 0) return "0.00";
-  if (size < 0.01) return "<0.01";
-  if (size >= 10_000) return COMPACT.format(size);
-  return size.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+// The balance and column format lives in quote-display.ts (the Launch page shows balances the same way).
+export { quoteFixed };
 
 /** One precision for every percentage on the page: "2.4%", "144.1%", "<0.1%" (a size, never signed). */
 function pctText(v: number) {
@@ -1054,7 +1041,9 @@ export function TradesList({
                 <th scope="col">Time</th>
                 <th scope="col">Trader</th>
                 <th scope="col" className="cdx-trades__n">{symbol}</th>
-                <th scope="col" className="cdx-trades__n cdx-trades__mcap">Market cap</th>
+                {/* A quote with no USD reference: the cells are in that quote, so the head names it, short enough for the
+                    column ("MC · DOGE", as Discover's tiles abbreviate it); screen readers hear the words. */}
+                <th scope="col" className="cdx-trades__n cdx-trades__mcap">{native ? <><span aria-hidden="true">MC · {symbol}</span><span className="sr-only">Market cap, {symbol}</span></> : "Market cap"}</th>
               </tr>
             </thead>
             <tbody ref={bodyRef}>
@@ -1115,8 +1104,8 @@ const EMPTY = <span className="mdx-dash">{"—"}</span>;
 /** The ticket's one message slot (P1-9 step 9): generic, so wallet errors can use it on devnet. */
 type TicketMessage = { kind: "error" | "warning" | "info"; text: ReactNode; plain: string };
 
-/** The ticket's foot: what this trade is and is not. */
-const TICKET_NOTE = IS_SIM ? "Test SOL on a simulated curve. Nothing is sent on chain." : "";
+/** The ticket's foot: what this trade is and is not, in the coin's own quote ("Test DOGE on a simulated curve."). */
+const ticketNote = (symbol: string) => IS_SIM ? `Test ${symbol} on a simulated curve. Nothing is sent on chain.` : "";
 
 /** A summary of the quote for screen readers, debounced so typing does not chatter (P1-9 step 3). */
 function useDebounced<T>(value: T, ms: number) {
@@ -1580,7 +1569,7 @@ export function TradePanel({
       {/* Below 1024px the submit is the action bar's, the view root's last child so that it sticks for the whole page.
           This stop keeps its place in the Tab order: focus passes straight on to the bar's button (A11Y-5). */}
       <span ref={t.barStopRef} role="button" tabIndex={0} aria-label={`Go to ${t.label}`} className="cdx-trade-ticket__bar-stop" onFocus={t.toBar} onClick={t.toBar} />
-      {TICKET_NOTE ? <p className="cdx-trade-ticket__note">{TICKET_NOTE}</p> : null}
+      {IS_SIM ? <p className="cdx-trade-ticket__note">{ticketNote(asset.symbol)}</p> : null}
     </form>
   );
 }

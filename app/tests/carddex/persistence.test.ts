@@ -127,6 +127,21 @@ describe("CardDex fixed creator cards and token trading", () => {
     await expect(service.launchCoin(user, {...input, ticker: "OLDPAIR", tokenPair: "TSLA / SOL"})).rejects.toThrow("reference pair must match");
   });
 
+  test("Home's all-time volume stays known until a coin with no SOL reference trades (VIS-4)", async () => {
+    await service.getMe(user);
+    const sol = getPairAsset("sol"), doge = getPairAsset("doge");
+    const traded = await service.launchCoin(user, { name: "Sol Pair Token", ticker: "SOLP", image: "/api/img/art/qa-token.png", lore: "", devBuy: LAMPORTS / 10, cardTemplate: DEFAULT_CARD_DESIGN, quoteAssetKey: sol.key, quoteMint: sol.mint });
+    const before = (await service.getHome()).stats.volume;
+    expect(before).toBeGreaterThan(0);
+    // A DOGE-pair coin with no trades adds nothing and hides nothing.
+    const untraded = await service.launchCoin(user, { name: "Doge Pair Token", ticker: "DOGEP", image: "/api/img/art/qa-token.png", lore: "", devBuy: 0, cardTemplate: DEFAULT_CARD_DESIGN, quoteAssetKey: doge.key, quoteMint: doge.mint });
+    expect((await service.getHome()).stats.volume).toBe(before);
+    // Once it trades, its volume has no SOL figure, so the total is unknown rather than understated.
+    await service.trade(user, untraded.id, "buy", Math.floor(initialQuoteReserves(doge.key).vSol / 30), 0, { quoteAssetKey: doge.key, quoteMint: doge.mint });
+    expect((await service.getHome()).stats.volume).toBeNull();
+    expect(traded.id).toBeTruthy();
+  });
+
   test("historical stock artwork keeps its stored SOL quote through reads and trades", async () => {
     const design = getCardDesign("stock-tsla"), now = Date.now();
     // Represents a pre-pairing row: the quote columns retain their migration defaults.

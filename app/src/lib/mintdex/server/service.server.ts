@@ -364,7 +364,8 @@ export async function getHome(): Promise<HomeData & Rev> {
     stats: {
       coins: coins.length,
       deedSales: 0,
-      volume: coins.some(coin => coin.volume === null) ? null : coins.reduce((s, c) => s + (c.volume ?? 0), 0),
+      // Unknown (a grey dash) only once a coin with no SOL reference has traded; an untraded one adds nothing.
+      volume: coins.some(coin => coin.volume === null && coin.volumeQuote !== "0") ? null : coins.reduce((s, c) => s + (c.volume ?? 0), 0),
       volumeByQuote: sumAtomsByQuote(coins.map(coin => [coin.quoteAssetKey, coin.volumeQuote])),
       players: players[0]?.n ?? 0,
     },

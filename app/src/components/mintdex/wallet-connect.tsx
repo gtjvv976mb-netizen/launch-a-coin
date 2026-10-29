@@ -32,12 +32,17 @@ function withNextStep(message: string) {
   return /try again|reconnect|switch|install|open /i.test(text) ? text : `${text} Choose a wallet to try again.`;
 }
 
-/** `connect` replaces connectLiveWallet for a chosen wallet (the launch panel passes its connect-and-sign-in). */
-export function WalletConnectDialog({ open, onOpenChange, connect = connectLiveWallet }: { open: boolean; onOpenChange: (o: boolean) => void; connect?: (walletName: string) => Promise<unknown> }) {
+/**
+ * `connect` replaces connectLiveWallet for a chosen wallet (the launch panel passes its connect-and-sign-in).
+ * `busyCopy`: for a wallet whose connect is also its sign-in prompt, the line to show while that prompt is open (it
+ * replaces the connect-only line, and the row reads "Signing in with …").
+ */
+export function WalletConnectDialog({ open, onOpenChange, connect = connectLiveWallet, busyCopy }: { open: boolean; onOpenChange: (o: boolean) => void; connect?: (walletName: string) => Promise<unknown>; busyCopy?: (walletName: string) => string | null }) {
   const wallet = useLiveWallet();
   const [error, setError] = useState("");
   const id = useId();
   const address = wallet.address;
+  const signingIn = wallet.connecting ? busyCopy?.(wallet.connecting) ?? null : null;
   // Where to get a wallet (shown only when this browser has none): the official pages.
   const getable = GET_WALLETS.filter((g) => !wallet.wallets.some((w) => w.name.toLowerCase().startsWith(g.name.toLowerCase())));
   const close = () => onOpenChange(false);
@@ -129,7 +134,7 @@ export function WalletConnectDialog({ open, onOpenChange, connect = connectLiveW
                           }}
                         >
                           <img src={w.icon} alt="" width={24} height={24} className="cdx-wallet-connect__icon" />
-                          <span className="cdx-wallet-connect__row-name">{busy ? `Connecting ${w.name}…` : w.name}</span>
+                          <span className="cdx-wallet-connect__row-name">{busy ? signingIn ? `Signing in with ${w.name}…` : `Connecting ${w.name}…` : w.name}</span>
                           <Icon name="chevron-right" />
                         </button>
                       </li>
@@ -170,7 +175,7 @@ export function WalletConnectDialog({ open, onOpenChange, connect = connectLiveW
                 <span>{error}</span>
               </p>
             ) : null}
-            <p className="cdx-wallet-connect__line">{WHAT_CONNECTING_DOES}</p>
+            <p className="cdx-wallet-connect__line" role={signingIn ? "status" : undefined}>{signingIn ?? WHAT_CONNECTING_DOES}</p>
           </>
         )}
       </div>

@@ -87,7 +87,8 @@ export function CaseScene({
   onInspect,
   turntable = true,
 }: CaseSceneProps) {
-  const slots = useCardSlots(card, { ascend: "ascend", art: "print", priority, sizes, hand: true });
+  // Inspect is opened to look closely: its face keeps the full-size skin on phones too (CanonicalCardSkin `full`).
+  const slots = useCardSlots(card, { ascend: "ascend", art: "print", priority, sizes, hand: true, full: kind === "inspect" });
   const tier = tierForLevel(slots.level);
   const [said, setSaid] = useState("");
   const [paused, setPaused] = useState(false);

@@ -389,4 +389,9 @@ describe("a launch that outlives the page view, and its confirmation (REL-4, REL
     expect(flow.coinRetryable({ status: "token_pending" }, true)).toBe(false);
     expect(flow.coinRetryable(null, true)).toBe(false);
   });
+  test("a finished or discarded saved launch is forgotten, never restored over a new draft (MW-1)", () => {
+    expect(flow.launchSettled({ status: "complete" })).toBe(true);
+    expect(flow.launchSettled({ status: "abandoned" })).toBe(true);
+    for (const status of ["prepared", "token_pending", "nft_pending"]) expect(flow.launchSettled({ status })).toBe(false);
+  });
 });

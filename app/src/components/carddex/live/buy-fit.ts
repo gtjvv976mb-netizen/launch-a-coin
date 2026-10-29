@@ -36,3 +36,13 @@ export function useLiveBuyRefusal(active: boolean, name: string, symbol: string,
   const query = useLiveBuyFitQuery(active, name, symbol, quoteAssetKey);
   return !active || !query.data ? undefined : liveBuyRefusal(query.data);
 }
+/**
+ * Whether the Launch page's initial buy is off, as the copy to show beside it, or null when a buy can be entered.
+ * `refusal` is useLiveBuyRefusal's answer. A tokenized-stock quote's first buy is refused on mainnet (issuer controls,
+ * ALLOW_PERMANENT_DELEGATE_QUOTE_BUY), so it is off before sign-in lets the size check answer; a server answer that
+ * the buy fits (null) wins.
+ */
+export function liveBuyOff(quoteKind: string, refusal: string | null | undefined): string | null {
+  if (typeof refusal === "string") return refusal;
+  return quoteKind === "stock" && refusal !== null ? STOCK_BUY_WARNS : null;
+}
