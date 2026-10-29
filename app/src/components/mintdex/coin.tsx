@@ -1040,10 +1040,10 @@ export function TradesList({
               <tr>
                 <th scope="col">Time</th>
                 <th scope="col">Trader</th>
-                <th scope="col" className="cdx-trades__n">{symbol}</th>
-                {/* A quote with no USD reference: the cells are in that quote, so the head names it, short enough for the
-                    column ("MC · DOGE", as Discover's tiles abbreviate it); screen readers hear the words. */}
-                <th scope="col" className="cdx-trades__n cdx-trades__mcap">{native ? <><span aria-hidden="true">MC · {symbol}</span><span className="sr-only">Market cap, {symbol}</span></> : "Market cap"}</th>
+                {/* A quote with no USD reference: both figure columns are in that quote, which can be wider than the fixed
+                    columns ("CHILLHOUSE"), so the heads stay short and the line under the table names the unit. */}
+                <th scope="col" className="cdx-trades__n">{native ? "Amount" : symbol}</th>
+                <th scope="col" className="cdx-trades__n cdx-trades__mcap">{native ? <><span aria-hidden="true">MC</span><span className="sr-only">Market cap</span></> : "Market cap"}</th>
               </tr>
             </thead>
             <tbody ref={bodyRef}>
@@ -1069,6 +1069,8 @@ export function TradesList({
               ))}
             </tbody>
           </table>
+          {/* The table's caption says it to screen readers. */}
+          {native ? <p className="cdx-trades__unit" aria-hidden="true">Amounts and market cap in {symbol}</p> : null}
           {loaded > initial ? (
             <div className="cdx-trades__more">
               <Button ref={toggleRef} variant="ghost" size="sm" onClick={toggle}>

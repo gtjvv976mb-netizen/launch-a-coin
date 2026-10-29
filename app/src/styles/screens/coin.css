@@ -102,6 +102,9 @@
 }
 .cdx-coin-screen__market .mdx-kpi { padding: 8px 12px; }
 .cdx-coin-screen__market .mdx-kpi:not([data-lead]) .mdx-kpi__value > .num { font-size: var(--text-lead); line-height: 24px; }
+/* A long quote unit ("0.0035 CHILLHOUSE") wraps under its figure rather than run into the next cell: the space
+ * before the unit, inside its span, may break (the figure itself never does; Num keeps whitespace-nowrap). */
+.cdx-coin-screen__market .mdx-kpi:not([data-lead]) .mdx-kpi__value > .num > .mdx-unit { white-space: normal; }
 .cdx-coin-screen__market .mdx-kpi[data-lead] .mdx-kpi__change { flex-basis: 100%; }
 /* A quote with no USD reference (a DOGE pair): its unit goes on its own line under the 30px figure, at the siblings'
  * size, so "38.84K DOGE" never runs into the curve cell or off a phone. USD figures carry no unit and are unchanged. */
@@ -298,6 +301,7 @@
 .cdx-trades__table .cdx-trades__n { text-align: right; }
 .cdx-trades__table tr:focus-visible { outline: 2px solid var(--color-zap); outline-offset: -2px; }
 .cdx-trades__table tr:focus:not(:focus-visible) { outline: none; }
+.cdx-trades__unit { padding-top: 8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
 .cdx-trades__more { display: flex; min-height: var(--hit); align-items: center; padding-top: 8px; margin-left: -12px; }
 .cdx-trades__foot,
 .cdx-trades__empty { padding-top: 12px; font-size: var(--text-body); color: var(--color-slate); }
