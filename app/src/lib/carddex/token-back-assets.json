@@ -1,0 +1,434 @@
+{
+  "pokemon-classic": {
+    "designKey": "pokemon-classic",
+    "path": "/assets/carddex/token-backs/pokemon-classic.png",
+    "sha256": "ebc70bc6fca2d9e1391199cbdf301e913e2477d265d1b709ef2026e2429158a7",
+    "sourceSha256": "f851e97b09f0b747adca0924f26bab829d9fe70a040532e2d82051a9f222ad4d",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "pokemon-full-art": {
+    "designKey": "pokemon-full-art",
+    "path": "/assets/carddex/token-backs/pokemon-full-art.png",
+    "sha256": "23255b896b9c899e1f1d54562dd15e2aac84c3e71bceac33418accb26221ad40",
+    "sourceSha256": "cd0658657b746dcea7972f33832fd7bf0a87e280040274e07d105e50c321b424",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "yugioh-monster": {
+    "designKey": "yugioh-monster",
+    "path": "/assets/carddex/token-backs/yugioh-monster.png",
+    "sha256": "7bcbc4627687c9f52e57b78cefc1687583e9438e15c051f1639d08fd677a1586",
+    "sourceSha256": "4fe348ab617bca9b18d3dec3fa4c5405989830209bb3e3b58e8737317fccdec1",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "yugioh-spell": {
+    "designKey": "yugioh-spell",
+    "path": "/assets/carddex/token-backs/yugioh-spell.png",
+    "sha256": "0303ebbb9d4b96ddc151cdbca99e3dc3470d4789efd173f60203e91fddadecb2",
+    "sourceSha256": "a3005591cf30352191e825373b92bee39b47ba79f9400b28abdccdc4c71f9393",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "magic-etched": {
+    "designKey": "magic-etched",
+    "path": "/assets/carddex/token-backs/magic-etched.png",
+    "sha256": "a74ba72c0d4cac3abe84f1591a007e556df000141da8e989ddc7177f18a8ed7a",
+    "sourceSha256": "f9be5cb15023d7123a52d252681e3dafca425152ad2ef5f280958ed90abd08fd",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "duel-masters": {
+    "designKey": "duel-masters",
+    "path": "/assets/carddex/token-backs/duel-masters.png",
+    "sha256": "3ddb18c60c186bc515f8096da2a71da66679099b05b1cf888714a20ad035b85b",
+    "sourceSha256": "a57bc8ec7d069f0f9d0a34172271ded37de597d82eaf8c42c2e19d58b8288d93",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "one-piece": {
+    "designKey": "one-piece",
+    "path": "/assets/carddex/token-backs/one-piece.png",
+    "sha256": "818ed468a27adc3ad00f477391261b0baba1eb860a45c002d14389257d322e75",
+    "sourceSha256": "01bce18b47fbf5d1b7f88b6f32451798743c5fbd313dfd2995f5dd68dbdd898c",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "obsidian-archive": {
+    "designKey": "obsidian-archive",
+    "path": "/assets/carddex/token-backs/obsidian-archive.png",
+    "sha256": "7a072ad3724ac6eb675c77f6254867b1a3959e99c9ef7ecc5f88bbd916b9d7cf",
+    "sourceSha256": "bab27d628d298ddfe2365e0cde5f9eb8d6a4f330ccea588dc3d4415f26e0d986",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "stock-gme": {
+    "designKey": "stock-gme",
+    "path": "/assets/carddex/token-backs/stock-gme.png",
+    "sha256": "78df86fc67c0a3b1670582cbadfcdf4965aa7095a34ce84d94263d306d796d51",
+    "sourceSha256": "6dac21d32f3f5201c8d6cdb802f791935f7795875b0a957e328c123cfa501d7a",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "stock-tsla": {
+    "designKey": "stock-tsla",
+    "path": "/assets/carddex/token-backs/stock-tsla.png",
+    "sha256": "2fda9a1b34f9298a58f8f6f2ab23ae963bea63364d903be9ad2c7d28cd539e1f",
+    "sourceSha256": "29b6b8a0e0ae6f39f0d399658475ced26b1ec354b74f0aebe39384150a932794",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "stock-nvda": {
+    "designKey": "stock-nvda",
+    "path": "/assets/carddex/token-backs/stock-nvda.png",
+    "sha256": "5cf3e51b166e4919c6f63df4c61f646a209dc5570e986b082bda3a1de0bcf6a9",
+    "sourceSha256": "02c16ca130621344f0774475b71ccf063016783e39dd806fa437fb2810e5a2af",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "stock-aapl": {
+    "designKey": "stock-aapl",
+    "path": "/assets/carddex/token-backs/stock-aapl.png",
+    "sha256": "120759df9db1b10202a7436aeb566d312d07e59d92f8edee3cdbf459775736ae",
+    "sourceSha256": "bee8a88ddd6de1454d0799c048cdee32b39c42d5d8541cbd08d2522c86d37726",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "stock-mstr": {
+    "designKey": "stock-mstr",
+    "path": "/assets/carddex/token-backs/stock-mstr.png",
+    "sha256": "d3d6db27b8e520c35c24c2da7fac83785eabad7f75f0958f6fb4caf9eb9bbe73",
+    "sourceSha256": "2f5c89cc74593cab438ab16030ec006caad5469b4b5b7579a0db1bd4f54d1a92",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "stock-coin": {
+    "designKey": "stock-coin",
+    "path": "/assets/carddex/token-backs/stock-coin.png",
+    "sha256": "3702f4de9a4bc2517ee33431025ae8f0dc7bb7112187534368c09abadbfb1311",
+    "sourceSha256": "955c43987cc990ac480c3e17b02aa409c715071affd88e71958b321a950373c1",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "spark": {
+    "designKey": "spark",
+    "path": "/assets/carddex/token-backs/spark.png",
+    "sha256": "f4b40cb796db0322b3a0fd1ad613758ea2170d2344e6afc6d16dff464797d832",
+    "sourceSha256": "93724c6e1d9338415c718a53cd583253caac32eb42685aceed0a67e7a9252e40",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "surge": {
+    "designKey": "surge",
+    "path": "/assets/carddex/token-backs/surge.png",
+    "sha256": "78009fa613039fffb8369f5bf4b835669b1118ec1e9e968adfb8e27fc560504a",
+    "sourceSha256": "8650221e9fb1bcf6390513c4ac9373fbd04258d877115612f2e3375ecc284572",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "nova": {
+    "designKey": "nova",
+    "path": "/assets/carddex/token-backs/nova.png",
+    "sha256": "20e527859966dbaaf9e7fe50e0bfeb84323ebe135e7e060e2a5f1c6bbd96c31b",
+    "sourceSha256": "27732340f4a8f99e4a42e12e03e666e1d3ad2d85220a9ae9888fbab9be25c3bb",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "tide": {
+    "designKey": "tide",
+    "path": "/assets/carddex/token-backs/tide.png",
+    "sha256": "656bd75dfa17a6f78224dc98f8de4830f223b5a5878896899f1bd53cf26a7b52",
+    "sourceSha256": "08b3a62dc3fd43b804249a4b6d1be764cef79bef7e38442932584ce3151fba27",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "apex": {
+    "designKey": "apex",
+    "path": "/assets/carddex/token-backs/apex.png",
+    "sha256": "17ccba15e8f159bbbefb9223dc2af801ac117500e56fb7de759a3d730c81dce6",
+    "sourceSha256": "5e0e31105bd5d3ff1c3e72d1716bd2fef6980799dcb87871b59c86c952496819",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "ember": {
+    "designKey": "ember",
+    "path": "/assets/carddex/token-backs/ember.png",
+    "sha256": "a2be784bdd48a6e5dbbfd68436fcf90a1356b41ecd2246cc61072fcae8d4ff0c",
+    "sourceSha256": "ddfaf532aae3d9f26c3758a2075300963bbd850b704b9e2d0a984ec07630f937",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "bloom": {
+    "designKey": "bloom",
+    "path": "/assets/carddex/token-backs/bloom.png",
+    "sha256": "7fa04605cf4116fa2d91364f2060d50bd552549e2f1a19f386c1ad452259bb2e",
+    "sourceSha256": "adc19a074afdadaf35b7f838d62f18d198c976c9a7bc19fa86581be829120777",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "mythic": {
+    "designKey": "mythic",
+    "path": "/assets/carddex/token-backs/mythic.png",
+    "sha256": "867bf7e6c46344fd9b503946c0e752c781bb1c0c05e42c8864fd1a0e5427f0d8",
+    "sourceSha256": "3782e0b75d90df3a9aaa29313aa238b40020e217616c8418a774ed375ca532bc",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "aurora": {
+    "designKey": "aurora",
+    "path": "/assets/carddex/token-backs/aurora.png",
+    "sha256": "2a185429844d2ea735c62d39251221671da87fc2a87f40c10633f444c75857a6",
+    "sourceSha256": "5f21dbdace6a36a7a46cf6ae344e22844c94822239fca098f7ec79fa0d9d41cf",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "relic": {
+    "designKey": "relic",
+    "path": "/assets/carddex/token-backs/relic.png",
+    "sha256": "9444d72340cc567f8576581e19ac5812d2ccf9bb1c0cefa72439a273c6c5c46b",
+    "sourceSha256": "ba794a1e849f4ed058b40ce9c8c8a6495033426d6460e1b6f4188042b5f4ed32",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "frost": {
+    "designKey": "frost",
+    "path": "/assets/carddex/token-backs/frost.png",
+    "sha256": "e2f16486a9bc08fdc7b507e3edcbe77096a329b4663f3c3f8e011ee6fc796977",
+    "sourceSha256": "0c53e091486b3fa93749ea32f9dccbee69aca115641de534a681a52e880c1f3c",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "regal": {
+    "designKey": "regal",
+    "path": "/assets/carddex/token-backs/regal.png",
+    "sha256": "eb8cbda07c6020aac7b1547d4b6210780ff64b545bc4c40e11b8477ce4da03b9",
+    "sourceSha256": "3dd4519345bdf4e3956f8bf8dde14eba535e28be49dd901ccadc7e716a7b2c0d",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "celestial": {
+    "designKey": "celestial",
+    "path": "/assets/carddex/token-backs/celestial.png",
+    "sha256": "c22a30955b2d591d57900a74133950f83849447bef93907e163b0589c675c1a8",
+    "sourceSha256": "0db70fed15f8ad4b52cd901cfd955bcfef60f5a2f12c2c1d73becf14be18bafd",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "legend": {
+    "designKey": "legend",
+    "path": "/assets/carddex/token-backs/legend.png",
+    "sha256": "27145a841109063f4e54cb6e38ebfeeac76c1a993778b11e34fe7d4828eea1c0",
+    "sourceSha256": "bfda8b3712b17801bbb718934f3a5f54dfbce008098875c9ff366b351f16a858",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "doge": {
+    "designKey": "doge",
+    "path": "/assets/carddex/token-backs/doge.png",
+    "sha256": "29e08189a1cd69fb3e29cc9274767c31187a98469543145082de46ae1d28a721",
+    "sourceSha256": "d7087aee025b5da400d424344f780880e2d50cd3849a10941145343d45562003",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "pepe": {
+    "designKey": "pepe",
+    "path": "/assets/carddex/token-backs/pepe.png",
+    "sha256": "d790f1f788ecda9ce35fd5c749e7f5a245fd915ec7cf30a046b0f7925e878a4e",
+    "sourceSha256": "110aadf4fa9135036efe4f556b4163d4692de1aa6d9d6e60ffb8485da1554f3b",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "shib": {
+    "designKey": "shib",
+    "path": "/assets/carddex/token-backs/shib.png",
+    "sha256": "bc1284bed8177d1b1b33163c5f385d8a680e5c7aeaa0f6c3cd3a7650528c0b59",
+    "sourceSha256": "1eb852feed20a93b2f0b6ea4de8f7311eb74b0dd3f0e8553b1069121817f7581",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "bonk": {
+    "designKey": "bonk",
+    "path": "/assets/carddex/token-backs/bonk.png",
+    "sha256": "cbb71f2679b5d31aca1f025622cce1f2f4a2d876b74f55b5959b1102f0e228f8",
+    "sourceSha256": "c1503d9b731f3baf94a29aa008b01c9c05b01b01984f6a38f63afb7119fd7b00",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "wif": {
+    "designKey": "wif",
+    "path": "/assets/carddex/token-backs/wif.png",
+    "sha256": "26508ebb8006b0df27dfc0f0a8a15496faadab5cdad476c6ed1c599b670266c9",
+    "sourceSha256": "ef529ea98483c9d1e8a2bedb0b633d4fa9b861f50b41ad506ed9280a32d3eae2",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "popcat": {
+    "designKey": "popcat",
+    "path": "/assets/carddex/token-backs/popcat.png",
+    "sha256": "613851d0e8549bcab3154cf776708215fb233962d5fb55db193e21cb022b6576",
+    "sourceSha256": "b7401685558506acc0a5df6df993ea7c92ae0486023fe7519b53e62793a56749",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "gamestop": {
+    "designKey": "gamestop",
+    "path": "/assets/carddex/token-backs/gamestop.png",
+    "sha256": "6954fd756871a7d100f421e59375ab64d928ad34ab9a997530d5170999076ffa",
+    "sourceSha256": "6bb05d01c19ea5ad2cb8cf53f914f3834c432f5b881ff3e34def594e0ddd2aed",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "amc": {
+    "designKey": "amc",
+    "path": "/assets/carddex/token-backs/amc.png",
+    "sha256": "da73b4cef5cf7889bc562ff7bb33804d3560c05dd42f4302cdf0a434367c1d0f",
+    "sourceSha256": "e55dc56372262f817ff981cb8caf640c88cbb6ea1d4d67502e5960863584e005",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "blackberry": {
+    "designKey": "blackberry",
+    "path": "/assets/carddex/token-backs/blackberry.png",
+    "sha256": "caba00b47853ce3e015a531bbc13a9b70185c4b7052c8ec7af63e88fbbbfb578",
+    "sourceSha256": "a68782c1d9ba4c53f0e64ab60903af09db648b343b86bec9527f9ffead9b5977",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "nokia": {
+    "designKey": "nokia",
+    "path": "/assets/carddex/token-backs/nokia.png",
+    "sha256": "cdd96e2d7afec7171e56c3847399e63b8a8d5bd0d9b8f5ba95359db4d8eb57c2",
+    "sourceSha256": "28aae0d18045ee058739961d6ecfb6f80c4c00b6df2bd720a4e0251db441b6ed",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "coinbase": {
+    "designKey": "coinbase",
+    "path": "/assets/carddex/token-backs/coinbase.png",
+    "sha256": "adf3ac4bb717f2aad27e3b60a7314631a1d2702109c605649d44d32c4b6e3f66",
+    "sourceSha256": "b5e6494e312adc63163ba2421a63b959dff126238bbab89523df9f23e1bb0409",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "binance": {
+    "designKey": "binance",
+    "path": "/assets/carddex/token-backs/binance.png",
+    "sha256": "f5396fbd0b2ba83022e98c2d63129a6088629d63828c549b963d0d268cf6313c",
+    "sourceSha256": "8e61dee0b7124946fa8b3dbfe4dab683a76690c079e67f95fc64cce27cb25798",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "kraken": {
+    "designKey": "kraken",
+    "path": "/assets/carddex/token-backs/kraken.png",
+    "sha256": "6eb6d0c294e5fe4e848e529e93d8a3d88a9ac6e080db65816e503b9a5aeafac7",
+    "sourceSha256": "3c2eb3b7d81d720f78be144b2a78b2823b50f4a5dfa0514b9376fd488949d9e7",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "strategy": {
+    "designKey": "strategy",
+    "path": "/assets/carddex/token-backs/strategy.png",
+    "sha256": "96f8a9a1ead900c2bee4eadc3c051236a7b6f9b9ffd5a9d464a17ba0996bbec6",
+    "sourceSha256": "4397e1ba9fbecce6b35ff86d80e0525710000a988ace53a28079d33634914e50",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "wildtype": {
+    "designKey": "wildtype",
+    "path": "/assets/carddex/token-backs/wildtype.png",
+    "sha256": "4138b79a5e97575a749f49a0e415442d2e5f069d1f9dea3c5b975ec75592ee54",
+    "sourceSha256": "a3e99823ca26c660cedfaabe5f3103d43de946f3417ef0708bfa7e9b03b3b590",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "ronin": {
+    "designKey": "ronin",
+    "path": "/assets/carddex/token-backs/ronin.png",
+    "sha256": "23bf87d760474045e74004a3de58cd3a513254639fbfdebc0ae8c1f3e29e10fc",
+    "sourceSha256": "a566de1b516a4ba7d1df760f79cf07e9125652a92e03e3afa894e4f9cec34bcb",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "astral": {
+    "designKey": "astral",
+    "path": "/assets/carddex/token-backs/astral.png",
+    "sha256": "2c717608a4214e3c04879de038f367e169af274c5f5fddacefeb9a74536081d3",
+    "sourceSha256": "6d5211103d5e82c5b90b8a15478cab55ea598dd85c31a497b3ed67e2a2b62266",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "neon-circuit": {
+    "designKey": "neon-circuit",
+    "path": "/assets/carddex/token-backs/neon-circuit.png",
+    "sha256": "5a3e7d3baead597e26ae2a0a3134b0383628de69c5502cb7b5cb0c9f17544461",
+    "sourceSha256": "7f2a711ca674414a2944b774ee14f33bfb3a0325a6b5ec828582f5ed741abbab",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "sovereign": {
+    "designKey": "sovereign",
+    "path": "/assets/carddex/token-backs/sovereign.png",
+    "sha256": "31074671756a7a0d98ac2f606a354c4f4ffaf23c8d6c61edf8c27104bf42bd8a",
+    "sourceSha256": "40dee3fe6a1a2c59076e865d398ef9a6891f52a83e721bab78b5747aba69f6bf",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  },
+  "abyssal": {
+    "designKey": "abyssal",
+    "path": "/assets/carddex/token-backs/abyssal.png",
+    "sha256": "690308c4aca1295f5af073526d9399452d2907d58a5ed3f7c1ce1399512e5a4f",
+    "sourceSha256": "19b8f9e2f08f55cea2f640bd1c7f2e4c79fa88cd9dcb67b9dac716208d8b8fd3",
+    "width": 630,
+    "height": 880,
+    "conversionVersion": "launchacard-token-back-png-v1"
+  }
+}

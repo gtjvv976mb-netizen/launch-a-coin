@@ -4,6 +4,13 @@ import { getPairAsset } from "../pairs";
 
 export const CREATOR_CARD_RENDERER_VERSION = CARD_RENDERER_VERSION;
 export const CREATOR_IMAGE_DIMENSIONS = Object.freeze({ card: {width:1260,height:1760}, case: {width:1440,height:2240} });
+/** Independent avatar format; the collectible print and its renderer version stay unchanged. */
+export const TOKEN_IMAGE_FORMAT = "launchacard-token-square-v1";
+export const TOKEN_IMAGE_DIMENSIONS = Object.freeze({width:1024,height:1024});
+export const TOKEN_IMAGE_LAYOUT = Object.freeze({
+  background:"#f5efe2", cardHeight:.76, cardWidth:.76*(63/88),
+  cardX:(1-.76*(63/88))/2, cardY:(1-.76)/2,
+});
 const W=1260,H=1760;
 const xml=(s:string)=>s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&apos;"}[c]!));
 export function imageDataUri(bytes:Uint8Array,mime:string) {return `data:${mime};base64,${Buffer.from(bytes).toString("base64")}`;}
@@ -14,7 +21,7 @@ function lines(s:string,width:number,size:number) {let remaining=s.replace(/\s+/
 const box=(b:{x:number;y:number;w:number;h:number})=>({x:b.x*W,y:b.y*H,w:b.w*W,h:b.h*H});
 
 /** The approved flattened SVG skin, shared content boxes, fonts and actual creator artwork. */
-export function creatorCardSvg(card:CardData,tokenMint:string,_creator:string,artUri:string,atlasUri:string) {
+export function creatorCardSvg(card:CardData,tokenMint:string,_creator:string,artUri:string,atlasUri:string,options:{tokenImage?:boolean}={}) {
   const a=box(layout.window),n=box(layout.name),t=box(layout.type),d=box(layout.text),unit=W/100;
   const ink=card.cardTemplate==="neon-circuit"?"#e2f4f0":"#30251a";
   const titleSize=print.title*unit,numeralSize=print.numeral*unit,typeSize=print.type*unit,loreSize=print.lore*unit,rowSize=print.row*unit;
@@ -22,10 +29,12 @@ export function creatorCardSvg(card:CardData,tokenMint:string,_creator:string,ar
   const nameWidth=n.w-2*nameInset-widthOf("1/1",numeralSize)-2*unit;
   const left=d.x+print.detailsInset*unit,right=d.x+d.w-print.detailsInset*unit;
   const rowHeight=rowSize*print.rowLine,rowGap=print.rowGap*unit;
-  const firstRow=d.y+d.h-print.detailsBottom*unit-(3*rowHeight+2*rowGap);
+  const rows=options.tokenImage
+    ? [["Token address",`${tokenMint.slice(0,5)}...${tokenMint.slice(-4)}`],["Holders","0"]]
+    : [["Token address",`${tokenMint.slice(0,5)}...${tokenMint.slice(-4)}`],["Market cap","At creation"],["Holders","0"]];
+  const firstRow=d.y+d.h-print.detailsBottom*unit-(rows.length*rowHeight+(rows.length-1)*rowGap);
   const description=lines(card.lore||"A fresh coin in the collection. Its story is still being written.",right-left,loreSize);
   const quote=getPairAsset(card.quoteAssetKey||"sol");
-  const rows=[["Token address",`${tokenMint.slice(0,5)}...${tokenMint.slice(-4)}`],["Market cap","At creation"],["Holders","0"]];
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1260" height="1760" viewBox="0 0 1260 1760" data-card-layout="${CANONICAL_CARD_TEMPLATE}">
     <defs><clipPath id="card-edge"><rect width="1260" height="1760" rx="${layout.radius*W}"/></clipPath><clipPath id="art-edge"><rect x="${a.x}" y="${a.y}" width="${a.w}" height="${a.h}" rx="${print.artRadius*unit}"/></clipPath><clipPath id="name-edge"><rect x="${n.x+nameInset}" y="${n.y}" width="${nameWidth}" height="${n.h}"/></clipPath></defs>
     <g clip-path="url(#card-edge)"><image width="1260" height="1760" href="${xml(atlasUri)}"/>
@@ -39,6 +48,16 @@ export function creatorCardSvg(card:CardData,tokenMint:string,_creator:string,ar
       <path d="M${left} ${firstRow-print.rowsTop*unit-.125*unit}H${right}" stroke="${ink}" stroke-opacity=".22" stroke-width="${.25*unit}"/>
       ${rows.map(([label,value],i)=>{const y=firstRow+rowSize*(.8+(print.rowLine-1)/2)+i*(rowHeight+rowGap),lx=left+widthOf(label,rowSize,true)+1.4*unit,rx=right-widthOf(value,rowSize,true)-1.4*unit;return `<text x="${left}" y="${y}" font-family="Courier Prime,monospace" font-size="${rowSize}" font-weight="600">${label}</text><path d="M${lx} ${y-.6*unit}H${rx}" stroke="${ink}" stroke-opacity=".35" stroke-dasharray="3 7" stroke-width="${.25*unit}"/><text x="${right}" y="${y}" text-anchor="end" font-family="Courier Prime,monospace" font-size="${rowSize}" font-weight="500">${xml(value)}</text>`;}).join("")}
     </g></g></svg>`;
+}
+
+/** Full upright card on a matte square, with every corner inside circular wallet avatars. */
+export function creatorTokenImageSvg(cardPng:Uint8Array) {
+  const {width,height}=TOKEN_IMAGE_DIMENSIONS;
+  const {background,cardX,cardY,cardWidth,cardHeight}=TOKEN_IMAGE_LAYOUT;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" data-token-image-format="${TOKEN_IMAGE_FORMAT}">
+    <rect width="${width}" height="${height}" fill="${background}"/>
+    <image x="${cardX*width}" y="${cardY*height}" width="${cardWidth*width}" height="${cardHeight*height}" preserveAspectRatio="xMidYMid meet" href="${imageDataUri(cardPng,"image/png")}"/>
+  </svg>`;
 }
 
 /** Fixed collectible case: the complete canonical card, polished rounded acrylic and an honest identity label. */

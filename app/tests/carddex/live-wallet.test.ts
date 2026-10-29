@@ -13,6 +13,7 @@ import { messageOf, payerGuardData, phantomGuarded, tokenGuardData, unsignedTran
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
 import { LiveWalletNotice } from "../../src/components/carddex/live/LiveWalletNotice";
+import { LiveTokenImage } from "../../src/components/carddex/live/LiveTokenImage";
 import { WALLET_NOTICE_COPY, WALLET_NOTICE_TITLE, WALLET_OPEN_COPY, walletNoticeItems } from "../../src/components/carddex/live/wallet-notice";
 import { assetSeed, creator, creatorSeed, fixture, mint, nftFixture } from "./live-plan-fixtures";
 
@@ -293,6 +294,26 @@ describe("what your wallet will show", () => {
     expect(html).toContain("don&#x27;t approve");
     const copy = [WALLET_OPEN_COPY, WALLET_NOTICE_TITLE, ...Object.values(WALLET_NOTICE_COPY).map(value => typeof value === "function" ? value("1", "SOL") : value)];
     for (const text of copy) { expect(text).not.toMatch(/[\u2013\u2014]/); expect(text).not.toMatch(/ignore|anyway|click through|safe to proceed/i); }
+  });
+});
+
+describe("the coin image in the review", () => {
+  const asset = (sha: string, ext: string, mimeType: string) => ({ sha256: sha.repeat(64), url: `https://launchacard.fun/api/live/assets/${sha.repeat(64)}.${ext}`, mimeType, bytes: 1 });
+  const three = { artwork: asset("a", "png", "image/png"), cardImage: asset("b", "png", "image/png"), caseImage: asset("c", "png", "image/png") };
+  test("shows the server-made turning card with its still, and nothing for a launch saved before it", () => {
+    const html = renderToStaticMarkup(createElement(LiveTokenImage, { intent: { name: "Glorb", assets: { ...three, tokenImage: asset("d", "gif", "image/gif"), tokenPoster: asset("e", "png", "image/png") } } }));
+    expect(html).toContain(`src="${asset("d", "gif", "image/gif").url}"`);
+    expect(html).toContain('width="1024" height="1024"');
+    expect(html).toContain('alt="Glorb coin image: your complete card turning from front to back"');
+    expect(html).toContain(`href="${asset("d", "gif", "image/gif").url}" target="_blank" rel="noopener noreferrer"`);
+    expect(html).toContain(`href="${asset("e", "png", "image/png").url}" target="_blank" rel="noopener noreferrer"`);
+    expect(html).toContain("Wallets that cannot play it show the front.");
+    // The artwork, card and case prints are never offered as the coin image.
+    for (const role of Object.values(three)) expect(html).not.toContain(role.url);
+    expect(renderToStaticMarkup(createElement(LiveTokenImage, { intent: { name: "Glorb", assets: three } }))).toBe("");
+    const compact = renderToStaticMarkup(createElement(LiveTokenImage, { intent: { name: "Glorb", assets: { ...three, tokenImage: asset("d", "gif", "image/gif") } }, compact: true }));
+    expect(compact).toContain('data-compact="true"'); expect(compact).not.toContain("Wallets that cannot");
+    expect(compact).not.toContain(">Still<");
   });
 });
 

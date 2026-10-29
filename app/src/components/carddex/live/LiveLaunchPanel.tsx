@@ -15,6 +15,7 @@ import { EmptyState } from "../../mintdex/empty-state";
 import { WalletConnectDialog } from "../../mintdex/wallet-connect";
 import { BUY_DOES_NOT_FIT, checkLiveBuyFit, LIVE_BUY_FIT, liveBuyFitKey, STOCK_BUY_WARNS } from "./buy-fit";
 import { formatLiveAmount } from "./amounts";
+import { LiveTokenImage } from "./LiveTokenImage";
 import { LiveWalletNotice } from "./LiveWalletNotice";
 import { PagedMessage } from "./PagedMessage";
 import { useLiveReadiness } from "./readiness";
@@ -43,10 +44,13 @@ export type LiveLaunchHandle = { submit(): void; startAnother(): void; /** The t
  * `status` is what the launch waits on, or why it stopped, for one line beside the bar's button.
  */
 export type LivePrimary = { kind: "submit" | "startAnother"; label: string; pendingLabel?: string; pending: boolean; disabled: boolean; blockedByPair: boolean; status?: { text: string; alert: boolean } | null };
-type Busy = "ownership" | "artwork" | "preparing" | "refreshing" | "wallet" | "submitting" | "confirming" | "recovering" | null;
+// coinImage: a new launch's first prepare, where the server also makes the coin's turning image. Every other prepare
+// (a saved launch prepared again, the buy-fit check, the card) is "preparing" and makes no image.
+type Busy = "ownership" | "artwork" | "coinImage" | "preparing" | "refreshing" | "wallet" | "submitting" | "confirming" | "recovering" | null;
 const BUSY_COPY: Record<NonNullable<Busy>, string> = {
   ownership: SIGN_IN_COPY,
-  artwork: "Preparing your permanent coin artwork and complete card image…",
+  artwork: "Preparing your artwork and complete card image…",
+  coinImage: "Making your turning coin image and checking the quote asset, balances and exact transaction costs…",
   preparing: "Checking the current quote asset, balances and exact transaction costs…",
   refreshing: "Getting a fresh transaction so your wallet sees current costs…",
   wallet: WALLET_OPEN_COPY,
@@ -315,7 +319,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
       creator.current = address; draftAtPrepare.current = draft;
       setBusy("artwork");
       const assets = await composeCreatorCard({ card, tokenMint: tokenKey.current.address, artwork: draft.artwork, website: draft.website, xUrl: draft.xUrl });
-      assertCurrent(version, address); setBusy("preparing");
+      assertCurrent(version, address); setBusy("coinImage");
       const input: LivePrepareInput = {
         idempotencyKey: idempotencyKey.current, tokenMint: tokenKey.current.address, nftMint: nftKey.current.address,
         name: draft.name, symbol: draft.symbol, description: draft.description, website: draft.website, xUrl: draft.xUrl, cardTemplate: draft.cardTemplate,
@@ -760,6 +764,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
 
     {intent ? <section className="cdx-live-block" aria-labelledby="cdx-live-saved">
       <h3 id="cdx-live-saved" className="cdx-live-subhead">Saved launch</h3>
+      <LiveTokenImage intent={intent} compact />
       <dl className="cdx-launch-cost cdx-live-review">
         <div><dt>Coin mint</dt><dd><TextLink href={`https://solscan.io/token/${intent.tokenMint}`} target="_blank"><span className="cdx-live-address">{brief(intent.tokenMint)}</span><Icon name="external" size={12} /></TextLink></dd></div>
         <div><dt>Quote asset</dt><dd>{selected.symbol}</dd></div>
@@ -797,6 +802,8 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
         <div ref={reviewBody} tabIndex={-1} role="region" aria-label="Transaction review" className="cdx-live-review-page">
           {reviewNotice ? <p className="cdx-live-callout" role="status">{reviewNotice}</p> : null}
           <p className="cdx-live-network"><strong>Solana mainnet · real funds</strong><span>{plan.kind === "token" ? getTradingPair(draftAtPrepare.current?.symbol ?? card.ticker, reviewIntent.quoteAssetKey) : "One-of-one creator card · no NFT royalties"}</span></p>
+          {/* The coin's permanent image, before the wallet opens (the server made it from this card; nothing to choose). */}
+          {plan.kind === "token" ? <LiveTokenImage intent={reviewIntent} /> : null}
           <dl className="cdx-launch-cost cdx-live-review">
             <div><dt>Network fee</dt><dd><span className="num">{formatLiveAmount(plan.review.networkFeeLamports, 9)}</span> <span className="mdx-unit">SOL</span></dd></div>
             <div><dt>Priority fee</dt><dd><span className="num">{formatLiveAmount(plan.review.priorityFeeLamports, 9)}</span> <span className="mdx-unit">SOL</span></dd></div>
@@ -836,6 +843,7 @@ type Stage = { state: "todo" | "active" | "done" | "stopped"; text: string };
 const PHASE: Record<NonNullable<Busy>, string> = {
   ownership: "Waiting for your wallet to sign in",
   artwork: "Preparing your artwork",
+  coinImage: "Making your coin image",
   preparing: "Preparing the transaction",
   refreshing: "Refreshing the transaction",
   wallet: "Waiting for your wallet",
