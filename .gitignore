@@ -8,7 +8,23 @@ dist/
 !.env.example
 .dev.vars*
 *.keypair.json
+# Solana CLI and Anchor key files (name-keypair.json, id.json, wallet files) and other private keys: this repo is public.
+*keypair*.json
+id.json
+*wallet*.json
+*.pem
+*.key
+.npmrc
+**/target/
+**/test-ledger/
 .keys/
+# Local agent and test evidence.
+.vercel/
+.lighthouse/
+.taste-skill/
+.playwright/
+test-results/
+playwright-report/
 output/
 .playwright-cli/
 .DS_Store
