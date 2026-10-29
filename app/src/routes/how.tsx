@@ -80,6 +80,7 @@ const SECTIONS: Section[] = [
         <li>
           Creating a coin means you accept the <TextLink to="/legal" hash="content-rules">content rules</TextLink>: {WORDS.contentRule}
         </li>
+        <li>Anyone can report a coin from its Coin details. Coins that break the content rules are hidden.</li>
         <li>Home's Launched on pump.fun list shows real launches on Solana mainnet, newest first.</li>
       </ul>
     ),
