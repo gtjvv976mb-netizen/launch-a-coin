@@ -3,7 +3,7 @@ import BN from "bn.js";
 import bs58 from "bs58";
 import { createHash } from "node:crypto";
 import { Keypair, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction, type AccountInfo } from "@solana/web3.js";
-import { AccountLayout, AccountState, AccountType, ExtensionType, MintLayout, TOKEN_2022_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { AccountLayout, AccountState, AccountType, ExtensionType, MintLayout, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { pack } from "@solana/spl-token-metadata";
 import { bondingCurvePda, GLOBAL_PDA, PUMP_FEE_CONFIG_PDA, PUMP_PROGRAM_ID, PUMP_SDK, QUOTE_CONTROL_PDA, newBondingCurve } from "@pump-fun/pump-sdk";
 import { getCreateV2InstructionDataSerializer, getUpdateV1InstructionDataSerializer, getPluginHeaderV1AccountDataSerializer, getPluginSerializer, Key, PluginType } from "@metaplex-foundation/mpl-core";
@@ -24,6 +24,7 @@ const creatorKey = Keypair.fromSeed(new Uint8Array(32).fill(111));
 const tokenKey = Keypair.fromSeed(new Uint8Array(32).fill(112));
 const nftKey = Keypair.fromSeed(new Uint8Array(32).fill(113));
 const now = () => new Date("2026-10-28T15:00:00Z");
+const moreMemeQuotes = ["goat", "zerebro", "act", "pippin", "vine", "aura", "michi", "cate", "ansem", "bert", "chillhouse", "usduc"];
 const tokenSignature = bs58.encode(new Uint8Array(64).fill(71));
 const nftSignature = bs58.encode(new Uint8Array(64).fill(72));
 const slot = fixture.context.slot + 10;
@@ -124,12 +125,23 @@ function mockRpc() {
 }
 
 describe("mainnet wallet preparation, independent confirmation and separate NFT recovery", () => {
-  test("actual SDK plans pass the independent browser verifier for all 25 quotes and Core NFT issuance", async () => {
+  test("actual SDK plans pass the independent browser verifier for all 37 quotes and separate Core NFT issuance", async () => {
+    expect(PAIR_ASSETS).toHaveLength(37);
     for (const quote of PAIR_ASSETS) {
       const input = defaultInput(); input.quoteKey = quote.key;
       input.card = { ...input.card, designKey: "obsidian-archive", frontSha256: art["obsidian-archive"].front.sha256, backSha256: art["obsidian-archive"].back.sha256 };
-      const plan = await prepareTokenTransaction(input, { connection: mockRpc().connection });
+      const rpc=mockRpc();
+      const plan = await prepareTokenTransaction(input, { connection: rpc.connection });
       expect(validateLivePlan(plan, expectedPlan(input, plan)).signers).toEqual([input.creator, input.mint]);
+      rpc.remember(plan,tokenSignature);await rpc.addToken(input);
+      const nft=await prepareCreatorNftTransaction(input,{connection:rpc.connection,tokenSignature,tokenMessageSha256:plan.messageSha256});
+      if(nft.status!=="wallet-signature-required")throw Error("Expected separate NFT issuance");
+      const wire=validateLivePlan(nft,expectedPlan(input,nft));
+      expect(wire.signers).toEqual([input.creator,input.nftMint]);
+      expect(nft.review).toMatchObject({quoteKey:quote.key,quoteMint:quote.mint,quoteDecimals:quote.decimals});
+      expect(nft.bindingSha256).toBe(plan.bindingSha256);
+      expect(wire.signatures.every(signature=>signature.every(byte=>byte===0))).toBe(true);
+      expect(rpc.sent()).toBe(0);
     }
     const input = defaultInput(), rpc = mockRpc();
     const token = await prepareTokenTransaction(input, { connection: rpc.connection });
@@ -137,6 +149,19 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     const nft = await prepareCreatorNftTransaction(input, { connection: rpc.connection, tokenSignature });
     if (nft.status !== "wallet-signature-required") throw new Error("Expected a fresh NFT plan");
     expect(validateLivePlan(nft, expectedPlan(input, nft)).signers).toEqual([input.creator, input.nftMint]);
+  });
+
+  test("new meme quote plans reject same-unit token-mint substitutions in the independent browser verifier", async () => {
+    for(const quoteKey of moreMemeQuotes){
+      const input=defaultInput();input.quoteKey=quoteKey;
+      input.card={...input.card,designKey:"obsidian-archive",frontSha256:art["obsidian-archive"].front.sha256,backSha256:art["obsidian-archive"].back.sha256};
+      const rpc=mockRpc(),plan=await prepareTokenTransaction(input,{connection:rpc.connection});
+      const original=PAIR_ASSETS.find(asset=>asset.key===quoteKey)!;
+      const replacement=PAIR_ASSETS.find(asset=>asset.mint!==original.mint&&asset.decimals===original.decimals&&asset.tokenProgram===original.tokenProgram)!;
+      expect(replacement).toBeDefined();
+      expect(()=>validateLivePlan(plan,{...expectedPlan(input,plan),quoteMint:replacement.mint})).toThrow();
+      expect(rpc.sent()).toBe(0);
+    }
   });
 
   for (const {design: designKey, quote: quoteKey} of MEME_PAIR_PRESETS) test(`${designKey}/${quoteKey} themed preset preserves exact identity through actual SDK token and NFT plans`, async () => {
@@ -223,7 +248,7 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     expect(Buffer.from(pumpInstructions[1].data).readBigUInt64LE(16)).toBe(BigInt(plan.review.minimumTokensOut));
   });
 
-  for (const quoteKey of ["pengu", "giga", "spx", "trump", "useless", "chillguy"]) test(`${quoteKey} initial buy retains exact atoms when it fits and explicitly rejects oversized metadata`, async () => {
+  for (const quoteKey of ["pengu", "giga", "spx", "trump", "useless", "chillguy",...moreMemeQuotes]) test(`${quoteKey} initial buy retains exact atoms when it fits and explicitly rejects oversized metadata`, async () => {
     const preset = MEME_PAIR_PRESETS.find(preset => preset.quote === quoteKey)!;
     const input = defaultInput(), design = art[preset.design], rpc = mockRpc();
     input.quoteKey = quoteKey;
@@ -236,7 +261,13 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     const global = PUMP_SDK.decodeGlobal(rpc.accounts.get(GLOBAL_PDA.toBase58())!);
     const recipient = global.buybackFeeRecipients.find(key => !key.equals(PublicKey.default))!;
     rpc.addQuoteBalance(input, 0n, recipient.toBase58());
-    await expect(prepareTokenTransaction(input, {connection: rpc.connection})).rejects.toThrow("1232-byte packet limit");
+    if(quote.tokenProgram===TOKEN_PROGRAM_ID.toBase58()){
+      await expect(prepareTokenTransaction(input, {connection: rpc.connection})).rejects.toThrow("1232-byte packet limit");
+    }else{
+      const standardUriPlan=await prepareTokenTransaction(input,{connection:rpc.connection});
+      expect(validateLivePlan(standardUriPlan,expectedPlan(input,standardUriPlan)).signatures.every(signature=>signature.every(byte=>byte===0))).toBe(true);
+      expect(standardUriPlan.review.initialBuyQuoteBaseUnits).toBe("1234567");
+    }
     // The adapter supports short public metadata URIs too. The app's current
     // longer URI must produce the explicit size error above, never omit a buy.
     input.tokenMetadataUri = "https://launchacard.fun/m/short";

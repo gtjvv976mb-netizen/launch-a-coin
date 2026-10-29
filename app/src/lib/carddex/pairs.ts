@@ -2,7 +2,7 @@ import verifiedAssets from "./pair-assets.json";
 import { CARD_DESIGNS, isCardDesignKey } from "./designs";
 import { DESIGN_QUOTE_KEYS, MEME_PAIR_PRESETS, PREFERRED_PAIR_DESIGNS } from "./design-pairings";
 
-export const PAIR_ASSET_KEYS = ["sol", "usdc", "gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc", "doge", "fartcoin", "pnut", "moodeng", "troll", "bonk", "wif", "cards", "sv151", "toad", "pengu", "giga", "spx", "trump", "useless", "chillguy"] as const;
+export const PAIR_ASSET_KEYS = ["sol", "usdc", "gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc", "doge", "fartcoin", "pnut", "moodeng", "troll", "bonk", "wif", "cards", "sv151", "toad", "pengu", "giga", "spx", "trump", "useless", "chillguy", "goat", "zerebro", "act", "pippin", "vine", "aura", "michi", "cate", "ansem", "bert", "chillhouse", "usduc"] as const;
 export type PairAssetKey = typeof PAIR_ASSET_KEYS[number];
 export type PairAsset = {
   key: PairAssetKey;
@@ -27,7 +27,7 @@ export type PairAsset = {
 export const PAIR_ASSETS: readonly Readonly<PairAsset>[] = Object.freeze(verifiedAssets.map(asset => Object.freeze(asset as PairAsset)));
 const BY_KEY = new Map<string, Readonly<PairAsset>>(PAIR_ASSETS.map(asset => [asset.key, asset]));
 export const PAIR_ASSETS_SOURCE = "https://pump.fun/docs/custom-pairs";
-export const PAIR_ASSETS_VERIFIED_AT = "2026-10-28";
+export const PAIR_ASSETS_VERIFIED_AT = "2026-10-29";
 
 export function isPairAssetKey(value: unknown): value is PairAssetKey {
   return typeof value === "string" && BY_KEY.has(value);

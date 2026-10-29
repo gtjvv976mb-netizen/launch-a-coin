@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { PAIR_ASSETS, allowedQuotesForDesign, defaultQuoteForDesign, getPairAsset, getTradingPair, matchingDesignsForQuote, recommendedMemeQuoteForDesign, resolveLaunchQuote } from "../../src/lib/carddex/pairs";
+import { PAIR_ASSETS, allowedQuotesForDesign, defaultQuoteForDesign, getPairAsset, getTradingPair, matchingDesignsForQuote, preferredDesignForQuote, recommendedMemeQuoteForDesign, resolveLaunchQuote } from "../../src/lib/carddex/pairs";
+import { MEME_PAIR_PRESETS } from "../../src/lib/carddex/design-pairings";
 import { marketCapText, quoteAtoms } from "../../src/lib/carddex/quote-display";
 import { CARD_DESIGNS, getCardDesign } from "../../src/lib/carddex/designs";
 
@@ -20,13 +21,13 @@ describe("reviewed pump.fun quote selection", () => {
     for (const key of ["doge","bonk","wif"]) expect(defaultQuoteForDesign(key).key).toBe(key);
     for (const design of ["pepe","shib","blackberry","nokia"]) {
       expect(defaultQuoteForDesign(design).key).toBe("sol");
-      expect(allowedQuotesForDesign(design)).toHaveLength(25);
+      expect(allowedQuotesForDesign(design)).toHaveLength(37);
     }
     expect(resolveLaunchQuote("pokemon-classic",{quoteAssetKey:"fartcoin"}).mint).toBe("9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump");
   });
   test("unknown assets and mint substitution fail closed", () => {
-    expect(PAIR_ASSETS).toHaveLength(25);
-    expect(new Set(PAIR_ASSETS.map(a=>a.mint)).size).toBe(25);
+    expect(PAIR_ASSETS).toHaveLength(37);
+    expect(new Set(PAIR_ASSETS.map(a=>a.mint)).size).toBe(37);
     expect(()=>getPairAsset("PEPE")).toThrow();
     expect(()=>resolveLaunchQuote("pokemon-classic",{quoteAssetKey:"usdc",quoteMint:getPairAsset("sol").mint})).toThrow();
     expect(getTradingPair("$CREATOR","tslax")).toBe("CREATOR / TSLAX");
@@ -74,7 +75,7 @@ describe("reviewed pump.fun quote selection", () => {
     for (const [designKey,quoteKey] of Object.entries(presets)) {
       const asset=getPairAsset(quoteKey);
       expect(defaultQuoteForDesign(designKey).key).toBe("sol");
-      expect(allowedQuotesForDesign(designKey)).toHaveLength(25);
+      expect(allowedQuotesForDesign(designKey)).toHaveLength(37);
       expect(recommendedMemeQuoteForDesign(designKey)?.key).toBe(quoteKey);
       expect(matchingDesignsForQuote(quoteKey).map(design=>design.key)).toContain(designKey);
       expect(resolveLaunchQuote(designKey,{quoteAssetKey:quoteKey,quoteMint:asset.mint})).toBe(asset);
@@ -95,5 +96,30 @@ describe("reviewed pump.fun quote selection", () => {
     expect(quoteAtoms(123456,"usdc")).toBe("0.123456");
     expect(quoteAtoms(123456,"bonk")).toBe("1.2346");
     expect(marketCapText({mcapUsd:null,quoteAssetKey:"doge"})).toBe("—");
+  });
+  test("twelve additional meme pairs use optional finishes without rewriting neutral or historical quotes", () => {
+    const additions={apex:"goat",astral:"zerebro","yugioh-spell":"act",bloom:"pippin","magic-etched":"vine",nova:"aura",spark:"michi",ronin:"cate",sovereign:"ansem",legend:"bert",abyssal:"chillhouse",surge:"usduc"};
+    expect(MEME_PAIR_PRESETS).toHaveLength(31);
+    expect(new Set(MEME_PAIR_PRESETS.map(preset=>preset.design)).size).toBe(29);
+    expect(new Set(MEME_PAIR_PRESETS.map(preset=>preset.quote)).size).toBe(28);
+    for(const [design,key] of Object.entries(additions)){
+      const quote=getPairAsset(key);
+      expect(quote.kind).toBe("meme");
+      expect(quote.decimals).toBe(6);
+      expect(preferredDesignForQuote(key)).toBe(design);
+      expect(recommendedMemeQuoteForDesign(design)?.key).toBe(key);
+      expect(matchingDesignsForQuote(key).map(item=>item.key)).toEqual([design]);
+      expect(defaultQuoteForDesign(design).key).toBe("sol");
+      expect(allowedQuotesForDesign(design)).toHaveLength(37);
+      for(const original of ["sol","tslax","cards"]){
+        expect(resolveLaunchQuote(design,{quoteAssetKey:original}).key).toBe(original);
+      }
+      expect(resolveLaunchQuote(design,{quoteAssetKey:key,quoteMint:quote.mint})).toBe(quote);
+      expect(()=>resolveLaunchQuote(design,{quoteAssetKey:key,quoteMint:getPairAsset("usdc").mint})).toThrow("quote mint");
+    }
+    // A familiar dollar-like ticker must not imply stable units or a USD conversion.
+    expect(getPairAsset("usduc").kind).toBe("meme");
+    expect(getTradingPair("OWN","usduc")).toBe("OWN / USDUC");
+    expect(marketCapText({mcapUsd:null,mcapQuote:1234,quoteAssetKey:"usduc"})).toBe("1.23K USDUC");
   });
 });

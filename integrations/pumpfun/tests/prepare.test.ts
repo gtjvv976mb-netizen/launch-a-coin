@@ -20,6 +20,7 @@ import {
 const creator = Keypair.fromSeed(new Uint8Array(32).fill(101)).publicKey.toBase58();
 const mint = Keypair.fromSeed(new Uint8Array(32).fill(102)).publicKey.toBase58();
 const now = () => new Date("2026-10-28T12:00:00Z");
+const moreMemeQuotes = ["goat", "zerebro", "act", "pippin", "vine", "aura", "michi", "cate", "ansem", "bert", "chillhouse", "usduc"];
 
 function input(designKey = "stock-tsla", quoteKey = "tslax"): PrepareLaunchInput {
   const design = art[designKey as keyof typeof art];
@@ -107,8 +108,8 @@ describe("unsigned official Pump custom-pair preparer", () => {
     expect("transaction" in plan).toBe(false);
   });
 
-  test("all 25 catalog assets use exact reviewed mints/programs; SOL has no extra quote accounts", async () => {
-    expect(PAIR_ASSETS).toHaveLength(25);
+  test("all 37 catalog assets use exact reviewed mints/programs; SOL has no extra quote accounts", async () => {
+    expect(PAIR_ASSETS).toHaveLength(37);
     for (const asset of PAIR_ASSETS) {
       const plan = await preparePumpLaunchPlan(input("obsidian-archive", asset.key), { connection: reader().connection, now });
       expect(plan.binding.quote.mint).toBe(asset.mint);
@@ -168,12 +169,31 @@ describe("unsigned official Pump custom-pair preparer", () => {
   });
 
   test("each additional meme quote rejects substituted mint units or token-program ownership", async () => {
-    for (const key of ["pengu","giga","spx","trump","useless","chillguy"]) {
+    for (const key of ["pengu","giga","spx","trump","useless","chillguy",...moreMemeQuotes]) {
       const asset=PAIR_ASSETS.find(candidate=>candidate.key===key)!;
       const changedDecimals=reader({mutate(accounts){accounts.get(asset.mint)!.data[44]=asset.decimals+1;}});
       await expect(preparePumpLaunchPlan(input("obsidian-archive",key),{connection:changedDecimals.connection})).rejects.toThrow("decimals or token program");
-      const changedProgram=reader({mutate(accounts){accounts.get(asset.mint)!.owner=TOKEN_2022_PROGRAM_ID;}});
+      const changedProgram=reader({mutate(accounts){accounts.get(asset.mint)!.owner=asset.tokenProgram===TOKEN_2022_PROGRAM_ID.toBase58()?TOKEN_PROGRAM_ID:TOKEN_2022_PROGRAM_ID;}});
       await expect(preparePumpLaunchPlan(input("obsidian-archive",key),{connection:changedProgram.connection})).rejects.toThrow();
+    }
+  });
+
+  test("new meme quotes resolve current starting reserves rather than pinning the reviewed pricing snapshot", async () => {
+    for (const key of moreMemeQuotes) {
+      const asset=PAIR_ASSETS.find(candidate=>candidate.key===key)!;
+      const currentReserves="123456789000";
+      const rpc=reader({mutate(accounts){
+        const data=accounts.get(QUOTE_CONTROL_PDA.toBase58())!.data;
+        const offset=data.indexOf(new PublicKey(asset.mint).toBuffer(),108);
+        expect(offset).toBeGreaterThanOrEqual(108);
+        data.writeBigUInt64LE(BigInt(currentReserves),offset+32);
+      }});
+      const plan=await preparePumpLaunchPlan(input("obsidian-archive",key),{connection:rpc.connection,now});
+      expect(plan.initialVirtualQuoteReserves).toBe(currentReserves);
+      expect(plan.initialVirtualQuoteReserves).not.toBe(asset.initialVirtualQuoteReserves);
+      expect(plan.admission).toBe("quoteControl");
+      expect(plan.binding.quote.mint).toBe(asset.mint);
+      expect(rpc.reads()).toBe(1);
     }
   });
 

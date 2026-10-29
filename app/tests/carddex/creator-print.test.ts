@@ -84,6 +84,20 @@ describe("trusted creator card composition",()=>{
   expect(caseSvg).toContain(">Launch a Card</text>");
   expect(caseSvg).toContain(">One of one</text>");
  });
+ test("every exported design keeps data labels in the browser's monospace family with room for dotted rules",()=>{
+  for(const design of CARD_DESIGNS){
+   const svg=creatorCardSvg(card(design.key),mint,wallet,data,data);
+   const labels=[...svg.matchAll(/<text\b([^>]*)>(Token address|Market cap|Holders)<\/text>/g)];
+   expect(labels).toHaveLength(3);
+   for(const [,attributes]of labels){
+    expect(attributes).toContain('font-family="Courier Prime,monospace"');
+    expect(attributes).toContain('font-weight="600"');
+   }
+   const rules=[...svg.matchAll(/<path d="M([\d.]+) [\d.]+H([\d.]+)"[^>]*stroke-dasharray="3 7"/g)];
+   expect(rules).toHaveLength(3);
+   for(const [,start,end]of rules)expect(Number(end)-Number(start)).toBeGreaterThan(0);
+  }
+ });
  test("long and non-Latin creator data cannot inject markup or move the shared geometry",()=>{
   const svg=creatorCardSvg({...card("doge"),name:"🔥市場".repeat(20),lore:'<script>alert("unsafe")</script>'.repeat(15)},mint,wallet,data,data);
   expect(svg).not.toContain("<script>");

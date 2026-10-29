@@ -204,7 +204,8 @@
 .cdx-canonical-skin__image { position: absolute; inset: 0; display: block; width: 100%; height: 100%; border-radius: inherit; pointer-events: none; }
 .cdx-canonical-skin__image[hidden] { display: none; }
 .cdx-canonical-card > .mdx-card__art { z-index: 2; overflow: hidden; border-radius: var(--canonical-art-radius); background: var(--design-base); }
-.cdx-canonical-card > .mdx-card__art > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* Keep creator art centered and color-faithful, matching the trusted NFT compositor. */
+.cdx-canonical-card > .mdx-card__art > img { display: block; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; filter: none; }
 .cdx-canonical-card > .mdx-card__art > img[hidden] { display: none; }
 .cdx-canonical-card__art-fallback { width: 100%; height: 100%; display: grid; place-items: center; color: var(--design-paper); font: italic 5cqw/1.3 var(--font-serif); }
 /* The placeholder sits on any design's base colour, so it carries the card's own text pair (the name and lore

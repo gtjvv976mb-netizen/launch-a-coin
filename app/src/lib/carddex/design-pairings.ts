@@ -14,6 +14,9 @@ export const PREFERRED_PAIR_DESIGNS: Readonly<Record<string,string>> = Object.fr
   fartcoin: "ember", pnut: "relic", moodeng: "tide", troll: "neon-circuit",
   pengu: "frost", giga: "mythic", spx: "celestial", trump: "regal",
   useless: "wildtype", chillguy: "aurora",
+  goat: "apex", zerebro: "astral", act: "yugioh-spell", pippin: "bloom",
+  vine: "magic-etched", aura: "nova", michi: "spark", cate: "ronin",
+  ansem: "sovereign", bert: "legend", chillhouse: "abyssal", usduc: "surge",
 });
 
 /**
@@ -40,4 +43,16 @@ export const MEME_PAIR_PRESETS = Object.freeze([
   {design:"regal",quote:"trump"},
   {design:"wildtype",quote:"useless"},
   {design:"aurora",quote:"chillguy"},
+  {design:"apex",quote:"goat"},
+  {design:"astral",quote:"zerebro"},
+  {design:"yugioh-spell",quote:"act"},
+  {design:"bloom",quote:"pippin"},
+  {design:"magic-etched",quote:"vine"},
+  {design:"nova",quote:"aura"},
+  {design:"spark",quote:"michi"},
+  {design:"ronin",quote:"cate"},
+  {design:"sovereign",quote:"ansem"},
+  {design:"legend",quote:"bert"},
+  {design:"abyssal",quote:"chillhouse"},
+  {design:"surge",quote:"usduc"},
 ] as const);

@@ -1,0 +1,28 @@
+{
+  "audit_at": "2026-10-28T16:46:10.718398+00:00",
+  "scope": "Read-only local provenance audit of the 96 original full-size WebP card assets referenced in jobs-cards.json; 320px previews excluded. Does not audit live rendering, NFT metadata, issuance or deployment.",
+  "ledger": "creative/higgsfield/jobs-cards.json",
+  "ledger_sha256": "52c1e54bda01f27b04090f3884a40e2117b92777c6010a095aaecb690bc0dc35",
+  "provider": "Higgsfield",
+  "model": "gpt_image_2_5",
+  "jobs": 96,
+  "statuses": {
+    "completed": 96
+  },
+  "unique_job_ids": 96,
+  "duplicate_job_ids": [],
+  "designs": 48,
+  "complete_front_back_pairs": 48,
+  "incomplete_pairs": [],
+  "full_size_webp_files_verified": 96,
+  "checks": [
+    "existence",
+    "SHA-256",
+    "byte length",
+    "dimensions",
+    "WebP format"
+  ],
+  "mismatches": [],
+  "passed": true,
+  "actions": "No generation, spending, image changes, application edits, transactions or deployment."
+}

@@ -13,7 +13,7 @@ const identity = (asset: RegistryAsset) => ({
 
 describe("browser and official-SDK quote registries", () => {
   test("every reviewed asset has the same exact identity in both registries", () => {
-    expect(appAssets).toHaveLength(25);
+    expect(appAssets).toHaveLength(37);
     expect(adapterCatalog.assets).toHaveLength(appAssets.length);
     expect(new Set(appAssets.map(asset => asset.key)).size).toBe(appAssets.length);
     expect(new Set(adapterCatalog.assets.map(asset => asset.key)).size).toBe(adapterCatalog.assets.length);
@@ -71,5 +71,33 @@ describe("browser and official-SDK quote registries", () => {
     expect(spx.listingProvider).toBe("Wormhole Portal");
     expect(spx.listingProviderTerms).toBe("https://portalbridge.com/");
     expect(appAssets.some(asset=>String(asset.key)==="popcat")).toBe(false);
+  });
+  test("twelve further published meme quotes retain independently reviewed identities, programs and unit snapshots", () => {
+    const expected=[
+      ["goat","CzLSujWBLFsSjncfkh59rUFqvafWcY5tzedWJSuypump","233175635887"],
+      ["zerebro","8x5VqbHA8D7NkD52uNuS5nnt3PwA8pLD34ymskeSo2Wn","109231897567"],
+      ["act","GJAFwWjJ3vnTsrQVabjBVK2TYB1YtRCQXRDfDgUnpump","379840212990"],
+      ["pippin","Dfh5DzRgSvvCFDoYc2ciTkMrbDfRKybA4SoFbPmApump","208254365784"],
+      ["vine","6AJcP7wuLwmRYLBNbi825wgguaPsWzPBEHcHndpRpump","461532103258"],
+      ["aura","DtR4D9FtVoTX2569gaL837ZgrB6wNjj6tkmnX9Rdk9B2","426470201898"],
+      ["michi","AywAYdNJnSLSXwKWYxDciPjqGRnwp4iZdQptuuQTpump","1284214290492"],
+      ["cate","Ai66LHZG9MCzg1WKdawwqduVAXpNDUuV8M3uyq5ppump","66439760654"],
+      ["ansem","9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump","50650546667"],
+      ["bert","HgBRWfYxEfvPhtqkaeymCQtHCrKE46qQ43pKe8HCpump","278902341021"],
+      ["chillhouse","GkyPYa7NnCFbduLknCfBfP7p8564X1VZhwZYJ6CZpump","3802387072666"],
+      ["usduc","CB9dDufT3ZuQXqqSfa1c5kY935TEreyBw9XJXxHKpump","1412752265704"],
+    ];
+    for(const [key,mint,initialVirtualQuoteReserves] of expected){
+      const asset=appAssets.find(item=>item.key===key)!;
+      const adapter=adapterCatalog.assets.find(item=>item.key===key)!;
+      const tokenProgram=["cate","ansem"].includes(key)?"TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
+      expect(asset).toMatchObject({key,mint,initialVirtualQuoteReserves,tokenProgram,kind:"meme",decimals:6,admission:"quoteControl",verificationSlot:462558257});
+      expect(adapter).toMatchObject({key,mint,initialVirtualQuoteReserves,tokenProgram,kind:"meme",decimals:6,mintVerificationSlot:462558257,admissionVerificationSlot:462558257});
+      expect(asset.sourceUrls).toContain("https://pump.fun/docs/custom-pairs");
+      expect(adapter.sourceUrls).toEqual(asset.sourceUrls);
+      expect(asset).not.toHaveProperty("referenceTicker");
+      expect(asset.symbol.length).toBeGreaterThan(0);
+    }
+    expect(appAssets.find(asset=>asset.key==="usduc")?.kind).toBe("meme");
   });
 });
