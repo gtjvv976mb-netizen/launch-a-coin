@@ -11,23 +11,7 @@
  * device's prefers-reduced-motion setting no longer does by itself (owner 2026-10-17).
  */
 
-:root {
-  --ease-throw: cubic-bezier(0.12, 0.85, 0.25, 1);
-  --ease-swell: cubic-bezier(0.45, 0, 0.55, 1);
-  --ease-burst: cubic-bezier(0.1, 0.8, 0.2, 1);
-  --ease-deal: cubic-bezier(0.22, 1.12, 0.36, 1);
-  --ease-drift: cubic-bezier(0.37, 0, 0.63, 1);
-  --t-turn: 700ms;
-  --t-spin: 640ms;
-  --t-quick: 300ms;
-  --t-glint: 1200ms;
-  --t-turntable: 6000ms;
-  --t-ascend: 1500ms;
-  --t-unbox: 1100ms;
-  --t-deal: 720ms;
-  --t-liftin: 420ms;
-  --t-rm-fade: 200ms;
-}
+/* The card engine's easing and durations (--ease-throw ... --t-rm-fade) live in carddex-theme.css. */
 
 /* ---------------------------------------------------------------- the face (MintCardFace) */
 

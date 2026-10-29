@@ -189,6 +189,11 @@ body[data-scroll-locked] .mdx-tt__charge > b {
   position: relative;
   z-index: 2;
 }
+/* The stage is its own stacking layer under the headline block: a card swaying toward you passes behind the
+ * actions, so they stay readable and clickable at every width. */
+.cdx-home .mdx-stage {
+  z-index: 1;
+}
 .cdx-home__copy {
   max-width: 60ch;
   margin-top: 10px;
@@ -446,5 +451,12 @@ body[data-scroll-locked] .mdx-tt__charge > b {
   .cdx-home__controls .mdx-btn--icon {
     width: 44px;
     height: 44px;
+  }
+}
+/* Narrow phones: the caption's market cap row keeps its "Market cap" label whole; the status strip above the page
+ * already says the trading is simulated. */
+@media (max-width: 399.98px) {
+  .cdx-home__caption .cdx-home__sim {
+    display: none;
   }
 }

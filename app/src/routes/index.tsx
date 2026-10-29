@@ -423,7 +423,7 @@ function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
               <Num size="lg" watch={marketCapWatch(c)} flashKey={c.id} odo>
                 {marketCapText(c)}
               </Num>
-              <SimTag className="self-center lg:hidden" />
+              <SimTag className="cdx-home__sim self-center lg:hidden" />
             </Figure>
           </dd>
         </div>
