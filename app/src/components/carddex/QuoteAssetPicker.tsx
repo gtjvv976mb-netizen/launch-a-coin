@@ -40,7 +40,7 @@ function AssetDisclosure({ asset, live }: { asset: Readonly<PairAsset>; live: bo
       <div className="cdx-pair-details__links">
         {asset.issuerTerms ? external(asset.issuerTerms, "Issuer terms") : null}
         {asset.listingProviderTerms ? external(asset.listingProviderTerms, `${asset.listingProvider ?? "Listing"} terms`) : null}
-        {external(PAIR_ASSETS_SOURCE, "Pump.fun pairs")}
+        {external(PAIR_ASSETS_SOURCE, "pump.fun pairs")}
       </div>
       <p>Mint reviewed {asset.verifiedAt}.{asset.kind !== "native" ? " SOL also pays network and account costs." : ""}{live ? " The exact mint is checked again before wallet review." : ""}</p>
     </div>
@@ -74,7 +74,7 @@ export function QuoteAssetMeta({ quoteAssetKey, live = false, named = false }: {
     <p className="cdx-pair-meta__links">
       {asset.issuerTerms ? external(asset.issuerTerms, "Issuer terms") : null}
       {asset.listingProviderTerms ? external(asset.listingProviderTerms, `${asset.listingProvider ?? "Listing"} terms`) : null}
-      {external(PAIR_ASSETS_SOURCE, "Pump.fun pairs")}
+      {external(PAIR_ASSETS_SOURCE, "pump.fun pairs")}
     </p>
     {asset.kind === "stock" ? <p>A tokenized-stock quote does not make your coin company shares.</p> : null}
     {live ? <p>The exact mint is checked again before wallet review.</p> : null}
