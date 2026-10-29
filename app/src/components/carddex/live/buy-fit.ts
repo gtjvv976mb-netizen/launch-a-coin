@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { checkLiveLaunchSize } from "../../../lib/carddex/live/api";
 
-export { BUY_DOES_NOT_FIT, BUY_FIT_AFTER_SIGN_IN } from "../../../lib/carddex/live/copy";
+export { BUY_DOES_NOT_FIT, BUY_FIT_AFTER_SIGN_IN, STOCK_BUY_WARNS } from "../../../lib/carddex/live/copy";
 export const LIVE_BUY_FIT = "live-buy-fit";
 export const liveBuyFitKey = (name: string, symbol: string, quoteAssetKey: string) => [LIVE_BUY_FIT, name.trim(), symbol, quoteAssetKey] as const;
 /** Exact size check for a signed-in creator. The buy amount never changes the size, so any nonzero amount answers it. */

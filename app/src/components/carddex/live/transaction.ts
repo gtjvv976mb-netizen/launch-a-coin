@@ -1,6 +1,10 @@
 import { ed25519 } from "@noble/curves/ed25519.js";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { LIVE_PACKET_LIMIT } from "../../../lib/carddex/live/types";
+// The one wallet rule and v0 decoder the server also uses (dependency-free; no RPC, no web3.js in the bundle).
+import {
+  LIGHTHOUSE_PROGRAM_ID, PUMP_LOOKUP_TABLE, decodeV0Message, resolveInstructions, walletMessageChange, type MessageView,
+} from "../../../../../integrations/pumpfun/src/wallet-guards";
 
 const ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const TOKEN_2022 = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
@@ -10,7 +14,11 @@ export const LIVE_PROGRAMS = {
   pump: "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
   associatedToken: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
   core: "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d",
+  /** Lighthouse v2, whose read-only assertions Phantom may append; never part of a prepared plan. */
+  lighthouse: LIGHTHOUSE_PROGRAM_ID,
 } as const;
+/** The highest priority fee a plan may carry, in micro-lamports per compute unit (the server's cap). */
+export const MAX_MICRO_LAMPORTS = 200_000n;
 
 export function base58(bytes: Uint8Array): string {
   let n = 0n;
@@ -79,50 +87,21 @@ export type TransactionPlan = {
 };
 
 type WireInstruction = { program: string; accounts: string[]; data: Uint8Array };
-type Wire = { bytes: Uint8Array; message: Uint8Array; signatureOffset: number; signatures: Uint8Array[]; signers: string[]; blockhash: string; programs: string[]; keys: string[]; instructions: WireInstruction[] };
-/** Narrow parser for this adapter's v0 transactions. Lookup tables and additional signers are refused. */
+type Wire = { bytes: Uint8Array; message: Uint8Array; signatureOffset: number; signatures: Uint8Array[]; signers: string[]; blockhash: string; programs: string[]; keys: string[]; instructions: WireInstruction[]; view: MessageView };
+/**
+ * Narrow parser for this adapter's v0 transactions: exactly two required signers (the creator, then the new asset),
+ * no readonly signer. Lookups resolve only through pump.fun's pinned create table (wallet-guards.ts), so every check
+ * below sees real addresses; any other table or entry is refused.
+ */
 export function parseLiveTransaction(bytes: Uint8Array): Wire {
   if (bytes.length > LIVE_PACKET_LIMIT || bytes.length < 134) throw new Error("The prepared transaction has an invalid size.");
-  let offset = 0;
-  const take = (length: number) => {
-    if (!Number.isSafeInteger(length) || length < 0 || offset + length > bytes.length) throw new Error("The transaction is truncated.");
-    const out = bytes.slice(offset, offset + length); offset += length; return out;
-  };
-  const byte = () => take(1)[0];
-  const length = () => {
-    let n = 0, shift = 0;
-    for (let i = 0; i < 3; i++) {
-      const b = byte(); n |= (b & 127) << shift;
-      if (!(b & 128)) { if (i > 0 && b === 0) throw new Error("Non-canonical transaction length."); return n; }
-      shift += 7;
-    }
-    throw new Error("Invalid transaction length.");
-  };
-  const count = length();
-  if (count !== 2) throw new Error("This launch must require only the creator and new asset signatures.");
-  const signatureOffset = offset;
-  const signatures = Array.from({ length: count }, () => take(64));
-  const messageOffset = offset;
-  if (byte() !== 0x80) throw new Error("This launch requires a version 0 transaction.");
-  const required = byte(), readonlySigned = byte(), readonlyUnsigned = byte();
-  const keyCount = length();
-  if (required !== count || readonlySigned !== 0 || keyCount < required || keyCount > 256 || readonlyUnsigned > keyCount - required) throw new Error("Invalid transaction account header.");
-  const keys = Array.from({ length: keyCount }, () => base58(take(32)));
-  if (new Set(keys).size !== keys.length) throw new Error("The transaction repeats an account.");
-  const blockhash = base58(take(32));
-  const instructionCount = length(), programs: string[] = [], instructions: WireInstruction[] = [];
-  if (!instructionCount || instructionCount > 20) throw new Error("Unexpected launch instruction count.");
-  for (let i = 0; i < instructionCount; i++) {
-    const program = byte();
-    if (program >= keyCount || program === 0) throw new Error("Invalid transaction program.");
-    programs.push(keys[program]);
-    const indexes = take(length());
-    for (const account of indexes) if (account >= keyCount) throw new Error("Invalid instruction account.");
-    instructions.push({ program: keys[program], accounts: Array.from(indexes, i => keys[i]), data: take(length()) });
-  }
-  if (length() !== 0) throw new Error("Address lookup tables are not used by this launch adapter.");
-  if (offset !== bytes.length) throw new Error("The transaction contains unexpected trailing bytes.");
-  return { bytes, message: bytes.slice(messageOffset), signatureOffset, signatures, signers: keys.slice(0, required), blockhash, programs, keys, instructions };
+  if (bytes[0] !== 2) throw new Error("This launch must require only the creator and new asset signatures.");
+  const signatureOffset = 1, signatures = [bytes.slice(1, 65), bytes.slice(65, 129)], message = bytes.slice(129);
+  const view = decodeV0Message(message);
+  if (view.header.required !== 2 || view.header.readonlySigned !== 0) throw new Error("Invalid transaction account header.");
+  const instructions = resolveInstructions(view);
+  return { bytes, message, signatureOffset, signatures, signers: view.staticKeys.slice(0, 2), blockhash: view.blockhash,
+    programs: instructions.map(ix => ix.program), keys: view.keys, instructions, view };
 }
 
 export type ExpectedPlan = {
@@ -149,7 +128,7 @@ function validateOperations(wire: Wire, expected: ExpectedPlan, plan: Transactio
   const limit = new DataView(limitBytes.buffer).getUint32(0, true);
   const micro = BigInt(u64(compute.find(i => i.data[0] === 3)!.data.slice(1)));
   const priority = (BigInt(limit) * micro + 999_999n) / 1_000_000n;
-  if (limit <= 0 || limit > 1_400_000 || micro < 1000n || micro > 100_000n || plan.review.computeUnitLimit !== limit || String(plan.review.microLamportsPerComputeUnit) !== micro.toString() || String(plan.review.priorityFeeLamports) !== priority.toString()) throw new Error("The actual priority fee differs from the cost review.");
+  if (limit <= 0 || limit > 1_400_000 || micro < 1000n || micro > MAX_MICRO_LAMPORTS || plan.review.computeUnitLimit !== limit || String(plan.review.microLamportsPerComputeUnit) !== micro.toString() || String(plan.review.priorityFeeLamports) !== priority.toString()) throw new Error("The actual priority fee differs from the cost review.");
   if (expected.kind === "token") {
     const pump = wire.instructions.filter(i => i.program === LIVE_PROGRAMS.pump);
     if (pump.length !== (BigInt(expected.initialBuyQuoteBaseUnits) > 0n ? 2 : 1)) throw new Error("The token transaction has unexpected Pump operations.");
@@ -190,6 +169,8 @@ export function validateLivePlan(plan: TransactionPlan, expected: ExpectedPlan):
   if (plan.kind !== expected.kind || plan.feePayer !== expected.creator || wire.signers[0] !== expected.creator) throw new Error("The transaction fee payer does not match your connected wallet.");
   if (wire.signers[1] !== expected.mint || plan.requiredSigners.length !== 2 || plan.requiredSigners.some((s, i) => s !== wire.signers[i])) throw new Error("The transaction requires an unexpected signer.");
   if (wire.blockhash !== plan.blockhash || hexHash(wire.message) !== plan.messageSha256 || plan.bindingSha256 !== expected.bindingSha256) throw new Error("The transaction does not match this launch commitment.");
+  // Only a coin transaction may load pump.fun's create table (the decoder already refused any other table).
+  if (wire.view.lookups.length && (expected.kind !== "token" || wire.view.lookups.some(lookup => lookup.table !== PUMP_LOOKUP_TABLE.address))) throw new Error("The transaction loads an unexpected address lookup table.");
   if (!Number.isSafeInteger(plan.lastValidBlockHeight) || plan.lastValidBlockHeight <= 0 || !Number.isSafeInteger(plan.verifiedSlot) || plan.verifiedSlot <= 0) throw new Error("The transaction has no valid verification window.");
   if (plan.review.quoteKey !== expected.quoteKey || plan.review.quoteMint !== expected.quoteMint || plan.review.quoteDecimals !== expected.quoteDecimals || plan.review.initialBuyQuoteBaseUnits !== expected.initialBuyQuoteBaseUnits || plan.review.launchInitialBuyQuoteBaseUnits !== expected.launchInitialBuyQuoteBaseUnits) throw new Error("The transaction quote or initial buy changed. Prepare it again.");
   if (expected.kind === "token" && expected.quoteKey !== "sol" && !wire.keys.includes(expected.quoteMint)) throw new Error("The transaction does not include the selected quote mint.");
@@ -209,10 +190,16 @@ export function partiallySignPlan(plan: TransactionPlan, expected: ExpectedPlan,
   out.set(ed25519.sign(wire.message, signer.seed), wire.signatureOffset + 64);
   return out;
 }
-/** The page-first order, for wallets not yet tested with wallet-first: checks what the wallet returns for a pre-signed plan. */
+/**
+ * The page-first order, for wallets not yet tested with wallet-first: checks what the wallet returns for a pre-signed
+ * plan. The page's signature covers the exact message, so it must come back byte for byte.
+ */
 export function validateWalletResult(before: Uint8Array, signed: Uint8Array, creator: string): Uint8Array {
-  const original = parseLiveTransaction(before), result = parseLiveTransaction(signed);
-  if (!sameBytes(original.message, result.message) || result.signers[0] !== creator || !sameBytes(original.signatures[1], result.signatures[1])) throw new Error("Your wallet changed the prepared transaction. Nothing was submitted.");
+  const original = parseLiveTransaction(before);
+  let result: Wire;
+  try { result = parseLiveTransaction(signed); } catch { throw new WalletChangedTransaction(signed.slice()); }
+  if (!sameBytes(original.message, result.message)) throw new WalletChangedTransaction(signed.slice());
+  if (result.signers[0] !== creator || !sameBytes(original.signatures[1], result.signatures[1])) throw new Error("Your wallet changed the prepared transaction. Nothing was submitted.");
   if (!result.signatures.every((sig, i) => ed25519.verify(sig, result.message, fromBase58(result.signers[i])))) throw new Error("The wallet returned invalid or incomplete transaction signatures. Nothing was submitted.");
   return signed;
 }
@@ -232,14 +219,17 @@ export class WalletChangedTransaction extends Error {
   constructor(readonly returned: Uint8Array) { super(WALLET_CHANGED_TRANSACTION); this.name = "WalletChangedTransaction"; }
 }
 /**
- * Wallet-first: the wallet must return the reviewed message byte for byte, signed by the creator (the fee payer) in
- * the first slot, with the new asset's slot still empty. Any other message is refused, never co-signed.
+ * Wallet-first: the wallet must return the reviewed message, or that message with only what the shared wallet rule
+ * accepts (wallet-guards.ts: read-only Lighthouse assertions appended after every plan instruction, a recompiled key
+ * order, a refreshed blockhash that the server re-checks before it relays anything), signed by the creator (the fee
+ * payer) in the first slot over the returned message, with the new asset's slot still empty. Anything else is
+ * refused, never co-signed.
  */
 export function validateWalletFirstResult(unsigned: Uint8Array, signed: Uint8Array, creator: string): Uint8Array {
   const original = parseLiveTransaction(unsigned);
   let result: Wire;
-  try { result = parseLiveTransaction(signed); } catch { throw new WalletChangedTransaction(signed.slice()); }
-  if (!sameBytes(original.message, result.message)) throw new WalletChangedTransaction(signed.slice());
+  try { result = parseLiveTransaction(signed); walletMessageChange(original.view, result.view, { allowBlockhashChange: true }); }
+  catch { throw new WalletChangedTransaction(signed.slice()); }
   if (result.signers[0] !== creator || !ed25519.verify(result.signatures[0], result.message, fromBase58(creator))) throw new Error("Your wallet did not return a valid signature from the creator wallet. Nothing was submitted.");
   if (result.signatures[1].some(Boolean)) throw new Error("The wallet returned an unexpected second signature. Nothing was submitted.");
   return signed;

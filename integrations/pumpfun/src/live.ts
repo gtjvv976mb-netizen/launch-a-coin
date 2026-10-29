@@ -3,7 +3,7 @@ import { ed25519 } from "@noble/curves/ed25519";
 import bs58 from "bs58";
 import BN from "bn.js";
 import {
-  ComputeBudgetProgram, Connection, PublicKey, TransactionInstruction,
+  AddressLookupTableAccount, AddressLookupTableProgram, ComputeBudgetProgram, Connection, PublicKey, TransactionInstruction,
   TransactionMessage, VersionedTransaction, type AccountInfo, type VersionedMessage,
   type VersionedTransactionResponse,
 } from "@solana/web3.js";
@@ -27,9 +27,15 @@ import {
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { toWeb3JsInstruction } from "@metaplex-foundation/umi-web3js-adapters";
 import {
-  MAINNET_GENESIS_HASH, PAIR_ASSETS, PUBLIC_MAINNET_RPC, hash, immutable,
-  preparePumpLaunchPlan, publicKey, reviewLaunchInput, reviewTokenFields, type PairKey, type PrepareLaunchInput,
+  ALLOW_PERMANENT_DELEGATE_QUOTE_BUY, MAINNET_GENESIS_HASH, PAIR_ASSETS, PERMANENT_DELEGATE_BUY_REFUSAL, PUBLIC_MAINNET_RPC, hash, immutable,
+  preparePumpLaunchPlan, publicKey, quoteIssuerControls, reviewLaunchInput, reviewTokenFields, type PairKey, type PrepareLaunchInput,
 } from "./index.ts";
+import {
+  LIGHTHOUSE_PROGRAM_ID, PACKET_LIMIT, PUMP_LOOKUP_TABLE, WALLET_GUARD_RESERVE_BYTES, WALLET_SIZE_TARGET, WalletMessageRefused,
+  decodeV0Message, walletMessageChange, withoutWalletGuards,
+} from "./wallet-guards.ts";
+
+export { LIGHTHOUSE_PROGRAM_ID, PACKET_LIMIT, PUMP_LOOKUP_TABLE, WALLET_GUARD_RESERVE_BYTES, WALLET_SIZE_TARGET };
 
 export const CORE_PROGRAM_ID = new PublicKey("CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d");
 export interface LiveLaunchInput extends PrepareLaunchInput {
@@ -45,7 +51,7 @@ export type LiveConnection = Pick<Connection,
   "getGenesisHash" | "getMultipleAccountsInfoAndContext" | "getAccountInfoAndContext" |
   "getAccountInfo" | "getLatestBlockhash" | "getRecentPrioritizationFees" |
   "getFeeForMessage" | "simulateTransaction" | "getTransaction" |
-  "getSignatureStatuses" | "getBlockHeight" | "getEpochInfo" | "sendRawTransaction"
+  "getSignatureStatuses" | "getBlockHeight" | "getEpochInfo" | "sendRawTransaction" | "isBlockhashValid"
 >;
 export type LiveOptions = { connection: LiveConnection; now?: () => Date };
 export type VerifyOptions = { connection: LiveConnection; signature?: string; expectedMessageSha256?: string };
@@ -105,13 +111,56 @@ function decodeInstruction(input: { programId: string; accounts: { address: stri
   });
 }
 
-/** Solana's packet limit for one signed transaction (no lookup tables are used). */
-export const PACKET_LIMIT = 1232;
-function compileWalletTransaction(payer: PublicKey, blockhash: string, units: number, microLamports: number, instructions: TransactionInstruction[]) {
+/**
+ * The two accounts every create_v2 write-locks, shared with every other pump.fun create: the Mayhem program account
+ * and the Mayhem SOL vault (writable in Pump's IDL even with mayhem off). The coin's priority fee is sampled on them;
+ * a fresh creator wallet alone has no fee history, so it priced at the floor while competing creates cleared at
+ * about 100,000-200,000 micro-lamports (mainnet, 2026-10-29).
+ */
+export const PUMP_SHARED_WRITE_LOCKS = Object.freeze([
+  new PublicKey("MAyhSmzXzV1pTf7LsNkrNwkWKTo4ougAJ1PPg47MD4e"), new PublicKey("BwWK17cbHxwWBKZkUYvzxLcNQ1YVyaFezduWbtm2de6s"),
+]);
+/** Priority-fee bounds in micro-lamports per compute unit: 200,000 x a 250k-unit coin limit is 0.00005 SOL. */
+export const MIN_MICRO_LAMPORTS = 1_000, MAX_MICRO_LAMPORTS = 200_000;
+/**
+ * Compute units added on top of 1.2 x the simulated use, so wallet assertions can never exhaust the limit (an
+ * exhausted limit fails the wallet's own simulation, which is its red warning). Measured on mainnet: the payer
+ * AssertAccountInfoMulti 1,818 units, a token-account assertion 4,954 (SPL), 4,971 (Token-2022 coin) or 7,973
+ * (Token-2022 stock) units; nine assertions (the most reported: the payer and eight stock-account assertions) are
+ * about 65,600 units. The smallest coin uses about 105,800 units, so 0.2 x 105,800 + 50,000 = 71,000 units are
+ * left; the card's 100,000 floor leaves about 73,500.
+ */
+export const GUARD_COMPUTE_MARGIN = 50_000;
+const TABLE_ADDRESS = new PublicKey(PUMP_LOOKUP_TABLE.address);
+/** Fills every unpinned table slot, so compiling can only use pinned entries. No transaction account has this key. */
+const UNPINNED_SLOT = new PublicKey(new Uint8Array(32).fill(255));
+const NEVER_DEACTIVATED = 0xffff_ffff_ffff_ffffn;
+/**
+ * The pinned pump.fun lookup table as a compile input, from a fresh read of its account: owned by the lookup-table
+ * program, never deactivated and holding every pinned entry at its pinned index. Null when anything differs, so the
+ * transaction is built without it.
+ */
+export function pinnedLookupTable(account: AccountInfo<Buffer> | null): AddressLookupTableAccount | null {
+  if (!account || account.executable || !account.owner.equals(AddressLookupTableProgram.programId)) return null;
+  let state: AddressLookupTableAccount["state"];
+  try { state = AddressLookupTableAccount.deserialize(account.data); } catch { return null; }
+  if (BigInt(state.deactivationSlot) !== NEVER_DEACTIVATED || PUMP_LOOKUP_TABLE.entries.some(([index, address]) => state.addresses[index]?.toBase58() !== address)) return null;
+  const addresses = Array.from({ length: Math.max(...PUMP_LOOKUP_TABLE.entries.map(([index]) => index)) + 1 }, () => UNPINNED_SLOT);
+  for (const [index, address] of PUMP_LOOKUP_TABLE.entries) addresses[index] = new PublicKey(address);
+  return new AddressLookupTableAccount({ key: TABLE_ADDRESS, state: { ...state, addresses } });
+}
+function compileWalletTransaction(payer: PublicKey, blockhash: string, units: number, microLamports: number, instructions: TransactionInstruction[], table: AddressLookupTableAccount | null = null) {
   return new VersionedTransaction(new TransactionMessage({
     payerKey: payer, recentBlockhash: blockhash,
     instructions: [ComputeBudgetProgram.setComputeUnitLimit({ units }), ComputeBudgetProgram.setComputeUnitPrice({ microLamports }), ...instructions],
-  }).compileToV0Message());
+  }).compileToV0Message(table ? [table] : []));
+}
+/** The table only when the plain transaction is over the wallet size target and the table is available. */
+function tableFor(plainBytes: number, table: AddressLookupTableAccount | null) {
+  return plainBytes > WALLET_SIZE_TARGET ? table : null;
+}
+function oversizeError(kind: "token" | "nft", bytes: number, advice: string[] = []) {
+  return new Error(`${kind === "token" ? "Launch" : "Card"} transaction is ${bytes} bytes and exceeds the ${WALLET_SIZE_TARGET}-byte wallet limit (Solana's ${PACKET_LIMIT}-byte packet limit less ${WALLET_GUARD_RESERVE_BYTES} bytes for wallet safety checks)${advice.length ? `; ${advice.join(", or ")}` : ""}`);
 }
 const shortVec = (length: number) => length < 0x80 ? 1 : length < 0x4000 ? 2 : 3;
 /** Exact signed wire size, also past the packet limit where web3.js serialization overruns. */
@@ -129,25 +178,30 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
   const [latest, payerAccount, prioritySamples, preparedBlockHeight] = await Promise.all([
     connection.getLatestBlockhash("confirmed"),
     connection.getAccountInfoAndContext(id.creator, "confirmed"),
-    connection.getRecentPrioritizationFees({ lockedWritableAccounts: [id.creator] }),
+    // The coin competes for the write locks every pump.fun create takes; the card has none, so its creator alone.
+    connection.getRecentPrioritizationFees({ lockedWritableAccounts: kind === "token" ? [...PUMP_SHARED_WRITE_LOCKS] : [id.creator] }),
     connection.getBlockHeight("confirmed"),
   ]);
   const payerBefore = safeLamports(payerAccount.value?.lamports ?? 0, "Wallet balance");
   const fees = prioritySamples.map((sample) => sample.prioritizationFee).filter((fee) => Number.isSafeInteger(fee) && fee >= 0).sort((a, b) => a - b);
-  const microLamports = Math.min(100_000, Math.max(1_000, fees[Math.floor(fees.length * 0.75)] ?? 1_000));
-  const compile = (limit: number) => compileWalletTransaction(id.creator, latest.blockhash, limit, microLamports, instructions);
+  const microLamports = Math.min(MAX_MICRO_LAMPORTS, Math.max(MIN_MICRO_LAMPORTS, fees[Math.floor(fees.length * 0.75)] ?? MIN_MICRO_LAMPORTS));
+  const plainBytes = (ixs: TransactionInstruction[]) => transactionBytes(compileWalletTransaction(id.creator, latest.blockhash, 1_400_000, microLamports, ixs).message);
+  // A coin transaction over the wallet size target (any initial buy) is compiled against pump.fun's own create
+  // lookup table, as pump.fun's creates are; it is read fresh and checked first, and is never used for the card.
+  const table = kind === "token" && plainBytes(instructions) > WALLET_SIZE_TARGET ? pinnedLookupTable(await connection.getAccountInfo(TABLE_ADDRESS, "confirmed")) : null;
+  const sized = (ixs: TransactionInstruction[]) => transactionBytes(compileWalletTransaction(id.creator, latest.blockhash, 1_400_000, microLamports, ixs, tableFor(plainBytes(ixs), table)).message);
+  const compile = (limit: number) => compileWalletTransaction(id.creator, latest.blockhash, limit, microLamports, instructions, tableFor(plainBytes(instructions), table));
   const first = compile(1_400_000);
   // The final guard. measureTokenTransaction lets the app refuse a non-fitting buy before anything is uploaded.
   const packetBytes = transactionBytes(first.message);
-  if (packetBytes > PACKET_LIMIT) {
-    if (kind !== "token") throw new Error(`Card transaction is ${packetBytes} bytes and exceeds Solana's ${PACKET_LIMIT}-byte packet limit`);
+  if (packetBytes > WALLET_SIZE_TARGET) {
+    if (kind !== "token") throw oversizeError("nft", packetBytes);
     // Advice only where it can work: the coin alone (the create is the first instruction), or this transaction with
     // the shortest name and symbol (1 byte each).
-    const advice = [
-      ...(id.buy > 0n && transactionBytes(compileWalletTransaction(id.creator, latest.blockhash, 1_400_000, microLamports, instructions.slice(0, 1)).message) <= PACKET_LIMIT ? ["launch without an initial buy"] : []),
-      ...(packetBytes - (Buffer.byteLength(input.name, "utf8") - 1) - (input.symbol.length - 1) <= PACKET_LIMIT ? ["use a shorter name or symbol"] : []),
-    ];
-    throw new Error(`Launch transaction is ${packetBytes} bytes and exceeds Solana's ${PACKET_LIMIT}-byte packet limit${advice.length ? `; ${advice.join(", or ")}` : ""}`);
+    throw oversizeError("token", packetBytes, [
+      ...(id.buy > 0n && sized(instructions.slice(0, 1)) <= WALLET_SIZE_TARGET ? ["launch without an initial buy"] : []),
+      ...(packetBytes - (Buffer.byteLength(input.name, "utf8") - 1) - (input.symbol.length - 1) <= WALLET_SIZE_TARGET ? ["use a shorter name or symbol"] : []),
+    ]);
   }
   const firstSimulation = await connection.simulateTransaction(first, {
     sigVerify: false, replaceRecentBlockhash: false, commitment: "confirmed",
@@ -156,7 +210,7 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
   if (firstSimulation.value.err) throw new Error(`Transaction simulation failed: ${JSON.stringify(firstSimulation.value.err)}`);
   const consumed = firstSimulation.value.unitsConsumed;
   if (!consumed || !Number.isSafeInteger(consumed) || consumed > 1_400_000) throw new Error("RPC did not return a valid compute estimate");
-  const computeUnitLimit = Math.min(1_400_000, Math.max(100_000, Math.ceil(consumed * 1.2) + 10_000));
+  const computeUnitLimit = Math.min(1_400_000, Math.max(100_000, Math.ceil(consumed * 1.2) + GUARD_COMPUTE_MARGIN));
   const transaction = compile(computeUnitLimit);
   const [simulation, fee] = await Promise.all([
     connection.simulateTransaction(transaction, { sigVerify: false, replaceRecentBlockhash: false, commitment: "confirmed",
@@ -201,7 +255,8 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
       totalDebitLamports: totalDebit.toString(), reserveBufferLamports: reserveBuffer.toString(),
       walletBalanceLamports: payerBefore.toString(), computeUnitLimit, microLamportsPerComputeUnit: microLamports,
       // The signed wire size equals this unsigned one: both signature slots are already in the bytes.
-      transactionBytes: serialized.length, packetLimit: PACKET_LIMIT,
+      transactionBytes: serialized.length, packetLimit: PACKET_LIMIT, walletSizeTarget: WALLET_SIZE_TARGET,
+      lookupTable: transaction.message.addressTableLookups.length ? PUMP_LOOKUP_TABLE.address : null,
     },
   });
 }
@@ -257,6 +312,7 @@ export async function prepareTokenTransaction(input: LiveLaunchInput, options: L
   const validated = await preparePumpLaunchPlan(input, { connection, now: options.now });
   const instructions = [decodeInstruction(validated.createInstruction)];
   let minimumTokensOut = "0";
+  if (id.buy > 0n && validated.quoteIssuerControls.permanentDelegate && !ALLOW_PERMANENT_DELEGATE_QUOTE_BUY) throw new Error(PERMANENT_DELEGATE_BUY_REFUSAL);
   if (id.buy > 0n) {
     const quoteAta = getAssociatedTokenAddressSync(id.quoteMint, id.creator, false, new PublicKey(id.asset.tokenProgram));
     const fresh = await connection.getMultipleAccountsInfoAndContext([GLOBAL_PDA, QUOTE_CONTROL_PDA, PUMP_FEE_CONFIG_PDA, quoteAta], "confirmed");
@@ -286,8 +342,10 @@ const SIZE_MINT = new PublicKey(new Uint8Array(32).fill(7)), SIZE_BLOCKHASH = ne
 export type TokenSizeInput = { creator: string; name: string; symbol: string; tokenMetadataUri: string; quoteKey: PairKey };
 /**
  * Exact wire size of the coin transaction prepareTokenTransaction builds, with and without an initial buy, from the
- * same builders, the real Pump accounts and a metadata URI of the final length. The buy amount never changes the size.
- * Existing ATAs are omitted exactly as prepare omits them; any other ATA create is counted. No blockhash, signing or send.
+ * same builders, the real Pump accounts, the same lookup-table choice and a metadata URI of the final length. The buy
+ * amount never changes the size. Existing ATAs are omitted exactly as prepare omits them; any other ATA create is
+ * counted. `limit` is the wallet size target prepare enforces. `buyBlocked` names a quote whose first buy prepare
+ * refuses for another reason ("issuer-controls": a permanent-delegate stock quote). No blockhash, signing or send.
  */
 export async function measureTokenTransaction(input: TokenSizeInput, options: { connection: Pick<LiveConnection, "getMultipleAccountsInfoAndContext"> }) {
   const asset = PAIR_ASSETS.find((candidate) => candidate.key === input.quoteKey);
@@ -296,14 +354,19 @@ export async function measureTokenTransaction(input: TokenSizeInput, options: { 
   const tokenMetadataUri = reviewTokenFields(input);
   const create = await PUMP_SDK.createV2Instruction({ mint: SIZE_MINT, user: creator, creator, name: input.name, symbol: input.symbol,
     uri: tokenMetadataUri, quoteMint, quoteTokenProgram, mayhemMode: false, cashback: false, holderReward: false });
-  const snapshot = await options.connection.getMultipleAccountsInfoAndContext([GLOBAL_PDA, QUOTE_CONTROL_PDA], "confirmed");
-  const [globalInfo, quoteControlInfo] = snapshot.value;
+  const snapshot = await options.connection.getMultipleAccountsInfoAndContext([GLOBAL_PDA, QUOTE_CONTROL_PDA, TABLE_ADDRESS, quoteMint], "confirmed");
+  const [globalInfo, quoteControlInfo, tableInfo, quoteInfo] = snapshot.value;
   if (!globalInfo?.owner.equals(PUMP_PROGRAM_ID) || !quoteControlInfo?.owner.equals(PUMP_PROGRAM_ID)) throw new Error("Current Pump accounts are unavailable");
+  if (!quoteInfo?.owner.equals(quoteTokenProgram)) throw new Error("The pair mint account is unavailable");
   const global = PUMP_SDK.decodeGlobal(globalInfo), quoteControl = PUMP_SDK.decodeQuoteControl(quoteControlInfo);
+  const issuerControls = quoteIssuerControls(unpackMint(quoteMint, quoteInfo, quoteTokenProgram));
   const buy = await withoutExistingSetup(options.connection, [create, ...await firstBuyInstructions({ mint: SIZE_MINT, creator, quoteMint, quoteTokenProgram },
     global, launchCurve(global, quoteControl, quoteMint, creator), 1n, new BN(1), "1")]);
-  const bytes = (instructions: TransactionInstruction[]) => transactionBytes(compileWalletTransaction(creator, SIZE_BLOCKHASH, 1_400_000, 1_000, instructions).message);
-  return { limit: PACKET_LIMIT, createBytes: bytes([create]), buyBytes: bytes(buy) };
+  const table = pinnedLookupTable(tableInfo ?? null);
+  const plain = (instructions: TransactionInstruction[]) => transactionBytes(compileWalletTransaction(creator, SIZE_BLOCKHASH, 1_400_000, 1_000, instructions).message);
+  const bytes = (instructions: TransactionInstruction[]) => transactionBytes(compileWalletTransaction(creator, SIZE_BLOCKHASH, 1_400_000, 1_000, instructions, tableFor(plain(instructions), table)).message);
+  return { limit: WALLET_SIZE_TARGET, packetLimit: PACKET_LIMIT, createBytes: bytes([create]), buyBytes: bytes(buy), lookupTable: !!table && plain(buy) > WALLET_SIZE_TARGET,
+    buyBlocked: issuerControls.permanentDelegate && !ALLOW_PERMANENT_DELEGATE_QUOTE_BUY ? "issuer-controls" as const : null };
 }
 
 function coreAttributes(input: LiveLaunchInput) {
@@ -335,11 +398,17 @@ function signedTransactionDetails(transaction: VersionedTransactionResponse, exp
   const messageSha256 = digest(message.serialize());
   if (expectedMessageSha256 && expectedMessageSha256 !== messageSha256) throw new Error("The finalized transaction message differs from the approved plan");
   const keys = message.getAccountKeys({ accountKeysFromLookups: transaction.meta.loadedAddresses });
-  const instructions = message.compiledInstructions.map((ix) => ({
-    programId: keys.get(ix.programIdIndex)!,
+  const all = message.compiledInstructions.map((ix) => ({
+    programId: keys.get(ix.programIdIndex)!, program: keys.get(ix.programIdIndex)!.toBase58(),
     accounts: ix.accountKeyIndexes.map((index) => keys.get(index)!), data: Buffer.from(ix.data),
   }));
-  return { message, messageSha256, keys, instructions };
+  // Wallet assertions count only inside the message the server validated before relaying (its hash is the expected
+  // one): then they must be a trailing suffix of read-only Lighthouse assertions, and the rest is checked as planned.
+  let instructions: typeof all;
+  const keyList = Array.from({ length: keys.length }, (_, index) => keys.get(index)!.toBase58());
+  try { instructions = withoutWalletGuards(all.map((ix) => ({ ...ix, accounts: ix.accounts.map((key) => key.toBase58()), source: ix })), !!expectedMessageSha256, keyList).map((ix) => ix.source); }
+  catch { throw new Error("Finalized transaction contains unexpected wallet instructions"); }
+  return { message, messageSha256, keys, instructions, walletGuards: all.length - instructions.length };
 }
 
 function matchesInstruction(actual: ReturnType<typeof signedTransactionDetails>["instructions"][number], expected: TransactionInstruction) {
@@ -482,28 +551,46 @@ export async function assertTokenMintReplaceable(input: LiveLaunchInput, options
   return { replaceable: true as const, finalizedBlockHeight: height, slot: account.context.slot, previousTokenMint: input.mint };
 }
 
-/** Verifies wallet+ephemeral signatures without producing any signature itself. */
+/** The message bytes of a serialized transaction (after its signatures), read strictly. */
+function messageBytesOf(raw: Uint8Array) {
+  const count = raw[0];
+  if (raw.length < 1 || count === undefined || count >= 0x80) throw new Error("Invalid signed transaction encoding or size");
+  return raw.subarray(1 + 64 * count);
+}
+/**
+ * Verifies wallet+ephemeral signatures without producing any signature itself. The returned message must be the
+ * plan's message, or that message with only the changes the shared wallet rule accepts (appended read-only Lighthouse
+ * assertions, and a refreshed blockhash that checkSignedWalletTransaction confirms is still valid). Both signatures are
+ * checked over the returned message. `signedMessageSha256` is the hash every later finalization check expects.
+ */
 export function validateSignedWalletTransaction(plan: WalletTransactionPlan, transactionBase64: string) {
   if (typeof transactionBase64 !== "string" || transactionBase64.length > 2000) throw new Error("Invalid signed transaction payload");
   const raw = Buffer.from(transactionBase64, "base64");
-  if (raw.length > 1232 || raw.length === 0 || raw.toString("base64") !== transactionBase64) throw new Error("Invalid signed transaction encoding or size");
+  if (raw.length > PACKET_LIMIT || raw.length === 0 || raw.toString("base64") !== transactionBase64) throw new Error("Invalid signed transaction encoding or size");
   const transaction = VersionedTransaction.deserialize(raw);
-  if (transaction.version !== 0 || transaction.message.addressTableLookups.length !== 0) throw new Error("Unexpected transaction version or lookup tables");
-  const message = transaction.message.serialize();
-  if (digest(message) !== plan.messageSha256 || transaction.message.recentBlockhash !== plan.blockhash) throw new Error("Signed transaction differs from the approved message");
+  if (transaction.version !== 0) throw new Error("Unexpected transaction version");
+  const message = transaction.message.serialize(), rawMessage = messageBytesOf(raw);
+  if (!Buffer.from(message).equals(Buffer.from(rawMessage))) throw new Error("Signed transaction has a non-canonical message encoding");
+  const planned = VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64"));
+  if (digest(planned.message.serialize()) !== plan.messageSha256 || planned.message.recentBlockhash !== plan.blockhash) throw new Error("The stored plan does not match its own message");
+  let change: ReturnType<typeof walletMessageChange>;
+  try { change = walletMessageChange(decodeV0Message(planned.message.serialize()), decodeV0Message(message), { allowBlockhashChange: true }); }
+  catch (error) { throw new Error(`Signed transaction differs from the approved message${error instanceof WalletMessageRefused ? ` (${error.reason})` : ""}`); }
   const signers = transaction.message.staticAccountKeys.slice(0, transaction.message.header.numRequiredSignatures).map((key) => key.toBase58());
   if (signers.length !== plan.requiredSigners.length || signers.some((key, index) => key !== plan.requiredSigners[index]) || signers[0] !== plan.feePayer) throw new Error("Signed transaction has unexpected signers or payer");
   for (let index = 0; index < signers.length; index++) {
     if (!ed25519.verify(transaction.signatures[index], message, transaction.message.staticAccountKeys[index].toBytes())) throw new Error(`Missing or invalid signature for ${signers[index]}`);
   }
   const signature = bs58.encode(transaction.signatures[0]);
-  return { signature, transactionBase64, messageSha256: plan.messageSha256 };
+  return { signature, transactionBase64, messageSha256: plan.messageSha256, signedMessageSha256: digest(message),
+    blockhash: transaction.message.recentBlockhash, blockhashChanged: change.blockhashChanged, walletGuards: change.guards.length };
 }
 
 /**
- * What a wallet changed in a prepared transaction, for the server log only: sizes, signers, blockhash, compute budget
- * and the outer programs it added or removed. It never signs, sends or trusts the returned bytes, which cannot land
- * without the new asset signature that only the page holds.
+ * What a wallet changed in a prepared transaction, for the server log only: sizes, signers, blockhash, compute budget,
+ * the outer programs it added or removed, and what the shared wallet rule says (accepted with which assertions, or the
+ * refusal reason). It never signs, sends or trusts the returned bytes, which cannot land without the new asset
+ * signature that only the page holds.
  */
 export function describeWalletChange(plan: WalletTransactionPlan, transactionBase64: string) {
   const before = VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64"));
@@ -511,7 +598,12 @@ export function describeWalletChange(plan: WalletTransactionPlan, transactionBas
   const summary = { bytesBefore: Buffer.from(plan.transactionBase64, "base64").length, bytesAfter: raw.length, limit: PACKET_LIMIT };
   let after: VersionedTransaction;
   try { after = VersionedTransaction.deserialize(raw); } catch { return { ...summary, parsed: false as const }; }
-  const key = (tx: VersionedTransaction, index: number) => tx.message.staticAccountKeys[index]?.toBase58() ?? `lookup:${index}`;
+  // Keys resolved through the pinned table when the message decodes, so a recompile's shifted indexes still compare.
+  const resolved = new Map<VersionedTransaction, string[] | null>();
+  const key = (tx: VersionedTransaction, index: number) => {
+    if (!resolved.has(tx)) { try { resolved.set(tx, decodeV0Message(tx.message.serialize()).keys); } catch { resolved.set(tx, null); } }
+    return resolved.get(tx)?.[index] ?? tx.message.staticAccountKeys[index]?.toBase58() ?? `lookup:${index}`;
+  };
   const instructions = (tx: VersionedTransaction) => tx.message.compiledInstructions.map((ix) => ({ program: key(tx, ix.programIdIndex),
     id: `${key(tx, ix.programIdIndex)}|${ix.accountKeyIndexes.map((index) => key(tx, index)).join(",")}|${Buffer.from(ix.data).toString("hex")}` }));
   const signers = (tx: VersionedTransaction) => tx.message.staticAccountKeys.slice(0, tx.message.header.numRequiredSignatures).map((k) => k.toBase58()).join(",");
@@ -520,13 +612,19 @@ export function describeWalletChange(plan: WalletTransactionPlan, transactionBas
   let cursor = 0;
   for (const ix of returned) if (cursor < planned.length && ix.id === planned[cursor].id) cursor++;
   const programs = (list: typeof planned) => new Set(list.map((ix) => ix.program));
+  // The rule's own answer, with each assertion as its discriminator, the plan key index it reads and its data size.
+  let rule: { accepted: true; guards: { discriminator: number; target: number; dataBytes: number }[]; recompiled: boolean } | { accepted: false; reason: string };
+  try {
+    const change = walletMessageChange(decodeV0Message(before.message.serialize()), decodeV0Message(after.message.serialize()), { allowBlockhashChange: true });
+    rule = { accepted: true, guards: change.guards, recompiled: change.recompiled };
+  } catch (error) { rule = { accepted: false, reason: error instanceof WalletMessageRefused ? error.reason : "unreadable" }; }
   return { ...summary, parsed: true as const, version: after.version, lookupTables: after.message.addressTableLookups.length,
     messageSha256: digest(after.message.serialize()), blockhashChanged: after.message.recentBlockhash !== before.message.recentBlockhash,
     signersChanged: signers(after) !== signers(before), walletSigned: after.signatures[0]?.some(Boolean) ?? false,
     instructionsBefore: planned.length, instructionsAfter: returned.length, planInstructionsKept: cursor === planned.length,
     computeBudgetChanged: compute(returned) !== compute(planned),
     programsAdded: [...programs(returned)].filter((program) => !programs(planned).has(program)),
-    programsRemoved: [...programs(planned)].filter((program) => !programs(returned).has(program)) };
+    programsRemoved: [...programs(planned)].filter((program) => !programs(returned).has(program)), rule };
 }
 
 /** A definite pre-send failure. Nothing was broadcast, so the same stage can be prepared again. */
@@ -535,27 +633,46 @@ export class SignedTransactionNotSent extends Error {
 }
 type SignedInput = { plan: WalletTransactionPlan; transactionBase64: string };
 /**
+ * Blocks added to the RPC's newest last valid block height to bound a wallet-refreshed blockhash: it covers an RPC
+ * node behind the one the wallet asked. Any blockhash that exists was produced at or before the newest block, so it
+ * stops landing at or before that block height + 150; this margin keeps the bound above it.
+ */
+export const REFRESHED_BLOCKHASH_MARGIN = 64;
+const EXPIRED = "The signed transaction blockhash expired before it was sent; prepare a fresh transaction";
+/**
  * Read-only checks before any broadcast, in order: signatures against the plan, the signature status, blockhash
  * expiry, then a sigVerify simulation. "landed" means the chain already knows this signature (keep and recover it,
  * including a failed one). An expired blockhash or a failed simulation throws SignedTransactionNotSent.
+ * `lastValidBlockHeight` is the height after which these signed bytes can no longer land: the plan's, or for a
+ * wallet-refreshed blockhash (accepted only while the RPC still knows it) an upper bound from the newest blockhash.
+ * The caller stores it with the bytes, and every abandon or replace gate waits past it.
  */
 export async function checkSignedWalletTransaction(input: SignedInput, options: { connection: LiveConnection }) {
   const validated = validateSignedWalletTransaction(input.plan, input.transactionBase64);
   const connection = options.connection;
   await assertMainnet(connection);
+  const bound = async () => {
+    if (!validated.blockhashChanged) return input.plan.lastValidBlockHeight;
+    const newest = await connection.getLatestBlockhash("processed");
+    if (!Number.isSafeInteger(newest.lastValidBlockHeight) || newest.lastValidBlockHeight <= 0) throw new Error("RPC did not return a valid block height");
+    return Math.max(input.plan.lastValidBlockHeight, newest.lastValidBlockHeight + REFRESHED_BLOCKHASH_MARGIN);
+  };
+  const checked = { signature: validated.signature, signedMessageSha256: validated.signedMessageSha256, walletGuards: validated.walletGuards, blockhashChanged: validated.blockhashChanged };
   const statuses = await connection.getSignatureStatuses([validated.signature], { searchTransactionHistory: true });
   const existing = statuses.value[0];
-  if (existing) return { status: "landed" as const, signature: validated.signature, err: existing.err ?? null };
+  if (existing) return { status: "landed" as const, ...checked, err: existing.err ?? null, lastValidBlockHeight: await bound() };
+  if (validated.blockhashChanged && !(await connection.isBlockhashValid(validated.blockhash, { commitment: "processed" })).value) throw new SignedTransactionNotSent("expired", EXPIRED);
+  const lastValidBlockHeight = await bound();
   const height = await connection.getBlockHeight("confirmed");
-  if (height > input.plan.lastValidBlockHeight) throw new SignedTransactionNotSent("expired", "The signed transaction blockhash expired before it was sent; prepare a fresh transaction");
+  if (height > lastValidBlockHeight) throw new SignedTransactionNotSent("expired", EXPIRED);
   const transaction = VersionedTransaction.deserialize(Buffer.from(validated.transactionBase64, "base64"));
   const simulation = await connection.simulateTransaction(transaction, { sigVerify: true, replaceRecentBlockhash: false, commitment: "confirmed", minContextSlot: input.plan.verifiedSlot });
   const err = simulation.value.err;
   // Someone else broadcast these exact bytes: recover them like any landed signature.
-  if (err === "AlreadyProcessed") return { status: "landed" as const, signature: validated.signature, err: null };
-  if (err === "BlockhashNotFound") throw new SignedTransactionNotSent("expired", "The signed transaction blockhash expired before it was sent; prepare a fresh transaction");
+  if (err === "AlreadyProcessed") return { status: "landed" as const, ...checked, err: null, lastValidBlockHeight };
+  if (err === "BlockhashNotFound") throw new SignedTransactionNotSent("expired", EXPIRED);
   if (err) throw new SignedTransactionNotSent("simulation", `Signed transaction simulation failed: ${JSON.stringify(err)}`);
-  return { status: "ready" as const, signature: validated.signature, blocksLeft: input.plan.lastValidBlockHeight - height };
+  return { status: "ready" as const, ...checked, blocksLeft: lastValidBlockHeight - height, lastValidBlockHeight };
 }
 
 /**

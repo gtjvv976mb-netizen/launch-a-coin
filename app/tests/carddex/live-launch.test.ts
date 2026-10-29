@@ -39,7 +39,9 @@ let env: Record<string, unknown>;
 mock.module("../../src/lib/bindings.server", () => ({bindings: () => env}));
 let tokenVerified = false, nftVerified = false, replaceable = false, uncertain = false, prepareCalls = 0, nftPrepareCalls = 0, sendCalls = 0, receiptCreator: string | null = null;
 let tokenInputs: any[] = [], nftInputs: any[] = [];
-let sizes = {createBytes: 950, buyBytes: 1200}, measured: any[] = [];
+let sizes: {createBytes: number; buyBytes: number; buyBlocked?: string | null} = {createBytes: 950, buyBytes: 1200}, measured: any[] = [];
+// What the mocked chain saw: the expected message hash each verification used, and each expiry gate's height.
+let verifyHashes: (string | undefined)[] = [], nftTokenHashes: (string | undefined)[] = [], expiryGates: (number | undefined)[] = [], checkedHeight: number | null = null;
 let preSend: "ready" | "landed" | "expired" | "simulation" | "error" = "ready", savedAtCheck: (string | null)[] = [];
 class SignedTransactionNotSent extends Error { constructor(readonly reason: string, message: string) { super(message); } }
 let tokenVerifyHook: (() => Promise<void>) | undefined, nftVerifyHook: (() => Promise<void>) | undefined, nftPrepareHook: (() => Promise<void>) | undefined, nftReplaceHook: (() => Promise<void>) | undefined;
@@ -52,32 +54,39 @@ function plan(input: any, kind: "token" | "nft") {
     bindingSha256: binding, verifiedSlot: 50, review: {quoteKey: input.quoteKey, initialBuyQuoteBaseUnits: input.initialBuyQuoteBaseUnits}};
 }
 function signedSignature(prepared: {kind: string; messageSha256: string}) { return prepared.kind === "token" ? "s".repeat(88) : String.fromCharCode(115 + Number(prepared.messageSha256.slice(-2))).repeat(88); }
+// "-guarded" bytes stand for what a wallet returns with appended Lighthouse assertions: another message, so another
+// signature and signed hash, within the shared wallet rule.
+const guarded = (bytes: string) => bytes.endsWith("-guarded");
+function signatureFor(prepared: {kind: string; messageSha256: string}, bytes: string) { const signature = signedSignature(prepared); return guarded(bytes) ? signature.slice(0, 87) + "G" : signature; }
+const signedHash = (prepared: {messageSha256: string}, bytes: string) => guarded(bytes) ? "e".repeat(62) + prepared.messageSha256.slice(-2) : prepared.messageSha256;
 mock.module("../../../integrations/pumpfun/src/live", () => ({
   createMainnetConnection: () => ({}),
   measureTokenTransaction: async (input: any) => { measured.push(input); return {limit: 1232, ...sizes}; },
   prepareTokenTransaction: async (input: any) => { tokenInputs.push(input); return plan(input, "token"); },
-  verifyTokenLaunch: async (input: any, options: any) => { const result = {status: tokenVerified ? "verified" : "pending", ...identity(input), signature: options.signature, slot: 101, messageSha256: options.expectedMessageSha256}; const hook = tokenVerifyHook; tokenVerifyHook = undefined; await hook?.(); return result; },
-  verifyCreatorNft: async (input: any, options: any) => { const result = {status: nftVerified ? "verified" : "pending", ...identity(input), signature: options.signature, slot: 102, messageSha256: options.expectedMessageSha256}; const hook = nftVerifyHook; nftVerifyHook = undefined; await hook?.(); return result; },
-  prepareCreatorNftTransaction: async (input: any) => { if (!tokenVerified) throw new Error("Token is not finalized"); nftInputs.push(input); const hook = nftPrepareHook; nftPrepareHook = undefined; await hook?.(); return nftVerified ? {status: "already-created", receipt: {status: "verified", ...identity(input)}} : plan(input, "nft"); },
-  assertNftMintReplaceable: async () => { if (!replaceable || nftVerified) throw new Error("Prior NFT blockhash has not expired or its account exists"); const hook = nftReplaceHook; nftReplaceHook = undefined; await hook?.(); return {replaceable: true}; },
-  assertTokenMintReplaceable: async () => { if (!replaceable || tokenVerified) throw new Error("Prior token blockhash has not expired or its account exists"); return {replaceable: true}; },
+  verifyTokenLaunch: async (input: any, options: any) => { verifyHashes.push(options.expectedMessageSha256); const result = {status: tokenVerified ? "verified" : "pending", ...identity(input), signature: options.signature, slot: 101, messageSha256: options.expectedMessageSha256}; const hook = tokenVerifyHook; tokenVerifyHook = undefined; await hook?.(); return result; },
+  verifyCreatorNft: async (input: any, options: any) => { if (options.signature) verifyHashes.push(options.expectedMessageSha256); const result = {status: nftVerified ? "verified" : "pending", ...identity(input), signature: options.signature, slot: 102, messageSha256: options.expectedMessageSha256}; const hook = nftVerifyHook; nftVerifyHook = undefined; await hook?.(); return result; },
+  prepareCreatorNftTransaction: async (input: any, options: any) => { if (!tokenVerified) throw new Error("Token is not finalized"); nftInputs.push(input); nftTokenHashes.push(options.tokenMessageSha256); const hook = nftPrepareHook; nftPrepareHook = undefined; await hook?.(); return nftVerified ? {status: "already-created", receipt: {status: "verified", ...identity(input)}} : plan(input, "nft"); },
+  assertNftMintReplaceable: async (_input: any, options: any) => { expiryGates.push(options.lastValidBlockHeight); if (!replaceable || nftVerified) throw new Error("Prior NFT blockhash has not expired or its account exists"); const hook = nftReplaceHook; nftReplaceHook = undefined; await hook?.(); return {replaceable: true}; },
+  assertTokenMintReplaceable: async (_input: any, options: any) => { expiryGates.push(options.lastValidBlockHeight); if (!replaceable || tokenVerified) throw new Error("Prior token blockhash has not expired or its account exists"); return {replaceable: true}; },
   validateSignedWalletTransaction: (prepared: any, bytes: string) => {
-    if (bytes !== `${prepared.transactionBase64}-signed`) throw new Error("Prepared message or required signatures changed");
-    return {signature: signedSignature(prepared), transactionBase64: bytes, messageSha256: prepared.messageSha256};
+    if (bytes !== `${prepared.transactionBase64}-signed` && bytes !== `${prepared.transactionBase64}-guarded`) throw new Error("Prepared message or required signatures changed");
+    return {signature: signatureFor(prepared, bytes), transactionBase64: bytes, messageSha256: prepared.messageSha256, signedMessageSha256: signedHash(prepared, bytes),
+      blockhash: "fixture", blockhashChanged: false, walletGuards: guarded(bytes) ? 2 : 0};
   },
   SignedTransactionNotSent,
   describeWalletChange: (prepared: any, bytes: string) => ({bytesBefore: 900, bytesAfter: 944, limit: 1232, parsed: true, blockhashChanged: false, programsAdded: ["L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95"], planned: prepared.messageSha256, returnedLength: bytes.length}),
-  checkSignedWalletTransaction: async ({plan: prepared}: any) => {
+  checkSignedWalletTransaction: async ({plan: prepared, transactionBase64: bytes}: any) => {
     savedAtCheck.push((sqlite.query("SELECT signature FROM live_launch_transactions WHERE message_sha256 = ?").get(prepared.messageSha256) as {signature: string | null}).signature);
     if (preSend === "expired") throw new SignedTransactionNotSent("expired", "The signed transaction blockhash expired before it was sent; prepare a fresh transaction");
     if (preSend === "simulation") throw new SignedTransactionNotSent("simulation", 'Signed transaction simulation failed: {"InstructionError":[2,"InsufficientFunds"]}');
     if (preSend === "error") throw new Error("429 Too Many Requests from https://rpc.example.test");
-    return preSend === "landed" ? {status: "landed", signature: signedSignature(prepared), err: null} : {status: "ready", signature: signedSignature(prepared), blocksLeft: 50};
+    const checked = {signature: signatureFor(prepared, bytes), signedMessageSha256: signedHash(prepared, bytes), walletGuards: guarded(bytes) ? 2 : 0, blockhashChanged: false, lastValidBlockHeight: checkedHeight ?? prepared.lastValidBlockHeight};
+    return preSend === "landed" ? {status: "landed", ...checked, err: null} : {status: "ready", ...checked, blocksLeft: 50};
   },
   broadcastSignedWalletTransaction: async ({plan: prepared, transactionBase64}: any) => {
     sendCalls++;
     const persisted = sqlite.query("SELECT signature, signed_transaction_base64 FROM live_launch_transactions WHERE message_sha256 = ?").get(prepared.messageSha256) as {signature: string; signed_transaction_base64: string};
-    expect(persisted.signature).toBe(signedSignature(prepared));
+    expect(persisted.signature).toBe(signatureFor(prepared, transactionBase64));
     expect(persisted.signed_transaction_base64).toBe(transactionBase64);
     return {status: uncertain ? "submission-uncertain" : "submitted", signature: persisted.signature};
   },
@@ -106,6 +115,7 @@ beforeEach(() => {
   tokenInputs = []; nftInputs = [];
   tokenVerifyHook = nftVerifyHook = nftPrepareHook = nftReplaceHook = undefined;
   sizes = {createBytes: 950, buyBytes: 1200}; measured = []; preSend = "ready"; savedAtCheck = [];
+  verifyHashes = []; nftTokenHashes = []; expiryGates = []; checkedHeight = null;
 });
 afterAll(() => { globalThis.fetch = nativeFetch; sqlite.close(); });
 function image(width: number, height: number) { const bytes = new Uint8Array(40); bytes.set([0x89, 0x50, 0x4e, 0x47]); new DataView(bytes.buffer).setUint32(16, width); new DataView(bytes.buffer).setUint32(20, height); return bytes; }
@@ -419,7 +429,7 @@ describe("isolated real-launch server lifecycle", () => {
   test("the size check measures the final URI length and reports the buy and the coin alone", async () => {
     const prepared = await service.prepareLiveLaunch(creator, await input());
     const check = (initialBuyQuoteBaseUnits: string) => service.checkLiveLaunchSize(creator, {name: "  Launch   Fixture ", symbol: "fix", quoteAssetKey: "sol", initialBuyQuoteBaseUnits});
-    expect(await check("1000")).toEqual({limit: 1232, bytes: 1200, fits: true, buyBytes: 1200, buyFits: true, createBytes: 950, createFits: true});
+    expect(await check("1000")).toEqual({limit: 1232, bytes: 1200, fits: true, buyBytes: 1200, buyFits: true, createBytes: 950, createFits: true, buyBlocked: null});
     expect(measured[0]).toMatchObject({creator, name: "Launch Fixture", symbol: "FIX", quoteKey: "sol"});
     expect(measured[0].tokenMetadataUri).toMatch(/^https:\/\/launchacard\.fun\/m\/[A-Za-z0-9_-]{43}$/);
     expect(measured[0].tokenMetadataUri.length).toBe(prepared.intent.tokenMetadataUri.length);
@@ -439,6 +449,50 @@ describe("isolated real-launch server lifecycle", () => {
     measured = [];
     expect((await service.prepareLiveLaunch(creator, original)).intent.status).toBe("prepared");
     expect(measured).toHaveLength(0);
+  });
+  test("a tokenized-stock first buy is refused with its own reason before anything is written", async () => {
+    const original = await input(), stored = objects.size;
+    sizes = {createBytes: 950, buyBytes: 1000, buyBlocked: "issuer-controls"};
+    const check = (initialBuyQuoteBaseUnits: string) => service.checkLiveLaunchSize(creator, {name: "Fixture", symbol: "FIX", quoteAssetKey: original.quoteAssetKey, initialBuyQuoteBaseUnits});
+    expect(await check("1")).toMatchObject({fits: false, buyFits: false, createFits: true, buyBlocked: "issuer-controls"});
+    expect(await check("0")).toMatchObject({fits: true, buyFits: false, buyBlocked: "issuer-controls"});
+    await expect(service.prepareLiveLaunch(creator, {...original, initialBuyQuoteBaseUnits: "1000"})).rejects.toThrow("Wallets warn when a first buy spends a tokenized-stock quote");
+    expect(objects.size).toBe(stored); expect(prepareCalls).toBe(0);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 0});
+  });
+  test("a wallet's assertions: the signed message hash and expiry bound are saved with the bytes, never change, and every later check uses them", async () => {
+    const first = await service.prepareLiveLaunch(creator, await input()), tx = first.transaction!;
+    const coinHash = "e".repeat(62) + tx.messageSha256.slice(-2);
+    // The page sends the plan's hash (the plan id) with the bytes the wallet returned; the bound is a refreshed one.
+    checkedHeight = 400;
+    const sent = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: `${tx.transactionBase64}-guarded`, walletName: "Phantom", signingOrder: "wallet-first"});
+    expect(sqlite.query("SELECT signature, signed_message_sha256, effective_last_valid_block_height FROM live_launch_transactions WHERE message_sha256 = ?").get(tx.messageSha256))
+      .toEqual({signature: sent.signature, signed_message_sha256: coinHash, effective_last_valid_block_height: 400});
+    for (const change of [`signed_message_sha256 = '${"f".repeat(64)}'`, "effective_last_valid_block_height = 401", "signed_message_sha256 = NULL"]) {
+      expect(() => sqlite.exec(`UPDATE live_launch_transactions SET ${change} WHERE message_sha256 = '${tx.messageSha256}'`)).toThrow("immutable");
+    }
+    // Confirmation by the plan's hash verifies the landed transaction against the signed hash.
+    await service.confirmLiveToken(creator, {intentId: first.intent.id, signature: sent.signature, messageSha256: tx.messageSha256});
+    await service.getLiveLaunchIntent(creator, first.intent.id);
+    expect(verifyHashes).toEqual([coinHash, coinHash]);
+    // Abandon waits past the signed bytes' bound (400), not the plan's (100).
+    replaceable = true;
+    expect((await service.abandonLiveLaunchIntent(creator, {intentId: first.intent.id})).intent.status).toBe("abandoned");
+    expect(expiryGates).toEqual([400]);
+  });
+  test("the card is prepared under the coin's signed hash, and a card key rotation waits past the signed card's bound", async () => {
+    const first = await service.prepareLiveLaunch(creator, await input()), tx = first.transaction!;
+    const sent = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: tx.messageSha256, transactionBase64: `${tx.transactionBase64}-guarded`});
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: first.intent.id, signature: sent.signature, messageSha256: tx.messageSha256});
+    const card = (await service.prepareLiveCreatorNft(creator, {intentId: first.intent.id})).transaction!;
+    expect(nftTokenHashes).toEqual(["e".repeat(62) + tx.messageSha256.slice(-2)]);
+    checkedHeight = 500;
+    const cardSent = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-guarded`});
+    expect(sqlite.query("SELECT signed_message_sha256, effective_last_valid_block_height FROM live_launch_transactions WHERE signature = ?").get(cardSent.signature)).toEqual({signed_message_sha256: "e".repeat(62) + card.messageSha256.slice(-2), effective_last_valid_block_height: 500});
+    replaceable = true;
+    await service.prepareLiveCreatorNft(creator, {intentId: first.intent.id, nftMint: replacementNft});
+    expect(expiryGates).toEqual([500]);
   });
   test("prepare checks the composition before it spends an RPC read on the size", async () => {
     const original = await input();

@@ -6,6 +6,8 @@ import { MEME_PAIR_PRESETS } from "../../src/lib/carddex/design-pairings";
 import { base58, fromBase58, hexHash, LIVE_PROGRAMS, parseLiveTransaction, partiallySignPlan, toBase64, unsentStageNext, validateLivePlan, validateWalletResult, destroyEphemeralSigner, type ExpectedPlan, type TransactionPlan,
   addEphemeralSignature, fromBase64, oversizedPlanError, planForWallet, planIsStale, refreshKeepsReview, signingOrderFor, signPlanWithWallet, validateWalletFirstResult, WALLET_CHANGED_TRANSACTION, WalletChangedTransaction } from "../../src/components/carddex/live/transaction";
 import { liveModeOpen } from "../../src/components/carddex/live/mode";
+import { signForLaunch, WALLET_RETRY_NOTICE } from "../../src/components/carddex/live/launch-flow";
+import { messageOf, payerGuardData, phantomGuarded, tokenGuardData, unsignedTransaction } from "../../../integrations/pumpfun/tests/message-fixtures";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
 import { LiveWalletNotice } from "../../src/components/carddex/live/LiveWalletNotice";
@@ -227,8 +229,6 @@ describe("wallet-first signing order", () => {
     const changes: Array<(bytes: Uint8Array) => Uint8Array> = [
       // A different priority fee: the SetComputeUnitPrice data (9 bytes, 3 then u64 1000) gets another price.
       unsigned => { const out = unsigned.slice(), at = out.findIndex((_, i) => out[i] === 9 && out[i + 1] === 3 && out[i + 2] === 232 && out[i + 3] === 3); out[at + 2] = 233; return out; },
-      // A refreshed blockhash.
-      unsigned => { const wire = parseLiveTransaction(unsigned), out = unsigned.slice(), at = wire.signatureOffset + 128 + 4 + 1 + wire.keys.length * 32; out.set(new Uint8Array(32).fill(9), at); return out; },
     ];
     for (const change of changes) {
       const wallet = fakeWallet(change);
@@ -325,5 +325,100 @@ describe("what your wallet will show", () => {
     expect(html).toContain("don&#x27;t approve");
     const copy = [WALLET_OPEN_COPY, WALLET_NOTICE_TITLE, ...Object.values(WALLET_NOTICE_COPY).map(value => typeof value === "function" ? value("1", "SOL") : value)];
     for (const text of copy) { expect(text).not.toMatch(/[\u2013\u2014]/); expect(text).not.toMatch(/ignore|anyway|click through|safe to proceed/i); }
+  });
+});
+
+// What a guard-adding wallet returns: its own version of the message (a test-side rewrite), signed in the creator slot.
+const walletRewrites = (rewrite: (message: Uint8Array) => Uint8Array) => fakeWallet(unsigned => unsignedTransaction(rewrite(messageOf(unsigned))));
+const LIGHTHOUSE_V0 = "L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK";
+describe("Phantom's Lighthouse assertions in the browser", () => {
+  for (const [kind, make, seed] of [["coin", fixture, assetSeed], ["card", nftFixture, nftSeed]] as const) test(`the page co-signs a ${kind} message with appended read-only assertions, recompiled mid-way through the readonly keys`, async () => {
+    const { plan, expected } = make(), wallet = walletRewrites(message => phantomGuarded(message, [{ target: creator, data: payerGuardData(10_000_000n) }, { target: expected.mint, data: tokenGuardData(1n) }]));
+    const signed = await signPlanWithWallet(plan, expected, { address: expected.mint, seed: seed.slice() }, "wallet-first", wallet.sign);
+    expect(wallet.shown).toHaveLength(1);
+    const final = parseLiveTransaction(signed);
+    expect(hexHash(final.message)).not.toBe(plan.messageSha256);
+    expect(final.programs.slice(-2)).toEqual([LIVE_PROGRAMS.lighthouse, LIVE_PROGRAMS.lighthouse]);
+    expect(final.signers).toEqual([creator, expected.mint]);
+    // Both signatures cover the message the wallet returned, not the plan's.
+    expect(ed25519.verify(final.signatures[0], final.message, fromBase58(creator))).toBe(true);
+    expect(ed25519.verify(final.signatures[1], final.message, fromBase58(expected.mint))).toBe(true);
+  });
+  test("a refreshed blockhash goes through to the server, which re-checks it before relaying anything", () => {
+    const { plan } = fixture(), unsigned = fromBase64(plan.transactionBase64);
+    const refreshed = phantomGuarded(messageOf(unsigned), [{ target: creator, data: payerGuardData() }], { blockhash: base58(new Uint8Array(32).fill(9)) });
+    const signed = unsignedTransaction(refreshed); signed.set(ed25519.sign(refreshed, creatorSeed), 1);
+    expect(validateWalletFirstResult(unsigned, signed, creator)).toEqual(signed);
+  });
+  test("assertions outside the rule are refused and never co-signed", async () => {
+    const { plan, expected } = fixture(), payer = { target: creator, data: payerGuardData() };
+    const stranger = base58(new Uint8Array(32).fill(66));
+    for (const rewrite of [
+      (message: Uint8Array) => phantomGuarded(message, [{ ...payer, program: LIGHTHOUSE_V0 }]),
+      (message: Uint8Array) => phantomGuarded(message, [{ target: creator, data: Uint8Array.from([0, 0, 0]) }]),
+      (message: Uint8Array) => phantomGuarded(message, [payer], { writableProgram: true }),
+      (message: Uint8Array) => phantomGuarded(message, [payer], { at: 1 }),
+      (message: Uint8Array) => phantomGuarded(message, [{ target: stranger, data: payerGuardData() }], { newKeys: [stranger] }),
+      (message: Uint8Array) => phantomGuarded(message, [{ ...payer, extraAccounts: [mint] }]),
+    ]) {
+      const wallet = walletRewrites(rewrite);
+      const refused = await signPlanWithWallet(plan, expected, { address: mint, seed: assetSeed.slice() }, "wallet-first", wallet.sign).then(() => null, (error: unknown) => error);
+      expect(refused).toBeInstanceOf(WalletChangedTransaction);
+      expect(parseLiveTransaction((refused as WalletChangedTransaction).returned).signatures[1].every(byte => byte === 0)).toBe(true);
+    }
+  });
+  test("a page-first plan must come back byte for byte: the page's signature covers the exact message", async () => {
+    const { plan, expected } = fixture(), wallet = walletRewrites(message => phantomGuarded(message, [{ target: creator, data: payerGuardData() }]));
+    const refused = await signPlanWithWallet(plan, expected, { address: mint, seed: assetSeed.slice() }, "page-first", wallet.sign).then(() => null, (error: unknown) => error);
+    expect(refused).toBeInstanceOf(WalletChangedTransaction);
+  });
+  test("the parser takes up to 32 instructions, enough for nine or more assertions", () => {
+    const { plan } = fixture(), message = messageOf(fromBase64(plan.transactionBase64));
+    // Three plan instructions here; the decoder takes 32 in all.
+    expect(parseLiveTransaction(unsignedTransaction(phantomGuarded(message, Array.from({ length: 16 }, () => ({ target: creator, data: payerGuardData() }))))).instructions).toHaveLength(19);
+    expect(parseLiveTransaction(unsignedTransaction(phantomGuarded(message, Array.from({ length: 29 }, () => ({ target: creator, data: Uint8Array.from([6, 0]) }))))).instructions).toHaveLength(32);
+    expect(() => parseLiveTransaction(unsignedTransaction(phantomGuarded(message, Array.from({ length: 30 }, () => ({ target: creator, data: Uint8Array.from([6, 0]) })))))).toThrow("instruction count");
+  });
+});
+
+describe("the wallet step with one page-first retry", () => {
+  const signer = () => ({ address: mint, seed: assetSeed.slice() });
+  const feeChange = (unsigned: Uint8Array) => { const out = unsigned.slice(), at = out.findIndex((_, i) => out[i] === 9 && out[i + 1] === 3 && out[i + 2] === 232 && out[i + 3] === 3); out[at + 2] = 233; return out; };
+  test("a wallet that appends accepted assertions signs once, wallet first", async () => {
+    const { plan, expected } = fixture(), wallet = walletRewrites(message => phantomGuarded(message, [{ target: creator, data: payerGuardData() }]));
+    const changed: Uint8Array[] = [], opened: boolean[] = [];
+    const step = await signForLaunch({ plan, receivedAt: 1_000, now: () => 2_000, expected, signer: signer(), order: "wallet-first", refresh: async () => { throw new Error("not stale"); },
+      walletSign: wallet.sign, onWalletChanged: (_plan, returned) => changed.push(returned), onWalletOpen: retry => opened.push(retry) });
+    expect(step).toMatchObject({ status: "signed", order: "wallet-first", fellBack: false });
+    expect(wallet.shown).toHaveLength(1); expect(changed).toHaveLength(0); expect(opened).toEqual([false]);
+  });
+  test("a wallet-first wallet that changes the fee is logged, then asked once more with the page signing first", async () => {
+    const { plan, expected } = fixture(); let calls = 0;
+    const wallet = fakeWallet(unsigned => ++calls === 1 ? feeChange(unsigned) : unsigned);
+    const changed: Uint8Array[] = [], opened: boolean[] = [];
+    const step = await signForLaunch({ plan, receivedAt: 1_000, now: () => 2_000, expected, signer: signer(), order: "wallet-first", refresh: async () => { throw new Error("not stale"); },
+      walletSign: wallet.sign, onWalletChanged: (_plan, returned) => changed.push(returned), onWalletOpen: retry => opened.push(retry) });
+    expect(step).toMatchObject({ status: "signed", order: "page-first", fellBack: true });
+    expect(changed).toHaveLength(1); expect(opened).toEqual([false, true]);
+    // The second prompt carried the page's signature already; the result is the reviewed message, both signed.
+    expect(ed25519.verify(parseLiveTransaction(wallet.shown[1]).signatures[1], parseLiveTransaction(wallet.shown[1]).message, fromBase58(mint))).toBe(true);
+    if (step.status !== "signed") throw new Error("Expected signed");
+    expect(hexHash(parseLiveTransaction(step.signed).message)).toBe(plan.messageSha256);
+    expect(WALLET_RETRY_NOTICE).toContain("nothing was sent");
+  });
+  test("a page-first wallet that changes the message is not retried", async () => {
+    const { plan, expected } = fixture(), wallet = fakeWallet(feeChange), changed: Uint8Array[] = [];
+    const refused = await signForLaunch({ plan, receivedAt: 1_000, now: () => 2_000, expected, signer: signer(), order: "page-first", refresh: async () => { throw new Error("not stale"); },
+      walletSign: wallet.sign, onWalletChanged: (_plan, returned) => changed.push(returned) }).then(() => null, (error: unknown) => error);
+    expect(refused).toBeInstanceOf(WalletChangedTransaction);
+    expect(wallet.shown).toHaveLength(1); expect(changed).toHaveLength(1);
+  });
+  test("a stale plan is prepared again before the retry, and a moved cost returns to the review", async () => {
+    const { plan, expected } = fixture(); let clock = 1_000, calls = 0, refreshes = 0;
+    const wallet = fakeWallet(unsigned => { clock += 40_000; return ++calls === 1 ? feeChange(unsigned) : unsigned; });
+    const step = await signForLaunch({ plan, receivedAt: 1_000, now: () => clock, expected, signer: signer(), order: "wallet-first",
+      refresh: async () => { refreshes++; return { ...plan, review: { ...plan.review, totalDebitLamports: "9999999" } }; }, walletSign: wallet.sign });
+    expect(refreshes).toBe(1); expect(wallet.shown).toHaveLength(1);
+    expect(step).toMatchObject({ status: "changed" });
   });
 });

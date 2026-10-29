@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import BN from "bn.js";
 import bs58 from "bs58";
 import { createHash } from "node:crypto";
-import { Keypair, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction, type AccountInfo } from "@solana/web3.js";
+import { ComputeBudgetProgram, Keypair, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction, type AccountInfo } from "@solana/web3.js";
 import { AccountLayout, AccountState, AccountType, ExtensionType, MintLayout, TOKEN_2022_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { pack } from "@solana/spl-token-metadata";
 import { bondingCurvePda, GLOBAL_PDA, PUMP_FEE_CONFIG_PDA, PUMP_PROGRAM_ID, PUMP_SDK, QUOTE_CONTROL_PDA, newBondingCurve } from "@pump-fun/pump-sdk";
@@ -11,11 +11,15 @@ import { getAssetV1AccountDataSerializer as rawAssetSerializer } from "@metaplex
 import { getPluginRegistryV1AccountDataSerializer as rawRegistrySerializer } from "@metaplex-foundation/mpl-core/dist/src/generated/types/pluginRegistryV1AccountData.js";
 import { publicKey as umiKey } from "@metaplex-foundation/umi";
 import { MAINNET_GENESIS_HASH, PAIR_ASSETS } from "../src/index.ts";
-import { CORE_PROGRAM_ID, PACKET_LIMIT, SignedTransactionNotSent, assertNftMintReplaceable, broadcastSignedWalletTransaction, checkSignedWalletTransaction, assertTokenMintReplaceable, creatorNftInstructions, describeWalletChange, measureTokenTransaction, prepareCreatorNftTransaction, prepareTokenTransaction, recoverCreatorLaunch, sendSignedWalletTransaction, transactionBytes, validateSignedWalletTransaction, verifyCreatorNft, verifyTokenLaunch, type LiveConnection, type LiveLaunchInput, type WalletTransactionPlan } from "../src/live.ts";
+import { CORE_PROGRAM_ID, PACKET_LIMIT, PUMP_LOOKUP_TABLE, REFRESHED_BLOCKHASH_MARGIN, WALLET_SIZE_TARGET, pinnedLookupTable, SignedTransactionNotSent, assertNftMintReplaceable, broadcastSignedWalletTransaction, checkSignedWalletTransaction, assertTokenMintReplaceable, creatorNftInstructions, describeWalletChange, measureTokenTransaction, prepareCreatorNftTransaction, prepareTokenTransaction, recoverCreatorLaunch, sendSignedWalletTransaction, transactionBytes, validateSignedWalletTransaction, verifyCreatorNft, verifyTokenLaunch, type LiveConnection, type LiveLaunchInput, type WalletTransactionPlan } from "../src/live.ts";
 import fixture from "./fixtures/mainnet-pair-accounts-2026-10-28.json";
 import feeFixture from "./fixtures/mainnet-fee-account-2026-10-28.json";
+import tableFixture from "./fixtures/mainnet-pump-lookup-table-2026-10-29.json";
 import art from "../src/design-assets.json";
 import { signPlanWithWallet, validateLivePlan, WalletChangedTransaction, type ExpectedPlan } from "../../../app/src/components/carddex/live/transaction";
+import { ALLOW_PERMANENT_DELEGATE_QUOTE_BUY } from "../src/index.ts";
+import { messageOf, payerGuardData, phantomGuarded, tokenGuardData, unsignedTransaction } from "./message-fixtures.ts";
+import { decodeV0Message } from "../src/wallet-guards.ts";
 import { MEME_PAIR_PRESETS } from "../../../app/src/lib/carddex/design-pairings";
 
 // Synthetic keys and blockhash are confined to this offline RPC mock. No test
@@ -56,9 +60,10 @@ function info(owner: PublicKey, data: Uint8Array, amount = 5_000_000): AccountIn
 function mockRpc() {
   const accounts = new Map<string, AccountInfo<Buffer>>(Object.entries(fixture.accounts).map(([key, value]) => [key, accountFromFixture(value)]));
   accounts.set(feeFixture.address, accountFromFixture(feeFixture.value[0]));
+  accounts.set(tableFixture.address, accountFromFixture(tableFixture.value));
   accounts.set(creatorKey.publicKey.toBase58(), info(PublicKey.default, new Uint8Array(), 10_000_000_000));
   const transactions = new Map<string, any>();
-  let simulationError: unknown = null, height = 1000, sent = 0, transportFails = false;
+  let simulationError: unknown = null, height = 1000, sent = 0, transportFails = false, blockhashValid = true;
   const connection = {
     getGenesisHash: async () => MAINNET_GENESIS_HASH,
     getMultipleAccountsInfoAndContext: async (keys: PublicKey[]) => ({ context: { slot }, value: keys.map((key) => accounts.get(key.toBase58()) ?? null) }),
@@ -72,13 +77,19 @@ function mockRpc() {
     getTransaction: async (signature: string) => transactions.get(signature) ?? null,
     getSignatureStatuses: async (signatures: string[]) => ({ context: { slot }, value: signatures.map((signature) => transactions.has(signature) ? { err: null, confirmations: null, confirmationStatus: "finalized", slot } : null) }),
     getBlockHeight: async () => height,
+    isBlockhashValid: async () => ({ context: { slot }, value: blockhashValid }),
     getEpochInfo: async () => ({ epoch: 1000, slotIndex: 100, slotsInEpoch: 432_000, absoluteSlot: slot, blockHeight: height }),
     sendRawTransaction: async (bytes: Uint8Array) => { sent++; if (transportFails) throw new Error("Transport timed out"); return bs58.encode(VersionedTransaction.deserialize(bytes).signatures[0]); },
   } as unknown as LiveConnection;
-  function remember(plan: WalletTransactionPlan, signature: string) {
+  function remember(plan: WalletTransactionPlan | { transactionBase64: string }, signature: string) {
     const tx = VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64"));
+    // Lookup keys as the RPC reports them: resolved through the (pinned) table, writable first.
+    const view = decodeV0Message(tx.message.serialize()), statics = view.staticKeys.length;
+    const writable = view.lookups.reduce((total, lookup) => total + lookup.writable.length, 0);
+    const loaded = (keys: string[]) => keys.map((key) => new PublicKey(key));
     transactions.set(signature, { slot, transaction: { message: tx.message, signatures: [signature] }, meta: {
-      err: null, fee: 11000, preBalances: [], postBalances: [], loadedAddresses: { readonly: [], writable: [] },
+      err: null, fee: 11000, preBalances: [], postBalances: [],
+      loadedAddresses: { writable: loaded(view.keys.slice(statics, statics + writable)), readonly: loaded(view.keys.slice(statics + writable)) },
     } });
   }
   function addQuoteBalance(input: LiveLaunchInput, amount: bigint, ownerAddress = input.creator) {
@@ -120,7 +131,8 @@ function mockRpc() {
     accounts.set(input.nftMint, info(CORE_PROGRAM_ID, Buffer.concat([asset, header, plugin, registry])));
   }
   return { connection, accounts, transactions, remember, addToken, addNft, addQuoteBalance, sent: () => sent,
-    simulationError: (error: unknown) => simulationError = error, height: (value: number) => height = value, transportFails: () => transportFails = true };
+    simulationError: (error: unknown) => simulationError = error, height: (value: number) => height = value, transportFails: () => transportFails = true,
+    blockhashValid: (value: boolean) => blockhashValid = value };
 }
 
 describe("mainnet wallet preparation, independent confirmation and separate NFT recovery", () => {
@@ -200,8 +212,9 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
   });
 
   test("initial buy uses exact quote units, current price and fees, minimum output and actual quote balance", async () => {
-    const input = { ...defaultInput(), initialBuyQuoteBaseUnits: "100000", slippageBps: 1 }, rpc = mockRpc();
-    await expect(prepareTokenTransaction(input, { connection: rpc.connection })).rejects.toThrow("wallet needs TSLAX");
+    const base = defaultInput(), card = { ...base.card, designKey: "obsidian-archive", frontSha256: art["obsidian-archive"].front.sha256, backSha256: art["obsidian-archive"].back.sha256 };
+    const input: LiveLaunchInput = { ...base, quoteKey: "usdc", card, initialBuyQuoteBaseUnits: "100000", slippageBps: 1 }, rpc = mockRpc();
+    await expect(prepareTokenTransaction(input, { connection: rpc.connection })).rejects.toThrow("wallet needs USDC");
     rpc.addQuoteBalance(input, 99_999n);
     await expect(prepareTokenTransaction(input, { connection: rpc.connection })).rejects.toThrow("Insufficient or frozen");
     rpc.addQuoteBalance(input, 1_000_000n);
@@ -217,6 +230,11 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     expect(plan.review.initialBuyQuoteBaseUnits).toBe("100000");
     expect(BigInt(plan.review.minimumTokensOut)).toBeGreaterThan(0n);
     const tx = VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64"));
+    // A token-quote create + first buy is over the wallet size target without a table, so it loads pump.fun's own.
+    expect(tx.message.addressTableLookups.map((lookup) => lookup.accountKey.toBase58())).toEqual([PUMP_LOOKUP_TABLE.address]);
+    expect(plan.review).toMatchObject({ lookupTable: PUMP_LOOKUP_TABLE.address, walletSizeTarget: WALLET_SIZE_TARGET });
+    expect(plan.review.transactionBytes).toBeLessThanOrEqual(WALLET_SIZE_TARGET);
+    expect(validateLivePlan(plan, expectedPlan(input, plan)).view.lookups[0].table).toBe(PUMP_LOOKUP_TABLE.address);
     const pumpInstructions = tx.message.compiledInstructions.filter((ix) => tx.message.staticAccountKeys[ix.programIdIndex].equals(PUMP_PROGRAM_ID));
     expect(pumpInstructions).toHaveLength(2);
     expect(Buffer.from(pumpInstructions[1].data).readBigUInt64LE(8)).toBe(100_000n);
@@ -236,12 +254,11 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     const global = PUMP_SDK.decodeGlobal(rpc.accounts.get(GLOBAL_PDA.toBase58())!);
     const recipient = global.buybackFeeRecipients.find(key => !key.equals(PublicKey.default))!;
     rpc.addQuoteBalance(input, 0n, recipient.toBase58());
-    await expect(prepareTokenTransaction(input, {connection: rpc.connection})).rejects.toThrow("1232-byte packet limit");
-    // The adapter supports short public metadata URIs too. The app's current
-    // longer URI must produce the explicit size error above, never omit a buy.
-    input.tokenMetadataUri = "https://launchacard.fun/m/short";
+    // The app's real 69-byte metadata URI: compiled against pump.fun's create table, the buy fits with wallet room.
     const plan = await prepareTokenTransaction(input, {connection: rpc.connection});
     const wire = validateLivePlan(plan, expectedPlan(input, plan));
+    expect(wire.view.lookups.map(lookup => lookup.table)).toEqual([PUMP_LOOKUP_TABLE.address]);
+    expect(wire.bytes.length).toBeLessThanOrEqual(WALLET_SIZE_TARGET);
     const pump = wire.instructions.filter(instruction => instruction.program === PUMP_PROGRAM_ID.toBase58());
     expect(pump).toHaveLength(2);
     expect(pump[1].accounts[2]).toBe(quote.mint);
@@ -251,13 +268,29 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     expect(Buffer.from(pump[1].data).readBigUInt64LE(16)).toBe(BigInt(plan.review.minimumTokensOut));
     expect(BigInt(plan.review.minimumTokensOut)).toBeGreaterThan(0n);
     expect(wire.signatures.every(signature => signature.every(byte => byte === 0))).toBe(true);
+    // Without the table (unavailable, or not as pinned) the same buy is refused before the wallet opens, never dropped.
+    rpc.accounts.delete(PUMP_LOOKUP_TABLE.address);
+    await expect(prepareTokenTransaction(input, {connection: rpc.connection})).rejects.toThrow(`${WALLET_SIZE_TARGET}-byte wallet limit`);
     expect(rpc.sent()).toBe(0);
   });
 
   test("oversized custom-pair initial buys fail explicitly instead of dropping the buy", async () => {
-    const input = { ...defaultInput(), tokenMetadataUri: "https://launchacard.fun/m/" + "x".repeat(160), initialBuyQuoteBaseUnits: "100000" }, rpc = mockRpc();
+    const base = defaultInput(), card = { ...base.card, designKey: "obsidian-archive", frontSha256: art["obsidian-archive"].front.sha256, backSha256: art["obsidian-archive"].back.sha256 };
+    // The longest name, symbol and metadata URI pump.fun accepts: over the wallet target even with the table.
+    const input: LiveLaunchInput = { ...base, quoteKey: "usdc", card, name: "N".repeat(32), symbol: "S".repeat(13), tokenMetadataUri: "https://launchacard.fun/m/" + "x".repeat(174), initialBuyQuoteBaseUnits: "100000" }, rpc = mockRpc();
     rpc.addQuoteBalance(input, 1_000_000n);
-    await expect(prepareTokenTransaction(input, { connection: rpc.connection })).rejects.toThrow("1232-byte packet limit");
+    await expect(prepareTokenTransaction(input, { connection: rpc.connection })).rejects.toThrow(`${WALLET_SIZE_TARGET}-byte wallet limit (Solana's 1232-byte packet limit less 160 bytes for wallet safety checks); launch without an initial buy, or use a shorter name or symbol`);
+    expect(rpc.sent()).toBe(0);
+  });
+
+  test("a tokenized-stock first buy is refused before anything is built; the stock coin alone still prepares", async () => {
+    expect(ALLOW_PERMANENT_DELEGATE_QUOTE_BUY).toBe(false);
+    const input = { ...defaultInput(), initialBuyQuoteBaseUnits: "100000" }, rpc = mockRpc();
+    rpc.addQuoteBalance(input, 1_000_000n);
+    await expect(prepareTokenTransaction(input, { connection: rpc.connection })).rejects.toThrow("tokenized-stock quotes in a first buy");
+    expect((await measureTokenTransaction({ ...input, quoteKey: "tslax" }, { connection: rpc.connection })).buyBlocked).toBe("issuer-controls");
+    expect((await measureTokenTransaction({ ...input, quoteKey: "usdc" }, { connection: rpc.connection })).buyBlocked).toBeNull();
+    expect((await prepareTokenTransaction({ ...input, initialBuyQuoteBaseUnits: "0" }, { connection: rpc.connection })).review.initialBuyQuoteBaseUnits).toBe("0");
     expect(rpc.sent()).toBe(0);
   });
 
@@ -289,32 +322,49 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
       const input = sized("sol"), size = await measure(input);
       const withBuy = await prepareTokenTransaction(input, { connection: mockRpc().connection });
       const withoutBuy = await prepareTokenTransaction({ ...input, initialBuyQuoteBaseUnits: "0" }, { connection: mockRpc().connection });
-      expect(size.limit).toBe(PACKET_LIMIT);
+      expect(size.limit).toBe(WALLET_SIZE_TARGET); expect(size.packetLimit).toBe(PACKET_LIMIT);
       expect(size.buyBytes).toBe(wire(withBuy)); expect(size.createBytes).toBe(wire(withoutBuy));
-      expect(size.buyBytes).toBeLessThanOrEqual(PACKET_LIMIT);
+      expect(size.buyBytes).toBeLessThanOrEqual(WALLET_SIZE_TARGET); expect(size.lookupTable).toBe(true);
     });
-    test("SOL with a 32-byte name and 13-character symbol: the buy does not fit, the coin alone does", async () => {
+    const withoutTable = () => { const rpc = mockRpc(); rpc.accounts.delete(PUMP_LOOKUP_TABLE.address); return rpc; };
+    test("SOL with a 32-byte name and 13-character symbol: the buy fits with pump.fun's table; without it only the coin alone does", async () => {
       const input = sized("sol", "N".repeat(32), "S".repeat(13)), size = await measure(input);
-      expect(size.buyBytes).toBeGreaterThan(PACKET_LIMIT); expect(size.createBytes).toBeLessThanOrEqual(PACKET_LIMIT);
-      // Both ways out work here: the coin alone fits, and so does this buy with a shorter name.
-      await expect(prepareTokenTransaction(input, { connection: mockRpc().connection })).rejects.toThrow(`${size.buyBytes} bytes and exceeds Solana's 1232-byte packet limit; launch without an initial buy, or use a shorter name or symbol`);
-      expect(wire(await prepareTokenTransaction({ ...input, initialBuyQuoteBaseUnits: "0" }, { connection: mockRpc().connection }))).toBe(size.createBytes);
+      expect(size.buyBytes).toBeLessThanOrEqual(WALLET_SIZE_TARGET);
+      expect(wire(await prepareTokenTransaction(input, { connection: mockRpc().connection }))).toBe(size.buyBytes);
+      const plain = await measure(input, withoutTable());
+      expect(plain.buyBytes).toBeGreaterThan(WALLET_SIZE_TARGET); expect(plain.createBytes).toBeLessThanOrEqual(WALLET_SIZE_TARGET); expect(plain.lookupTable).toBe(false);
+      // No name is short enough for this buy without the table, so the error only offers launching without it.
+      await expect(prepareTokenTransaction(input, { connection: withoutTable().connection })).rejects.toThrow(`${plain.buyBytes} bytes and exceeds the ${WALLET_SIZE_TARGET}-byte wallet limit (Solana's 1232-byte packet limit less 160 bytes for wallet safety checks); launch without an initial buy`);
+      expect(wire(await prepareTokenTransaction({ ...input, initialBuyQuoteBaseUnits: "0" }, { connection: withoutTable().connection }))).toBe(size.createBytes);
     });
-    test("USDC with a buy does not fit even with a short name; the coin alone does", async () => {
+    test("USDC with a buy fits with pump.fun's table; without it, the coin alone does", async () => {
       const input = sized("usdc"), rpc = mockRpc(); rpc.addQuoteBalance(input, 1_000_000n);
       const size = await measure(input, rpc);
-      expect(size.buyBytes).toBeGreaterThan(PACKET_LIMIT); expect(size.createBytes).toBeLessThanOrEqual(PACKET_LIMIT);
-      // No name is short enough for this buy, so the error only offers launching without it.
-      const error = await prepareTokenTransaction(input, { connection: rpc.connection }).then(() => null, (caught: Error) => caught.message);
-      expect(error).toEndWith(`${size.buyBytes} bytes and exceeds Solana's 1232-byte packet limit; launch without an initial buy`);
+      expect(size.buyBytes).toBeLessThanOrEqual(WALLET_SIZE_TARGET); expect(size.createBytes).toBeLessThanOrEqual(WALLET_SIZE_TARGET);
+      const bare = withoutTable(); bare.addQuoteBalance(input, 1_000_000n);
+      const plain = await measure(input, bare);
+      expect(plain.buyBytes).toBeGreaterThan(WALLET_SIZE_TARGET);
+      const error = await prepareTokenTransaction(input, { connection: bare.connection }).then(() => null, (caught: Error) => caught.message);
+      expect(error).toEndWith(`${plain.buyBytes} bytes and exceeds the ${WALLET_SIZE_TARGET}-byte wallet limit (Solana's 1232-byte packet limit less 160 bytes for wallet safety checks); launch without an initial buy`);
+    });
+    test("a table that is deactivated or lost a pinned entry is never used", () => {
+      const account = { ...(mockRpc().accounts.get(PUMP_LOOKUP_TABLE.address)!) };
+      expect(pinnedLookupTable(account)?.state.addresses[19].toBase58()).toBe("BwWK17cbHxwWBKZkUYvzxLcNQ1YVyaFezduWbtm2de6s");
+      const deactivated = Buffer.from(account.data); deactivated.writeBigUInt64LE(5n, 4);
+      expect(pinnedLookupTable({ ...account, data: deactivated })).toBeNull();
+      const changed = Buffer.from(account.data); changed.fill(9, 56 + 32 * 19, 56 + 32 * 20);
+      expect(pinnedLookupTable({ ...account, data: changed })).toBeNull();
+      expect(pinnedLookupTable({ ...account, owner: PublicKey.default })).toBeNull();
+      expect(pinnedLookupTable(null)).toBeNull();
     });
     test("an existing buyback account is left out exactly as prepare leaves it out", async () => {
-      const input = sized("tslax"), rpc = mockRpc(); rpc.addQuoteBalance(input, 1_000_000n);
+      const input = sized("bonk"), rpc = mockRpc(); rpc.addQuoteBalance(input, 1_000_000n);
       const missing = await measure(input, rpc);
-      seedBuybackAta(rpc, "tslax");
+      seedBuybackAta(rpc, "bonk");
       const present = await measure(input, rpc);
       expect(present.buyBytes).toBeLessThan(missing.buyBytes);
-      if (present.buyBytes <= PACKET_LIMIT) expect(wire(await prepareTokenTransaction(input, { connection: rpc.connection }))).toBe(present.buyBytes);
+      expect(present.buyBytes).toBeLessThanOrEqual(WALLET_SIZE_TARGET);
+      expect(wire(await prepareTokenTransaction(input, { connection: rpc.connection }))).toBe(present.buyBytes);
       expect(present.createBytes).toBe(missing.createBytes);
       expect(rpc.sent()).toBe(0);
     });
@@ -428,8 +478,9 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     const signed = Buffer.from(tx.serialize()).toString("base64");
     const validated = validateSignedWalletTransaction(plan, signed);
     expect(validated.signature).toBe(bs58.encode(tx.signatures[0]));
+    // A refreshed blockhash is within the wallet rule, but these signatures cover the old message.
     const altered = VersionedTransaction.deserialize(Buffer.from(signed, "base64")); altered.message.recentBlockhash = PublicKey.default.toBase58();
-    expect(() => validateSignedWalletTransaction(plan, Buffer.from(altered.serialize()).toString("base64"))).toThrow("approved message");
+    expect(() => validateSignedWalletTransaction(plan, Buffer.from(altered.serialize()).toString("base64"))).toThrow("invalid signature");
     rpc.transportFails();
     const uncertain = await sendSignedWalletTransaction({ plan, transactionBase64: signed }, { connection: rpc.connection });
     expect(uncertain.status).toBe("submission-uncertain"); expect(uncertain.signature).toBe(validated.signature);
@@ -463,16 +514,17 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     rpc.height(1000); rpc.simulationError("BlockhashNotFound"); await rejected("expired");
     rpc.simulationError({ InstructionError: [2, "InsufficientFunds"] }); await rejected("simulation");
     rpc.simulationError("AlreadyProcessed");
-    expect(await checkSignedWalletTransaction(signed, { connection: rpc.connection })).toEqual({ status: "landed", signature, err: null });
+    expect(await checkSignedWalletTransaction(signed, { connection: rpc.connection })).toMatchObject({ status: "landed", signature, err: null });
     rpc.simulationError(null);
-    expect(await checkSignedWalletTransaction(signed, { connection: rpc.connection })).toEqual({ status: "ready", signature, blocksLeft: 200 });
+    expect(await checkSignedWalletTransaction(signed, { connection: rpc.connection })).toEqual({ status: "ready", signature, blocksLeft: 200, lastValidBlockHeight: 1200,
+      signedMessageSha256: plan.messageSha256, walletGuards: 0, blockhashChanged: false });
     expect(rpc.sent()).toBe(0);
     expect(await broadcastSignedWalletTransaction(signed, { connection: rpc.connection })).toEqual({ status: "submitted", signature });
     expect(rpc.sent()).toBe(1);
     rpc.remember(plan, signature); rpc.height(1300);
     expect((await checkSignedWalletTransaction(signed, { connection: rpc.connection })).status).toBe("landed");
     rpc.connection.getSignatureStatuses = async () => ({ context: { slot }, value: [{ slot, confirmations: null, err: { InstructionError: [2, "Custom"] }, confirmationStatus: "confirmed" }] }) as any;
-    expect(await checkSignedWalletTransaction(signed, { connection: rpc.connection })).toEqual({ status: "landed", signature, err: { InstructionError: [2, "Custom"] } });
+    expect(await checkSignedWalletTransaction(signed, { connection: rpc.connection })).toMatchObject({ status: "landed", signature, err: { InstructionError: [2, "Custom"] } });
     await expect(sendSignedWalletTransaction(signed, { connection: rpc.connection })).rejects.toThrow("already failed");
     expect(rpc.sent()).toBe(1);
   });
@@ -522,16 +574,17 @@ describe("wallet-first signing against the server's checks", () => {
     await expect(checkSignedWalletTransaction({ plan, transactionBase64: walletOnly }, { connection: rpc.connection })).rejects.toThrow("invalid signature");
     expect(rpc.sent()).toBe(0);
   });
-  test("a wallet that adds a guard instruction is refused, never co-signed, and its change is described for the log", async () => {
+  test("a wallet that adds a Lighthouse instruction outside the rule is refused, never co-signed, and its change is described for the log", async () => {
     const input = defaultInput(), rpc = mockRpc(), plan = await prepareTokenTransaction(input, { connection: rpc.connection });
     const refused = await signPlanWithWallet(plan, expectedPlan(input, plan), { address: input.mint, seed: tokenKey.secretKey.slice(0, 32) }, "wallet-first", walletSigns(withGuard).sign).then(() => null, (error: unknown) => error);
     expect(refused).toBeInstanceOf(WalletChangedTransaction);
     const returned = Buffer.from((refused as WalletChangedTransaction).returned).toString("base64");
     expect(VersionedTransaction.deserialize(Buffer.from(returned, "base64")).signatures[1].every((byte) => byte === 0)).toBe(true);
-    expect(() => validateSignedWalletTransaction(plan, returned)).toThrow("approved message");
+    expect(() => validateSignedWalletTransaction(plan, returned)).toThrow("approved message (guard)");
     const change = describeWalletChange(plan, returned);
     expect(change).toMatchObject({ parsed: true, version: 0, lookupTables: 0, blockhashChanged: true, signersChanged: false, walletSigned: true,
-      planInstructionsKept: true, computeBudgetChanged: false, programsAdded: [LIGHTHOUSE.toBase58()], programsRemoved: [], limit: PACKET_LIMIT });
+      planInstructionsKept: true, computeBudgetChanged: false, programsAdded: [LIGHTHOUSE.toBase58()], programsRemoved: [], limit: PACKET_LIMIT,
+      rule: { accepted: false, reason: "guard" } });
     if (!change.parsed) throw new Error("Expected a readable changed transaction");
     expect(change.instructionsAfter).toBe(change.instructionsBefore + 1);
     expect(change.bytesAfter).toBeGreaterThan(change.bytesBefore);
@@ -549,5 +602,124 @@ describe("wallet-first signing against the server's checks", () => {
       expect(validateLivePlan(plan, expectedPlan(input, plan)).bytes.length).toBe(plan.review.transactionBytes);
       expect(() => validateLivePlan({ ...plan, review: { ...plan.review, transactionBytes: plan.review.transactionBytes - 1 } } as typeof plan, expectedPlan(input, plan))).toThrow("size differs");
     }
+  });
+});
+
+// A wallet that signs first and returns its own version of the message (as Phantom does with Lighthouse): `change`
+// rewrites the message bytes; the wallet signs only the creator slot of what it returns. Synthetic key, mock RPC only.
+function walletReturns(change: (message: Uint8Array) => Uint8Array) {
+  return async (bytes: Uint8Array) => {
+    const tx = VersionedTransaction.deserialize(unsignedTransaction(change(messageOf(bytes))));
+    tx.sign([creatorKey]);
+    return tx.serialize();
+  };
+}
+const coinAta = (input: LiveLaunchInput) => getAssociatedTokenAddressSync(new PublicKey(input.mint), new PublicKey(input.creator), false, TOKEN_2022_PROGRAM_ID).toBase58();
+const solBuy = (): LiveLaunchInput => ({ ...defaultInput(), quoteKey: "sol", initialBuyQuoteBaseUnits: "100000",
+  card: { ...defaultInput().card, designKey: "obsidian-archive", frontSha256: art["obsidian-archive"].front.sha256, backSha256: art["obsidian-archive"].back.sha256 } });
+
+describe("Phantom's Lighthouse assertions under the shared wallet rule, end to end", () => {
+  test("coin and card: the page co-signs the guarded message, the server stores its hash, and finalization expects that hash", async () => {
+    const input = solBuy(), rpc = mockRpc();
+    const token = await prepareTokenTransaction(input, { connection: rpc.connection });
+    // Phantom's shape on a SOL create + first buy: the payer and the new coin account asserted, message recompiled.
+    const guards = [{ target: input.creator, data: payerGuardData(9_000_000_000n) }, { target: coinAta(input), data: tokenGuardData(BigInt(token.review.minimumTokensOut)) }];
+    const signed = await signPlanWithWallet(token, expectedPlan(input, token), { address: input.mint, seed: tokenKey.secretKey.slice(0, 32) }, "wallet-first", walletReturns((message) => phantomGuarded(message, guards)));
+    const base64 = Buffer.from(signed).toString("base64"), landed = VersionedTransaction.deserialize(signed);
+    expect(landed.message.addressTableLookups.map((lookup) => lookup.accountKey.toBase58())).toEqual([PUMP_LOOKUP_TABLE.address]);
+    expect(signed.length).toBeLessThanOrEqual(PACKET_LIMIT);
+    const validated = validateSignedWalletTransaction(token, base64);
+    expect(validated).toMatchObject({ messageSha256: token.messageSha256, walletGuards: 2, blockhashChanged: false });
+    expect(validated.signedMessageSha256).toBe(createHash("sha256").update(landed.message.serialize()).digest("hex"));
+    expect(validated.signedMessageSha256).not.toBe(token.messageSha256);
+    expect(await checkSignedWalletTransaction({ plan: token, transactionBase64: base64 }, { connection: rpc.connection })).toMatchObject({ status: "ready", lastValidBlockHeight: token.lastValidBlockHeight, signedMessageSha256: validated.signedMessageSha256, walletGuards: 2 });
+    expect(describeWalletChange(token, base64)).toMatchObject({ programsAdded: [LIGHTHOUSE.toBase58()], planInstructionsKept: true, computeBudgetChanged: false,
+      rule: { accepted: true, guards: [{ discriminator: 6, target: 0, dataBytes: 26 }, { discriminator: 10, dataBytes: 27 }] } });
+    // The guarded transaction lands. Only the stored signed hash verifies it; the plan hash or no hash refuses it.
+    rpc.remember({ transactionBase64: base64 }, validated.signature); await rpc.addToken(input);
+    expect(await verifyTokenLaunch(input, { connection: rpc.connection, signature: validated.signature, expectedMessageSha256: validated.signedMessageSha256 })).toMatchObject({ status: "verified", messageSha256: validated.signedMessageSha256 });
+    await expect(verifyTokenLaunch(input, { connection: rpc.connection, signature: validated.signature, expectedMessageSha256: token.messageSha256 })).rejects.toThrow("differs from the approved plan");
+    await expect(verifyTokenLaunch(input, { connection: rpc.connection, signature: validated.signature })).rejects.toThrow("unexpected wallet instructions");
+    // The card, prepared from the coin under its signed hash, gets the payer assertion the same way.
+    const nft = await prepareCreatorNftTransaction(input, { connection: rpc.connection, tokenSignature: validated.signature, tokenMessageSha256: validated.signedMessageSha256 });
+    if (nft.status !== "wallet-signature-required") throw new Error("Expected a fresh NFT plan");
+    expect(nft.review.lookupTable).toBeNull();
+    const card = await signPlanWithWallet(nft, expectedPlan(input, nft), { address: input.nftMint, seed: nftKey.secretKey.slice(0, 32) }, "wallet-first", walletReturns((message) => phantomGuarded(message, [guards[0]])));
+    const cardBase64 = Buffer.from(card).toString("base64"), cardValidated = validateSignedWalletTransaction(nft, cardBase64);
+    expect(cardValidated.walletGuards).toBe(1);
+    rpc.remember({ transactionBase64: cardBase64 }, cardValidated.signature); rpc.addNft(input);
+    expect(await verifyCreatorNft(input, { connection: rpc.connection, signature: cardValidated.signature, expectedMessageSha256: cardValidated.signedMessageSha256 })).toMatchObject({ status: "verified", messageSha256: cardValidated.signedMessageSha256 });
+    await expect(verifyCreatorNft(input, { connection: rpc.connection, signature: cardValidated.signature })).rejects.toThrow("unexpected wallet instructions");
+    expect(rpc.sent()).toBe(0);
+  });
+
+  test("assertions that write, add accounts or signers, use another program, sit among the plan, or change the compute budget are refused", async () => {
+    const input = defaultInput(), rpc = mockRpc(), plan = await prepareTokenTransaction(input, { connection: rpc.connection });
+    const seed = { address: input.mint, seed: tokenKey.secretKey.slice(0, 32) };
+    const global = GLOBAL_PDA.toBase58(), payer = { target: input.creator, data: payerGuardData() };
+    // Real web3.js recompiles: a Lighthouse instruction whose account meta is writable or a signer moves that key's flags.
+    const recompiled = (extra: TransactionInstruction) => (message: Uint8Array) => {
+      const decompiled = TransactionMessage.decompile(VersionedTransaction.deserialize(unsignedTransaction(message)).message);
+      decompiled.instructions.push(extra);
+      return new VersionedTransaction(decompiled.compileToV0Message()).message.serialize();
+    };
+    const assertion = (keys: { pubkey: PublicKey; isSigner: boolean; isWritable: boolean }[], data = payerGuardData()) => new TransactionInstruction({ programId: LIGHTHOUSE, keys, data: Buffer.from(data) });
+    const changes: Array<[string, (message: Uint8Array) => Uint8Array]> = [
+      ["writable assertion target", recompiled(assertion([{ pubkey: GLOBAL_PDA, isSigner: false, isWritable: true }]))],
+      ["signer assertion target", recompiled(assertion([{ pubkey: GLOBAL_PDA, isSigner: true, isWritable: false }]))],
+      ["MemoryWrite with a new memory account", recompiled(assertion([{ pubkey: creatorKey.publicKey, isSigner: true, isWritable: true }, { pubkey: Keypair.generate().publicKey, isSigner: false, isWritable: true }], Uint8Array.from([0, 0, 0])))],
+      ["the old Lighthouse program", (message) => phantomGuarded(message, [{ ...payer, program: "L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK" }])],
+      ["a non-Lighthouse program", (message) => phantomGuarded(message, [{ ...payer, program: "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr" }])],
+      ["an assertion among the plan instructions", (message) => phantomGuarded(message, [payer], { at: 2 })],
+      ["an assertion on an account the plan lacks", (message) => phantomGuarded(message, [{ target: getAssociatedTokenAddressSync(new PublicKey(PAIR_ASSETS[1].mint), creatorKey.publicKey).toBase58(), data: payerGuardData() }], { newKeys: [getAssociatedTokenAddressSync(new PublicKey(PAIR_ASSETS[1].mint), creatorKey.publicKey).toBase58()] })],
+      ["an added compute-budget instruction", recompiled(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 2_500_000 }))],
+      // Phantom's own fee insertion: the reviewed price replaced by 2,500,000 micro-lamports, plus a payer assertion.
+      ["a changed priority fee", (message) => {
+        const decompiled = TransactionMessage.decompile(VersionedTransaction.deserialize(unsignedTransaction(message)).message);
+        decompiled.instructions[1] = ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 2_500_000 });
+        return phantomGuarded(new VersionedTransaction(decompiled.compileToV0Message()).message.serialize(), [payer]);
+      }],
+    ];
+    for (const [label, change] of changes) {
+      const refused = await signPlanWithWallet(plan, expectedPlan(input, plan), seed, "wallet-first", walletReturns(change)).then(() => null, (error: unknown) => error);
+      expect([label, refused instanceof WalletChangedTransaction]).toEqual([label, true]);
+      const returned = Buffer.from((refused as WalletChangedTransaction).returned).toString("base64");
+      // Never co-signed: even a server that received these bytes refuses them.
+      expect([label, (() => { try { validateSignedWalletTransaction(plan, returned); return "accepted"; } catch (error) { return (error as Error).message; } })()]).not.toEqual([label, "accepted"]);
+    }
+    expect(global).toBe(GLOBAL_PDA.toBase58());
+    expect(rpc.sent()).toBe(0);
+  });
+
+  test("a wallet-refreshed blockhash is relayed only while the RPC still knows it, and its expiry bound outlasts the refreshed hash", async () => {
+    const input = defaultInput(), rpc = mockRpc(), plan = await prepareTokenTransaction(input, { connection: rpc.connection });
+    const refreshed = new PublicKey(new Uint8Array(32).fill(46)).toBase58();
+    const signed = await signPlanWithWallet(plan, expectedPlan(input, plan), { address: input.mint, seed: tokenKey.secretKey.slice(0, 32) }, "wallet-first",
+      walletReturns((message) => phantomGuarded(message, [{ target: input.creator, data: payerGuardData() }], { blockhash: refreshed })));
+    const base64 = Buffer.from(signed).toString("base64");
+    expect(validateSignedWalletTransaction(plan, base64)).toMatchObject({ blockhashChanged: true, blockhash: refreshed, walletGuards: 1 });
+    rpc.blockhashValid(false);
+    const expired = await checkSignedWalletTransaction({ plan, transactionBase64: base64 }, { connection: rpc.connection }).catch((error) => error);
+    expect(expired).toBeInstanceOf(SignedTransactionNotSent); expect(expired.reason).toBe("expired");
+    rpc.blockhashValid(true);
+    // Newest last valid height 1200 (mock) + margin: an upper bound for any blockhash that exists now.
+    expect(await checkSignedWalletTransaction({ plan, transactionBase64: base64 }, { connection: rpc.connection })).toMatchObject({ status: "ready", blockhashChanged: true, lastValidBlockHeight: 1200 + REFRESHED_BLOCKHASH_MARGIN, blocksLeft: 1200 + REFRESHED_BLOCKHASH_MARGIN - 1000 });
+    // A landed refreshed transaction reports the same bound, for the abandon and replace gates.
+    rpc.remember({ transactionBase64: base64 }, bs58.encode(VersionedTransaction.deserialize(signed).signatures[0]));
+    expect(await checkSignedWalletTransaction({ plan, transactionBase64: base64 }, { connection: rpc.connection })).toMatchObject({ status: "landed", lastValidBlockHeight: 1200 + REFRESHED_BLOCKHASH_MARGIN });
+    expect(rpc.sent()).toBe(0);
+  });
+
+  test("a coin compiled against pump.fun's table must come back with the same lookups", async () => {
+    const input = solBuy(), rpc = mockRpc(), plan = await prepareTokenTransaction(input, { connection: rpc.connection });
+    const table = pinnedLookupTable(rpc.accounts.get(PUMP_LOOKUP_TABLE.address)!)!;
+    const withoutTable = (message: Uint8Array) => {
+      const decompiled = TransactionMessage.decompile(VersionedTransaction.deserialize(unsignedTransaction(message)).message, { addressLookupTableAccounts: [table] });
+      return new VersionedTransaction(decompiled.compileToV0Message()).message.serialize();
+    };
+    const refused = await signPlanWithWallet(plan, expectedPlan(input, plan), { address: input.mint, seed: tokenKey.secretKey.slice(0, 32) }, "wallet-first", walletReturns(withoutTable)).then(() => null, (error: unknown) => error);
+    expect(refused).toBeInstanceOf(WalletChangedTransaction);
+    expect(() => validateSignedWalletTransaction(plan, Buffer.from((refused as WalletChangedTransaction).returned).toString("base64"))).toThrow();
+    expect(rpc.sent()).toBe(0);
   });
 });

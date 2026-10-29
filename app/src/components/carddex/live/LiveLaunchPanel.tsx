@@ -13,16 +13,17 @@ import { getPairAsset, getTradingPair } from "../../../lib/carddex/pairs";
 import type { CardData } from "../../mintdex/MintCard";
 import { Button, Icon, Modal, TextLink } from "../../mintdex/ui";
 import { LiveWalletButton } from "./LiveWalletButton";
-import { BUY_DOES_NOT_FIT, checkLiveBuyFit, LIVE_BUY_FIT, liveBuyFitKey } from "./buy-fit";
+import { BUY_DOES_NOT_FIT, checkLiveBuyFit, LIVE_BUY_FIT, liveBuyFitKey, STOCK_BUY_WARNS } from "./buy-fit";
 import { formatLiveAmount } from "./amounts";
 import { LiveWalletNotice } from "./LiveWalletNotice";
 import { PagedMessage } from "./PagedMessage";
 import { useLiveReadiness } from "./readiness";
 import { getLiveWalletSnapshot, signLiveMessage, signLiveTransaction, useLiveWallet } from "./wallet";
 import {
-  createEphemeralSigner, destroyEphemeralSigner, planForWallet, signingOrderFor, signPlanWithWallet, toBase64, unsentStageNext,
-  validateLivePlan, WalletChangedTransaction, type EphemeralSigner, type ExpectedPlan, type SigningOrder, type TransactionPlan,
+  createEphemeralSigner, destroyEphemeralSigner, signingOrderFor, toBase64, unsentStageNext,
+  validateLivePlan, type EphemeralSigner, type ExpectedPlan, type SigningOrder, type TransactionPlan,
 } from "./transaction";
+import { signForLaunch, WALLET_RETRY_NOTICE } from "./launch-flow";
 import { WALLET_OPEN_COPY } from "./wallet-notice";
 
 export type LiveLaunchDraft = {
@@ -224,7 +225,8 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, notice
         const size = unwrap(await checkLiveBuyFit(draft.name, draft.symbol, draft.quoteAssetKey, draft.initialBuyQuoteBaseUnits));
         assertCurrent(version, address);
         queryClient.setQueryData(liveBuyFitKey(draft.name, draft.symbol, draft.quoteAssetKey), size);
-        if (!size.fits) throw new Error(size.createFits ? BUY_DOES_NOT_FIT : "This coin's name and symbol don't fit in one transaction. Use a shorter name or symbol.");
+        // buyBlocked: a tokenized-stock quote, whose first buy the server refuses (wallets warn on issuer-controlled tokens).
+        if (!size.fits) throw new Error(size.buyBlocked ? STOCK_BUY_WARNS : size.createFits ? BUY_DOES_NOT_FIT : "This coin's name and symbol don't fit in one transaction. Use a shorter name or symbol.");
       }
       if (!tokenKey.current) tokenKey.current = createEphemeralSigner();
       if (!nftKey.current) nftKey.current = createEphemeralSigner();
@@ -311,33 +313,26 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, notice
       await authenticate(address, version);
       const key = reviewed.kind === "token" ? tokenKey.current : nftKey.current;
       if (!key) throw new Error("This page no longer holds the new asset key. Resume the saved launch to recover safely.");
-      // A plan older than about 30 seconds is prepared again first, so its blockhash outlasts the wallet prompt. The
-      // review shows again only when a reviewed cost moved beyond the priority fee.
-      const ready = await planForWallet(reviewed, planAt.current, () => refreshPlan(current, reviewed.kind, address, version));
-      assertCurrent(version, address);
-      if (ready.status === "gone") { setReviewOpen(false); setPlan(null); return; }
-      if (ready.status !== "fresh") acceptPlan(ready.plan);
-      if (ready.status === "changed") { setReviewNotice(REVIEW_COSTS_UPDATED); goReview(0); return; }
-      const active = ready.plan, stage = pendingIntent.current ?? current;
       const walletName = getLiveWalletSnapshot().name ?? undefined;
       const order = signingOrderFor(walletName, readiness.data?.walletFirst);
-      setReviewNotice(null); setBusy("wallet");
-      let signed: Uint8Array;
-      try {
-        // Wallet first (Phantom's order): the wallet signs the unsigned plan, then this page adds the new address's
-        // signature to exactly the bytes the wallet returned. Other wallets keep the page-first order until tested.
-        signed = await signPlanWithWallet(active, expectedFor(stage, active.kind), key, order, async transaction => {
-          const out = await signLiveTransaction(transaction, address);
-          assertCurrent(version, address);
-          return out;
-        });
-      } catch (error) {
-        // A changed message is never co-signed or sent. Its summary goes to the server log for the mainnet test.
-        if (error instanceof WalletChangedTransaction) void reportLiveWalletChange({ data: { intentId: stage.id, kind: active.kind, messageSha256: active.messageSha256, walletName: (walletName ?? "unknown").slice(0, 64), transactionBase64: toBase64(error.returned) } }).catch(() => undefined);
-        throw error;
-      }
-      assertCurrent(version, address); setReviewOpen(false);
-      held.current = { intentId: stage.id, kind: active.kind, messageSha256: active.messageSha256, transactionBase64: toBase64(signed), walletName: walletName?.slice(0, 64), signingOrder: order };
+      setReviewNotice(null);
+      // Wiring only; the step itself is launch-flow.ts signForLaunch. A plan older than about 30 seconds is prepared
+      // again first (the review shows again only when a reviewed cost moved beyond the priority fee). Wallet first
+      // (Phantom's order): the wallet signs, then this page co-signs what it returned, within the shared wallet rule.
+      // A message outside that rule is never co-signed; its summary goes to the server log, and the wallet opens once
+      // more in the page-first order.
+      const step = await signForLaunch({ plan: reviewed, receivedAt: planAt.current, expected: expectedFor(current, reviewed.kind), signer: key, order,
+        refresh: () => refreshPlan(current, reviewed.kind, address, version),
+        onPlan: next => acceptPlan(next),
+        onWalletOpen: retry => { if (retry) setReviewNotice(WALLET_RETRY_NOTICE); setBusy("wallet"); },
+        onWalletChanged: (changed, returned) => void reportLiveWalletChange({ data: { intentId: current.id, kind: changed.kind, messageSha256: changed.messageSha256, walletName: (walletName ?? "unknown").slice(0, 64), transactionBase64: toBase64(returned) } }).catch(() => undefined),
+        walletSign: async transaction => { const out = await signLiveTransaction(transaction, address); assertCurrent(version, address); return out; } });
+      assertCurrent(version, address);
+      if (step.status === "gone") { setReviewOpen(false); setPlan(null); return; }
+      if (step.status === "changed") { setReviewNotice(REVIEW_COSTS_UPDATED); goReview(0); return; }
+      const active = step.plan, stage = pendingIntent.current ?? current;
+      setReviewOpen(false);
+      held.current = { intentId: stage.id, kind: active.kind, messageSha256: active.messageSha256, transactionBase64: toBase64(step.signed), walletName: walletName?.slice(0, 64), signingOrder: step.order };
       await submitHeld(stage, address, version);
     });
   }

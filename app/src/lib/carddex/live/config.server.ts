@@ -21,7 +21,10 @@ const RECOVERY_OFF = "Saved launch recovery is paused in this deployment.";
 /**
  * Wallets that sign the unsigned transaction before this page adds the new coin or card signature, the order Phantom
  * asks for. CARDDEX_LIVE_WALLET_FIRST is a comma list of Wallet Standard names, "*" for every wallet or "none"; unset
- * means Phantom only. Every other wallet keeps the earlier order (the page signs first) until it is tested.
+ * means Phantom only. Every other wallet keeps the earlier order (the page signs first) until it is tested: Backpack's
+ * public source rewrites the compute budget of unsigned dApp transactions (so wallet-first would always fall back),
+ * MetaMask's snap keeps dApp bytes in both orders, and Solflare, OKX, Jupiter and Coinbase are undocumented. Do not
+ * ship "*". A wallet-first wallet whose returned message breaks the shared wallet rule falls back to page-first once.
  */
 export const DEFAULT_WALLET_FIRST = ["Phantom"];
 export function walletFirstWallets(value: string | undefined): string[] {

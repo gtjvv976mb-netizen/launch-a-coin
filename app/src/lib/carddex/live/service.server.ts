@@ -7,14 +7,18 @@ import { clearGuard, db, guard, one, q, readBatch, stmt, UserError } from "../..
 import { fetchPublicBytes, metadataUriPlaceholder, putPublicAsset, putPublicJson, validateOwnedAsset, verifyPublicJson } from "./assets.server";
 import { sha256, walletBytes } from "./auth.server";
 import { COMPOSITION_VERSION, requireTrustedComposition } from "./composition.server";
-import { BUY_DOES_NOT_FIT } from "./copy";
+import { BUY_DOES_NOT_FIT, STOCK_BUY_WARNS } from "./copy";
 import { requireLiveConfig } from "./config.server";
 import { normalizeLiveFields, normalizeLiveIdentity } from "./validation.server";
 import { LIVE_PACKET_LIMIT, type LiveAssets, type LiveLaunchIntent, type LivePrepareInput, type LiveStage } from "./types";
 
 type Payload = {input: Omit<LiveLaunchInput, "nftMint">; assets: LiveAssets; fields: ReturnType<typeof normalizeLiveFields>};
 type IntentRow = {id: string; creator_wallet: string; token_mint: string; nft_mint: string; quote_key: string; quote_mint: string; design_key: string; payload_sha256: string; payload_json: string; binding_sha256: string; token_metadata_uri: string; nft_metadata_uri: string; status: LiveStage; token_signature: string | null; nft_signature: string | null; token_receipt_json: string | null; nft_receipt_json: string | null; created_at: number; updated_at: number};
-type PlanRow = {id: string; intent_id: string; kind: "token" | "nft"; message_sha256: string; plan_json: string; signature: string | null; signed_transaction_base64: string | null; status: "prepared" | "pending" | "confirmed"};
+type PlanRow = {id: string; intent_id: string; kind: "token" | "nft"; message_sha256: string; plan_json: string; signature: string | null; signed_transaction_base64: string | null; signed_message_sha256: string | null; effective_last_valid_block_height: number | null; status: "prepared" | "pending" | "confirmed"};
+/** The message a finalized transaction must carry: what was signed (within the shared wallet rule) once it is saved, else the plan. */
+const landedMessageSha256 = (plan: PlanRow) => plan.signed_message_sha256 ?? plan.message_sha256;
+/** The block height after which this plan's transaction, signed or not, can no longer land. */
+const planExpiry = (plan: PlanRow) => Math.max((JSON.parse(plan.plan_json) as WalletTransactionPlan).lastValidBlockHeight, plan.effective_last_valid_block_height ?? 0);
 const connection = () => sdk.createMainnetConnection(requireLiveConfig("recovery").rpcUrl);
 function adapterInput(row: IntentRow): LiveLaunchInput { return {...(JSON.parse(row.payload_json) as Payload).input, nftMint: row.nft_mint}; }
 function publicIntent(row: IntentRow): LiveLaunchIntent {
@@ -97,7 +101,10 @@ async function preparePayload(wallet: string, raw: LivePrepareInput): Promise<Pa
   for (const role of ["artwork", "cardImage", "caseImage"] as const) await validateOwnedAsset(wallet, raw.assets[role], role);
   // After the composition and asset reads, before the first write (the design copies and metadata). Prepare still
   // re-checks the final bytes.
-  if (BigInt(raw.initialBuyQuoteBaseUnits) > 0n && !(await checkLiveLaunchSize(wallet, {...fields, initialBuyQuoteBaseUnits: raw.initialBuyQuoteBaseUnits})).fits) throw new UserError(BUY_DOES_NOT_FIT);
+  if (BigInt(raw.initialBuyQuoteBaseUnits) > 0n) {
+    const size = await checkLiveLaunchSize(wallet, {...fields, initialBuyQuoteBaseUnits: raw.initialBuyQuoteBaseUnits});
+    if (!size.fits) throw new UserError(size.buyBlocked ? STOCK_BUY_WARNS : BUY_DOES_NOT_FIT);
+  }
   const sources = await sourceAssets(wallet, fields.cardTemplate), quote = getPairAsset(fields.quoteAssetKey), design = getCardDesign(fields.cardTemplate);
   const common = {version: 1, rendererVersion: COMPOSITION_VERSION, creatorWallet: wallet, tokenMint: fields.tokenMint, quoteAssetKey: quote.key, quoteMint: quote.mint,
     cardTemplate: fields.cardTemplate, sourceFrontSha256: sources.front.sha256, sourceBackSha256: sources.back.sha256,
@@ -123,15 +130,20 @@ async function preparePayload(wallet: string, raw: LivePrepareInput): Promise<Pa
     card: {designKey: fields.cardTemplate, frontUri: sources.front.url, backUri: sources.back.url,
       frontSha256: sources.front.sha256, backSha256: sources.back.sha256, nftMetadataUri: nftMetadata.url}}};
 }
-/** Exact coin-transaction size for this creator, name, symbol and quote, before any artwork or metadata is uploaded. */
+/**
+ * Exact coin-transaction size for this creator, name, symbol and quote, before any artwork or metadata is uploaded.
+ * `limit` is the wallet size target (Solana's packet limit less room for wallet assertions). `buyBlocked` is set when
+ * prepare refuses this quote's first buy for another reason ("issuer-controls": a tokenized-stock quote).
+ */
 export async function checkLiveLaunchSize(wallet: string, raw: {name: string; symbol: string; quoteAssetKey: string; initialBuyQuoteBaseUnits: string}) {
   requireLiveConfig("launch"); walletBytes(wallet);
   const {name, symbol} = normalizeLiveIdentity(raw);
   if (!isPairAssetKey(raw.quoteAssetKey)) throw new UserError("Choose a supported pump.fun quote asset.");
   if (!/^(0|[1-9][0-9]{0,19})$/.test(raw.initialBuyQuoteBaseUnits)) throw new UserError("Review the initial-buy atoms before preparing a real launch.");
   const size = await chain(() => sdk.measureTokenTransaction({creator: wallet, name, symbol, quoteKey: raw.quoteAssetKey as LiveLaunchInput["quoteKey"], tokenMetadataUri: metadataUriPlaceholder()}, {connection: connection()}));
-  const bytes = BigInt(raw.initialBuyQuoteBaseUnits) > 0n ? size.buyBytes : size.createBytes;
-  return {limit: size.limit, bytes, fits: bytes <= size.limit, buyBytes: size.buyBytes, buyFits: size.buyBytes <= size.limit, createBytes: size.createBytes, createFits: size.createBytes <= size.limit};
+  const buy = BigInt(raw.initialBuyQuoteBaseUnits) > 0n, bytes = buy ? size.buyBytes : size.createBytes;
+  const buyFits = size.buyBytes <= size.limit && !size.buyBlocked, createFits = size.createBytes <= size.limit;
+  return {limit: size.limit, bytes, fits: buy ? buyFits : createFits, buyBytes: size.buyBytes, buyFits, createBytes: size.createBytes, createFits, buyBlocked: size.buyBlocked ?? null};
 }
 export async function prepareLiveLaunch(wallet: string, raw: LivePrepareInput) {
   requireLiveConfig("launch");
@@ -180,7 +192,7 @@ export async function confirmLiveToken(wallet: string, input: {intentId: string;
   const row = await ownedIntent(wallet, input.intentId), plan = await confirmationPlan(row, "token", input);
   if (["nft_pending", "complete"].includes(row.status) && row.token_signature !== input.signature) throw new UserError("This token already has a different finalized launch signature.");
   if (row.token_receipt_json && JSON.parse(row.token_receipt_json).status === "verified") return {intent: publicIntent(row), receipt: JSON.parse(row.token_receipt_json) as Awaited<ReturnType<typeof sdk.verifyTokenLaunch>>};
-  const receipt = await chain(() => sdk.verifyTokenLaunch(adapterInput(row), {connection: connection(), signature: input.signature, expectedMessageSha256: plan.message_sha256}));
+  const receipt = await chain(() => sdk.verifyTokenLaunch(adapterInput(row), {connection: connection(), signature: input.signature, expectedMessageSha256: landedMessageSha256(plan)}));
   verifyReceipt(row, receipt);
   if (receipt.status === "pending" && !plan.signature) return {intent: publicIntent(await ownedIntent(wallet, row.id)), receipt};
   await guardedBatch([
@@ -197,7 +209,7 @@ export async function confirmLiveCreatorNft(wallet: string, input: {intentId: st
   if (row.status === "complete" && row.nft_signature && row.nft_signature !== input.signature) throw new UserError("This creator NFT is already finalized under another signature.");
   if (row.nft_receipt_json && JSON.parse(row.nft_receipt_json).status === "verified") return {intent: publicIntent(row), receipt: JSON.parse(row.nft_receipt_json) as Awaited<ReturnType<typeof sdk.verifyCreatorNft>>};
   const plan = await confirmationPlan(row, "nft", input);
-  const receipt = await chain(() => sdk.verifyCreatorNft(adapterInput(row), {connection: connection(), signature: input.signature, expectedMessageSha256: plan.message_sha256}));
+  const receipt = await chain(() => sdk.verifyCreatorNft(adapterInput(row), {connection: connection(), signature: input.signature, expectedMessageSha256: landedMessageSha256(plan)}));
   verifyReceipt(row, receipt);
   if (receipt.status === "pending" && !plan.signature) return {intent: publicIntent(await ownedIntent(wallet, row.id)), receipt};
   await guardedBatch([
@@ -228,7 +240,8 @@ export async function prepareLiveCreatorNft(wallet: string, input: {intentId: st
   if (nextMint !== row.nft_mint || row.nft_signature !== null) {
     walletBytes(nextMint);
     const [previous] = await readBatch(q<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = 'nft'", row.id));
-    const expiry = previous.length ? Math.max(...previous.map(attempt => (JSON.parse(attempt.plan_json) as WalletTransactionPlan).lastValidBlockHeight)) : undefined;
+    // Signed bytes with a wallet-refreshed blockhash can outlive their plan: wait past whichever ends later.
+    const expiry = previous.length ? Math.max(...previous.map(planExpiry)) : undefined;
     await chain(() => sdk.assertNftMintReplaceable(adapterInput(row), {connection: connection(), lastValidBlockHeight: expiry}));
     await guardedBatch([
       snapshotGuard(row), clearGuard(), planSetGuard(row.id, "nft", previous), clearGuard(),
@@ -237,7 +250,7 @@ export async function prepareLiveCreatorNft(wallet: string, input: {intentId: st
     row = await ownedIntent(wallet, row.id);
     if (row.nft_mint !== nextMint) throw new UserError("The NFT issuance changed in another tab. Refresh this launch.");
   }
-  const result = await chain(() => sdk.prepareCreatorNftTransaction(adapterInput(row), {connection: connection(), tokenSignature: row.token_signature!, tokenMessageSha256: tokenPlan.message_sha256}));
+  const result = await chain(() => sdk.prepareCreatorNftTransaction(adapterInput(row), {connection: connection(), tokenSignature: row.token_signature!, tokenMessageSha256: landedMessageSha256(tokenPlan)}));
   if ("receipt" in result) { await completeExistingNft(row, result.receipt); return {intent: publicIntent(await ownedIntent(wallet, row.id)), transaction: null}; }
   await savePlan(row, result); return {intent: publicIntent(row), transaction: result};
 }
@@ -267,7 +280,7 @@ export async function abandonLiveLaunchIntent(wallet: string, input: {intentId: 
   if (row.status === "abandoned") return {intent: publicIntent(row)};
   if (row.status !== "prepared" && row.status !== "token_pending") throw new UserError("A finalized token launch must be resumed, not abandoned.");
   const [plans] = await readBatch(q<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = 'token'", row.id));
-  const expiry = Math.max(...plans.map(plan => (JSON.parse(plan.plan_json) as WalletTransactionPlan).lastValidBlockHeight));
+  const expiry = Math.max(...plans.map(planExpiry));
   await chain(() => sdk.assertTokenMintReplaceable(adapterInput(row), {connection: connection(), lastValidBlockHeight: expiry}));
   await guardedBatch([snapshotGuard(row), clearGuard(), planSetGuard(row.id, "token", plans), clearGuard(), stmt("UPDATE live_launch_intents SET status = 'abandoned', updated_at = ? WHERE id = ? AND status IN ('prepared','token_pending')", Date.now(), row.id)]);
   return {intent: publicIntent(await ownedIntent(wallet, row.id))};
@@ -316,7 +329,8 @@ export async function submitLiveTransaction(wallet: string, input: {intentId: st
   }
   if (submittedSignature && submittedSignature !== signed.signature) throw new UserError("A different transaction for this stage is already pending. Recover it before authorizing another.");
   if (prepared.signature && (prepared.signature !== signed.signature || prepared.signed_transaction_base64 !== signed.transactionBase64)) throw new UserError("This prepared transaction already has different submitted bytes.");
-  logTransactionSize("signed", row.id, input.kind, plan.messageSha256, signed.transactionBase64, {...(input.walletName ? {wallet: input.walletName} : {}), ...(input.signingOrder ? {order: input.signingOrder} : {})});
+  logTransactionSize("signed", row.id, input.kind, plan.messageSha256, signed.transactionBase64, {...(input.walletName ? {wallet: input.walletName} : {}), ...(input.signingOrder ? {order: input.signingOrder} : {}),
+    ...(signed.signedMessageSha256 !== plan.messageSha256 ? {signedMessageSha256: signed.signedMessageSha256, walletGuards: String(signed.walletGuards), blockhash: signed.blockhashChanged ? "refreshed" : "plan"} : {})});
   // Read-only checks run before anything is saved. A definite failure (expired approval, failed signed simulation)
   // leaves this stage as it was, so the creator can prepare it again with the same keys.
   const checked = await checkBeforeSend(plan, signed.transactionBase64, !!submittedSignature);
@@ -333,7 +347,9 @@ export async function submitLiveTransaction(wallet: string, input: {intentId: st
     stmt("DELETE FROM tx_guard"),
     stmt("INSERT INTO tx_guard (ok) SELECT CASE WHEN EXISTS (SELECT 1 FROM live_launch_transactions WHERE id = ? AND (signature IS NULL OR (signature = ? AND signed_transaction_base64 = ?))) THEN 1 ELSE 0 END", prepared.id, signed.signature, signed.transactionBase64),
     stmt("DELETE FROM tx_guard"),
-    stmt("UPDATE live_launch_transactions SET signature = ?, signed_transaction_base64 = ?, status = 'pending', updated_at = ? WHERE id = ?", signed.signature, signed.transactionBase64, now, prepared.id),
+    // The signed message hash and the height after which these bytes can no longer land are saved with them: every
+    // finalization check expects that hash, and abandon and card replacement wait past that height.
+    stmt("UPDATE live_launch_transactions SET signature = ?, signed_transaction_base64 = ?, signed_message_sha256 = ?, effective_last_valid_block_height = COALESCE(effective_last_valid_block_height, ?), status = 'pending', updated_at = ? WHERE id = ?", signed.signature, signed.transactionBase64, checked.signedMessageSha256, checked.lastValidBlockHeight, now, prepared.id),
     input.kind === "token"
       ? stmt("UPDATE live_launch_intents SET token_signature = ?, status = 'token_pending', updated_at = ? WHERE id = ? AND status IN ('prepared','token_pending')", signed.signature, now, row.id)
       : stmt("UPDATE live_launch_intents SET nft_signature = ?, updated_at = ? WHERE id = ? AND status = 'nft_pending'", signed.signature, now, row.id),
