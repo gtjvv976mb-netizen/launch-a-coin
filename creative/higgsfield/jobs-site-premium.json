@@ -1,0 +1,299 @@
+{
+ "brief": "creative/higgsfield/site-premium-brief.md",
+ "provider": "Higgsfield",
+ "model": "gpt_image_2_5 (variant flare, quality high)",
+ "approved": "Owner: 'USE HIGGSFIELD', added credits, then chose 'High quality, ~20 credits' on 2026-10-29",
+ "quoted_credits": {
+  "16:9/9:16 2k": 2.75,
+  "1:1/21:9 1k": 1.5
+ },
+ "spent_credits": 20.0,
+ "note": "6 first-attempt submissions were refused with HTTP 429 (rate limit) and created no job; they were resubmitted unchanged.",
+ "jobs": [
+  {
+   "name": "stage-backdrop-a",
+   "job_id": "f83e531c-a872-409c-80cf-abc82d0f19cc",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_135326_f83e531c-a872-409c-80cf-abc82d0f19cc.png",
+   "aspect_ratio": "16:9",
+   "resolution": "2k",
+   "background": null,
+   "prompt": "Empty backdrop for a premium classic trading-card collector's showroom, photographed. A wall of deep black-brown velvet (#14110d to #1f1a14) with soft vertical folds, lit by one warm overhead antique-gold spotlight that makes a soft oval pool of light in the centre and falls off to darkness at the edges. A few very fine warm-gold dust motes drift in the light. The lower third of the frame fades smoothly to near-black. Heavy vignette, fine film grain, low bloom, quiet and expensive. The centre is completely empty: no objects, no pedestal, no cards, no furniture, no people. No text, letters, numbers or logos. No neon, no blue, cyan or purple, no grid.",
+   "credits": 2.75,
+   "used": true,
+   "master": "creative/higgsfield/site-premium/stage-backdrop-a.webp",
+   "master_hashes": {
+    "original_png_sha256": "09ebb14543212089ebf0a8ee0c7b6637acefcfe9f8f8fa3c2e7c04dc72bf0f3e",
+    "original_size": [
+     2688,
+     1520
+    ],
+    "webp_sha256": "11d1b7a4bee5aa29601801f83fda9935a22fc218d55503b0f2d88ac1e42ac924",
+    "webp_bytes": 267922
+   }
+  },
+  {
+   "name": "stage-backdrop-b",
+   "job_id": "8796fb2c-3c24-4ec8-ba36-680d71135975",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_135406_8796fb2c-3c24-4ec8-ba36-680d71135975.png",
+   "aspect_ratio": "16:9",
+   "resolution": "2k",
+   "background": null,
+   "prompt": "Empty backdrop for a premium classic trading-card collector's showroom, photographed. A wall of deep black-brown velvet (#14110d to #1f1a14) with soft vertical folds, lit by one warm overhead antique-gold spotlight that makes a soft oval pool of light in the centre and falls off to darkness at the edges. A few very fine warm-gold dust motes drift in the light. The lower third of the frame fades smoothly to near-black. Heavy vignette, fine film grain, low bloom, quiet and expensive. The centre is completely empty: no objects, no pedestal, no cards, no furniture, no people. No text, letters, numbers or logos. No neon, no blue, cyan or purple, no grid.",
+   "credits": 2.75,
+   "used": false,
+   "master": "creative/higgsfield/site-premium/stage-backdrop-b.webp",
+   "master_hashes": {
+    "original_png_sha256": "f959c5afaf469d7a08efcb2f1fc1fc4b5501ba4497edaf49b1c04b4a59595e87",
+    "original_size": [
+     2688,
+     1520
+    ],
+    "webp_sha256": "e3883c59e6a64c40a8eab011724ccdb7e9144561272cf9a6d257cdef31efc6b0",
+    "webp_bytes": 281540
+   }
+  },
+  {
+   "name": "stage-backdrop-phone-a",
+   "job_id": "9cfd96b2-2794-4b09-bc6a-b5fc44bb1fc5",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_135252_9cfd96b2-2794-4b09-bc6a-b5fc44bb1fc5.png",
+   "aspect_ratio": "9:16",
+   "resolution": "2k",
+   "background": null,
+   "prompt": "Vertical empty backdrop for a premium classic trading-card collector's showroom, photographed. A wall of deep black-brown velvet (#14110d to #1f1a14) with soft vertical folds, lit by one warm overhead antique-gold spotlight that makes a soft oval pool of light in the upper middle and falls off to darkness at the edges. A few very fine warm-gold dust motes drift in the light. The lower third of the frame fades smoothly to near-black. Heavy vignette, fine film grain, low bloom, quiet and expensive. The centre is completely empty: no objects, no pedestal, no cards, no furniture, no people. No text, letters, numbers or logos. No neon, no blue, cyan or purple, no grid.",
+   "credits": 2.75,
+   "used": true,
+   "master": "creative/higgsfield/site-premium/stage-backdrop-phone-a.webp",
+   "master_hashes": {
+    "original_png_sha256": "f3a83122fd3dbe3ee3ce5b660038435fc1dd44d736d690adffbc8663f727774b",
+    "original_size": [
+     1520,
+     2688
+    ],
+    "webp_sha256": "ebaa019d7389600485c1f4cd56693a08f6fd436093618bcbce32a6d116ebb63b",
+    "webp_bytes": 358918
+   }
+  },
+  {
+   "name": "stage-backdrop-phone-b",
+   "job_id": "9582e22e-a783-41c1-84b2-fc805251b508",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_135403_9582e22e-a783-41c1-84b2-fc805251b508.png",
+   "aspect_ratio": "9:16",
+   "resolution": "2k",
+   "background": null,
+   "prompt": "Vertical empty backdrop for a premium classic trading-card collector's showroom, photographed. A wall of deep black-brown velvet (#14110d to #1f1a14) with soft vertical folds, lit by one warm overhead antique-gold spotlight that makes a soft oval pool of light in the upper middle and falls off to darkness at the edges. A few very fine warm-gold dust motes drift in the light. The lower third of the frame fades smoothly to near-black. Heavy vignette, fine film grain, low bloom, quiet and expensive. The centre is completely empty: no objects, no pedestal, no cards, no furniture, no people. No text, letters, numbers or logos. No neon, no blue, cyan or purple, no grid.",
+   "credits": 2.75,
+   "used": false,
+   "master": "creative/higgsfield/site-premium/stage-backdrop-phone-b.webp",
+   "master_hashes": {
+    "original_png_sha256": "68fab6fc0aa552ab91a16f864c1e9853b818321e7c4b40183027fb082a435850",
+    "original_size": [
+     1520,
+     2688
+    ],
+    "webp_sha256": "f777a02cf8eea131e45277b2db212b5e7f4b7729add0b51d2be15641d07436b3",
+    "webp_bytes": 397138
+   }
+  },
+  {
+   "name": "panel-leather-a",
+   "job_id": "0f0f9a86-bb03-447b-9405-54ae583ca19c",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_135324_0f0f9a86-bb03-447b-9405-54ae583ca19c.png",
+   "aspect_ratio": "1:1",
+   "resolution": "1k",
+   "background": null,
+   "prompt": "Flat, evenly lit, top-down close-up photograph of fine-grain dark walnut-brown leather (#1f1a14), very low contrast, the same uniform texture across the whole frame with no edges, seams, stitching, folds, highlights or vignette, suitable as a subtle seamless background texture for a premium website. No text, no logos, no objects.",
+   "credits": 1.5,
+   "used": true,
+   "master": "creative/higgsfield/site-premium/panel-leather-a.webp",
+   "master_hashes": {
+    "original_png_sha256": "df8ae978b6271da6b2f5d9d85534b2a337c3781ab16c49a6f019b245b72cb67b",
+    "original_size": [
+     1024,
+     1024
+    ],
+    "webp_sha256": "4573c07c0e77c138bea0c4236a9414a60b6213b05e60aa977e4d74f8188ff8ad",
+    "webp_bytes": 342262
+   }
+  },
+  {
+   "name": "panel-walnut-a",
+   "job_id": "1ef0f805-da8f-4222-9e17-7246ebacd52a",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_135253_1ef0f805-da8f-4222-9e17-7246ebacd52a.png",
+   "aspect_ratio": "1:1",
+   "resolution": "1k",
+   "background": null,
+   "prompt": "Flat, evenly lit, top-down close-up photograph of hand-rubbed dark walnut wood with a fine straight grain, very dark brown (#1f1a14), very low contrast, the same uniform texture across the whole frame with no edges, knots, seams, highlights or vignette, suitable as a subtle seamless background texture for a premium website. No text, no logos, no objects.",
+   "credits": 1.5,
+   "used": false,
+   "master": "creative/higgsfield/site-premium/panel-walnut-a.webp",
+   "master_hashes": {
+    "original_png_sha256": "fadae1657fa9339a286c66a5a61c990f154f953aa68515eee1b7e6771d62b1c8",
+    "original_size": [
+     1024,
+     1024
+    ],
+    "webp_sha256": "5e47e6d7dcc475665a319489d4e8a0ab84dbbc7fefb5e523edf14cdf81a526e7",
+    "webp_bytes": 220696
+   }
+  },
+  {
+   "name": "gold-divider-a",
+   "job_id": "dc1fe9c6-6cee-46b2-9827-7e90db11024c",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_135253_dc1fe9c6-6cee-46b2-9827-7e90db11024c.png",
+   "aspect_ratio": "21:9",
+   "resolution": "1k",
+   "background": "transparent",
+   "prompt": "A single slim horizontal ornamental divider of engraved antique gold leaf (#d4a64a) with soft wear: a fine centred classical filigree flourish with thin rules extending evenly to both sides, symmetrical and delicate, like a premium stationery or banknote engraving. Isolated on a transparent background, centred, occupying a thin band across the middle of the frame. No text, letters, numbers or logos, no gems, no chrome, no glow.",
+   "credits": 1.5,
+   "used": true,
+   "master": "creative/higgsfield/site-premium/gold-divider-a.webp",
+   "master_hashes": {
+    "original_png_sha256": "f7d24c5971991c29410e02794d42cdb56d5211013afe7f999e3cd70f34342083",
+    "original_size": [
+     1344,
+     576
+    ],
+    "webp_sha256": "397aa4b0140fbdef9453bc61a6a25a3aa3d1a40cad5a7cd6d09ede9acd2a1edd",
+    "webp_bytes": 93022
+   }
+  },
+  {
+   "name": "gold-divider-b",
+   "job_id": "3a96e133-aecb-4f7c-a246-00ac8de03a8b",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_135253_3a96e133-aecb-4f7c-a246-00ac8de03a8b.png",
+   "aspect_ratio": "21:9",
+   "resolution": "1k",
+   "background": "transparent",
+   "prompt": "A single slim horizontal ornamental divider of engraved antique gold leaf (#d4a64a) with soft wear: a small centred diamond-and-scroll motif with two fine double rules extending evenly to both sides, symmetrical, restrained and classical, like the rule on a premium certificate. Isolated on a transparent background, centred, occupying a thin band across the middle of the frame. No text, letters, numbers or logos, no gems, no chrome, no glow.",
+   "credits": 1.5,
+   "used": true,
+   "master": "creative/higgsfield/site-premium/gold-divider-b.webp",
+   "master_hashes": {
+    "original_png_sha256": "409200cfb28cce2ac9da30d946d6fd1fa14c7c29ea6d8a3edce3f16da27f0735",
+    "original_size": [
+     1344,
+     576
+    ],
+    "webp_sha256": "6fde2394dc31d9266e8fa3bf659ad235ce8715ad7877ea1c8e088667a424d65e",
+    "webp_bytes": 43710
+   }
+  },
+  {
+   "name": "gold-corner-a",
+   "job_id": "09395e54-290b-4f17-b6ad-22a65ad8b203",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_135323_09395e54-290b-4f17-b6ad-22a65ad8b203.png",
+   "aspect_ratio": "1:1",
+   "resolution": "1k",
+   "background": "transparent",
+   "prompt": "A single engraved antique gold leaf (#d4a64a) corner flourish for a classic frame: an L-shaped fine filigree ornament in the top-left corner of the frame, two thin rules running along the top and left edges, and a delicate scroll at the corner, soft wear, like a premium certificate or banknote engraving. Isolated on a transparent background. No text, letters, numbers or logos, no gems, no chrome, no glow.",
+   "credits": 1.5,
+   "used": true,
+   "master": "creative/higgsfield/site-premium/gold-corner-a.webp",
+   "master_hashes": {
+    "original_png_sha256": "da926adb7cfd351fc5441a02dac3091a7abb74fb5d24ec5cda2df65c405f0e89",
+    "original_size": [
+     1024,
+     1024
+    ],
+    "webp_sha256": "9e34914df9bfd4b603f9373df0ffb8f7032a8d54fa24b46a8c7aec3e7677cc52",
+    "webp_bytes": 185180
+   }
+  },
+  {
+   "name": "gold-corner-b",
+   "job_id": "11092d3d-49a8-474f-9f12-60866b80e1c2",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_135408_11092d3d-49a8-474f-9f12-60866b80e1c2.png",
+   "aspect_ratio": "1:1",
+   "resolution": "1k",
+   "background": "transparent",
+   "prompt": "A single engraved antique gold leaf (#d4a64a) corner ornament for a classic frame: a restrained L-shaped corner with a fine double rule along the top and left edges and a small stepped quarter-rosette at the corner, soft wear, like the corner of a premium playing card box or banknote. Isolated on a transparent background, placed in the top-left corner. No text, letters, numbers or logos, no gems, no chrome, no glow.",
+   "credits": 1.5,
+   "used": true,
+   "master": "creative/higgsfield/site-premium/gold-corner-b.webp",
+   "master_hashes": {
+    "original_png_sha256": "f6c5cf1168e945653ec52d58aa4b52316f2c3395e861ab2580b9d408da37bae5",
+    "original_size": [
+     1024,
+     1024
+    ],
+    "webp_sha256": "d90c2512e5715abc0838c7ddea2f9a26db8c7a2b8d35e0f350b26669e7d8b7b8",
+    "webp_bytes": 99928
+   }
+  }
+ ],
+ "derivatives": {
+  "app/public/assets/site/stage-backdrop-1600.webp": {
+   "bytes": 39732,
+   "sha256": "7844efbb56cc6f115dd538d85f5cda9b8c18dc7975c0053c24a39f399ffa66c2",
+   "size": [
+    1600,
+    905
+   ]
+  },
+  "app/public/assets/site/stage-backdrop-2400.webp": {
+   "bytes": 84516,
+   "sha256": "c81aca3aa705ed989236865c62e151af561ae2d78545a14143701b2263725a93",
+   "size": [
+    2400,
+    1357
+   ]
+  },
+  "app/public/assets/site/stage-backdrop-phone-780.webp": {
+   "bytes": 44474,
+   "sha256": "1977409b4a8fbdb9bfff964e4035097137703fe60de66c1a9de56df69f8346d5",
+   "size": [
+    780,
+    1379
+   ]
+  },
+  "app/public/assets/site/panel-leather-768.webp": {
+   "bytes": 42014,
+   "sha256": "1c0b42fa71de599da39090c2a4f7887b9306a0fb42ac642d4a6276d6d53541f4",
+   "size": [
+    768,
+    768
+   ]
+  },
+  "app/public/assets/site/gold-divider.webp": {
+   "bytes": 36480,
+   "sha256": "1600c3fbfca4b4f01c10ad4b3c5eef09792d8ec257d3d5f3649c4b36c9b070b9",
+   "size": [
+    1200,
+    67
+   ]
+  },
+  "app/public/assets/site/gold-divider-filigree.webp": {
+   "bytes": 76696,
+   "sha256": "a4bc99a2751df5cfab1b05e9ba503848675d37418700f866cce49cc03f95f7cf",
+   "size": [
+    1200,
+    127
+   ]
+  },
+  "app/public/assets/site/gold-corner.webp": {
+   "bytes": 15226,
+   "sha256": "426a91b5af6a54ff663086479b7a5b4ffc7d84747a9137ad7f888aa94711c63d",
+   "size": [
+    384,
+    381
+   ]
+  },
+  "app/public/assets/site/gold-corner-filigree.webp": {
+   "bytes": 36002,
+   "sha256": "2b810ef3208792c200d1815828dffa1a9e3ff374fef02f9becba6f2fe44bf167",
+   "size": [
+    384,
+    378
+   ]
+  }
+ },
+ "derivative_sources": {
+  "stage-backdrop-1600/2400": "stage-backdrop-a",
+  "stage-backdrop-phone-780": "stage-backdrop-phone-a",
+  "panel-leather-768": "panel-leather-a, 384px tile mirrored 2x2 so it repeats without seams",
+  "gold-divider": "gold-divider-b, alpha-cropped",
+  "gold-divider-filigree": "gold-divider-a, alpha-cropped",
+  "gold-corner": "gold-corner-b, alpha-cropped",
+  "gold-corner-filigree": "gold-corner-a, alpha-cropped"
+ }
+}
