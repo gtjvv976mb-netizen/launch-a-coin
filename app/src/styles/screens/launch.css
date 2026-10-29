@@ -173,7 +173,7 @@
 
 /* The description grows with its text (three lines to start); it never scrolls on its own. Browsers without
  * field-sizing are sized by launch.tsx. */
-.cdx-launch .cdx-launch-description { min-block-size: 84px; resize: none; overflow-y: hidden; field-sizing: content; }
+.cdx-launch .cdx-launch-description { min-block-size: 84px; resize: none; overflow: hidden; field-sizing: content; }
 
 /* The initial buy: the amount, then one row of quick amounts (None, 0.1, 0.5, 1, 5), then its note. */
 .cdx-launch-quick { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: 8px; margin-top: 8px; }

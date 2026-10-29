@@ -334,7 +334,7 @@ export function TokenFacts({ page, className = "" }: { page: CoinPage; className
             href={`https://solscan.io/token/${asset.mint}`}
             target="_blank"
             rel="noreferrer"
-            aria-label={`${asset.symbol} quote mint on Solscan (opens in a new tab)`}
+            aria-label={`${asset.mint.slice(0, 4)}…${asset.mint.slice(-4)}, ${asset.symbol} quote mint on Solscan (opens in a new tab)`}
           >
             <span className="num">{asset.mint.slice(0, 4)}…{asset.mint.slice(-4)}</span> <Icon name="external" size={12} />
           </a>

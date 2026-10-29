@@ -807,7 +807,8 @@ function Launch() {
                 type="button"
                 data-over={dragging ? "true" : undefined}
                 data-filled={preview ? "true" : undefined}
-                aria-label={preview ? "Artwork. Choose another image to replace it" : "Artwork. Drop an image or choose one to upload"}
+                // The name starts with the visible words (WCAG 2.5.3), so "click Upload artwork" works by voice.
+                aria-label={uploading ? "Preparing artwork…" : preview ? "Replace artwork. Drop or choose another image" : "Upload artwork. Drop an image or choose one"}
                 aria-describedby={artMsg || (artGated && !preview) ? "art-spec art-help" : "art-spec"}
                 aria-invalid={artMsg ? true : undefined}
                 aria-busy={uploading || undefined}

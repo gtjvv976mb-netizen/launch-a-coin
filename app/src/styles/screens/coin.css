@@ -258,6 +258,8 @@
 }
 .cdx-chart__empty p { max-width: 32ch; font-size: var(--text-body); color: var(--color-slate); text-wrap: pretty; }
 .cdx-chart .mdx-tabs--sm .mdx-tabs__tab { min-width: 40px; }
+/* Touch and phones keep the primitive's 44px options (this sheet's layer would otherwise win with 40). */
+@media (pointer: coarse), (max-width: 1023.98px) { .cdx-chart .mdx-tabs--sm .mdx-tabs__tab { min-width: 44px; } }
 .cdx-chart__note { margin-top: 8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
 
 /* ---- activity: a table of rules and alignment that grows with its rows (the page scrolls), its header row sticky

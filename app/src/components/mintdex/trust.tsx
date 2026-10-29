@@ -120,9 +120,10 @@ export function ModeBadge({ className = "" }: { className?: string }) {
           align="start"
           sideOffset={8}
           collisionPadding={menuCollisionPadding()}
+          aria-labelledby="mode-badge-title"
           className="mdx-menu mdx-pop z-50 w-[min(300px,calc(100vw_-_24px))] p-4 outline-none"
         >
-          <p className="mb-1 text-body font-semibold text-ink">{MODE_COPY.badge}</p>
+          <p id="mode-badge-title" className="mb-1 text-body font-semibold text-ink">{MODE_COPY.badge}</p>
           {body(() => setOpen(false))}
         </Popover.Content>
       </Popover.Portal>
