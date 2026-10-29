@@ -807,8 +807,8 @@ function Launch() {
                 type="button"
                 data-over={dragging ? "true" : undefined}
                 data-filled={preview ? "true" : undefined}
-                // The name starts with the visible words (WCAG 2.5.3), so "click Upload artwork" works by voice.
-                aria-label={uploading ? "Preparing artwork…" : preview ? "Replace artwork. Drop or choose another image" : "Upload artwork. Drop an image or choose one"}
+                // The name is the visible words (WCAG 2.5.3), so "click Upload artwork" works by voice.
+                aria-labelledby="art-cta art-sub"
                 aria-describedby={artMsg || (artGated && !preview) ? "art-spec art-help" : "art-spec"}
                 aria-invalid={artMsg ? true : undefined}
                 aria-busy={uploading || undefined}
@@ -822,8 +822,8 @@ function Launch() {
                   {preview && !uploading ? <img src={preview} alt="" draggable={false} className="cdx-launch-art__image" /> : uploading ? null : <Icon name="plus" size={20} />}
                 </span>
                 <span className="cdx-launch-art__copy">
-                  <strong>{uploading ? "Preparing artwork…" : preview ? "Replace artwork" : "Upload artwork"}</strong>
-                  <span>{preview ? "Drop or choose another image" : "Drop an image or choose one"}</span>
+                  <strong id="art-cta">{uploading ? "Preparing artwork…" : preview ? "Replace artwork" : "Upload artwork"}</strong>
+                  <span id="art-sub">{preview ? "Drop or choose another image" : "Drop an image or choose one"}</span>
                 </span>
               </button>
               <p id="art-spec" className="cdx-launch-art__spec">
