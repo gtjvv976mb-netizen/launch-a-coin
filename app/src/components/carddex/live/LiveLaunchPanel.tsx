@@ -15,6 +15,7 @@ import { EmptyState } from "../../mintdex/empty-state";
 import { WalletConnectDialog } from "../../mintdex/wallet-connect";
 import { BUY_DOES_NOT_FIT, checkLiveBuyFit, LIVE_BUY_FIT, liveBuyFitKey, STOCK_BUY_WARNS } from "./buy-fit";
 import { formatLiveAmount } from "./amounts";
+import { LiveTokenImage } from "./LiveTokenImage";
 import { LiveWalletNotice } from "./LiveWalletNotice";
 import { PagedMessage } from "./PagedMessage";
 import { useLiveReadiness } from "./readiness";
@@ -46,8 +47,8 @@ export type LivePrimary = { kind: "submit" | "startAnother"; label: string; pend
 type Busy = "ownership" | "artwork" | "preparing" | "refreshing" | "wallet" | "submitting" | "confirming" | "recovering" | null;
 const BUSY_COPY: Record<NonNullable<Busy>, string> = {
   ownership: SIGN_IN_COPY,
-  artwork: "Preparing your permanent coin artwork and complete card image…",
-  preparing: "Checking the current quote asset, balances and exact transaction costs…",
+  artwork: "Preparing your artwork and complete card image…",
+  preparing: "Making your turning coin image and checking the quote asset, balances and exact transaction costs…",
   refreshing: "Getting a fresh transaction so your wallet sees current costs…",
   wallet: WALLET_OPEN_COPY,
   submitting: "Submitting the transaction you approved…",
@@ -750,6 +751,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
 
     {intent ? <section className="cdx-live-block" aria-labelledby="cdx-live-saved">
       <h3 id="cdx-live-saved" className="cdx-live-subhead">Saved launch</h3>
+      <LiveTokenImage intent={intent} compact />
       <dl className="cdx-launch-cost cdx-live-review">
         <div><dt>Coin mint</dt><dd><TextLink href={`https://solscan.io/token/${intent.tokenMint}`} target="_blank"><span className="cdx-live-address">{brief(intent.tokenMint)}</span><Icon name="external" size={12} /></TextLink></dd></div>
         <div><dt>Quote asset</dt><dd>{selected.symbol}</dd></div>
@@ -787,6 +789,8 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
         <div ref={reviewBody} tabIndex={-1} role="region" aria-label="Transaction review" className="cdx-live-review-page">
           {reviewNotice ? <p className="cdx-live-callout" role="status">{reviewNotice}</p> : null}
           <p className="cdx-live-network"><strong>Solana mainnet · real funds</strong><span>{plan.kind === "token" ? getTradingPair(draftAtPrepare.current?.symbol ?? card.ticker, reviewIntent.quoteAssetKey) : "One-of-one creator card · no NFT royalties"}</span></p>
+          {/* The coin's permanent image, before the wallet opens (the server made it from this card; nothing to choose). */}
+          {plan.kind === "token" ? <LiveTokenImage intent={reviewIntent} /> : null}
           <dl className="cdx-launch-cost cdx-live-review">
             <div><dt>Network fee</dt><dd><span className="num">{formatLiveAmount(plan.review.networkFeeLamports, 9)}</span> <span className="mdx-unit">SOL</span></dd></div>
             <div><dt>Priority fee</dt><dd><span className="num">{formatLiveAmount(plan.review.priorityFeeLamports, 9)}</span> <span className="mdx-unit">SOL</span></dd></div>

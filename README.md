@@ -10,6 +10,7 @@ Independent project based on MintDex, publicly branded **Launch a Card** at **ht
 - Matching text-free Higgsfield front/back artwork for all 48 designs, with the creator's token image and live card content composed above the frame.
 - One shared Launch a Card v2 front: every design uses aligned name, larger artwork, ticker/pair and description/statistics panels. Bottom platform/owner labels, coin numbers and both footer slots are removed; matching themed material completes the bottom edge. Only frame art, textured paper, material, foil and reverse change.
 - Card-first compact launch form, one full 3D preview, artwork upload, token metadata and disclosed optional initial buy.
+- Local, not yet published: new creator token metadata uses a consistent1024px turning front/back card GIF with no market-cap row, plus a PNG still. Existing Higgsfield artwork is reused; saved launches retain their original images. See the [token image implementation record](reports/launch-a-card-token-image-2026-10-29.md).
 - Observed OHLC candlestick charts with quote-native units, UTC ranges and touch/keyboard inspection.
 - Local pump.fun-style token curve, buys/sells, charts, activity, holdings and NFT card collection.
 - Existing rounded 3D slab, both-face 360° shimmer, touch rotation, viewer and case.

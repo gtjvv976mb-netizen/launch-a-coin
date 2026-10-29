@@ -657,6 +657,18 @@
 .cdx-live-review-page:focus { outline: none; }
 .cdx-live-network { display: grid; gap: 2px; }
 .cdx-live-network strong { color: var(--color-ink); font-weight: 600; }
+/* The coin's image (LiveTokenImage): the server-made turning card beside what it is, in the review before the wallet
+ * opens and, smaller, in the saved launch. The square is the image itself (its cream matte included), at 1:1. */
+.cdx-live-token-image { display: flex; min-width: 0; align-items: center; gap: 12px; margin: 0; }
+.cdx-live-token-image__frame { display: block; width: 112px; height: 112px; flex: none; overflow: hidden; border-radius: var(--radius-row); }
+.cdx-live-token-image__frame > img { display: block; width: 100%; height: 100%; object-fit: cover; outline: 1px solid var(--image-outline); outline-offset: -1px; border-radius: inherit; }
+.cdx-live-token-image[data-compact] .cdx-live-token-image__frame { width: 64px; height: 64px; }
+.cdx-live-token-image > figcaption { display: grid; min-width: 0; gap: 2px; }
+.cdx-live-token-image > figcaption > strong { font-size: var(--text-body); line-height: 20px; font-weight: 600; color: var(--color-ink); }
+.cdx-live-token-image > figcaption > span:not([class]) { font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); text-wrap: pretty; }
+.cdx-live-token-image__links { display: flex; flex-wrap: wrap; gap: 0 20px; }
+.cdx-live-token-image__links > .mdx-link { display: inline-flex; align-items: center; gap: 4px; font-size: var(--text-caption); }
+@media (max-width: 479.98px) { .cdx-live-token-image__frame { width: 96px; height: 96px; } }
 .cdx-live-review > div[data-total] dd { font-weight: 600; }
 .cdx-live-review[data-stack] > div { display: grid; gap: 2px; }
 .cdx-live-review[data-stack] dd { text-align: left; flex: initial; }
