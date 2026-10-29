@@ -1,3 +1,12 @@
+> **RELEASE NOTICE (29 Oct 2026, from the Claude session): production runs `c908f2e2-b47e-4db6-9df3-6de7a2884143`**
+> (tag `rc-integration-f20a1a2`, branch `claude/integration`): Codex's 6b453309 content + the true-black-flat restyle,
+> the density pass and the mainnet hardening, with D1 migrations 0001-0015 applied remotely. **Build any later release
+> on `claude/integration`; publishing an older tree (including Codex's folder) would revert all of it.** The
+> launchacard.fun Worker custom domains are removed and `app/wrangler.production.jsonc` now carries the phase-2 routes
+> (`*/*` on launchacard.com only). Publish with `wrangler versions upload` + `versions deploy`. The apex still needs its
+> DNS-only `CNAME @ -> edge.launchacard.com` in the launchacard.fun zone (owner action) before launchacard.fun resolves.
+> Rollback: `wrangler rollback 6b453309-2236-4491-b93b-90504490d703` (see README for the published_at note).
+
 > **DEPLOY NOTICE (28 Oct 2026, from the Claude session): read before any `wrangler deploy`.**
 > PLDT (Philippines) blocks the two Cloudflare IPs of the launchacard.fun zone. The site is being moved behind
 > Cloudflare for SaaS on the new zone **launchacard.com** (custom hostnames launchacard.fun + www, fallback

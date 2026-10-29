@@ -10,10 +10,10 @@
   // Require an existing compatible CPU allowance; never purchase or upgrade a plan.
   "limits": {"cpu_ms": 30000},
   "assets": {"directory": "./dist/client", "binding": "ASSETS", "not_found_handling": "none"},
-  // Cloudflare for SaaS phase 1: keep the launchacard.fun custom domains until the DNS cutover, and serve the
-  // launchacard.com zone (custom hostnames launchacard.fun/www, fallback edge.launchacard.com) through its */* route.
-  // After cutover the custom_domain entries MUST be removed (see reports/saas-edge-cutover.md) before any later deploy.
-  "routes": [{"pattern": "launchacard.fun", "custom_domain": true}, {"pattern": "www.launchacard.fun", "custom_domain": true}, {"pattern": "*/*", "zone_name": "launchacard.com"}],
+  // Cloudflare for SaaS phase 2: launchacard.fun and www are custom hostnames on the launchacard.com zone (fallback
+  // edge.launchacard.com) and reach this Worker through its */* route only. The launchacard.fun Worker custom domains
+  // are gone; never add them back (they would replace the DNS-only CNAMEs and put the site on PLDT-blocked IPs).
+  "routes": [{"pattern": "*/*", "zone_name": "launchacard.com"}],
   // A routed Worker cannot fetch() its own zone, so own-origin asset checks go through this binding.
   "services": [{"binding": "SELF", "service": "launch-a-card"}],
   "vars": {
