@@ -8,7 +8,7 @@ import { Icon } from "../mintdex/ui";
 
 export const pairKindLabel = (asset: Readonly<PairAsset>) => ({ native: "Native quote", stable: "Stablecoin quote", stock: "Tokenized stock quote", meme: "Memecoin quote", collector: "Collector token quote" })[asset.kind];
 
-export function PairBadge({ quoteAssetKey, ticker = "YOUR COIN", compact = false }: {
+export function PairBadge({ quoteAssetKey, ticker = "TICKER", compact = false }: {
   quoteAssetKey: string; ticker?: string; compact?: boolean;
 }) {
   const asset = getPairAsset(quoteAssetKey);
@@ -49,7 +49,8 @@ function AssetDisclosure({ asset, live }: { asset: Readonly<PairAsset>; live: bo
 
 /**
  * The mint and the terms on one visible line that wraps (Launch's Pair field; no disclosure): the short mint linked
- * to Solscan (its full address in the link's name), then each terms link, then what the quote does and does not do.
+ * to Solscan (its name starts with the visible short mint, WCAG 2.5.3), then each terms link, then what the quote does
+ * and does not do.
  */
 export function QuoteAssetMeta({ quoteAssetKey, live = false }: { quoteAssetKey: string; live?: boolean }) {
   const asset = getPairAsset(quoteAssetKey);
@@ -57,7 +58,7 @@ export function QuoteAssetMeta({ quoteAssetKey, live = false }: { quoteAssetKey:
   const external = (href: string, label: string, name?: string) => <a className="mdx-link mdx-hit" href={href} target="_blank" rel="noreferrer" aria-label={name}>{label}<Icon name="external" size={12} /></a>;
   return <div className="cdx-pair-meta">
     <p className="cdx-pair-meta__links">
-      <span>{asset.kind === "native" ? "Wrapped SOL mint" : "Mint"} {external(`https://solscan.io/token/${asset.mint}`, short, `${asset.kind === "native" ? "Wrapped SOL mint" : "Quote asset mint"} ${asset.mint} on Solscan`)}</span>
+      <span>{asset.kind === "native" ? "Wrapped SOL mint" : "Mint"} {external(`https://solscan.io/token/${asset.mint}`, short, `${short}, ${asset.kind === "native" ? "Wrapped SOL" : "quote asset"} mint on Solscan (opens in a new tab)`)}</span>
       {asset.issuerTerms ? external(asset.issuerTerms, "Issuer terms") : null}
       {asset.listingProviderTerms ? external(asset.listingProviderTerms, `${asset.listingProvider ?? "Listing"} terms`) : null}
       {external(PAIR_ASSETS_SOURCE, "Pump.fun pairs")}
@@ -158,7 +159,7 @@ export function QuoteAssetPicker({ value, designKey, ticker, onChange, onPending
       )}
     </select>
     <div id={`${id}-help`} className="cdx-pair-picker__hint">
-      <strong>{getTradingPair(ticker ?? "YOUR COIN", asset.key)}</strong>
+      <strong>{getTradingPair(ticker || "TICKER", asset.key)}</strong>
       <span>{balance ? `${balance} ${asset.symbol} ${live ? "wallet balance" : "test balance"}` : live ? "Solana mainnet · real assets" : "Demo · no real assets"}</span>
     </div>
     {designMatch ?? (bound ? <p className="cdx-pair-picker__binding">This design is paired with {bound.symbol}. Choosing another quote offers a compatible design.</p> : null)}

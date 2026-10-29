@@ -260,10 +260,9 @@ function EnterDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
+          {/* Enabled with an empty handle too (one primary rule): a press says why under the field. */}
           <Button
             type="submit"
-            disabled={!valid}
-            onBlocked={() => setError(invalidReason)}
             pending={busy}
             pendingLabel="Starting..."
           >

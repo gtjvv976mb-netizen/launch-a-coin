@@ -582,7 +582,8 @@
     color: var(--color-ink);
   }
   .mdx-tabs:not([data-measured]) .mdx-tabs__tab[data-selected] {
-    background: var(--color-nested);
+    background: var(--color-raised);
+    box-shadow: inset 0 0 0 1px var(--color-control-border); /* taste-skill-ignore: the selected thumb's ring, not elevation */
   }
   .mdx-tabs__thumb {
     position: absolute;
@@ -594,7 +595,10 @@
     transform: translateX(var(--x, 0px)) scaleX(var(--s, 1));
     transform-origin: left center;
     border-radius: var(--radius-pill);
-    background: var(--color-nested);
+    /* One step above its track and ringed in the control border (3.6:1 on the surface), so the selected option
+     * shows by shape as well as by its label (WCAG 1.4.1, 1.4.11). No hue: lightness only. */
+    background: var(--color-raised);
+    box-shadow: inset 0 0 0 1px var(--color-control-border); /* taste-skill-ignore: the selected thumb's ring, not elevation */
     pointer-events: none;
   }
   .mdx-tabs:not([data-measured]) .mdx-tabs__thumb {
@@ -652,7 +656,8 @@
     padding: 0 8px;
   }
 
-  /* Buy | Sell (SideToggle): the segmented look, one nested thumb; the selected label takes the market colour. */
+  /* Buy | Sell (SideToggle): the segmented look, one ringed thumb (as .mdx-tabs__thumb); the selected label is ink.
+   * Green and red stay on the submit and the quote figures, not on the tab. */
   .mdx-side {
     position: relative;
     display: grid;
@@ -670,7 +675,8 @@
     left: 4px;
     width: calc(50% - 4px);
     border-radius: var(--radius-pill);
-    background: var(--color-nested);
+    background: var(--color-raised);
+    box-shadow: inset 0 0 0 1px var(--color-control-border); /* taste-skill-ignore: the selected thumb's ring, not elevation */
     transition: transform 280ms var(--ease-in-out);
   }
   .mdx-side[data-side="sell"]::before {
@@ -697,10 +703,7 @@
     }
   }
   .mdx-side > button[aria-pressed="true"] {
-    color: var(--color-up);
-  }
-  .mdx-side[data-side="sell"] > button[aria-pressed="true"] {
-    color: var(--color-down);
+    color: var(--color-ink);
   }
 
   /* ------------------------------------------------ buttons
@@ -2198,6 +2201,13 @@ a:focus-visible .mdx-lift {
     .mdx-actionbar > :is(.mdx-btn, a.mdx-btn) {
       flex: 1 1 auto;
     }
+    /* Phones held sideways: height is what is short, so the bar is the control and 4px either side. */
+    @media (max-height: 500px) {
+      .mdx-actionbar {
+        min-height: var(--actionbar-h);
+        padding-block: 4px;
+      }
+    }
     /* Toasts rise above the bar instead of covering it. */
     html:has(.mdx-actionbar) .mdx-toasts {
       bottom: calc(var(--tabbar-h) + var(--actionbar-h) + 16px + env(safe-area-inset-bottom));
@@ -2424,12 +2434,17 @@ a:focus-visible .mdx-lift {
     color: var(--color-slate);
     font-size: var(--text-caption);
   }
+  /* Selected: the shared "selected" mark (a raised fill and an ink ring, as the design swatches and tiles), never the
+   * primary's cream: one cream pill a screen. */
   .mdx-chip[aria-pressed="true"] {
-    background: var(--color-ink);
-    color: var(--color-on-cta);
+    background: var(--color-raised);
+    color: var(--color-ink);
+    outline: 2px solid var(--color-ink);
+    outline-offset: -2px;
   }
-  .mdx-chip[aria-pressed="true"] .mdx-chip__count {
-    color: var(--color-nested);
+  .mdx-chip[aria-pressed="true"]:focus-visible {
+    outline: 2px solid var(--color-zap);
+    outline-offset: 2px;
   }
   @media (hover: hover) and (pointer: fine) {
     .mdx-chip:hover:not([aria-pressed="true"]) {

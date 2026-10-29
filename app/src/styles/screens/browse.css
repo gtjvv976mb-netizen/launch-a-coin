@@ -8,8 +8,10 @@
 
 /* ---------------------------------------------------------------- shared by both screens */
 
-/* Search fields: the input recipe with a search glyph on the left and a quiet clear button (×) inside the right
- * padding (the native cancel button is hidden by the primitive). Both sit in the page header's toolbar. */
+/* Search fields: the top bar's search recipe (shell.css .cdx-search__input: a filled pill on the nested step, no
+ * border, one lightness step up on hover, the focus ring as every field), so the toolbar row is all pills and the
+ * product has one search look. A search glyph on the left and a quiet clear button (×) inside the right padding (the
+ * native cancel button is hidden by the primitive). Both sit in the page header's toolbar. */
 .cdx-discover__search,
 .cdx-library__search {
   position: relative;
@@ -18,6 +20,18 @@
 .cdx-discover__search .mdx-input,
 .cdx-library__search .mdx-input {
   padding-inline: 40px 44px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--color-nested);
+  background-clip: padding-box;
+  transition: background-color var(--t-hover) ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cdx-discover__search .mdx-input:hover:not(:disabled, :focus),
+  .cdx-library__search .mdx-input:hover:not(:disabled, :focus) {
+    border-color: transparent;
+    background-color: var(--color-raised);
+  }
 }
 /* Empty: no clear button yet, so the placeholder may use that room (a narrow phone field keeps "Search designs"). */
 .cdx-discover__search .mdx-input:placeholder-shown,
@@ -364,9 +378,10 @@
     top: 0;
   }
   /* A tile may be as tall as main's visible height: the screen less the top bar, the 44px sideways tab bar and its
-   * 1px rule, the safe area under it, main's 16px top padding and 4px of slack, less the caption. */
+   * 1px rule (none from 740px, --tabbar-side-h), the safe area under it, main's 16px top padding and 4px of slack,
+   * less the caption. */
   .cdx-token-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, calc((100svh - var(--topbar-h) - 45px - env(safe-area-inset-bottom, 0px) - 20px - var(--coin-cap)) * 63 / 88)));
+    grid-template-columns: repeat(auto-fill, minmax(150px, calc((100svh - var(--topbar-h) - var(--tabbar-side-h) - env(safe-area-inset-bottom, 0px) - 20px - var(--coin-cap)) * 63 / 88)));
     /* Tiles end on the column's right edge; what the fixed tracks leave over widens the gap beside the header. */
     justify-content: end;
   }
@@ -594,7 +609,7 @@
 }
 
 /* A design tile: the flat print, its name and one meta line on the surface step; hover lifts it one lightness step,
- * selected is the nested step with a 2px inset ink ring and a check (no gold). 8px padding in a 12px corner. Height =
+ * selected is the nested step with a 2px inset ink ring (no gold, no check over the print). 8px padding in a 12px corner. Height =
  * the print + 62 (8 padding, 6, the name 20, 2, the meta 16, 10). "Use" is a small pill on the print's top right,
  * outside the flow, so it never changes a row's height. */
 .cdx-design-tile {
@@ -650,22 +665,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* The selected check sits on the print's top left corner, out of the text flow, so selecting never re-wraps a name
- * or changes a row's height. A 2px ring of the tile's own fill separates it from the art. */
-.cdx-design-tile__check {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  display: grid;
-  width: 24px;
-  height: 24px;
-  place-items: center;
-  border: 2px solid var(--color-nested);
-  border-radius: var(--radius-pill);
-  background: var(--color-ink);
-  color: var(--color-on-cta);
-  pointer-events: none;
-}
 /* Use: the secondary pill on the nested step with the control boundary, so it reads over any print. Touch: 32px tall
  * with the 44px hit; a fine pointer: 28px with the 40px hit (the primitive's ::after). Press and reduced motion come
  * from .mdx-btn. */
@@ -696,43 +695,16 @@
   background: var(--color-raised);
 }
 
-/* Phones held sideways: the header and the preview stack in a 240px left column, the library fills the right one from
- * the top of the page; nothing sticks but the action bar. DOM order (header, preview, library) is the visual order. */
+/* Phones held sideways (density D3): the header row, then the preview as one row (the 150px card beside its name,
+ * the pair select and Asset details, the phone arrangement above), then the library across the whole column, so the
+ * designs get four or more tracks instead of three beside an empty column. The action bar names the selected design,
+ * so the preview need not follow the library down. DOM order (header, preview, library) is the visual order. */
 @media (max-width: 1023.98px) and (max-height: 500px) and (orientation: landscape) {
   .cdx-archive {
     --preview-cw: 150px;
   }
-  .cdx-archive__main {
-    display: grid;
-    grid-template-columns: 240px minmax(0, 1fr);
-    /* The library spans both rows; the flexible second row takes its extra height, so the preview stays under the
-     * header. */
-    grid-template-rows: auto 1fr;
-    align-content: start;
-    align-items: start;
-    gap: var(--gap-section);
-  }
-  .cdx-archive__main > .mdx-pagehead {
-    grid-column: 1;
-    grid-row: 1;
-  }
-  .cdx-archive__body {
-    display: contents;
-  }
-  .cdx-archive__vitrine {
-    display: flex;
-    grid-column: 1;
-    grid-row: 2;
-    flex-direction: column;
-    align-items: center;
-  }
   .cdx-archive__info {
-    align-self: stretch;
     max-width: none;
-  }
-  .cdx-library {
-    grid-column: 2;
-    grid-row: 1 / span 2;
   }
 }
 

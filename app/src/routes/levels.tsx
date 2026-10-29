@@ -35,6 +35,7 @@ import {
   recommendedMemeQuoteForDesign,
 } from "../lib/carddex/pairs";
 import { MEME_PAIR_PRESETS } from "../lib/carddex/design-pairings";
+import { DESIGN_GROUPS, inDesignGroup } from "../components/carddex/design-groups";
 import { initialQuoteReserves, quoteMetrics } from "../lib/carddex/quote-simulation";
 import { QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
 
@@ -55,22 +56,10 @@ export const Route = createFileRoute("/levels")({
     }),
   component: Designs,
 });
-const GROUPS = [
-  { key: "all", name: "All" },
-  { key: "classic", name: "Classics" },
-  { key: "premium", name: "Premium" },
-  { key: "stocks", name: "Stock pairs" },
-  { key: "memes", name: "Meme pairs" },
-  { key: "limited", name: "Limited" },
-] as const;
+// The collections and their membership are shared with Launch's All designs dialog (design-groups.ts).
+const GROUPS = DESIGN_GROUPS;
 
-const matchesCategory = (design: CardDesign, group: string) =>
-  group === "all" ||
-  (group === "stocks"
-    ? boundQuoteForDesign(design.key)?.kind === "stock"
-    : group === "memes"
-      ? !!recommendedMemeQuoteForDesign(design.key)
-      : design.category === group);
+const matchesCategory = inDesignGroup;
 const memePairKeys = new Set<string>(MEME_PAIR_PRESETS.map((preset) => preset.quote));
 const memePairAssets = PAIR_ASSETS.filter((asset) => memePairKeys.has(asset.key));
 const matchesMemePair = (design: CardDesign, quoteKey: string) =>

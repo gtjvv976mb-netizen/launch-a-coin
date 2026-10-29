@@ -51,6 +51,8 @@ export default function SheetDrawer({
         <Drawer.Overlay className="mdx-sheet-overlay cdx-overlay-backdrop" />
         <Drawer.Content
           ref={panel}
+          // Modal for screen readers too (as dialog-modal.tsx), so a virtual cursor stays inside the sheet.
+          aria-modal="true"
           className="mdx-sheet cdx-overlay cdx-overlay--sheet"
           onOpenAutoFocus={(e) => {
             // The opener may have moved since the render (a menu that closed and handed focus to its trigger).

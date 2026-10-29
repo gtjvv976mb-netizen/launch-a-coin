@@ -170,6 +170,7 @@
   --actionbar-h: 64px; /* the phone sticky action bar (a 44px control + 2 x 10px) */
   --topbar-h: 48px;
   --tabbar-h: 58px;
+  --tabbar-side-h: 45px; /* the tab bar held sideways (a 44px row and its rule); 0 from 740px, where it steps aside */
 
   /* ---- controls: visible size and the hit area every control reaches (::after) */
   --hit: 44px; /* 40px under a fine pointer (dense desktop UI) */
@@ -231,6 +232,19 @@
     --hit: 40px;
     --control-h: 40px;
     --row-h: 40px;
+  }
+}
+/* Phones held sideways: the action bar is a 44px control with 4px above and below; 740px and wider, the five links
+ * move into the top bar and the tab bar steps aside (shell.css). */
+@media (max-width: 1023.98px) and (max-height: 500px) {
+  :root {
+    --actionbar-h: 52px;
+  }
+}
+@media (min-width: 740px) and (max-width: 1023.98px) and (max-height: 500px) {
+  :root {
+    --tabbar-h: 0px;
+    --tabbar-side-h: 0px;
   }
 }
 

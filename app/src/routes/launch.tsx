@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type DragEvent,
   type FormEvent,
   type KeyboardEvent,
@@ -36,7 +37,7 @@ import { quoteBuy } from "../lib/mintdex/curve";
 import { sol, tokens } from "../lib/mintdex/format";
 import { pageHead, sentences } from "../lib/mintdex/seo";
 import { oneOf, searchSchema, text } from "../lib/mintdex/search";
-import { LaunchCardPreview, LaunchCardRow } from "../components/carddex/live/LaunchCardPreview";
+import { LaunchCardPreview } from "../components/carddex/live/LaunchCardPreview";
 import { CardDesignPicker } from "../components/carddex/CardDesignPicker";
 import { DEFAULT_CARD_DESIGN, getCardDesign, isCardDesignKey } from "../lib/carddex/designs";
 import { allowedQuotesForDesign, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, isPairAssetKey, type PairAssetKey } from "../lib/carddex/pairs";
@@ -45,7 +46,7 @@ import { QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
 import type { LiveLaunchHandle, LivePrimary } from "../components/carddex/live/LiveLaunchPanel";
 import { firstProblem, enterTarget, quickBuyAmounts, sameAmount, type FormCheck } from "../components/carddex/launch-form";
 import { liveReadinessQuery, useLiveLaunchOpen, useLiveRecoveryOpen } from "../components/carddex/live/readiness";
-import { parseLiveAmount } from "../components/carddex/live/amounts";
+import { formatLiveAmount, parseLiveAmount } from "../components/carddex/live/amounts";
 import { BUY_DOES_NOT_FIT, BUY_FIT_AFTER_SIGN_IN, useLiveBuyFit } from "../components/carddex/live/buy-fit";
 import { PagedMessage } from "../components/carddex/live/PagedMessage";
 import type { LiveLaunchIntent } from "../lib/carddex/live/types";
@@ -187,7 +188,22 @@ function linkError(value: string, kind: "web" | "x"): string | null {
 
 type FieldKey = "name" | "ticker" | "website" | "x";
 /** The form's checks, in DOM order: the first one that fails takes focus (Launch pressed, or Enter in a field). */
-type ProblemKey = "name" | "ticker" | "art" | "pair" | "buy" | "website" | "x";
+type ProblemKey = "name" | "ticker" | "art" | "pair" | "buy" | "website" | "x" | "terms";
+
+/**
+ * Phones and phones held sideways (launch.css uses the same query): the live card sits in the fields panel beside
+ * Name and Ticker; elsewhere it has its own track. One turntable is mounted, in whichever place shows. The server
+ * draws the wide place; the phone slot keeps its size until hydration moves the card in.
+ */
+const PHONE_CARD_MQ = "(max-width: 767.98px), (max-width: 1023.98px) and (max-height: 500px)";
+function subscribePhoneCard(cb: () => void) {
+  const mq = window.matchMedia(PHONE_CARD_MQ);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+}
+function usePhoneCard() {
+  return useSyncExternalStore(subscribePhoneCard, () => window.matchMedia(PHONE_CARD_MQ).matches, () => false);
+}
 
 /** A value that settles: it follows `value` once it has held still for `ms`. */
 function useSettledValue<T>(value: T, ms: number): T {
@@ -223,6 +239,10 @@ function Launch() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [preparedArt, setPreparedArt] = useState<Blob | null>(null);
   const [liveLocked, setLiveLocked] = useState(false);
+  // A mainnet step is running (sign-in, the artwork upload, preparing): the press already captured the fields.
+  const [liveBusy, setLiveBusy] = useState(false);
+  // The mainnet terms checkbox shows unchecked: Enter stops on it before the primary.
+  const [termsNeeded, setTermsNeeded] = useState(false);
   const [liveMint, setLiveMint] = useState<string | null>(null);
   const [liveCreator, setLiveCreator] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -238,6 +258,7 @@ function Launch() {
   const [livePrimary, setLivePrimary] = useState<LivePrimary | null>(null);
   const viewId = useId();
   const formId = `${viewId}-form`;
+  const phoneCard = usePhoneCard();
   // A creator's permanent design choice is independent of the token's market data.
   const search = Route.useSearch();
   // Test mode is the default. Mainnet needs both an explicit choice and the owner's switch (CARDDEX_LIVE_LAUNCH_ENABLED).
@@ -273,6 +294,9 @@ function Launch() {
     setWebsite(intent.website ?? ""); setXUrl(intent.xUrl ?? "");
     setDesignKey(getCardDesign(intent.cardTemplate).key);
     if (isPairAssetKey(intent.quoteAssetKey)) setQuoteKey(intent.quoteAssetKey);
+    // The saved launch's own initial buy, as a plain decimal in its quote ("" for none).
+    const buy = intent.initialBuyQuoteBaseUnits;
+    setDevBuy(buy === "0" ? "" : formatLiveAmount(buy, getPairAsset(intent.quoteAssetKey).decimals).replace(/,/g, ""));
     setPreview(intent.assets.artwork.url);
   }, []);
   useEffect(() => {
@@ -289,7 +313,16 @@ function Launch() {
   // Restore the saved draft once, after the URL's design and quote are applied. A design in the URL wins.
   // The mode is known from the first render (the loader read readiness on the server), so `live` here is the
   // page's real mode, not a test-mode placeholder. A step saved by the old step-by-step form is ignored.
+  // Recovery-only mainnet waits: its locked fields fill from a saved launch, and a draft there would read as one.
+  // The draft comes back once the page leaves that mode.
+  const draftRestored = useRef(false);
+  // The save below skips the commit that restores (it would see the fields before the restore lands).
+  const justRestored = useRef(false);
   useEffect(() => {
+    if (draftRestored.current) return;
+    if (recoveryOnly) { setDraftReady(true); return; }
+    draftRestored.current = true;
+    justRestored.current = true;
     const d = readDraft();
     if (d) {
       setName(str(d.name).slice(0, 24)); setTicker(str(d.ticker).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8));
@@ -303,7 +336,7 @@ function Launch() {
     }
     setDraftReady(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [recoveryOnly]);
 
   const fileRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -389,6 +422,7 @@ function Launch() {
 
   const dirty = !!(name || ticker || lore || website || xUrl || devBuy || imageUrl);
   useEffect(() => {
+    if (justRestored.current) { justRestored.current = false; return; }
     if (!draftReady || (live && liveLocked) || recoveryOnly) return;
     writeDraft(dirty ? { name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey, imageUrl: live ? null : imageUrl } : null);
   }, [draftReady, dirty, name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey, imageUrl, live, liveLocked, recoveryOnly]);
@@ -480,10 +514,13 @@ function Launch() {
     { key: "buy", ok: !devError && !(balanceError && devQuote?.ok) },
     { key: "website", ok: !websiteError },
     { key: "x", ok: !xError },
+    // Mainnet: the terms checkbox sits in the ticket, after every field and before the primary.
+    { key: "terms", ok: !(live && termsNeeded) },
   ];
-  const problemRefs: Record<ProblemKey, RefObject<HTMLElement | null>> = {
+  const problemRefs: Record<Exclude<ProblemKey, "terms">, RefObject<HTMLElement | null>> = {
     name: nameRef, ticker: tickerRef, art: artRef, pair: pairConfirmationRef, buy: devRef, website: websiteRef, x: xRef,
   };
+  const problemEl = (key: ProblemKey) => key === "terms" ? liveRef.current?.terms() : problemRefs[key].current;
   /** Focus, then bring it into view at once (no smooth scroll); scroll-margin keeps it clear of the action bar. */
   const land = (el: HTMLElement | null | undefined) => {
     if (!el) return;
@@ -495,7 +532,7 @@ function Launch() {
     [...(document.querySelectorAll<HTMLElement>("[data-launch-primary]"))].find((el) => el.getClientRects().length > 0);
   function focusFirstProblem() {
     const key = firstProblem(checks());
-    if (key) requestAnimationFrame(() => land(problemRefs[key].current));
+    if (key) requestAnimationFrame(() => land(problemEl(key)));
   }
   /** Enter in a text field never submits: it moves to the next field that needs something, or to the primary. */
   function onFormKeyDown(e: KeyboardEvent<HTMLFormElement>) {
@@ -506,22 +543,32 @@ function Launch() {
     const target = enterTarget(checks());
     if (target === "primary") land(visiblePrimary());
     else {
-      if (target !== "pair") setTouched((t) => ({ ...t, [target]: true }));
-      land(problemRefs[target].current);
+      if (target !== "pair" && target !== "terms") setTouched((t) => ({ ...t, [target]: true }));
+      land(problemEl(target));
     }
   }
 
   // ------------------------------------------------ Start over (a confirm dialog; the safe answer has focus)
   const clearedRef = useRef(false);
-  function startOver() {
-    clearedRef.current = true;
-    setResetOpen(false);
+  function clearFields() {
     writeDraft(null);
     setName(""); setTicker(""); setLore(""); setWebsite(""); setXUrl(""); setDevBuy("");
     setPreview(null); setImageUrl(null); setPreparedArt(null); setTickerNote("");
     setTouched({}); setShowErrors(false);
     reset("launch");
   }
+  function startOver() {
+    clearedRef.current = true;
+    setResetOpen(false);
+    clearFields();
+  }
+  // "Start another launch" after a finished mainnet launch: the finished coin's fields go, so nothing invites a
+  // second coin with the same name and ticker (no confirm: the finished launch is saved on chain).
+  const startAnotherLive = useCallback(() => {
+    clearFields();
+    requestAnimationFrame(() => nameRef.current?.focus());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // After Clear draft, Name takes focus once the dialog has handed focus back (Start over itself has left the page).
   useEffect(() => {
     if (resetOpen || !clearedRef.current) return;
@@ -596,7 +643,7 @@ function Launch() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name, ticker, lore, website, xUrl, devBuy, imageUrl, quoteKey, designKey]);
 
-  // The live preview's data: the stage on tablet and desktop, the compact row on phones.
+  // The live preview's data: the stage on tablet and desktop, beside Name and Ticker on phones.
   const previewCard: CardData = {
     name: name.trim() || "Your coin",
     ticker: ticker || "TICKER",
@@ -630,8 +677,14 @@ function Launch() {
     changePair(boundQuoteForDesign(key)?.key ?? quoteKey, key);
   };
 
-  // Recovery-only mainnet mode: the fields wait for a saved launch to fill them, and stay locked once it does.
-  const locked = live && (liveLocked || recoveryOnly);
+  // Recovery-only mainnet mode: the fields wait for a saved launch to fill them, and stay locked once it does. They
+  // also hold still while a mainnet step runs, since the press already captured them.
+  const locked = live && (liveLocked || recoveryOnly || liveBusy);
+  // Mainnet art lives in memory: with none prepared (a finished launch cleared, a saved one discarded), no old image
+  // stays in the field or on the card while the field is open.
+  useEffect(() => {
+    if (live && !liveLocked && !preparedArt && preview) setPreview(null);
+  }, [live, liveLocked, preparedArt, preview]);
   const buyOff = locked || buyBlocked;
   const quickAmounts = quickBuyAmounts(quoteKey, live ? undefined : maxDev);
 
@@ -746,13 +799,15 @@ function Launch() {
       <p className="sr-only" aria-live="polite">{draftLine ? "Draft saved in this browser." : ""}</p>
 
       <form id={formId} onSubmit={submit} onKeyDown={onFormKeyDown} noValidate aria-label="New coin" className="cdx-launch-grid">
-        {/* Phones and landscape phones: the live card as one row (tap: 3D); tablets and desktop show the stage. */}
-        <LaunchCardRow card={previewCard} />
-
         {/* ------------------------------------------------ the fields: required first, then everything optional */}
         <div className="cdx-launch-fields mdx-plinth">
           {recoveryOnly && !liveLocked ? <p className="cdx-launch-fields__note">These fields fill in from your saved launch.</p> : null}
           <div className="cdx-launch-required">
+            {/* Phones: the live card, turnable, beside Name and Ticker (its controls come first in Tab order, as it
+                reads first). The slot keeps its size before hydration places the card. */}
+            <div className="cdx-launch-f cdx-launch-f--card">
+              {phoneCard ? <section aria-label="Your card preview" className="cdx-create-preview"><LaunchCardPreview card={previewCard} /></section> : null}
+            </div>
             <Field label="Name" htmlFor="name" error={nameMsg} help={<span className="sr-only">2 to 24 characters.</span>} right={<span className="num" aria-hidden>{name.length}/24</span>} className="cdx-launch-f cdx-launch-f--name">
               <Input
                 disabled={locked}
@@ -842,7 +897,7 @@ function Launch() {
               </div>
 
               <div className="cdx-launch-f cdx-launch-f--pair">
-                <QuoteAssetPicker variant="inline" value={quoteKey} designKey={designKey} ticker={ticker || "YOUR COIN"} onChange={changePair} onPendingChange={setPairPending} confirmationRef={pairConfirmationRef} live={live} disabled={locked} balance={!live && me ? formatQuoteAmount(quoteBalance, quoteKey) : undefined} />
+                <QuoteAssetPicker variant="inline" value={quoteKey} designKey={designKey} ticker={ticker || "TICKER"} onChange={changePair} onPendingChange={setPairPending} confirmationRef={pairConfirmationRef} live={live} disabled={locked} balance={!live && me ? formatQuoteAmount(quoteBalance, quoteKey) : undefined} />
                 {pairNotice && !pairPending ? <p className="cdx-pair-notice" role="status">{pairNotice}</p> : null}
               </div>
 
@@ -868,7 +923,7 @@ function Launch() {
                   />
                 </Field>
                 <div className="cdx-launch-quick" role="group" aria-label="Quick amounts">
-                  <Button variant="chip" size="sm" aria-pressed={sameAmount(devBuy, "")} aria-label="No initial buy" disabled={buyOff} onClick={() => setDevBuy("")}>None</Button>
+                  <Button variant="chip" size="sm" aria-pressed={sameAmount(devBuy, "")} aria-label="None, no initial buy" disabled={buyOff} onClick={() => setDevBuy("")}>None</Button>
                   {quickAmounts.map((amount) => (
                     <Button key={amount} variant="chip" size="sm" className="num" aria-pressed={sameAmount(devBuy, amount)} aria-label={`${amount} ${quoteAsset.symbol}`} disabled={buyOff} onClick={() => setDevBuy(amount)}>{amount}</Button>
                   ))}
@@ -895,7 +950,8 @@ function Launch() {
                   </p>
                 </div>
                 {/* Mainnet, with a buy: its slippage, under the buy so the quick amounts above never move. */}
-                {liveBuyText ? (
+                {/* A saved launch keeps the slippage it was prepared with, which the page does not hold: hidden there. */}
+                {liveBuyText && !liveLocked ? (
                   <label className="cdx-live-slippage cdx-launch-slippage">
                     <span>Slippage</span>
                     <select className="mdx-select mdx-select--field" value={slippageBps} disabled={locked} onChange={(e) => setSlippageBps(Number(e.target.value))}>
@@ -949,14 +1005,16 @@ function Launch() {
 
         {/* ------------------------------------------------ the card, then the ticket (two sticky columns from 1024px) */}
         <div className="cdx-launch-side">
-          <section id={`${viewId}-card`} aria-label="Your card preview" className="cdx-create-preview">
-            <LaunchCardPreview card={previewCard} />
-            <p className="cdx-create-preview__note">Live preview. It changes as you edit.</p>
-          </section>
+          {!phoneCard ? (
+            <section id={`${viewId}-card`} aria-label="Your card preview" className="cdx-create-preview">
+              <LaunchCardPreview card={previewCard} />
+              <p className="cdx-create-preview__note">Live preview. It changes as you edit.</p>
+            </section>
+          ) : null}
 
           <aside className="cdx-launch-ticket" aria-label="Cost and launch" data-live={live || undefined}>
             <div className="cdx-launch-ticket__panel mdx-plinth">
-              {live ? <Suspense fallback={<div className="mdx-skeleton cdx-launch-live-skeleton" aria-hidden />}><LiveLaunchPanel ref={liveRef} launchesOpen={liveOpen} notice={buyDropped ? BUY_DOES_NOT_FIT : null} card={previewCard} draft={liveDraft} draftKey={draftKey} initialBuy={liveBuyText} slippageBps={slippageBps} ready={readyList} pairPending={pairPending} onLockedChange={setLiveLocked} onIntentLoaded={restoreLiveIntent} onPrimary={setLivePrimary} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /></Suspense> : demoTicket}
+              {live ? <Suspense fallback={<div className="mdx-skeleton cdx-launch-live-skeleton" aria-hidden />}><LiveLaunchPanel ref={liveRef} launchesOpen={liveOpen} notice={buyDropped ? BUY_DOES_NOT_FIT : null} card={previewCard} draft={liveDraft} draftKey={draftKey} initialBuy={liveBuyText} slippageBps={slippageBps} ready={readyList} pairPending={pairPending} onLockedChange={setLiveLocked} onBusyChange={setLiveBusy} onTermsNeeded={setTermsNeeded} onIntentLoaded={restoreLiveIntent} onStartAnother={startAnotherLive} onPrimary={setLivePrimary} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /></Suspense> : demoTicket}
             </div>
           </aside>
         </div>
@@ -968,7 +1026,13 @@ function Launch() {
 
       {/* Below 1024px the primary stays on screen above the tab bar; from 1024px it sits in the ticket. */}
       <ActionBar phoneOnly label="Launch" className={live ? "cdx-launch-bar cdx-launch-bar--live" : "cdx-launch-bar"}>
-        {live ? liveBarButton : (
+        {live ? (
+          <>
+            {/* What the launch waits on, or why it stopped, beside the button (the ticket's alert announces it). */}
+            {livePrimary?.status ? <p className="cdx-launch-bar__status" data-alert={livePrimary.status.alert || undefined}>{livePrimary.status.alert ? <Icon name="warning" size={14} /> : null}<span>{livePrimary.status.text}</span></p> : null}
+            {liveBarButton}
+          </>
+        ) : (
           <>
             <p className="cdx-launch-bar__total"><span>Total</span><span>{totalValue}</span></p>
             {demoButton(true)}

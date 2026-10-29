@@ -136,8 +136,12 @@ const CAPTION_HALF_MS = 130;
 const CAPTION_FALLBACK_MS = 1800;
 /** The visitor's Pause on the featured cards, kept for later visits (MOT-7). */
 const PAUSE_KEY = "mdx-featured-paused";
-const TRENDING_ROWS = 5;
-const ACTIVITY_ROWS = 6;
+/**
+ * Rows rendered in Trending and Recent activity. home.css shows 5 and 6 of them up to 999px tall, more on taller
+ * desktop screens (density D5), so a tall screen gets more data instead of empty ground; See all opens the rest.
+ */
+const TRENDING_ROWS = 10;
+const ACTIVITY_ROWS = 10;
 /**
  * At most ten featured coins, rarest first: one line of picks on every desktop stage (10 x 40 + Pause fits the 1024
  * stage), so the card never shrinks for them. The rest stay one click away on Discover.
@@ -378,13 +382,13 @@ function CollectionKpis({ stats, place }: { stats: HomeData["stats"]; place: "he
     />
   );
   if (place === "head") {
+    // The figures alone, each as wide as its words, then the Simulated tag after the last one (as Discover's and
+    // Portfolio's meta lines end on it): no "Collection" row head that would read as a fourth KPI.
     return (
       <section aria-labelledby={headId} className="cdx-home-collection" data-place="head">
-        <p className="cdx-home-collection__label">
-          <span id={headId}>Collection</span>
-          <SimTag />
-        </p>
+        <span id={headId} className="sr-only">Collection</span>
         {strip}
+        <SimTag className="cdx-home-collection__sim" />
       </section>
     );
   }

@@ -7,7 +7,7 @@ import { Link } from "@tanstack/react-router";
 
 import { MintCard, type CardData } from "../mintdex/MintCard";
 import { View3DHost, type View3DItem } from "../mintdex/card3d";
-import { ButtonLink, Change, CurveTrack, Icon } from "../mintdex/ui";
+import { ButtonLink, Change, CurveTrack } from "../mintdex/ui";
 import { getCardDesign, type CardDesign } from "../../lib/carddex/designs";
 import { marketCapText } from "../../lib/carddex/quote-display";
 import type { CoinSummary } from "../../lib/mintdex/types";
@@ -104,8 +104,9 @@ const COLLECTION: Record<CardDesign["category"], string> = {
  * A Designs library tile: a button that previews the design (aria-pressed when it is the selected one), and its own
  * "Use" link that goes straight to /launch with this design and the pair the tile shows (one click, density R5). The
  * card is a flat print of the sample coin in this design; the caption names it, then its collection and the pair it
- * launches with ("Classic · SOL pair"). Selected: an inset ink ring and a check on the print's corner, never a gold
- * fill; the ring is an outline, so selecting never changes the tile's size.
+ * launches with ("Classic · SOL pair"). Selected: the nested fill and a 2px inset ink ring (the shared "selected" mark;
+ * no check over the print's name banner), never a gold fill; the ring is an outline, so selecting never changes the
+ * tile's size.
  */
 export function DesignTile({
   design,
@@ -151,11 +152,6 @@ export function DesignTile({
       >
         Use<span className="sr-only"> {design.name}</span>
       </ButtonLink>
-      {pressed ? (
-        <span className="cdx-design-tile__check" aria-hidden>
-          <Icon name="check" size={12} strokeWidth={2} />
-        </span>
-      ) : null}
     </div>
   );
 }

@@ -162,18 +162,14 @@
   margin-left: 2px;
 }
 
+/* 8px apart at every width, so each 36px tool keeps its whole 44px hit area (a 4px gap let neighbours overlap). */
 .cdx-topbar__tools {
   display: flex;
   min-width: 0;
   flex: 1 1 auto;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
-}
-@media (min-width: 1024px) {
-  .cdx-topbar__tools {
-    gap: 8px;
-  }
+  gap: 8px;
 }
 
 /* Search: a 36px pill field from 1024px (the combobox), an icon below that (one tap opens Discover's field). */
@@ -262,23 +258,23 @@
   min-width: 260px;
 }
 
-/* Calm motion in the bar from 1024px; the words show from 1280px (the switch keeps its name below that). */
+/* 1024 to 1179px (density D7, V7): the search collapses to its icon (one click opens Discover's field, and "/" presses
+ * it), so the nav keeps its room and Calm motion keeps its words. */
+@media (min-width: 1024px) and (max-width: 1179.98px) {
+  .cdx-topbar__search {
+    display: none;
+  }
+  .cdx-topbar__searchbtn {
+    display: inline-flex;
+  }
+}
+/* Calm motion in the bar from 1024px, always with its words (a bare switch said nothing to sighted users). */
 .cdx-topbar__calm {
   display: none;
 }
 @media (min-width: 1024px) {
   .cdx-topbar__calm {
     display: flex;
-  }
-}
-@media (max-width: 1279.98px) {
-  .cdx-topbar__calm .mdx-calm__label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
   }
 }
 
@@ -464,6 +460,26 @@
     height: 44px;
     flex-direction: row;
     gap: 6px;
+  }
+}
+/* Phones held sideways, 740px and wider (density D2): the five links sit in the 48px top bar (the mark without its
+ * name makes room) and the tab bar goes, so the fixed chrome is 48px plus a page's action bar, not 93px. The same
+ * query sets --tabbar-h to 0 (carddex-theme.css). */
+@media (min-width: 740px) and (max-width: 1023.98px) and (max-height: 500px) {
+  .cdx-tabbar {
+    display: none;
+  }
+  .cdx-topnav {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0;
+  }
+  .cdx-topnav__link {
+    padding: 0 8px;
+  }
+  .cdx-brand__name {
+    display: none;
   }
 }
 

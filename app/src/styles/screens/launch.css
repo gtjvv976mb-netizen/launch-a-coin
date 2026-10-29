@@ -8,8 +8,8 @@
  *   desktop (>=1024): form | card | ticket, three tracks across the column; the card and the demo ticket stick while
  *     the form scrolls (each is shorter than the screen; the taller live ticket scrolls with the page).
  *   tablet (768-1023, taller than 500): form | a side column (the card, then the cost summary).
- *   phones and landscape phones: the card as one compact row above the form (tap: 3D), the form, the cost summary,
- *     and the page's action bar (total + the primary) above the tab bar.
+ *   phones and landscape phones: the live card (turnable, with its controls) beside Name and Ticker in the fields
+ *     panel, the rest of the form, the cost summary, and the page's action bar (total + the primary).
  * Elevation by lightness alone: the fields panel and the ticket are the surfaces; the card stands on the ground.
  * No gold here: the card is the only colour. */
 
@@ -45,19 +45,18 @@
   transition: color var(--t-hover) ease, background-color var(--t-hover) ease;
 }
 .cdx-launch-mode a::before { content: ""; position: absolute; inset: -4px 0; }
-.cdx-launch-mode a[aria-current] { background: var(--color-nested); color: var(--color-ink); font-weight: 600; }
-.cdx-launch-mode a:focus-visible { outline-offset: -2px; }
+.cdx-launch-mode a[aria-current] { background: var(--color-raised); outline: 1px solid var(--color-control-border); outline-offset: -1px; color: var(--color-ink); font-weight: 600; }
+.cdx-launch-mode a:focus-visible { outline: 2px solid var(--color-zap); outline-offset: -2px; }
 @media (hover: hover) and (pointer: fine) { .cdx-launch-mode a:not([aria-current]):hover { color: var(--color-ink); } }
 
 /* ------------------------------------------------ the grid: one DOM, three arrangements */
-/* Phones and landscape phones: one column (the preview row, the fields, the cost summary); the stage stays mounted
- * but hidden. */
+/* Phones and landscape phones: one column (the fields with the card in them, the cost summary); the side column's
+ * stage is not rendered there (launch.tsx usePhoneCard). */
 .cdx-launch-grid { display: flex; min-width: 0; flex-direction: column; gap: var(--gap-section); }
 .cdx-launch-side { display: block; min-width: 0; }
 .cdx-launch .cdx-create-preview { display: none; }
 @media (min-width: 768px) and (max-width: 1023.98px) and (min-height: 500.02px) {
   .cdx-launch-grid { display: grid; grid-template-columns: minmax(0, 1fr) 264px; align-items: start; }
-  .cdx-launch .cdx-launch-row { display: none; }
   .cdx-launch-side { display: flex; flex-direction: column; gap: var(--gap-section); }
   .cdx-launch .cdx-create-preview { display: flex; }
 }
@@ -71,7 +70,6 @@
     grid-template-columns: minmax(0, 1fr) var(--launch-card-col) var(--launch-ticket-col);
     align-items: start;
   }
-  .cdx-launch .cdx-launch-row { display: none; }
   /* The card and the ticket become the grid's second and third tracks. */
   .cdx-launch-side { display: contents; }
   .cdx-launch .cdx-create-preview { display: flex; }
@@ -171,6 +169,40 @@
   .cdx-launch-art__frame { width: 96px; height: 96px; }
 }
 
+/* The live card's phone place (density V1, R8): the turnable card and its controls in the first column, Name and
+ * Ticker beside it, the artwork under both (beside them when the panel is wide, as a phone held sideways). The same
+ * query as launch.tsx PHONE_CARD_MQ; elsewhere the slot is not shown and the card has its own track. */
+.cdx-launch-f--card { display: none; }
+@media (max-width: 767.98px), (max-width: 1023.98px) and (max-height: 500px) {
+  .cdx-launch { --launch-phone-card: clamp(140px, 44%, 172px); }
+  .cdx-launch-required {
+    grid-template-columns: var(--launch-phone-card) minmax(0, 1fr);
+    grid-template-areas: "card name" "card ticker" "card ." "art art";
+    /* The card is taller than Name and Ticker: the spare height goes to the empty third row, not between them. */
+    grid-template-rows: auto auto 1fr;
+  }
+  .cdx-launch-required > .cdx-launch-f--card { display: block; grid-area: card; min-width: 0; }
+  .cdx-launch-required > .cdx-launch-f--name { grid-area: name; }
+  .cdx-launch-required > .cdx-launch-f--ticker { grid-area: ticker; }
+  .cdx-launch-required > .cdx-launch-f--art { grid-area: art; }
+  /* Before hydration places the card, the empty slot holds its size: the card (63:88) and the controls row. */
+  .cdx-launch-f--card:empty::before { content: ""; display: block; aspect-ratio: 63 / 88; margin-bottom: 56px; }
+  .cdx-launch .cdx-launch-f--card .cdx-create-preview { --cw: 100cqw; display: flex; gap: 0; padding-top: 0; }
+  /* Three 44px controls in the 140px column: 4px apart, so they keep one row. */
+  .cdx-launch-f--card .cdx-card-controls { gap: 4px; }
+}
+@media (max-width: 1023.98px) and (max-height: 500px) {
+  .cdx-launch { --launch-phone-card: 140px; }
+}
+@container launch-fields (min-width: 600px) {
+  @media (max-width: 767.98px), (max-width: 1023.98px) and (max-height: 500px) {
+    .cdx-launch-required {
+      grid-template-columns: var(--launch-phone-card) minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas: "card name art" "card ticker art" "card . art";
+    }
+  }
+}
+
 /* The description grows with its text (three lines to start); it never scrolls on its own. Browsers without
  * field-sizing are sized by launch.tsx. */
 .cdx-launch .cdx-launch-description { min-block-size: 84px; resize: none; overflow: hidden; field-sizing: content; }
@@ -178,7 +210,9 @@
 /* The initial buy: the amount, then one row of quick amounts (None, 0.1, 0.5, 1, 5), then its note. */
 .cdx-launch-quick { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: 8px; margin-top: 8px; }
 .cdx-launch-quick .mdx-btn { padding-inline: 0; }
-.cdx-launch-quick .mdx-btn[aria-pressed="true"] { background: var(--color-ink); color: var(--color-on-cta); }
+/* Selected: the shared "selected" mark (raised fill, an ink ring), never the primary's cream (one primary a screen). */
+.cdx-launch-quick .mdx-btn[aria-pressed="true"] { background: var(--color-raised); color: var(--color-ink); outline: 2px solid var(--color-ink); outline-offset: -2px; }
+.cdx-launch-quick .mdx-btn[aria-pressed="true"]:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; }
 .cdx-launch-note { display: grid; gap: 4px; margin-top: 8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
 .cdx-launch-note__error { color: var(--color-down); font-size: var(--text-body); line-height: 20px; }
 .cdx-launch-slippage { margin-top: 8px; font-size: var(--text-body); line-height: 20px; }
@@ -186,33 +220,9 @@
 .cdx-launch-cost > div[data-total]:has(> .cdx-live-later) > dt { flex: none; }
 
 /* Focus moved to a field that needs something lands clear of the screen's edges (main's scroll-padding adds the
- * action bar on phones, carddex-viewport.css). */
-.cdx-launch :is(input, textarea, select, button, [tabindex="-1"]) { scroll-margin-block: 16px; }
-
-/* ------------------------------------------------ the preview row (phones and landscape phones) */
-.cdx-launch-row {
-  position: relative;
-  display: flex;
-  width: 100%;
-  min-height: 72px;
-  align-items: center;
-  gap: 12px;
-  padding: 8px var(--pad-panel);
-  border-radius: var(--radius-panel);
-  background: var(--color-surface);
-  color: var(--color-ink);
-  text-align: left;
-  transition: background-color var(--t-hover) ease, transform var(--t-press) var(--ease-out);
-}
-.cdx-launch-row__face { display: block; width: 44px; flex: none; }
-.cdx-launch-row__face > .mdx-card { width: 100%; }
-.cdx-launch-row__text { display: grid; min-width: 0; flex: 1; gap: 2px; }
-.cdx-launch-row__text > strong { overflow: hidden; font-size: var(--text-body); line-height: 20px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
-.cdx-launch-row__ticker { font-weight: 500; color: var(--color-slate); }
-.cdx-launch-row__text > span { overflow: hidden; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); text-overflow: ellipsis; white-space: nowrap; }
-.cdx-launch-row__go { display: inline-flex; flex: none; align-items: center; gap: 4px; height: 32px; padding: 0 12px; border-radius: var(--radius-pill); background: var(--color-nested); font-size: var(--text-caption); font-weight: 600; }
-.cdx-launch-row:active { transform: scale(0.98); }
-.cdx-launch-row:focus-visible { outline-offset: 2px; }
+ * action bar on phones, carddex-viewport.css). A field also keeps its label row (and counter) above it in view. */
+.cdx-launch :is(button, [tabindex="-1"]) { scroll-margin-block: 16px; }
+.cdx-launch :is(input, textarea, select) { scroll-margin-block: 48px 16px; }
 
 /* ------------------------------------------------ the card's stage: the card, its controls and one caption */
 .cdx-create-preview {
@@ -268,12 +278,15 @@
 .cdx-launch-fee-note { font-size: var(--text-caption); line-height: 16px; color: var(--color-ink); text-wrap: pretty; }
 .cdx-launch-live-skeleton { height: 420px; border-radius: var(--radius-row); }
 
-/* Required to launch: three words on one row, each with its mark (a check, an empty ring, or after a press a warning:
- * icon and colour together, never colour alone). */
+/* Required to launch: three words on one row, each with its mark (a check, a short dash, or after a press a warning:
+ * icon and colour together, never colour alone). The to-do mark is a status, not a control: a dash, never a ring a
+ * radio button would have. */
 .cdx-launch-ready { display: grid; gap: 4px; }
 .cdx-launch-ready > ul { display: flex; flex-wrap: wrap; gap: 4px 16px; }
 .cdx-launch-ready li { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
-.cdx-launch-ready__mark { display: grid; width: 16px; height: 16px; flex: none; place-items: center; border: 1.5px solid var(--color-control-border); border-radius: var(--radius-pill); }
+.cdx-launch-ready__mark { display: grid; width: 16px; height: 16px; flex: none; place-items: center; border: 1.5px solid var(--color-hairline); border-radius: var(--radius-pill); }
+.cdx-launch-ready li[data-state="todo"] .cdx-launch-ready__mark { border-color: transparent; }
+.cdx-launch-ready li[data-state="todo"] .cdx-launch-ready__mark::before { content: ""; width: 8px; height: 2px; border-radius: var(--radius-pill); background: var(--color-placeholder); }
 .cdx-launch-ready li[data-state="done"] { color: var(--color-ink); }
 .cdx-launch-ready li[data-state="done"] .cdx-launch-ready__mark { border-color: var(--color-up-soft); background: var(--color-up-soft); color: var(--color-up); }
 .cdx-launch-ready li[data-state="missing"] { color: var(--color-down-hover); }
@@ -297,17 +310,24 @@
 .cdx-launch-bar__total { display: grid; flex: none; gap: 0; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
 .cdx-launch-bar__total > span:last-child { color: var(--color-ink); font-size: var(--text-body); line-height: 20px; font-weight: 600; white-space: nowrap; }
 .cdx-launch-bar__total .cdx-launch-cost__plus { display: block; font-size: var(--text-caption); line-height: 16px; }
+.cdx-launch-bar--live { flex-wrap: wrap; row-gap: 6px; }
 .cdx-launch-bar--live > .mdx-btn { width: 100%; }
+/* The live bar's one status line over its button: the step it waits on, or why the launch stopped (two lines at most;
+ * the ticket below holds the whole message). */
+.cdx-launch-bar__status { display: flex; flex: 1 0 100%; min-width: 0; align-items: flex-start; gap: 6px; font-size: var(--text-caption); line-height: 16px; color: var(--color-ink); }
+.cdx-launch-bar__status > span { display: -webkit-box; min-width: 0; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; }
+.cdx-launch-bar__status[data-alert] { color: var(--color-down-hover); }
+.cdx-launch-bar__status > svg { flex: none; }
+/* The bar's button shrinks and wraps its words before it would push the page sideways (WCAG 1.4.12 text spacing). */
+.cdx-launch-bar .mdx-btn { min-width: 0; flex: 1 1 auto; white-space: normal; text-wrap: balance; }
 
 /* ------------------------------------------------ landscape phones: height is what is short */
 @media (max-width: 1023.98px) and (max-height: 500px) {
   .cdx-launch { gap: 12px; }
-  .cdx-launch-row { min-height: 52px; padding-block: 6px; }
-  .cdx-launch-row__face { width: 32px; }
-  .cdx-launch .cdx-launch-bar { min-height: 52px; padding-block: 4px; }
 }
-/* The shortest phones held sideways (568x320): the top bar steps aside so a field and the bar fit. */
-@media (min-width: 560px) and (max-width: 1023.98px) and (max-height: 360px) {
+/* The shortest phones held sideways (568x320): the top bar steps aside so a field and the bar fit. Not from 740px,
+ * where the top bar carries the navigation (shell.css) in place of the tab bar. */
+@media (min-width: 560px) and (max-width: 739.98px) and (max-height: 360px) {
   .cdx-viewport:has(.cdx-launch) .cdx-topbar { display: none; }
 }
 
@@ -627,9 +647,8 @@
 
 /* ------------------------------------------------ reduced motion and Calm: no scale on press, colour changes only */
 @media (prefers-reduced-motion: reduce) {
-  .cdx-launch-row:active,
   .cdx-design-picker__swatch:active:not(:disabled) { transform: none; }
   .cdx-pair-matching__toggle > svg,
   .cdx-pair-disclosure > summary > svg { transition: none; }
 }
-:root[data-motion="calm"] :is(.cdx-launch-row, .cdx-design-picker__swatch):active { transform: none; }
+:root[data-motion="calm"] .cdx-design-picker__swatch:active { transform: none; }

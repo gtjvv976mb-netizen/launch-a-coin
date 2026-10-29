@@ -103,7 +103,7 @@
 .cdx-coin-screen__market .mdx-kpi:not([data-lead]) .mdx-kpi__value > .num { font-size: var(--text-lead); line-height: 24px; }
 .cdx-coin-screen__market .mdx-kpi[data-lead] .mdx-kpi__change { flex-basis: 100%; }
 .cdx-coin-screen__market .mdx-kpi__sub:has(> .mdx-curve) { margin-top: 6px; }
-/* The cell's label and figure stand in for the track's own head (the progressbar keeps its words). */
+/* The cell's label and figure stand in for the track's own head (the meter keeps its words). */
 .cdx-coin-screen__market .mdx-curve__head { display: none; }
 .cdx-coin-screen__chg { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-caption); color: var(--color-slate); }
 .cdx-coin-screen__curvenote { font-size: var(--text-caption); color: var(--color-slate); }
@@ -214,8 +214,10 @@
 .cdx-chart__plot { position: relative; flex: 1; min-height: 160px; margin-top: 12px; }
 .cdx-coin-screen .cdx-chart__plot { flex: none; height: var(--chart-plot-h); min-height: 0; }
 .cdx-chart__svg { position: absolute; inset: 0; display: block; overflow: visible; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
-.cdx-chart__svg:focus:not(:focus-visible) { outline: none; }
-.cdx-chart__svg:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 4px; border-radius: var(--radius-chip); }
+/* The keyboard stepper (role=slider) lies over the plot without taking the pointer; its ring is the plot's. */
+.cdx-chart__stepper { position: absolute; inset: 0; pointer-events: none; }
+.cdx-chart__stepper:focus:not(:focus-visible) { outline: none; }
+.cdx-chart__stepper:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 4px; border-radius: var(--radius-chip); }
 .cdx-chart__grid { stroke: var(--color-hairline); stroke-width: 1; }
 .cdx-chart__base { stroke: var(--color-field); stroke-width: 1; }
 .cdx-chart__label { fill: var(--color-placeholder); font-family: var(--font-sans); font-size: 12px; font-variant-numeric: tabular-nums; }
@@ -295,14 +297,18 @@
 .cdx-trades__more { display: flex; min-height: var(--hit); align-items: center; padding-top: 8px; margin-left: -12px; }
 .cdx-trades__foot,
 .cdx-trades__empty { padding-top: 12px; font-size: var(--text-body); color: var(--color-slate); }
-@media (max-width: 767.98px) {
+/* The trader's handle tells one row from the next, so it gets the room: the narrow figure columns hold until the
+ * table is wide (from 1280px), and the market cap gives way on the smallest phones. */
+@media (max-width: 1279.98px) {
   .cdx-trades__table th:nth-child(1) { width: 36px; }
   .cdx-trades__table th:nth-child(3) { width: 64px; }
   .cdx-trades__table th:nth-child(4) { width: 72px; }
 }
-@media (max-width: 359.98px) {
+@media (max-width: 379.98px) {
   .cdx-trades__mcap { display: none; }
 }
+/* A demo bot: one quiet word after the handle (as Home's feed), never a chip. */
+.cdx-handle__bot { flex: none; font-size: var(--text-caption); color: var(--color-slate); white-space: pre; }
 
 /* ---- trade ticket. Below 1024 its submit is the action bar's (TradeActionBar), so the ticket's own is hidden. */
 .cdx-trade-ticket { display: flex; flex-direction: column; gap: 12px; }

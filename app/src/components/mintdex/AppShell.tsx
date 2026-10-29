@@ -506,13 +506,16 @@ export function StartOverDialog({
 const loadWalletMenu = () => import("./wallet-menu");
 const WalletMenu = lazy(loadWalletMenu);
 
+/** The pill shows "99.88 SOL": its name keeps those words together (WCAG 2.5.3) and says the kind after them. */
+const BALANCE_NOTE = MODE_COPY.walletUnit === "SOL" ? "" : `, ${MODE_COPY.walletUnit.replace(/ SOL$/, "")} balance`;
+
 /** The signed-in wallet's face in the top bar: avatar and balance in one 36px pill. The Radix menu around it
  * (wallet-menu.tsx) is a lazy chunk. */
 export function WalletButton({ me, ...rest }: { me: NonNullable<Me> } & ComponentProps<"button">) {
   return (
     <button
       type="button"
-      aria-label={`Wallet, @${me.handle}, ${sol(me.balance, 2)} ${MODE_COPY.walletUnit}`}
+      aria-label={`Wallet, @${me.handle}, ${sol(me.balance, 2)} SOL${BALANCE_NOTE}`}
       // Where focus lands when "Try the demo" leaves with the sign-in it opened (focus.ts focusNear).
       data-focus-home=""
       {...rest}
@@ -736,7 +739,7 @@ function TopBar({
                 type="button"
                 onClick={() => setMenu(true)}
                 aria-haspopup="dialog"
-                aria-label={`Menu, @${me.handle}, ${sol(me.balance, 2)} ${MODE_COPY.walletUnit}${unread ? `, ${unread} new` : ""}`}
+                aria-label={`Menu, @${me.handle}, ${sol(me.balance, 2)} SOL${BALANCE_NOTE}${unread ? `, ${unread} new` : ""}`}
                 data-focus-home=""
                 className="cdx-wallet cdx-only-phone"
               >
@@ -1001,7 +1004,15 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
       // The bar's field, or the page's own (Discover hides the bar's).
       const page = document.getElementById("token-search");
       const el = searchRef.current?.offsetParent ? searchRef.current : page instanceof HTMLInputElement ? page : null;
-      if (!el || el.offsetParent === null) return;
+      if (!el || el.offsetParent === null) {
+        // No field on screen (the bar's search is an icon at this width): press the icon, which opens Discover's.
+        const icon = document.querySelector<HTMLElement>(".cdx-topbar__searchbtn");
+        if (icon?.offsetParent) {
+          e.preventDefault();
+          icon.click();
+        }
+        return;
+      }
       e.preventDefault();
       el.focus();
     };

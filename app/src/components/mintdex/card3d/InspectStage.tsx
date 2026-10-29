@@ -43,7 +43,7 @@ export default function InspectStage({
           // CardCase hands focus back to the opener (Inspect opens without a Radix Trigger).
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
-          <Dialog.Title className="sr-only">Inspect the {card.name} card</Dialog.Title>
+          <Dialog.Title className="sr-only">{card.name} card in 3D</Dialog.Title>
           <Dialog.Close ref={close} className="mdx-inspect__btn mdx-inspect__close">
             <Icon name="close" strokeWidth={2} />
             Close

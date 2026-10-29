@@ -84,8 +84,11 @@
   font-weight: 600;
   text-wrap: balance;
 }
-/* Flush with the padding: the ring sits 16/16 from a dialog's corner and 12px from a sheet's edge. */
+/* Flush with the padding: the ring sits 16/16 from a dialog's corner and 12px from a sheet's edge. It paints above
+ * the body's sticky rows (the design browser's filters), so its 44px hit area is whole. */
 .cdx-overlay__close {
+  position: relative;
+  z-index: 2;
   margin-right: 0;
 }
 .cdx-overlay__body {
@@ -119,10 +122,15 @@
 .cdx-overlay--sheet .cdx-overlay__body .mdx-sheet-foot {
   box-shadow: 0 var(--sheet-pad-b) 0 var(--color-surface); /* taste-skill-ignore: the same flat band */
 }
-/* The Launch design browser fills a fixed frame (its grid is sized by the frame): keep the frame on phones too
- * (launch.css holds the desktop height). */
+/* The Launch design browser (density D4): on desktop the dialog takes the page column's width (more tracks, a
+ * shorter scroll); on phones the sheet opens at full height, its top just under the top bar. */
+.cdx-overlay--dialog:has(.cdx-design-browser) {
+  width: min(calc(100vw - 64px), var(--column));
+}
 .cdx-overlay--sheet:has(.cdx-design-browser) {
-  height: min(600px, calc(var(--cdx-app-height, 100dvh) - 12px));
+  height: calc(var(--cdx-app-height, 100dvh) - var(--topbar-h));
+  max-height: none;
+  max-width: none;
 }
 
 /* ---------------------------------------------------------------- dialog content

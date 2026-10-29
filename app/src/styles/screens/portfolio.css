@@ -174,12 +174,25 @@
     grid-template-areas: "coins cards balances";
   }
 }
-/* A new account (no coins, no cards) from 1024: the two one-line empty states stack beside the balances. */
+/* A new account (no coins, no cards; portfolio.tsx data-fresh), density D6: one line with both ways in across the
+ * column, then every balance under it at full width, in two halves side by side from 1024px. */
+.cdx-portfolio__grid[data-fresh] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "empty" "balances";
+}
+.cdx-portfolio__none { grid-area: empty; }
+.cdx-portfolio__none-actions { display: inline-flex; flex-wrap: wrap; gap: 8px; }
+.cdx-balances-split { display: grid; min-width: 0; gap: 0 32px; }
 @media (min-width: 1024px) {
-  .cdx-portfolio__grid:has(> [data-section="coins"][data-empty]):has(> [data-section="cards"][data-empty]) {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    /* The second row takes the balances' extra height, so the cards panel sits right under the coins panel. */
-    grid-template-rows: auto 1fr;
-    grid-template-areas: "coins balances" "cards balances";
-  }
+  .cdx-balances-split { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+}
+/* One list below 1024px: the first half, then Show all opens the second in place (its header stays for screen readers
+ * only). From 1024px both halves show and the toggle goes. */
+@media (max-width: 1023.98px) {
+  .cdx-balances-split:not([data-open]) > [data-part="second"] { display: none; }
+  .cdx-balances[data-part="second"] thead th { height: 0; overflow: hidden; border: 0; clip-path: inset(50%); white-space: nowrap; }
+  .cdx-balances-split[data-open] .cdx-balances[data-part="first"] tbody tr:last-child > * { border-bottom: 1px solid var(--color-rule); }
+}
+@media (min-width: 1024px) {
+  .cdx-balances-more { display: none; }
 }

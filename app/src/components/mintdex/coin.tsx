@@ -28,6 +28,7 @@ import {
 } from "../../lib/mintdex/api";
 import { FAUCET_AMOUNT, TOKEN_UNIT, TRADE_FEE_BPS } from "../../lib/mintdex/constants";
 import {
+  BOT_HINT,
   FLOW,
   IS_SIM,
   MODE_COPY,
@@ -205,12 +206,19 @@ export function PriceFigure({ value }: { value: number }) {
   );
 }
 
-/** A handle, then the "bot" tag for a demo bot and "you" for the viewer. Truncates the handle, never the tags. */
+/**
+ * A handle, then " · bot" in slate for a demo bot (the quiet word Home's feed uses, not a chip on every row) and
+ * "you" for the viewer. Truncates the handle, never the tags.
+ */
 function Handle({ handle, bot, you, className = "" }: { handle: string; bot?: boolean; you?: boolean; className?: string }) {
   return (
     <span className={cx("inline-flex min-w-0 max-w-full items-center gap-1.5", className)}>
       <span className="truncate">{atName(handle)}</span>
-      {bot ? <BotTag /> : null}
+      {bot ? (
+        <span className="cdx-handle__bot">
+          <span aria-hidden>· </span>bot<span className="sr-only">, {BOT_HINT.toLowerCase()}</span>
+        </span>
+      ) : null}
       {you ? <Badge>you</Badge> : null}
     </span>
   );
@@ -251,7 +259,7 @@ function marketItems(coin: CoinDetail): StatItem[] {
       ),
     },
     {
-      // The figure and its note are hidden from screen readers: the track's progressbar says the same words.
+      // The figure and its note are hidden from screen readers: the track's meter says the same words.
       label: "Bonding curve",
       value: coin.graduated ? (
         <span aria-hidden="true">Graduated</span>
@@ -856,8 +864,8 @@ export function McapChart({
     const rect = event.currentTarget.getBoundingClientRect();
     setActive(nearest(((event.clientX - rect.left) / rect.width) * W));
   }
-  function onKey(event: React.KeyboardEvent<SVGSVGElement>) {
-    if (!points.length || !["ArrowLeft", "ArrowRight", "Home", "End", "Escape"].includes(event.key)) return;
+  function onKey(event: React.KeyboardEvent<HTMLElement>) {
+    if (!points.length || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "Escape"].includes(event.key)) return;
     event.preventDefault();
     if (event.key === "Escape") {
       setActive(null);
@@ -867,15 +875,16 @@ export function McapChart({
       event.key === "Home" ? 0
       : event.key === "End" ? points.length - 1
       : at == null ? points.length - 1
-      : Math.max(0, Math.min(points.length - 1, at + (event.key === "ArrowLeft" ? -1 : 1)));
+      : Math.max(0, Math.min(points.length - 1, at + (event.key === "ArrowLeft" || event.key === "ArrowDown" ? -1 : 1)));
     setActive(next);
   }
 
+  // The stepper's value in words (a slider, so screen readers in browse mode hand it the arrow keys).
   const readout = selected
-    ? `${fullFigure(selected.v)} after a ${selected.side} on ${utcStamp(selected.t)}.`
-    : "";
+    ? `${fullFigure(selected.v)} after a ${selected.side} on ${utcStamp(selected.t)}`
+    : last ? `Latest ${fullFigure(last.v)}` : "";
   const summary = last
-    ? `Market cap after each trade ${def.key === "all" ? "since launch" : def.words.replace(/^in /, "over ")}: ${points.length} ${points.length === 1 ? "trade" : "trades"}, latest ${fullFigure(last.v)}. Left and right arrow keys step through the trades.`
+    ? `Market cap after each trade ${def.key === "all" ? "since launch" : def.words.replace(/^in /, "over ")}: ${points.length} ${points.length === 1 ? "trade" : "trades"}, latest ${fullFigure(last.v)}.`
     : "";
   const emptyText = samples.length
     ? `No trades ${def.words}. Choose a longer range.`
@@ -905,9 +914,6 @@ export function McapChart({
             onPointerMove={onMove}
             onPointerDown={onMove}
             onPointerLeave={(event) => { if (event.pointerType !== "touch") setActive(null); }}
-            onKeyDown={onKey}
-            onBlur={() => setActive(null)}
-            tabIndex={0}
             role="img"
             aria-label={`Market cap chart, latest ${fullFigure(last.v)}`}
           >
@@ -937,6 +943,22 @@ export function McapChart({
             {selected ? <circle cx={x(selected.t)} cy={y(selected.v)} r={4} className="cdx-chart__dot" /> : null}
           </svg>
         )}
+        {/* The keyboard way through the trades: one slider over the plot (role=img takes no keys in a screen
+            reader's browse mode, and VoiceOver's swipe up/down adjusts a slider). Pointer input stays on the svg. */}
+        {points.length ? (
+          <div
+            className="cdx-chart__stepper"
+            role="slider"
+            tabIndex={0}
+            aria-label="Step through trades"
+            aria-valuemin={1}
+            aria-valuemax={points.length}
+            aria-valuenow={(at ?? points.length - 1) + 1}
+            aria-valuetext={readout}
+            onKeyDown={onKey}
+            onBlur={() => setActive(null)}
+          />
+        ) : null}
         {selected ? (
           <div
             className="cdx-chart__tip"
@@ -953,7 +975,6 @@ export function McapChart({
         Each step is a trade · UTC{isTruncated ? ` · latest ${trades.length} trades` : ""}
         {native ? ` · in ${symbol}` : MODE_COPY.usdNote ? ` · ${MODE_COPY.usdNote}` : ""}
       </p>
-      <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">{readout}</span>
     </section>
   );
 }
@@ -1273,8 +1294,9 @@ export function useTradeTicket(page: CoinPage) {
 
   function blocked() {
     setAttempted(true);
-    // Move focus to the reason, so it is read and seen (P1-9 step 2).
-    requestAnimationFrame(() => msgRef.current?.focus());
+    // No amount yet: the amount field takes focus ("Enter an amount." shows above the button). Otherwise focus moves
+    // to the reason, so it is read and seen (P1-9 step 2).
+    requestAnimationFrame(() => (quote ? msgRef.current : inputRef.current)?.focus());
   }
 
   function submit(e: FormEvent) {
@@ -1330,10 +1352,12 @@ export function useTradeTicket(page: CoinPage) {
       ? `You pay ${input} ${asset.symbol}`
       : `You sell ${tokens(amount)} $${coin.ticker}`
     : null;
+  // The primary stays cream and enabled (Launch's rule): a press with no amount, or one that cannot fill, says why in
+  // the ticket's message slot instead of greying the screen's one action out.
   const submitProps = {
     type: "submit" as const,
     form: formId,
-    disabled: !!me && !ready,
+    disabled: false,
     pending: pending === "trade",
     pendingLabel: "Filling...",
     feedback: feedback("trade"),

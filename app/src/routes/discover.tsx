@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { num, oneOf, searchSchema, text } from "../lib/mintdex/search";
 import { CoinTile } from "../components/carddex/GalleryTile";
 import {
@@ -105,6 +105,17 @@ function Discover() {
       <span className="tabular-nums">{coins.length}</span> {coins.length === 1 ? "coin" : "coins"}
     </>
   );
+  // The count is announced once typing pauses (500ms), not on every keystroke: a quiet status of its own, with the
+  // visible words. Nothing is said on arrival.
+  const matchText = query.trim() ? `${coins.length} ${coins.length === 1 ? "coin matches" : "coins match"} “${query.trim()}”` : `${coins.length} ${coins.length === 1 ? "coin" : "coins"}`;
+  const [said, setSaid] = useState("");
+  const typed = useRef(false);
+  useEffect(() => {
+    if (!typed.current) { typed.current = true; return; }
+    const timer = setTimeout(() => setSaid(matchText), 500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
   const clearSearch = () => {
     // The field stays mounted; carry focus back to it so typing can start again.
     setQuery("");
@@ -119,7 +130,7 @@ function Discover() {
         context={
           <>
             <span className="cdx-discover__ctx">
-              <span aria-live="polite">
+              <span>
                 {count}
                 {query.trim()
                   ? ` ${coins.length === 1 ? "matches" : "match"} “${query.trim()}”`
@@ -128,6 +139,7 @@ function Discover() {
               · sorted by {sortLabel}
             </span>{" "}
             <SimTag className="cdx-discover__sim" />
+            <span className="sr-only" role="status">{said}</span>
           </>
         }
         toolbar={

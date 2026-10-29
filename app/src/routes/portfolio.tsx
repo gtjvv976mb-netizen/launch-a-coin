@@ -158,28 +158,69 @@ function Cards({ rows }: { rows: PortfolioData["deeds"] }) {
 }
 
 /** Test balances by quote asset: SOL first, then the quotes you hold or trade in, then the zeros. The first 10. */
-function Balances({ rows, byQuote }: { rows: Array<[string, number]>; byQuote: Record<string, string> }) {
+function BalanceRow({ entry: [key, value], byQuote, i, focus }: { entry: [string, number]; byQuote: Record<string, string>; i: number; focus?: boolean }) {
+  const asset = getPairAsset(key);
+  return (
+    <tr>
+      <th scope="row" data-item={i} tabIndex={focus ? -1 : undefined}>
+        <span className="cdx-balances__sym">{asset.symbol}</span><span className="cdx-balances__name">{asset.name}</span>
+      </th>
+      <td className="cdx-balances__n num">{quoteFixed(value, key)}</td>
+      <td className="cdx-balances__n num">{quoteFixed(byQuote[key] ?? 0, key)}</td>
+    </tr>
+  );
+}
+const BALANCE_HEAD = (
+  <thead>
+    <tr><th scope="col">Asset</th><th scope="col" className="cdx-balances__n">Balance</th><th scope="col" className="cdx-balances__n">In coins</th></tr>
+  </thead>
+);
+
+/**
+ * Every test balance. `whole` (a new account, nothing else to show): all of them in two halves, side by side from
+ * 1024px with no Show all. Below 1024px they are one list: the first half, then Show all opens the second in place
+ * (its header kept for screen readers only). Otherwise the first rows and Show all.
+ */
+function Balances({ rows, byQuote, whole = false }: { rows: Array<[string, number]>; byQuote: Record<string, string>; whole?: boolean }) {
   const all = useShowAll(rows.length, BALANCES_FIRST);
+  const [rest, setRest] = useState(false);
+  const restRef = useRef<HTMLDivElement>(null);
+  if (whole) {
+    const half = Math.ceil(rows.length / 2);
+    return (
+      <>
+        <div ref={restRef} className="cdx-balances-split" data-open={rest || undefined}>
+          {[rows.slice(0, half), rows.slice(half)].map((part, n) => part.length ? (
+            <table key={n} className="cdx-balances" data-part={n === 0 ? "first" : "second"}>
+              <caption className="sr-only">Test balances by quote asset, {n === 0 ? `1 to ${half}` : `${half + 1} to ${rows.length}`} of {rows.length}</caption>
+              {BALANCE_HEAD}
+              <tbody>{part.map((entry, i) => <BalanceRow key={entry[0]} entry={entry} byQuote={byQuote} i={i + n * half} focus={n === 1 && i === 0} />)}</tbody>
+            </table>
+          ) : null)}
+        </div>
+        <p className="cdx-portfolio__caption">A separate demo balance per quote asset.</p>
+        {rows.length > half ? (
+          <div className="cdx-portfolio__more cdx-balances-more">
+            <Button variant="ghost" size="sm" onClick={() => {
+              const open = !rest;
+              setRest(open);
+              // Opening moves focus to the first new row, as the other Show all toggles do.
+              if (open) requestAnimationFrame(() => restRef.current?.querySelector<HTMLElement>('[data-part="second"] tbody th')?.focus());
+            }}>
+              {rest ? "Show fewer" : `Show all ${rows.length} balances`}
+            </Button>
+          </div>
+        ) : null}
+      </>
+    );
+  }
   return (
     <>
       <table className="cdx-balances">
         <caption className="sr-only">Test balances by quote asset</caption>
-        <thead>
-          <tr><th scope="col">Asset</th><th scope="col" className="cdx-balances__n">Balance</th><th scope="col" className="cdx-balances__n">In coins</th></tr>
-        </thead>
+        {BALANCE_HEAD}
         <tbody ref={(el) => { all.listRef.current = el; }}>
-          {rows.slice(0, all.limit).map(([key, value], i) => {
-            const asset = getPairAsset(key);
-            return (
-              <tr key={key}>
-                <th scope="row" data-item={i} tabIndex={all.open && i === BALANCES_FIRST ? -1 : undefined}>
-                  <span className="cdx-balances__sym">{asset.symbol}</span><span className="cdx-balances__name">{asset.name}</span>
-                </th>
-                <td className="cdx-balances__n num">{quoteFixed(value, key)}</td>
-                <td className="cdx-balances__n num">{quoteFixed(byQuote[key] ?? 0, key)}</td>
-              </tr>
-            );
-          })}
+          {rows.slice(0, all.limit).map((entry, i) => <BalanceRow key={entry[0]} entry={entry} byQuote={byQuote} i={i} focus={all.open && i === BALANCES_FIRST} />)}
         </tbody>
       </table>
       <p className="cdx-portfolio__caption">A separate demo balance per quote asset.</p>
@@ -195,7 +236,7 @@ function balanceRows(me: NonNullable<Me>, byQuote: Record<string, string>): Arra
   return [...entries].sort((a, b) => rank(a) - rank(b) || getPairAsset(a[0]).symbol.localeCompare(getPairAsset(b[0]).symbol));
 }
 
-/** The signed-out first run: the page's frame (figures as dashes, the coins table's header) holding the invitation. */
+/** The signed-out first run: the page's frame (figures as dashes) holding the invitation. */
 function SignedOut() {
   const { openEnter } = useSessionUi();
   const dashes: StatItem[] = [
@@ -210,11 +251,6 @@ function SignedOut() {
       <KpiGroup items={dashes} lead strip className="cdx-portfolio__kpis cdx-portfolio__kpis--out" />
       <section className="cdx-portfolio__panel cdx-portfolio__invite" aria-labelledby="portfolio-coins-out">
         <SectionHead title={<span id="portfolio-coins-out">Coins</span>} />
-        <div className="cdx-holdings">
-          <div className="cdx-holdings__head" aria-hidden="true">
-            <span>Coin</span><span>Held</span><span>Value</span><span>24h</span>
-          </div>
-        </div>
         <EmptyState
           hero
           className="cdx-portfolio-empty"
@@ -295,6 +331,8 @@ function Collection({ me }: { me: NonNullable<Me> }) {
   ];
   const noCoins = !!data && !data.holdings.length;
   const noCards = !!data && !data.deeds.length;
+  // A new account (nothing held, no card): one line with both ways in, and every balance laid out under it.
+  const fresh = noCoins && noCards;
   return (
     <div className="mdx-frame cdx-portfolio">
       <PageHeader
@@ -310,7 +348,17 @@ function Collection({ me }: { me: NonNullable<Me> }) {
         }
       />
       <KpiGroup items={items} lead strip className="cdx-portfolio__kpis" />
-      <div className="cdx-portfolio__grid">
+      <div className="cdx-portfolio__grid" data-fresh={fresh || undefined}>
+        {fresh ? (
+          <section data-section="coins" className="cdx-portfolio__panel cdx-portfolio__none" aria-labelledby="portfolio-none">
+            <EmptyState
+              compact
+              title={<span id="portfolio-none">No coins or cards yet.</span>}
+              body="Buy a coin on its page, or launch your own to get its one-of-one card."
+              action={<span className="cdx-portfolio__none-actions"><ButtonLink to="/discover" variant="outline" size="sm">Discover coins</ButtonLink><ButtonLink to="/launch" variant="outline" size="sm">Launch a coin</ButtonLink></span>}
+            />
+          </section>
+        ) : <>
         <section data-section="coins" data-empty={noCoins || undefined} className="cdx-portfolio__panel cdx-portfolio__coins" aria-labelledby="portfolio-coins">
           <SectionHead title={<span id="portfolio-coins">Coins</span>} right={data ? <span className="num">{data.holdings.length} held</span> : undefined} />
           {failed ? (
@@ -335,12 +383,13 @@ function Collection({ me }: { me: NonNullable<Me> }) {
             <EmptyState compact title="No cards yet." body="Launch a coin to get its one-of-one card." action={<ButtonLink to="/launch" variant="outline" size="sm">Launch a coin</ButtonLink>} />
           )}
         </section>
+        </>}
         <section data-section="balances" className="cdx-portfolio__panel cdx-portfolio__balances" aria-labelledby="portfolio-balances">
           <SectionHead
             title={<span id="portfolio-balances">Test balances</span>}
             right={<span className="num text-slate">{balances.length} {balances.length === 1 ? "asset" : "assets"}</span>}
           />
-          <Balances rows={balances} byQuote={byQuote} />
+          <Balances rows={balances} byQuote={byQuote} whole={fresh} />
         </section>
       </div>
     </div>

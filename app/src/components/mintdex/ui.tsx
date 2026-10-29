@@ -1826,10 +1826,9 @@ export function Stats({
       data-strip={strip || undefined}
       style={{ "--kpi-cols": cols ?? items.length } as CSSProperties}
     >
-      {items.map((it, i) => (
-        <div key={it.label} className="mdx-kpi" data-lead={(lead && i === 0) || undefined}>
-          <dt className="mdx-kpi__label">{it.label}</dt>
-          <dd className="mdx-kpi__value">
+      {items.map((it, i) => {
+        const value = (
+          <>
             {it.value == null ? (
               <span className="mdx-dash" aria-label="Not available">
                 {"\u2014"}
@@ -1840,10 +1839,24 @@ export function Stats({
               </Num>
             )}
             {it.change != null ? <span className="mdx-kpi__change">{it.change}</span> : null}
-          </dd>
-          {it.sub != null ? <dd className="mdx-kpi__sub">{it.sub}</dd> : null}
-        </div>
-      ))}
+          </>
+        );
+        return (
+          <div key={it.label} className="mdx-kpi" data-lead={(lead && i === 0) || undefined}>
+            <dt className="mdx-kpi__label">{it.label}</dt>
+            {/* One definition per term: a sub line (the curve track) shares its figure's <dd>, so no definition
+                reads empty when the figure is hidden from screen readers. */}
+            {it.sub != null ? (
+              <dd>
+                <div className="mdx-kpi__value">{value}</div>
+                <div className="mdx-kpi__sub">{it.sub}</div>
+              </dd>
+            ) : (
+              <dd className="mdx-kpi__value">{value}</dd>
+            )}
+          </div>
+        );
+      })}
     </dl>
   );
 }
@@ -1852,8 +1865,10 @@ export const KpiGroup = Stats;
 /**
  * The signature element: the bonding-curve track. Every pump.fun coin is on a curve until it graduates; the gold
  * fill is the true ratio (no stub at zero), the label reads "Curve 64%" and, past graduation, "Graduated". It is a
- * progressbar with a text value, so a screen reader hears "Curve 64%, 36% left to graduation". Missing data is a
- * grey dash. `size="sm"` (tiles, rows) drops the trailing note; `note` overrides it ("Graduates at 85 SOL").
+ * meter (a measured level, not progress on a task) with a text value, so a screen reader hears "Curve 64%, 36% left
+ * to graduation". Missing data is a grey dash. `size="sm"` (tiles, rows) drops the trailing note and hides its visible
+ * label from screen readers (the meter's value says the same words, once, inside a link's name); `note` overrides the
+ * note ("Graduates at 85 SOL").
  */
 export function CurveTrack({
   progress,
@@ -1881,7 +1896,7 @@ export function CurveTrack({
       : `${label} ${pct}%, ${100 - pct}% left to graduation`;
   return (
     <div className={cx("mdx-curve", className)} data-size={size} data-done={done || undefined}>
-      <div className="mdx-curve__head">
+      <div className="mdx-curve__head" aria-hidden={size === "sm" || undefined}>
         <span className="mdx-curve__label">
           {label}{" "}
           {known ? <span className="num">{done ? "100%" : `${pct}%`}</span> : <span className="mdx-dash">{"\u2014"}</span>}
@@ -1892,7 +1907,7 @@ export function CurveTrack({
       </div>
       <div
         className="mdx-curve__track"
-        role="progressbar"
+        role="meter"
         aria-label={label}
         aria-valuemin={0}
         aria-valuemax={100}

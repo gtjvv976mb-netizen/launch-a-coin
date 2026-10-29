@@ -344,7 +344,8 @@ export async function getHome(): Promise<HomeData & Rev> {
   const [raw, h, b, p, v, events, players, rev] = await readBatch(
     allCoinsQuery(),
     ...aggQueries(Date.now() - DAY),
-    eventsQuery(8),
+    // Home renders up to 10 rows of each (taller screens show more of them, home.css).
+    eventsQuery(10),
     q<{ n: number }>("SELECT COUNT(*) AS n FROM users WHERE is_npc = 0"),
     revQuery(),
   );
@@ -355,7 +356,7 @@ export async function getHome(): Promise<HomeData & Rev> {
     const best = sortCoins(coins.filter((c) => c.cardTemplate === design.key), "mcap")[0];
     if (best) featured.push(best);
   }
-  const trending = sortCoins(coins).slice(0, 6);
+  const trending = sortCoins(coins).slice(0, 10);
   return {
     featured,
     trending,

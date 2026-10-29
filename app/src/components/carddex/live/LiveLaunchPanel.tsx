@@ -31,12 +31,13 @@ export type LiveLaunchDraft = {
   cardTemplate: string; quoteAssetKey: string; quoteMint: string;
   initialBuyQuoteBaseUnits: string; artwork: Blob;
 };
-export type LiveLaunchHandle = { submit(): void; startAnother(): void };
+export type LiveLaunchHandle = { submit(): void; startAnother(): void; /** The terms checkbox, while it shows. */ terms(): HTMLInputElement | null };
 /**
  * The ticket's one primary, as the page's phone action bar shows it: "submit" submits the form (the page checks the
  * fields, then calls submit() above, which picks the stage's action); "startAnother" clears a finished launch.
+ * `status` is what the launch waits on, or why it stopped, for one line beside the bar's button.
  */
-export type LivePrimary = { kind: "submit" | "startAnother"; label: string; pendingLabel?: string; pending: boolean; disabled: boolean; blockedByPair: boolean };
+export type LivePrimary = { kind: "submit" | "startAnother"; label: string; pendingLabel?: string; pending: boolean; disabled: boolean; blockedByPair: boolean; status?: { text: string; alert: boolean } | null };
 type Busy = "ownership" | "artwork" | "preparing" | "refreshing" | "wallet" | "submitting" | "confirming" | "recovering" | null;
 const BUSY_COPY: Record<NonNullable<Busy>, string> = {
   ownership: "Approve the ownership message in your wallet. This message spends no funds.",
@@ -66,7 +67,7 @@ function unwrap<T extends object>(result: LiveResult<T>): T {
 }
 const brief = (value: string) => `${value.slice(0, 5)}…${value.slice(-5)}`;
 
-export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOpen, notice, initialBuy = null, slippageBps = 100, ready, onInvalid, onLockedChange, onIntentLoaded, onPrimary, ref }: {
+export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOpen, notice, initialBuy = null, slippageBps = 100, ready, onInvalid, onLockedChange, onBusyChange, onTermsNeeded, onIntentLoaded, onStartAnother, onPrimary, ref }: {
   draft: LiveLaunchDraft | null; card: CardData; pairPending: boolean; launchesOpen: boolean; notice?: string | null; onInvalid(): void;
   /** Changes whenever a draft field does (the page's string of them): a connect that was waiting to launch stops. */
   draftKey: string;
@@ -77,7 +78,13 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
   /** The page's list of what a launch still needs (name, ticker, artwork), shown above the terms. */
   ready?: ReactNode;
   onLockedChange(locked: boolean): void;
+  /** True while a wallet or server step runs: the page holds its fields still (the press already captured them). */
+  onBusyChange?(busy: boolean): void;
+  /** True while the terms checkbox shows unchecked, so the page's Enter order stops on it before the primary. */
+  onTermsNeeded?(needed: boolean): void;
   onIntentLoaded(intent: LiveLaunchIntent | null): void;
+  /** After "Start another launch": the page clears the finished coin's fields. */
+  onStartAnother?(): void;
   /** The page's state setter for its phone action bar; called only when the primary changes. */
   onPrimary?: Dispatch<SetStateAction<LivePrimary | null>>;
   ref?: Ref<LiveLaunchHandle>;
@@ -113,10 +120,11 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
   const idempotencyKey = useRef<string | null>(null), creator = useRef<string | null>(null);
   const running = useRef(false), generation = useRef(0), mounted = useRef(true);
   const termsRef = useRef<HTMLInputElement>(null);
-  // The wallet chooser opens from the ticket's own primary. A launch press that opened it carries on once a mainnet
-  // wallet connects (the effect below); closing it without one, or on another network, drops that.
+  // The wallet chooser opens from the ticket's own primary. The press that opened it (a launch, or finding a saved
+  // launch) carries on once a mainnet wallet connects (the effect below); closing it without one, or on another
+  // network, drops that.
   const [connectOpen, setConnectOpen] = useState(false);
-  const continueAfterConnect = useRef(false);
+  const continueAfterConnect = useRef<"launch" | "recover" | null>(null);
   const pendingIntent = useRef<LiveLaunchIntent | null>(null);
   const draftAtPrepare = useRef<LiveLaunchDraft | null>(null);
   const preparedInput = useRef<LivePrepareInput | null>(null);
@@ -124,6 +132,8 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
   const canLaunch = launchesOpen && readiness.data?.ready === true;
   const canRecover = canLaunch || readiness.data?.recoveryReady === true;
   useEffect(() => { onLockedChange(!!intent); }, [intent, onLockedChange]);
+  useEffect(() => { onBusyChange?.(!!busy); }, [busy, onBusyChange]);
+  useEffect(() => () => onBusyChange?.(false), [onBusyChange]);
   useEffect(() => { onIntentLoaded(intent); }, [intent, onIntentLoaded]);
   useEffect(() => () => onLockedChange(false), [onLockedChange]);
   useEffect(() => {
@@ -218,7 +228,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
     if (pairPending || !draft) { onInvalid(); return; }
     if (!canLaunch) { setError(canRecover ? RECOVERY_ONLY : "Mainnet launch setup must be ready before a transaction can be prepared."); return; }
     if (!terms) { setError(TERMS_NEEDED); termsRef.current?.focus(); return; }
-    if (!wallet.address) { continueAfterConnect.current = true; setConnectOpen(true); return; }
+    if (!wallet.address) { continueAfterConnect.current = "launch"; setConnectOpen(true); return; }
     await operate(async (address, version) => {
       if (pendingIntent.current?.status === "prepared" && preparedInput.current && tokenKey.current) {
         await authenticate(address, version); setBusy("preparing");
@@ -434,8 +444,10 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
       assertCurrent(version, address); retain(response.intent);
     });
   }
-  const startAnother = () => { if (intent?.status !== "complete") return; rememberIntent(intent.creatorWallet, null); pendingIntent.current = null; setIntent(null); setPlan(null); preparedInput.current = null; draftAtPrepare.current = null; idempotencyKey.current = null; creator.current = null; setTerms(false); };
-  useImperativeHandle(ref, () => ({ startAnother, submit: () => { if (resend) void sendAgain(); else if (intent?.status === "nft_pending") void prepareNft(); else if (intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current) void checkConfirmation(); else if (!intent && !canLaunch && canRecover) void recover(wallet.address ? savedIntent(wallet.address) ?? undefined : undefined); else if (intent?.status !== "complete") void prepareDraft(); } }));
+  const startAnother = () => { if (intent?.status !== "complete") return; rememberIntent(intent.creatorWallet, null); pendingIntent.current = null; setIntent(null); setPlan(null); preparedInput.current = null; draftAtPrepare.current = null; idempotencyKey.current = null; creator.current = null; setTerms(false); setError(""); setAttempted(false); onStartAnother?.(); };
+  // Find saved launch without a wallet opens the chooser and carries on after the connect, as a launch press does.
+  const findSaved = () => { if (!wallet.address) { continueAfterConnect.current = "recover"; setConnectOpen(true); return; } void recover(savedIntent(wallet.address) ?? undefined); };
+  useImperativeHandle(ref, () => ({ startAnother, terms: () => termsRef.current, submit: () => { if (resend) void sendAgain(); else if (intent?.status === "nft_pending") void prepareNft(); else if (intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current) void checkConfirmation(); else if (!intent && !canLaunch && canRecover) findSaved(); else if (intent?.status !== "complete") void prepareDraft(); } }));
   const selected = intent ? getPairAsset(intent.quoteAssetKey) : getPairAsset(card.quoteAssetKey);
   const currentTitle = intent?.status === "complete" ? "Your coin and card are on mainnet" : intent?.status === "nft_pending" ? "Coin verified. Your card is next." : intent?.status === "token_pending" ? "Coin transaction submitted" : "Create through your wallet";
   const reviewIntent = intent;
@@ -459,6 +471,8 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
           : intent?.nftSignature ? { state: "active", text: "Sent. Check its confirmation." }
             : { state: "active", text: "Ready to issue" };
   const showFresh = !intent && canLaunch;
+  useEffect(() => { onTermsNeeded?.(showFresh && !terms); }, [showFresh, terms, onTermsNeeded]);
+  useEffect(() => () => onTermsNeeded?.(false), [onTermsNeeded]);
   // The progress rows show from the first press on: sign-in, the artwork upload and the preparing all run before a
   // saved launch exists.
   const showProgress = !!(busy || intent || error && attempted);
@@ -470,11 +484,16 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
         : intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current ? { kind: "submit", label: "Check confirmation", pending: !!busy, disabled: !canRecover, blockedByPair: false }
           : !intent && !canLaunch && canRecover ? { kind: "submit", label: "Find saved launch", pending: !!busy, disabled: false, blockedByPair: false }
             : { kind: "submit", label: !wallet.address ? "Connect wallet to launch" : notSent === "token" ? "Prepare again" : "Review mainnet launch", pendingLabel: "Preparing…", pending: !!busy, disabled: !canLaunch || pairPending, blockedByPair: pairPending };
+  // What the bar says beside its button: the step it waits on, or why the launch stopped (the panel's alert below
+  // the primary announces it; the bar's line is for the eye).
+  const statusText = busy ? PHASE[busy] : error || "";
+  const statusAlert = !busy && !!error;
+  primary.status = statusText ? { text: statusText, alert: statusAlert } : null;
   // Reported by value, so the page's bar re-renders only when the primary itself changes.
   useEffect(() => {
-    onPrimary?.(prev => prev && prev.kind === primary.kind && prev.label === primary.label && prev.pendingLabel === primary.pendingLabel && prev.pending === primary.pending && prev.disabled === primary.disabled && prev.blockedByPair === primary.blockedByPair ? prev : primary);
+    onPrimary?.(prev => prev && prev.kind === primary.kind && prev.label === primary.label && prev.pendingLabel === primary.pendingLabel && prev.pending === primary.pending && prev.disabled === primary.disabled && prev.blockedByPair === primary.blockedByPair && (prev.status?.text ?? "") === statusText && !!prev.status?.alert === statusAlert ? prev : primary);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onPrimary, primary.kind, primary.label, primary.pendingLabel, primary.pending, primary.disabled, primary.blockedByPair]);
+  }, [onPrimary, primary.kind, primary.label, primary.pendingLabel, primary.pending, primary.disabled, primary.blockedByPair, statusText, statusAlert]);
   useEffect(() => () => onPrimary?.(null), [onPrimary]);
 
   // ------------------------------------------------ connect, then carry on with the launch press that asked for it
@@ -483,20 +502,34 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
     if (open) return;
     // The dialog closes right after a connect resolves, before this render sees the wallet: read the store.
     const now = getLiveWalletSnapshot();
-    if (!now.address) continueAfterConnect.current = false;
-    else if (!now.mainnet) { continueAfterConnect.current = false; setError("Switch this wallet account to Solana mainnet, then try again."); }
+    if (!now.address) continueAfterConnect.current = null;
+    else if (!now.mainnet) { continueAfterConnect.current = null; setError("Switch this wallet account to Solana mainnet, then try again."); }
   };
   useEffect(() => {
-    if (!wallet.address || !wallet.mainnet || !continueAfterConnect.current) return;
-    continueAfterConnect.current = false;
-    void prepareDraft();
+    const next = continueAfterConnect.current;
+    if (!wallet.address || !wallet.mainnet || !next) return;
+    continueAfterConnect.current = null;
+    if (next === "recover") void recover(savedIntent(wallet.address) ?? undefined);
+    else void prepareDraft();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wallet.address, wallet.mainnet]);
   // A draft edited while the chooser was open is a new decision: it waits for another press.
-  useEffect(() => { continueAfterConnect.current = false; }, [draftKey]);
-  useEffect(() => () => { continueAfterConnect.current = false; }, []);
+  useEffect(() => { continueAfterConnect.current = null; }, [draftKey]);
+  useEffect(() => () => { continueAfterConnect.current = null; }, []);
 
-  return <section className="cdx-live-panel" aria-label="Mainnet wallet launch">
+  // What the launch waits on, or why it stopped, lands under the inline primary; near the screen's bottom edge it comes
+  // fully into view (nearest: no move when it already shows). Phones show it in the action bar instead, where the
+  // inline primary is hidden.
+  const panelRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!(error || busy) || reviewOpen) return;
+    const panel = panelRef.current;
+    const inline = panel?.querySelector<HTMLElement>(".cdx-live-primary");
+    const line = panel?.querySelector<HTMLElement>(":scope > .cdx-paged-message");
+    if (inline?.getClientRects().length && line) requestAnimationFrame(() => line.scrollIntoView({ block: "nearest" }));
+  }, [error, busy, reviewOpen]);
+
+  return <section ref={panelRef} className="cdx-live-panel" aria-label="Mainnet wallet launch">
     {/* Setup first: while mainnet is not ready, nothing below can be asked for. */}
     {!canRecover ? <div className="cdx-live-callout">
       {readiness.isPending ? <p role="status">Checking mainnet readiness…</p> : readiness.isError ? <p>Launch readiness could not be checked. Check again in a moment.</p> : <PagedMessage text={[...(readiness.data?.blockers ?? []), "No transaction or charge is requested while setup is incomplete."].join(" ")} />}
@@ -533,6 +566,9 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
         : <Button type="submit" block className="cdx-live-primary" data-launch-primary="" pending={primary.pending} pendingLabel={primary.pendingLabel} disabled={primary.disabled} onBlocked={primary.blockedByPair ? onInvalid : undefined}>{primary.label}</Button>}
       {intent?.status === "nft_pending" && (intent.nftSignature || uncertain) ? <Button variant="outline" block pending={!!busy} disabled={!canRecover} onClick={() => void checkConfirmation()}>Check card confirmation</Button> : null}
     </div>
+    {/* What the launch waits on, or why it stopped, right under the primary (the stage rows below say which step). */}
+    {busy ? <PagedMessage text={BUSY_COPY[busy]} /> : null}
+    {error ? <PagedMessage text={error} alert /> : null}
     {wallet.address ? <p className="cdx-live-wallet-line">Creator wallet · <span className="cdx-live-address">{brief(wallet.address)}</span>{!wallet.mainnet ? " · Switch to mainnet" : ""}</p> : null}
 
     {showProgress ? <section className="cdx-live-block" aria-labelledby="cdx-live-progress">
@@ -547,14 +583,8 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
           {intent?.nftSignature ? <TextLink href={`https://solscan.io/tx/${intent.nftSignature}`} target="_blank">Card transaction<Icon name="external" size={12} /></TextLink> : null}
         </StageRow>
       </ol>
-      {busy ? <PagedMessage text={BUSY_COPY[busy]} /> : null}
-      {error ? <PagedMessage text={error} alert /> : null}
       {intent?.status === "nft_pending" && !busy && !error ? <p>The coin is verified. Issue its separate one-of-one card to the same creator wallet.</p> : null}
-    </section> : <>
-      {/* Before anything starts: a check that stopped the press (the terms, the network), then what happens next. */}
-      {error ? <PagedMessage text={error} alert /> : null}
-      {showFresh ? <p className="cdx-live-next">Your wallet opens for a sign-in message that spends nothing, then your coin, then its card.</p> : null}
-    </>}
+    </section> : showFresh ? <p className="cdx-live-next">Your wallet opens for a sign-in message that spends nothing, then your coin, then its card.</p> : null}
     {pairPending ? <p role="status">Confirm or cancel the quote change under Pair before preparing a transaction.</p> : null}
     {notice && !intent ? <p role="status">{notice}</p> : null}
 
@@ -570,6 +600,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
       <dl className="cdx-launch-cost cdx-live-review">
         <div><dt>Coin mint</dt><dd><TextLink href={`https://solscan.io/token/${intent.tokenMint}`} target="_blank"><span className="cdx-live-address">{brief(intent.tokenMint)}</span><Icon name="external" size={12} /></TextLink></dd></div>
         <div><dt>Quote asset</dt><dd>{selected.symbol}</dd></div>
+        <div><dt>Initial buy</dt><dd>{intent.initialBuyQuoteBaseUnits === "0" ? "None" : <><span className="num">{formatLiveAmount(intent.initialBuyQuoteBaseUnits, selected.decimals)}</span> <span className="mdx-unit">{selected.symbol}</span></>}</dd></div>
         <div><dt>Card design</dt><dd>{getCardDesign(intent.cardTemplate).name}</dd></div>
       </dl>
       <p className="cdx-live-meta">These launch details are locked to this saved request.</p>
@@ -579,13 +610,15 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
       </div> : null}
     </section> : null}
 
-    {/* Saved launches, in the page (no disclosure): find or resume one for the connected wallet. */}
-    {canRecover && !intent ? <section className="cdx-live-block cdx-live-saved" aria-labelledby="cdx-live-saved-list">
+    {/* Saved launches, in the page (no disclosure): find or resume one for the connected wallet. While new launches
+        are off, the primary (Find saved launch) and the callout above already ask for this, so only a found list shows. */}
+    {canRecover && !intent && (canLaunch || recoveryItems.length > 0) ? <section className="cdx-live-block cdx-live-saved" aria-labelledby="cdx-live-saved-list">
       <h3 id="cdx-live-saved-list" className="cdx-live-subhead">Saved launches</h3>
       {wallet.address ? <>
-        <button type="button" className="mdx-link mdx-hit cdx-live-find" disabled={!!busy} onClick={() => void recover(savedIntent(wallet.address!) ?? undefined)}>Find or resume a saved launch</button>
+        {/* While new launches are off the primary is Find saved launch, so this second control would repeat it. */}
+        {canLaunch ? <button type="button" className="mdx-link mdx-hit cdx-live-find" disabled={!!busy} onClick={() => void recover(savedIntent(wallet.address!) ?? undefined)}>Find or resume a saved launch</button> : null}
         {recoveryItems.length ? <ul className="cdx-live-saved__list" aria-label="Saved launches for this wallet">{recoveryItems.map(i => <li key={i.id}><Button variant="outline" block disabled={!!busy} onClick={() => void recover(i.id)}><span className="cdx-live-address">{brief(i.tokenMint)}</span>{i.status === "nft_pending" ? "Card pending" : "Check launch"}</Button></li>)}</ul> : null}
-      </> : <EmptyState compact title="Connect the creator wallet to find a saved launch." action={<button type="button" className="mdx-link mdx-hit" onClick={() => { continueAfterConnect.current = false; setConnectOpen(true); }}>Connect wallet</button>} />}
+      </> : <EmptyState compact title="Connect the creator wallet to find a saved launch." action={<button type="button" className="mdx-link mdx-hit" onClick={() => { continueAfterConnect.current = null; setConnectOpen(true); }}>Connect wallet</button>} />}
     </section> : null}
 
     <WalletConnectDialog open={connectOpen} onOpenChange={connectChange} />

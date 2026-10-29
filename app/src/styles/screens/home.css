@@ -505,6 +505,21 @@
   flex-direction: column;
   margin-inline: -8px;
 }
+/* Taller desktop screens get more rows, not more empty ground (density D5; index.tsx renders 10 of each): 5 Trending
+ * and 6 activity rows below 1024px wide or 1000px tall (1440x900 as before), 7 and 9 from 1000px tall (1920x1080),
+ * all 10 from 1300px (2560x1440). */
+@media (max-width: 1023.98px), (max-height: 999.98px) {
+  .cdx-home-trending .cdx-home-panel__list > li:nth-child(n + 6),
+  .cdx-home-activity .cdx-home-panel__list > :nth-child(n + 7) {
+    display: none;
+  }
+}
+@media (min-width: 1024px) and (min-height: 1000px) and (max-height: 1299.98px) {
+  .cdx-home-trending .cdx-home-panel__list > li:nth-child(n + 8),
+  .cdx-home-activity .cdx-home-panel__list > :nth-child(n + 10) {
+    display: none;
+  }
+}
 .cdx-home-panel__error {
   display: flex;
   flex-direction: column;
@@ -739,22 +754,18 @@
     flex: 1;
   }
 }
-/* In the header row (from 1280): "Collection" over its Simulated tag, as a row head with the same two lines as the
- * cells beside it (label over figure), set off by space, then the strip; at most 44px tall, bottom-aligned with the
+/* In the header row (from 1280): the three cells, each as wide as its label and figure (24px between them, the
+ * hairline in the middle), then the Simulated tag after the last figure; at most 44px tall, bottom-aligned with the
  * context line. */
 .cdx-home-collection[data-place="head"] {
   display: none;
 }
-.cdx-home-collection__label {
-  display: flex;
+.cdx-home-collection[data-place="head"] .mdx-kpis {
+  grid-template-columns: repeat(var(--kpi-cols, 3), max-content);
+}
+.cdx-home-collection__sim {
   flex: none;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  font-size: var(--text-caption);
-  line-height: 16px;
-  font-weight: 500;
-  color: var(--color-slate);
+  align-self: flex-end;
 }
 @media (min-width: 1280px) {
   .cdx-home-collection[data-place="head"] {

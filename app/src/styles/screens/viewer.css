@@ -51,6 +51,12 @@
     right: -8px;
   }
 }
+/* In a grid (Discover's tiles): inside the tile's corner, so no tile pokes into the page gutter or past the column
+ * edge (density D8, R2/R3). The touch hit area below still grows inward and down, never past the tile. */
+.cdx-token-cell > .mdx-v3d-host > .mdx-v3dbtn {
+  top: 6px;
+  right: 6px;
+}
 /* The hit size. Touch: the extra area grows inward and down over the card's corner (the side a grid cell never
  * clips), not out past the cell's edge. Fine pointers: 40px all round. */
 .mdx-v3dbtn::before {

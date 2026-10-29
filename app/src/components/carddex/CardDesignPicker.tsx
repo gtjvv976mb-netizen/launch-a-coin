@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useState } from "react";
 import { CARD_DESIGNS, getCardDesign, type CardDesign } from "../../lib/carddex/designs";
 
 import { PAIR_ASSETS, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, recommendedMemeQuoteForDesign, type PairAssetKey } from "../../lib/carddex/pairs";
+import { DESIGN_GROUPS, inDesignGroup as inGroup, type DesignGroup } from "./design-groups";
 import { MEME_PAIR_PRESETS } from "../../lib/carddex/design-pairings";
 import { AutoGrid, Badge, Button, Chip, Icon, Modal } from "../mintdex/ui";
 import type { CardData } from "../mintdex/MintCard";
@@ -9,23 +10,8 @@ import { CanonicalCardFace } from "./CanonicalCardFace";
 import { PairBadge } from "./QuoteAssetPicker";
 import { designRow, type DesignRow } from "./launch-form";
 
-const DESIGN_GROUPS = [
-  ["all", "All designs"],
-  ["stocks", "Stock pairs"],
-  ["memes", "Meme & collector pairs"],
-  ["classic", "Trading card classics"],
-  ["premium", "Premium collection"],
-  ["limited", "Limited editions"],
-] as const;
-type DesignGroup = typeof DESIGN_GROUPS[number][0];
 const memePairKeys = new Set<string>(MEME_PAIR_PRESETS.map(preset => preset.quote));
 const memePairAssets = PAIR_ASSETS.filter(asset => memePairKeys.has(asset.key));
-
-function inGroup(design: CardDesign, group: DesignGroup) {
-  return group === "all" || (group === "stocks"
-    ? boundQuoteForDesign(design.key)?.kind === "stock"
-    : group === "memes" ? !!recommendedMemeQuoteForDesign(design.key) : design.category === group);
-}
 
 /** The creator's live card in another design: the same details, that design's quote when it is bound to one. */
 function cardIn(base: CardData, design: CardDesign, quoteKey: string, asset = boundQuoteForDesign(design.key) ?? getPairAsset(quoteKey)): CardData {
@@ -99,19 +85,20 @@ export function CardDesignPicker({
   };
 
   // The library: your coin previewed in every design, in a dialog, so the draft never leaves the page. Every design
-  // in the chosen collection is laid out (the dialog body scrolls); the collection filter stays at its top.
+  // in the chosen collection is laid out (the dialog body scrolls); the collection filter stays at its top. The
+  // dialog takes the page column's width (overlays.css), so a wide screen gets more tracks and less scrolling.
   const library = (
-    <Modal open={open && !disabled} onOpenChange={setOpen} title="Choose your card design" description="Your coin in each permanent design. Choosing one keeps your coin details and artwork." width={860}>
+    <Modal open={open && !disabled} onOpenChange={setOpen} title="Choose your card design" description="Your coin in each permanent design. Choosing one keeps your coin details and artwork." width={1600}>
       <div className="cdx-design-browser" data-vaul-no-drag>
         <div className="cdx-design-browser__filters">
           {/* Collections: wrapping chips from 768px, one select on phones (chips would run past two lines). */}
           <div className="mdx-chiprow cdx-design-browser__chips" role="group" aria-label="Collection">
-            {DESIGN_GROUPS.map(([key, label]) => <Chip key={key} pressed={group === key} count={CARD_DESIGNS.filter(design => inGroup(design, key)).length} onClick={() => pickGroup(key)}>{label}</Chip>)}
+            {DESIGN_GROUPS.map(({ key, name }) => <Chip key={key} pressed={group === key} count={CARD_DESIGNS.filter(design => inGroup(design, key)).length} onClick={() => pickGroup(key)}>{name}</Chip>)}
           </div>
           <div className="cdx-design-browser__collection">
             <label htmlFor={`${id}-group`} className="mdx-label">Collection</label>
             <select id={`${id}-group`} className="mdx-select mdx-select--field" value={group} disabled={disabled} onChange={event => pickGroup(event.target.value as DesignGroup)}>
-              {DESIGN_GROUPS.map(([key, label]) => <option key={key} value={key}>{label} ({CARD_DESIGNS.filter(design => inGroup(design, key)).length})</option>)}
+              {DESIGN_GROUPS.map(({ key, name }) => <option key={key} value={key}>{name} ({CARD_DESIGNS.filter(design => inGroup(design, key)).length})</option>)}
             </select>
           </div>
           {group === "memes" ? <div className="cdx-design-browser__filter">
@@ -219,7 +206,7 @@ export function CardDesignPicker({
       >
         Browse all {CARD_DESIGNS.length} designs
       </Button>
-      {!compact ? <PairBadge quoteAssetKey={quoteKey} ticker={ticker || "YOUR COIN"} compact /> : null}
+      {!compact ? <PairBadge quoteAssetKey={quoteKey} ticker={ticker || "TICKER"} compact /> : null}
       {library}
     </div>
   );
