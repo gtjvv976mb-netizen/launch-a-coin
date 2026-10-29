@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { ed25519 } from "@noble/curves/ed25519";
 import { base58Encode } from "../../../chain/sdk/src/bytes";
-import { boundQuoteForDesign, getPairAsset } from "../../src/lib/carddex/pairs";
+import { PAIR_ASSETS, UNPAIRED_DESIGN, boundQuoteForDesign, designForPair, getPairAsset } from "../../src/lib/carddex/pairs";
 import { MEME_PAIR_PRESETS } from "../../src/lib/carddex/design-pairings";
 import renderAssets from "../../src/lib/carddex/render-assets.json";
 import tokenBackAssets from "../../src/lib/carddex/token-back-assets.json";
@@ -166,20 +166,49 @@ beforeEach(() => {
 afterAll(() => { globalThis.fetch = nativeFetch; sqlite.close(); });
 function image(width: number, height: number) { const bytes = new Uint8Array(40); bytes.set([0x89, 0x50, 0x4e, 0x47]); new DataView(bytes.buffer).setUint32(16, width); new DataView(bytes.buffer).setUint32(20, height); return bytes; }
 async function input(overrides: Partial<{cardTemplate: string; quoteAssetKey: string; quoteMint: string; tokenMint: string}> = {}) {
-  const fields = {tokenMint: mint, name: "Launch Fixture", symbol: "FIX", description: "Creator token with a separate card.", website: "https://creator.example/", xUrl: "https://x.com/creator", cardTemplate: "spark", quoteAssetKey: "sol", quoteMint: "So11111111111111111111111111111111111111112", ...overrides};
+  // SOL's own design (the pair picks the card). Overrides may name another pair with its design, or an old combination.
+  const fields = {tokenMint: mint, name: "Launch Fixture", symbol: "FIX", description: "Creator token with a separate card.", website: "https://creator.example/", xUrl: "https://x.com/creator", cardTemplate: "one-piece", quoteAssetKey: "sol", quoteMint: "So11111111111111111111111111111111111111112", ...overrides};
   const refs = {artwork: await assets.putPublicAsset(creator, image(128,128), "image/png"), cardImage: await assets.putPublicAsset(creator, image(1260,1760), "image/png"), caseImage: await assets.putPublicAsset(creator, image(1440,2240), "image/png")};
   await new Prepared("INSERT OR IGNORE INTO live_compositions (wallet, binding_sha256, artwork_sha256, card_sha256, case_sha256, renderer_version, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)", [creator, await compositionBinding(creator, fields), refs.artwork.sha256, refs.cardImage.sha256, refs.caseImage.sha256, COMPOSITION_VERSION, Date.now()]).run();
   return {...fields, idempotencyKey: "fixture-request", nftMint, initialBuyQuoteBaseUnits: "0", slippageBps: 100, termsAcknowledged: true as const, assets: refs};
 }
+/**
+ * A launch saved before the pair picked the card, in any combination it allowed then, exactly as its rows were stored
+ * (with the coin image GIF and still the token-gif release added). Recovery must take it as it is.
+ */
+async function savedBeforePairRule(cardTemplate: string, quoteKey: string) {
+  const quote = getPairAsset(quoteKey), original = await input({cardTemplate, quoteAssetKey: quote.key, quoteMint: quote.mint}), fields = normalizeLiveFields(original);
+  const tokenImage = await assets.putPublicAsset(creator, new Uint8Array([0x47, 0x49, 0x46, 0x38, 0x39, 0x61, ...new Array(40).fill(1)]), "image/gif");
+  const tokenPoster = await assets.putPublicAsset(creator, image(1024, 1024), "image/png");
+  const tokenMetadata = await assets.putPublicJson(creator, {name: fields.name, symbol: fields.symbol, description: fields.description, image: tokenImage.url, animation_url: tokenImage.url,
+    properties: {files: [{uri: tokenImage.url, type: "image/gif"}, {uri: tokenPoster.url, type: "image/png"}], category: "image", launchACard: {cardTemplate, quoteAssetKey: quote.key, quoteMint: quote.mint}}});
+  const nftMetadata = await assets.putPublicJson(creator, {name: fields.name, image: original.assets.caseImage.url, seller_fee_basis_points: 0,
+    attributes: [{trait_type: "Card design", value: cardTemplate}, {trait_type: "Quote asset", value: quote.symbol}, {trait_type: "Quote mint", value: quote.mint}]});
+  const savedAssets = {...original.assets, tokenImage, tokenPoster};
+  const payload = {fields, assets: savedAssets, input: {creator, mint, name: fields.name, symbol: fields.symbol, tokenMetadataUri: tokenMetadata.url,
+    quoteKey: fields.quoteAssetKey, nftName: fields.name, initialBuyQuoteBaseUnits: original.initialBuyQuoteBaseUnits, slippageBps: original.slippageBps,
+    renderedCardSha256: original.assets.cardImage.sha256, nftMetadataSha256: nftMetadata.sha256,
+    card: {designKey: cardTemplate, frontUri: original.assets.cardImage.url, backUri: original.assets.caseImage.url,
+      frontSha256: original.assets.cardImage.sha256, backSha256: original.assets.caseImage.sha256, nftMetadataUri: nftMetadata.url}}};
+  // The request hash covers the three images the creator composed; the server-made coin images are not part of it.
+  const requestedHash = await auth.sha256(JSON.stringify({creator, fields, assets: original.assets, initialBuyQuoteBaseUnits: original.initialBuyQuoteBaseUnits, slippageBps: original.slippageBps}));
+  const now = Date.now();
+  sqlite.query("INSERT INTO live_launch_intents (id, idempotency_key, creator_wallet, token_mint, nft_mint, quote_key, quote_mint, design_key, payload_sha256, payload_json, binding_sha256, token_metadata_uri, nft_metadata_uri, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'prepared', ?, ?)")
+    .run("saved-before-pair-rule", original.idempotencyKey, creator, mint, nftMint, fields.quoteAssetKey, fields.quoteMint, cardTemplate,
+      requestedHash, JSON.stringify(payload), binding, tokenMetadata.url, nftMetadata.url, now, now);
+  return {original, quote, savedAssets, tokenMetadata, nftMetadata, payloadJson: JSON.stringify(payload)};
+}
 describe("isolated real-launch server lifecycle", () => {
-  const stockPairs = {"stock-gme": "gmex", "stock-tsla": "tslax", "stock-nvda": "nvdax", "stock-aapl": "aaplx", "stock-mstr": "mstrx", "stock-coin": "coinx", gamestop: "gmex", amc: "amc", coinbase: "coinx", strategy: "mstrx"};
-  const designPairs = [...Object.entries(stockPairs), ...MEME_PAIR_PRESETS.map(({design, quote}) => [design, quote] as const)];
-  for (const [cardTemplate, quoteKey] of designPairs) test(`${cardTemplate}/${quoteKey} preserves its exact quote through metadata, NFT preparation and saved reads`, async () => {
+  // The pair picks the card: every pair launches with its own design, sent as the pair alone (the Launch form's shape
+  // is the full three; older clients too), and keeps it through metadata, the NFT and saved reads.
+  const designPairs = PAIR_ASSETS.map(asset => [designForPair(asset.key)!, asset.key] as const);
+  for (const [cardTemplate, quoteKey] of designPairs) test(`${quoteKey} launches its own ${cardTemplate} card through metadata, NFT preparation and saved reads`, async () => {
     const quote = getPairAsset(quoteKey);
     const original = await input({cardTemplate, quoteAssetKey: quote.key, quoteMint: quote.mint});
-    await expect(service.prepareLiveLaunch(creator, {...original, quoteMint: getPairAsset("usdc").mint})).rejects.toThrow("quote mint does not match");
+    const {cardTemplate: _design, ...pairOnly} = original;
+    await expect(service.prepareLiveLaunch(creator, {...pairOnly, quoteMint: getPairAsset(quote.key === "usdc" ? "sol" : "usdc").mint})).rejects.toThrow("quote mint does not match");
     expect(prepareCalls).toBe(0);
-    const prepared = await service.prepareLiveLaunch(creator, original);
+    const prepared = await service.prepareLiveLaunch(creator, pairOnly);
     expect(tokenInputs).toHaveLength(1);
     expect(tokenInputs[0]).toMatchObject({quoteKey: quote.key, card: {designKey: cardTemplate}});
     expect(prepared.intent).toMatchObject({quoteAssetKey: quote.key, quoteMint: quote.mint, cardTemplate});
@@ -207,21 +236,58 @@ describe("isolated real-launch server lifecycle", () => {
     expect(sqlite.query("SELECT COUNT(*) AS n FROM coins").get()).toEqual({n: 0});
     expect(sendCalls).toBe(0);
   });
+  // A new launch in an old combination is refused in plain words, before any artwork, metadata, plan or row.
+  const refusedNew: [string, string, string][] = [["spark", "sol", "The SOL pair comes with its own card"], ["pokemon-classic", "sol", "comes with its own card"], ["pokemon-classic", "cards", "The CARDS pair comes with its own card"], ["stock-tsla", "gmex", "The GMEX pair comes with its own card"],
+    ["pokemon-full-art", "sv151", UNPAIRED_DESIGN], ["gamestop", "gmex", UNPAIRED_DESIGN], ["coinbase", "coinx", UNPAIRED_DESIGN], ["strategy", "mstrx", UNPAIRED_DESIGN], ["shib", "sol", UNPAIRED_DESIGN]];
+  for (const [cardTemplate, quoteKey, message] of refusedNew) test(`a new ${cardTemplate}/${quoteKey} launch is refused: ${message}`, async () => {
+    // The request names the old combination; the fixture's own composition is SOL's, so nothing else could pass.
+    const quote = getPairAsset(quoteKey), original = {...await input(), cardTemplate, quoteAssetKey: quote.key, quoteMint: quote.mint}, puts = storagePuts;
+    await expect(service.prepareLiveLaunch(creator, original)).rejects.toThrow(message);
+    expect(prepareCalls).toBe(0); expect(tokenMediaCalls).toBe(0); expect(storagePuts).toBe(puts);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 0});
+  });
+  test("a design-only request (an older client) launches with that design's own pair; an unpaired design alone is refused", async () => {
+    const doge = getPairAsset("doge"), original = await input({cardTemplate: "doge", quoteAssetKey: doge.key, quoteMint: doge.mint});
+    const {quoteAssetKey: _key, quoteMint: _mint, ...designOnly} = original;
+    const prepared = await service.prepareLiveLaunch(creator, designOnly);
+    expect(prepared.intent).toMatchObject({cardTemplate: "doge", quoteAssetKey: "doge", quoteMint: doge.mint});
+    expect(tokenInputs[0]).toMatchObject({quoteKey: "doge", card: {designKey: "doge"}});
+    // The same launch sent as all three fields is the same request, not a second one.
+    expect((await service.prepareLiveLaunch(creator, original)).intent.id).toBe(prepared.intent.id);
+    await expect(service.prepareLiveLaunch(creator, {...designOnly, cardTemplate: "gamestop", idempotencyKey: "another-request", tokenMint: otherWallet})).rejects.toThrow(UNPAIRED_DESIGN);
+  });
+  test("a card composition is refused for a design that is not its pair's own, before anything is uploaded", async () => {
+    const {composeLiveAssets} = await import("../../src/lib/carddex/live/composition.server");
+    const fields = {tokenMint: mint, name: "Launch Fixture", symbol: "FIX", description: "", cardTemplate: "spark", quoteAssetKey: "sol", quoteMint: getPairAsset("sol").mint};
+    const puts = storagePuts;
+    await expect(composeLiveAssets(creator, fields, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow("The SOL pair comes with its own card");
+    await expect(composeLiveAssets(creator, {...fields, cardTemplate: "kraken"}, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(UNPAIRED_DESIGN);
+    expect(storagePuts).toBe(puts);
+  });
+  // Saved before the pair picked the card: every earlier chooser preset that is not its pair's design now, neutral
+  // designs on SOL or a stock, and designs no pair has. Each recovers byte for byte and finishes its card.
   const neutralPresetDesigns = [...new Set(MEME_PAIR_PRESETS.map(preset => preset.design))].filter(design => !boundQuoteForDesign(design));
-  const legacyPairs = [["pokemon-full-art", "tslax"], ["pepe", "gmex"], ...neutralPresetDesigns.map(design => [design, "sol"] as const)];
-  for (const [cardTemplate, quoteKey] of legacyPairs) test(`saved ${cardTemplate}/${quoteKey} intent retains its existing quote and committed print`, async () => {
-    const quote = getPairAsset(quoteKey), original = await input({cardTemplate, quoteAssetKey: quote.key, quoteMint: quote.mint});
-    const prepared = await service.prepareLiveLaunch(creator, original);
-    // Existing intents must recover without being reinterpreted by the new chooser presets.
-    sqlite.query("UPDATE live_compositions SET renderer_version = 'launchacard-canonical-v1'").run();
+  const legacyPairs = [["pokemon-full-art", "tslax"], ["pepe", "gmex"], ["spark", "tslax"], ["gamestop", "gmex"], ["kraken", "sol"],
+    ...MEME_PAIR_PRESETS.filter(preset => designForPair(preset.quote) !== preset.design).map(preset => [preset.design, preset.quote] as const),
+    ...neutralPresetDesigns.map(design => [design, "sol"] as const)];
+  for (const [cardTemplate, quoteKey] of legacyPairs) test(`a launch saved as ${cardTemplate}/${quoteKey} before the pair picked the card recovers unchanged`, async () => {
+    const {original, quote, savedAssets, tokenMetadata, nftMetadata, payloadJson} = await savedBeforePairRule(cardTemplate, quoteKey);
+    const tokenBytes = await assets.fetchPublicBytes(tokenMetadata.url), nftBytes = await assets.fetchPublicBytes(nftMetadata.url);
+    // Its composition is gone (an older print), as for any launch saved a while ago.
+    sqlite.query("DELETE FROM live_compositions").run();
     const recovered = await service.prepareLiveLaunch(creator, original);
-    expect(recovered.intent).toEqual(prepared.intent);
-    expect(recovered.intent).toMatchObject({cardTemplate, quoteAssetKey: quote.key, quoteMint: quote.mint, assets: prepared.intent.assets});
-    expect(prepareCalls).toBe(2);
+    expect(recovered.intent).toMatchObject({id: "saved-before-pair-rule", cardTemplate, quoteAssetKey: quote.key, quoteMint: quote.mint, assets: savedAssets, tokenMetadataUri: tokenMetadata.url, nftMetadataUri: nftMetadata.url});
+    expect(tokenInputs[0]).toMatchObject({quoteKey: quote.key, tokenMetadataUri: tokenMetadata.url, card: {designKey: cardTemplate}});
+    expect(prepareCalls).toBe(1); expect(tokenMediaCalls).toBe(0);
+    // Nothing it stored changed: the row, its metadata and its coin images.
+    expect((sqlite.query("SELECT payload_json FROM live_launch_intents WHERE id = 'saved-before-pair-rule'").get() as {payload_json: string}).payload_json).toBe(payloadJson);
+    expect(await assets.fetchPublicBytes(tokenMetadata.url)).toEqual(tokenBytes);
+    expect(await assets.fetchPublicBytes(nftMetadata.url)).toEqual(nftBytes);
+    expect((await service.getLiveLaunchIntent(creator, "saved-before-pair-rule")).assets).toEqual(savedAssets);
     tokenVerified = true;
-    await service.confirmLiveToken(creator, {intentId: prepared.intent.id, signature: "s".repeat(88), messageSha256: recovered.transaction!.messageSha256});
-    await service.prepareLiveCreatorNft(creator, {intentId: prepared.intent.id});
-    expect(nftInputs[0]).toMatchObject({quoteKey: quote.key, card: {designKey: cardTemplate, nftMetadataUri: prepared.intent.nftMetadataUri}});
+    await service.confirmLiveToken(creator, {intentId: "saved-before-pair-rule", signature: "s".repeat(88), messageSha256: recovered.transaction!.messageSha256});
+    await service.prepareLiveCreatorNft(creator, {intentId: "saved-before-pair-rule"});
+    expect(nftInputs[0]).toMatchObject({quoteKey: quote.key, card: {designKey: cardTemplate, nftMetadataUri: nftMetadata.url}});
     expect(sendCalls).toBe(0);
   });
   test("trusted renderer rejects stale atlas metadata and changed bytes", async () => {

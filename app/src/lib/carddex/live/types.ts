@@ -14,6 +14,8 @@ export type LivePrepareInput = {
   withCard?: boolean;
 };
 export type LiveComposeInput = Pick<LivePrepareInput, "tokenMint" | "name" | "symbol" | "description" | "website" | "xUrl" | "cardTemplate" | "quoteAssetKey" | "quoteMint">;
+/** A prepare request as the server accepts it: the pair alone names the card (an older client also sends the design). */
+export type LivePrepareRequest = Omit<LivePrepareInput, "cardTemplate" | "quoteAssetKey" | "quoteMint"> & Partial<Pick<LivePrepareInput, "cardTemplate" | "quoteAssetKey" | "quoteMint">>;
 export type { WalletTransactionPlan } from "../../../../../integrations/pumpfun/src/live";
 export type LiveReadiness = {
   implemented: true; configured: boolean;

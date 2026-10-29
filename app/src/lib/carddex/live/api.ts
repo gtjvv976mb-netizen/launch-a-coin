@@ -69,7 +69,8 @@ export const prepareLiveLaunch = createServerFn({method: "POST"}).validator(z.ob
   idempotencyKey: z.string().min(8).max(100), tokenMint: publicKey, nftMint: publicKey,
   name: z.string().min(1).max(32), symbol: z.string().regex(/^[A-Za-z0-9]{1,13}$/), description: z.string().max(280),
   website: z.string().max(2048).optional(), xUrl: z.string().max(2048).optional(),
-  cardTemplate: z.string().max(50), quoteAssetKey: z.string().max(30), quoteMint: publicKey,
+  // The pair names the card: a pair alone is a complete request (an older client also sends the design).
+  cardTemplate: z.string().max(50).optional(), quoteAssetKey: z.string().max(30).optional(), quoteMint: publicKey.optional(),
   initialBuyQuoteBaseUnits: z.string().regex(/^(0|[1-9][0-9]{0,19})$/), slippageBps: z.number().int().min(0).max(1000),
   assets: z.object({artwork: asset, cardImage: asset, caseImage: asset}), termsAcknowledged: z.literal(true), withCard: z.boolean().optional(),
 })).handler(({data}) => attempt("prepare", async () => { await sameOrigin(); await perAddress(LIMITS.prepareIp); return service.prepareLiveLaunch(await signedIn(LIMITS.prepareWallet), data); }));

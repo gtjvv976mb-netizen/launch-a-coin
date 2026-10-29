@@ -12,7 +12,7 @@ import { fetchPublicBytes, putPublicAsset, sniffLiveImage } from "./assets.serve
 import { sha256, walletBytes } from "./auth.server";
 import { requireLiveConfig } from "./config.server";
 import { BUSY, createRendererSlot } from "./render-slot";
-import { compositionBinding, normalizeLiveFields } from "./validation.server";
+import { compositionBinding, normalizeLiveFields, requireNewLaunchPair, type LiveFieldsInput } from "./validation.server";
 import type { LiveAssets, LiveComposeInput } from "./types";
 
 export const COMPOSITION_VERSION = CARD_RENDERER_VERSION;
@@ -48,9 +48,11 @@ function creatorImageInput(wallet:string,fields:LiveComposeInput,artwork:LiveAss
     dexLabel: "1 / 1", ownerHandle: `${wallet.slice(0, 4)}…${wallet.slice(-4)}`, mintAddress: fields.tokenMint},
     tokenMint: fields.tokenMint, creator: wallet, artwork: bytes, mimeType};
 }
-export async function composeLiveAssets(wallet: string, raw: LiveComposeInput, file: File): Promise<LiveAssets> {
+export async function composeLiveAssets(wallet: string, raw: LiveFieldsInput, file: File): Promise<LiveAssets> {
   requireLiveConfig("launch"); walletBytes(wallet);
   const fields = normalizeLiveFields(raw);
+  // A composition is always for a new launch: the card printed is the pair's own design.
+  requireNewLaunchPair(fields);
   if (fields.tokenMint === wallet) throw new UserError("Generate a separate new token mint address.");
   if (file.size < 30 || file.size > 4 * 1024 * 1024) throw new UserError("Use creator artwork under 4 MB.");
   const bytes = new Uint8Array(await file.arrayBuffer()), mime = sniffLiveImage(bytes), dimensions = imageSize(bytes);

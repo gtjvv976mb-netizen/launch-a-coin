@@ -1,4 +1,4 @@
-import { PAIR_ASSETS, getPairAsset, resolveLaunchQuote } from "../../carddex/pairs";
+import { PAIR_ASSETS, getPairAsset, resolveNewLaunchPair } from "../../carddex/pairs";
 import { demoQuoteStartBalance } from "../../carddex/quote-simulation";
 import type { QuoteIdentity } from "../types";
 import { UserError, all, db, one, stmt } from "./db.server";
@@ -15,9 +15,10 @@ export function resolveStoredQuote(row: { quote_asset_key: string; quote_mint: s
   } catch (error) { throw new UserError(error instanceof Error ? error.message : "Unsupported quote asset."); }
 }
 
-export function launchQuote(design: string, input: { quoteAssetKey?: string; quoteMint?: string }) {
-  try { return resolveLaunchQuote(design, input); }
-  catch (error) { throw new UserError(error instanceof Error ? error.message : "Choose a compatible quote asset."); }
+/** A new demo launch: the pair picks the card (pairs.ts resolveNewLaunchPair); a mismatched design is refused. */
+export function newLaunchPair(input: { cardTemplate?: string; quoteAssetKey?: string; quoteMint?: string }) {
+  try { return resolveNewLaunchPair(input); }
+  catch (error) { throw new UserError(error instanceof Error ? error.message : "Pick a supported pair."); }
 }
 
 /** One-time local test funds only. SOL remains in users.balance; each SPL quote has its own ledger. */

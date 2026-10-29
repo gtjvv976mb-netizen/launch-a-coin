@@ -10,8 +10,8 @@ import { sha256, walletBytes } from "./auth.server";
 import { COMPOSITION_VERSION, composeTokenAssets, requireTrustedComposition } from "./composition.server";
 import { BUY_DOES_NOT_FIT, STOCK_BUY_WARNS } from "./copy";
 import { requireLiveConfig } from "./config.server";
-import { normalizeLiveFields, normalizeLiveIdentity } from "./validation.server";
-import { LIVE_PACKET_LIMIT, type LiveApprovedCard, type LiveAssets, type LiveChainCheck, type LiveLaunchIntent, type LivePrepareInput, type LiveStage } from "./types";
+import { normalizeLiveFields, normalizeLiveIdentity, requireNewLaunchPair } from "./validation.server";
+import { LIVE_PACKET_LIMIT, type LiveApprovedCard, type LiveAssets, type LiveChainCheck, type LiveLaunchIntent, type LivePrepareRequest, type LiveStage } from "./types";
 
 type Payload = {input: Omit<LiveLaunchInput, "nftMint">; assets: LiveAssets; fields: ReturnType<typeof normalizeLiveFields>};
 type IntentRow = {id: string; creator_wallet: string; token_mint: string; nft_mint: string; quote_key: string; quote_mint: string; design_key: string; payload_sha256: string; payload_json: string; binding_sha256: string; token_metadata_uri: string; nft_metadata_uri: string; status: LiveStage; token_signature: string | null; nft_signature: string | null; token_receipt_json: string | null; nft_receipt_json: string | null; created_at: number; updated_at: number};
@@ -173,7 +173,7 @@ async function sourceAssets(wallet: string, designKey: string) {
   };
   return {front: await load(design.front), back: await load(design.back)};
 }
-async function preparePayload(wallet: string, raw: LivePrepareInput): Promise<Payload> {
+async function preparePayload(wallet: string, raw: LivePrepareRequest): Promise<Payload> {
   const fields = normalizeLiveFields(raw);
   walletBytes(wallet); walletBytes(raw.nftMint);
   if (new Set([wallet, fields.tokenMint, raw.nftMint, fields.quoteMint]).size !== 4) throw new UserError("Creator, new token mint, creator NFT and quote mint must be distinct addresses.");
@@ -258,7 +258,7 @@ async function retireUnlandedCoin(wallet: string, row: IntentRow): Promise<Inten
   logLaunchEvent("coin_retired", {intentId: row.id, kind: "token", plans: plans.length});
   return ownedIntent(wallet, row.id);
 }
-export async function prepareLiveLaunch(wallet: string, raw: LivePrepareInput) {
+export async function prepareLiveLaunch(wallet: string, raw: LivePrepareRequest) {
   requireLiveConfig("launch");
   if (!/^[a-zA-Z0-9_-]{8,100}$/.test(raw.idempotencyKey)) throw new UserError("Use a stable launch request identifier.");
   const fields = normalizeLiveFields(raw);
@@ -277,6 +277,9 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareInput) {
     const card = cardFits(transaction, ahead);
     await savePlan(existing, transaction, card); return {intent: publicIntent(existing), transaction, card};
   }
+  // A new launch from here on (a saved one returned above, whatever design and pair it was saved with): the pair picks
+  // the card, and a design that is not the pair's own is refused before any artwork, metadata or plan is made.
+  requireNewLaunchPair(fields);
   // One coin in flight per wallet (REL-5): another device or a cleared browser must recover the submitted coin first.
   const inFlight = await one<{id: string}>("SELECT id FROM live_launch_intents WHERE creator_wallet = ? AND status = 'token_pending' LIMIT 1", wallet);
   if (inFlight) throw new UserError("Finish or discard your saved launch first: its coin transaction was already sent. Find it under Saved launches.");
