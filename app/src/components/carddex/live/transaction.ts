@@ -213,10 +213,29 @@ export function signingOrderFor(walletName: string | null | undefined, walletFir
   const name = walletName?.trim().toLowerCase();
   return name && walletFirst?.some(entry => entry === "*" || entry.trim().toLowerCase() === name) ? "wallet-first" : "page-first";
 }
+/**
+ * Whether this wallet approves the coin and its card in one prompt (a multi-input solana:signTransaction), from the
+ * server's list (readiness.walletBatch). Never Phantom, whatever the list says: Phantom blocks multi-transaction requests
+ * from a site it has not reviewed (its red "Request blocked" screen).
+ */
+export function signsBothFor(walletName: string | null | undefined, walletBatch: readonly string[] | undefined): boolean {
+  const name = walletName?.trim().toLowerCase();
+  return !!name && name !== "phantom" && !!walletBatch?.some(entry => entry === "*" || entry.trim().toLowerCase() === name);
+}
 export const WALLET_CHANGED_TRANSACTION = "Nothing was sent and nothing was charged. Your wallet returned a different transaction from the one you reviewed, so this page stopped before adding its own signature. Close this review and try again.";
-/** The wallet returned a different message. `returned` holds its bytes for the server's change log; they cannot land unsigned by this page. */
+/**
+ * The wallet returned a different message. `returned` holds its bytes for the server's change log; they cannot land
+ * unsigned by this page. For one prompt with several transactions, `changes` lists every refused one by its position.
+ */
 export class WalletChangedTransaction extends Error {
-  constructor(readonly returned: Uint8Array) { super(WALLET_CHANGED_TRANSACTION); this.name = "WalletChangedTransaction"; }
+  readonly changes: readonly {index: number; returned: Uint8Array}[];
+  constructor(readonly returned: Uint8Array, changes?: readonly {index: number; returned: Uint8Array}[]) {
+    super(WALLET_CHANGED_TRANSACTION); this.name = "WalletChangedTransaction"; this.changes = changes ?? [{index: 0, returned}];
+  }
+}
+/** The wallet did not return one signed transaction for each one it was asked to sign in a single prompt. */
+export class WalletBatchUnsupported extends Error {
+  constructor() { super("Your wallet did not sign both transactions in one approval."); this.name = "WalletBatchUnsupported"; }
 }
 /**
  * Wallet-first: the wallet must return the reviewed message, or that message with only what the shared wallet rule
@@ -263,8 +282,45 @@ export async function signPlanWithWallet(plan: TransactionPlan, expected: Expect
   return addEphemeralSignature(returned, signer, expected.mint);
 }
 
+/**
+ * Several plans in one wallet prompt (the coin and its card), each checked exactly as signPlanWithWallet checks one:
+ * page-first, each pre-signed plan must come back byte for byte; wallet-first, each returned message must pass the
+ * shared wallet rule before the page adds its signature. A result count that differs from the request throws
+ * WalletBatchUnsupported (nothing was co-signed). Any refused message throws one WalletChangedTransaction listing
+ * them all, and nothing is returned.
+ */
+export async function signPlansWithWallet(items: readonly {plan: TransactionPlan; expected: ExpectedPlan; signer: EphemeralSigner}[], order: SigningOrder,
+  walletSignAll: (transactions: Uint8Array[]) => Promise<Uint8Array[]>): Promise<Uint8Array[]> {
+  const unsigned = items.map(({plan, expected, signer}) => {
+    const wire = validateLivePlan(plan, expected);
+    if (signer.address !== expected.mint || wire.signatures.some(signature => signature.some(Boolean))) throw new Error("The prepared transaction already contains an unexpected signature.");
+    return wire.bytes.slice();
+  });
+  const shown = order === "page-first" ? items.map(({plan, expected, signer}) => partiallySignPlan(plan, expected, signer)) : unsigned;
+  const returned = await walletSignAll(shown.map(bytes => bytes.slice()));
+  if (!Array.isArray(returned) || returned.length !== items.length) throw new WalletBatchUnsupported();
+  const changes: {index: number; returned: Uint8Array}[] = [];
+  const signed = items.map(({expected, signer}, index) => {
+    try {
+      if (order === "page-first") return validateWalletResult(shown[index], returned[index], expected.creator);
+      validateWalletFirstResult(shown[index], returned[index], expected.creator);
+      return addEphemeralSignature(returned[index], signer, expected.mint);
+    } catch (error) {
+      if (!(error instanceof WalletChangedTransaction)) throw error;
+      changes.push({index, returned: error.returned}); return null;
+    }
+  });
+  if (changes.length) throw new WalletChangedTransaction(changes[0].returned, changes);
+  return signed as Uint8Array[];
+}
+
 /** A plan this page received more than ~30 s ago is prepared again before the wallet opens, so its blockhash is fresh. */
 export const PLAN_FRESH_MS = 30_000;
+/**
+ * The coin and card prepared together are fresh for ~15 s: the card's blockhash must outlive the wallet prompt, the
+ * coin's landing and its finalized verification (about 20 s) before the card can be sent, inside its ~150-block window.
+ */
+export const PAIR_FRESH_MS = 15_000;
 export const planIsStale = (receivedAt: number, now: number, maxAgeMs = PLAN_FRESH_MS) => !(receivedAt > 0) || now - receivedAt > maxAgeMs;
 /**
  * Whether a re-prepared plan can go to the wallet without another review: same stage, quote and initial buy, a SOL

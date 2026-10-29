@@ -539,6 +539,18 @@ export async function prepareCreatorNftTransaction(input: LiveLaunchInput, optio
   return makeWalletPlan(input, "nft", creatorNftInstructions(input), "0", options);
 }
 
+/**
+ * The card transaction prepared with its coin, before the coin exists, so one wallet prompt can approve both. Core's
+ * CreateV1 and UpdateV1 read no token or Pump account (the coin mint is attribute text only), so it simulates and
+ * prices on its own; its review and balance check are the card's alone. The caller relays it only after
+ * verifyTokenLaunch verified the coin (the app requires the nft_pending stage). Never signs or sends.
+ */
+export async function prepareCreatorNftAheadOfCoin(input: LiveLaunchInput, options: LiveOptions) {
+  const existing = await verifyCreatorNft(input, { connection: options.connection });
+  if (existing.status === "verified") return { status: "already-created" as const, receipt: existing };
+  return makeWalletPlan(input, "nft", creatorNftInstructions(input), "0", options);
+}
+
 export async function recoverCreatorLaunch(input: LiveLaunchInput, options: LiveOptions & { tokenSignature?: string; nftSignature?: string; tokenMessageSha256?: string; nftMessageSha256?: string }) {
   const token = await verifyTokenLaunch(input, { connection: options.connection, signature: options.tokenSignature, expectedMessageSha256: options.tokenMessageSha256 });
   if (token.status !== "verified") return { status: "token-pending" as const, token };

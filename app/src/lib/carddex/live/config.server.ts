@@ -27,10 +27,26 @@ const RECOVERY_OFF = "Saved launch recovery is paused in this deployment.";
  * ship "*". A wallet-first wallet whose returned message breaks the shared wallet rule falls back to page-first once.
  */
 export const DEFAULT_WALLET_FIRST = ["Phantom"];
-export function walletFirstWallets(value: string | undefined): string[] {
-  if (value === undefined) return DEFAULT_WALLET_FIRST;
+function walletList(value: string | undefined, fallback: string[]): string[] {
+  if (value === undefined) return fallback;
   const names = value.split(",").map(name => name.trim()).filter(name => name && name.length <= 64);
   return names.some(name => name.toLowerCase() === "none") ? [] : names.includes("*") ? ["*"] : names;
+}
+export function walletFirstWallets(value: string | undefined): string[] { return walletList(value, DEFAULT_WALLET_FIRST); }
+/**
+ * Wallets that approve the coin and its card in one prompt: a multi-input solana:signTransaction, then the page relays
+ * the card only once the coin is verified. CARDDEX_LIVE_WALLET_BATCH takes the same comma list, "*" or "none"; unset
+ * means Backpack only, whose public source shows one approval screen for a multi-transaction request and signs the
+ * page-first order without rewriting it. Phantom is never batched, whatever the list says: Phantom blocks requests of
+ * two or more transactions from a site it has not reviewed with its red "Request blocked" screen (github.com/orgs/
+ * phantom/discussions/520), and Jupiter's "Connect as Phantom" reports the same name. MetaMask signs a multi-input
+ * request one confirmation at a time (no saving); Solflare, OKX and Coinbase are undocumented. Every other wallet
+ * approves the card in its own prompt once the coin is confirmed.
+ */
+export const DEFAULT_WALLET_BATCH = ["Backpack"];
+export const NEVER_BATCH_WALLETS = ["phantom"];
+export function walletBatchWallets(value: string | undefined): string[] {
+  return walletList(value, DEFAULT_WALLET_BATCH).filter(name => !NEVER_BATCH_WALLETS.includes(name.toLowerCase()));
 }
 /**
  * Two switches. CARDDEX_LIVE_LAUNCH_ENABLED="true" opens new launches (compose, a new intent, the coin transaction
@@ -53,7 +69,8 @@ export function liveReadiness(): LiveReadiness {
   const recoveryReady = configured && recoveryEnabled;
   // A new launch must also be able to finish, so it needs recovery (sign-in, confirmation, the card) too.
   return { implemented: true, configured, enabled, ready: recoveryReady && enabled, recoveryEnabled, recoveryReady,
-    network: "solana-mainnet-beta", publicOrigin: origin, blockers, walletFirst: walletFirstWallets(env.CARDDEX_LIVE_WALLET_FIRST) };
+    network: "solana-mainnet-beta", publicOrigin: origin, blockers, walletFirst: walletFirstWallets(env.CARDDEX_LIVE_WALLET_FIRST),
+    walletBatch: walletBatchWallets(env.CARDDEX_LIVE_WALLET_BATCH) };
 }
 /** "launch" starts something new; "recovery" serves a creator's existing launch. */
 export function requireLiveConfig(scope: "launch" | "recovery") {

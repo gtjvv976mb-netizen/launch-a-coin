@@ -1,11 +1,14 @@
 import { ed25519 } from "@noble/curves/ed25519";
+import type { D1PreparedStatement } from "@cloudflare/workers-types";
 import { db, one, stmt, UserError } from "../../mintdex/server/db.server";
 import { requireLiveConfig } from "./config.server";
-import { liveSignInMessage, liveSignInProblem } from "./sign-in";
+import { liveSignInInput, liveSignInMessage, liveSignInOutputProblem, liveSignInProblem, type LiveSignInInput } from "./sign-in";
 import type { LiveWallet } from "./types";
 
 export const LIVE_SESSION_COOKIE = "carddex_live_session";
 const CHALLENGE_MS = 5 * 60_000, SESSION_MS = 2 * 3_600_000;
+/** Wallet-independent sign-in challenges one client may request per minute. */
+export const SIGN_IN_CHALLENGES_PER_MINUTE = 10;
 const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 export function walletBytes(wallet: string): Uint8Array {
   if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(wallet)) throw new UserError("Use a valid Solana signer address.");
@@ -47,15 +50,58 @@ export async function verifyWalletChallenge(input: {challengeId: string; wallet:
   try { signature = Uint8Array.from(atob(input.signatureBase64), char => char.charCodeAt(0)); }
   catch { throw new UserError("The wallet signature is invalid."); }
   if (signature.length !== 64 || !ed25519.verify(signature, new TextEncoder().encode(challenge.message), walletBytes(input.wallet), {zip215: false})) throw new UserError("The wallet signature is invalid.");
-  const token = randomToken(), expiresAt = now + SESSION_MS;
   // A consumed challenge cannot create another session, including two concurrent verify requests.
-  await db().batch([
+  return startSession(input.wallet, now, [
     stmt("INSERT INTO tx_guard (ok) SELECT CASE WHEN EXISTS (SELECT 1 FROM live_wallet_challenges WHERE id = ? AND consumed_at IS NULL AND expires_at > ?) THEN 1 ELSE 0 END", input.challengeId, now),
     stmt("DELETE FROM tx_guard"),
     stmt("UPDATE live_wallet_challenges SET consumed_at = ? WHERE id = ?", now, input.challengeId),
-    stmt("INSERT INTO live_wallet_sessions (token_hash, wallet, created_at, expires_at) VALUES (?, ?, ?, ?)", await sha256(token), input.wallet, now, expiresAt),
   ]);
-  return { token, wallet: input.wallet, expiresAt };
+}
+/** The one session result both ownership routes end in, written in the same batch that consumes the challenge. */
+async function startSession(wallet: string, now: number, consume: D1PreparedStatement[]) {
+  const token = randomToken(), expiresAt = now + SESSION_MS;
+  await db().batch([...consume, stmt("INSERT INTO live_wallet_sessions (token_hash, wallet, created_at, expires_at) VALUES (?, ?, ?, ?)", await sha256(token), wallet, now, expiresAt)]);
+  return { token, wallet, expiresAt };
+}
+const base64Bytes = (value: string, label: string) => {
+  try { return Uint8Array.from(atob(value), char => char.charCodeAt(0)); }
+  catch { throw new UserError(`The wallet ${label} is invalid.`); }
+};
+/**
+ * A solana:signIn challenge (connect and ownership in one wallet prompt). It names no wallet, so it is rate-limited per
+ * client: `client` is the connecting address, stored only as a hash. Every request field is set here, bound to this
+ * site's public origin and Solana mainnet, single-use and short-lived.
+ */
+export async function createSignInChallenge(client: string | null) {
+  const { origin } = requireLiveConfig("recovery");
+  const now = Date.now(), expiresAt = now + CHALLENGE_MS, clientHash = await sha256(`${origin}|${client ?? "unknown"}`);
+  const recent = await one<{n: number}>("SELECT COUNT(*) AS n FROM live_sign_in_challenges WHERE client_hash = ? AND created_at > ?", clientHash, now - 60_000);
+  if ((recent?.n ?? 0) >= SIGN_IN_CHALLENGES_PER_MINUTE) throw new UserError("Wait a minute before signing in again.");
+  const challengeId = crypto.randomUUID();
+  const input = liveSignInInput({ origin, nonce: randomToken(), issuedAt: new Date(now), expiresAt: new Date(expiresAt) });
+  await stmt("INSERT INTO live_sign_in_challenges (id, client_hash, origin, input_json, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)", challengeId, clientHash, origin, JSON.stringify(input), now, expiresAt).run();
+  return { challengeId, input, expiresAt };
+}
+/**
+ * Verifies a solana:signIn result the way @solana/wallet-standard-util verifySignIn does (liveSignInOutputProblem:
+ * parse, every field equal, the canonical text exactly the signed bytes), then the ed25519 signature over those bytes.
+ * Ends in the same session as the ownership message.
+ */
+export async function verifySignInChallenge(input: {challengeId: string; wallet: string; signedMessageBase64: string; signatureBase64: string}) {
+  const { origin } = requireLiveConfig("recovery");
+  const challenge = await one<{origin: string; input_json: string; expires_at: number; consumed_at: number | null}>("SELECT * FROM live_sign_in_challenges WHERE id = ?", input.challengeId);
+  const now = Date.now();
+  if (!challenge || challenge.origin !== origin || challenge.consumed_at !== null || challenge.expires_at <= now) throw new UserError("This sign-in expired or was already used. Sign in again.");
+  const request = JSON.parse(challenge.input_json) as LiveSignInInput, key = walletBytes(input.wallet);
+  const signedMessage = base64Bytes(input.signedMessageBase64, "sign-in message"), signature = base64Bytes(input.signatureBase64, "signature");
+  const problem = liveSignInOutputProblem(request, input.wallet, signedMessage) ?? liveSignInProblem(new TextDecoder().decode(signedMessage), { origin, wallet: input.wallet });
+  if (problem) throw new UserError(problem);
+  if (signature.length !== 64 || !ed25519.verify(signature, signedMessage, key, {zip215: false})) throw new UserError("The wallet signature is invalid.");
+  return startSession(input.wallet, now, [
+    stmt("INSERT INTO tx_guard (ok) SELECT CASE WHEN EXISTS (SELECT 1 FROM live_sign_in_challenges WHERE id = ? AND consumed_at IS NULL AND expires_at > ?) THEN 1 ELSE 0 END", input.challengeId, now),
+    stmt("DELETE FROM tx_guard"),
+    stmt("UPDATE live_sign_in_challenges SET consumed_at = ?, wallet = ? WHERE id = ?", now, input.wallet, input.challengeId),
+  ]);
 }
 export async function liveWalletFromToken(token?: string | null): Promise<LiveWallet | null> {
   if (!token || !/^[a-f0-9]{64}$/.test(token)) return null;

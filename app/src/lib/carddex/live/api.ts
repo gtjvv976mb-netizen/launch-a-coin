@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { deleteCookie, getCookie, getRequestHeader, setCookie, setResponseHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { UserError } from "../../mintdex/server/db.server";
-import { createWalletChallenge, deleteLiveWalletSession, LIVE_SESSION_COOKIE, liveWalletFromToken, requireLiveWallet, verifyWalletChallenge } from "./auth.server";
+import { createSignInChallenge, createWalletChallenge, deleteLiveWalletSession, LIVE_SESSION_COOKIE, liveWalletFromToken, requireLiveWallet, verifySignInChallenge, verifyWalletChallenge } from "./auth.server";
 import { assertLiveOrigin, liveReadiness } from "./config.server";
 import * as service from "./service.server";
 import type { LiveResult } from "./types";
@@ -19,6 +19,12 @@ async function attempt<T extends object>(fn: () => Promise<T>): Promise<LiveResu
 function noStore() { try { setResponseHeader("Cache-Control", "no-store"); } catch { /* No request context in isolated tests. */ } }
 function revalidate() { try { setResponseHeader("Cache-Control", "no-cache"); } catch { /* No request context in isolated tests. */ } }
 function sameOrigin() { assertLiveOrigin(getRequestHeader("origin") ?? null); }
+/** The connecting address Cloudflare reports, for the per-client sign-in rate limit only (stored as a hash). */
+function clientAddress() { try { return getRequestHeader("cf-connecting-ip") ?? null; } catch { return null; } }
+function startCookie(result: {token: string; wallet: string; expiresAt: number}) {
+  setCookie(LIVE_SESSION_COOKIE, result.token, {httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: Math.floor((result.expiresAt - Date.now()) / 1000)});
+  return {wallet: result.wallet, expiresAt: result.expiresAt};
+}
 const wallet = () => requireLiveWallet(getCookie(LIVE_SESSION_COOKIE));
 const publicKey = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/);
 const intentId = z.string().uuid();
@@ -33,9 +39,14 @@ export const createLiveWalletChallenge = createServerFn({method: "POST"}).valida
   sameOrigin(); return createWalletChallenge(data.wallet);
 }));
 export const verifyLiveWallet = createServerFn({method: "POST"}).validator(z.object({challengeId: intentId, wallet: publicKey, signatureBase64: z.string().max(128)})).handler(({data}) => attempt(async () => {
-  sameOrigin(); const result = await verifyWalletChallenge(data);
-  setCookie(LIVE_SESSION_COOKIE, result.token, {httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: Math.floor((result.expiresAt - Date.now()) / 1000)});
-  return {wallet: result.wallet, expiresAt: result.expiresAt};
+  sameOrigin(); return startCookie(await verifyWalletChallenge(data));
+}));
+// solana:signIn: connect and ownership in one wallet prompt. The challenge names no wallet; the session is the same.
+export const createLiveSignInChallenge = createServerFn({method: "POST"}).handler(() => attempt(async () => {
+  sameOrigin(); return createSignInChallenge(clientAddress());
+}));
+export const verifyLiveSignIn = createServerFn({method: "POST"}).validator(z.object({challengeId: intentId, wallet: publicKey, signedMessageBase64: z.string().min(1).max(2048), signatureBase64: z.string().max(128)})).handler(({data}) => attempt(async () => {
+  sameOrigin(); return startCookie(await verifySignInChallenge(data));
 }));
 export const signOutLiveWallet = createServerFn({method: "POST"}).handler(() => attempt(async () => {
   sameOrigin(); await deleteLiveWalletSession(getCookie(LIVE_SESSION_COOKIE)); deleteCookie(LIVE_SESSION_COOKIE, {path: "/"}); return {};
@@ -46,7 +57,7 @@ export const prepareLiveLaunch = createServerFn({method: "POST"}).validator(z.ob
   website: z.string().max(2048).optional(), xUrl: z.string().max(2048).optional(),
   cardTemplate: z.string().max(50), quoteAssetKey: z.string().max(30), quoteMint: publicKey,
   initialBuyQuoteBaseUnits: z.string().regex(/^(0|[1-9][0-9]{0,19})$/), slippageBps: z.number().int().min(0).max(1000),
-  assets: z.object({artwork: asset, cardImage: asset, caseImage: asset}), termsAcknowledged: z.literal(true),
+  assets: z.object({artwork: asset, cardImage: asset, caseImage: asset}), termsAcknowledged: z.literal(true), withCard: z.boolean().optional(),
 })).handler(({data}) => attempt(async () => { sameOrigin(); return service.prepareLiveLaunch((await wallet()).wallet, data); }));
 export const checkLiveLaunchSize = createServerFn({method: "POST"}).validator(z.object({
   name: z.string().min(1).max(32), symbol: z.string().regex(/^[A-Za-z0-9]{1,13}$/), quoteAssetKey: z.string().max(30),
@@ -71,6 +82,11 @@ const walletName = z.string().min(1).max(64);
 export const submitLiveTransaction = createServerFn({method: "POST"}).validator(z.object({intentId, kind: z.enum(["token", "nft"]), messageSha256: sha256, transactionBase64: z.string().min(80).max(4000),
   walletName: walletName.optional(), signingOrder: z.enum(["wallet-first", "page-first"]).optional()})).handler(({data}) => attempt(async () => {
   sameOrigin(); return service.submitLiveTransaction((await wallet()).wallet, data);
+}));
+// The card approved with its coin in one prompt, saved before the coin is sent; relayed by submitLiveTransaction later.
+export const holdLiveCard = createServerFn({method: "POST"}).validator(z.object({intentId, messageSha256: sha256, transactionBase64: z.string().min(80).max(4000),
+  walletName: walletName.optional(), signingOrder: z.enum(["wallet-first", "page-first"]).optional()})).handler(({data}) => attempt(async () => {
+  sameOrigin(); return service.holdLiveCard((await wallet()).wallet, data);
 }));
 export const reportLiveWalletChange = createServerFn({method: "POST"}).validator(z.object({intentId, kind: z.enum(["token", "nft"]), messageSha256: sha256, walletName, transactionBase64: z.string().min(1).max(4000)})).handler(({data}) => attempt(async () => {
   sameOrigin(); return service.reportLiveWalletChange((await wallet()).wallet, data);

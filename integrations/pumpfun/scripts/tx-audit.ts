@@ -3,8 +3,8 @@
 //   bun scripts/tx-audit.ts [outDir]
 //
 // The coin transaction comes from the production prepareTokenTransaction and measureTokenTransaction. The card
-// transaction uses the production creatorNftInstructions and the same compile, pricing and compute-limit rule as
-// makeWalletPlan (not exported), because preparing it in production first needs a finalized coin on chain.
+// transaction comes from the production prepareCreatorNftAheadOfCoin, the card plan one wallet approval signs together
+// with its coin; it is built while the coin is not on chain.
 // Every simulation runs with sigVerify off. Nothing is signed or sent, and no secret is read: the fee payer is a
 // public, well-funded mainnet address used only as a simulation input, and the coin mint and card asset are
 // throwaway public keys (their secret halves are dropped unused). RPC calls are counted, throttled and logged.
@@ -12,7 +12,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import BN from "bn.js";
 import {
-  ComputeBudgetProgram, Connection, Keypair, PublicKey, TransactionInstruction, TransactionMessage,
+  ComputeBudgetProgram, Connection, Keypair, PublicKey, TransactionInstruction,
   VersionedTransaction, type AccountInfo, type MessageV0,
 } from "@solana/web3.js";
 import {
@@ -27,8 +27,8 @@ import pumpIdl from "../node_modules/@pump-fun/pump-sdk/src/idl/pump.json";
 import art from "../src/design-assets.json";
 import { PAIR_ASSETS, PUBLIC_MAINNET_RPC } from "../src/index.ts";
 import {
-  CORE_PROGRAM_ID, GUARD_COMPUTE_MARGIN, MAX_MICRO_LAMPORTS, MIN_MICRO_LAMPORTS, PACKET_LIMIT, PUMP_LOOKUP_TABLE, WALLET_SIZE_TARGET,
-  creatorNftInstructions, describeWalletChange, measureTokenTransaction,
+  CORE_PROGRAM_ID, PACKET_LIMIT, PUMP_LOOKUP_TABLE, WALLET_SIZE_TARGET,
+  describeWalletChange, measureTokenTransaction, prepareCreatorNftAheadOfCoin,
   prepareTokenTransaction, transactionBytes, validateSignedWalletTransaction, type LiveLaunchInput, type WalletTransactionPlan,
 } from "../src/live.ts";
 import { WalletMessageRefused, decodeV0Message, keyFlags, walletMessageChange } from "../src/wallet-guards.ts";
@@ -400,45 +400,32 @@ summary["size-matrix"] = { quotes: PAIR_ASSETS.length, walletSizeTarget: WALLET_
   createBytesRange: [Math.min(...matrix.map((r) => r.createBytes)), Math.max(...matrix.map((r) => r.createBytes))],
   buyWithGuardsMaxBytes: Math.max(...allowed.map((r) => r.buyWithGuardsBytes)), buyFitsWithGuardsAll: allowed.every((r) => r.buyWithGuardsBytes <= PACKET_LIMIT) };
 
-// ---- Card transaction (production instructions; makeWalletPlan's compile, price and limit rule) --------------
+// ---- Card transaction: production prepareCreatorNftAheadOfCoin, the plan one approval signs with its coin ------
+// The coin is never on chain here (nothing is sent), so this is also the proof that the card plan needs no coin.
 const cardSource = coinPlans.get("B-sol-create-buy") ?? coinPlans.get("A-sol-create-only")!;
 {
-  const input = cardSource.input, instructions = creatorNftInstructions(input);
-  const [latest, prioritySamples, preparedBlockHeight] = await Promise.all([
-    base.getLatestBlockhash("confirmed"), base.getRecentPrioritizationFees({ lockedWritableAccounts: [payer] }), base.getBlockHeight("confirmed")]);
-  const fees = prioritySamples.map((s) => s.prioritizationFee).filter((fee) => Number.isSafeInteger(fee) && fee >= 0).sort((a, b) => a - b);
-  const microLamports = Math.min(MAX_MICRO_LAMPORTS, Math.max(MIN_MICRO_LAMPORTS, fees[Math.floor(fees.length * 0.75)] ?? MIN_MICRO_LAMPORTS));
-  const compile = (units: number) => new VersionedTransaction(new TransactionMessage({ payerKey: payer, recentBlockhash: latest.blockhash,
-    instructions: [ComputeBudgetProgram.setComputeUnitLimit({ units }), ComputeBudgetProgram.setComputeUnitPrice({ microLamports }), ...instructions] }).compileToV0Message());
-  const first = await simulate("card at 1.4M (makeWalletPlan's first pass)", compile(1_400_000), [payer]);
-  const computeUnitLimit = Math.min(1_400_000, Math.max(100_000, Math.ceil(first.unitsConsumed * 1.2) + GUARD_COMPUTE_MARGIN));
-  const transaction = compile(computeUnitLimit);
-  const fee = await base.getFeeForMessage(transaction.message, "confirmed");
-  const priorityFee = (BigInt(computeUnitLimit) * BigInt(microLamports) + 999_999n) / 1_000_000n;
-  const plan = {
-    kind: "nft", network: "solana:mainnet", status: "wallet-signature-required",
-    transactionBase64: Buffer.from(transaction.serialize()).toString("base64"),
-    messageSha256: createHash("sha256").update(transaction.message.serialize()).digest("hex"),
-    blockhash: latest.blockhash, lastValidBlockHeight: latest.lastValidBlockHeight, preparedBlockHeight,
-    requiredSigners: transaction.message.staticAccountKeys.slice(0, 2).map((k) => k.toBase58()), feePayer: payer.toBase58(),
-    bindingSha256: cardSource.plan.bindingSha256, verifiedSlot: first.slot, preparedAt: new Date().toISOString(),
-    instructionPrograms: [...new Set(transaction.message.compiledInstructions.map((ix) => transaction.message.staticAccountKeys[ix.programIdIndex].toBase58()))],
-    instructionSummary: ["Create separate Core NFT owned by creator", "Permanently remove metadata update authority"],
-    review: { quoteKey: cardSource.plan.review.quoteKey, quoteMint: cardSource.plan.review.quoteMint, quoteDecimals: cardSource.plan.review.quoteDecimals, tokenDecimals: 6,
-      initialBuyQuoteBaseUnits: "0", launchInitialBuyQuoteBaseUnits: input.initialBuyQuoteBaseUnits, minimumTokensOut: "0",
-      networkFeeLamports: String((fee.value ?? 0) - Number(priorityFee)), priorityFeeLamports: priorityFee.toString(), rentAndProgramCostLamports: "0", totalDebitLamports: "0",
-      reserveBufferLamports: "50000", walletBalanceLamports: "0", computeUnitLimit, microLamportsPerComputeUnit: microLamports,
-      transactionBytes: transaction.serialize().length, packetLimit: PACKET_LIMIT },
-  } as unknown as WalletTransactionPlan;
+  const input = cardSource.input;
+  const prepared = await prepareCreatorNftAheadOfCoin(input, { connection: connection as never });
+  if (prepared.status !== "wallet-signature-required") throw new Error("The throwaway card asset already exists");
+  const plan = prepared as WalletTransactionPlan, computeUnitLimit = Number(plan.review.computeUnitLimit), microLamports = plan.review.microLamportsPerComputeUnit;
+  const transaction = VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64"));
   const dump = dumpTransaction(transaction);
   const simulation = await simulate("card", transaction, [payer, new PublicKey(input.nftMint)]);
   const guarded = withGuards(plan, [payerGuard(payer, 0n)]);
   const guardedSimulation = guarded.transaction ? await simulate("card + Phantom-shaped payer guard", guarded.transaction, [payer]) : null;
   const stress = await stressGuards(plan, computeUnitLimit, simulation.unitsConsumed, null);
+  // One approval for both (Backpack by default; never Phantom): the coin and this card prepared together, with the
+  // server's rule that the wallet must cover both debits plus the coin's reserve before the card joins the prompt.
+  const coin = cardSource.plan;
+  const pair = { coinMessageSha256: coin.messageSha256, cardMessageSha256: plan.messageSha256, sameBinding: coin.bindingSha256 === plan.bindingSha256,
+    coinTotalDebitLamports: coin.review.totalDebitLamports, cardTotalDebitLamports: plan.review.totalDebitLamports, reserveBufferLamports: coin.review.reserveBufferLamports,
+    walletBalanceLamports: coin.review.walletBalanceLamports,
+    bothFit: BigInt(coin.review.walletBalanceLamports) >= BigInt(coin.review.totalDebitLamports) + BigInt(plan.review.totalDebitLamports) + BigInt(coin.review.reserveBufferLamports),
+    cardSigningWindowBlocks: plan.lastValidBlockHeight - plan.preparedBlockHeight, cardSimErrWithoutCoin: simulation.err };
   const record = {
-    input, plan, stressNineGuards: stress, note: "Core create reads no token account, so the card simulates fully although its coin is not on chain; prepareCreatorNftTransaction itself would first require the finalized coin.",
-    browserValidateLivePlan: browserAccepts(input, plan), getFeeForMessage: fee.value, firstPassUnits: first.unitsConsumed, computeUnitLimit, microLamports, priorityFeeSamples: feeSummary(prioritySamples),
-    preparedBlockHeight, lastValidBlockHeight: latest.lastValidBlockHeight, transaction: dump, simulation,
+    input, plan, pair, stressNineGuards: stress, note: "Production prepareCreatorNftAheadOfCoin: Core create reads no token account, so the card prepares and simulates while its coin is not on chain.",
+    browserValidateLivePlan: browserAccepts(input, plan), computeUnitLimit, microLamports,
+    preparedBlockHeight: plan.preparedBlockHeight, lastValidBlockHeight: plan.lastValidBlockHeight, transaction: dump, simulation,
     phantomGuards: { guardCount: 1, bytesAfter: guarded.bytes, addedBytes: guarded.bytes - dump.wireBytes, fitsPacket: guarded.fits,
       unitsConsumed: guardedSimulation?.unitsConsumed ?? null, guardUnits: guardedSimulation ? guardedSimulation.unitsConsumed - simulation.unitsConsumed : null,
       withinPlanLimit: guardedSimulation ? guardedSimulation.err === null && guardedSimulation.unitsConsumed <= computeUnitLimit : null,
@@ -447,7 +434,8 @@ const cardSource = coinPlans.get("B-sol-create-buy") ?? coinPlans.get("A-sol-cre
   };
   save("G-card.json", record);
   summary["G-card"] = { bytes: dump.wireBytes, headroom: dump.headroomBytes, cuLimit: computeUnitLimit, cuUsed: simulation.unitsConsumed, cuMargin: computeUnitLimit - simulation.unitsConsumed, microLamports, simErr: simulation.err,
-    loadedData: simulation.loadedAccountsDataSize, payerOutflowLamports: simulation.payerOutflowLamports, browser: record.browserValidateLivePlan,
+    loadedData: simulation.loadedAccountsDataSize, payerOutflowLamports: simulation.payerOutflowLamports, totalDebitReview: plan.review.totalDebitLamports, browser: record.browserValidateLivePlan,
+    pair: { bothFit: pair.bothFit, sameBinding: pair.sameBinding, cardSigningWindowBlocks: pair.cardSigningWindowBlocks },
     guarded: { bytes: guarded.bytes, units: record.phantomGuards.unitsConsumed, withinLimit: record.phantomGuards.withinPlanLimit, loadedData: record.phantomGuards.loadedAccountsDataSize,
       rule: guarded.transaction ? (shippedChecks(plan, guarded.transaction).sharedRule as { accepted: boolean }).accepted : null },
     stressNineGuards: { units: stress.unitsConsumed, withinLimit: stress.withinPlanLimit, bytes: stress.bytesAfter } };

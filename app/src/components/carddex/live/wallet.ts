@@ -1,9 +1,13 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { getWallets } from "@wallet-standard/app";
 import { StandardConnect, StandardDisconnect, StandardEvents, type StandardConnectFeature, type StandardDisconnectFeature, type StandardEventsFeature } from "@wallet-standard/features";
-import { SolanaSignMessage, SolanaSignTransaction, type SolanaSignMessageFeature, type SolanaSignTransactionFeature } from "@solana/wallet-standard-features";
+import {
+  SolanaSignIn, SolanaSignMessage, SolanaSignTransaction,
+  type SolanaSignInFeature, type SolanaSignInInput, type SolanaSignMessageFeature, type SolanaSignTransactionFeature,
+} from "@solana/wallet-standard-features";
 import { ed25519 } from "@noble/curves/ed25519.js";
 import { MAINNET_CHAIN, fromBase58, sameBytes } from "./transaction";
+import { SignInWrongSite } from "./wallet-errors";
 
 type Registry = ReturnType<typeof getWallets>;
 type Wallet = ReturnType<Registry["get"]>[number];
@@ -81,6 +85,39 @@ export async function connectLiveWallet(name: string) {
     return account.address;
   } finally { publish(null); }
 }
+/** Marks a wallet as connecting for the whole sign-in (server reads included), so the wallet list stays busy. */
+export async function whileConnecting<T>(name: string, run: () => Promise<T>): Promise<T> {
+  publish(name);
+  try { return await run(); } finally { publish(null); }
+}
+/** Whether this wallet offers solana:signIn (connect and ownership in one prompt); an account listing features must list it. */
+export function walletSupportsSignIn(name: string | null | undefined): boolean {
+  const wallet = available.find(w => w.name === name);
+  if (!wallet || !(SolanaSignIn in wallet.features)) return false;
+  const account = active?.wallet === wallet ? active.account : null;
+  return !account || !account.features.length || account.features.includes(SolanaSignIn);
+}
+/**
+ * One solana:signIn prompt: the wallet connects (when it was not) and signs the request's SIWS text. Returns the
+ * signed-in account and the wallet's bytes as they are; proveOwnership checks the text and the signature, and the
+ * server checks both again. The signed-in account becomes the connected one, as with connect.
+ */
+export async function signInLiveWallet(name: string, input: SolanaSignInInput) {
+  const chosen = available.find(w => w.name === name);
+  if (!chosen) throw new Error("That wallet is not available in this browser.");
+  const feature = chosen.features[SolanaSignIn] as SolanaSignInFeature[typeof SolanaSignIn] | undefined;
+  if (!feature) throw new Error("This wallet has no sign-in. Connect it, then approve the ownership message.");
+  let out: Awaited<ReturnType<typeof feature.signIn>>[number] | undefined;
+  try { [out] = await feature.signIn(input); }
+  catch (error) { if ((error as { code?: unknown } | null)?.code === -32000 && input.domain) throw new SignInWrongSite(input.domain); throw error; }
+  if (!out?.account || !out.signedMessage?.length || !out.signature?.length) throw new Error("Your wallet did not finish signing in. Nothing was signed for a transaction.");
+  if (out.signatureType && out.signatureType !== "ed25519" || out.signedMessageFormat) throw new Error("Your wallet signed in with a message format this site does not accept.");
+  const address = out.account.address, key = fromBase58(address);
+  if (key.length !== 32 || out.account.publicKey && !sameBytes(new Uint8Array(out.account.publicKey), key)) throw new Error("Your wallet returned an invalid Solana account.");
+  const account = chosen.accounts.find(a => a.address === address) ?? out.account;
+  setActive({ wallet: chosen, account });
+  return { address, signedMessage: new Uint8Array(out.signedMessage), signature: new Uint8Array(out.signature) };
+}
 export async function disconnectLiveWallet() {
   const previous = active; setActive(null);
   const feature = previous?.wallet.features[StandardDisconnect] as StandardDisconnectFeature[typeof StandardDisconnect] | undefined;
@@ -116,4 +153,17 @@ export async function signLiveTransaction(transaction: Uint8Array, expectedAddre
   needWallet(expectedAddress);
   if (!out?.signedTransaction?.length) throw new Error("The wallet returned no signed transaction. Nothing was submitted.");
   return new Uint8Array(out.signedTransaction);
+}
+/**
+ * The coin and its card in one solana:signTransaction request (several inputs). Returns the wallet's outputs as they
+ * are, in order; signPlansWithWallet checks the count and every transaction. Same rules as signLiveTransaction.
+ */
+export async function signLiveTransactions(transactions: Uint8Array[], expectedAddress: string): Promise<Uint8Array[]> {
+  const current = needWallet(expectedAddress);
+  if (current.account.features.length && !current.account.features.includes(SolanaSignTransaction)) throw new Error("This wallet account does not support transaction signing.");
+  const feature = current.wallet.features[SolanaSignTransaction] as SolanaSignTransactionFeature[typeof SolanaSignTransaction];
+  if (!feature.supportedTransactionVersions.includes(0)) throw new Error("This wallet does not support the version 0 launch transaction.");
+  const outputs = await feature.signTransaction(...transactions.map(transaction => ({ account: current.account, transaction, chain: MAINNET_CHAIN, options: { preflightCommitment: "confirmed" as const } })));
+  needWallet(expectedAddress);
+  return Array.from(outputs ?? [], out => new Uint8Array(out?.signedTransaction ?? []));
 }

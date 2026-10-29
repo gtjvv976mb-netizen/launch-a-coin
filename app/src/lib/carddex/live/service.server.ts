@@ -10,7 +10,7 @@ import { COMPOSITION_VERSION, requireTrustedComposition } from "./composition.se
 import { BUY_DOES_NOT_FIT, STOCK_BUY_WARNS } from "./copy";
 import { requireLiveConfig } from "./config.server";
 import { normalizeLiveFields, normalizeLiveIdentity } from "./validation.server";
-import { LIVE_PACKET_LIMIT, type LiveAssets, type LiveLaunchIntent, type LivePrepareInput, type LiveStage } from "./types";
+import { LIVE_PACKET_LIMIT, type LiveApprovedCard, type LiveAssets, type LiveLaunchIntent, type LivePrepareInput, type LiveStage } from "./types";
 
 type Payload = {input: Omit<LiveLaunchInput, "nftMint">; assets: LiveAssets; fields: ReturnType<typeof normalizeLiveFields>};
 type IntentRow = {id: string; creator_wallet: string; token_mint: string; nft_mint: string; quote_key: string; quote_mint: string; design_key: string; payload_sha256: string; payload_json: string; binding_sha256: string; token_metadata_uri: string; nft_metadata_uri: string; status: LiveStage; token_signature: string | null; nft_signature: string | null; token_receipt_json: string | null; nft_receipt_json: string | null; created_at: number; updated_at: number};
@@ -71,15 +71,38 @@ function logTransactionSize(event: "prepared" | "signed", intentId: string, kind
   const bytes = wireBytes(transactionBase64);
   console.info(`Live launch transaction ${event}`, JSON.stringify({intentId, kind, messageSha256, bytes, limit: LIVE_PACKET_LIMIT, headroom: LIVE_PACKET_LIMIT - bytes, ...extra}));
 }
-async function savePlan(row: IntentRow, plan: WalletTransactionPlan) {
-  checkPlan(row, plan);
+const insertPlan = (intentId: string, plan: WalletTransactionPlan, now: number) =>
+  stmt("INSERT OR IGNORE INTO live_launch_transactions (id, intent_id, kind, message_sha256, plan_json, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'prepared', ?, ?)", crypto.randomUUID(), intentId, plan.kind, plan.messageSha256, JSON.stringify(plan), now, now);
+/** Saves a stage's plan; `card` is a card plan prepared with a coin plan (prepareCardAhead), saved in the same batch. */
+async function savePlan(row: IntentRow, plan: WalletTransactionPlan, card: WalletTransactionPlan | null = null) {
+  checkPlan(row, plan); if (card) checkPlan(row, card);
   const now = Date.now();
-  if (plan.kind === "token" && row.status !== "prepared" || plan.kind === "nft" && row.status !== "nft_pending") throw new UserError("Recover the existing transaction before preparing another for this stage.");
-  await guardedBatch([
-    snapshotGuard(row), clearGuard(),
-    stmt("INSERT OR IGNORE INTO live_launch_transactions (id, intent_id, kind, message_sha256, plan_json, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'prepared', ?, ?)", crypto.randomUUID(), row.id, plan.kind, plan.messageSha256, JSON.stringify(plan), now, now),
-  ]);
+  if (plan.kind === "token" && row.status !== "prepared" || plan.kind === "nft" && row.status !== "nft_pending" || card && (card.kind !== "nft" || plan.kind !== "token")) throw new UserError("Recover the existing transaction before preparing another for this stage.");
+  await guardedBatch([snapshotGuard(row), clearGuard(), insertPlan(row.id, plan, now), ...(card ? [insertPlan(row.id, card, now)] : [])]);
   logTransactionSize("prepared", row.id, plan.kind, plan.messageSha256, plan.transactionBase64);
+  if (card) logTransactionSize("prepared", row.id, "nft", card.messageSha256, card.transactionBase64, {ahead: "coin"});
+}
+/**
+ * The card plan prepared with the coin's, for a wallet that approves both in one prompt (readiness.walletBatch). Core
+ * reads no token account, so it is built before the coin exists; it is relayed only once the coin is verified
+ * (submitLiveTransaction requires nft_pending). Null whenever it cannot be prepared now: the card then follows the
+ * coin with its own prompt, and nothing here can stop the coin.
+ */
+async function prepareCardAhead(input: LiveLaunchInput): Promise<WalletTransactionPlan | null> {
+  try {
+    const result = await sdk.prepareCreatorNftAheadOfCoin(input, {connection: connection()});
+    return result.status === "already-created" ? null : result;
+  } catch (error) {
+    console.info("Live launch card not prepared with its coin", JSON.stringify({reason: (error instanceof Error ? error.message : "unknown").replace(/https?:\/\/\S+/g, "[provider]").slice(0, 200)}));
+    return null;
+  }
+}
+/** The card goes in the coin's prompt only if the wallet holds enough SOL for both, plus the coin's reserve buffer. */
+function cardFits(coin: WalletTransactionPlan, card: WalletTransactionPlan | null) {
+  if (!card) return null;
+  const fits = BigInt(coin.review.walletBalanceLamports) >= BigInt(coin.review.totalDebitLamports) + BigInt(card.review.totalDebitLamports) + BigInt(coin.review.reserveBufferLamports);
+  if (!fits) console.info("Live launch card not prepared with its coin", JSON.stringify({reason: "balance"}));
+  return fits ? card : null;
 }
 async function sourceAssets(wallet: string, designKey: string) {
   const design = reviewedDesigns[designKey as keyof typeof reviewedDesigns];
@@ -154,28 +177,34 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareInput) {
   if (existing) {
     if (existing.creator_wallet !== wallet || existing.payload_sha256 !== requestedHash) throw new UserError("This mint or request identifier is already bound to different launch details.");
     if (existing.status === "abandoned") throw new UserError("This unused draft was safely abandoned. Start with a fresh mint and request identifier.");
-    if (existing.status === "nft_pending" || existing.status === "complete") return {intent: publicIntent(existing), transaction: null};
+    if (existing.status === "nft_pending" || existing.status === "complete") return {intent: publicIntent(existing), transaction: null, card: null};
     if (existing.status === "token_pending") throw new UserError("A token transaction was already submitted. Recover its confirmation before preparing another launch.");
     const pending = await one<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = 'token' ORDER BY created_at DESC LIMIT 1", existing.id);
     if (pending?.signature) throw new UserError("A token transaction was already submitted. Recover its confirmation before preparing another launch.");
-    const transaction = await chain(() => sdk.prepareTokenTransaction(adapterInput(existing), {connection: connection()}));
-    await savePlan(existing, transaction); return {intent: publicIntent(existing), transaction};
+    const [transaction, ahead] = await Promise.all([chain(() => sdk.prepareTokenTransaction(adapterInput(existing), {connection: connection()})), raw.withCard ? prepareCardAhead(adapterInput(existing)) : null]);
+    const card = cardFits(transaction, ahead);
+    await savePlan(existing, transaction, card); return {intent: publicIntent(existing), transaction, card};
   }
   const payload = await preparePayload(wallet, raw);
-  const transaction = await chain(() => sdk.prepareTokenTransaction({...payload.input, nftMint: raw.nftMint}, {connection: connection()}));
+  // With withCard, the card plan is prepared alongside (prepareCardAhead) and saved in the same batch as the coin's.
+  const [transaction, ahead] = await Promise.all([chain(() => sdk.prepareTokenTransaction({...payload.input, nftMint: raw.nftMint}, {connection: connection()})),
+    raw.withCard ? prepareCardAhead({...payload.input, nftMint: raw.nftMint}) : null]);
+  const card = cardFits(transaction, ahead);
   const id = crypto.randomUUID(), now = Date.now();
   try {
     await db().batch([
       stmt("INSERT INTO live_launch_intents (id, idempotency_key, creator_wallet, token_mint, nft_mint, quote_key, quote_mint, design_key, payload_sha256, payload_json, binding_sha256, token_metadata_uri, nft_metadata_uri, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'prepared', ?, ?)", id, raw.idempotencyKey, wallet, fields.tokenMint, raw.nftMint, fields.quoteAssetKey, fields.quoteMint, fields.cardTemplate, requestedHash, JSON.stringify(payload), transaction.bindingSha256, payload.input.tokenMetadataUri, payload.input.card.nftMetadataUri, now, now),
       stmt("INSERT INTO live_launch_transactions (id, intent_id, kind, message_sha256, plan_json, status, created_at, updated_at) VALUES (?, ?, 'token', ?, ?, 'prepared', ?, ?)", crypto.randomUUID(), id, transaction.messageSha256, JSON.stringify(transaction), now, now),
+      ...(card ? [insertPlan(id, card, now)] : []),
     ]);
   } catch (error) {
     const concurrent = await one<IntentRow>("SELECT * FROM live_launch_intents WHERE token_mint = ? AND creator_wallet = ?", fields.tokenMint, wallet);
     if (!concurrent || concurrent.payload_sha256 !== requestedHash) throw new UserError("This launch mint or request identifier is already reserved.");
-    await savePlan(concurrent, transaction); return {intent: publicIntent(concurrent), transaction};
+    await savePlan(concurrent, transaction, card); return {intent: publicIntent(concurrent), transaction, card};
   }
   logTransactionSize("prepared", id, "token", transaction.messageSha256, transaction.transactionBase64);
-  return {intent: publicIntent(await ownedIntent(wallet, id)), transaction};
+  if (card) logTransactionSize("prepared", id, "nft", card.messageSha256, card.transactionBase64, {ahead: "coin"});
+  return {intent: publicIntent(await ownedIntent(wallet, id)), transaction, card};
 }
 
 async function confirmationPlan(row: IntentRow, kind: "token" | "nft", input: {signature: string; messageSha256?: string}): Promise<PlanRow> {
@@ -254,7 +283,19 @@ export async function prepareLiveCreatorNft(wallet: string, input: {intentId: st
   if ("receipt" in result) { await completeExistingNft(row, result.receipt); return {intent: publicIntent(await ownedIntent(wallet, row.id)), transaction: null}; }
   await savePlan(row, result); return {intent: publicIntent(row), transaction: result};
 }
-export async function getLiveLaunchIntent(wallet: string, id: string) {
+/**
+ * The card the wallet approved with its coin, while it is still the one to send: the newest card plan for the current
+ * card address holds saved signed bytes that were never submitted. A newer card plan (prepared on its own after an
+ * expiry or a refusal) replaces it.
+ */
+async function approvedCard(row: IntentRow): Promise<LiveApprovedCard | null> {
+  if (row.nft_signature) return null;
+  const newest = await one<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = 'nft' ORDER BY created_at DESC, rowid DESC LIMIT 1", row.id);
+  if (!newest || newest.signature || !newest.signed_transaction_base64) return null;
+  if (!(JSON.parse(newest.plan_json) as WalletTransactionPlan).requiredSigners.includes(row.nft_mint)) return null;
+  return {messageSha256: newest.message_sha256, transactionBase64: newest.signed_transaction_base64, nftMint: row.nft_mint};
+}
+export async function getLiveLaunchIntent(wallet: string, id: string): Promise<LiveLaunchIntent> {
   let row = await ownedIntent(wallet, id);
   if (row.status === "token_pending") {
     const [plans] = await readBatch(q<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = 'token' AND signature IS NOT NULL ORDER BY created_at DESC LIMIT 20", id));
@@ -268,7 +309,9 @@ export async function getLiveLaunchIntent(wallet: string, id: string) {
     const receipt = await chain(() => sdk.verifyCreatorNft(adapterInput(row), {connection: connection()}));
     if (await completeExistingNft(row, receipt)) row = await ownedIntent(wallet, id);
   }
-  return publicIntent(row);
+  // A resumed page (a closed tab) reads the approved card here and sends it once the coin is verified. A finished or
+  // abandoned launch has none to send, so it reads exactly as listed.
+  return {...publicIntent(row), ...(["prepared", "token_pending", "nft_pending"].includes(row.status) ? {approvedCard: await approvedCard(row)} : {})};
 }
 export async function listLiveLaunchIntents(wallet: string) {
   requireLiveConfig("recovery");
@@ -316,6 +359,8 @@ async function checkBeforeSend(plan: WalletTransactionPlan, transactionBase64: s
 type SigningContext = {walletName?: string; signingOrder?: "wallet-first" | "page-first"};
 export async function submitLiveTransaction(wallet: string, input: {intentId: string; kind: "token" | "nft"; messageSha256: string; transactionBase64: string} & SigningContext) {
   const row = await ownedIntent(wallet, input.intentId);
+  // A card approved with its coin waits for the coin's finalized verification: never relayed before it.
+  if (input.kind === "nft" && ["prepared", "token_pending"].includes(row.status)) throw new UserError("The card is sent once its coin is verified on Solana. Check the coin's confirmation first.");
   if (input.kind === "token" && !["prepared", "token_pending"].includes(row.status) || input.kind === "nft" && row.status !== "nft_pending") throw new UserError("This launch has already advanced beyond that wallet transaction.");
   const prepared = await one<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = ? AND message_sha256 = ?", row.id, input.kind, input.messageSha256);
   if (!prepared) throw new UserError("This transaction was not prepared for this launch.");
@@ -329,6 +374,8 @@ export async function submitLiveTransaction(wallet: string, input: {intentId: st
   }
   if (submittedSignature && submittedSignature !== signed.signature) throw new UserError("A different transaction for this stage is already pending. Recover it before authorizing another.");
   if (prepared.signature && (prepared.signature !== signed.signature || prepared.signed_transaction_base64 !== signed.transactionBase64)) throw new UserError("This prepared transaction already has different submitted bytes.");
+  // A card approved with its coin was saved before it was sent (holdLiveCard): only those exact bytes go for its plan.
+  if (!prepared.signature && prepared.signed_transaction_base64 && prepared.signed_transaction_base64 !== signed.transactionBase64) throw new UserError("This card was already approved with other signed bytes. Send those, or prepare the card again.");
   logTransactionSize("signed", row.id, input.kind, plan.messageSha256, signed.transactionBase64, {...(input.walletName ? {wallet: input.walletName} : {}), ...(input.signingOrder ? {order: input.signingOrder} : {}),
     ...(signed.signedMessageSha256 !== plan.messageSha256 ? {signedMessageSha256: signed.signedMessageSha256, walletGuards: String(signed.walletGuards), blockhash: signed.blockhashChanged ? "refreshed" : "plan"} : {})});
   // Read-only checks run before anything is saved. A definite failure (expired approval, failed signed simulation)
@@ -365,6 +412,33 @@ export async function submitLiveTransaction(wallet: string, input: {intentId: st
     return {intent: publicIntent(await ownedIntent(wallet, row.id)), signature: signed.signature, submission: "unknown" as const,
       warning: "The provider did not return a definitive submission result. Check this saved signature before authorizing anything else."};
   }
+}
+/**
+ * Saves the card the wallet approved together with its coin, before the coin is sent, so a closed tab can still send
+ * it once the coin is verified. The bytes must pass the same check as any send (the shared wallet rule against the
+ * card's plan, both signatures valid) and keep the plan's blockhash, so they stop landing at the plan's own expiry,
+ * which card replacement already waits past. Nothing is sent here: submitLiveTransaction relays these exact bytes
+ * only at the nft_pending stage.
+ */
+export async function holdLiveCard(wallet: string, input: {intentId: string; messageSha256: string; transactionBase64: string} & SigningContext) {
+  const row = await ownedIntent(wallet, input.intentId);
+  if (!["prepared", "token_pending", "nft_pending"].includes(row.status) || row.nft_signature) throw new UserError("This card can no longer be saved ahead of its coin. Check the saved launch.");
+  const prepared = await one<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = 'nft' AND message_sha256 = ?", row.id, input.messageSha256);
+  if (!prepared) throw new UserError("This card transaction was not prepared for this launch.");
+  const plan = JSON.parse(prepared.plan_json) as WalletTransactionPlan; checkPlan(row, plan);
+  let signed: ReturnType<typeof sdk.validateSignedWalletTransaction>;
+  try { signed = sdk.validateSignedWalletTransaction(plan, input.transactionBase64); }
+  catch (error) { throw new UserError(`The approved card differs from the one you reviewed, so it was not saved (${error instanceof Error ? error.message.slice(0, 200) : "invalid signature"}).`); }
+  // A refreshed blockhash needs an RPC read to bound when the bytes stop landing; that card is approved again later.
+  if (signed.blockhashChanged) throw new UserError("Your wallet refreshed the card's blockhash, so the card is approved on its own after the coin.");
+  if (prepared.signature || prepared.signed_transaction_base64 && prepared.signed_transaction_base64 !== signed.transactionBase64) throw new UserError("This card transaction already has other approved bytes.");
+  await guardedBatch([
+    guard("EXISTS (SELECT 1 FROM live_launch_intents WHERE id = ? AND nft_mint = ? AND binding_sha256 = ? AND nft_signature IS NULL AND status IN ('prepared','token_pending','nft_pending'))", row.id, row.nft_mint, row.binding_sha256), clearGuard(),
+    stmt("UPDATE live_launch_transactions SET signed_transaction_base64 = ?, signed_message_sha256 = ?, effective_last_valid_block_height = ?, updated_at = ? WHERE id = ? AND signature IS NULL", signed.transactionBase64, signed.signedMessageSha256, plan.lastValidBlockHeight, Date.now(), prepared.id),
+  ]);
+  logTransactionSize("signed", row.id, "nft", plan.messageSha256, signed.transactionBase64, {held: "until the coin is verified",
+    ...(input.walletName ? {wallet: input.walletName} : {}), ...(input.signingOrder ? {order: input.signingOrder} : {})});
+  return {held: true as const, lastValidBlockHeight: plan.lastValidBlockHeight};
 }
 /**
  * A wallet returned a different message from the reviewed plan, so the page refused to co-sign it. Logs what changed

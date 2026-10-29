@@ -11,7 +11,7 @@ import { getAssetV1AccountDataSerializer as rawAssetSerializer } from "@metaplex
 import { getPluginRegistryV1AccountDataSerializer as rawRegistrySerializer } from "@metaplex-foundation/mpl-core/dist/src/generated/types/pluginRegistryV1AccountData.js";
 import { publicKey as umiKey } from "@metaplex-foundation/umi";
 import { MAINNET_GENESIS_HASH, PAIR_ASSETS } from "../src/index.ts";
-import { CORE_PROGRAM_ID, PACKET_LIMIT, PUMP_LOOKUP_TABLE, REFRESHED_BLOCKHASH_MARGIN, WALLET_SIZE_TARGET, pinnedLookupTable, SignedTransactionNotSent, assertNftMintReplaceable, broadcastSignedWalletTransaction, checkSignedWalletTransaction, assertTokenMintReplaceable, creatorNftInstructions, describeWalletChange, measureTokenTransaction, prepareCreatorNftTransaction, prepareTokenTransaction, recoverCreatorLaunch, sendSignedWalletTransaction, transactionBytes, validateSignedWalletTransaction, verifyCreatorNft, verifyTokenLaunch, type LiveConnection, type LiveLaunchInput, type WalletTransactionPlan } from "../src/live.ts";
+import { CORE_PROGRAM_ID, PACKET_LIMIT, PUMP_LOOKUP_TABLE, REFRESHED_BLOCKHASH_MARGIN, WALLET_SIZE_TARGET, pinnedLookupTable, SignedTransactionNotSent, assertNftMintReplaceable, broadcastSignedWalletTransaction, checkSignedWalletTransaction, assertTokenMintReplaceable, creatorNftInstructions, describeWalletChange, measureTokenTransaction, prepareCreatorNftAheadOfCoin, prepareCreatorNftTransaction, prepareTokenTransaction, recoverCreatorLaunch, sendSignedWalletTransaction, transactionBytes, validateSignedWalletTransaction, verifyCreatorNft, verifyTokenLaunch, type LiveConnection, type LiveLaunchInput, type WalletTransactionPlan } from "../src/live.ts";
 import fixture from "./fixtures/mainnet-pair-accounts-2026-10-28.json";
 import feeFixture from "./fixtures/mainnet-fee-account-2026-10-28.json";
 import tableFixture from "./fixtures/mainnet-pump-lookup-table-2026-10-29.json";
@@ -413,6 +413,35 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     }
     expect(update.newUpdateAuthority).toEqual({ __option: "Some", value: { __kind: "None" } });
     expect(instructions.every((ix) => ix.programId.equals(CORE_PROGRAM_ID))).toBe(true);
+  });
+
+  test("the card can be prepared with its coin, before the coin exists: Core reads no token account", async () => {
+    const input = defaultInput(), rpc = mockRpc(), reads: string[] = [];
+    const connection = new Proxy(rpc.connection, { get(target, prop) {
+      const value = Reflect.get(target, prop);
+      if (prop === "getMultipleAccountsInfoAndContext" || prop === "getAccountInfoAndContext" || prop === "getAccountInfo") return async (keys: PublicKey | PublicKey[], ...rest: unknown[]) => {
+        for (const key of Array.isArray(keys) ? keys : [keys]) reads.push(key.toBase58());
+        return (value as (...args: unknown[]) => unknown).call(target, keys, ...rest);
+      };
+      return typeof value === "function" ? value.bind(target) : value;
+    } }) as LiveConnection;
+    const card = await prepareCreatorNftAheadOfCoin(input, { connection });
+    if (card.status !== "wallet-signature-required") throw new Error("Expected a fresh card plan");
+    expect(card.kind).toBe("nft"); expect(card.requiredSigners).toEqual([input.creator, input.nftMint]);
+    expect(validateLivePlan(card, expectedPlan(input, card)).signers).toEqual([input.creator, input.nftMint]);
+    // Nothing about the coin is read: not its mint, its curve or any token account.
+    expect(reads).not.toContain(input.mint);
+    expect(reads).not.toContain(bondingCurvePda(new PublicKey(input.mint)).toBase58());
+    expect(new Set(reads)).toEqual(new Set([input.nftMint, input.creator]));
+    // The same card as the one prepared after the coin: the same instructions and binding.
+    const token = await prepareTokenTransaction(input, { connection: rpc.connection });
+    rpc.remember(token, tokenSignature); await rpc.addToken(input);
+    const after = await prepareCreatorNftTransaction(input, { connection: rpc.connection, tokenSignature });
+    if (after.status !== "wallet-signature-required") throw new Error("Expected a fresh card plan");
+    expect(after.messageSha256).toBe(card.messageSha256); expect(after.bindingSha256).toBe(card.bindingSha256);
+    rpc.addNft(input);
+    expect((await prepareCreatorNftAheadOfCoin(input, { connection: rpc.connection })).status).toBe("already-created");
+    expect(rpc.sent()).toBe(0);
   });
 
   test("NFT stage waits for final token verification and permits token-created/NFT-pending recovery", async () => {

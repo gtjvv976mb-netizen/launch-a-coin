@@ -39,6 +39,8 @@ let env: Record<string, unknown>;
 mock.module("../../src/lib/bindings.server", () => ({bindings: () => env}));
 let tokenVerified = false, nftVerified = false, replaceable = false, uncertain = false, prepareCalls = 0, nftPrepareCalls = 0, sendCalls = 0, receiptCreator: string | null = null;
 let tokenInputs: any[] = [], nftInputs: any[] = [];
+// The card prepared with its coin (withCard): what it was prepared from, whether that fails, and the wallet's balance.
+let aheadInputs: any[] = [], aheadFails = false, walletLamports = "10000000000";
 let sizes: {createBytes: number; buyBytes: number; buyBlocked?: string | null} = {createBytes: 950, buyBytes: 1200}, measured: any[] = [];
 // What the mocked chain saw: the expected message hash each verification used, and each expiry gate's height.
 let verifyHashes: (string | undefined)[] = [], nftTokenHashes: (string | undefined)[] = [], expiryGates: (number | undefined)[] = [], checkedHeight: number | null = null;
@@ -51,12 +53,15 @@ function plan(input: any, kind: "token" | "nft") {
   const counter = kind === "token" ? ++prepareCalls : ++nftPrepareCalls;
   return {kind, transactionBase64: `${kind}-unsigned-${counter}`, messageSha256: (kind === "token" ? "a" : "c").repeat(62) + String(counter).padStart(2, "0"),
     blockhash: "fixture", lastValidBlockHeight: 100, requiredSigners: [input.creator, kind === "token" ? input.mint : input.nftMint], feePayer: input.creator,
-    bindingSha256: binding, verifiedSlot: 50, review: {quoteKey: input.quoteKey, initialBuyQuoteBaseUnits: input.initialBuyQuoteBaseUnits}};
+    bindingSha256: binding, verifiedSlot: 50, review: {quoteKey: input.quoteKey, initialBuyQuoteBaseUnits: input.initialBuyQuoteBaseUnits,
+      walletBalanceLamports: walletLamports, totalDebitLamports: kind === "token" ? "30000000" : "6000000", reserveBufferLamports: "50000"}};
 }
 function signedSignature(prepared: {kind: string; messageSha256: string}) { return prepared.kind === "token" ? "s".repeat(88) : String.fromCharCode(115 + Number(prepared.messageSha256.slice(-2))).repeat(88); }
 // "-guarded" bytes stand for what a wallet returns with appended Lighthouse assertions: another message, so another
 // signature and signed hash, within the shared wallet rule.
 const guarded = (bytes: string) => bytes.endsWith("-guarded");
+// "-refreshed" bytes stand for a wallet-refreshed blockhash within the shared wallet rule.
+const refreshed = (bytes: string) => bytes.endsWith("-refreshed");
 function signatureFor(prepared: {kind: string; messageSha256: string}, bytes: string) { const signature = signedSignature(prepared); return guarded(bytes) ? signature.slice(0, 87) + "G" : signature; }
 const signedHash = (prepared: {messageSha256: string}, bytes: string) => guarded(bytes) ? "e".repeat(62) + prepared.messageSha256.slice(-2) : prepared.messageSha256;
 mock.module("../../../integrations/pumpfun/src/live", () => ({
@@ -65,13 +70,14 @@ mock.module("../../../integrations/pumpfun/src/live", () => ({
   prepareTokenTransaction: async (input: any) => { tokenInputs.push(input); return plan(input, "token"); },
   verifyTokenLaunch: async (input: any, options: any) => { verifyHashes.push(options.expectedMessageSha256); const result = {status: tokenVerified ? "verified" : "pending", ...identity(input), signature: options.signature, slot: 101, messageSha256: options.expectedMessageSha256}; const hook = tokenVerifyHook; tokenVerifyHook = undefined; await hook?.(); return result; },
   verifyCreatorNft: async (input: any, options: any) => { if (options.signature) verifyHashes.push(options.expectedMessageSha256); const result = {status: nftVerified ? "verified" : "pending", ...identity(input), signature: options.signature, slot: 102, messageSha256: options.expectedMessageSha256}; const hook = nftVerifyHook; nftVerifyHook = undefined; await hook?.(); return result; },
+  prepareCreatorNftAheadOfCoin: async (input: any) => { aheadInputs.push(input); if (aheadFails) throw new Error("429 Too Many Requests from https://rpc.example.test"); return plan(input, "nft"); },
   prepareCreatorNftTransaction: async (input: any, options: any) => { if (!tokenVerified) throw new Error("Token is not finalized"); nftInputs.push(input); nftTokenHashes.push(options.tokenMessageSha256); const hook = nftPrepareHook; nftPrepareHook = undefined; await hook?.(); return nftVerified ? {status: "already-created", receipt: {status: "verified", ...identity(input)}} : plan(input, "nft"); },
   assertNftMintReplaceable: async (_input: any, options: any) => { expiryGates.push(options.lastValidBlockHeight); if (!replaceable || nftVerified) throw new Error("Prior NFT blockhash has not expired or its account exists"); const hook = nftReplaceHook; nftReplaceHook = undefined; await hook?.(); return {replaceable: true}; },
   assertTokenMintReplaceable: async (_input: any, options: any) => { expiryGates.push(options.lastValidBlockHeight); if (!replaceable || tokenVerified) throw new Error("Prior token blockhash has not expired or its account exists"); return {replaceable: true}; },
   validateSignedWalletTransaction: (prepared: any, bytes: string) => {
-    if (bytes !== `${prepared.transactionBase64}-signed` && bytes !== `${prepared.transactionBase64}-guarded`) throw new Error("Prepared message or required signatures changed");
+    if (![`${prepared.transactionBase64}-signed`, `${prepared.transactionBase64}-guarded`, `${prepared.transactionBase64}-refreshed`].includes(bytes)) throw new Error("Prepared message or required signatures changed");
     return {signature: signatureFor(prepared, bytes), transactionBase64: bytes, messageSha256: prepared.messageSha256, signedMessageSha256: signedHash(prepared, bytes),
-      blockhash: "fixture", blockhashChanged: false, walletGuards: guarded(bytes) ? 2 : 0};
+      blockhash: "fixture", blockhashChanged: refreshed(bytes), walletGuards: guarded(bytes) ? 2 : 0};
   },
   SignedTransactionNotSent,
   describeWalletChange: (prepared: any, bytes: string) => ({bytesBefore: 900, bytesAfter: 944, limit: 1232, parsed: true, blockhashChanged: false, programsAdded: ["L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95"], planned: prepared.messageSha256, returnedLength: bytes.length}),
@@ -92,7 +98,7 @@ mock.module("../../../integrations/pumpfun/src/live", () => ({
   },
 }));
 const {publicOrigin, liveReadiness} = await import("../../src/lib/carddex/live/config.server");
-const {LIVE_SIGN_IN_CHAIN_ID, liveSignInProblem} = await import("../../src/lib/carddex/live/sign-in");
+const {LIVE_SIGN_IN_CHAIN_ID, LIVE_SIGN_IN_STATEMENT: LIVE_SIGN_IN_STATEMENT_TEXT, liveSignInProblem} = await import("../../src/lib/carddex/live/sign-in");
 const auth = await import("../../src/lib/carddex/live/auth.server");
 const assets = await import("../../src/lib/carddex/live/assets.server");
 const service = await import("../../src/lib/carddex/live/service.server");
@@ -116,6 +122,7 @@ beforeEach(() => {
   tokenVerifyHook = nftVerifyHook = nftPrepareHook = nftReplaceHook = undefined;
   sizes = {createBytes: 950, buyBytes: 1200}; measured = []; preSend = "ready"; savedAtCheck = [];
   verifyHashes = []; nftTokenHashes = []; expiryGates = []; checkedHeight = null;
+  aheadInputs = []; aheadFails = false; walletLamports = "10000000000";
 });
 afterAll(() => { globalThis.fetch = nativeFetch; sqlite.close(); });
 function image(width: number, height: number) { const bytes = new Uint8Array(40); bytes.set([0x89, 0x50, 0x4e, 0x47]); new DataView(bytes.buffer).setUint32(16, width); new DataView(bytes.buffer).setUint32(20, height); return bytes; }
@@ -692,5 +699,187 @@ describe("wallet warning fixes on the server", () => {
     expect(liveReadiness().walletFirst).toEqual([]);
     env.CARDDEX_LIVE_WALLET_FIRST = "";
     expect(liveReadiness().walletFirst).toEqual([]);
+  });
+});
+
+describe("one wallet approval for the coin and its card, on the server", () => {
+  const rows = (id: string) => sqlite.query("SELECT kind, signature, signed_transaction_base64 AS bytes, signed_message_sha256 AS hash, effective_last_valid_block_height AS bound FROM live_launch_transactions WHERE intent_id = ? ORDER BY kind, created_at").all(id) as {kind: string; signature: string | null; bytes: string | null; hash: string | null; bound: number | null}[];
+  test("withCard prepares the card plan with the coin's, saved together, before the coin exists", async () => {
+    const first = await service.prepareLiveLaunch(creator, {...await input(), withCard: true});
+    expect(first.intent.status).toBe("prepared");
+    expect(first.card).toMatchObject({kind: "nft", requiredSigners: [creator, nftMint], bindingSha256: binding});
+    expect(aheadInputs).toHaveLength(1); expect(aheadInputs[0]).toMatchObject({creator, mint, nftMint, card: {nftMetadataUri: first.intent.nftMetadataUri}});
+    expect(rows(first.intent.id).map(row => row.kind)).toEqual(["nft", "token"]);
+    // Without it, nothing extra is prepared; a stale re-prepare with it adds a fresh pair for the same launch and keys.
+    const plain = await service.prepareLiveLaunch(creator, await input());
+    expect(plain.card).toBeNull(); expect(aheadInputs).toHaveLength(1);
+    const again = await service.prepareLiveLaunch(creator, {...await input(), withCard: true});
+    expect(again.intent.id).toBe(first.intent.id); expect(again.card!.messageSha256).not.toBe(first.card!.messageSha256);
+    expect(rows(first.intent.id).map(row => row.kind)).toEqual(["nft", "nft", "token", "token", "token"]);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 1});
+    expect(sendCalls).toBe(0);
+  });
+  test("the card stays out of the coin's prompt when the wallet cannot cover both, or it cannot be prepared now", async () => {
+    walletLamports = "36000000"; // the coin's 30,000,000 and its 50,000 reserve fit; the card's 6,000,000 more does not
+    const short = await service.prepareLiveLaunch(creator, {...await input(), withCard: true});
+    expect(short.card).toBeNull(); expect(short.transaction!.kind).toBe("token");
+    expect(rows(short.intent.id).map(row => row.kind)).toEqual(["token"]);
+    walletLamports = "10000000000"; aheadFails = true;
+    const {result, lines} = await captured("info", async () => service.prepareLiveLaunch(creator, {...await input(), withCard: true}));
+    expect(result.card).toBeNull(); expect(result.transaction!.kind).toBe("token");
+    const skipped = lines.filter(line => line[0] === "Live launch card not prepared with its coin").map(line => String(line[1]));
+    expect(skipped).toHaveLength(1); expect(skipped[0]).toContain("[provider]"); expect(skipped[0]).not.toContain("rpc.example.test");
+  });
+  test("the approved card is saved before the coin is sent, never relayed before the coin is verified, and a closed tab can send it", async () => {
+    const first = await service.prepareLiveLaunch(creator, {...await input(), withCard: true}), coin = first.transaction!, card = first.card!;
+    const cardBytes = `${card.transactionBase64}-signed`;
+    // Never before the coin is verified, held or not.
+    await expect(service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: card.messageSha256, transactionBase64: cardBytes})).rejects.toThrow("sent once its coin is verified");
+    expect(await service.holdLiveCard(creator, {intentId: first.intent.id, messageSha256: card.messageSha256, transactionBase64: cardBytes, walletName: "Backpack", signingOrder: "page-first"})).toEqual({held: true, lastValidBlockHeight: 100});
+    expect(rows(first.intent.id).find(row => row.kind === "nft")).toEqual({kind: "nft", signature: null, bytes: cardBytes, hash: card.messageSha256, bound: 100});
+    // The same bytes again are accepted; other bytes for that plan are refused, and the saved bytes never change.
+    await service.holdLiveCard(creator, {intentId: first.intent.id, messageSha256: card.messageSha256, transactionBase64: cardBytes});
+    await expect(service.holdLiveCard(creator, {intentId: first.intent.id, messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-guarded`})).rejects.toThrow("other approved bytes");
+    expect(() => sqlite.exec(`UPDATE live_launch_transactions SET signed_transaction_base64 = 'other' WHERE message_sha256 = '${card.messageSha256}'`)).toThrow("immutable");
+    expect((await service.getLiveLaunchIntent(creator, first.intent.id)).approvedCard).toEqual({messageSha256: card.messageSha256, transactionBase64: cardBytes, nftMint});
+    await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: coin.messageSha256, transactionBase64: `${coin.transactionBase64}-signed`});
+    expect(sendCalls).toBe(1);
+    // The tab closes. A fresh page reads the saved launch: the coin is pending, the card still approved.
+    const resumed = await service.getLiveLaunchIntent(creator, first.intent.id);
+    expect(resumed).toMatchObject({status: "token_pending", approvedCard: {messageSha256: card.messageSha256}});
+    await expect(service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: card.messageSha256, transactionBase64: cardBytes})).rejects.toThrow("sent once its coin is verified");
+    tokenVerified = true;
+    const verified = await service.getLiveLaunchIntent(creator, first.intent.id);
+    expect(verified.status).toBe("nft_pending"); expect(verified.approvedCard!.transactionBase64).toBe(cardBytes);
+    await expect(service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-guarded`})).rejects.toThrow("already approved with other signed bytes");
+    const sent = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: verified.approvedCard!.messageSha256, transactionBase64: verified.approvedCard!.transactionBase64});
+    expect(sent.intent.nftSignature).toBe(sent.signature); expect(sendCalls).toBe(2);
+    expect((await service.getLiveLaunchIntent(creator, first.intent.id)).approvedCard).toBeNull();
+    nftVerified = true;
+    expect((await service.confirmLiveCreatorNft(creator, {intentId: first.intent.id, signature: sent.signature, messageSha256: card.messageSha256})).intent.status).toBe("complete");
+    expect(verifyHashes.at(-1)).toBe(card.messageSha256);
+    expect((await service.getLiveLaunchIntent(creator, first.intent.id)).approvedCard).toBeUndefined();
+  });
+  test("an approved card that ran out of time while the coin confirmed is prepared again on its own, with the same card key", async () => {
+    const first = await service.prepareLiveLaunch(creator, {...await input(), withCard: true}), card = first.card!;
+    await service.holdLiveCard(creator, {intentId: first.intent.id, messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-signed`});
+    const coinSent = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "token", messageSha256: first.transaction!.messageSha256, transactionBase64: `${first.transaction!.transactionBase64}-signed`});
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: first.intent.id, signature: coinSent.signature, messageSha256: first.transaction!.messageSha256});
+    preSend = "expired";
+    const refused = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-signed`}).then(() => null, (error: unknown) => error);
+    expect(service.liveFailure(refused)).toMatchObject({ok: false, unsendable: true, expired: true});
+    expect(sqlite.query("SELECT status, nft_signature FROM live_launch_intents WHERE id = ?").get(first.intent.id)).toEqual({status: "nft_pending", nft_signature: null});
+    preSend = "ready";
+    const fresh = (await service.prepareLiveCreatorNft(creator, {intentId: first.intent.id, nftMint})).transaction!;
+    expect(fresh.requiredSigners).toEqual([creator, nftMint]); expect(expiryGates).toEqual([]);
+    // The newer card plan replaces the expired approval.
+    expect((await service.getLiveLaunchIntent(creator, first.intent.id)).approvedCard).toBeNull();
+    const sent = await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: fresh.messageSha256, transactionBase64: `${fresh.transactionBase64}-signed`});
+    expect(sent.intent.nftSignature).toBe(sent.signature); expect(sendCalls).toBe(2);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 1});
+  });
+  test("a card key change waits past the approved card's expiry, and the old approval is never used for the new key", async () => {
+    const first = await service.prepareLiveLaunch(creator, {...await input(), withCard: true}), card = first.card!;
+    await service.holdLiveCard(creator, {intentId: first.intent.id, messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-signed`});
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: first.intent.id, signature: "s".repeat(88), messageSha256: first.transaction!.messageSha256});
+    await expect(service.prepareLiveCreatorNft(creator, {intentId: first.intent.id, nftMint: replacementNft})).rejects.toThrow("not expired");
+    expect(expiryGates).toEqual([100]);
+    replaceable = true;
+    const rotated = await service.prepareLiveCreatorNft(creator, {intentId: first.intent.id, nftMint: replacementNft});
+    expect(rotated.intent.nftMint).toBe(replacementNft);
+    expect((await service.getLiveLaunchIntent(creator, first.intent.id)).approvedCard).toBeNull();
+    await expect(service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-signed`})).rejects.toThrow("does not match");
+    expect(sendCalls).toBe(0);
+  });
+  test("a card is saved ahead only within the same check as a send, and only before it is sent", async () => {
+    const first = await service.prepareLiveLaunch(creator, {...await input(), withCard: true}), card = first.card!, coin = first.transaction!;
+    const hold = (messageSha256: string, transactionBase64: string) => service.holdLiveCard(creator, {intentId: first.intent.id, messageSha256, transactionBase64});
+    await expect(hold(card.messageSha256, "modified")).rejects.toThrow("differs from the one you reviewed");
+    await expect(hold(card.messageSha256, `${card.transactionBase64}-refreshed`)).rejects.toThrow("refreshed the card's blockhash");
+    await expect(hold(coin.messageSha256, `${coin.transactionBase64}-signed`)).rejects.toThrow("not prepared for this launch");
+    await expect(service.holdLiveCard(otherWallet, {intentId: first.intent.id, messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-signed`})).rejects.toThrow("does not belong");
+    expect(rows(first.intent.id).every(row => row.bytes === null)).toBe(true);
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: first.intent.id, signature: "s".repeat(88), messageSha256: coin.messageSha256});
+    await service.submitLiveTransaction(creator, {intentId: first.intent.id, kind: "nft", messageSha256: card.messageSha256, transactionBase64: `${card.transactionBase64}-signed`});
+    await expect(hold(card.messageSha256, `${card.transactionBase64}-signed`)).rejects.toThrow("can no longer be saved");
+  });
+  test("readiness lists the wallets that sign both in one prompt: Backpack unless configured, never Phantom", () => {
+    expect(liveReadiness().walletBatch).toEqual(["Backpack"]);
+    env.CARDDEX_LIVE_WALLET_BATCH = "Phantom, Backpack, MetaMask";
+    expect(liveReadiness().walletBatch).toEqual(["Backpack", "MetaMask"]);
+    env.CARDDEX_LIVE_WALLET_BATCH = "*";
+    expect(liveReadiness().walletBatch).toEqual(["*"]);
+    env.CARDDEX_LIVE_WALLET_BATCH = "none";
+    expect(liveReadiness().walletBatch).toEqual([]);
+  });
+});
+
+const {liveSignInText} = await import("../../src/lib/carddex/live/sign-in");
+describe("Sign In With Solana on the server (solana:signIn)", () => {
+  const encode = (text: string) => new TextEncoder().encode(text);
+  const b64 = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes));
+  const proof = (challengeId: string, text: string, seed = creatorSeed, wallet = creator) => ({challengeId, wallet, signedMessageBase64: b64(encode(text)), signatureBase64: b64(ed25519.sign(encode(text), seed))});
+  test("a wallet-independent challenge names this site and mainnet, and a canonical sign-in starts the same session as the message", async () => {
+    const challenge = await auth.createSignInChallenge("203.0.113.7");
+    expect(challenge.input).toMatchObject({domain: "launchacard.fun", uri: "https://launchacard.fun", version: "1", chainId: "mainnet", statement: LIVE_SIGN_IN_STATEMENT_TEXT});
+    expect(challenge.input.nonce).toMatch(/^[a-f0-9]{64}$/);
+    expect(Date.parse(challenge.input.expirationTime) - Date.parse(challenge.input.issuedAt)).toBe(5 * 60_000);
+    // The client is stored only as a hash.
+    expect(JSON.stringify(sqlite.query("SELECT * FROM live_sign_in_challenges").all())).not.toContain("203.0.113.7");
+    const session = await auth.verifySignInChallenge(proof(challenge.challengeId, liveSignInText(challenge.input, creator)));
+    expect(session.wallet).toBe(creator);
+    expect((await auth.requireLiveWallet(session.token)).wallet).toBe(creator);
+    expect(sqlite.query("SELECT wallet, consumed_at IS NOT NULL AS used FROM live_sign_in_challenges WHERE id = ?").get(challenge.challengeId)).toEqual({wallet: creator, used: 1});
+    await expect(auth.verifySignInChallenge(proof(challenge.challengeId, liveSignInText(challenge.input, creator)))).rejects.toThrow("already used");
+    expect(() => sqlite.exec(`UPDATE live_sign_in_challenges SET input_json = '{}' WHERE id = '${challenge.challengeId}'`)).toThrow("immutable");
+  });
+  test("another site, chain, wording, account or signature is refused, and nothing starts a session", async () => {
+    const challenge = await auth.createSignInChallenge("203.0.113.8"), text = liveSignInText(challenge.input, creator);
+    const before = (sqlite.query("SELECT COUNT(*) AS n FROM live_wallet_sessions").get() as {n: number}).n;
+    for (const [changed, reason] of [
+      [text.replace("launchacard.fun wants", "www.launchacard.fun wants"), "another site"],
+      [text.replace("URI: https://launchacard.fun", "URI: https://launch-a-card.gtjvv976mb.workers.dev"), "another site"],
+      [text.replace("Chain ID: mainnet", "Chain ID: solana:mainnet"), "not for Solana mainnet"],
+      [text.replace("Authorize Launch a Card", "Authorize"), "changed the sign-in message"],
+      [`${text}\nResources:\n- https://elsewhere.example`, "changed the sign-in message"],
+      [`Sign in\n${text}`, "something other than a sign-in"],
+    ] as const) await expect(auth.verifySignInChallenge(proof(challenge.challengeId, changed))).rejects.toThrow(reason);
+    await expect(auth.verifySignInChallenge(proof(challenge.challengeId, text, new Uint8Array(32).fill(10), otherWallet))).rejects.toThrow("names another wallet");
+    await expect(auth.verifySignInChallenge({...proof(challenge.challengeId, liveSignInText(challenge.input, otherWallet), creatorSeed, otherWallet)})).rejects.toThrow("signature is invalid");
+    expect((sqlite.query("SELECT COUNT(*) AS n FROM live_wallet_sessions").get() as {n: number}).n).toBe(before);
+    // Still unused: the right proof is accepted afterwards.
+    expect((await auth.verifySignInChallenge(proof(challenge.challengeId, text))).wallet).toBe(creator);
+  });
+  test("an expired challenge is refused; challenges are limited per client, not per wallet; recovery off closes sign-in", async () => {
+    const expired = await auth.createSignInChallenge("203.0.113.9");
+    // Its expiry is immutable in the schema; the test lifts that rule only to stand in for the passing of time.
+    sqlite.exec("DROP TRIGGER carddex_live_sign_in_challenge_immutable");
+    sqlite.query("UPDATE live_sign_in_challenges SET expires_at = 0 WHERE id = ?").run(expired.challengeId);
+    await expect(auth.verifySignInChallenge(proof(expired.challengeId, liveSignInText(expired.input, creator)))).rejects.toThrow("expired");
+    for (let i = 1; i < auth.SIGN_IN_CHALLENGES_PER_MINUTE; i++) await auth.createSignInChallenge("203.0.113.9");
+    await expect(auth.createSignInChallenge("203.0.113.9")).rejects.toThrow("Wait a minute");
+    expect((await auth.createSignInChallenge("198.51.100.1")).input.domain).toBe("launchacard.fun");
+    env.CARDDEX_LIVE_RECOVERY_ENABLED = "false";
+    await expect(auth.createSignInChallenge("198.51.100.2")).rejects.toThrow("recovery is paused");
+  });
+  test("end to end: a mock wallet with solana:signIn connects and signs in with one prompt against the real server checks", async () => {
+    const {mountRegistry, signInLiveWallet, connectLiveWallet, signLiveMessage, walletSupportsSignIn, disconnectLiveWallet} = await import("../../src/components/carddex/live/wallet");
+    const {proveOwnership} = await import("../../src/components/carddex/live/launch-flow");
+    const {mockWallet} = await import("./mock-wallets");
+    const release = mountRegistry(), phantom = mockWallet({name: "Phantom", seed: creatorSeed, signIn: true});
+    try {
+      let token = "";
+      const result = await proveOwnership({address: null, canSignIn: walletSupportsSignIn("Phantom"), origin: "https://launchacard.fun",
+        signInChallenge: () => auth.createSignInChallenge("203.0.113.10"),
+        verifySignIn: async signed => { token = (await auth.verifySignInChallenge(signed)).token; },
+        messageChallenge: wallet => auth.createWalletChallenge(wallet), verifyMessage: async signed => { token = (await auth.verifyWalletChallenge(signed)).token; },
+        signIn: input => signInLiveWallet("Phantom", input), connect: () => connectLiveWallet("Phantom"), signMessage: (message, wallet) => signLiveMessage(message, wallet)});
+      expect(result).toEqual({address: creator, method: "sign-in", prompts: 1});
+      expect(phantom.prompts).toEqual(["signIn"]);
+      expect((await auth.requireLiveWallet(token)).wallet).toBe(creator);
+    } finally { await disconnectLiveWallet(); phantom.unregister(); release(); }
   });
 });
