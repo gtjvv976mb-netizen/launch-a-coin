@@ -31,6 +31,7 @@ import { useMe, useSessionUi } from "./session";
 import { Sheet } from "./sheet";
 import { afterLoadIdle } from "./opened-once";
 import { useMotionLevel } from "./card3d/motion3d";
+import { GyroChip } from "./card3d/GyroChip";
 import { Ticker } from "./Ticker";
 // The live launch sheet stays here (lazy chrome below) so the global CSS keeps its order.
 import "../../carddex-live.css";
@@ -67,6 +68,9 @@ const TABS: Array<{ to: TabPath; label: string; icon: GenIconName; exact?: boole
 ];
 
 /** Which rail tab owns a path. Coin pages belong to Discover (the dex). */
+/** The pages where MintDex shows "Enable phone tilt" above the content on phones. */
+const PHONE_TILT_PAGES = new Set(["/discover", "/levels", "/portfolio"]);
+
 function tabIndex(pathname: string) {
   if (pathname === "/") return 0;
   if (pathname.startsWith("/coin/")) return 1;
@@ -1302,6 +1306,12 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
           tabIndex={-1}
           aria-busy={pending || undefined}
           className="cdx-viewport-main mdx-main mdx-scroll min-h-0 flex-1 p-4 pb-[calc(80px_+_env(safe-area-inset-bottom))] [--main-pad:16px] max-lg:overflow-x-clip lg:overflow-x-hidden lg:overflow-y-auto lg:p-6 lg:[--main-pad:24px] short:p-4 short:[--main-pad:16px]">
+          {/* MintDex's phone tilt prompt at the top of the card pages (Home and the coin case carry their own). */}
+          {PHONE_TILT_PAGES.has(path) ? (
+            <div className="mdx-phone-tilt mdx-phone-tilt--page flex lg:hidden">
+              <GyroChip />
+            </div>
+          ) : null}
           {children}
         </main>
         <MobileTabs pending={pending} />

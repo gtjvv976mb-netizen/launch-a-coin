@@ -1451,6 +1451,11 @@
   min-height: 44px;
   transform: none;
 }
+/* The page-level prompt (MintDex: Discover, Designs and Portfolio on phones): a pill at the page's top left. */
+.mdx-phone-tilt--page {
+  justify-content: flex-start;
+  padding: 0 0 12px;
+}
 /* Table cards are small: a nearer eye, so their rest pose, sway and a pick-up read as 3D at 160 to 260px wide
  * (owner override 2026-10-11: 640px, was 760px, which left the rest lean too faint to see). */
 .mdx-card3d[data-depth="table"] {
