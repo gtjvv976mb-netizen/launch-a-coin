@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, test } from "bun:test";
+import { createRendererSlot } from "../../src/lib/carddex/live/render-slot";
 import {
-  encodeTokenTurntable, tokenTurntableCorners, TOKEN_ANIMATION_BACKGROUND, TOKEN_ANIMATION_FORMAT,
+  encodeIndexedTurntable, encodeTokenTurntable, indexTokenFaces, tokenTurntableCorners, TOKEN_ANIMATION_BACKGROUND, TOKEN_ANIMATION_FORMAT,
   TOKEN_ANIMATION_SIZE, TOKEN_ANIMATION_FRAMES, TOKEN_ANIMATION_FRAME_MS, TOKEN_ANIMATION_HOLD_MS,
   TOKEN_ANIMATION_MAX_BYTES, type TokenCardPixels,
 } from "../../src/lib/carddex/live/token-turntable";
@@ -119,6 +120,14 @@ describe("permanent full-card token turntable", () => {
       expect(() => encodeTokenTurntable(bad, back)).toThrow("canonical 63:88");
     }
   });
+  test("indexing first, then encoding, gives the same bytes, and the output buffer never grows", () => {
+    const faces = indexTokenFaces(front, back);
+    expect(faces.front.pixels).toHaveLength(front.width * front.height);
+    const split = encodeIndexedTurntable(faces);
+    expect(split).toEqual(bytes);
+    // A view of the one buffer sized at the limit: no growth copy while encoding.
+    expect(split.buffer.byteLength).toBe(TOKEN_ANIMATION_MAX_BYTES);
+  });
   test("offset input views keep their own pixels and are never modified", () => {
     const storage = new Uint8Array(front.pixels.length + 8); storage.fill(99); storage.set(front.pixels, 4);
     const view = {...front, pixels: storage.subarray(4, -4)};
@@ -126,5 +135,34 @@ describe("permanent full-card token turntable", () => {
     expect(() => encodeTokenTurntable({...view, pixels: view.pixels.subarray(1)}, back)).toThrow();
     expect(storage[0]).toBe(99); expect(storage[storage.length - 1]).toBe(99);
     expect(view.pixels).toEqual(front.pixels);
+  });
+});
+
+describe("one card render at a time per isolate", () => {
+  test("jobs never overlap, keep their results, and a failed job frees the slot", async () => {
+    const slot = createRendererSlot({pollMs: 1});
+    let running = 0, most = 0;
+    const job = (value: number, fail = false) => slot(async () => {
+      running++; most = Math.max(most, running);
+      await new Promise(resolve => setTimeout(resolve, 5));
+      running--;
+      if (fail) throw new Error("render failed");
+      return value;
+    });
+    const results = await Promise.allSettled([job(1), job(2, true), job(3), job(4)]);
+    expect(most).toBe(1);
+    expect(results.map(result => result.status === "fulfilled" ? result.value : (result.reason as Error).message)).toEqual([1, "render failed", 3, 4]);
+  });
+  test("a holder that never settles stops blocking once its lease ends", async () => {
+    const slot = createRendererSlot({leaseMs: 30, pollMs: 1});
+    void slot(() => new Promise(() => {}));
+    const started = Date.now();
+    expect(await slot(async () => "next")).toBe("next");
+    expect(Date.now() - started).toBeGreaterThanOrEqual(25);
+  });
+  test("a waiter gives up with a retryable message instead of waiting forever", async () => {
+    const slot = createRendererSlot({leaseMs: 1_000, waitMs: 20, pollMs: 1});
+    void slot(() => new Promise(() => {}));
+    await expect(slot(async () => "never")).rejects.toThrow("Try again in a moment");
   });
 });

@@ -10,7 +10,7 @@ import renderAssets from "../../src/lib/carddex/render-assets.json";
 import tokenBackAssets from "../../src/lib/carddex/token-back-assets.json";
 import { CARD_RENDERER_VERSION } from "../../src/lib/carddex/card-template";
 import { CREATOR_CARD_RENDERER_VERSION, TOKEN_IMAGE_FORMAT } from "../../src/lib/carddex/live/creator-print";
-import { TOKEN_ANIMATION_FORMAT } from "../../src/lib/carddex/live/token-turntable";
+import { TokenAnimationTooLarge, TOKEN_ANIMATION_FORMAT } from "../../src/lib/carddex/live/token-turntable";
 
 // Only synthetic in-memory sign-in keys and mocked RPC are used. This test cannot submit a transaction.
 const creatorSeed = new Uint8Array(32).fill(7), creator = base58Encode(ed25519.getPublicKey(creatorSeed));
@@ -45,7 +45,7 @@ let env: Record<string, unknown>;
 // keepAlive stands for waitUntil: it records each promise the Worker would keep running after a closed tab.
 let keptAlive = 0;
 mock.module("../../src/lib/bindings.server", () => ({bindings: () => env, keepAlive: <T,>(promise: Promise<T>) => { keptAlive++; return promise; }}));
-let tokenMediaCalls = 0;
+let tokenMediaCalls = 0, tokenMediaTooLarge = false;
 function tokenGif() {
   // Valid single-frame GIF on a square logical canvas. Real frame encoding is
   // exercised by creator-print tests; lifecycle tests never invoke a renderer.
@@ -57,6 +57,7 @@ function tokenGif() {
 mock.module("../../src/lib/carddex/live/compose.server", () => ({
   composeCreatorTokenMedia: async () => {
     tokenMediaCalls++;
+    if (tokenMediaTooLarge) throw new TokenAnimationTooLarge();
     return {tokenImage: tokenGif(), tokenPoster: image(1024, 1024), mimeType: "image/gif", format: TOKEN_ANIMATION_FORMAT, posterFormat: TOKEN_IMAGE_FORMAT};
   },
 }));
@@ -154,7 +155,7 @@ beforeEach(() => {
   for (const name of readdirSync(migrations).filter(name => name.endsWith(".sql")).sort()) { const sql = readFileSync(resolve(migrations, name), "utf8"); if (sql.replace(/--[^\n]*/g, "").trim()) sqlite.exec(sql); }
   env = {DB: localD1, STORAGE: storage, CARDDEX_DEPLOYMENT_ENV: "production", CARDDEX_PUBLIC_ORIGIN: "https://launchacard.fun", CARDDEX_MAINNET_RPC_URL: "https://rpc.example.test", CARDDEX_LIVE_LAUNCH_ENABLED: "true"};
   tokenVerified = nftVerified = replaceable = uncertain = false; prepareCalls = nftPrepareCalls = sendCalls = 0; receiptCreator = null;
-  tokenMediaCalls = 0;
+  tokenMediaCalls = 0; tokenMediaTooLarge = false;
   tokenInputs = []; nftInputs = [];
   tokenVerifyHook = nftVerifyHook = nftPrepareHook = nftReplaceHook = undefined;
   sizes = {createBytes: 950, buyBytes: 1200}; measured = []; preSend = "ready"; savedAtCheck = [];
@@ -378,6 +379,13 @@ describe("isolated real-launch server lifecycle", () => {
     expect(tokenMediaCalls).toBe(0);
     expect(prepareCalls).toBe(0);
     expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 0});
+  });
+  test("a coin image over the size limit refuses the launch in plain words, before metadata or any RPC", async () => {
+    tokenMediaTooLarge = true;
+    await expect(service.prepareLiveLaunch(creator, await input())).rejects.toThrow("too much fine detail for your coin's turning image");
+    expect(tokenMediaCalls).toBe(1); expect(prepareCalls).toBe(0);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 0});
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_assets WHERE mime_type = 'application/json'").get()).toEqual({n: 0});
   });
   test("historical three-asset intents recover their original artwork metadata without composing token media", async () => {
     const original = await input(), fields = normalizeLiveFields(original);

@@ -4,8 +4,8 @@ import type { CardData } from "../../../components/mintdex/MintCard";
 import renderAssets from "../render-assets.json";
 import tokenBackAssets from "../token-back-assets.json";
 import { getPairAsset } from "../pairs";
-import { encodeTokenTurntable, TOKEN_ANIMATION_FORMAT } from "./token-turntable";
-import { creatorCardSvg, creatorCaseSvg, creatorTokenImageSvg, imageDataUri, CREATOR_IMAGE_DIMENSIONS, TOKEN_IMAGE_DIMENSIONS, TOKEN_IMAGE_FORMAT } from "./creator-print";
+import { encodeIndexedTurntable, indexTokenFaces, TOKEN_ANIMATION_FORMAT } from "./token-turntable";
+import { creatorCardSvg, creatorCaseSvg, creatorTokenImageSvg, imageDataUri, CREATOR_IMAGE_DIMENSIONS, TOKEN_IMAGE_FORMAT } from "./creator-print";
 export { CREATOR_CARD_RENDERER_VERSION } from "./creator-print";
 
 let initialized:Promise<void>|undefined;
@@ -34,27 +34,28 @@ export async function composeCreatorImages(input:CreatorImageInput,dependencies:
  return {cardImage,caseImage,mimeType:"image/png" as const,dimensions:CREATOR_IMAGE_DIMENSIONS};
 }
 
-/** Token metadata uses a separate card print without a market-cap row; NFT prints remain unchanged. */
-export async function composeCreatorTokenImage(input:CreatorImageInput,dependencies:CreatorImageDependencies) {
- const {artUri,atlasUri,fonts}=await loadRenderInput(input,dependencies);
- const cardImage=render(creatorCardSvg(input.card,input.tokenMint,input.creator,artUri,atlasUri,{tokenImage:true}),fonts);
- const tokenImage=render(creatorTokenImageSvg(cardImage),fonts);
- return {tokenImage,mimeType:"image/png" as const,dimensions:TOKEN_IMAGE_DIMENSIONS,format:TOKEN_IMAGE_FORMAT};
-}
-
 function facePixels(png:Uint8Array) {
  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="630" height="880"><image width="630" height="880" href="${imageDataUri(png,"image/png")}"/></svg>`;
  const renderer=new Resvg(svg);
  try {const output=renderer.render();try{return {pixels:output.pixels.slice(),width:output.width,height:output.height};}finally{output.free();}}finally{renderer.free();}
 }
-/** Stable, paid-generation-free turntable of the exact approved artwork and normalized creator details. */
-export async function composeCreatorTokenMedia(input:CreatorImageInput,dependencies:CreatorImageDependencies) {
+/**
+ * The still and both indexed faces. Its own function so the artwork and atlas data URIs, the fonts, the full-size
+ * front print and both RGBA faces are unreachable once it returns, before the frames are encoded (memory, not output:
+ * the pixels are the same as rendering everything in one function).
+ */
+async function tokenFacesAndStill(input:CreatorImageInput,dependencies:CreatorImageDependencies) {
  const {artUri,atlasUri,fonts}=await loadRenderInput(input,dependencies);
  const back=(tokenBackAssets as Record<string,{path:string}>)[input.card.cardTemplate||""];
  if(!back)throw new Error("This card design has no verified token-image reverse.");
  const backPng=await dependencies.loadAsset(back.path);
  const frontPng=render(creatorCardSvg(input.card,input.tokenMint,input.creator,artUri,atlasUri,{tokenImage:true}),fonts);
  const tokenPoster=render(creatorTokenImageSvg(frontPng),fonts);
- const tokenImage=encodeTokenTurntable(facePixels(frontPng),facePixels(backPng));
+ return {tokenPoster,faces:indexTokenFaces(facePixels(frontPng),facePixels(backPng))};
+}
+/** Stable, paid-generation-free turntable of the exact approved artwork and normalized creator details. */
+export async function composeCreatorTokenMedia(input:CreatorImageInput,dependencies:CreatorImageDependencies) {
+ const {tokenPoster,faces}=await tokenFacesAndStill(input,dependencies);
+ const tokenImage=encodeIndexedTurntable(faces);
  return {tokenImage,tokenPoster,mimeType:"image/gif" as const,format:TOKEN_ANIMATION_FORMAT,posterFormat:TOKEN_IMAGE_FORMAT};
 }

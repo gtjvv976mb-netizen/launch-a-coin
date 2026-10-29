@@ -11,6 +11,10 @@ export const TOKEN_ANIMATION_CARD_HEIGHT = TOKEN_ANIMATION_SIZE * .76;
 export const TOKEN_ANIMATION_BACKGROUND = Object.freeze([245, 239, 226] as const);
 
 export type TokenCardPixels = { pixels: Uint8Array; width: number; height: number };
+/** The finished GIF would pass the public image limit. Not reached in QA, even by random-noise artwork on all 48 designs. */
+export class TokenAnimationTooLarge extends Error {
+  constructor() { super("The complete token animation exceeds the public image size limit."); this.name = "TokenAnimationTooLarge"; }
+}
 type IndexedFace = { pixels: Uint8Array; width: number; height: number };
 const ASPECT = 63 / 88;
 const CARD_WIDTH = TOKEN_ANIMATION_CARD_HEIGHT * ASPECT;
@@ -125,14 +129,32 @@ function projectFrame(target: Uint8Array, front: IndexedFace, back: IndexedFace,
   }
 }
 
+/** Both faces reduced to one shared palette: about a quarter of their RGBA size. */
+export type TokenTurntableFaces = { palette: number[][]; front: IndexedFace; back: IndexedFace };
+/**
+ * Palette and indexed faces from the two RGBA faces. A separate step so the caller's full-colour faces (and whatever
+ * made them) are unreachable before the 64 frames are encoded: in a Worker isolate (128 MB, with the renderer's
+ * WebAssembly memory) only the indexed faces, one frame and the output stay alive while encoding.
+ */
+export function indexTokenFaces(front: TokenCardPixels, back: TokenCardPixels): TokenTurntableFaces {
+  validateFace(front); validateFace(back);
+  const palette = paletteFor(front, back);
+  const cache = new Int16Array(65_536); cache.fill(-1);
+  return {palette, front: indexFace(front, palette, cache), back: indexFace(back, palette, cache)};
+}
+
 /** Pure JavaScript encoder: no canvas, filesystem, browser, network, native code or dynamic Wasm. */
 export function encodeTokenTurntable(front: TokenCardPixels, back: TokenCardPixels): Uint8Array {
-  validateFace(front); validateFace(back);
-  const palette = paletteFor(front, back), background = palette.length - 4;
-  const cache = new Int16Array(65_536); cache.fill(-1);
-  const indexedFront = indexFace(front, palette, cache), indexedBack = indexFace(back, palette, cache);
+  return encodeIndexedTurntable(indexTokenFaces(front, back));
+}
+
+/** The 64 frames from indexed faces (indexTokenFaces). */
+export function encodeIndexedTurntable({palette, front: indexedFront, back: indexedBack}: TokenTurntableFaces): Uint8Array {
+  const background = palette.length - 4;
   const frame = new Uint8Array(TOKEN_ANIMATION_SIZE * TOKEN_ANIMATION_SIZE);
-  const gif = GIFEncoder({initialCapacity: 8 * 1024 * 1024});
+  // One buffer at the size limit, so the encoder never grows it: each growth would briefly hold the old and the new
+  // copy (about 20 MB at this size), and the output can never be larger than the limit anyway.
+  const gif = GIFEncoder({initialCapacity: TOKEN_ANIMATION_MAX_BYTES});
   for (let index = 0; index < TOKEN_ANIMATION_FRAMES; index++) {
     projectFrame(frame, indexedFront, indexedBack, index / TOKEN_ANIMATION_FRAMES * Math.PI * 2, background, background + 1, background + 2);
     gif.writeFrame(frame, TOKEN_ANIMATION_SIZE, TOKEN_ANIMATION_SIZE, {
@@ -142,11 +164,11 @@ export function encodeTokenTurntable(front: TokenCardPixels, back: TokenCardPixe
       delay: index === 0 || index === TOKEN_ANIMATION_FRAMES / 2 ? TOKEN_ANIMATION_HOLD_MS : TOKEN_ANIMATION_FRAME_MS,
       dispose: 1,
     });
-    if (gif.bytesView().byteLength > TOKEN_ANIMATION_MAX_BYTES) throw new Error("The complete token animation exceeds the public image size limit.");
+    if (gif.bytesView().byteLength > TOKEN_ANIMATION_MAX_BYTES) throw new TokenAnimationTooLarge();
   }
   gif.finish();
   const bytes = gif.bytesView();
-  if (bytes.byteLength > TOKEN_ANIMATION_MAX_BYTES) throw new Error("The complete token animation exceeds the public image size limit.");
+  if (bytes.byteLength > TOKEN_ANIMATION_MAX_BYTES) throw new TokenAnimationTooLarge();
   // The encoder is private and is never reused: returning its final bounded
   // view avoids a second multi-megabyte copy before immutable asset storage.
   return bytes;

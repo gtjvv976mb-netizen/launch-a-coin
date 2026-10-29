@@ -11,10 +11,13 @@ import tokenBackAssets from "../token-back-assets.json";
 import { fetchPublicBytes, putPublicAsset, sniffLiveImage } from "./assets.server";
 import { sha256, walletBytes } from "./auth.server";
 import { requireLiveConfig } from "./config.server";
+import { BUSY, createRendererSlot } from "./render-slot";
 import { compositionBinding, normalizeLiveFields } from "./validation.server";
 import type { LiveAssets, LiveComposeInput } from "./types";
 
 export const COMPOSITION_VERSION = CARD_RENDERER_VERSION;
+/** Card and case prints and coin-image exports take turns in this isolate (render-slot.ts: the 128 MB isolate limit). */
+const withRendererSlot = createRendererSlot({busy: () => new UserError(BUSY)});
 export async function loadRendererAsset(path: string): Promise<Uint8Array> {
   if (!/^\/(assets|fonts)\/[a-zA-Z0-9_./-]+$/.test(path) || path.includes("..") || path.includes("//")) throw new UserError("The card renderer requested an unsupported asset.");
   const rendered = path.startsWith("/assets/carddex/render/") ? Object.values(renderedDesigns).find(asset => asset.path === path) : undefined;
@@ -54,22 +57,28 @@ export async function composeLiveAssets(wallet: string, raw: LiveComposeInput, f
   if (mime !== "image/png" && mime !== "image/jpeg") throw new UserError("Use PNG or JPEG artwork for the final NFT. Convert WebP to PNG before composing.");
   if (!dimensions || dimensions.w < 32 || dimensions.h < 32 || dimensions.w > 2048 || dimensions.h > 2048 || dimensions.w * dimensions.h > 2048 * 2048) throw new UserError("Use readable artwork up to 2048 pixels per side.");
   const artwork = await putPublicAsset(wallet, bytes, mime);
-  const {composeCreatorImages} = await import("./compose.server");
-  const images = await composeCreatorImages(creatorImageInput(wallet,fields,artwork,bytes,mime), {loadAsset: loadRendererAsset});
-  const cardImage = await putPublicAsset(wallet, images.cardImage, images.mimeType);
-  const caseImage = await putPublicAsset(wallet, images.caseImage, images.mimeType);
+  const {cardImage, caseImage} = await withRendererSlot(async () => {
+    const {composeCreatorImages} = await import("./compose.server");
+    const images = await composeCreatorImages(creatorImageInput(wallet,fields,artwork,bytes,mime), {loadAsset: loadRendererAsset});
+    return {cardImage: await putPublicAsset(wallet, images.cardImage, images.mimeType), caseImage: await putPublicAsset(wallet, images.caseImage, images.mimeType)};
+  });
   await stmt("INSERT OR IGNORE INTO live_compositions (wallet, binding_sha256, artwork_sha256, card_sha256, case_sha256, renderer_version, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)", wallet, await compositionBinding(wallet, fields), artwork.sha256, cardImage.sha256, caseImage.sha256, COMPOSITION_VERSION, Date.now()).run();
   return {artwork, cardImage, caseImage};
 }
+const TOKEN_IMAGE_TOO_LARGE = "This artwork has too much fine detail for your coin's turning image. Nothing was sent. Use a simpler or smaller image and compose the card again.";
 /** Called only after exact composition and ownership checks in new-launch preparation; clients cannot supply these exports. */
-export async function composeTokenAssets(wallet:string,fields:LiveComposeInput,assets:LiveAssets) {
-  const {composeCreatorTokenMedia}=await import("./compose.server");
-  const bytes=await fetchPublicBytes(assets.artwork.url);
-  const media=await composeCreatorTokenMedia(creatorImageInput(wallet,fields,assets.artwork,bytes,assets.artwork.mimeType),{loadAsset:loadRendererAsset});
-  const tokenImage=await putPublicAsset(wallet,media.tokenImage,"image/gif");
-  const tokenPoster=await putPublicAsset(wallet,media.tokenPoster,"image/png");
-  await validateTokenExport(tokenImage); await validateTokenExport(tokenPoster);
-  return {tokenImage,tokenPoster,format:media.format,posterFormat:media.posterFormat};
+export function composeTokenAssets(wallet:string,fields:LiveComposeInput,assets:LiveAssets) {
+  return withRendererSlot(async () => {
+    // Stored inside its own function, so the encoded GIF (up to 12 MB) is unreachable before it is read back below.
+    const stored = await (async () => {
+      const {composeCreatorTokenMedia}=await import("./compose.server");
+      const media=await composeCreatorTokenMedia(creatorImageInput(wallet,fields,assets.artwork,await fetchPublicBytes(assets.artwork.url),assets.artwork.mimeType),{loadAsset:loadRendererAsset})
+        .catch(error=>{throw error instanceof Error&&error.name==="TokenAnimationTooLarge"?new UserError(TOKEN_IMAGE_TOO_LARGE):error;});
+      return {tokenImage:await putPublicAsset(wallet,media.tokenImage,"image/gif"),tokenPoster:await putPublicAsset(wallet,media.tokenPoster,"image/png"),format:media.format,posterFormat:media.posterFormat};
+    })();
+    await validateTokenExport(stored.tokenImage); await validateTokenExport(stored.tokenPoster);
+    return stored;
+  });
 }
 async function validateTokenExport(asset:LiveAssets["artwork"]) {
   if(await sha256(await fetchPublicBytes(asset.url))!==asset.sha256)throw new UserError("The public token image does not match this creator's card export.");
