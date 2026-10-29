@@ -32,7 +32,7 @@
 @import "../packages/quanta/src/css/tailwind/gradient.css";
 
 @import "tw-animate-css";
-/* Tokens first: the one :root / @theme (classic dark). */
+/* Tokens first: the one :root / @theme (D1 Logo Ground). */
 @import "./carddex-theme.css";
 @import "./mintdex.css";
 /* Alive 3D (refs/alive-3d-spec.md): the card (CARD) and the page life (SITE): sky, stage, ticker. */

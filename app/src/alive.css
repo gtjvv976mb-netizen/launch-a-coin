@@ -1126,7 +1126,8 @@ body:has(.mdx-inspect) .mdx-sky {
 .mdx-ticker {
   position: relative;
   display: flex;
-  height: var(--ticker-h);
+  /* The two gold hairlines sit outside the 40px (44px on touch) track, so Pause and the links keep full targets. */
+  height: calc(var(--ticker-h) + 2px);
   flex: none;
   align-items: center;
   gap: 10px;
@@ -1190,6 +1191,7 @@ body:has(.mdx-inspect) .mdx-sky {
   padding-right: 22px;
 }
 .mdx-ticker__link {
+  position: relative;
   display: inline-flex;
   height: 26px;
   align-items: center;
@@ -1199,6 +1201,12 @@ body:has(.mdx-inspect) .mdx-sky {
   color: var(--color-ink);
   white-space: nowrap;
   transition: background-color var(--t-fast) var(--ease-room);
+}
+/* MintDex's 26px pill, with a hit area the full height of the track (40px, 44px on touch). */
+.mdx-ticker__link::after {
+  content: "";
+  position: absolute;
+  inset: calc((26px - var(--ticker-h)) / 2) 0;
 }
 @media (hover: hover) {
   .mdx-ticker__link:hover {

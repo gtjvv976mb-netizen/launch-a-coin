@@ -134,6 +134,11 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    /* The context line clips sideways only, so its links keep their 40px hit area (.mdx-hit) above and below. */
+    .mdx-pagehead:not([data-wrap]) .mdx-pagehead__context {
+      overflow-x: clip;
+      overflow-y: visible;
+    }
   }
   @media (max-width: 1023.98px) {
     .mdx-pagehead__back {

@@ -18,6 +18,8 @@
   .cdx-dex__head .mdx-select { max-width: 42vw; text-overflow: ellipsis; }
   /* The heading serif is wider than the condensed sans: the title keeps one line beside the pills. */
   .cdx-dex__head .mdx-pagehead__title { overflow-wrap: normal; white-space: nowrap; }
+  /* The count and its link wrap as whole words: "How it works" never splits across lines. */
+  .cdx-dex__head .mdx-pagehead__context .mdx-link { white-space: nowrap; }
 }
 @media (max-width: 379.98px) {
   .cdx-dex__head { flex-wrap: wrap; }

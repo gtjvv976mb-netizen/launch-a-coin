@@ -461,6 +461,18 @@ body[data-scroll-locked] .mdx-tt__charge > b {
     height: 44px;
   }
 }
+/* A market cap in a long quote unit ("3.54M CHILLHOUSE"): the label never truncates, the unit is caption-size, and
+ * on a narrow column the figure takes the next line under its leader. */
+.cdx-home__caption .mdx-leaders > div {
+  flex-wrap: wrap;
+  row-gap: 2px;
+}
+.cdx-home__caption .mdx-leaders dt {
+  flex: none;
+}
+.cdx-home__caption .mdx-leaders .mdx-unit {
+  font-size: 13px;
+}
 /* Narrow phones: the caption's market cap row keeps its "Market cap" label whole; the status strip above the page
  * already says the trading is simulated. */
 @media (max-width: 399.98px) {

@@ -717,7 +717,7 @@ function Launch() {
           <span aria-hidden> · </span>
         </span>
       ) : null}
-      <TextLink to="/how" hash="launch">How it works</TextLink>
+      <TextLink to="/how" hash={recoveryOnly ? "recovery" : "launch"}>How it works</TextLink>
     </>
   );
 

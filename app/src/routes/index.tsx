@@ -107,7 +107,7 @@ export const Route = createFileRoute("/")({
 /*
  * Home (spec 8.1, family A; refs/alive-3d-spec.md 5.1, the Turntable vitrine): stage + aside.
  *
- * The MintDex home (mintdex.fun, re-paletted classic dark): headline and actions over the featured-card stage, the
+ * The MintDex home (mintdex.fun, in the D1 Logo Ground palette): headline and actions over the featured-card stage, the
  * rail with Trending, Launched on pump.fun (real mainnet launches) and Activity on the right; phones stack the rail
  * under the stage as one panel.
  *
@@ -388,6 +388,18 @@ function Figure({ children }: { children: ReactNode }) {
   return <span className="flex min-w-0 items-baseline justify-end gap-2">{children}</span>;
 }
 
+/** A market cap in the coin's own quote ("3.54M CHILLHOUSE"): the figure rolls, the symbol is its unit. */
+function mcapUnit(c: CoinSummary) {
+  const text = marketCapText(c);
+  const cut = c.mcapUsd == null ? text.lastIndexOf(" ") : -1;
+  return cut > 0 ? text.slice(cut + 1) : undefined;
+}
+function mcapFigure(c: CoinSummary) {
+  const text = marketCapText(c);
+  const cut = c.mcapUsd == null ? text.lastIndexOf(" ") : -1;
+  return cut > 0 ? text.slice(0, cut) : text;
+}
+
 /** How many figure rows a coin's caption shows: market cap always, Buy now and Top bid only when there is one. */
 function figureRows(c: CoinSummary) {
   return 1;
@@ -419,8 +431,8 @@ function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
             <Figure>
               {/* The odometer stays mounted across a step and rolls to the next coin's figure; flashKey keeps the
                   up/down flash for real moves of one coin only (a step is not a market move). */}
-              <Num size="lg" watch={marketCapWatch(c)} flashKey={c.id} odo>
-                {marketCapText(c)}
+              <Num size="lg" watch={marketCapWatch(c)} flashKey={c.id} odo unit={mcapUnit(c)}>
+                {mcapFigure(c)}
               </Num>
               <SimTag className="cdx-home__sim self-center lg:hidden" />
             </Figure>

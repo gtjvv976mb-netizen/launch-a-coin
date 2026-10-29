@@ -1144,7 +1144,8 @@ export function Odometer({ text }: { text: string }) {
               </span>
             </span>
           ) : (
-            <span key={i}>{ch}</span>
+            // A space stays a space: a bare " " flex item would collapse to nothing ("3.54MCHILLHOUSE").
+            <span key={i}>{ch === " " ? "\u00a0" : ch}</span>
           ),
         )}
       </span>

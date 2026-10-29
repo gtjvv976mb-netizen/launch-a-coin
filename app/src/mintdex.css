@@ -2285,6 +2285,7 @@ a:focus-visible .mdx-lift {
 
 /* The rail's logo row: the mark and the wordmark on one 32px line. */
 .mdx-lockup {
+  position: relative;
   display: inline-flex;
   height: 32px;
   flex: none;
@@ -2295,12 +2296,18 @@ a:focus-visible .mdx-lift {
   color: var(--color-ink);
   text-decoration: none;
 }
+/* MintDex's 32px logo row, with a 40px hit area. */
+.mdx-lockup::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
 /* The name is the logo's own lettering (creative/brand/README.md): a white alpha mask (2.244:1) painted in the ink
  * token, so it follows the theme. The text stays in the DOM, hidden behind the mask; the link carries the name. */
 .mdx-lockup__name {
   display: block;
-  width: calc(26px * 2.244);
-  height: 26px;
+  width: calc(30px * 2.244);
+  height: 30px;
   overflow: hidden;
   background-color: currentColor;
   color: var(--color-ink);

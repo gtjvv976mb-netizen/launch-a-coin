@@ -1511,7 +1511,7 @@
   --bk-motif: none;
 }
 .mdx-card3d[tabindex]:focus-visible {
-  outline: 2px solid var(--color-zap, #f0d48c);
+  outline: 2px solid var(--color-zap, #e3c07c);
   outline-offset: 6px;
 }
 .mdx-card3d__enter,
@@ -1912,7 +1912,7 @@
   height: 17cqw;
   pointer-events: none;
   border-radius: 50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow, #d4a64a) 46%, transparent) 0%, color-mix(in srgb, var(--glow, #d4a64a) 14%, transparent) 62%, transparent 100%);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow, #b3843a) 46%, transparent) 0%, color-mix(in srgb, var(--glow, #b3843a) 14%, transparent) 62%, transparent 100%);
 }
 .mdx-card3d__pedestal::before,
 .mdx-card3d__pedestal::after {
@@ -1927,7 +1927,7 @@
   top: 30%;
   height: 50%;
   background: linear-gradient(to bottom, #0b1022, #05070f);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--glow, #d4a64a) 30%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--glow, #b3843a) 30%, transparent);
 }
 /* The top disc with its neon rim. */
 .mdx-card3d__pedestal::before {
@@ -1936,8 +1936,8 @@
   height: 50%;
   background: radial-gradient(ellipse at 50% 42%, #1d2440 0%, #0e1328 62%, #090c1a 100%);
   box-shadow:
-    inset 0 0 0 1.5px color-mix(in srgb, var(--glow, #d4a64a) 85%, white),
-    0 0 10px 1px color-mix(in srgb, var(--glow, #d4a64a) 60%, transparent);
+    inset 0 0 0 1.5px color-mix(in srgb, var(--glow, #b3843a) 85%, white),
+    0 0 10px 1px color-mix(in srgb, var(--glow, #b3843a) 60%, transparent);
 }
 /* Spinning list cards keep their isolated 3D pose, front/back planes and rounded perimeter. The same
  * extruded walls stay mounted through spin-to-drag transitions, so no rectangular edge pierces a corner. */
@@ -2421,8 +2421,8 @@
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: var(--color-sheet, #2b241b);
-  color: var(--color-ink, #eef3fa);
+  background: var(--color-sheet, #40211a);
+  color: var(--color-ink, #f3e7cf);
   font: 600 13px/1 var(--font-sans);
   white-space: nowrap;
   cursor: pointer;
@@ -2462,7 +2462,7 @@
   content: none;
 }
 .mdx-case__btn:focus-visible {
-  outline: 2px solid var(--color-zap, #f0d48c);
+  outline: 2px solid var(--color-zap, #e3c07c);
   outline-offset: 2px;
 }
 @media (hover: hover) {
@@ -2488,7 +2488,7 @@
   outline: none;
 }
 .mdx-case__scene:focus-visible .mdx-case__plate--front .mdx-case__acrylic {
-  outline: 2px solid var(--color-zap, #f0d48c);
+  outline: 2px solid var(--color-zap, #e3c07c);
   outline-offset: 4px;
 }
 
