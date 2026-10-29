@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1260" height="1760" viewBox="0 0 1260 1760" data-card-layout="launchacard-v2">
+    <defs><clipPath id="card-edge"><rect width="1260" height="1760" rx="63.504"/></clipPath><clipPath id="art-edge"><rect x="126" y="264" width="1008" height="774.4" rx="13.860000000000001"/></clipPath><clipPath id="name-edge"><rect x="173.88" y="96.8" width="812.9141999999999" height="105.6"/></clipPath></defs>
+    <g clip-path="url(#card-edge)"><image width="1260" height="1760" href="ATLAS_REFERENCE"/>
+    <image x="126" y="264" width="1008" height="774.4" preserveAspectRatio="xMidYMid slice" clip-path="url(#art-edge)" href="ART_REFERENCE"/>
+    <g fill="#30251a" font-family="Libre Caslon Text,serif">
+      <text x="173.88" y="175.304" font-size="75.6" clip-path="url(#name-edge)">Your Token</text>
+      <text x="1086.12" y="165.4508" text-anchor="end" font-size="46.62" font-weight="700">1/1</text>
+      <text x="163.8" y="1124.7436000000002" font-family="Courier Prime,monospace" font-size="36.54">$TOKEN</text>
+      <text x="1096.2" y="1124.7436000000002" text-anchor="end" font-style="italic" font-size="36.54">DOGE pair</text>
+      <text x="189" y="1261.8875" font-style="italic" font-size="47.25">Your token. Your card.</text>
+      <path d="M189 1456.1359999999997H1071" stroke="#30251a" stroke-opacity=".22" stroke-width="3.15"/>
+      <text x="189" y="1508.97725" font-family="Courier Prime,monospace" font-size="38.43" font-weight="600">Token address</text><path d="M506.39399999999995 1501.41725H776.6640000000001" stroke="#30251a" stroke-opacity=".35" stroke-dasharray="3 7" stroke-width="3.15"/><text x="1071" y="1508.97725" text-anchor="end" font-family="Courier Prime,monospace" font-size="38.43" font-weight="500">So111...1112</text><text x="189" y="1561.99175" font-family="Courier Prime,monospace" font-size="38.43" font-weight="600">Holders</text><path d="M368.04599999999994 1554.43175H1030.302" stroke="#30251a" stroke-opacity=".35" stroke-dasharray="3 7" stroke-width="3.15"/><text x="1071" y="1561.99175" text-anchor="end" font-family="Courier Prime,monospace" font-size="38.43" font-weight="500">0</text>
+    </g></g></svg>

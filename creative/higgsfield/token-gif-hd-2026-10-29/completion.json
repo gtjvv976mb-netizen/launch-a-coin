@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-29",
+  "provider": "Higgsfield",
+  "purpose": "Native 4K premium turning-card master and pump.fun GIF proof",
+  "authorization": {
+    "text": "use my credits there and maximize it",
+    "scope": "One 5-second 4K/high-bitrate master, review before additional paid generations",
+    "quotedCredits": 110,
+    "balanceBefore": 261,
+    "expectedRemaining": 151
+  },
+  "model": "seedance_2_0",
+  "params": {
+    "model": "seedance_2_0",
+    "prompt": "Create an extremely crisp premium trading-card product turntable using the supplied exact card front and matching back. One single rigid physical 63:88 rounded card, centered upright, matte warm ivory background #f5efe2. Fixed camera and constant scale, card height 76% of square frame. Begin on the exact front, rotate smoothly one complete 360-degree revolution around its vertical axis, show the supplied exact back clearly at halfway, finish on the exact front in the identical pose for a seamless loop. Subtle restrained traveling foil highlights on the existing gold metal; realistic thin card edge. Preserve the actual supplied artwork, creator illustration, all typography and lettering, border construction, colors, geometry and both faces. No added labels, market cap, invented symbols, particles, props, case, crown, new logo, camera movement, zoom, depth of field, motion blur, bending or morphing. All four corners remain visible with circular-avatar-safe padding. Silent, clean studio light, sharp material detail, highest fidelity.",
+    "duration": 5,
+    "aspect_ratio": "1:1",
+    "resolution": "4k",
+    "mode": "std",
+    "bitrate_mode": "high",
+    "generate_audio": false,
+    "count": 1,
+    "use_unlim": false,
+    "medias": [
+      {
+        "role": "start_image",
+        "value": "edee3a7a-ead1-433f-a2ca-bd991ed38042"
+      },
+      {
+        "role": "end_image",
+        "value": "edee3a7a-ead1-433f-a2ca-bd991ed38042"
+      },
+      {
+        "role": "image",
+        "value": "d3eb25b9-81b0-4b9c-b38e-a41510c226fc"
+      }
+    ]
+  },
+  "jobId": "6ff06584-8807-4183-9079-0656145f8e68",
+  "status": "completed",
+  "references": {
+    "front": "edee3a7a-ead1-433f-a2ca-bd991ed38042",
+    "back": "d3eb25b9-81b0-4b9c-b38e-a41510c226fc",
+    "dimensions": [
+      2048,
+      2048
+    ],
+    "sourceArtwork": "Existing approved Higgsfield Doge front/back; deterministic canonical content composition"
+  },
+  "adjustment": "image role mapped to image_references by Seedance backend",
+  "deployed": false,
+  "resultUrl": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_141455_6ff06584-8807-4183-9079-0656145f8e68.mp4",
+  "deliveryStatus": "REJECTED by owner; not for token image or website use",
+  "ownerCorrection": "why is the card thick, the current card designs in the site is already enough, you already make them turn in the site, just make it as the GIF token image and remove the marketcap",
+  "replacement": "Capture/export the existing website card design and turntable; remove market cap in token export only. No further paid generations.",
+  "localRejectedMaster": "output/higgsfield/token-gif-hd-2026-10-29/rejected/thick-card-master.mp4",
+  "actualOutput": {
+    "width": 2880,
+    "height": 2880,
+    "frames": 121,
+    "fps": 24,
+    "durationSeconds": 5.041667,
+    "bytes": 22647355
+  },
+  "balanceObservation": {
+    "before": 261,
+    "after": 96.5,
+    "quotedJobCredits": 110,
+    "note": "Balance is account-wide. No per-job billing receipt is exposed here, so the total balance change is not attributed solely to this job."
+  }
+}

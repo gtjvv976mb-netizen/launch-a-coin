@@ -1,0 +1,16 @@
+[
+  {
+    "file": "front-2048.png",
+    "width": 2048,
+    "height": 2048,
+    "bytes": 2303393,
+    "sha256": "a982e839da3101db1e0f2215050fe1f8cc9cf4eb895a7b7163802a2c4a234185"
+  },
+  {
+    "file": "back-2048.png",
+    "width": 2048,
+    "height": 2048,
+    "bytes": 3636560,
+    "sha256": "a4fb9924ae871928a72c8601cf6c2807265e679b0749d7864e7f33c11341fa83"
+  }
+]

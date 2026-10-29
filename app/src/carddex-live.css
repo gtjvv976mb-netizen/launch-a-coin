@@ -81,3 +81,20 @@
  .cdx-launch .cdx-live-pane > .cdx-live-check { min-height:44px; align-items:center; font-size:11px; line-height:1.3; }
  .cdx-launch .cdx-live-pane[data-launch-pane=launch] > .cdx-live-address { grid-column:auto; display:flex; min-height:44px; align-items:center; font-size:11px; }
 }
+
+/* The immutable export is reviewed beside its identities, without reducing the main card preview. */
+.cdx-live-token-image { display:grid; grid-template-columns:64px minmax(0,1fr); align-items:center; gap:12px; margin:0; min-width:0; }
+.cdx-live-token-image > a,.cdx-live-token-image picture,.cdx-live-token-image img { display:block; width:64px; height:64px; }
+.cdx-live-token-image img { border:1px solid var(--color-hairline); border-radius:10px; object-fit:contain; }
+.cdx-live-token-image figcaption { display:grid; gap:2px; font-size:11px; line-height:1.35; }
+.cdx-live-token-image figcaption strong { font-size:12px; color:var(--color-ink); }
+.cdx-live-token-image figcaption span { color:var(--color-slate); }
+.cdx-live-token-image figcaption a { width:fit-content; min-height:28px; display:inline-flex; align-items:center; text-decoration:underline; text-underline-offset:3px; }
+@media(min-width:560px) and (max-width:1023px) and (max-height:440px) { .cdx-live-pane > .cdx-live-token-image { grid-column:1 / -1; } }
+
+.cdx-live-token-image--review { grid-template-columns:144px minmax(0,1fr); }
+.cdx-live-token-image--review > a,.cdx-live-token-image--review picture,.cdx-live-token-image--review img { width:144px; height:144px; }
+@media(max-height:480px) {
+ .cdx-live-token-image--review { grid-template-columns:80px minmax(0,1fr); }
+ .cdx-live-token-image--review > a,.cdx-live-token-image--review picture,.cdx-live-token-image--review img { width:80px; height:80px; }
+}

@@ -6,7 +6,7 @@ import { getPairAsset } from "../pairs";
 import { clearGuard, db, guard, one, q, readBatch, stmt, UserError } from "../../mintdex/server/db.server";
 import { fetchPublicBytes, putPublicAsset, putPublicJson, validateOwnedAsset, verifyPublicJson } from "./assets.server";
 import { sha256, walletBytes } from "./auth.server";
-import { COMPOSITION_VERSION, requireTrustedComposition } from "./composition.server";
+import { COMPOSITION_VERSION, composeTokenAssets, requireTrustedComposition } from "./composition.server";
 import { requireLiveConfig } from "./config.server";
 import { normalizeLiveFields } from "./validation.server";
 import type { LiveAssets, LiveLaunchIntent, LivePrepareInput, LiveStage } from "./types";
@@ -78,15 +78,18 @@ async function preparePayload(wallet: string, raw: LivePrepareInput): Promise<Pa
   walletBytes(wallet); walletBytes(raw.nftMint);
   if (new Set([wallet, fields.tokenMint, raw.nftMint, fields.quoteMint]).size !== 4) throw new UserError("Creator, new token mint, creator NFT and quote mint must be distinct addresses.");
   if (!raw.termsAcknowledged || !/^(0|[1-9][0-9]{0,19})$/.test(raw.initialBuyQuoteBaseUnits) || BigInt(raw.initialBuyQuoteBaseUnits) > 0xffffffffffffffffn || !Number.isInteger(raw.slippageBps) || raw.slippageBps < 0 || raw.slippageBps > 1000) throw new UserError("Review the quote terms, initial-buy atoms and slippage before preparing a real launch.");
+  if (raw.assets.tokenImage || raw.assets.tokenPoster) throw new UserError("Token image exports are created by this server from your verified card. Compose only the original artwork, card and case.");
   await requireTrustedComposition(wallet, fields, raw.assets);
   for (const role of ["artwork", "cardImage", "caseImage"] as const) await validateOwnedAsset(wallet, raw.assets[role], role);
   const sources = await sourceAssets(wallet, fields.cardTemplate), quote = getPairAsset(fields.quoteAssetKey), design = getCardDesign(fields.cardTemplate);
+  const media = await composeTokenAssets(wallet,fields,raw.assets);
   const common = {version: 1, rendererVersion: COMPOSITION_VERSION, creatorWallet: wallet, tokenMint: fields.tokenMint, quoteAssetKey: quote.key, quoteMint: quote.mint,
     cardTemplate: fields.cardTemplate, sourceFrontSha256: sources.front.sha256, sourceBackSha256: sources.back.sha256,
     artworkSha256: raw.assets.artwork.sha256, cardImageSha256: raw.assets.cardImage.sha256, caseImageSha256: raw.assets.caseImage.sha256};
-  const tokenJson = {name: fields.name, symbol: fields.symbol, description: fields.description, image: raw.assets.artwork.url,
+  const tokenJson = {name: fields.name, symbol: fields.symbol, description: fields.description, image: media.tokenImage.url, animation_url: media.tokenImage.url,
     ...(fields.website ? {website: fields.website} : {}), ...(fields.xUrl ? {twitter: fields.xUrl} : {}),
-    properties: {files: [{uri: raw.assets.artwork.url, type: raw.assets.artwork.mimeType}], category: "image", launchACard: common}};
+    properties: {files: [{uri: media.tokenImage.url, type: media.tokenImage.mimeType}, {uri: media.tokenPoster.url, type: media.tokenPoster.mimeType}], category: "image",
+      launchACard: {...common,tokenImageSha256:media.tokenImage.sha256,tokenPosterSha256:media.tokenPoster.sha256,tokenImageFormat:media.format,tokenPosterFormat:media.posterFormat,tokenPoster:media.tokenPoster.url}}};
   const nftJson = {name: fields.name, symbol: fields.symbol, description: fields.description,
     image: raw.assets.caseImage.url, seller_fee_basis_points: 0,
     ...(fields.website ? {external_url: fields.website} : {}),
@@ -98,7 +101,7 @@ async function preparePayload(wallet: string, raw: LivePrepareInput): Promise<Pa
   const tokenMetadata = await putPublicJson(wallet, tokenJson), nftMetadata = await putPublicJson(wallet, nftJson);
   await verifyPublicJson(tokenMetadata, tokenJson); await verifyPublicJson(nftMetadata, nftJson);
   if (new TextEncoder().encode(tokenMetadata.url).length > 200) throw new UserError("The public metadata URI exceeds pump.fun's supported length.");
-  return {fields, assets: raw.assets, input: {creator: wallet, mint: fields.tokenMint, name: fields.name, symbol: fields.symbol,
+  return {fields, assets: {...raw.assets,tokenImage:media.tokenImage,tokenPoster:media.tokenPoster}, input: {creator: wallet, mint: fields.tokenMint, name: fields.name, symbol: fields.symbol,
     tokenMetadataUri: tokenMetadata.url, quoteKey: quote.key, nftName: fields.name,
     initialBuyQuoteBaseUnits: raw.initialBuyQuoteBaseUnits, slippageBps: raw.slippageBps,
     renderedCardSha256: raw.assets.cardImage.sha256, nftMetadataSha256: nftMetadata.sha256,

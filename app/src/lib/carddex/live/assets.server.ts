@@ -5,7 +5,7 @@ import { sha256 } from "./auth.server";
 import { publicOrigin, requireLiveConfig } from "./config.server";
 import type { LiveAsset, LiveAssets } from "./types";
 
-const EXT: Record<string, string> = {"image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "application/json": "json"};
+const EXT: Record<string, string> = {"image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "image/gif": "gif", "application/json": "json"};
 const IMMUTABLE = "public, max-age=31536000, immutable";
 const MAX_BYTES = 12 * 1024 * 1024;
 function metadataDigest(sha: string) { return btoa(String.fromCharCode(...sha.match(/../g)!.map(byte => parseInt(byte, 16)))).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, ""); }
@@ -14,6 +14,7 @@ export function sniffLiveImage(bytes: Uint8Array): string | null {
   if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return "image/png";
   if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image/jpeg";
   if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 && bytes[8] === 0x57 && bytes[9] === 0x45) return "image/webp";
+  if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38 && (bytes[4] === 0x37 || bytes[4] === 0x39) && bytes[5] === 0x61) return "image/gif";
   return null;
 }
 export async function putPublicAsset(wallet: string, bytes: Uint8Array, mimeType: string): Promise<LiveAsset> {
@@ -54,7 +55,7 @@ export async function fetchPublicBytes(url: string, maxBytes = MAX_BYTES): Promi
   if (parsed.origin !== origin || parsed.search || parsed.hash || parsed.username || parsed.password) throw new UserError("Public launch assets must use the configured Launch a Card origin.");
   // Workers rejects redirect:"error" before sending a request. Manual mode keeps
   // this same-origin check intact; every 3xx fails the !ok check below.
-  const response = await fetchOwnOrigin(url, {redirect: "manual", signal: AbortSignal.timeout(15_000), headers: {accept: "image/png,image/webp,image/jpeg,application/json"}});
+  const response = await fetchOwnOrigin(url, {redirect: "manual", signal: AbortSignal.timeout(15_000), headers: {accept: "image/png,image/webp,image/jpeg,image/gif,application/json"}});
   if (!response.ok || Number(response.headers.get("content-length") ?? 0) > maxBytes) throw new UserError("A public launch asset is not reachable or exceeds the size limit.");
   const bytes = new Uint8Array(await response.arrayBuffer());
   if (bytes.length > maxBytes) throw new UserError("A public launch asset exceeds the size limit.");
@@ -77,7 +78,7 @@ export async function verifyPublicJson(asset: LiveAsset, expected: unknown) {
   if (await sha256(bytes) !== asset.sha256 || new TextDecoder().decode(bytes) !== JSON.stringify(expected)) throw new UserError("The public metadata does not match this immutable launch.");
 }
 export async function serveLiveAsset(filename: string): Promise<Response> {
-  if (!/^[a-f0-9]{64}\.(png|jpg|webp|json)$/.test(filename)) return new Response("Not found", {status: 404});
+  if (!/^[a-f0-9]{64}\.(png|jpg|webp|gif|json)$/.test(filename)) return new Response("Not found", {status: 404});
   const object = await bindings().STORAGE?.get(`live/${filename}`);
   if (!object) return new Response("Not found", {status: 404});
   return new Response(object.body as unknown as ReadableStream, {headers: {

@@ -1,6 +1,7 @@
 export type LiveStage = "prepared" | "token_pending" | "nft_pending" | "complete" | "abandoned";
 export type LiveAsset = { sha256: string; url: string; mimeType: string; bytes: number };
-export type LiveAssets = { artwork: LiveAsset; cardImage: LiveAsset; caseImage: LiveAsset };
+// Token media is server-derived on new preparation. Historical immutable intents have only the original three assets.
+export type LiveAssets = { artwork: LiveAsset; cardImage: LiveAsset; caseImage: LiveAsset; tokenImage?: LiveAsset; tokenPoster?: LiveAsset };
 export type LivePrepareInput = {
   idempotencyKey: string; tokenMint: string; nftMint: string;
   name: string; symbol: string; description: string; website?: string; xUrl?: string; cardTemplate: string;

@@ -528,7 +528,7 @@ function Launch() {
               className={`mdx-drop cdx-launch-art ${artMsg ? "border-down" : ""}`}
             >
               {preview ? <img src={preview} alt="" draggable={false} className="cdx-launch-art__image" /> : <span className="cdx-launch-art__add" aria-hidden>+</span>}
-              <span className="cdx-launch-art__copy"><strong>{uploading ? "Preparing artwork…" : preview ? "Replace artwork" : "Upload artwork"}</strong><span>Square image · drop or browse</span></span>
+              <span className="cdx-launch-art__copy"><strong>{uploading ? "Preparing artwork…" : preview ? "Replace artwork" : "Upload artwork"}</strong><span>Placed inside your card · drop or browse</span></span>
             </button>
             <input disabled={live && liveLocked} ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="sr-only" tabIndex={-1} aria-hidden onChange={(e) => { handleFile(e.target.files?.[0]); e.target.value = ""; }} />
           </Field>

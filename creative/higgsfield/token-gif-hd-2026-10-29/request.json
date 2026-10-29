@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-29",
+  "provider": "Higgsfield",
+  "purpose": "Native 4K premium turning-card master and pump.fun GIF proof",
+  "authorization": {
+    "text": "use my credits there and maximize it",
+    "scope": "One 5-second 4K/high-bitrate master, review before additional paid generations",
+    "quotedCredits": 110,
+    "balanceBefore": 261,
+    "expectedRemaining": 151
+  },
+  "model": "seedance_2_0",
+  "params": {
+    "model": "seedance_2_0",
+    "prompt": "Create an extremely crisp premium trading-card product turntable using the supplied exact card front and matching back. One single rigid physical 63:88 rounded card, centered upright, matte warm ivory background #f5efe2. Fixed camera and constant scale, card height 76% of square frame. Begin on the exact front, rotate smoothly one complete 360-degree revolution around its vertical axis, show the supplied exact back clearly at halfway, finish on the exact front in the identical pose for a seamless loop. Subtle restrained traveling foil highlights on the existing gold metal; realistic thin card edge. Preserve the actual supplied artwork, creator illustration, all typography and lettering, border construction, colors, geometry and both faces. No added labels, market cap, invented symbols, particles, props, case, crown, new logo, camera movement, zoom, depth of field, motion blur, bending or morphing. All four corners remain visible with circular-avatar-safe padding. Silent, clean studio light, sharp material detail, highest fidelity.",
+    "duration": 5,
+    "aspect_ratio": "1:1",
+    "resolution": "4k",
+    "mode": "std",
+    "bitrate_mode": "high",
+    "generate_audio": false,
+    "count": 1,
+    "use_unlim": false,
+    "medias": [
+      {
+        "role": "start_image",
+        "value": "edee3a7a-ead1-433f-a2ca-bd991ed38042"
+      },
+      {
+        "role": "end_image",
+        "value": "edee3a7a-ead1-433f-a2ca-bd991ed38042"
+      },
+      {
+        "role": "image",
+        "value": "d3eb25b9-81b0-4b9c-b38e-a41510c226fc"
+      }
+    ]
+  },
+  "jobId": "6ff06584-8807-4183-9079-0656145f8e68",
+  "status": "submitted",
+  "references": {
+    "front": "edee3a7a-ead1-433f-a2ca-bd991ed38042",
+    "back": "d3eb25b9-81b0-4b9c-b38e-a41510c226fc",
+    "dimensions": [
+      2048,
+      2048
+    ],
+    "sourceArtwork": "Existing approved Higgsfield Doge front/back; deterministic canonical content composition"
+  },
+  "adjustment": "image role mapped to image_references by Seedance backend",
+  "deployed": false
+}

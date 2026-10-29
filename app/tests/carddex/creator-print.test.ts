@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, test } from "bun:test";
 import { Resvg, initWasm } from "@resvg/resvg-wasm";
 import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
-import { creatorCardSvg, creatorCaseSvg, imageDataUri, CREATOR_CARD_RENDERER_VERSION, CREATOR_IMAGE_DIMENSIONS } from "../../src/lib/carddex/live/creator-print";
+import { creatorCardSvg, creatorCaseSvg, creatorTokenImageSvg, imageDataUri, CREATOR_CARD_RENDERER_VERSION, CREATOR_IMAGE_DIMENSIONS, TOKEN_IMAGE_FORMAT, TOKEN_IMAGE_DIMENSIONS, TOKEN_IMAGE_LAYOUT } from "../../src/lib/carddex/live/creator-print";
 import renderAssets from "../../src/lib/carddex/render-assets.json";
 import reviewedDesigns from "../../../integrations/pumpfun/src/design-assets.json";
 import { CANONICAL_CARD_LAYOUT, CARD_RENDERER_VERSION } from "../../src/lib/carddex/card-template";
@@ -83,6 +83,40 @@ describe("trusted creator card composition",()=>{
   expect(svg).toContain('clip-path="url(#name-edge)"');
   expect(svg).toContain('rx="63.504"');
  });
+ test("all token-image prints omit market cap and close the remaining data rows without changing NFT prints",()=>{
+  const rowY=(svg:string,label:string)=>Number(svg.match(new RegExp(`<text\\b[^>]*\\by="([\\d.]+)"[^>]*>${label}<\\/text>`))?.[1]);
+  for(const design of CARD_DESIGNS){
+   const normal=creatorCardSvg(card(design.key),mint,wallet,data,data);
+   const token=creatorCardSvg(card(design.key),mint,wallet,data,data,{tokenImage:true});
+   expect(normal).toContain(">Market cap</text>");expect(normal).toContain(">At creation</text>");
+   expect(token).not.toContain(">Market cap</text>");expect(token).not.toContain(">At creation</text>");
+   expect(token).toContain(">Token address</text>");expect(token).toContain(">Holders</text>");
+   expect(token).toContain(">1/1</text>");expect(token).toContain(">$TEST</text>");
+   expect(token).toContain(`${defaultQuoteForDesign(design.key).symbol} pair`);
+   expect(token.match(/stroke-dasharray="3 7"/g)).toHaveLength(2);
+   expect(rowY(token,"Token address")).toBe(rowY(normal,"Market cap"));
+   expect(rowY(token,"Holders")).toBe(rowY(normal,"Holders"));
+   expect(creatorCardSvg(card(design.key),mint,wallet,data,data,{})).toBe(normal);
+  }
+ });
+ test("the independent square format embeds the supplied full PNG without extra labels, clipping or a case",()=>{
+  const png=new Uint8Array([137,80,78,71,13,10,26,10]);
+  const svg=creatorTokenImageSvg(png);
+  expect(TOKEN_IMAGE_DIMENSIONS).toEqual({width:1024,height:1024});
+  expect(TOKEN_IMAGE_LAYOUT.cardWidth/TOKEN_IMAGE_LAYOUT.cardHeight).toBeCloseTo(63/88,12);
+  expect(TOKEN_IMAGE_LAYOUT.cardHeight).toBe(.76);
+  expect(TOKEN_IMAGE_LAYOUT.cardX+TOKEN_IMAGE_LAYOUT.cardWidth/2).toBe(.5);
+  expect(TOKEN_IMAGE_LAYOUT.cardY+TOKEN_IMAGE_LAYOUT.cardHeight/2).toBe(.5);
+  const cornerRadius=Math.hypot(TOKEN_IMAGE_LAYOUT.cardWidth/2,TOKEN_IMAGE_LAYOUT.cardHeight/2);
+  expect(cornerRadius).toBeLessThan(.47);
+  expect(svg).toContain(`data-token-image-format="${TOKEN_IMAGE_FORMAT}"`);
+  expect(svg).toContain('width="1024" height="1024"');
+  expect(svg).toContain(`fill="${TOKEN_IMAGE_LAYOUT.background}"`);
+  expect(svg).toContain(`href="${imageDataUri(png,"image/png")}"`);
+  expect(svg).toContain('preserveAspectRatio="xMidYMid meet"');
+  expect(svg.match(/<image\b/g)).toHaveLength(1);
+  expect(svg).not.toMatch(/<text\b|clip-path|transform=|<filter\b/);
+ });
 });
 describe("real PNG output",()=>{
  let fonts:Uint8Array[];
@@ -104,5 +138,36 @@ describe("real PNG output",()=>{
   }finally{image.free();}}finally{renderer.free();}
   const caseRenderer=new Resvg(creatorCaseSvg(png!,mint),{font:{fontBuffers:fonts}});
   try{const image=caseRenderer.render();try{expect(image.width).toBe(1440);expect(image.height).toBe(2240);expect(image.pixels[3]).toBe(0);expect(image.asPng().byteLength).toBeGreaterThan(100_000);}finally{image.free();}}finally{caseRenderer.free();}
+ },30_000);
+ for(const key of ["pokemon-classic","stock-tsla","doge","neon-circuit"])test(`${key} token image is opaque, square and fully safe inside a circular avatar`,async()=>{
+  const assetKey=key==="stock-tsla"?"stock-tsla--stock":key;
+  const atlas=await readFile(`public${renderAssets[assetKey as keyof typeof renderAssets].path}`);
+  const uri=imageDataUri(atlas,"image/png");
+  const cardRenderer=new Resvg(creatorCardSvg(card(key),mint,wallet,uri,uri,{tokenImage:true}),{font:{fontBuffers:fonts}});
+  let cardPng:Uint8Array;
+  try{const image=cardRenderer.render();try{cardPng=image.asPng().slice();}finally{image.free();}}finally{cardRenderer.free();}
+  const squareRenderer=new Resvg(creatorTokenImageSvg(cardPng!),{font:{fontBuffers:fonts}});
+  try{const image=squareRenderer.render();try{
+   expect(image.width).toBe(1024);expect(image.height).toBe(1024);
+   expect(image.asPng().byteLength).toBeGreaterThan(50_000);
+   const pixels=image.pixels,bg=[245,239,226];
+   let minX=1024,minY=1024,maxX=-1,maxY=-1,minAlpha=255,maxRadius=0,foreground=0;
+   for(let y=0;y<1024;y++)for(let x=0;x<1024;x++){
+    const i=(y*1024+x)*4;minAlpha=Math.min(minAlpha,pixels[i+3]);
+    if(pixels[i]===bg[0]&&pixels[i+1]===bg[1]&&pixels[i+2]===bg[2])continue;
+    foreground++;minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);
+    maxRadius=Math.max(maxRadius,Math.hypot(x+.5-512,y+.5-512));
+   }
+   expect(minAlpha).toBe(255);expect(foreground).toBeGreaterThan(300_000);
+   expect(minX).toBeGreaterThanOrEqual(Math.floor(TOKEN_IMAGE_LAYOUT.cardX*1024)-1);
+   expect(minY).toBeGreaterThanOrEqual(Math.floor(TOKEN_IMAGE_LAYOUT.cardY*1024)-1);
+   expect(maxX).toBeLessThanOrEqual(Math.ceil((TOKEN_IMAGE_LAYOUT.cardX+TOKEN_IMAGE_LAYOUT.cardWidth)*1024));
+   expect(maxY).toBeLessThanOrEqual(Math.ceil((TOKEN_IMAGE_LAYOUT.cardY+TOKEN_IMAGE_LAYOUT.cardHeight)*1024));
+   expect(maxX-minX).toBeGreaterThan(550);expect(maxY-minY).toBeGreaterThan(770);
+   expect(maxRadius).toBeLessThan(482); // At least30px clearance from a512px-radius crop.
+   for(const [x,y]of [[0,0],[1023,0],[0,1023],[1023,1023]]){
+    const i=(y*1024+x)*4;expect(Array.from(pixels.subarray(i,i+4))).toEqual([...bg,255]);
+   }
+  }finally{image.free();}}finally{squareRenderer.free();}
  },30_000);
 });
