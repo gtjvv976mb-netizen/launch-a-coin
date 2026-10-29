@@ -436,3 +436,15 @@ body[data-scroll-locked] .mdx-tt__charge > b {
   font-size: 13px;
   line-height: 1.45;
 }
+/* Phones: the caption's View coin and the stepping row are whole 44px targets (MintDex's phone pills). */
+@media (max-width: 1023.98px) {
+  .cdx-home__caption .mdx-btn {
+    min-height: 44px;
+    padding-inline: 18px;
+    font-size: 15px;
+  }
+  .cdx-home__controls .mdx-btn--icon {
+    width: 44px;
+    height: 44px;
+  }
+}

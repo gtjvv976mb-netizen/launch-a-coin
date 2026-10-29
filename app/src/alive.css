@@ -1070,10 +1070,11 @@ body:has(.mdx-inspect) .mdx-sky {
  * track holds the rows twice and slides by half its width, so the loop never jumps. It holds still under the
  * pointer, with the Pause button, offscreen, in a hidden tab and under dialogs (.is-paused); calm makes it a still
  * row that scrolls sideways by hand. */
+/* MintDex's bar is 34px; ours is 40px so its Pause is a whole 40px target under a fine pointer (44px on phones). */
 .mdx-ticker {
   position: relative;
   display: flex;
-  height: 34px;
+  height: var(--ticker-h);
   flex: none;
   align-items: center;
   gap: 10px;
@@ -1186,8 +1187,8 @@ body:has(.mdx-inspect) .mdx-sky {
 }
 .mdx-ticker__pause {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 100%;
   flex: none;
   place-items: center;
   color: var(--color-slate);
@@ -1225,12 +1226,10 @@ body:has(.mdx-inspect) .mdx-sky {
 }
 @media (max-width: 1023.98px) {
   .mdx-ticker {
-    height: 44px;
     padding-left: max(12px, env(safe-area-inset-left));
   }
   .mdx-ticker__pause {
     width: 44px;
-    height: 44px;
   }
 }
 

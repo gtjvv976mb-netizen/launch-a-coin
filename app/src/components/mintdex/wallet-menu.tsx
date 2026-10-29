@@ -1,7 +1,7 @@
 /**
- * The signed-in wallet menu (the top bar's AccountControl), loaded on demand. The same rows, in the same order and
- * words, as the phone Menu sheet (chrome-05): the account first, then Portfolio and the faucet, and Start over last,
- * after a rule, in the negative colour. Help, Terms and Calm motion live in the desktop top bar and footer.
+ * The signed-in wallet menu (the rail's wallet card, MintDex), loaded on demand; it opens upward from the rail's foot.
+ * The account first, then Portfolio and the faucet, and Start over last, after a rule, in the negative colour. Help,
+ * Terms and Calm motion sit in the rail above and below it.
  */
 import * as Popover from "@radix-ui/react-popover";
 import { Link } from "@tanstack/react-router";
@@ -29,12 +29,12 @@ export default function WalletMenu({ me }: { me: NonNullable<Me> }) {
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content
-          side="bottom"
-          align="end"
+          side="top"
+          align="start"
           sideOffset={8}
           ref={panel}
           aria-label="Account"
-          className="mdx-menu mdx-pop cdx-overlay-menu"
+          className="mdx-menu mdx-pop cdx-overlay-menu w-[var(--radix-popover-trigger-width)] min-w-[200px]"
           // Radix skips links when it picks the first control; start on the first row (Portfolio) instead.
           onOpenAutoFocus={(e) => {
             const first = panel.current?.querySelector<HTMLElement>(".mdx-menu-item");

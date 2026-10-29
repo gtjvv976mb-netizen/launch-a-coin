@@ -1193,22 +1193,35 @@
 /* ---------------------------------------------------------------- toasts (ui.tsx ToastProvider; placement in mintdex.css)
  * The float surface with one shadow; status in a small glyph, never a coloured fill: a check on the raised step
  * for done, the warning glyph in the negative colour for an error. Dismiss reaches the hit size. */
+/* The toast panel (the pre-restyle look): a raised walnut pill-ish panel that floats; errors on the down red. */
 .mdx-toast {
   min-height: 48px;
+  padding: 8px 8px 8px 16px;
+  border-radius: var(--radius-pop);
+  background: var(--color-sheet);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-float);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.mdx-toast--level {
+  font-size: 15px;
+  font-weight: 600;
 }
 .mdx-toast__ok {
-  background: var(--color-raised);
-  color: var(--color-ink);
+  background: var(--color-neon);
+  color: var(--color-neon-ink);
 }
 .mdx-toast[data-kind="err"] {
-  background: var(--color-float);
+  background: var(--color-down);
+  color: var(--color-neon-ink);
 }
 .mdx-toast[data-kind="err"]::before {
   content: "";
   flex: none;
   width: 16px;
   height: 16px;
-  background: var(--color-down-hover);
+  background: currentColor;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 2.25 14.25 13.5H1.75L8 2.25Z'/%3E%3Cpath d='M8 6.5v3M8 11.6v.1'/%3E%3C/svg%3E") center / contain no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 2.25 14.25 13.5H1.75L8 2.25Z'/%3E%3Cpath d='M8 6.5v3M8 11.6v.1'/%3E%3C/svg%3E") center / contain no-repeat;
 }

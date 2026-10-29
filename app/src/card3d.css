@@ -1527,7 +1527,7 @@
   --bk-motif: none;
 }
 .mdx-card3d[tabindex]:focus-visible {
-  outline: 2px solid var(--color-zap, #38d9ff);
+  outline: 2px solid var(--color-zap, #f0d48c);
   outline-offset: 6px;
 }
 .mdx-card3d__enter,
@@ -1862,7 +1862,7 @@
  * the card's face stays one flat, sharp layer. Static paint (no layer per card); at full motion only the prism ring
  * of the top designs turns, by transform. Calm keeps the still glow. */
 .mdx-card3d {
-  --glow: #3dffb5;
+  --glow: var(--color-neon);
   --glow-k: 0.3;
 }
 .mdx-card3d__halo {
@@ -1906,7 +1906,7 @@
   aspect-ratio: 1;
   translate: -50% 0;
   border-radius: 50%;
-  background: conic-gradient(from 0deg, #3dffb5, #38d9ff, #8b7bff, #ff3dce, #ffe45c, #3dffb5);
+  background: conic-gradient(from 0deg, var(--light-2), var(--light-3), var(--light-5), var(--light-4), var(--light-1), var(--light-2));
   -webkit-mask-image: radial-gradient(closest-side, transparent 62%, #000 84%, transparent 100%);
   mask-image: radial-gradient(closest-side, transparent 62%, #000 84%, transparent 100%);
   opacity: 0.75;
@@ -1928,7 +1928,7 @@
   height: 17cqw;
   pointer-events: none;
   border-radius: 50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow, #3dffb5) 46%, transparent) 0%, color-mix(in srgb, var(--glow, #3dffb5) 14%, transparent) 62%, transparent 100%);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow, #d4a64a) 46%, transparent) 0%, color-mix(in srgb, var(--glow, #d4a64a) 14%, transparent) 62%, transparent 100%);
 }
 .mdx-card3d__pedestal::before,
 .mdx-card3d__pedestal::after {
@@ -1943,7 +1943,7 @@
   top: 30%;
   height: 50%;
   background: linear-gradient(to bottom, #0b1022, #05070f);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--glow, #3dffb5) 30%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--glow, #d4a64a) 30%, transparent);
 }
 /* The top disc with its neon rim. */
 .mdx-card3d__pedestal::before {
@@ -1952,8 +1952,8 @@
   height: 50%;
   background: radial-gradient(ellipse at 50% 42%, #1d2440 0%, #0e1328 62%, #090c1a 100%);
   box-shadow:
-    inset 0 0 0 1.5px color-mix(in srgb, var(--glow, #3dffb5) 85%, white),
-    0 0 10px 1px color-mix(in srgb, var(--glow, #3dffb5) 60%, transparent);
+    inset 0 0 0 1.5px color-mix(in srgb, var(--glow, #d4a64a) 85%, white),
+    0 0 10px 1px color-mix(in srgb, var(--glow, #d4a64a) 60%, transparent);
 }
 /* Spinning list cards keep their isolated 3D pose, front/back planes and rounded perimeter. The same
  * extruded walls stay mounted through spin-to-drag transitions, so no rectangular edge pierces a corner. */
@@ -2153,12 +2153,12 @@
   padding: 0 16px;
   border: 0;
   border-radius: 999px;
-  background: rgb(10 14 22 / 0.82);
-  color: var(--color-ink, #eef3fa);
+  background: rgb(var(--rgb-wall) / 0.82);
+  color: var(--color-ink);
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
-  box-shadow: 0 0 0 1px rgb(61 255 181 / 0.4), 0 0 14px -4px rgb(61 255 181 / 0.5), 0 6px 16px -8px rgb(0 0 0 / 0.6);
+  box-shadow: 0 0 0 1px rgb(var(--rgb-gold) / 0.4), 0 0 14px -4px rgb(var(--rgb-gold) / 0.5), 0 6px 16px -8px rgb(0 0 0 / 0.6);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   cursor: pointer;
@@ -2437,12 +2437,12 @@
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: var(--color-sheet, #151c29);
+  background: var(--color-sheet, #2b241b);
   color: var(--color-ink, #eef3fa);
   font: 600 13px/1 var(--font-sans);
   white-space: nowrap;
   cursor: pointer;
-  box-shadow: var(--shadow-raise), 0 0 0 1px rgb(56 217 255 / 0.32);
+  box-shadow: var(--shadow-raise), 0 0 0 1px rgb(var(--rgb-zap) / 0.32);
   transition:
     transform var(--t-fast, 160ms) var(--ease-spring),
     background-color var(--t-fast, 160ms) var(--ease-room);
@@ -2478,7 +2478,7 @@
   content: none;
 }
 .mdx-case__btn:focus-visible {
-  outline: 2px solid var(--color-zap, #38d9ff);
+  outline: 2px solid var(--color-zap, #f0d48c);
   outline-offset: 2px;
 }
 @media (hover: hover) {
@@ -2504,7 +2504,7 @@
   outline: none;
 }
 .mdx-case__scene:focus-visible .mdx-case__plate--front .mdx-case__acrylic {
-  outline: 2px solid var(--color-zap, #38d9ff);
+  outline: 2px solid var(--color-zap, #f0d48c);
   outline-offset: 4px;
 }
 
@@ -2758,7 +2758,7 @@
   transform: none;
 }
 .mdx-v3dbtn:focus-visible {
-  outline: 2px solid var(--color-zap, #38d9ff);
+  outline: 2px solid var(--color-zap, #f0d48c);
   outline-offset: 2px;
 }
 @media (hover: none) {
@@ -2806,8 +2806,8 @@
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   /* Its own light-on-dark ink: the backdrop stays night-dark in the cream theme (carddex-theme.css --v3d-*). */
-  color: var(--v3d-ink, #eef3fa);
-  background: radial-gradient(ellipse 70% 58% at 50% 44%, #16213d 0%, #0a0f1f 52%, #03040a 100%);
+  color: var(--v3d-ink, #f3ead6);
+  background: radial-gradient(ellipse 70% 58% at 50% 44%, var(--color-sheet) 0%, var(--color-plinth) 52%, var(--color-sleeve) 100%);
   outline: none;
   overflow: clip;
   overscroll-behavior: contain;
@@ -2817,9 +2817,9 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 50% 30% at 50% 72%, color-mix(in srgb, var(--color-neon, #3dffb5) 10%, transparent), transparent 70%),
-    radial-gradient(ellipse 40% 50% at 18% 20%, rgb(255 61 206 / 0.1), transparent 70%),
-    radial-gradient(ellipse 40% 50% at 82% 24%, rgb(56 217 255 / 0.1), transparent 70%);
+    radial-gradient(ellipse 50% 30% at 50% 72%, color-mix(in srgb, var(--color-neon, #d4a64a) 10%, transparent), transparent 70%),
+    radial-gradient(ellipse 40% 50% at 18% 20%, rgb(var(--rgb-red) / 0.1), transparent 70%),
+    radial-gradient(ellipse 40% 50% at 82% 24%, rgb(var(--rgb-zap) / 0.1), transparent 70%);
 }
 .mdx-v3d__sky::after {
   /* The neon grid floor (still). */
@@ -2830,12 +2830,12 @@
   bottom: 0;
   height: 42%;
   background:
-    repeating-linear-gradient(to right, rgb(61 255 181 / 0.16) 0 1px, transparent 1px 64px),
-    repeating-linear-gradient(to bottom, rgb(61 255 181 / 0.16) 0 1px, transparent 1px 40px);
+    repeating-linear-gradient(to right, rgb(var(--rgb-gold) / 0.16) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(to bottom, rgb(var(--rgb-gold) / 0.16) 0 1px, transparent 1px 40px);
   transform: perspective(420px) rotateX(58deg);
   transform-origin: 50% 100%;
-  -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 90%);
-  mask-image: linear-gradient(to top, #000 10%, transparent 90%);
+  -webkit-mask-image: linear-gradient(to top, black 10%, transparent 90%);
+  mask-image: linear-gradient(to top, black 10%, transparent 90%);
 }
 .mdx-v3d__bar {
   position: relative;
@@ -2854,7 +2854,7 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--v3d-accent, #3dffb5);
+  color: var(--v3d-accent, #d4a64a);
 }
 .mdx-v3d__tools {
   display: flex;
@@ -2871,20 +2871,20 @@
   border-radius: 999px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--v3d-ink, #eef3fa);
-  background: var(--v3d-control, rgb(21 28 41 / 0.72));
-  border: 1px solid var(--v3d-control-border, rgb(148 178 220 / 0.5)); /* taste-skill-ignore: 3:1 control boundary on the night backdrop */
+  color: var(--v3d-ink, #f3ead6);
+  background: var(--v3d-control, rgb(var(--rgb-plinth) / 0.72));
+  border: 1px solid var(--v3d-control-border, rgb(var(--rgb-ink) / 0.5)); /* taste-skill-ignore: 3:1 control boundary on the night backdrop */
   transition: border-color 140ms var(--ease-room);
 }
 @media (hover: hover) and (pointer: fine) {
   .mdx-v3d__btn:hover {
-    border-color: var(--v3d-control-hover, rgb(61 255 181 / 0.8));
+    border-color: var(--v3d-control-hover, rgb(var(--rgb-gold) / 0.8));
   }
 }
 .mdx-v3d__btn:focus-visible,
 .mdx-v3d__go:focus-visible,
 .mdx-v3d .mdx-v3d__step:focus-visible {
-  outline: 2px solid var(--v3d-accent, #38d9ff);
+  outline: 2px solid var(--v3d-accent, #f0d48c);
   outline-offset: 2px;
 }
 .mdx-v3d__close {
@@ -2940,55 +2940,55 @@
   top: 0;
   translate: 0 -50%;
   scale: 1.25 0.42;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow-c, #3dffb5) 42%, transparent), transparent 100%);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow-c, #d4a64a) 42%, transparent), transparent 100%);
 }
 .mdx-v3d__ped-side {
   top: calc(var(--W) * 0.075);
   translate: 0 -50%;
   scale: 1 0.3;
-  background: linear-gradient(to bottom, #111832, #04060d 70%);
+  background: linear-gradient(to bottom, var(--color-plinth), var(--color-sleeve) 70%);
   box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--color-hype, #ff3dce) 55%, transparent),
-    0 0 40px 4px color-mix(in srgb, var(--color-hype, #ff3dce) 30%, transparent);
+    0 0 0 2px color-mix(in srgb, var(--color-hype, #9e2b25) 55%, transparent),
+    0 0 40px 4px color-mix(in srgb, var(--color-hype, #9e2b25) 30%, transparent);
 }
 .mdx-v3d__ped-top {
   top: 0;
   translate: 0 -50%;
   scale: 1 0.3;
   overflow: clip;
-  background: radial-gradient(closest-side, #222b4c 0%, #121a33 62%, #0a0f22 100%);
+  background: radial-gradient(closest-side, var(--color-tint) 0%, var(--color-sheet) 62%, var(--color-plinth) 100%);
   box-shadow:
-    inset 0 0 0 3px var(--color-neon, #3dffb5),
-    inset 0 0 26px 2px color-mix(in srgb, var(--color-neon, #3dffb5) 45%, transparent),
-    0 0 30px 2px color-mix(in srgb, var(--color-neon, #3dffb5) 45%, transparent);
+    inset 0 0 0 3px var(--color-neon, #d4a64a),
+    inset 0 0 26px 2px color-mix(in srgb, var(--color-neon, #d4a64a) 45%, transparent),
+    0 0 30px 2px color-mix(in srgb, var(--color-neon, #d4a64a) 45%, transparent);
 }
 .mdx-v3d__ped-top > b {
   position: absolute;
   inset: 7%;
   border-radius: 50%;
   background:
-    radial-gradient(closest-side, rgb(0 0 0 / 0.55) 0 22%, transparent 23% 100%),
-    repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--glow-c, #38d9ff) 70%, transparent) 0 2deg, transparent 2deg 15deg);
-  -webkit-mask-image: radial-gradient(closest-side, transparent 60%, #000 62% 96%, transparent 98%);
-  mask-image: radial-gradient(closest-side, transparent 60%, #000 62% 96%, transparent 98%);
+    radial-gradient(closest-side, rgb(var(--rgb-shade) / 0.55) 0 22%, transparent 23% 100%),
+    repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--glow-c, #f0d48c) 70%, transparent) 0 2deg, transparent 2deg 15deg);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 60%, black 62% 96%, transparent 98%);
+  mask-image: radial-gradient(closest-side, transparent 60%, black 62% 96%, transparent 98%);
 }
 .mdx-v3d__step {
   position: absolute;
   z-index: 2;
   top: 50%;
   translate: 0 -50%;
-  background: rgb(21 28 41 / 0.78);
+  background: rgb(var(--rgb-plinth) / 0.78);
 }
 /* The chevrons are outline buttons: re-ink them for the night backdrop (the page's outline recipe is dark ink). */
 .mdx-v3d .mdx-v3d__step {
-  color: var(--v3d-ink, #eef3fa);
-  background: var(--v3d-control, rgb(21 28 41 / 0.78));
-  border: 1px solid var(--v3d-control-border, rgb(148 178 220 / 0.5)); /* taste-skill-ignore: 3:1 control boundary on the night backdrop */
+  color: var(--v3d-ink, #f3ead6);
+  background: var(--v3d-control, rgb(var(--rgb-plinth) / 0.78));
+  border: 1px solid var(--v3d-control-border, rgb(var(--rgb-ink) / 0.5)); /* taste-skill-ignore: 3:1 control boundary on the night backdrop */
   box-shadow: none;
 }
 @media (hover: hover) and (pointer: fine) {
   .mdx-v3d .mdx-v3d__step:hover:not(:disabled, [aria-disabled="true"]) {
-    border-color: var(--v3d-control-hover, rgb(61 255 181 / 0.8));
+    border-color: var(--v3d-control-hover, rgb(var(--rgb-gold) / 0.8));
     box-shadow: none;
   }
 }
@@ -3025,10 +3025,10 @@
   justify-content: center;
   gap: 10px;
   font-size: 14px;
-  color: var(--v3d-muted, #9ba8bc);
+  color: var(--v3d-muted, #bdae92);
 }
 .mdx-v3d__ticker {
-  color: var(--v3d-ink, #eef3fa);
+  color: var(--v3d-ink, #f3ead6);
   font-weight: 600;
 }
 .mdx-v3d__go {
@@ -3036,7 +3036,7 @@
 }
 .mdx-v3d__hint {
   font-size: 12px;
-  color: var(--v3d-muted, #9ba8bc);
+  color: var(--v3d-muted, #bdae92);
 }
 .mdx-v3d__hint-touch {
   display: none;
