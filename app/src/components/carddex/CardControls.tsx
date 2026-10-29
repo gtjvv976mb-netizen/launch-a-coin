@@ -1,5 +1,8 @@
-import type { ButtonHTMLAttributes, ReactNode, Ref } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode, type Ref } from "react";
+import type { CardData } from "../mintdex/MintCard";
 import { Icon, type IconName } from "../mintdex/icons";
+
+const InspectStage = lazy(() => import("../mintdex/card3d/InspectStage"));
 
 /**
  * The compact card-controls row (density R6 and R8, .taste-skill/density/rules.md): a card keeps Turn over,
@@ -30,4 +33,32 @@ export function CardControlButton({
       <Icon name={icon} />
     </button>
   );
+}
+
+/** The 3D viewer on request: open state, and focus back on the control that opened it once it closes. */
+function useViewer() {
+  const [open, setOpen] = useState(false);
+  const opener = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (open) { wasOpen.current = true; return; }
+    if (!wasOpen.current) return;
+    wasOpen.current = false;
+    const target = opener.current;
+    const frame = requestAnimationFrame(() => { if (target?.isConnected) target.focus({ preventScroll: true }); });
+    return () => cancelAnimationFrame(frame);
+  }, [open]);
+  return { open, setOpen, opener };
+}
+
+/**
+ * A turntable stage's View in 3D: the row's last control and the 3D case it opens on request (InspectStage, loaded
+ * then), so every stage with a controls row (Launch, Designs, the coin case) offers Turn over, Pause and View in 3D.
+ */
+export function useViewIn3D(card: CardData, className = "") {
+  const viewer = useViewer();
+  return {
+    control: <CardControlButton ref={viewer.opener} icon="rotate-3d" label={`View in 3D: ${card.name}`} tip="View in 3D" className={className} onClick={() => viewer.setOpen(true)} aria-haspopup="dialog" />,
+    viewer: viewer.open ? <Suspense fallback={null}><InspectStage card={card} open={viewer.open} onOpenChange={viewer.setOpen} /></Suspense> : null,
+  };
 }

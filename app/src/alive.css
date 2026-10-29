@@ -90,7 +90,7 @@
 .mdx-playbtn {
   transition:
     background-color var(--t-fast) var(--ease-room),
-    transform var(--t-press) var(--ease-spring);
+    transform var(--t-press) var(--ease-out);
 }
 @media (hover: hover) {
   .mdx-playbtn:hover {

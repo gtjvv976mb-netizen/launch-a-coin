@@ -73,14 +73,14 @@
   /* ---- radius: concentric, from the 20px card (outer = inner + padding) */
   --radius-chip: 6px; /* the "/" key hint only */
   --radius-row: 12px; /* rows and their hover, menu items (in a 16 popover with 4 padding), tiles, tooltips */
-  --radius-field: 12px; /* inputs, field selects, textareas */
+  --radius-field: 8px; /* inputs, field selects, textareas: the 20px panel less its 12px phone padding */
   --radius-pop: 16px; /* menus, popovers, toasts, search suggestions */
   --radius-panel: 20px; /* panels and phone sheets (a nested panel with 8px padding takes --radius-row) */
   --radius-aside: 24px; /* desktop dialogs */
   --radius-pill: 999px; /* every button, chip, badge, segmented track and thumb, switch */
 
   /* ---- type: Instrument Sans for every UI word and figure; the card faces keep their own */
-  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: "Instrument Sans", "Instrument Sans Fallback", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-title: var(--font-sans);
   --font-addr: "Courier Prime", ui-monospace, "SF Mono", Menlo, monospace; /* addresses and hashes */
   --font-card-serif: "Libre Caslon Text", Georgia, "Times New Roman", serif;
@@ -109,7 +109,6 @@
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1); /* sheets (vaul) */
   /* The card engine's own curves (card3d.css reads them; unchanged so the cards move exactly as before). */
   --ease-room: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
   --ease-exit: cubic-bezier(0.4, 0, 1, 1);
   --ease-sheen: cubic-bezier(0.45, 0, 0.25, 1);
 }

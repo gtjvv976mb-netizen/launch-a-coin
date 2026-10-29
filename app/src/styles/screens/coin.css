@@ -71,6 +71,7 @@
  * chevron, the title (never cut) and Share on one row, then the context line in full with Simulated at its end. */
 .cdx-coin-screen .mdx-pagehead__right { gap: 12px; }
 /* The tag's wrappers carry the display (the tag's own inline-flex is a utility, a later layer). */
+.cdx-coin-screen__by { display: inline-block; max-width: 100%; }
 .cdx-coin-screen__simtag { display: none; margin-left: 8px; }
 .cdx-coin-screen__simtag--wide { display: inline-flex; }
 .cdx-coin-back { display: inline-flex; align-items: center; gap: 4px; font-size: var(--text-body); }
@@ -258,7 +259,7 @@
   border-bottom: 1px solid var(--color-field); /* taste-skill-ignore: the plot's baseline */
   text-align: center;
 }
-.cdx-chart__empty p { max-width: 32ch; font-size: var(--text-body); color: var(--color-slate); text-wrap: pretty; }
+.cdx-chart__empty p { max-width: 21.3em; font-size: var(--text-body); color: var(--color-slate); text-wrap: pretty; }
 .cdx-chart .mdx-tabs--sm .mdx-tabs__tab { min-width: 40px; }
 /* Touch and phones keep the primitive's 44px options (this sheet's layer would otherwise win with 40). */
 @media (pointer: coarse), (max-width: 1023.98px) { .cdx-chart .mdx-tabs--sm .mdx-tabs__tab { min-width: 44px; } }
@@ -332,8 +333,12 @@
 .cdx-trade-ticket__msg p[data-kind="info"] { color: var(--color-ink); }
 .cdx-trade-ticket__msg .mdx-glyph { margin-top: 2px; }
 .cdx-trade-ticket__note { margin-top: -4px; font-size: var(--text-caption); line-height: 16px; color: var(--color-placeholder); text-align: center; }
+/* The bar's stop in the Tab order (coin.tsx TradePanel): no box, never shown (focus moves on at once); only where
+ * the bar is. */
+.cdx-trade-ticket__bar-stop { display: none; }
 @media (max-width: 1023.98px) {
   .cdx-trade-ticket__submit { display: none; }
+  .cdx-trade-ticket__bar-stop { display: block; width: 0; height: 0; overflow: hidden; }
 }
 @media (max-width: 767.98px) {
   .cdx-trade-ticket { gap: 8px; }
@@ -351,20 +356,21 @@
 .cdx-trade-bar__spend:empty { display: none; }
 .cdx-trade-bar .cdx-trade-bar__submit { flex: 1 1 60%; min-width: 0; height: var(--btn-h-lg); }
 
-/* ---- About: the description and the curve sentence (65ch) beside the facts from 640px of panel width */
+/* ---- About: the description and the curve sentence (65ch) beside the facts from 640px of panel width. Measures are
+ * in em (Instrument Sans's 1ch = 0.666em), so the fallback face's narrower ch never moves them while the font loads. */
 .cdx-coin-about { container-type: inline-size; display: flex; flex-direction: column; gap: 12px; }
 .cdx-coin-about__body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 .cdx-coin-about__text { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; gap: 12px; }
 .cdx-coin-about__facts { display: flex; min-width: 0; flex-direction: column; }
 .cdx-coin-about__facts > dl + dl { border-top: 1px solid var(--color-rule); } /* taste-skill-ignore: the rule between two key-value tables */
 @container (min-width: 640px) {
-  .cdx-coin-about__body { grid-template-columns: minmax(0, 65ch) minmax(240px, 1fr); column-gap: 32px; }
+  .cdx-coin-about__body { grid-template-columns: minmax(0, 43.3em) minmax(240px, 1fr); column-gap: 32px; }
 }
-.cdx-coin-about__lore { max-width: 65ch; font-size: var(--text-body); line-height: 20px; overflow-wrap: anywhere; white-space: pre-line; }
-.cdx-coin-about__note { max-width: 65ch; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); text-wrap: pretty; }
+.cdx-coin-about__lore { max-width: 43.3em; font-size: var(--text-body); line-height: 20px; overflow-wrap: anywhere; white-space: pre-line; }
+.cdx-coin-about__note { max-width: 43.3em; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); text-wrap: pretty; }
 .cdx-coin-about__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
 .cdx-coin-about__actions .mdx-link { display: inline-flex; align-items: center; gap: 4px; }
-.cdx-coin-about__foot { max-width: 65ch; font-size: var(--text-caption); line-height: 16px; color: var(--color-placeholder); }
+.cdx-coin-about__foot { max-width: 43.3em; font-size: var(--text-caption); line-height: 16px; color: var(--color-placeholder); }
 /* Addresses in the chrome use the UI face (Courier Prime stays inside the cards). */
 .cdx-coin-screen .addr { font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
 

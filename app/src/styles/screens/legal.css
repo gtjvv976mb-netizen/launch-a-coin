@@ -11,7 +11,9 @@
  * Tokens: carddex-theme.css. */
 
 .cdx-legal__layout {
-  --legal-measure: 46ch; /* about 65 characters a line: Instrument Sans averages ~0.69ch a glyph */
+  /* 46ch of Instrument Sans (its 0 is 0.666em), about 65 characters a line (it averages ~0.69ch a glyph). In em, not
+   * ch: the fallback face's 0 is narrower, so a ch track moved the whole column when the web font swapped in (CLS). */
+  --legal-measure: 30.63em;
   display: flex;
   flex-direction: column;
   gap: var(--gap-section);
@@ -197,7 +199,7 @@
 }
 
 /* ---- from 768px: the text beside the short version, the section links pinned across both. The layout's own font
- * size is the text's, so the 46ch track equals the paragraphs' 46ch measure. The links' grid area spans every row
+ * size is the text's, so the track equals the paragraphs' measure. The links' grid area spans every row
  * (a sticky box never leaves its area) while their box stays in the first row. */
 @media (min-width: 768px) {
   .cdx-legal__layout {

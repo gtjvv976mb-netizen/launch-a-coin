@@ -221,13 +221,14 @@ function Discover() {
           <AutoGrid ref={gridRef} min="var(--coin-min)" className="cdx-token-grid">
             {visible.map((c, i) => (
               <li key={c.id} className="cdx-token-item">
-                {/* The first rows load at once and at high priority; the rest when they near the screen. The sizes match
-                    the laid-out card (half the column on phones, a quarter on tablets, about 160-200px above). */}
+                {/* The first four (two rows on a phone, the start of the first row above) load at once and at high
+                    priority; the rest when they near the screen, so a phone's first screen gets the bandwidth. The sizes
+                    match the laid-out card (under half the screen on phones, a quarter on tablets, 150-200px above). */}
                 <CoinTile
                   coin={c}
                   list={items}
-                  priority={i < 8}
-                  sizes="(max-width: 767px) 50vw, (max-width: 1023px) 25vw, 200px"
+                  priority={i < 4}
+                  sizes="(max-width: 767px) 46vw, (max-width: 1023px) 25vw, 200px"
                 />
               </li>
             ))}

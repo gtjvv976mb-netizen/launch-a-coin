@@ -100,7 +100,8 @@
   justify-content: flex-start;
   gap: 12px;
   padding: 12px;
-  border-radius: var(--radius-pop);
+  /* Concentric with the slot inside it: the 8px field corner plus the 12px padding. */
+  border-radius: var(--radius-panel);
   text-align: left;
 }
 .cdx-launch-art__frame {
@@ -110,7 +111,7 @@
   flex: none;
   place-items: center;
   overflow: hidden;
-  border-radius: var(--radius-row);
+  border-radius: var(--radius-field);
   background: var(--color-track);
   color: var(--color-ink);
 }

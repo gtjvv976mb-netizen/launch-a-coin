@@ -147,8 +147,9 @@ const ACTIVITY_ROWS = 10;
  * stage), so the card never shrinks for them. The rest stay one click away on Discover.
  */
 const FEATURED_MAX = 10;
-/** The staged faces' sizes (the card is at most 320px on phones, 400px from 640px; 351px on a 1440 stage). */
-const FACE_SIZES = "(max-width: 639px) 280px, 400px";
+/** The staged faces' sizes, as laid out: 240-272px on phones, 400px on a tablet, 274-354px on a 1024-1439 stage and
+ * 400px from 1440px. Close to the real width, so a 1.75x phone takes the 480px copies. */
+const FACE_SIZES = "(max-width: 639px) 270px, (max-width: 1023px) 400px, (max-width: 1439px) 300px, 400px";
 
 /**
  * The featured lot: which coin is selected and the step direction. The selection follows the coin (by id)
@@ -199,7 +200,7 @@ function featuredCard(c: CoinSummary): CardData {
  * demo data. Not keyed on the coin: it fades around a swap by class, so View coin stays the same element and keeps
  * focus.
  */
-function LotCaption({ coin: c }: { coin: CoinSummary }) {
+function LotCaption({ coin: c, onTurnOver }: { coin: CoinSummary; onTurnOver?: () => void }) {
   return (
     <div className="cdx-home-lot">
       <div className="cdx-home-lot__head">
@@ -209,9 +210,14 @@ function LotCaption({ coin: c }: { coin: CoinSummary }) {
             <span className="num">${c.ticker}</span> · {getCardDesign(c.cardTemplate).name} design
           </p>
         </div>
-        <ButtonLink to="/coin/$id" params={{ id: c.id }} size="sm" variant="outline">
-          {HOME_COPY.viewCoin}
-        </ButtonLink>
+        <div className="cdx-home-lot__actions">
+          {/* Turn over, the stage's card control (V5): the same 32px pill as View coin, so the row keeps its height
+              and the picks keep their line. */}
+          {onTurnOver ? <CardControlButton icon="turn-over" label={`Turn over: ${c.name}`} tip="Turn over" className="mdx-btn--sm" onClick={onTurnOver} /> : null}
+          <ButtonLink to="/coin/$id" params={{ id: c.id }} size="sm" variant="outline">
+            {HOME_COPY.viewCoin}
+          </ButtonLink>
+        </div>
       </div>
       <div className="cdx-home-lot__market">
         <dl className="cdx-home-lot__cap">
@@ -328,8 +334,10 @@ function LaunchedSection({ now }: { now: number }) {
         title={<span id={headId}>Launched on pump.fun</span>}
         right={<span className="cdx-home-panel__meta">Real · Solana mainnet</span>}
       />
+      {/* One placeholder tile, and an empty state no shorter than it (home.css): the server HTML and the answer
+          keep the panel's height, so the stage beside it (which stretches to the pulse) never resizes its card. */}
       {launches.isPending ? (
-        <LaunchedSkeleton rows={2} />
+        <LaunchedSkeleton rows={1} />
       ) : launches.isError && !rows.length ? (
         <div role="alert" className="cdx-home-panel__error">
           <p>Couldn't load the launch list. Check your connection, then try again.</p>
@@ -563,6 +571,15 @@ function Home() {
   }, [playing]);
   const [interactionHeld, setInteractionHeld] = useState(false);
   const cardPointers = useRef(new Set<number>());
+  // Turn over is a hand on the card: the next coin waits as it does after a drag.
+  const turnHold = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(turnHold.current), []);
+  const turnShown = () => {
+    turntableCtl.current?.turnOver(1, true);
+    setInteractionHeld(true);
+    clearTimeout(turnHold.current);
+    turnHold.current = setTimeout(() => setInteractionHeld(false), INTERACTION_HOLD_MS);
+  };
   const [settled, setSettled] = useState(0);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -796,7 +813,7 @@ function Home() {
           {/* The caption fades around a swap by class (not keyed), so View coin keeps focus (P1-21). */}
           <div className={`cdx-home__caption ${captionMotion}`}>
             {caption ? (
-              <LotCaption coin={caption} />
+              <LotCaption coin={caption} onTurnOver={shown && target ? turnShown : undefined} />
             ) : (
               <div className="cdx-home-lot">
                 <h2 className="mdx-name">No cards yet</h2>

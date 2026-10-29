@@ -59,6 +59,25 @@ function applySiteHeaders(response: Response, url: URL): Response {
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
+/** The part of workerd's HTMLRewriter this entry uses (the Worker types are not in tsconfig). */
+type Rewriter = {
+  on(selector: string, handlers: { element(element: { setAttribute(name: string, value: string): void }): void }): Rewriter;
+  transform(response: Response): Response;
+};
+declare const HTMLRewriter: (new () => Rewriter) | undefined;
+
+/**
+ * The client bundle hydrates a page the server already painted, so the browser fetches it after the stylesheets, the
+ * fonts and the card images it can see (PERF: the largest paint on a phone is a card skin, and the 250KB bundle at
+ * TanStack's default High priority shared the first round trips with them). Clicks before hydration still follow the
+ * page's real links. Pages only; workerd always provides HTMLRewriter.
+ */
+function lowerScriptPriority(response: Response): Response {
+  if (typeof HTMLRewriter === "undefined" || !(response.headers.get("content-type") ?? "").includes("text/html")) return response;
+  const low = { element(element: { setAttribute(name: string, value: string): void }) { element.setAttribute("fetchpriority", "low"); } };
+  return new HTMLRewriter().on('link[rel="modulepreload"]', low).on('script[type="module"][src]', low).transform(response);
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     // One canonical hop also keeps www wallet pages on the configured origin.
@@ -81,7 +100,7 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(req, env, ctx);
-      return applySiteHeaders(applySecurityHeaders(await normalizeCatastrophicSsrResponse(response), url), url);
+      return applySiteHeaders(applySecurityHeaders(lowerScriptPriority(await normalizeCatastrophicSsrResponse(response)), url), url);
     } catch (error) {
       console.error(error);
       return applySecurityHeaders(

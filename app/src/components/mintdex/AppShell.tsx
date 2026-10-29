@@ -898,6 +898,48 @@ function DevnetSiteNote() {
   );
 }
 
+/** The hover wait before the first tooltip shows (the 400ms in carddex.css, home.css and viewer.css). */
+const TIP_DELAY_MS = 400;
+/** How long the tooltips stay warm after the pointer leaves one. */
+const TIP_COOL_MS = 600;
+
+/**
+ * Tooltips ([data-tip]) on an Operate surface: the first one a mouse rests on waits a beat; while one is showing, or
+ * just after, its neighbours open at once with no fade (html[data-tips-warm]), so running along a row of card
+ * controls reads every name without waiting at each. Touch never shows them; keyboard focus shows them at once.
+ */
+function useWarmTips() {
+  useEffect(() => {
+    const root = document.documentElement;
+    let wait: ReturnType<typeof setTimeout> | undefined;
+    let cool: ReturnType<typeof setTimeout> | undefined;
+    const tipOf = (target: EventTarget | null) => (target instanceof Element ? target.closest("[data-tip]") : null);
+    const over = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse" || !tipOf(e.target)) return;
+      clearTimeout(cool);
+      if (root.hasAttribute("data-tips-warm")) return;
+      clearTimeout(wait);
+      wait = setTimeout(() => root.setAttribute("data-tips-warm", ""), TIP_DELAY_MS);
+    };
+    const out = (e: PointerEvent) => {
+      const tip = tipOf(e.target);
+      if (!tip || (e.relatedTarget instanceof Node && tip.contains(e.relatedTarget))) return;
+      clearTimeout(wait);
+      clearTimeout(cool);
+      cool = setTimeout(() => root.removeAttribute("data-tips-warm"), TIP_COOL_MS);
+    };
+    document.addEventListener("pointerover", over);
+    document.addEventListener("pointerout", out);
+    return () => {
+      clearTimeout(wait);
+      clearTimeout(cool);
+      document.removeEventListener("pointerover", over);
+      document.removeEventListener("pointerout", out);
+      root.removeAttribute("data-tips-warm");
+    };
+  }, []);
+}
+
 /** Keeps the live wallet registry open across pages, loaded once the page has loaded and is idle. */
 function useLiveWalletRegistry() {
   useEffect(() => {
@@ -914,6 +956,7 @@ function useLiveWalletRegistry() {
 
 export function AppShell({ children, devnetSite = false }: { children: ReactNode; devnetSite?: boolean }) {
   useLiveWalletRegistry();
+  useWarmTips();
   const searchRef = useRef<HTMLInputElement>(null);
   const pending = useRoutePending();
   const path = useRouterState({ select: (s) => s.location.pathname });

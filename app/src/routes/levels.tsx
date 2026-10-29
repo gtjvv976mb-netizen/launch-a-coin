@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { searchSchema, text } from "../lib/mintdex/search";
 import { HeroTurntable } from "../components/carddex/HeroTurntable";
+import { useViewIn3D } from "../components/carddex/CardControls";
 import { type CardData } from "../components/mintdex/MintCard";
 import {
   ActionBar,
@@ -38,6 +39,17 @@ import { MEME_PAIR_PRESETS } from "../lib/carddex/design-pairings";
 import { DESIGN_GROUPS, inDesignGroup } from "../components/carddex/design-groups";
 import { initialQuoteReserves, quoteMetrics } from "../lib/carddex/quote-simulation";
 import { QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
+
+/** The selected design on its turntable, with the stage's three controls (Turn over, Pause, View in 3D). */
+function DesignStage({ card }: { card: CardData }) {
+  const view3d = useViewIn3D(card);
+  return (
+    <>
+      <HeroTurntable card={card} viewportFit controls={view3d.control} />
+      {view3d.viewer}
+    </>
+  );
+}
 
 export const Route = createFileRoute("/levels")({
   validateSearch: searchSchema({
@@ -344,7 +356,7 @@ function Designs() {
             aria-label="Selected design preview"
           >
             <div className="cdx-archive__card" key={design.key}>
-              <HeroTurntable card={card} viewportFit />
+              <DesignStage card={card} />
             </div>
             <div className="cdx-archive__info">
               <div className="cdx-archive__caption">

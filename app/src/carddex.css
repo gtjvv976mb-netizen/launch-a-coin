@@ -19,8 +19,10 @@
   }
 }
 /* The tooltip: the control's name on the float surface above it. Hover waits a beat (an Operate surface: a pointer
- * passing over the row does not flash labels); keyboard focus shows it at once. Never on touch (no hover). */
-.cdx-card-control[data-tip]::before {
+ * passing over the row does not flash labels), then its neighbours open at once; keyboard focus shows it at once.
+ * Never on touch (no hover). */
+/* .mdx-tip: any other icon-only control that names itself the same way (ShareButton), never with title=. */
+:is(.cdx-card-control, .mdx-tip)[data-tip]::before {
   content: attr(data-tip);
   position: absolute;
   bottom: calc(100% + 6px);
@@ -41,12 +43,22 @@
   transition: opacity var(--t-fast) ease;
 }
 @media (hover: hover) and (pointer: fine) {
-  .cdx-card-control[data-tip]:hover::before {
+  :is(.cdx-card-control, .mdx-tip)[data-tip]:hover::before {
     opacity: 1;
     transition-delay: 400ms;
   }
 }
-.cdx-card-control[data-tip]:focus-visible::before {
+/* A header control (Share) sits at the column's right edge: its tip ends there too. */
+.mdx-tip[data-tip]::before {
+  right: 0;
+  left: auto;
+  transform: none;
+}
+:is(.cdx-card-control, .mdx-tip)[data-tip]:focus-visible::before {
   opacity: 1;
+  transition: none;
+}
+/* Warm (AppShell useWarmTips: a tooltip is showing or just closed): a neighbour's opens at once, with no fade. */
+:root[data-tips-warm] :is(.cdx-card-control, .mdx-tip)[data-tip]:hover::before {
   transition: none;
 }

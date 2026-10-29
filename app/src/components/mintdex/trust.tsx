@@ -231,14 +231,14 @@ export function ShareButton({
         <button
           type="button"
           aria-label={label}
-          title={label}
+          data-tip={label}
           onClick={(e) => {
             if (!canNativeShare()) return;
             // The phone's own share sheet instead of the popover (preventDefault stops Radix opening it).
             e.preventDefault();
             navigator.share({ title, text, url }).catch(() => {});
           }}
-          className={cx("mdx-btn mdx-btn--icon mdx-btn--ghost data-[state=open]:bg-track", className)}
+          className={cx("mdx-btn mdx-btn--icon mdx-btn--ghost mdx-tip data-[state=open]:bg-track", className)}
         >
           <Icon name="share" />
         </button>

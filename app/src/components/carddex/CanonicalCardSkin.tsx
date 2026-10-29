@@ -4,6 +4,7 @@ import renderAssets from "../../lib/carddex/render-assets.json";
 import { CANONICAL_CARD_LAYOUT, CARD_RENDERER_VERSION } from "../../lib/carddex/card-template";
 import { generatedSkinSource, phoneCopy, useDeferredPlate, useReadyImage } from "./GeneratedCardArt";
 import { defaultQuoteForDesign, getPairAsset } from "../../lib/carddex/pairs";
+import { useFreshMount } from "../mintdex/card3d/motion3d";
 
 type Box = { x:number; y:number; w:number; h:number };
 type Insets = { x:number; y?:number; top?:number; bottom?:number };
@@ -38,13 +39,27 @@ export function canonicalSkinAsset(cardTemplate:string,quoteAssetKey?:string) {
   return candidate?.rendererVersion===CARD_RENDERER_VERSION?candidate:null;
 }
 
-/** A skin's srcset: the 320 px preview, the 480 and 640 px WebP copies written beside it (preview/<key>-480.webp and
- * preview/<key>-640.webp, by scripts/card-skin-variants.ts) and the 1260 px atlas, so a 2x phone takes 640 px. */
-export function canonicalSkinSrcSet(atlas:RenderAsset) {
+/** Phones and tablets: their skin candidates stop at the 640 px copy (the 1260 px atlas is a 2 MB PNG). */
+export const SKIN_PHONE_MEDIA="(max-width: 1023px)";
+export function phoneSkin() {
+  return typeof window!=="undefined"&&typeof window.matchMedia==="function"&&window.matchMedia(SKIN_PHONE_MEDIA).matches;
+}
+
+/** A skin's srcset: the 480 and 640 px WebP copies written beside its preview (preview/<key>-480.webp and
+ * preview/<key>-640.webp, by scripts/card-skin-variants.ts), then the 1260 px atlas except on phones (`phone`).
+ * The 320 px preview PNG is left out where the copies exist: it weighs about seven 480 px WebP copies. */
+export function canonicalSkinSrcSet(atlas:RenderAsset,phone=false) {
   if(!atlas.previewPath) return `${atlas.path} 1260w`;
   const base=atlas.previewPath.replace(/\.png$/,"");
-  const mid=base!==atlas.previewPath?`${base}-480.webp 480w, ${base}-640.webp 640w, `:"";
-  return `${atlas.previewPath} 320w, ${mid}${atlas.path} 1260w`;
+  if(base===atlas.previewPath) return `${atlas.previewPath} 320w, ${atlas.path} 1260w`;
+  const copies=`${base}-480.webp 480w, ${base}-640.webp 640w`;
+  return phone?copies:`${copies}, ${atlas.path} 1260w`;
+}
+
+/** The small copy a staged or miniature plate takes on a phone: the 480 px WebP where it exists. */
+function smallSkin(atlas:RenderAsset) {
+  const base=atlas.previewPath!.replace(/\.png$/,"");
+  return base!==atlas.previewPath?`${base}-480.webp`:atlas.previewPath!;
 }
 
 const stagedIdle=()=>true;
@@ -55,18 +70,26 @@ export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,eag
   const atlas=canonicalSkinAsset(cardTemplate,quoteAssetKey);
   const box=useRef<HTMLDivElement>(null);
   // A staged slot (eager: a neighbour the card turns to next) and a lite miniature (the blurred neighbours beside
-  // the Home card) wait for the first touch or turn, or load plus idle (PERF-1), and phones take the 320px preview;
+  // the Home card) wait for the first touch or turn, or load plus idle (PERF-1), and phones take the 480px copy;
   // the shown face and other lazy cards load as before.
   const staged=(eager||lite)&&!priority;
   const wanted=useDeferredPlate(box,!staged,stagedIdle)||!staged;
   const small=staged&&!!atlas?.previewPath&&phoneCopy();
-  const src=atlas&&wanted?(small?atlas.previewPath!:atlas.path):null;
+  const src=atlas&&wanted?(small?smallSkin(atlas):atlas.path):null;
   const imageRef=useRef<HTMLImageElement>(null);
   const image=useReadyImage(imageRef,src);
   const ready=!!src && image.ready;
+  // The skin the server HTML painted shows as soon as the browser decodes it: it is the page's LCP and must not wait
+  // for hydration. A face mounted on the client, or a skin that changes later, stays hidden until it has loaded.
+  const fresh=useFreshMount();
+  const painted=useRef<string|null|undefined>(undefined);
+  if(painted.current===undefined) painted.current=fresh?null:src;
+  const shown=ready||(!!src&&src===painted.current);
+  const imageSizes=small?undefined:sizes??(priority||eager?"300px":"auto, 300px");
+  const skin=atlas&&src?<img ref={imageRef} className="cdx-canonical-skin__image" src={src} srcSet={small?undefined:canonicalSkinSrcSet(atlas)} sizes={imageSizes} style={shown?undefined:{opacity:0}} alt="" hidden={image.failed} draggable={false} loading={priority||eager?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":eager?"low":undefined} onLoad={image.onLoad} onError={image.onError} />:null;
   return <div ref={box} className="cdx-canonical-skin" data-market-finish={quote.kind} data-card-skin-ready={ready?"":undefined} data-card-skin-source={ready?cardTemplate:undefined} aria-hidden>
     <CanonicalSkinSurface cardTemplate={cardTemplate} quoteAssetKey={quoteAssetKey} id={id} />
-    {atlas&&src?<img ref={imageRef} className="cdx-canonical-skin__image" src={src} srcSet={small?undefined:canonicalSkinSrcSet(atlas)} sizes={small?undefined:sizes??(priority||eager?"300px":"auto, 300px")} style={{opacity:ready?1:0}} alt="" hidden={image.failed} draggable={false} loading={priority||eager?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":eager?"low":undefined} onLoad={image.onLoad} onError={image.onError} />:null}
+    {skin&&atlas?(small?skin:<picture><source media={SKIN_PHONE_MEDIA} srcSet={canonicalSkinSrcSet(atlas,true)} sizes={imageSizes} />{skin}</picture>):null}
   </div>;
 }
 

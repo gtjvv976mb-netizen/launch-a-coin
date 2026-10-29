@@ -51,11 +51,16 @@
     right: -8px;
   }
 }
-/* In a grid (Discover's tiles): inside the tile's corner, so no tile pokes into the page gutter or past the column
- * edge (density D8, R2/R3). The touch hit area below still grows inward and down, never past the tile. */
+/* In a grid (Discover's tiles): over the art window's lower right corner, so it covers neither the name banner's 1/1
+ * mark nor any print text (V4), and no tile pokes into the page gutter (density D8). The art window is the same box
+ * on every design (card-template.ts: x .10 and w .80 of the card's width, bottom at .59 of its 63:88 height); the
+ * host is an inline-size container as wide as the card. */
+.cdx-token-cell > .mdx-v3d-host {
+  container-type: inline-size;
+}
 .cdx-token-cell > .mdx-v3d-host > .mdx-v3dbtn {
-  top: 6px;
-  right: 6px;
+  top: calc(100cqw * 88 / 63 * 0.59 - 38px);
+  right: calc(10cqw + 6px);
 }
 /* The hit size. Touch: the extra area grows inward and down over the card's corner (the side a grid cell never
  * clips), not out past the cell's edge. Fine pointers: 40px all round. */
@@ -68,6 +73,10 @@
 @media (pointer: coarse) {
   .mdx-v3dbtn::before {
     inset: -1px -1px -13px -13px;
+  }
+  /* Over the art window (above): the 44px area grows evenly. */
+  .cdx-token-cell > .mdx-v3d-host > .mdx-v3dbtn::before {
+    inset: -7px;
   }
 }
 /* On the case: at the picture window's lower left, mirroring the Inspect pill (the art window is the same box on
@@ -107,6 +116,10 @@
   .mdx-case .mdx-v3dbtn--case[data-tip]:hover::before {
     opacity: 1;
     transition-delay: 400ms;
+  }
+  /* Warm (AppShell useWarmTips): opens at once after a neighbour's. */
+  :root[data-tips-warm] .mdx-case .mdx-v3dbtn--case[data-tip]:hover::before {
+    transition: none;
   }
 }
 .mdx-case .mdx-v3dbtn--case[data-tip]:focus-visible::before {

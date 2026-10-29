@@ -205,6 +205,19 @@
   justify-content: space-between;
   gap: 12px;
 }
+/* Turn over, then View coin, 8px apart: two 32px pills with 40/44px hits. */
+.cdx-home-lot__actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+/* Its name above it, right-aligned so it never leaves the column. */
+.cdx-home-lot__actions .cdx-card-control[data-tip]::before {
+  right: 0;
+  left: auto;
+  transform: none;
+}
 /* The name, then "$TICKER · Ronin design" on its baseline; the meta gives way first. */
 .cdx-home-lot__id {
   display: flex;
@@ -403,6 +416,10 @@
   .cdx-home__pick[data-tip]:hover::before {
     opacity: 1;
     transition-delay: 400ms;
+  }
+  /* Warm (AppShell useWarmTips): the next pick's name opens at once. */
+  :root[data-tips-warm] .cdx-home__pick[data-tip]:hover::before {
+    transition: none;
   }
 }
 /* Pause: the 36px card-control pill (its hit area reaches 40/44 through .mdx-btn::after), centred on the first line
@@ -802,6 +819,10 @@
 /* ---------------------------------------------------------------- launched on pump.fun (real launches) */
 /* Every launch the endpoint returns (at most 12) as tiles in an auto-fill grid: two columns in the wide pulse and on
  * tablets, one in the 1024 pulse and on phones. */
+/* No launches yet: the line holds one row of tiles (8 + the 56px card + 8), the placeholder's height. */
+.cdx-home-launched > .mdx-empty {
+  min-height: 72px;
+}
 .cdx-home-launched__list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(var(--home-launch-min), 100%), 1fr));

@@ -25,6 +25,45 @@
   font-display: swap;
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
+/* Metric-matched fallback while Instrument Sans loads (font-display: swap), so the swap does not reflow lines and
+ * move the page (CLS). The system UI face is about 7% narrower; Arial (and Roboto, close to it, on Android) scaled to
+ * Instrument Sans's width at each weight, with its 0.97 / 0.25 ascent and descent. A device with neither skips it. */
+@font-face {
+  font-family: "Instrument Sans Fallback";
+  src: local("Arial"), local("ArialMT"), local("Roboto"), local("Roboto-Regular");
+  font-weight: 400;
+  size-adjust: 100.1%;
+  ascent-override: 96.9%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Instrument Sans Fallback";
+  src: local("Arial"), local("ArialMT"), local("Roboto"), local("Roboto-Regular");
+  font-weight: 500;
+  size-adjust: 101.4%;
+  ascent-override: 95.7%;
+  descent-override: 24.7%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Instrument Sans Fallback";
+  src: local("Arial Bold"), local("Arial-BoldMT"), local("Roboto Bold"), local("Roboto-Bold");
+  font-weight: 600;
+  size-adjust: 96.5%;
+  ascent-override: 100.5%;
+  descent-override: 25.9%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Instrument Sans Fallback";
+  src: local("Arial Bold"), local("Arial-BoldMT"), local("Roboto Bold"), local("Roboto-Bold");
+  font-weight: 700;
+  size-adjust: 97.7%;
+  ascent-override: 99.3%;
+  descent-override: 25.6%;
+  line-gap-override: 0%;
+}
 /* Addresses and transaction hashes only. */
 @font-face {
   font-family: "Fragment Mono";
@@ -311,8 +350,7 @@
   }
   /* The tray every minted card sits in, closed on all four sides and concentric with the card's 1/8 in
    * corner (the percentage form on the tray box: 0.6px off on shelves, 1.2px on featured trays). Drawn
-   * outside the box with a negative inset, so it changes no layout and no fit math. Never shadowed. Wraps
-   * .mdx-lift, never the reverse: on hover the card rises out of its tray while the tray stays put. */
+   * outside the box with a negative inset, so it changes no layout and no fit math. Never shadowed. */
   .mdx-pocket {
     --pocket: 6px;
     position: relative;
@@ -1706,28 +1744,8 @@
   animation-name: mdx-tick-down;
 }
 
-/* Home featured step: directional (--d is 1 for next, -1 for previous). */
-@keyframes mdx-lot-out {
-  to {
-    opacity: 0;
-    transform: translateX(calc(var(--d, 1) * -12px));
-  }
-}
-@keyframes mdx-lot-in {
-  from {
-    opacity: 0;
-    transform: translateX(calc(var(--d, 1) * 12px)) translateY(4px);
-  }
-}
-.mdx-lot-out {
-  animation: mdx-lot-out var(--t-fast) var(--ease-exit) both;
-}
-.mdx-lot-in {
-  animation: mdx-lot-in 280ms var(--ease-spring) both;
-}
-
-/* Chart (backlog P1-23): the line draws itself once on mount and on a range change (keyed; polls keep it),
- * the endpoint springs in as the line reaches it, and new gridlines fade in. pathLength={1} on the path makes
+/* Chart (backlog P1-23): the line draws itself once on mount and on a range change (keyed; polls keep it), and new
+ * gridlines fade in. pathLength={1} on the path makes
  * the draw independent of its length. */
 @keyframes mdx-draw {
   from {
@@ -1739,39 +1757,12 @@
   stroke-dashoffset: 0;
   animation: mdx-draw var(--t-progress) var(--ease-room) backwards;
 }
-@keyframes mdx-dot-in {
-  from {
-    opacity: 0;
-    transform: scale(0.4);
-  }
-}
-.mdx-dot-in {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: mdx-dot-in var(--t-base) var(--ease-spring) 560ms backwards;
-}
 /* The chart line glows (static filter: the draw animates its dash, never the glow). */
 .mdx-chartline {
   filter: none;
 }
 .mdx-grid-in {
   animation: mdx-fade var(--t-slow) var(--ease-room) backwards;
-}
-
-/* A design unlocks while you watch (backlog P1-19): the design chip springs in with its new name, next to the
- * card's own evolve. Only on a real unlock after mount, never on the first frame. */
-@keyframes mdx-chip-pop {
-  0% {
-    opacity: 0;
-    transform: scale(0.86);
-  }
-  60% {
-    opacity: 1;
-  }
-}
-.mdx-chip-pop {
-  display: inline-flex;
-  animation: mdx-chip-pop 420ms var(--ease-spring) backwards;
 }
 
 /* Button feedback (P1-8): the check stroke draws itself; the error shake is transform only. */
@@ -1817,18 +1808,6 @@
   }
 }
 
-/* Card lift: the card wrapper rises 6px out of its tray; the card's own shadow travels with it. */
-.mdx-lift {
-  transition: transform var(--t-slow) var(--ease-spring);
-}
-a:focus-visible .mdx-lift {
-  transform: translateY(-6px);
-}
-@media (hover: hover) {
-  a:hover .mdx-lift {
-    transform: translateY(-6px);
-  }
-}
 
 /* Touch press feedback (backlog P0-1): no hover on touch screens, so a press answers instead. */
 @media (hover: none) {
@@ -1838,11 +1817,6 @@ a:focus-visible .mdx-lift {
     background-color: var(--color-tint);
     transform: scale(0.97);
     transition-duration: 80ms;
-  }
-  a:active .mdx-lift {
-    transform: translateY(-2px) scale(0.99);
-    transition-duration: 90ms;
-    transition-timing-function: var(--ease-room);
   }
 }
 
@@ -1979,10 +1953,6 @@ a:focus-visible .mdx-lift {
 :root[data-motion="calm"]::view-transition-new(*) {
   animation: none !important;
 }
-:root[data-motion="calm"] .mdx-lift,
-:root[data-motion="calm"] a:hover .mdx-lift,
-:root[data-motion="calm"] a:focus-visible .mdx-lift,
-:root[data-motion="calm"] a:active .mdx-lift,
 :root[data-motion="calm"] .mdx-btn:hover,
 :root[data-motion="calm"] .mdx-btn:active,
 :root[data-motion="calm"] .mdx-row:active,

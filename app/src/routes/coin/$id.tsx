@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import { num, oneOf, searchSchema } from "../../lib/mintdex/search";
 
 import {
@@ -42,6 +42,35 @@ import type { CoinDetail, CoinPage } from "../../lib/mintdex/types";
 
 /** The coin's card art as an img sizes value: about 168px on phones, the 240 to 300px column on tablets, 320px up. */
 const CASE_SIZES = "(max-width: 767px) 180px, (max-width: 1023px) 300px, 320px";
+
+/**
+ * Keyboard order follows the reading order on screen (density R8): the grid places every section by its area, so the
+ * DOM order can follow each arrangement without moving anything. Phones read the card, its figures, the ticket, the
+ * chart, the trades and About; tablets put the figures first; desktop reads the card, the centre column (figures,
+ * chart, trades), then the ticket, with About last, or before the ticket where the ticket runs beside it (1280 x 860
+ * and up). The server sends the phone order; a wider screen reorders once it hydrates.
+ */
+type CoinOrder = "phone" | "tablet" | "desk" | "deskTall";
+type CoinSection = "card" | "market" | "side" | "chart" | "trades" | "details";
+const COIN_ORDER: Record<CoinOrder, CoinSection[]> = {
+  phone: ["card", "market", "side", "chart", "trades", "details"],
+  tablet: ["market", "card", "side", "chart", "trades", "details"],
+  desk: ["card", "market", "chart", "trades", "side", "details"],
+  deskTall: ["card", "market", "chart", "trades", "details", "side"],
+};
+const ORDER_QUERIES = ["(min-width: 1280px) and (min-height: 860px)", "(min-width: 1024px)", "(min-width: 768px)"] as const;
+function subscribeCoinOrder(cb: () => void) {
+  const lists = ORDER_QUERIES.map((q) => window.matchMedia(q));
+  for (const l of lists) l.addEventListener("change", cb);
+  return () => { for (const l of lists) l.removeEventListener("change", cb); };
+}
+function currentCoinOrder(): CoinOrder {
+  const [tall, desk, tablet] = ORDER_QUERIES.map((q) => window.matchMedia(q).matches);
+  return tall ? "deskTall" : desk ? "desk" : tablet ? "tablet" : "phone";
+}
+function useCoinOrder(): CoinOrder {
+  return useSyncExternalStore(subscribeCoinOrder, currentCoinOrder, () => "phone");
+}
 
 /**
  * ?minted=1: the launcher just minted this card, so the page opens "Your card is live" once (P1-12).
@@ -185,14 +214,64 @@ function CoinScreen({
   const design = getCardDesign(coin.cardTemplate);
   // The newest trade (trades run oldest first): each new one jolts the case.
   const latestTradeId = trades.length ? trades[trades.length - 1].id : null;
+  const order = useCoinOrder();
+  const sections: Record<CoinSection, ReactNode> = {
+    card: (
+      <section key="card" data-section="card" className="cdx-coin-screen__object" aria-label={`${coin.name} collectible card`}>
+        <div className="cdx-coin-screen__case">
+          <CoinCase coin={coin} latestTradeId={latestTradeId} priority inspect={false} sizes={CASE_SIZES} />
+        </div>
+        <CardFacts page={page} className="cdx-coin-screen__facts" />
+      </section>
+    ),
+    market: <CoinMarket key="market" coin={coin} />,
+    side: (
+      <div key="side" data-section="trade" className="cdx-coin-screen__side">
+        <TradePanel page={page} ticket={ticket} />
+        <TokenFacts page={page} className="cdx-coin-screen__token" />
+      </div>
+    ),
+    chart: (
+      <div key="chart" data-section="chart" className="cdx-coin-screen__chart">
+        <McapChart
+          trades={trades}
+          tradeCount={coin.trades}
+          currentUsd={coin.mcapUsd}
+          currentQuote={coin.mcapQuote}
+          quoteAssetKey={coin.quoteAssetKey}
+          createdAt={coin.createdAt}
+          level={coin.level}
+        />
+      </div>
+    ),
+    trades: (
+      <div key="trades" data-section="trades" className="cdx-coin-screen__activity">
+        <TradesList trades={trades} count={coin.trades} />
+      </div>
+    ),
+    details: (
+      <div key="details" data-section="details" className="cdx-coin-screen__details">
+        <CoinAbout
+          page={page}
+          onEdit={() => setLoreOpen(true)}
+          cardFacts={<CardFacts page={page} className="cdx-coin-about__card" />}
+        />
+      </div>
+    ),
+  };
   return (
     <div className="mdx-frame cdx-coin-screen">
       <PageHeader
         title={coin.name}
         context={
           <>
-            ${coin.ticker} · {design.name} design · launched by {atName(coin.creatorHandle)}
-            {coin.creatorIsBot ? " (bot)" : ""}
+            ${coin.ticker} · {design.name} design ·{" "}
+            {/* One unit for line breaking: the handle never wraps away from "launched by", so the web font's swap
+                cannot move it between lines (CLS). */}
+            <span className="cdx-coin-screen__by">
+              launched by {atName(coin.creatorHandle)}
+              {coin.creatorIsBot ? " (bot)" : ""}
+            </span>
             {/* Below 1024 the Simulated tag ends the context line (the title row keeps its room for the name). */}
             <span className="cdx-coin-screen__simtag"><SimTag /></span>
           </>
@@ -200,40 +279,7 @@ function CoinScreen({
         back={<BackToDiscover compact />}
         right={<><span className="cdx-coin-screen__simtag--wide"><SimTag /></span><ShareButton {...coinShare(coin)} label={`Share ${coin.name}`} /></>}
       />
-      <div className="cdx-coin-screen__grid">
-        <section data-section="card" className="cdx-coin-screen__object" aria-label={`${coin.name} collectible card`}>
-          <div className="cdx-coin-screen__case">
-            <CoinCase coin={coin} latestTradeId={latestTradeId} priority inspect={false} sizes={CASE_SIZES} />
-          </div>
-          <CardFacts page={page} className="cdx-coin-screen__facts" />
-        </section>
-        <CoinMarket coin={coin} />
-        <div data-section="trade" className="cdx-coin-screen__side">
-          <TradePanel page={page} ticket={ticket} />
-          <TokenFacts page={page} className="cdx-coin-screen__token" />
-        </div>
-        <div data-section="chart" className="cdx-coin-screen__chart">
-          <McapChart
-            trades={trades}
-            tradeCount={coin.trades}
-            currentUsd={coin.mcapUsd}
-            currentQuote={coin.mcapQuote}
-            quoteAssetKey={coin.quoteAssetKey}
-            createdAt={coin.createdAt}
-            level={coin.level}
-          />
-        </div>
-        <div data-section="trades" className="cdx-coin-screen__activity">
-          <TradesList trades={trades} count={coin.trades} />
-        </div>
-        <div data-section="details" className="cdx-coin-screen__details">
-          <CoinAbout
-            page={page}
-            onEdit={() => setLoreOpen(true)}
-            cardFacts={<CardFacts page={page} className="cdx-coin-about__card" />}
-          />
-        </div>
-      </div>
+      <div className="cdx-coin-screen__grid">{COIN_ORDER[order].map((key) => sections[key])}</div>
       <Modal open={loreOpen} onOpenChange={setLoreOpen} title="Edit description">
         <LoreEditor coinId={coin.id} lore={coin.lore} onDone={() => setLoreOpen(false)} />
       </Modal>

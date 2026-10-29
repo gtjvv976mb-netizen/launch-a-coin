@@ -145,9 +145,11 @@ export function CardDesignPicker({
             const design = getCardDesign(key);
             const bound = boundQuoteForDesign(key);
             return <li key={key}>
-              <button type="button" className="cdx-design-picker__swatch" aria-pressed={value === key} aria-label={`${design.name}, ${bound ? `${bound.symbol} pair` : "any pair"}`} disabled={disabled} onClick={() => { if (!disabled && value !== key) onChange(key); }}>
+              {/* Named by its visible name (label in name, WCAG 2.5.3); the pair it launches with is sr-only text. */}
+              <button type="button" className="cdx-design-picker__swatch" aria-pressed={value === key} disabled={disabled} onClick={() => { if (!disabled && value !== key) onChange(key); }}>
                 <span className="cdx-design-picker__face" aria-hidden><CanonicalCardFace card={cardIn(baseCard, design, quoteKey)} design={design} compact lite sizes="96px" /></span>
                 <span className="cdx-design-picker__name">{design.name}</span>
+                <span className="sr-only">, {bound ? `${bound.symbol} pair` : "any pair"}</span>
               </button>
             </li>;
           })}

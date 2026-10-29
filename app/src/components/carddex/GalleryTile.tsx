@@ -12,25 +12,10 @@ import { getCardDesign, type CardDesign } from "../../lib/carddex/designs";
 import { marketCapText } from "../../lib/carddex/quote-display";
 import type { CoinSummary } from "../../lib/mintdex/types";
 
-/** "up 11.0%", "down 2.3%", "unchanged": the change in words for the tile's accessible name. */
-function changeWords(v: number) {
-  const pct = Number.isFinite(v) ? Math.abs(v * 100) : 0;
-  const text = pct >= 100 ? pct.toFixed(0) : pct.toFixed(1);
-  if (text === "0.0") return "unchanged in 24 hours";
-  return `${v > 0 ? "up" : "down"} ${text}% in 24 hours`;
-}
-
-function curveWords(coin: CoinSummary) {
-  if (coin.graduated) return "graduated";
-  if (coin.curveProgress == null || !Number.isFinite(coin.curveProgress))
-    return "curve not available";
-  return `curve ${Math.round(Math.min(1, Math.max(0, coin.curveProgress)) * 100)}%`;
-}
-
 /**
  * A Discover coin: one link around the card and its caption (one tab stop to open the coin, one for View in 3D,
- * which sits on the card's top right corner outside the face, shown at rest). Caption: name and market cap, ticker
- * and the 24h change, then the bonding-curve track.
+ * which sits over the art window's lower right corner, shown at rest). Caption: name and market cap, ticker and the
+ * 24h change, then the bonding-curve track.
  */
 export function CoinTile({
   coin,
@@ -45,17 +30,17 @@ export function CoinTile({
   sizes: string;
 }) {
   const mc = marketCapText(coin);
-  const label = `${coin.name} $${coin.ticker}, market cap ${mc === "—" ? "not available" : mc}, ${changeWords(coin.change24h)}, ${curveWords(coin)}, ${getCardDesign(coin.cardTemplate).name} design`;
   return (
     <article className="cdx-token-cell">
       <View3DHost item={{ id: coin.id, card: coin }} list={list} btnClassName="mdx-v3dbtn--stage">
+        {/* The link is named by its caption as shown (label in name, WCAG 2.5.3), with the words a screen reader
+            needs in sr-only text; the card above it is the same coin, so it stays out of the name. */}
         <Link
           to="/coin/$id"
           params={{ id: coin.id }}
           className="cdx-token-cell__link"
-          aria-label={label}
         >
-          <div className="cdx-token-cell__card">
+          <div className="cdx-token-cell__card" aria-hidden>
             <MintCard
               card={coin}
               depth="table"
@@ -68,9 +53,10 @@ export function CoinTile({
             <div className="cdx-token-cell__row">
               <h2 className="cdx-token-cell__name">{coin.name}</h2>
               <span className="cdx-token-cell__mc">
-                <span className="cdx-token-cell__unit">MC</span>{" "}
+                <span className="cdx-token-cell__unit" aria-hidden>MC</span>
+                <span className="sr-only">, market cap</span>{" "}
                 {mc === "—" ? (
-                  <span className="mdx-dash">—</span>
+                  <><span className="mdx-dash" aria-hidden>—</span><span className="sr-only">not available</span></>
                 ) : (
                   <span className="num">{mc}</span>
                 )}
@@ -86,6 +72,7 @@ export function CoinTile({
               graduated={coin.graduated}
               className="cdx-token-cell__curve"
             />
+            <span className="sr-only">, {getCardDesign(coin.cardTemplate).name} design</span>
           </div>
         </Link>
       </View3DHost>

@@ -1149,6 +1149,8 @@ export function useTradeTicket(page: CoinPage) {
   // The two submits: the ticket's own (from 1024px) and the phone action bar's (below). Enter clicks the shown one.
   const inlineRef = useRef<HTMLButtonElement>(null);
   const barRef = useRef<HTMLButtonElement>(null);
+  // The bar's place in the Tab order (A11Y-5): a stop at the end of the ticket, below 1024px only (TradePanel).
+  const barStopRef = useRef<HTMLSpanElement>(null);
   const formId = useId();
   const now = useNow(60_000);
 
@@ -1365,6 +1367,18 @@ export function useTradeTicket(page: CoinPage) {
     onBlocked: blocked,
   };
 
+  // Tab from the ticket's last control lands on the bar's button (always on screen, so no scroll); Tab or Shift+Tab
+  // from there carries on from the stop, so the order reads amount, Buy, then the chart (A11Y-5).
+  const toBar = () => barRef.current?.focus({ preventScroll: true });
+  const onBarKey = (e: KeyboardEvent<HTMLButtonElement>) => {
+    const stop = barStopRef.current;
+    if (e.key !== "Tab" || e.altKey || e.ctrlKey || e.metaKey || !stop?.isConnected || !stop.getClientRects().length) return;
+    const next = tabbableBeside(stop, e.shiftKey ? -1 : 1, barRef.current);
+    if (!next) return;
+    e.preventDefault();
+    next.focus();
+  };
+
   return {
     coin,
     me,
@@ -1396,7 +1410,20 @@ export function useTradeTicket(page: CoinPage) {
     msgRef,
     inlineRef,
     barRef,
+    barStopRef,
+    toBar,
+    onBarKey,
   };
+}
+
+const TABBABLE = 'a[href], button, input, select, textarea, summary, [tabindex]';
+/** The next (dir 1) or previous (dir -1) element Tab would reach from `from`, skipping `skip` (the bar's button). */
+function tabbableBeside(from: HTMLElement, dir: 1 | -1, skip: HTMLElement | null): HTMLElement | null {
+  const all = [...document.querySelectorAll<HTMLElement>(TABBABLE)].filter((el) => el === from || (
+    el !== skip && el.tabIndex >= 0 && !(el as HTMLButtonElement).disabled && !el.closest("[inert]") && el.getClientRects().length > 0
+  ));
+  const at = all.indexOf(from);
+  return at < 0 ? null : all[at + dir] ?? null;
 }
 
 export type TradeTicket = ReturnType<typeof useTradeTicket>;
@@ -1550,6 +1577,9 @@ export function TradePanel({
       <Button ref={t.inlineRef} {...t.submitProps} block className="cdx-trade-ticket__submit">
         {t.label}
       </Button>
+      {/* Below 1024px the submit is the action bar's, the view root's last child so that it sticks for the whole page.
+          This stop keeps its place in the Tab order: focus passes straight on to the bar's button (A11Y-5). */}
+      <span ref={t.barStopRef} role="button" tabIndex={0} aria-label={`Go to ${t.label}`} className="cdx-trade-ticket__bar-stop" onFocus={t.toBar} onClick={t.toBar} />
       {TICKET_NOTE ? <p className="cdx-trade-ticket__note">{TICKET_NOTE}</p> : null}
     </form>
   );
@@ -1566,7 +1596,8 @@ export function TradeActionBar({ ticket }: { ticket: TradeTicket }) {
   return (
     <ActionBar phoneOnly label={`Buy or sell $${t.coin.ticker}`} className="cdx-trade-bar">
       <p className="cdx-trade-bar__spend num">{t.spend}</p>
-      <Button ref={t.barRef} {...t.submitProps} className="cdx-trade-bar__submit">
+      {/* Out of the natural Tab order: the ticket's stop (TradePanel) leads here, and Tab from here goes on from it. */}
+      <Button ref={t.barRef} {...t.submitProps} tabIndex={-1} onKeyDown={t.onBarKey} className="cdx-trade-bar__submit">
         {t.label}
       </Button>
     </ActionBar>

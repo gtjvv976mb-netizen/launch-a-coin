@@ -116,13 +116,13 @@
  * mdx-name, mdx-plinth, mdx-aside, mdx-main, mdx-pair, mdx-h1, mdx-h2, mdx-display, mdx-small, mdx-micro,
  * mdx-unit, mdx-mini, mdx-label, mdx-input, mdx-select, mdx-menu-trigger, mdx-drop (+ data-over), mdx-range
  * (+ --fill, --tier), mdx-progress (+ __fill, --tier), mdx-menu, mdx-menu-item, mdx-menu-check, mdx-pop,
- * mdx-dialog, mdx-overlay, mdx-row (+ data-new, inset focus ring), mdx-thumb, mdx-live, mdx-step-dot, mdx-lift,
+ * mdx-dialog, mdx-overlay, mdx-row (+ data-new, inset focus ring), mdx-thumb, mdx-live, mdx-step-dot,
  * mdx-enter (+ --i), mdx-check, mdx-btn__done, mdx-btn[data-feedback], mdx-toast__x, mdx-toast__action, mdx-badge
  * (+ --dot), mdx-suggest, mdx-skip,
- * mdx-stagger, mdx-page, mdx-tick, mdx-lot-in, mdx-lot-out (+ --d), mdx-fade, mdx-skeleton, mdx-hit, mdx-routebar
- * (+ data-phase), mdx-livepause, mdx-draw, mdx-dot-in, mdx-grid-in, mdx-chip-pop, data-pending on tabs; utilities
+ * mdx-stagger, mdx-page, mdx-tick, mdx-fade, mdx-skeleton, mdx-hit, mdx-routebar (+ data-phase), mdx-livepause,
+ * mdx-draw, mdx-grid-in, data-pending on tabs; utilities
  * num and addr; variants short:, wide:, xwide:, fit:. Tokens: rounded-{chip,row,field,pop,panel,aside,pill},
- * shadow-{ring,rest,raise,lift,float,modal}, ease-{room,spring,exit,sheen}, --t-* durations, --stagger.
+ * shadow-{ring,rest,raise,lift,float,modal}, ease-{room,exit,sheen}, --t-* durations, --stagger.
  */
 import { Link, type LinkProps } from "@tanstack/react-router";
 import {

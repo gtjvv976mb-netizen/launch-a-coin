@@ -14,7 +14,8 @@ export function HeroTurntable({ card, className = "", playing: controlled, onPla
   const [localPlaying, setLocalPlaying] = useState(true);
   const level = useMotionLevel();
   const playing = controlled ?? localPlaying;
-  const slots = useCardSlots(card, { ascend: "ascend", art: "fade", priority: true, sizes: "(max-width: 767px) 72vw, 400px", hand: true });
+  // As laid out: 140-172px on phones (Launch, Designs), about 250px to 1279px, up to 420px wider.
+  const slots = useCardSlots(card, { ascend: "ascend", art: "fade", priority: true, sizes: "(max-width: 767px) 40vw, (max-width: 1279px) 260px, 400px", hand: true });
   useEffect(() => {
     const body = slots.ctl.current?.body;
     if (!body || !viewportFit) return;

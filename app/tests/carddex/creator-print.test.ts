@@ -68,7 +68,9 @@ describe("trusted creator card composition",()=>{
     expect([canvasWidth,canvasHeight]).toEqual([width,Math.round(width*asset.height/asset.width)]);
     expect([copy.width,copy.height]).toEqual([canvasWidth,canvasHeight]);
    }
-   expect(canonicalSkinSrcSet(asset)).toBe(`${asset.previewPath} 320w, ${variant.w480.path} 480w, ${variant.w640.path} 640w, ${asset.path} 1260w`);
+   expect(canonicalSkinSrcSet(asset)).toBe(`${variant.w480.path} 480w, ${variant.w640.path} 640w, ${asset.path} 1260w`);
+   // Phones stop at the 640 px copy: the 1260 px atlas PNG is never one of their candidates.
+   expect(canonicalSkinSrcSet(asset,true)).toBe(`${variant.w480.path} 480w, ${variant.w640.path} 640w`);
   }
  });
  test("all 48 exported fronts omit bottom identity and serial labels while retaining one top edition",()=>{

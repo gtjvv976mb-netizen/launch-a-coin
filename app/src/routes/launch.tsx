@@ -192,8 +192,9 @@ type ProblemKey = "name" | "ticker" | "art" | "pair" | "buy" | "website" | "x" |
 
 /**
  * Phones and phones held sideways (launch.css uses the same query): the live card sits in the fields panel beside
- * Name and Ticker; elsewhere it has its own track. One turntable is mounted, in whichever place shows. The server
- * draws the wide place; the phone slot keeps its size until hydration moves the card in.
+ * Name and Ticker; elsewhere it has its own track. One turntable is mounted, in whichever place shows. The server HTML
+ * draws both places (null here), so a phone paints its card before hydration (it is the screen's LCP); the place that
+ * does not show drops out once the page has hydrated.
  */
 const PHONE_CARD_MQ = "(max-width: 767.98px), (max-width: 1023.98px) and (max-height: 500px)";
 function subscribePhoneCard(cb: () => void) {
@@ -201,8 +202,8 @@ function subscribePhoneCard(cb: () => void) {
   mq.addEventListener("change", cb);
   return () => mq.removeEventListener("change", cb);
 }
-function usePhoneCard() {
-  return useSyncExternalStore(subscribePhoneCard, () => window.matchMedia(PHONE_CARD_MQ).matches, () => false);
+function usePhoneCard(): boolean | null {
+  return useSyncExternalStore(subscribePhoneCard, () => window.matchMedia(PHONE_CARD_MQ).matches, () => null);
 }
 
 /** A value that settles: it follows `value` once it has held still for `ms`. */
@@ -804,9 +805,9 @@ function Launch() {
           {recoveryOnly && !liveLocked ? <p className="cdx-launch-fields__note">These fields fill in from your saved launch.</p> : null}
           <div className="cdx-launch-required">
             {/* Phones: the live card, turnable, beside Name and Ticker (its controls come first in Tab order, as it
-                reads first). The slot keeps its size before hydration places the card. */}
+                reads first). The slot keeps its size when a client render has not placed the card yet. */}
             <div className="cdx-launch-f cdx-launch-f--card">
-              {phoneCard ? <section aria-label="Your card preview" className="cdx-create-preview"><LaunchCardPreview card={previewCard} /></section> : null}
+              {phoneCard !== false ? <section aria-label="Your card preview" className="cdx-create-preview"><LaunchCardPreview card={previewCard} /></section> : null}
             </div>
             <Field label="Name" htmlFor="name" error={nameMsg} help={<span className="sr-only">2 to 24 characters.</span>} right={<span className="num" aria-hidden>{name.length}/24</span>} className="cdx-launch-f cdx-launch-f--name">
               <Input
@@ -877,7 +878,7 @@ function Launch() {
                   {preview && !uploading ? <img src={preview} alt="" draggable={false} className="cdx-launch-art__image" /> : uploading ? null : <Icon name="plus" size={20} />}
                 </span>
                 <span className="cdx-launch-art__copy">
-                  <strong id="art-cta">{uploading ? "Preparing artwork…" : preview ? "Replace artwork" : "Upload artwork"}</strong>
+                  <strong id="art-cta">{uploading ? "Preparing artwork…" : preview ? "Replace artwork" : "Upload artwork"}</strong>{" "}
                   <span id="art-sub">{preview ? "Drop or choose another image" : "Drop an image or choose one"}</span>
                 </span>
               </button>
@@ -1005,7 +1006,7 @@ function Launch() {
 
         {/* ------------------------------------------------ the card, then the ticket (two sticky columns from 1024px) */}
         <div className="cdx-launch-side">
-          {!phoneCard ? (
+          {phoneCard !== true ? (
             <section id={`${viewId}-card`} aria-label="Your card preview" className="cdx-create-preview">
               <LaunchCardPreview card={previewCard} />
               <p className="cdx-create-preview__note">Live preview. It changes as you edit.</p>
