@@ -248,9 +248,11 @@ function CoinScreen({
 
       {/* The market: header row, stats, chart and recent trades. */}
       <div className="contents xl:flex xl:min-h-0 xl:flex-col xl:gap-4 xl:[grid-area:1/2/2/3]">
+        {/* 56px tall (MintDex), growing only for a quote unit on its own line under the market cap ("3.54M" over
+            "CHILLHOUSE"), which would otherwise rise out of the row into the ticker. */}
         <CoinHeader
           coin={coin}
-          className="max-lg:hidden lg:order-none lg:self-end lg:[grid-area:1/2/2/3] xl:h-14 xl:flex-none xl:flex-nowrap xl:self-stretch"
+          className="max-lg:hidden lg:order-none lg:self-end lg:[grid-area:1/2/2/3] xl:min-h-14 xl:flex-none xl:flex-nowrap xl:self-stretch"
         />
         <CoinStats coin={coin} pane="chart" className="order-7 max-lg:pt-1 lg:order-none lg:[grid-area:2/2/3/3] xl:flex-none" />
         <div className="cdx-coin-market contents lg:flex lg:flex-col lg:rounded-panel lg:bg-plinth lg:p-4 lg:shadow-ring lg:[grid-area:4/1/5/3] xl:min-h-0 xl:flex-1">

@@ -64,6 +64,16 @@ const LIVE_STEPS: Step[] = [
 
 type Section = { id: string; nav: string; title: string; body: ReactNode };
 
+/** The demo's first line. "Not open yet" only while mainnet launches are off: production opens them beside the demo. */
+function DemoLine() {
+  const liveOpen = useLiveLaunchOpen();
+  return (
+    <li>
+      {liveOpen ? "" : "Mainnet launches are not open yet. "}The demo uses test SOL: no real coin or card is created.
+    </li>
+  );
+}
+
 const SECTIONS: Section[] = [
   {
     id: "launch",
@@ -203,7 +213,7 @@ const SECTIONS: Section[] = [
     title: "The demo",
     body: (
       <ul>
-        <li>Mainnet launches are not open yet. The demo uses test SOL: no real coin or card is created.</li>
+        <DemoLine />
         <li>Pick a handle to get {START_SOL} test SOL. No wallet needed.</li>
         <li>Your test account lives in this browser. Clearing site data ends access to it.</li>
         <li>Start the demo to upload art. You can fill in everything else first.</li>
