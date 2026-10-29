@@ -2,7 +2,6 @@ import type { CSSProperties } from "react";
 import { defaultQuoteForDesign, getPairAsset } from "../../lib/carddex/pairs";
 import { marketCapText } from "../../lib/carddex/quote-display";
 
-import { dexNo } from "../../lib/mintdex/format";
 import type { Box, FrameLayout, Tier } from "../../lib/mintdex/tiers";
 import type { CardData } from "./MintCard";
 
@@ -24,13 +23,11 @@ function MintAddress({ address }: { address: string }) {
   </>;
 }
 
-/** The original MintDex name, ticker, lore, token rows and footer, shared without layout variants. */
-export function CardPrint({ card, layout, tier, preview = false }: { card: CardData; layout: FrameLayout; tier: Tier; preview?: boolean }) {
-  const [footA, footB] = layout.footer;
+/** Token identity, artwork companion and readable details; fronts have no platform/serial footer. */
+export function CardPrint({ card, layout, preview = false }: { card: CardData; layout: FrameLayout; tier: Tier; preview?: boolean }) {
   const quote = card.quoteAssetKey ? getPairAsset(card.quoteAssetKey) : defaultQuoteForDesign(card.cardTemplate);
   // A local creator mock-up has no verified tier, holder count or token address. Real cards retain every value.
   const unquoted = preview && card.dexNo <= 0 && !card.mintAddress && card.dexLabel !== "Sample";
-  const ownerHandle = unquoted ? undefined : card.ownerHandle;
   return <>
     <div className="mdx-card__name" data-card-slot="name" style={boxStyle(layout.name)}>
       <span className="mdx-card__title">{card.name}</span>
@@ -41,7 +38,7 @@ export function CardPrint({ card, layout, tier, preview = false }: { card: CardD
       <span>{quote.symbol} pair</span>
     </div>
     <div className="mdx-card__text" data-card-slot="details" style={boxStyle(layout.text)}>
-      <p className="mdx-card__lore" data-card-slot="description">{card.lore || (unquoted ? "Your token's story will appear here." : "A fresh coin in the dex. Its story is still being written.")}</p>
+      <p className="mdx-card__lore" data-card-slot="description">{card.lore || (unquoted ? "Your coin's story will appear here." : "A fresh coin in the collection. Its story is still being written.")}</p>
       <div className="mdx-card__rows">
         <div className="mdx-card__row" data-card-slot="address">
           <span><span className="mdx-card__long">Token address</span><span className="mdx-card__short">Address</span></span>
@@ -56,12 +53,5 @@ export function CardPrint({ card, layout, tier, preview = false }: { card: CardD
         </div>
       </div>
     </div>
-    {footA ? <div className="mdx-card__foot" data-card-slot="creator" style={boxStyle(footA)}>
-      <span className="mdx-card__clip">{ownerHandle ? <><span className="mdx-card__long">Owner </span>@{ownerHandle}</> : "Launch a Card"}</span>
-      {ownerHandle && card.ownerIsBot ? <span className="mdx-card__bot">bot</span> : null}
-    </div> : null}
-    {footB ? <div className="mdx-card__foot mdx-card__foot--end" data-card-slot="serial" style={boxStyle(footB)}>
-      {card.dexLabel ?? (unquoted ? "Preview" : dexNo(card.dexNo))}
-    </div> : null}
   </>;
 }

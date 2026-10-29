@@ -11,13 +11,14 @@
 // - checkRev tells a poller whether anything changed since the revision it holds (one tiny read).
 
 import { createServerFn } from "@tanstack/react-start";
-import { setResponseHeader } from "@tanstack/react-start/server";
+import { getRequestHeader, setResponseHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 import { REPORT_REASON_VALUES } from "./copy";
 import { NOINDEX_COINS, NOINDEX_PORTFOLIO } from "./seo";
 import { currentUser, enterWithHandle, requireUser, sessionTokenHash, signOutCurrent } from "./server/auth.server";
 import { UserError, revString, type Settled } from "./server/db.server";
+import { clientKey, enforceLimit, LIMITS, SITE } from "../carddex/live/limits.server";
 import { ensureSeeded, kickAmbient } from "./server/seed.server";
 import * as svc from "./server/service.server";
 import { MAX_LEVEL } from "./tiers";
@@ -175,6 +176,12 @@ export const enter = createServerFn({ method: "POST" })
   .validator(z.object({ handle: z.string().max(32) }))
   .handler(async ({ data }) =>
     attempt(async () => {
+      // Demo accounts are free: limited per connecting address (an IPv6 /64) and for the whole site, so the public art
+      // uploads stay bounded (SEC-3, SEC-R1).
+      let address: string | null = null;
+      try { address = clientKey(getRequestHeader("cf-connecting-ip")); } catch { /* No request context. */ }
+      await enforceLimit(LIMITS.demoEnterIp, address, "Too many new demo accounts from this connection. Try again later.");
+      await enforceLimit(LIMITS.demoEnterSite, SITE, "The demo is busy right now. Try again in a little while.");
       const u = await enterWithHandle(data.handle);
       return { me: await svc.getMe(u) };
     }),

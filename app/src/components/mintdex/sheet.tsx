@@ -3,8 +3,9 @@
  * reusing src/components/ui/drawer.tsx (that file stays untouched and out of the chrome).
  *
  *   Sheet          open (req), onOpenChange (req), title (req), description (sr-only), children (req). A bottom
- *                  sheet: panel fill, 24px top corners, a grip, swipe down (or tap outside, Escape, the 44px
- *                  close) to dismiss, with viewport-bounded pages and safe-area padding. It
+ *                  sheet: surface fill, 20px top corners, a grab handle, swipe down (or tap outside, Escape, the
+ *                  quiet Close) to dismiss. As tall as its content up to near the top of the screen, then the
+ *                  body scrolls inside; 12px padding (16px from 768px) or the safe-area insets. It
  *                  slides up on open and back down on close (instant under reduced motion). vaul keeps a
  *                  focused field above the on-screen keyboard (it watches visualViewport and lifts the sheet).
  *                  Wrap a dialog's call to action in .mdx-sheet-foot to pin it to the sheet's bottom edge when
@@ -17,12 +18,10 @@
  *   useKeyboardSafe(ref) keeps the submit button of the form in `ref` above the on-screen keyboard while one of
  *                  its fields has focus (phones, outside sheets: the coin page trade ticket).
  */
-import { useEffect, useRef, useSyncExternalStore, type ReactNode, type RefObject } from "react";
-import { Drawer } from "vaul";
+import { lazy, Suspense, useEffect, useSyncExternalStore, type ReactNode, type RefObject } from "react";
 
-import { CardMotionProvider } from "./card3d";
-import { ancestry, focusNear } from "./focus";
-import "../../carddex-overlays.css";
+import { useOpenedOnce } from "./opened-once";
+
 
 export const PHONE_MQ = "(max-width: 1023.98px)";
 
@@ -49,7 +48,7 @@ export function isCoarsePointer() {
 }
 
 /** Text fields that raise the on-screen keyboard. */
-function isTextField(el: Element | null): el is HTMLElement {
+export function isTextField(el: Element | null): el is HTMLElement {
   if (!(el instanceof HTMLElement)) return false;
   if (el.tagName === "TEXTAREA" || el.isContentEditable) return true;
   if (el.tagName !== "INPUT") return false;
@@ -95,78 +94,26 @@ export function useKeyboardSafe(ref: RefObject<HTMLElement | null>) {
   }, [ref]);
 }
 
-function CloseGlyph() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden>
-      <path d="M2.5 2.5l9 9M11.5 2.5l-9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
+const loadDrawer = () => import("./sheet-drawer");
+const SheetDrawer = lazy(loadDrawer);
 
-export function Sheet({
-  open,
-  onOpenChange,
-  title,
-  description,
-  children,
-}: {
+type SheetProps = {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   title: string;
   description?: string;
   children: ReactNode;
-}) {
-  // Like Modal: sheets often open without a Radix Trigger, so remember what had focus and hand it back.
-  const returnTo = useRef<HTMLElement | null>(null);
-  const returnChain = useRef<HTMLElement[]>([]);
+};
+
+/**
+ * Sheets never render open on the server or at hydration (they open after an interaction), so the drawer mounts
+ * on first open (see useOpenedOnce).
+ */
+export function Sheet(props: SheetProps) {
+  if (!useOpenedOnce(props.open, loadDrawer)) return null;
   return (
-    // autoFocus: focus moves into the sheet (the first field with autoFocus, else the first control), so
-    // keyboard and screen reader users land inside it.
-    <Drawer.Root open={open} onOpenChange={onOpenChange} autoFocus>
-      <Drawer.Portal>
-        <Drawer.Overlay className="mdx-sheet-overlay fixed inset-0 z-50 bg-[var(--overlay)]" />
-        <Drawer.Content
-          className="mdx-sheet fixed inset-x-0 bottom-0 z-50 mx-auto flex w-full max-w-[600px] flex-col rounded-t-panel bg-plinth text-ink shadow-modal outline-none"
-          onOpenAutoFocus={() => {
-            const el = document.activeElement;
-            // Never hand focus back to a text field on a touch screen: that would raise the keyboard again.
-            returnTo.current =
-              el instanceof HTMLElement && el !== document.body && !(isCoarsePointer() && isTextField(el))
-                ? el
-                : null;
-            returnChain.current = ancestry(el instanceof HTMLElement && el !== document.body ? el : null);
-          }}
-          onCloseAutoFocus={(e) => {
-            const el = returnTo.current;
-            returnTo.current = null;
-            e.preventDefault();
-            if (el?.isConnected) el.focus({ preventScroll: true });
-            // The opener left with the action: the nearest thing still there, never a text field on a touch
-            // screen (the keyboard would rise again).
-            else focusNear(returnChain.current, { avoidText: isCoarsePointer() });
-          }}
-          {...(description ? null : { "aria-describedby": undefined })}
-        >
-          {/* The grip: a visual cue that the sheet swipes down. The whole sheet drags. */}
-          <div aria-hidden className="mdx-sheet__grip" />
-          <div className="mdx-sheet__head flex flex-none items-start justify-between gap-4">
-            <Drawer.Title className="min-w-0 pt-2.5 text-[18px] font-semibold leading-[1.3] tracking-[-0.01em] text-ink">
-              {title}
-            </Drawer.Title>
-            <Drawer.Close
-              className="-mr-2.5 grid h-11 w-11 flex-none place-items-center rounded-pill text-ink transition-colors duration-(--t-fast) ease-room hover:bg-track"
-              aria-label="Close"
-            >
-              <CloseGlyph />
-            </Drawer.Close>
-          </div>
-          {description ? <Drawer.Description className="sr-only">{description}</Drawer.Description> : null}
-          <div className="mdx-sheet__body min-h-0 flex-1">
-            {/* Cards inside a sheet lift in after it slides up (M11). */}
-            <CardMotionProvider enter="liftin">{children}</CardMotionProvider>
-          </div>
-        </Drawer.Content>
-      </Drawer.Portal>
-    </Drawer.Root>
+    <Suspense fallback={null}>
+      <SheetDrawer {...props} />
+    </Suspense>
   );
 }

@@ -739,7 +739,7 @@ export function ChainLaunch() {
                     {devError}
                   </span>
                 ) : hasDevBuy && !devEst ? (
-                  <span className="block">Token estimate unavailable. Your dev buy is included in the total and checked before signing.</span>
+                  <span className="block">Coin estimate unavailable. Your dev buy is included in the total and checked before signing.</span>
                 ) : !devEst ? (
                   <span className="block">{LAUNCH_COPY.devEmpty(`${sol(MAX_DEV_BUY, 0)} ${SOL_WORD}`)}</span>
                 ) : null}
@@ -762,7 +762,7 @@ export function ChainLaunch() {
 
           <div className="mt-auto">
             <p className="mb-1 text-[13px] leading-[1.45] text-slate">
-              <TextLink to="/legal" search={{ tab: "terms" }}>
+              <TextLink to="/legal" hash="terms">
                 Content rules
               </TextLink>
               : {WORDS.contentRule}

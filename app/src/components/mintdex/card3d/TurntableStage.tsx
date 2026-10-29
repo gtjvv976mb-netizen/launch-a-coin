@@ -11,7 +11,7 @@
  * no coasting; a drag still turns the card.
  */
 import * as Dialog from "@radix-ui/react-dialog";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
   useEffect,
   useId,
@@ -26,7 +26,8 @@ import { tierForLevel } from "../../../lib/mintdex/tiers";
 import { MintCardFace, cardLabel, cardDesign, cardBackTheme, designedCard } from "../MintCard";
 import { getMemeIcon } from "../../../lib/mintdex/meme-icons";
 import { getEdition } from "../../../lib/mintdex/editions";
-import { ChevronButton, TierTag } from "../ui";
+import { Icon } from "../ui";
+import { CardControlButton, CardControls } from "../../carddex/CardControls";
 import { BackFace } from "./backface";
 import { CARD_BOX, extrude, paintAcrylic, paintEdge } from "./extrude";
 import { CasePlate, caseBox } from "./case-chrome";
@@ -37,7 +38,7 @@ import { designMaterialStyle } from "./design-material";
 import { templateStyle } from "./templates";
 import { editionMaterialStyle } from "./edition-material";
 import { memeIconMaterialStyle } from "./meme-icon-material";
-import { Rotate3DIcon, type View3DItem } from "./view3d";
+import { type View3DItem } from "./view3d";
 import "../../../collector-case-viewer.css";
 
 /** Auto-spin speed: one turn in 10 s. */
@@ -46,7 +47,7 @@ const AUTO = 36;
 const TILT = 6;
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 2.2;
-const SIZES = "(max-width: 767px) 72vw, 380px";
+const SIZES = "(max-width: 767px) 84vw, 560px";
 
 type Sim = {
   angle: number;
@@ -84,6 +85,7 @@ export default function TurntableStage({
   const [paused, setPaused] = useState(false);
   const [said, setSaid] = useState("");
   const hintId = useId();
+  const pathname = useRouterState({ select: (st) => st.location.pathname });
 
   const stageRef = useRef<HTMLDivElement | null>(null);
   // The dialog's portal mounts its content after the first render: effects that need the stage wait for it.
@@ -229,10 +231,13 @@ export default function TurntableStage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
-    // Pause stops the ambient spin at its current angle. Later deliberate drags can still coast,
-    // and an in-progress manual flip keeps its spring instead of being interrupted.
+    // Pause stops the ambient spin and settles the card on its nearest front face (F7: never frozen edge-on or
+    // showing its back). Later deliberate drags can still coast, and an in-progress manual flip keeps its spring.
     const s = sim.current;
-    if ((paused || calm) && !s.dragging && s.flipTo == null) s.vel = 0;
+    if ((paused || calm) && !s.dragging && s.flipTo == null) {
+      s.vel = 0;
+      if (paused && !calm) s.flipTo = Math.round(s.angle / 360) * 360;
+    }
     kick();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paused, calm]);
@@ -512,6 +517,7 @@ export default function TurntableStage({
   };
 
   const coinId = item.coinId === undefined ? item.id : item.coinId;
+  const onCoinPage = !!coinId && pathname === `/coin/${encodeURIComponent(coinId)}`;
   const icon = getMemeIcon(card.memeIcon);
   const edition = getEdition(card.edition);
   const style = { ...templateStyle(tier.key), ...editionMaterialStyle(card.edition), ...memeIconMaterialStyle(card.memeIcon), ...designMaterialStyle(card.cardTemplate), "--rest-k": 0, ...(item.cased ? { "--T": "6.5cqw", "--case-top": "-28cqw", "--accent": tier.accent } : {}) } as CSSProperties;
@@ -520,6 +526,7 @@ export default function TurntableStage({
     <Dialog.Root open onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
         <Dialog.Content
+          aria-modal="true"
           className="mdx-v3d"
           aria-describedby={hintId}
           data-calm={calm ? "" : undefined}
@@ -536,74 +543,29 @@ export default function TurntableStage({
           <Dialog.Title className="sr-only">{card.name} card in 3D</Dialog.Title>
           <p id={hintId} className="sr-only">
             Drag to spin the card, scroll or pinch to zoom. Left and Right arrow keys turn it, Up
-            and Down zoom, F flips it{calm ? "" : ", P pauses the spin"}
+            and Down zoom, F turns it over{calm ? "" : ", P pauses the spin"}
             {many ? ", Page Up and Page Down step to the other cards" : ""}. Escape closes.
           </p>
-          <i className="mdx-v3d__sky" aria-hidden />
+          {/* The viewer shell (styles/screens/viewer.css): the card's name on the left, Close on the right, the card
+              as large as the window allows on the flat ground, then its controls in one centred row. Same words as
+              every card row: Turn over, Pause spin or Resume spin, Close. */}
           <div className="mdx-v3d__bar">
-            <span className="mdx-v3d__badge">
-              <Rotate3DIcon size={14} />
-              3D view
-            </span>
-            <div className="mdx-v3d__tools">
-              {calm ? null : (
-                <button
-                  type="button"
-                  className="mdx-v3d__btn"
-                  aria-pressed={paused}
-                  onClick={() => setPaused((v) => !v)}
-                  data-v3d="play"
-                >
-                  {paused ? (
-                    <svg aria-hidden viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
-                      <path d="M4.5 2.8v10.4L13 8z" />
-                    </svg>
-                  ) : (
-                    <svg aria-hidden viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
-                      <rect x="3.5" y="2.8" width="3" height="10.4" rx="0.8" />
-                      <rect x="9.5" y="2.8" width="3" height="10.4" rx="0.8" />
-                    </svg>
-                  )}
-                  {paused ? "Play spin" : "Pause spin"}
-                </button>
-              )}
-              <button
-                type="button"
-                className="mdx-v3d__btn"
-                onClick={() => flip(1)}
-                data-v3d="flip"
-              >
-                <svg
-                  aria-hidden
-                  viewBox="0 0 16 16"
-                  width="14"
-                  height="14"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M2.5 8a5.5 5.5 0 0 1 9.6-3.6M13.5 8a5.5 5.5 0 0 1-9.6 3.6" />
-                  <path d="M12.6 1.8v2.9H9.7M3.4 14.2v-2.9h2.9" />
-                </svg>
-                Flip
-              </button>
-              <Dialog.Close className="mdx-v3d__btn mdx-v3d__close" aria-label="Close 3D view">
-                <svg
-                  aria-hidden
-                  viewBox="0 0 16 16"
-                  width="14"
-                  height="14"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.9"
-                  strokeLinecap="round"
-                >
-                  <path d="M3.5 3.5l9 9M12.5 3.5l-9 9" />
-                </svg>
-              </Dialog.Close>
+            <div className="mdx-v3d__title">
+              <h2 className="mdx-v3d__name">{card.name}</h2>
+              <p className="mdx-v3d__meta">
+                <span className="mdx-v3d__ticker">${card.ticker}</span>
+                <span>{cardDesign(card).name}</span>
+                {many ? (
+                  <span className="mdx-v3d__count num">
+                    {index + 1} of {items.length}
+                  </span>
+                ) : null}
+              </p>
             </div>
+            <Dialog.Close className="mdx-v3d__btn mdx-v3d__close">
+              <Icon name="close" strokeWidth={2} />
+              Close
+            </Dialog.Close>
           </div>
 
           <div
@@ -645,7 +607,7 @@ export default function TurntableStage({
                       <div className="mdx-card3d__faces">
                         <FaceDepth.Provider value="hand">
                           <div className="mdx-card3d__slot" data-on="">
-                            <MintCardFace card={card} sizes={SIZES} priority />
+                            <MintCardFace card={card} sizes={SIZES} priority full />
                           </div>
                         </FaceDepth.Provider>
                       </div>
@@ -655,45 +617,31 @@ export default function TurntableStage({
                 </div>
               </div>
             </div>
-            {many ? (
-              <>
-                <ChevronButton
-                  dir="left"
-                  label="Previous card"
-                  onClick={() => onStep(index - 1)}
-                  className="mdx-v3d__step mdx-v3d__step--prev"
-                />
-                <ChevronButton
-                  dir="right"
-                  label="Next card"
-                  onClick={() => onStep(index + 1)}
-                  className="mdx-v3d__step mdx-v3d__step--next"
-                />
-              </>
-            ) : null}
           </div>
 
           <div className="mdx-v3d__cap">
-            <h2 className="mdx-v3d__name">{card.name}</h2>
-            <div className="mdx-v3d__meta">
-              <span className="mdx-v3d__ticker">${card.ticker}</span>
-              <span className="mdx-v3d__count">{cardDesign(card).name}</span>
-              {many ? (
-                <span className="mdx-v3d__count num">
-                  {index + 1} of {items.length}
-                </span>
+            {/* The compact card-controls row (CardControls, shared with HeroTurntable): icon pills named by their
+                tooltips, Previous and Next card at its ends when the viewer has neighbours; View coin keeps its words
+                (it leaves the viewer). */}
+            <CardControls className="mdx-v3d__controls">
+              {many ? <CardControlButton icon="chevron-left" label="Previous card" onClick={() => onStep(index - 1)} data-v3d="prev" /> : null}
+              <CardControlButton icon="turn-over" label="Turn over" onClick={() => flip(1)} data-v3d="flip" />
+              {calm ? null : (
+                <CardControlButton icon={paused ? "play" : "pause"} label={paused ? "Resume spin" : "Pause spin"} onClick={() => setPaused((v) => !v)} data-v3d="play" />
+              )}
+              {many ? <CardControlButton icon="chevron-right" label="Next card" onClick={() => onStep(index + 1)} data-v3d="next" /> : null}
+              {/* Hidden when the viewer shows the coin of the page underneath: it would lead back to itself. */}
+              {coinId && !onCoinPage ? (
+                <Link
+                  to="/coin/$id"
+                  params={{ id: coinId }}
+                  className="mdx-v3d__btn mdx-v3d__go"
+                  onClick={onClose}
+                >
+                  View coin
+                </Link>
               ) : null}
-            </div>
-            {coinId ? (
-              <Link
-                to="/coin/$id"
-                params={{ id: coinId }}
-                className="mdx-btn mdx-btn--primary mdx-v3d__go"
-                onClick={onClose}
-              >
-                View coin
-              </Link>
-            ) : null}
+            </CardControls>
             <p className="mdx-v3d__hint" aria-hidden>
               <span className="mdx-v3d__hint-fine">Drag to spin, scroll to zoom</span>
               <span className="mdx-v3d__hint-touch">Swipe to spin, pinch to zoom</span>

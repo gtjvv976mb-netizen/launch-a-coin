@@ -1,0 +1,501 @@
+/* The app shell (AppShell.tsx): the 48px top bar, the phone tab bar, the page foot and the shell notes.
+ * Shared: owned by the foundation, not by a screen group (.taste-skill/restyle/ownership.md). Layer: cdx.
+ *
+ * Grid arithmetic (density rule R3): the column is min(100% - 2 x gutter, 1600px) at every width (gutters 16 / 24
+ * from 768 / 32 from 1280); the top bar's inner row and main's padding use the same max(), so the mark sits on the
+ * column's left edge and the account control ends on its right edge. --sbw is main's scrollbar width (AppShell
+ * measures it): the bar adds it on the right because it has no scrollbar of its own. At 1440: 32px each side; at
+ * 1920: (1920 - 1600) / 2 = 160px. Phones: 16px gutters (plus the notch insets held sideways). */
+
+.cdx-app.cdx-viewport {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-ground);
+  color: var(--color-ink);
+  isolation: isolate;
+}
+
+/* ------------------------------------------------ top bar */
+.cdx-topbar {
+  position: relative;
+  z-index: var(--z-nav);
+  flex: none;
+  height: var(--topbar-h);
+  background: var(--color-ground);
+  /* The rule shows once content scrolls under the bar (AppShell sets data-scrolled from main's scrollTop): the one
+   * line the direction keeps on the sticky bar. taste-skill-ignore: a sticky bar's scroll rule, not a resting card. */
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--t-fast) ease;
+  /* No overflow clip here: the search suggestions hang below the bar (an overflow:hidden bar cut them off). */
+}
+.cdx-topbar[data-scrolled] {
+  border-bottom-color: var(--color-hairline);
+}
+.cdx-topbar__inner {
+  --bar-pad: max(var(--page-gutter), (100% - var(--sbw) - var(--column)) / 2);
+  display: flex;
+  height: 100%;
+  align-items: center;
+  gap: 16px;
+  padding-left: max(var(--bar-pad), env(safe-area-inset-left));
+  padding-right: calc(max(var(--bar-pad), env(safe-area-inset-right)) + var(--sbw));
+}
+@media (min-width: 1024px) {
+  .cdx-topbar__inner {
+    gap: 24px;
+  }
+}
+.cdx-topbar__lead {
+  display: flex;
+  min-width: 0;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+}
+.cdx-brand {
+  position: relative;
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--radius-row);
+  color: var(--color-ink);
+  font-size: var(--text-body);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+}
+/* The hit area reaches --hit both ways. Below 480px only the 24px mark shows: it grows 6px right (the Demo pill's own
+ * area starts 4px into the 10px gap) and the rest left into the gutter. */
+.cdx-brand::after {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - var(--hit)) / 2)) -6px min(0px, calc((100% - var(--hit)) / 2))
+    min(-4px, calc(100% - var(--hit) + 6px));
+}
+.cdx-brand__name {
+  display: none;
+}
+@media (min-width: 480px) {
+  .cdx-brand__name {
+    display: inline;
+  }
+}
+/* The one demo signal: the Demo pill beside the mark opens the explainer (trust.tsx ModeBadge). */
+.cdx-demo-pill {
+  position: relative;
+  display: inline-flex;
+  height: 22px;
+  flex: none;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-track);
+  color: var(--color-slate);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: 1;
+  transition: background-color var(--t-hover) ease, color var(--t-hover) ease;
+}
+.cdx-demo-pill::before {
+  content: "";
+  position: absolute;
+  inset: calc((22px - var(--hit)) / 2) -4px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cdx-demo-pill:hover,
+  .cdx-demo-pill[data-state="open"] {
+    background: var(--color-raised);
+    color: var(--color-ink);
+  }
+}
+@media (max-width: 359.98px) {
+  .cdx-demo-pill {
+    display: none;
+  }
+}
+
+/* Desktop links: 14px slate, the current one in ink; no pill, no hue. */
+.cdx-topnav {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .cdx-topnav {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 4px;
+  }
+}
+.cdx-topnav__link {
+  position: relative;
+  display: inline-flex;
+  height: 36px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  color: var(--color-slate);
+  font-size: var(--text-body);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color var(--t-hover) ease;
+}
+.cdx-topnav__link::after {
+  content: "";
+  position: absolute;
+  inset: calc((36px - var(--hit)) / 2) 0;
+}
+.cdx-topnav__link[data-active="true"] {
+  color: var(--color-ink);
+}
+.cdx-topnav__link[data-pending] {
+  color: var(--color-ink);
+  opacity: 0.7;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cdx-topnav__link:hover {
+    color: var(--color-ink);
+  }
+}
+.cdx-topnav__link .mdx-badge {
+  margin-left: 2px;
+}
+
+/* 8px apart at every width, so each 36px tool keeps its whole 44px hit area (a 4px gap let neighbours overlap). */
+.cdx-topbar__tools {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Search: a 36px pill field from 1024px (the combobox), an icon below that (one tap opens Discover's field). */
+.cdx-topbar__search {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .cdx-topbar__search {
+    display: block;
+    width: clamp(160px, 18vw, 240px);
+  }
+  .cdx-topbar__searchbtn {
+    display: none;
+  }
+  /* Discover: its own field under the title takes over; the bar keeps the icon, which focuses that field. */
+  .cdx-topbar__tools[data-page-search] .cdx-topbar__search {
+    display: none;
+  }
+  .cdx-topbar__tools[data-page-search] .cdx-topbar__searchbtn {
+    display: inline-flex;
+  }
+}
+.cdx-search {
+  position: relative;
+  width: 100%;
+}
+.cdx-search__glyph {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  color: var(--color-slate);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+/* A 36px pill on screen inside a 40px target: the 2px transparent border is part of the field (fine-pointer --hit). */
+.cdx-search__input {
+  display: block;
+  width: 100%;
+  height: 40px;
+  padding: 0 34px 0 32px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--color-nested);
+  background-clip: padding-box;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  transition: background-color var(--t-hover) ease;
+}
+.cdx-search__input::placeholder {
+  color: var(--color-placeholder);
+  opacity: 1;
+}
+.cdx-search__input:focus {
+  outline: none;
+}
+.cdx-search__input:focus-visible {
+  outline: 2px solid var(--color-zap);
+  outline-offset: 0;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cdx-search__input:hover:not(:focus) {
+    background: var(--color-raised);
+  }
+}
+.cdx-search__key {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: var(--radius-chip);
+  background: var(--color-raised);
+  color: var(--color-slate);
+  font-size: var(--text-caption);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+.cdx-search__list {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(100% + 6px);
+  z-index: var(--z-overlay);
+  min-width: 260px;
+}
+
+/* 1024 to 1179px (density D7, V7): the search collapses to its icon (one click opens Discover's field, and "/" presses
+ * it), so the nav keeps its room and Calm motion keeps its words. */
+@media (min-width: 1024px) and (max-width: 1179.98px) {
+  .cdx-topbar__search {
+    display: none;
+  }
+  .cdx-topbar__searchbtn {
+    display: inline-flex;
+  }
+}
+/* Calm motion in the bar from 1024px, always with its words (a bare switch said nothing to sighted users). */
+.cdx-topbar__calm {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .cdx-topbar__calm {
+    display: flex;
+  }
+}
+
+/* The wallet pill (desktop menu trigger, phone Menu button): avatar and balance, 36px. */
+.cdx-wallet {
+  position: relative;
+  display: inline-flex;
+  height: 36px;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-nested);
+  color: var(--color-ink);
+  white-space: nowrap;
+  transition: background-color var(--t-hover) ease;
+}
+.cdx-wallet::after {
+  content: "";
+  position: absolute;
+  inset: calc((36px - var(--hit)) / 2) 0;
+}
+.cdx-wallet__balance {
+  line-height: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cdx-wallet:hover,
+  .cdx-wallet[data-state="open"] {
+    background: var(--color-raised);
+  }
+}
+.cdx-wallet:active {
+  transform: scale(0.96);
+}
+.cdx-only-phone {
+  display: inline-flex;
+}
+.cdx-only-desk {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .cdx-only-phone {
+    display: none;
+  }
+  .cdx-only-desk {
+    display: contents;
+  }
+}
+
+/* One shell note row (the devnet test site, the mainnet launch warning). */
+.cdx-shellnote {
+  flex: none;
+  padding: 4px 16px;
+  background: var(--color-surface);
+  color: var(--color-slate);
+  font-size: var(--text-caption);
+  line-height: 18px;
+  text-align: center;
+}
+
+/* ------------------------------------------------ the Menu sheet (phones, signed in) */
+.cdx-menu-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--radius-pop);
+  background: var(--color-nested);
+}
+.cdx-menu-list {
+  display: flex;
+  margin: 12px -12px 0;
+  flex-direction: column;
+}
+.cdx-menu-list .mdx-menu-item {
+  font-size: var(--text-lead);
+}
+.cdx-menu-calm {
+  margin: 8px 12px;
+}
+.cdx-menu-danger {
+  margin-top: 8px;
+  color: var(--color-down-hover);
+}
+
+/* ------------------------------------------------ the page foot */
+.cdx-footer {
+  display: flex;
+  margin-top: 24px;
+  padding: 16px 0 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  color: var(--color-slate);
+  font-size: var(--text-body);
+}
+.cdx-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+}
+.cdx-footer__links .mdx-link {
+  color: var(--color-slate);
+  font-weight: 500;
+}
+.cdx-footer__links .mdx-link[aria-current] {
+  color: var(--color-ink);
+  text-decoration-color: var(--color-ink);
+}
+.cdx-footer__calm {
+  min-width: 180px;
+}
+@media (min-width: 1024px) {
+  .cdx-footer__calm {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------ the tab bar (phones and tablets) */
+.cdx-tabbar {
+  display: flex;
+  flex: none;
+  /* 8px sides keep the end labels on the 16px page margin (a 78px cell centres "Portfolio" about 10px in). */
+  padding: 0 max(8px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(8px, env(safe-area-inset-left));
+  background: var(--color-ground);
+  /* taste-skill-ignore: the fixed tab bar's top rule; page content scrolls under it on the same ground. */
+  border-top: 1px solid var(--color-hairline);
+}
+@media (min-width: 1024px) {
+  .cdx-tabbar {
+    display: none;
+  }
+}
+.mdx-mtab {
+  position: relative;
+  display: flex;
+  height: var(--tabbar-h);
+  min-width: 0;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--color-slate);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  line-height: 1;
+  transition: color var(--t-hover) ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.mdx-mtab:focus-visible {
+  outline-offset: -2px;
+  border-radius: var(--radius-row);
+}
+.mdx-mtab__icon {
+  position: relative;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+}
+.mdx-mtab[data-active="true"] {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.mdx-mtab[data-pending] {
+  opacity: 0.7;
+}
+.mdx-mtab:active .mdx-mtab__icon {
+  transform: scale(0.92);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mdx-mtab:active .mdx-mtab__icon {
+    transform: none;
+  }
+}
+/* Phones held sideways: a 44px bar, icon beside label. */
+@media (max-width: 1023.98px) and (max-height: 500px) {
+  .mdx-mtab {
+    height: 44px;
+    flex-direction: row;
+    gap: 6px;
+  }
+}
+/* Phones held sideways, 740px and wider (density D2): the five links sit in the 48px top bar (the mark without its
+ * name makes room) and the tab bar goes, so the fixed chrome is 48px plus a page's action bar, not 93px. The same
+ * query sets --tabbar-h to 0 (carddex-theme.css). */
+@media (min-width: 740px) and (max-width: 1023.98px) and (max-height: 500px) {
+  .cdx-tabbar {
+    display: none;
+  }
+  .cdx-topnav {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0;
+  }
+  .cdx-topnav__link {
+    padding: 0 8px;
+  }
+  .cdx-brand__name {
+    display: none;
+  }
+}
+
+/* The Stepper's count and its Pause/Play: shared controls that reach the hit size. */
+.mdx-step-count {
+  min-width: 52px;
+  color: var(--color-slate);
+  font-size: var(--text-body);
+  text-align: center;
+}
+.mdx-playbtn {
+  position: relative;
+}
+.mdx-playbtn::after {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - var(--hit)) / 2));
+  border-radius: inherit;
+}

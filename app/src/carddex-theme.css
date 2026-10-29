@@ -1,207 +1,268 @@
-/* CardDex: the original card-led application, in a vivid collector-card palette. */
+/* Launch a Card tokens: the one source of truth (direction: .taste-skill/app/notes.md, style true-black-flat).
+ *
+ * A warm near-black ground with elevation by lightness alone (ground, surface, nested: no borders or shadows on
+ * cards at rest). Foil gold is the ONLY data hue (price line, curve fill, the current period): never a button,
+ * tab or nav fill. The primary action is made primary by inversion (a cream-white pill with a near-black label).
+ * Instrument Sans for every UI word and figure (tabular); Libre Caslon and Courier Prime live inside the cards.
+ *
+ * Tailwind namespaces (--color-*, --radius-*, --font-*, --text-*, --ease-*) sit in the top-level @theme static
+ * block, so utilities such as bg-surface, text-slate, rounded-panel, text-caption and ease-out exist. Runtime values
+ * (durations, shadows, z-index, control heights, gutters) sit in :root. Nothing else in the app defines a colour,
+ * radius, shadow or motion value: sheets and components read these names. Old names (wall, plinth, sheet, tint,
+ * track, neon, zap) are kept as aliases of the new roles so every existing utility follows the new look. */
+
+@theme static {
+  /* ---- ground and surfaces: one lightness step each */
+  --color-ground: #0d0c0b; /* the page and the shell (top bar, tab bar) */
+  --color-surface: #171512; /* panels, the trade ticket, dialogs, sheets */
+  --color-nested: #26231f; /* a panel inside a panel, fields, the segmented thumb, secondary buttons */
+  --color-raised: #302c27; /* hover on a nested control, the selected chip track */
+  --color-float: #1f1c19; /* menus, popovers, toasts: one step above the surface, with --shadow-pop */
+
+  /* ---- text: two greys far enough apart to read as two (both 4.5:1 or better on every surface above) */
+  --color-ink: #f2f1ee; /* primary text, 13.9:1 on nested: a low-chroma bone (a yellow cream read as a stock palette) */
+  --color-ink-hover: #ffffff;
+  --color-slate: #b8b0a3; /* secondary text, labels, inactive nav and tabs (7.3:1 on nested) */
+  --color-placeholder: #9c9488; /* meta, timestamps, placeholders (5.2:1 on nested, 4.6:1 on raised) */
+
+  /* ---- lines */
+  --color-control-border: #756d62; /* every interactive boundary: 3.6:1 on surface, 3.8:1 on ground */
+  --color-hairline: #2e2a25; /* dividers, chart gridlines, the sticky bar's rule */
+  --color-rule: #23201c; /* row rules inside a surface */
+  --color-field: #4a443d; /* decorative only: leader dots */
+
+  /* ---- the one data hue and the market pair */
+  --color-gold: #e8bd62; /* data only: the price line, the curve fill, the current period */
+  --color-gold-soft: rgb(232 189 98 / 0.14); /* a chart area fill under the gold line (14% or less) */
+  --color-up: #3fc07a;
+  --color-up-soft: #172a1d;
+  --color-up-hover: #5ccf8f;
+  --color-down: #e5566f; /* 5.1:1 on surface; on nested panels set it at 600 weight or on --color-down-soft */
+  --color-down-soft: #2c1a20;
+  --color-down-hover: #ec7187;
+  --color-warn: #e5a93b;
+  --color-warn-soft: #2b2414;
+
+  /* ---- the primary action: inversion, never gold */
+  --color-cta: #f2f1ee;
+  --color-cta-hover: #ffffff;
+  --color-on-cta: #0d0c0b; /* 17.4:1 on the cream fill */
+
+  /* ---- aliases of the old role names (every existing utility and sheet keeps working) */
+  --color-wall: var(--color-ground);
+  --color-plinth: var(--color-surface);
+  --color-sheet: var(--color-nested);
+  --color-tint: var(--color-raised);
+  --color-sleeve: #12100e; /* the tray behind a minted card */
+  --color-wall-deep: #1d1a17; /* skeleton bars on the ground */
+  --color-track: rgb(242 241 238 / 0.08); /* segmented tracks, chips, ghost hover: one step up on any surface */
+  --color-wash: rgb(232 189 98 / 0.12); /* the arrival wash on a new feed row (start colour only) */
+  --color-neon: var(--color-ink); /* selected outline, active underline, link hover: brightness, not hue */
+  --color-neon-ink: var(--color-on-cta);
+  --color-on-neon: var(--color-on-cta);
+  --color-zap: var(--color-ink); /* focus ring */
+  --color-hype: var(--color-down);
+
+  /* Foil stops sampled from the card holo (card faces only). */
+  --color-holo-pink: #f6c6dd;
+  --color-holo-butter: #f7eac2;
+  --color-holo-mint: #c8f0de;
+  --color-holo-sky: #c6e0f5;
+  --color-holo-lilac: #dccdf5;
+
+  /* ---- radius: concentric, from the 20px card (outer = inner + padding) */
+  --radius-chip: 6px; /* the "/" key hint only */
+  --radius-row: 12px; /* rows and their hover, menu items (in a 16 popover with 4 padding), tiles, tooltips */
+  --radius-field: 8px; /* inputs, field selects, textareas: the 20px panel less its 12px phone padding */
+  --radius-pop: 16px; /* menus, popovers, toasts, search suggestions */
+  --radius-panel: 20px; /* panels and phone sheets (a nested panel with 8px padding takes --radius-row) */
+  --radius-aside: 24px; /* desktop dialogs */
+  --radius-pill: 999px; /* every button, chip, badge, segmented track and thumb, switch */
+
+  /* ---- type: Instrument Sans for every UI word and figure; the card faces keep their own */
+  --font-sans: "Instrument Sans", "Instrument Sans Fallback", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-title: var(--font-sans);
+  --font-addr: "Courier Prime", ui-monospace, "SF Mono", Menlo, monospace; /* addresses and hashes */
+  --font-card-serif: "Libre Caslon Text", Georgia, "Times New Roman", serif;
+  --font-card-mono: "Courier Prime", ui-monospace, Menlo, monospace;
+  --font-display: var(--font-card-serif); /* card only: MintCard's "Your art here" placeholder */
+
+  /* Scale 12 / 14 / 16 / 20 / 24, plus one 30px lead figure (Portfolio total, Coin market cap). Nothing at 48. */
+  --text-caption: 12px; /* meta, timestamps, badges, column heads, axis ticks, tab-bar labels */
+  --text-caption--line-height: 16px;
+  --text-body: 14px; /* body, labels, buttons, tabs, table cells, nav links */
+  --text-body--line-height: 20px;
+  --text-lead: 16px; /* section and dialog headings; inputs on touch (no iOS zoom) */
+  --text-lead--line-height: 24px;
+  --text-title: 20px; /* the page title on phones, a featured card name */
+  --text-title--line-height: 26px;
+  --text-heading: 24px; /* the page title (h1) from 1024px; KPI values */
+  --text-heading--line-height: 30px;
+  --text-figure: 30px; /* the one lead figure on a screen */
+  --text-figure--line-height: 36px;
+
+  /* ---- motion (website-standard motion-values.md): one easing set */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* enter, exit, moving hovers */
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1); /* movement on screen (an indicator sliding) */
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1); /* sheets (vaul) */
+  /* The card engine's own curves (card3d.css reads them; unchanged so the cards move exactly as before). */
+  --ease-room: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-sheen: cubic-bezier(0.45, 0, 0.25, 1);
+}
+
 :root {
-  color-scheme: light;
-  --color-wall: #f6edcd;
-  --color-plinth: #fff9e8;
-  --color-sheet: #fffdf5;
-  --color-tint: #eee4cf;
-  --color-sleeve: #e2d4b7;
-  --color-wall-deep: #e2d4b7;
-  --color-track: rgb(129 88 24 / .09);
-  --color-wash: rgb(255 213 58 / .3);
-  --color-ink: #30271d;
-  --color-ink-hover: #211910;
-  --color-slate: #675a46;
-  --color-placeholder: #7a6d58;
-  --color-field: #ac9871;
-  --color-control-border: #9a8055;
-  --color-hairline: #cdbd98;
-  --color-rule: #dfd2b7;
-  --color-neon: #8b5915;
-  --color-neon-ink: #30251b;
-  --color-zap: #9b5d15;
-  --color-hype: #b62b2e;
-  --color-up: #12654e;
-  --color-up-hover: #0b513f;
-  --color-up-soft: rgb(18 101 78 / .1);
-  --color-down: #bb2939;
-  --color-down-hover: #9f2030;
-  --color-down-soft: rgb(187 41 57 / .09);
-  --cdx-frame: #8b5915;
-  --cdx-frame-deep: #211c16;
-  --cdx-yellow: #ffda45;
-  --cdx-yellow-light: #fff1a0;
-  --holo: linear-gradient(125deg, #fff8bc, #ffdb48 38%, #fff3a0 65%, #f6b92b);
-  --holo-flat: #ffda45;
-  --sheen: linear-gradient(105deg, transparent 30%, rgb(255 255 255 / .7) 48%, rgb(255 247 194 / .8) 52%, transparent 74%);
-  --glow-neon: 0 2px 0 #b78319, 0 0 0 1px #dbab2b, 0 5px 16px -8px rgb(133 90 0 / .35);
-  --glow-neon-hi: 0 2px 0 #b78319, 0 0 0 1px #bf8e15, 0 7px 20px -8px rgb(133 90 0 / .4);
-  --glow-zap: 0 0 0 1px #8b5915, 0 3px 14px -7px rgb(139 89 21 / .3);
-  --glow-focus: 0 0 0 4px rgb(139 89 21 / .16), 0 0 0 1px #8b5915;
-  --card-shadow: rgb(63 44 17 / .24);
-  --overlay: rgb(35 27 17 / .68);
-  --shadow-raise: 0 2px 6px -3px rgb(67 49 22 / .2);
-  --shadow-lift: 0 8px 24px -12px rgb(67 49 22 / .3);
-  --shadow-modal: 0 24px 90px -24px rgb(43 30 12 / .42);
-}
-html, body { background: var(--color-wall); color: var(--color-ink); }
-html { scrollbar-color: #b2955f #eee3c9; }
-::selection { background: #ffe16b; color: #30251b; }
-input, textarea { caret-color: #8b5915; }
+  color-scheme: dark;
 
-/* Obsidian navigation is the dark outer sleeve; content stays warm, readable card paper. */
-.mdx-rail, .mdx-mhead, .mdx-mobile-tabs {
-  --color-wall: #29231d;
-  --color-plinth: #251f19;
-  --color-sheet: #40372a;
-  --color-tint: #4b3f2b;
-  --color-ink: #fff8df;
-  --color-ink-hover: #fff;
-  --color-slate: #dfd0ac;
-  --color-placeholder: #d5c49d;
-  --color-neon: #ffe36a;
-  --color-zap: #ffe36a;
-  --color-control-border: #a89264;
-  --color-hairline: #796740;
-  --color-track: rgb(255 231 173 / .1);
-  background: linear-gradient(155deg, #3d3020, #211c16 68%, #171510);
-  color: var(--color-ink);
-}
-.mdx-rail { border-right: 3px solid #d7a72d; box-shadow: 3px 0 0 rgb(255 248 202 / .8); }
-.mdx-mhead { border-bottom: 2px solid #d7a72d; }
-.mdx-mobile-tabs { border-top: 3px solid #d7a72d; box-shadow: 0 -5px 18px -12px rgb(58 39 13 / .3); }
-.mdx-rail .mdx-link { color: var(--color-ink); }
-.mdx-display, .mdx-h1 { color: #503616; }
-.cdx-app .cdx-eyebrow::before { content: ""; display: inline-block; width: 5px; height: 8px; background: #c6323b; margin-right: 7px; transform: skewX(-15deg); }
-.mdx-rail-pill {
-  background: linear-gradient(100deg, rgb(255 222 74 / .17), rgb(255 239 161 / .05));
-  box-shadow: inset 0 0 0 1px rgb(255 228 118 / .55);
-}
-.mdx-tab[data-active="true"] { color: #ffe36a; text-shadow: none; }
-.mdx-tab__tile::before, .mdx-mtab__icon::before { box-shadow: inset 0 0 0 1px #fff0a1, 0 2px 5px rgb(41 27 11 / .2); }
-.mdx-tab__foil > i { background: conic-gradient(from 30deg, #ffec87, #e9ad26, #fff6bc, #ffce35, #ffec87); }
-.mdx-tabs__thumb, .mdx-tabs:not([data-measured]) .mdx-tabs__tab[aria-pressed="true"] {
-  box-shadow: 0 0 0 1px #bca16b, 0 2px 4px rgb(99 65 17 / .08);
-}
-[data-testid="local-demo-note"] {
-  background: #ffe575;
-  color: #57421d;
-  border-color: #d4a837;
-}
-[data-testid="local-demo-note"] .text-ink { color: #30271d; }
-.mdx-phone-tilt { background: #eee4cf; border-bottom: 1px solid #cdbd98; }
-.mdx-ticker, .mdx-ticker[data-empty] {
-  background: linear-gradient(90deg, #fff0aa, #fff9e8 22%, #fff9e8 78%, #eee1bf);
-  border-bottom: 1px solid #cdbd98;
-  box-shadow: none;
-}
-.mdx-ticker[data-activity="past"] { box-shadow: none; }
-.mdx-ticker__item[data-tone="hype"] { --tone: var(--color-hype); }
-.mdx-ticker__tag { text-shadow: none; }
+  /* ---- durations (state feedback only: Operate screens have no entrances) */
+  --t-press: 140ms; /* press scale(0.96) */
+  --t-hover: 120ms; /* colour, background and border on hover (pointer: fine) */
+  --t-fast: 160ms; /* tab label colour, switch, popover close */
+  --t-base: 220ms; /* menu and popover open, toast in */
+  --t-slow: 300ms; /* dialog open (close 200ms) */
+  --t-progress: 700ms;
+  --t-sheen: 900ms;
+  --t-wash: 1600ms;
+  --t-shimmer: 1600ms;
+  --stagger: 40ms;
 
-/* Collector paper: static engraving and fine fibre, with two restrained existing light layers. */
-.mdx-sky {
-  background:
-    radial-gradient(ellipse at 71% 8%, rgb(255 250 219 / .88), transparent 57%),
-    radial-gradient(ellipse at 8% 88%, rgb(225 181 65 / .23), transparent 60%),
-    linear-gradient(118deg, #f9f1d6, #f3e5b7 55%, #fbf4dc);
+  /* ---- elevation: nothing at rest has a shadow; only what floats does */
+  --shadow-border: 0 0 0 1px rgb(255 255 255 / 0.08); /* the one white ring a floating surface wears on dark */
+  --shadow-pop: 0 0 0 1px rgb(255 255 255 / 0.08), 0 12px 32px -12px rgb(0 0 0 / 0.72); /* menus, popovers, toasts */
+  --shadow-modal: 0 0 0 1px rgb(255 255 255 / 0.08), 0 24px 80px -20px rgb(0 0 0 / 0.8); /* dialogs, sheets */
+  /* Retired resting shadows and glows: kept as names so old call sites render flat. */
+  --shadow-ring: none;
+  --shadow-rest: none;
+  --shadow-raise: none;
+  --shadow-lift: var(--shadow-pop);
+  --shadow-float: var(--shadow-pop);
+  --glow-neon: none;
+  --glow-neon-hi: none;
+  --glow-zap: none;
+  --glow-focus: none;
+  --card-shadow: rgb(0 0 0 / 0.55); /* the card's own contact shadow (card3d.css) */
+  --overlay: rgb(5 4 3 / 0.72); /* dialog backdrop, no blur */
+  --image-outline: rgb(255 255 255 / 0.1); /* MIFB image outline on thumbnails, dark */
+  /* The chrome foil retired: a flat fill wherever an old rule still paints --holo. */
+  --holo: linear-gradient(var(--color-ink), var(--color-ink));
+  --holo-flat: var(--color-ink);
+  --sheen: linear-gradient(transparent, transparent);
+
+  /* ---- layout and density (.taste-skill/density/rules.md R3 and R6)
+   * The content column is min(100% - 2 x gutter, --column) at every width: main's padding and the top bar's inner
+   * row both use max(gutter, (100% - --sbw - --column) / 2), so they share one left and one right edge. */
+  --column: 1600px; /* the widest the column gets (was 1152px) */
+  --page-gutter: 16px; /* side padding of the page; 24px from 768px, 32px from 1280px */
+  --main-pad: var(--page-gutter);
+  --sbw: 0px; /* main's scrollbar width, measured by AppShell (0 with overlay scrollbars) */
+  --gap-page: 16px; /* page header to the body */
+  --gap-section: 16px; /* between sections and panels */
+  --gap-head: 8px; /* a section head to its list */
+  --gap-grid: 12px; /* between tiles in an auto-fill grid */
+  --pad-panel: 12px; /* panel padding on phones; 16px from 768px */
+  --row-h: 44px; /* a list or table row on touch; 40px under a fine pointer */
+  --pagehead-h: 56px; /* the page header row at desktop: title 24 + meta 14 + actions on one row */
+  --tile-min: 150px; /* the smallest tile track in an auto-fill grid on phones; 176px from 768px */
+  --tile-min-design: 150px; /* a design tile track (the card art stays legible at 150px) */
+  --actionbar-h: 64px; /* the phone sticky action bar (a 44px control + 2 x 10px) */
+  --topbar-h: 48px;
+  --tabbar-h: 58px;
+  --tabbar-side-h: 45px; /* the tab bar held sideways (a 44px row and its rule); 0 from 740px, where it steps aside */
+
+  /* ---- controls: visible size and the hit area every control reaches (::after) */
+  --hit: 44px; /* 40px under a fine pointer (dense desktop UI) */
+  --control-h: 44px; /* inputs, selects, search, chips, segmented tracks, menu items; 40px under a fine pointer */
+  --btn-h: 36px; /* md pill (the direction's 36px primary) */
+  --btn-h-sm: 32px;
+  --btn-h-lg: 44px; /* the launch commit */
+
+  /* ---- stacking */
+  --z-nav: 30; /* top bar, tab bar */
+  --z-progress: 40; /* route progress line */
+  --z-overlay: 50; /* backdrops, dialogs, sheets, popovers, menus */
+  --z-stage: 60; /* the 3D and Inspect viewers */
+  --z-toast: 70;
+  --z-skip: 80;
+
+  /* ---- the 3D viewer (styles/screens/viewer.css reads these) */
+  --v3d-ink: #f2f1ee;
+  --v3d-muted: #b8b0a3;
+  --v3d-accent: #f2f1ee;
+  --v3d-control: rgb(242 241 238 / 0.08);
+  --v3d-control-border: #756d62;
+  --v3d-control-hover: #f2f1ee;
+
+  /* Avatar stops: pale identity tints (a dark initial reads 10:1 or better on each). */
+  --avatar-1: #f3d27a;
+  --avatar-2: #e9b48f;
+  --avatar-3: #c9cf9a;
+  --avatar-4: #d8c3a0;
+  --avatar-5: #b9c6c9;
+
+  /* Legacy type names (sheets still read them). */
+  --type-min: 0.75rem;
+  --type-page-title: 24px;
+  --type-page-title-sm: 20px;
+  --type-display: 24px;
+
+  /* Legacy duration aliases. */
+  --dur-press: var(--t-press);
+  --dur-fast: var(--t-fast);
+  --dur-base: var(--t-base);
+  --dur-slow: var(--t-slow);
+  --dur-celebrate: 1100ms;
 }
-.mdx-sky__engraving {
-  inset: 0;
-  background: url('/assets/carddex/collector-engraving.svg') center center / cover no-repeat;
-  opacity: .8;
-}
-.mdx-sky::after {
-  background:
-    repeating-linear-gradient(18deg, rgb(118 87 40 / .027) 0 .6px, transparent .6px 5px),
-    repeating-linear-gradient(103deg, rgb(255 253 230 / .2) 0 .7px, transparent .7px 7px),
-    radial-gradient(1px 1px at 20% 30%, rgb(127 94 45 / .16) 40%, transparent 60%);
-  background-size: auto, auto, 11px 13px;
-  opacity: .58;
-}
-.mdx-sky__a--1 {
-  background: radial-gradient(42% 46% at 18% 14%, rgb(255 221 107 / .23), transparent 75%), radial-gradient(40% 44% at 86% 22%, rgb(171 63 39 / .065), transparent 75%);
-}
-.mdx-sky__a--2 {
-  background:
-    linear-gradient(118deg, transparent 36%, rgb(255 253 228 / .3) 43%, rgb(241 203 101 / .12) 48%, transparent 56%),
-    radial-gradient(closest-side, rgb(202 157 65 / .13), transparent 78%);
-}
-.mdx-sky__stars {
-  opacity: .24;
-  background-image: radial-gradient(1.2px 1.2px at 12% 18%, #9b742d 50%, transparent 52%), radial-gradient(1.2px 1.2px at 68% 42%, #b28a22 50%, transparent 52%), radial-gradient(1px 1px at 32% 76%, #ad8848 50%, transparent 52%);
-}
-.mdx-sky__floor { opacity: .55; }
-.mdx-sky__floor > i > b {
-  background-image: linear-gradient(135deg, transparent 49.3%, rgb(139 103 43 / .13) 49.7% 50.3%, transparent 50.7%), linear-gradient(45deg, transparent 49.3%, rgb(139 103 43 / .09) 49.7% 50.3%, transparent 50.7%);
-}
-:root:not([data-motion]) .mdx-sky__floor > i > b { animation-duration: 12s; }
-.mdx-sky__floor::after {
-  background: linear-gradient(to bottom, #f6edcd, transparent 58%), linear-gradient(to right, #f6edcd, transparent 24%, transparent 76%, #f6edcd);
-}
-@media (max-width: 1023px) {
-  .mdx-sky__engraving { background-size: auto 100%; background-position: 36% center; opacity: .64; }
-  .mdx-sky::after { opacity: .45; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .mdx-sky__a, .mdx-sky__floor > i > b { animation: none !important; }
-}
-.mdx-holo-ink {
-  background-image: linear-gradient(100deg, transparent 38%, rgb(255 243 159 / .9) 50%, transparent 62%), linear-gradient(100deg, #8b5915, #9b6617 45%, #503616);
-}
-.mdx-vitrine__beam { background: radial-gradient(ellipse 34% 90% at 50% 0%, rgb(255 216 66 / .22), transparent 70%); }
-.mdx-vitrine__dust i { background: radial-gradient(circle, #fff7ce, rgb(255 216 66 / .7) 40%, transparent 72%); }
-.mdx-tt__plinth { display: none; }
-.cdx-app .mdx-plinth, .cdx-app .rounded-panel.bg-plinth, .cdx-app .cdx-archive__vitrine {
-  border: 2px solid #a67d2c;
-  background: linear-gradient(155deg, #fffdf1, #fff8de);
-  box-shadow: inset 0 0 0 4px #ffdf68, inset 0 0 0 5px rgb(181 136 26 / .3), 0 7px 22px -14px rgb(104 70 24 / .2);
-}
-.cdx-app .cdx-archive__vitrine { padding: 24px 22px 20px; }
-.cdx-app .cdx-design-row {
-  border-color: #cfbc91;
-  background: #fffdf1;
-  box-shadow: inset 0 1px 0 #fff;
-}
-.cdx-app .cdx-design-row[aria-pressed="true"] {
-  background: #fff0a7;
-  border-color: #8c6221;
-  box-shadow: inset 0 0 0 1px #8c6221;
-}
-.cdx-app .cdx-filter button[aria-pressed="true"] { background: #8b5915; color: #fff9df; border-color: #8b5915; }
-.cdx-app .cdx-filter button[aria-pressed="true"] span { opacity: .9; }
-.cdx-app .cdx-hero-turntable__controls button { background: #fff8df; border-color: #baa373; color: #6c4b1c; }
-.cdx-app .cdx-stock-reference { background: #f4e6bc; border-color: #cdbd98; border-radius: 7px; padding-inline: 10px; }
-.mdx-input { background: #fffdf4; border-color: #9a8055; color: #30271d; }
-.mdx-rail .mdx-input { background: #40372a; color: #fff8df; border-color: #ab925e; }
-.mdx-btn--outline { border: 1px solid #ae8a45; box-shadow: 0 2px 0 #decca6; }
-.mdx-btn--buy, .mdx-btn--sell, .mdx-side > button[aria-pressed="true"] { color: #fffdf0; }
-.mdx-btn--buy { box-shadow: 0 2px 0 #074935; }
-.mdx-btn--sell { box-shadow: 0 2px 0 #8f1726; }
-.mdx-side::before, .mdx-side[data-side="sell"]::before { box-shadow: none; }
-.mdx-dialog, .mdx-menu, .mdx-pop { border: 2px solid #a67d2c; }
-@media (hover: hover) and (pointer: fine) {
-  .cdx-app .cdx-design-row:hover { background: #fff4c7; border-color: #a67d2c; }
-  .cdx-app .cdx-filter button:hover:not([aria-pressed="true"]) { background: #f0dfb4; }
-  .mdx-btn--buy:hover:not([aria-disabled="true"]) { box-shadow: 0 2px 0 #074935, 0 5px 15px -9px #12654e; }
-  .mdx-btn--sell:hover:not([aria-disabled="true"]) { box-shadow: 0 2px 0 #8f1726, 0 5px 15px -9px #bb2939; }
-}
-@media (min-width: 1024px) {
-  .cdx-app .cdx-coin-market, .cdx-app .cdx-coin-actions {
-    border: 2px solid #a67d2c;
-    background: linear-gradient(155deg, #fffdf1, #fff8de);
-    box-shadow: inset 0 0 0 4px #ffdf68, inset 0 0 0 5px rgb(181 136 26 / .3), 0 7px 22px -14px rgb(104 70 24 / .2);
-  }
-  .cdx-app .mdx-coin [data-pane].rounded-panel.bg-plinth {
-    border: 0;
-    background: transparent;
-    box-shadow: none;
+@media (min-width: 768px) {
+  :root {
+    --page-gutter: 24px;
+    --pad-panel: 16px;
+    --tile-min: 176px;
   }
 }
-@media (max-width: 580px) {
-  .cdx-app .cdx-archive__vitrine { padding: 26px 18px 22px; }
+@media (min-width: 1280px) {
+  :root {
+    --page-gutter: 32px;
+  }
 }
-@media (forced-colors: active) {
-  .mdx-rail, .mdx-mhead, .mdx-mobile-tabs, .mdx-sky { background: Canvas; }
-  .cdx-app .rounded-panel.bg-plinth, .cdx-app .cdx-archive__vitrine, .cdx-app .cdx-create-preview, .cdx-app .cdx-design-row { box-shadow: none; }
+@media (pointer: fine) {
+  :root {
+    --hit: 40px;
+    --control-h: 40px;
+    --row-h: 40px;
+  }
+}
+/* Phones held sideways: the action bar is a 44px control with 4px above and below; 740px and wider, the five links
+ * move into the top bar and the tab bar steps aside (shell.css). */
+@media (max-width: 1023.98px) and (max-height: 500px) {
+  :root {
+    --actionbar-h: 52px;
+  }
+}
+@media (min-width: 740px) and (max-width: 1023.98px) and (max-height: 500px) {
+  :root {
+    --tabbar-h: 0px;
+    --tabbar-side-h: 0px;
+  }
+}
+
+/* The flat ground everywhere: no gradients, no glows, no paper. */
+@layer base {
+  html,
+  body {
+    background: var(--color-ground);
+    color: var(--color-ink);
+  }
+  html {
+    scrollbar-color: var(--color-hairline) var(--color-ground);
+  }
+  ::selection {
+    background: var(--color-ink);
+    color: var(--color-on-cta);
+  }
+  input,
+  textarea {
+    caret-color: var(--color-ink);
+  }
 }

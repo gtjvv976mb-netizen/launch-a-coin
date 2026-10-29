@@ -46,7 +46,6 @@ import {
   Button,
   ButtonLink,
   Change,
-  EmptyState,
   Ledge,
   Num,
   Skeleton,
@@ -55,6 +54,7 @@ import {
   prefersReducedMotion,
   useSize,
 } from "../../mintdex/ui";
+import { EmptyState } from "../../mintdex/empty-state";
 import { CardExplorerLinks, ChainCardPanel, DisclosureChevron } from "./ChainCardPanel";
 import { ChainTradePanel } from "./ChainTradePanel";
 import { useViewer } from "./tx";

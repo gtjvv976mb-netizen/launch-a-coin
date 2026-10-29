@@ -33,16 +33,36 @@ describe("quote-native simulation units", () => {
     }
   });
 
-  test("custom stock/meme quotes never acquire an invented SOL or USD conversion", () => {
+  test("custom stock, meme and collector quotes never acquire an invented SOL or USD conversion", () => {
     for (const asset of PAIR_ASSETS) {
       const metrics = quoteMetrics(initialQuoteReserves(asset.key), asset.key);
       expect(metrics.mcapQuote).toBeGreaterThan(0);
-      if (asset.kind === "stock" || asset.kind === "meme") {
+      if (asset.kind === "stock" || asset.kind === "meme" || asset.kind === "collector") {
         expect(metrics.mcapUsd).toBeNull();
         expect(metrics.priceSol).toBeNull();
         expect(metrics.valuationMode).toBe("quote-native");
         expect(quoteAtomsToSol(quoteUnit(asset.key), asset.key)).toBeNull();
       } else expect(metrics.valuationMode).toBe("demo-reference");
+    }
+  });
+  test("collector atom precision stays exact without an invented SOL conversion", () => {
+    for (const key of ["cards","sv151"]) {
+      expect(parseQuoteAmount("123.000001",key)).toBe(123_000_001);
+      expect(parseQuoteAmount("0.0000001",key)).toBeNull();
+      expect(formatQuoteAmount(1,key)).toBe("0.000001");
+      expect(quoteAtomsToSol(1_000_000,key)).toBeNull();
+    }
+  });
+  test("new meme balances use their actual quote units rather than SOL lamports", () => {
+    for (const [key, decimals] of [["pengu", 6], ["giga", 5], ["spx", 8], ["trump", 6], ["useless", 6], ["chillguy", 6]] as const) {
+      const unit = 10 ** decimals;
+      const amount = `123.${"0".repeat(decimals - 1)}1`;
+      expect(quoteUnit(key)).toBe(unit);
+      expect(parseQuoteAmount(amount, key)).toBe(123 * unit + 1);
+      expect(formatQuoteAmount(1, key)).toBe(`0.${"0".repeat(decimals - 1)}1`);
+      expect(parseQuoteAmount(`0.${"0".repeat(decimals)}1`, key)).toBeNull();
+      expect(quoteAtomsToSol(123 * unit + 1, key)).toBeNull();
+      expect(quoteMetrics(initialQuoteReserves(key), key)).toMatchObject({mcapUsd: null, priceSol: null, valuationMode: "quote-native"});
     }
   });
 });

@@ -1,47 +1,72 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, type CSSProperties } from "react";
-import { PageControls, usePageCapacity } from "../components/carddex/Viewport";
-import { z } from "zod";
-import { MintCard } from "../components/mintdex/MintCard";
-import { View3DHost } from "../components/mintdex/card3d";
-import { PageFrame, Change } from "../components/mintdex/ui";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { num, oneOf, searchSchema, text } from "../lib/mintdex/search";
+import { CoinTile } from "../components/carddex/GalleryTile";
+import {
+  AutoGrid,
+  Button,
+  ButtonLink,
+  IconButton,
+  Icon,
+  PageFrame,
+  PageHeader,
+  SortMenu,
+  TextLink,
+} from "../components/mintdex/ui";
+import { EmptyState } from "../components/mintdex/empty-state";
+import { SimTag } from "../components/mintdex/trust";
 import { listCoins } from "../lib/mintdex/api";
-import { getCardDesign } from "../lib/carddex/designs";
-import { marketCapText } from "../lib/carddex/quote-display";
 import { pageHead } from "../lib/mintdex/seo";
-import "../carddex.css";
 
 export const Route = createFileRoute("/discover")({
-  validateSearch: z.object({
-    q: z.string().max(40).optional().catch(undefined),
-    sort: z.enum(["trending", "mcap", "new", "next"]).optional().catch(undefined),
-    focus: z.number().optional().catch(undefined),
-    tier: z.number().optional().catch(undefined),
-    page: z.number().optional().catch(undefined),
+  validateSearch: searchSchema({
+    q: text(40),
+    sort: oneOf(["trending", "mcap", "new", "next"]),
+    focus: num(),
+    tier: num(),
+    page: num(),
   }),
   loader: () => listCoins({ data: {} }),
   shouldReload: ({ cause }) => cause !== "stay",
   head: () =>
     pageHead({
       path: "/discover",
-      title: "Discover tokens | Launch a Card",
+      title: "Discover | Launch a Card",
       description:
-        "Explore tokens and their creator-selected NFT trading cards. Local demo with simulated pump.fun trading.",
+        "Explore coins and their creator-selected NFT trading cards. A demo with simulated pump.fun trading.",
     }),
+  pendingComponent: DiscoverPending,
   component: Discover,
 });
+
+const SORTS = [
+  { value: "trending", label: "Trending" },
+  { value: "mcap", label: "Market cap" },
+  { value: "new", label: "Newest" },
+] as const;
+type Sort = (typeof SORTS)[number]["value"];
+
+/** Every coin up to 48 is laid out on the page (density R4); a longer list shows its first 48 and one "Show all N
+ * coins" that expands in place (the page param stays in the URL: any value above 1 means expanded). */
+const INLINE = 48;
+
+const clock = (t: number) =>
+  new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
 function Discover() {
   const initial = Route.useLoaderData(),
     search = Route.useSearch();
   const navigate = useNavigate({ from: "/discover" });
   const query = search.q ?? "";
-  const setQuery = (value: string) => void navigate({
-    search: (previous) => ({ ...previous, q: value || undefined, page: undefined }),
-    replace: true,
-    resetScroll: false,
-  });
-  const { data } = useQuery({
+  const sort: Sort = search.sort === "mcap" || search.sort === "new" ? search.sort : "trending";
+  const setQuery = (value: string) =>
+    void navigate({
+      search: (previous) => ({ ...previous, q: value || undefined, page: undefined }),
+      replace: true,
+      resetScroll: false,
+    });
+  const { data, isError, isFetching, dataUpdatedAt, refetch } = useQuery({
     queryKey: ["coins", {}],
     queryFn: () => listCoins({ data: {} }),
     initialData: initial,
@@ -51,102 +76,251 @@ function Discover() {
   const coins = useMemo(
     () =>
       data
-        .filter((c) => `${c.name} ${c.ticker}`.toLowerCase().includes(query.toLowerCase()))
+        .filter((c) => `${c.name} ${c.ticker}`.toLowerCase().includes(query.trim().toLowerCase()))
         .sort((a, b) =>
-          search.sort === "new"
+          sort === "new"
             ? b.createdAt - a.createdAt
-            : search.sort === "mcap"
+            : sort === "mcap"
               ? (b.mcapUsd ?? -1) - (a.mcapUsd ?? -1)
               : (b.volume24h ?? -1) - (a.volume24h ?? -1),
         ),
-    [data, query, search.sort],
+    [data, query, sort],
   );
-  const grid = usePageCapacity({ rowHeight:300, minWidth:190, maxColumns:4, maxRows:2 });
-  const pages = Math.max(1, Math.ceil(coins.length / grid.count));
-  const page = Math.min(Math.max(0, (search.page ?? 1) - 1), pages - 1);
-  const visible = coins.slice(page * grid.count, (page + 1) * grid.count);
-  const items = coins.map((c) => ({ id: c.id, card: c }));
+  const gridRef = useRef<HTMLUListElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const expanded = (search.page ?? 1) > 1;
+  const visible = expanded ? coins : coins.slice(0, INLINE);
+  // "Show all" moves focus to the first coin it added, so keyboard users carry on from there.
+  const focusFrom = useRef<number | null>(null);
+  useEffect(() => {
+    const from = focusFrom.current;
+    if (from == null || visible.length <= from) return;
+    focusFrom.current = null;
+    gridRef.current?.children[from]?.querySelector<HTMLElement>(".cdx-token-cell__link")?.focus();
+  }, [visible.length]);
+  const items = useMemo(() => coins.map((c) => ({ id: c.id, card: c })), [coins]);
+  const sortLabel = SORTS.find((s) => s.value === sort)!.label.toLowerCase();
+  const count = (
+    <>
+      <span className="tabular-nums">{coins.length}</span> {coins.length === 1 ? "coin" : "coins"}
+    </>
+  );
+  // The count is announced once typing pauses (500ms), not on every keystroke: a quiet status of its own, with the
+  // visible words. Nothing is said on arrival.
+  const matchText = query.trim() ? `${coins.length} ${coins.length === 1 ? "coin matches" : "coins match"} “${query.trim()}”` : `${coins.length} ${coins.length === 1 ? "coin" : "coins"}`;
+  const [said, setSaid] = useState("");
+  const typed = useRef(false);
+  useEffect(() => {
+    if (!typed.current) { typed.current = true; return; }
+    const timer = setTimeout(() => setSaid(matchText), 500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
+  const clearSearch = () => {
+    // The field stays mounted; carry focus back to it so typing can start again.
+    setQuery("");
+    searchRef.current?.focus();
+  };
   return (
     <PageFrame className="cdx-discover">
-      <header className="cdx-archive__head">
-        <div>
-          <h1 className="mdx-h1">The collection.</h1>
-        </div>
-        <Link to="/launch" className="mdx-link min-h-11 inline-flex items-center">
-          Create a card
-        </Link>
-      </header>
-      <div className="cdx-discover__tools">
-        <label className="sr-only" htmlFor="token-search">
-          Search tokens
-        </label>
-        <input
-          id="token-search"
-          className="mdx-input"
-          type="search"
-          value={query}
-          maxLength={40}
-          placeholder="Search a token or ticker…"
-          onChange={(e) => setQuery(e.target.value)}
-          autoFocus={search.focus === 1}
-        />
-        <label className="sr-only" htmlFor="token-sort">
-          Sort tokens
-        </label>
-        <select
-          id="token-sort"
-          className="mdx-input"
-          value={search.sort === "next" ? "trending" : (search.sort ?? "trending")}
-          onChange={(e) =>
-            void navigate({
-              search: {
-                q: query || undefined,
-                sort: e.target.value as "trending" | "mcap" | "new",
-              },
-              replace: true,
-            })
-          }
-        >
-          <option value="trending">Trending</option>
-          <option value="mcap">Market cap</option>
-          <option value="new">Newest</option>
-        </select>
+      {/* One header row from 1024px: the title and its one line (count, sort, the page's Simulated label), then
+          search, sort and the primary. Only the count phrase ellipsizes, so a long query never hides Simulated. */}
+      <PageHeader
+        title="Discover"
+        context={
+          <>
+            <span className="cdx-discover__ctx">
+              <span>
+                {count}
+                {query.trim()
+                  ? ` ${coins.length === 1 ? "matches" : "match"} “${query.trim()}”`
+                  : null}
+              </span>{" "}
+              · sorted by {sortLabel}
+            </span>{" "}
+            <SimTag className="cdx-discover__sim" />
+            <span className="sr-only" role="status">{said}</span>
+          </>
+        }
+        toolbar={
+          <>
+            <div className="cdx-discover__search">
+              <label className="sr-only" htmlFor="token-search">
+                Search coins
+              </label>
+              <Icon name="search" className="cdx-discover__search-glyph" />
+              <input
+                ref={searchRef}
+                id="token-search"
+                className="mdx-input"
+                type="search"
+                value={query}
+                maxLength={40}
+                placeholder="Search coins"
+                enterKeyHint="search"
+                autoComplete="off"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape" && query) {
+                    e.preventDefault();
+                    setQuery("");
+                  }
+                }}
+                autoFocus={search.focus === 1}
+              />
+              {query ? (
+                <IconButton
+                  icon="close"
+                  label="Clear search"
+                  size="sm"
+                  className="cdx-discover__clear"
+                  onClick={clearSearch}
+                />
+              ) : null}
+            </div>
+            <SortMenu
+              value={sort}
+              options={[...SORTS]}
+              label="Sort"
+              labelClassName="max-md:sr-only"
+              onChange={(value) =>
+                void navigate({
+                  search: (previous) => ({
+                    ...previous,
+                    sort: value === "trending" ? undefined : value,
+                    page: undefined,
+                  }),
+                  replace: true,
+                  resetScroll: false,
+                })
+              }
+            />
+          </>
+        }
+        right={
+          <ButtonLink to="/launch" className="cdx-discover__launch">
+            Launch a coin
+          </ButtonLink>
+        }
+      />
+      <div className="cdx-discover__body">
+        {isError && !isFetching ? (
+          <p className="cdx-discover__stale" role="status">
+            <Icon name="warning" className="cdx-discover__stale-glyph" />
+            <span>
+              Couldn't refresh the coin list. Showing figures from{" "}
+              <span className="tabular-nums">{clock(dataUpdatedAt)}</span>.
+            </span>{" "}
+            <TextLink onClick={() => void refetch()}>Try again</TextLink>
+          </p>
+        ) : null}
+        {coins.length > 0 ? (
+          <AutoGrid ref={gridRef} min="var(--coin-min)" className="cdx-token-grid">
+            {visible.map((c, i) => (
+              <li key={c.id} className="cdx-token-item">
+                {/* The first four (two rows on a phone, the start of the first row above) load at once and at high
+                    priority; the rest when they near the screen, so a phone's first screen gets the bandwidth. The sizes
+                    match the laid-out card (under half the screen on phones, a quarter on tablets, 150-200px above). */}
+                <CoinTile
+                  coin={c}
+                  list={items}
+                  priority={i < 4}
+                  sizes="(max-width: 767px) 46vw, (max-width: 1023px) 25vw, 200px"
+                />
+              </li>
+            ))}
+          </AutoGrid>
+        ) : query.trim() ? (
+          <EmptyState
+            compact
+            title={`No coins match “${query.trim()}”`}
+            action={
+              <Button variant="outline" size="sm" onClick={clearSearch}>
+                Clear search
+              </Button>
+            }
+          />
+        ) : (
+          <EmptyState
+            title="No coins yet"
+            body="Every coin launched here shows up with its card. Launch the first one."
+            action={<TextLink to="/levels">Browse card designs</TextLink>}
+          />
+        )}
+        {!expanded && coins.length > INLINE ? (
+          <div className="cdx-discover__more">
+            <span className="cdx-discover__shown">
+              Showing <span className="tabular-nums">{INLINE}</span> of{" "}
+              <span className="tabular-nums">{coins.length}</span>
+            </span>
+            <Button
+              variant="outline"
+              onClick={() => {
+                focusFrom.current = INLINE;
+                void navigate({
+                  search: (s) => ({ ...s, page: 2 }),
+                  replace: true,
+                  resetScroll: false,
+                });
+              }}
+            >
+              {/* One text run: the button's flex gap would otherwise space out the count. */}
+              <span className="tabular-nums">{`Show all ${coins.length} coins`}</span>
+            </Button>
+          </div>
+        ) : null}
       </div>
-      <div ref={grid.ref} className="cdx-token-grid" style={{"--page-columns":grid.columns,"--page-rows":grid.rows} as CSSProperties}>
-        {visible.map((c) => (
-          <article key={c.id} className="cdx-token-cell">
-            <View3DHost item={{ id: c.id, card: c }} list={items}>
-              <Link
-                to="/coin/$id"
-                params={{ id: c.id }}
-                aria-label={`Open ${c.name}, $${c.ticker}, ${getCardDesign(c.cardTemplate).name} design`}
-              >
-                <MintCard card={c} depth="table" idle="turntable" />
-              </Link>
-            </View3DHost>
-            <Link to="/coin/$id" params={{ id: c.id }} className="cdx-token-cell__caption">
-              <div>
-                <strong>{c.name}</strong>
-                <span>${c.ticker}</span>
-              </div>
-              <div>
-                <span>{marketCapText(c)}</span>
-                <Change v={c.change24h} />
-              </div>
-            </Link>
-          </article>
-        ))}
-      </div>
-      <PageControls page={page} pages={pages} onPage={next=>void navigate({search:s=>({...s,page:next ? next+1 : undefined}),replace:true,resetScroll:false})} label={`${coins.length} tokens`} />
-      {coins.length === 0 && (
-        <div className="cdx-empty" role="status">
-          No tokens found. Try another search, or{" "}
-          <Link to="/launch" className="mdx-link">
-            launch the first one
-          </Link>
-          .
+    </PageFrame>
+  );
+}
+
+/**
+ * While the coin list loads (a client-side visit slower than the router's pending delay): the final layout with each
+ * value as a flat bar at its real size, no shimmer, so nothing moves when the coins land.
+ */
+function DiscoverPending() {
+  return (
+    <PageFrame className="cdx-discover">
+      <PageHeader
+        title="Discover"
+        context={<span className="cdx-skel cdx-skel--context" />}
+        toolbar={
+          <>
+            <span aria-hidden className="cdx-discover__search cdx-skel cdx-skel--field" />
+            <span aria-hidden className="cdx-skel cdx-skel--select" />
+          </>
+        }
+        right={
+          <ButtonLink to="/launch" className="cdx-discover__launch">
+            Launch a coin
+          </ButtonLink>
+        }
+      />
+      <div className="cdx-discover__body">
+        <p className="sr-only" role="status">
+          Loading coins
+        </p>
+        {/* 14 tiles: the two rows above the fold at 1440 (7 columns). */}
+        <div aria-hidden>
+          <AutoGrid min="var(--coin-min)" className="cdx-token-grid">
+            {Array.from({ length: 14 }, (_, i) => (
+              <li key={i} className="cdx-token-item">
+                <div className="cdx-token-cell cdx-token-cell--skel">
+                  <span className="cdx-skel cdx-skel--card" />
+                  <span className="cdx-token-cell__caption">
+                    <span className="cdx-skel cdx-skel--name" />
+                    <span className="cdx-skel cdx-skel--ticker" />
+                    <span className="cdx-skel cdx-skel--track" />
+                  </span>
+                </div>
+              </li>
+            ))}
+          </AutoGrid>
         </div>
-      )}
+      </div>
     </PageFrame>
   );
 }

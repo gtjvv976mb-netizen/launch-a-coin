@@ -1,10 +1,22 @@
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState, type CSSProperties } from "react";
-import { z } from "zod";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { searchSchema, text } from "../lib/mintdex/search";
 import { HeroTurntable } from "../components/carddex/HeroTurntable";
-import { MintCard, type CardData } from "../components/mintdex/MintCard";
-import { PageControls, usePageCapacity } from "../components/carddex/Viewport";
-import { PageFrame } from "../components/mintdex/ui";
+import { useViewIn3D } from "../components/carddex/CardControls";
+import { type CardData } from "../components/mintdex/MintCard";
+import {
+  ActionBar,
+  AutoGrid,
+  Button,
+  ButtonLink,
+  Chip,
+  IconButton,
+  Icon,
+  PageFrame,
+  PageHeader,
+} from "../components/mintdex/ui";
+import { EmptyState } from "../components/mintdex/empty-state";
+import { DesignTile } from "../components/carddex/GalleryTile";
 import {
   CARD_DESIGNS,
   DEFAULT_CARD_DESIGN,
@@ -13,62 +25,191 @@ import {
   type CardDesign,
 } from "../lib/carddex/designs";
 import { pageHead } from "../lib/mintdex/seo";
-import { allowedQuotesForDesign, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, isPairAssetKey } from "../lib/carddex/pairs";
+import {
+  PAIR_ASSETS,
+  allowedQuotesForDesign,
+  boundQuoteForDesign,
+  defaultQuoteForDesign,
+  getPairAsset,
+  isPairAssetKey,
+  preferredDesignForQuote,
+  recommendedMemeQuoteForDesign,
+} from "../lib/carddex/pairs";
+import { MEME_PAIR_PRESETS } from "../lib/carddex/design-pairings";
+import { DESIGN_GROUPS, inDesignGroup } from "../components/carddex/design-groups";
 import { initialQuoteReserves, quoteMetrics } from "../lib/carddex/quote-simulation";
-import { PairBadge, QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
-import "../carddex.css";
+import { QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
+
+/** The selected design on its turntable, with the stage's three controls (Turn over, Pause, View in 3D). */
+function DesignStage({ card }: { card: CardData }) {
+  const view3d = useViewIn3D(card);
+  return (
+    <>
+      {/* Upright phones stack the preview at 260px (browse.css --preview-cw); wider, HeroTurntable's own sizes. */}
+      <HeroTurntable card={card} viewportFit controls={view3d.control} sizes="(max-width: 559px) 260px, (max-width: 767px) 40vw, (max-width: 1279px) 260px, 400px" />
+      {view3d.viewer}
+    </>
+  );
+}
 
 export const Route = createFileRoute("/levels")({
-  validateSearch: z.object({
-    design: z.string().optional().catch(undefined),
-    quote: z.string().optional().catch(undefined),
-    collection: z.string().optional().catch(undefined),
-    icon: z.string().optional().catch(undefined),
-    edition: z.string().optional().catch(undefined),
-    view3d: z.string().optional().catch(undefined),
+  validateSearch: searchSchema({
+    design: text(),
+    quote: text(),
+    collection: text(),
+    icon: text(),
+    edition: text(),
+    view3d: text(),
   }),
   head: () =>
     pageHead({
       path: "/levels",
-      title: "The design archive | Launch a Card",
+      title: "Card designs | Launch a Card",
       description: `${CARD_DESIGNS.length} premium card designs. Pick the permanent design for your own token, from trading-card classics to limited-edition foil artwork.`,
     }),
   component: Designs,
 });
-const GROUPS = [
-  { key: "all", name: "All" },
-  { key: "classic", name: "Classics" },
-  { key: "premium", name: "Premium" },
-  { key: "stocks", name: "Stock pairs" },
-  { key: "memes", name: "Meme pairs" },
-  { key: "limited", name: "Limited" },
-] as const;
+// The collections and their membership are shared with Launch's All designs dialog (design-groups.ts).
+const GROUPS = DESIGN_GROUPS;
+
+const matchesCategory = inDesignGroup;
+const memePairKeys = new Set<string>(MEME_PAIR_PRESETS.map((preset) => preset.quote));
+const memePairAssets = PAIR_ASSETS.filter((asset) => memePairKeys.has(asset.key));
+const matchesMemePair = (design: CardDesign, quoteKey: string) =>
+  MEME_PAIR_PRESETS.some((preset) => preset.design === design.key && preset.quote === quoteKey);
+/** What a search reads for each design: its name and description, and the tickers and names of the pairs it wears. */
+const searchText = (d: CardDesign) =>
+  `${d.name} ${d.description} ${boundQuoteForDesign(d.key)?.symbol ?? ""} ${boundQuoteForDesign(d.key)?.name ?? ""} ${MEME_PAIR_PRESETS.filter(
+    (preset) => preset.design === d.key,
+  )
+    .map((preset) => {
+      const asset = getPairAsset(preset.quote);
+      return `${asset.symbol} ${asset.name}`;
+    })
+    .join(" ")}`.toLowerCase();
 
 function Designs() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/levels" });
   const key = search.design ?? search.icon ?? search.edition;
-  const design = getCardDesign(isCardDesignKey(key) ? key : DEFAULT_CARD_DESIGN);
   const collection = search.collection === "icons" ? "limited" : search.collection;
-  const category = GROUPS.some(group => group.key === collection) ? collection! : "all";
-  const setCategory = (collection: string) => { setPageIndex(0); void navigate({search: {...search, collection: collection === "all" ? undefined : collection}, replace: true, resetScroll: false}); };
+  const category = GROUPS.some((group) => group.key === collection) ? collection! : "all";
+  const selected = isCardDesignKey(key) ? getCardDesign(key) : null;
+  const preferred = isPairAssetKey(search.quote) ? preferredDesignForQuote(search.quote) : null;
+  const family = category === "stocks" ? "stock" : category === "memes" ? "meme" : null;
+  const fallback = family
+    ? (CARD_DESIGNS.find((d) => d.key === preferred && matchesCategory(d, category)) ??
+      CARD_DESIGNS.find((d) => matchesCategory(d, category)))
+    : null;
+  const design = selected ?? fallback ?? getCardDesign(DEFAULT_CARD_DESIGN);
+  const setCategory = (collection: string) => {
+    setMemePairFilter("all");
+    const paired = collection === "stocks" || collection === "memes";
+    const next = paired
+      ? matchesCategory(design, collection)
+        ? design
+        : (CARD_DESIGNS.find((d) => d.key === preferred && matchesCategory(d, collection)) ??
+          CARD_DESIGNS.find((d) => matchesCategory(d, collection)))
+      : null;
+    const nextQuote = next
+      ? (boundQuoteForDesign(next.key) ??
+        (collection === "memes" ? recommendedMemeQuoteForDesign(next.key, quote.key) : null) ??
+        defaultQuoteForDesign(next.key))
+      : null;
+    void navigate({
+      search: {
+        ...search,
+        collection: collection === "all" ? undefined : collection,
+        ...(next && nextQuote ? { design: next.key, quote: nextQuote.key } : {}),
+      },
+      replace: true,
+      resetScroll: false,
+    });
+  };
   const [query, setQuery] = useState("");
-  const [view, setView] = useState("preview");
-  const [libraryTab, setLibraryTab] = useState("designs");
-  const [pageIndex, setPageIndex] = useState(0);
-  const grid = usePageCapacity({rowHeight:185,minWidth:120,maxColumns:3,maxRows:3});
+  const [memePairFilter, setMemePairFilter] = useState("all");
+  const searchRef = useRef<HTMLInputElement>(null);
+  // A pair change that needs a compatible design waits for its confirmation (QuoteAssetPicker): the library and the
+  // collection filter lock, and the primary reads "Confirm pair first" and takes focus to the confirmation.
+  const [pairPending, setPairPending] = useState(false);
+  const confirmRef = useRef<HTMLDivElement>(null);
+  const focusConfirm = () => confirmRef.current?.focus();
+  useEffect(() => {
+    if (!pairPending) return;
+    // A safety net only: the confirmation sits in the preview column, which keeps it on screen (see vitrineRef); this
+    // does nothing when it is visible, and focus never moves on its own. Two frames: the column's new height reaches
+    // CSS in the first (ResizeObserver runs after that frame's callbacks), so the check sees the re-anchored column.
+    let raf = requestAnimationFrame(() => {
+      raf = requestAnimationFrame(() => confirmRef.current?.scrollIntoView({ block: "nearest" }));
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [pairPending]);
+  // The preview column sticks beside the library from 1024px. Its height goes to CSS (--vitrine-h), so a column that
+  // grows past the screen (asset details, matching designs, a waiting pair change) sticks by its bottom edge instead
+  // of its top: what just opened stays in view, and the whole column is reachable by scrolling the page.
+  const vitrineRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = vitrineRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() =>
+      el.style.setProperty("--vitrine-h", `${el.offsetHeight}px`),
+    );
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const requestedQuote = isPairAssetKey(search.quote) ? getPairAsset(search.quote) : null;
-  const quote = boundQuoteForDesign(design.key) ?? (requestedQuote && allowedQuotesForDesign(design.key).some(a=>a.key===requestedQuote.key) ? requestedQuote : defaultQuoteForDesign(design.key));
+  const quote =
+    boundQuoteForDesign(design.key) ??
+    (requestedQuote && allowedQuotesForDesign(design.key).some((a) => a.key === requestedQuote.key)
+      ? requestedQuote
+      : ((category === "memes" ? recommendedMemeQuoteForDesign(design.key) : null) ??
+        defaultQuoteForDesign(design.key)));
   const sampleMetrics = quoteMetrics(initialQuoteReserves(quote.key), quote.key);
-  const matchesCategory = (d: CardDesign, group: string) => group === "all" || (group === "stocks" ? boundQuoteForDesign(d.key)?.kind === "stock" : group === "memes" ? boundQuoteForDesign(d.key)?.kind === "meme" : d.category === group);
+  const normalizedQuery = query.trim().toLowerCase();
+  // Searching an exact asset must preview and apply that identity, including shared finishes.
+  const queryPair =
+    category === "memes"
+      ? memePairAssets.find((asset) =>
+          [asset.key, asset.symbol, asset.name].some(
+            (value) => value.toLowerCase() === normalizedQuery,
+          ),
+        )
+      : null;
+  const filterPair =
+    category === "memes"
+      ? (memePairAssets.find((asset) => asset.key === memePairFilter) ?? queryPair)
+      : null;
+  const choiceQuote = (d: CardDesign) =>
+    boundQuoteForDesign(d.key) ??
+    (category === "memes"
+      ? recommendedMemeQuoteForDesign(
+          d.key,
+          filterPair?.key ?? (d.key === design.key ? quote.key : undefined),
+        )
+      : null) ??
+    quote;
   const shown = useMemo(
     () =>
       CARD_DESIGNS.filter(
         (d) =>
           matchesCategory(d, category) &&
-          `${d.name} ${d.description} ${boundQuoteForDesign(d.key)?.symbol ?? ""} ${boundQuoteForDesign(d.key)?.name ?? ""}`.toLowerCase().includes(query.toLowerCase()),
+          (!filterPair || matchesMemePair(d, filterPair.key)) &&
+          searchText(d).includes(normalizedQuery),
       ),
-    [category, query],
+    [category, normalizedQuery, filterPair?.key],
+  );
+  // Chip counts follow the search, so "Classics 2" means two classics match what is typed.
+  const groupCounts = useMemo(
+    () =>
+      Object.fromEntries(
+        GROUPS.map((g) => [
+          g.key,
+          CARD_DESIGNS.filter(
+            (d) => matchesCategory(d, g.key) && searchText(d).includes(normalizedQuery),
+          ).length,
+        ]),
+      ),
+    [normalizedQuery],
   );
   const card: CardData = {
     cardTemplate: design.key,
@@ -86,133 +227,264 @@ function Designs() {
     lore: "A small creature with a very big world to discover.",
     ownerHandle: "you",
   };
+  // A pick keeps you in the library (comparing designs is pick, look, pick again); the header, the action bar and
+  // this line say what is selected.
+  const [announce, setAnnounce] = useState("");
   const pick = (d: CardDesign) => {
-    const nextQuote = boundQuoteForDesign(d.key) ?? quote;
-    setView("preview");
-    void navigate({ search: { ...search, design: d.key, quote: nextQuote.key }, replace: true, resetScroll: false });
+    const nextQuote = choiceQuote(d);
+    setAnnounce(`${d.name} selected, GLORB / ${nextQuote.symbol} pair.`);
+    void navigate({
+      search: { ...search, design: d.key, quote: nextQuote.key },
+      replace: true,
+      resetScroll: false,
+    });
   };
-  const pages = Math.max(1,Math.ceil(shown.length/grid.count));
-  const page = Math.min(pageIndex,pages-1);
+  const clearSearch = () => {
+    setQuery("");
+    searchRef.current?.focus();
+  };
+  const group = GROUPS.find((g) => g.key === category)!;
+  const filtered = category !== "all" || !!normalizedQuery || !!filterPair;
+  const primary = pairPending ? (
+    <Button disabled onBlocked={focusConfirm}>
+      Confirm pair first
+    </Button>
+  ) : (
+    <ButtonLink to="/launch" search={{ design: design.key, quote: quote.key }}>
+      Use this design
+    </ButtonLink>
+  );
   return (
-    <PageFrame className={`cdx-archive cdx-archive--${view}`}>
-      <div className="sr-only">{view}</div>
-      <header className="cdx-archive__head">
-        <div>
-          <h1 className="mdx-h1">Card designs.</h1>
-          <p className="cdx-muted">{CARD_DESIGNS.length} designs. Your artwork takes the centre.</p>
-        </div>
-        <Link
-          to="/launch"
-          search={{ design: design.key, quote: quote.key }}
-          className="mdx-btn mdx-btn--primary cdx-use-design"
-        >
-          Use this design
-        </Link>
-      </header>
-      <div className="cdx-view-tabs cdx-archive-mobile-tabs" aria-label="Design views"><button type="button" aria-pressed={view==="preview"} onClick={()=>setView("preview")}>Card preview</button><button type="button" aria-pressed={view==="library" && libraryTab==="designs"} onClick={()=>{setView("library");setLibraryTab("designs");}}>Designs</button><button type="button" aria-pressed={view==="library" && libraryTab==="pair"} onClick={()=>{setView("library");setLibraryTab("pair");}}>Pair</button></div>
-      <div className="cdx-archive__body" data-view={view}>
-        <section className="cdx-archive__vitrine" aria-label="Selected card design preview">
-          <div
-            className="cdx-archive__halo"
-            style={{ "--cdx-accent": design.palette[1] } as CSSProperties}
-            aria-hidden
-          />
-          <div className="cdx-archive__card" key={design.key}>
-            <HeroTurntable card={card} viewportFit />
-          </div>
-          <div className="cdx-archive__caption">
-            <h2>{design.name}</h2>
-            <button type="button" className="cdx-archive__pair-link mdx-link" onClick={()=>{setView("library");setLibraryTab("pair");}}>GLORB / {quote.symbol} · Pair details</button>
-            <span className="cdx-demo-note">
-              Sample card · drag to inspect
-            </span>
-          </div>
-        </section>
-        <section className="cdx-library" aria-label="Card design library">
-          <div className="cdx-view-tabs cdx-library-desktop-tabs" aria-label="Library sections"><button type="button" aria-pressed={libraryTab==="designs"} onClick={()=>setLibraryTab("designs")}>Designs</button><button type="button" aria-pressed={libraryTab==="pair"} onClick={()=>setLibraryTab("pair")}>Trading pair</button></div>
-          {libraryTab === "pair" ? <div className="cdx-fit-region"><QuoteAssetPicker value={quote.key} designKey={design.key} ticker="GLORB" compact viewport onChange={(nextQuote,nextDesign)=>void navigate({ search:{...search,design:nextDesign,quote:nextQuote},replace:true,resetScroll:false })} /></div> : <>
-          <div className="cdx-library__tools">
-            <label className="sr-only" htmlFor="design-search">
-              Search card designs
-            </label>
-            <input
-              id="design-search"
-              className="mdx-input"
-              placeholder="Find your design…"
-              value={query}
-              onChange={(e) => {setQuery(e.target.value);setPageIndex(0);}}
-              type="search"
-            />
-            <label className="sr-only" htmlFor="design-category">Design category</label><select id="design-category" className="cdx-category-select mdx-input" value={category} onChange={event=>setCategory(event.target.value)}>{GROUPS.map(group=><option key={group.key} value={group.key}>{group.name} · {CARD_DESIGNS.filter(d=>matchesCategory(d,group.key)).length}</option>)}</select>
-            <div className="cdx-filter" aria-label="Filter designs">
-              {GROUPS.map((g) => (
-                <button
-                  key={g.key}
-                  type="button"
-                  aria-pressed={category === g.key}
-                  onClick={() => setCategory(g.key)}
-                >
-                  {g.name}
-                  <span>
-                    {g.key === "all"
-                      ? CARD_DESIGNS.length
-                      : CARD_DESIGNS.filter((d) => matchesCategory(d, g.key)).length}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-          <div ref={grid.ref} className="cdx-library__list" style={{"--page-columns":grid.columns,"--page-rows":grid.rows} as CSSProperties}>
-            {shown.slice(page*grid.count,(page+1)*grid.count).map((d, i) => (
-              <button
-                key={d.key}
-                type="button"
-                className="cdx-design-row"
-                data-reveal
-                aria-pressed={design.key === d.key}
-                aria-label={`Preview ${d.name}`}
-                onClick={() => pick(d)}
-                style={
-                  {
-                    "--cdx-accent": d.palette[1],
-                    "--cdx-base": d.palette[0],
-                    "--cdx-order": Math.min(i, 8),
-                  } as CSSProperties
-                }
-              >
-                <div className="cdx-design-row__preview" aria-hidden>
-                  <MintCard
-                    card={{ ...card, cardTemplate: d.key, level: d.materialLevel, quoteAssetKey: (boundQuoteForDesign(d.key) ?? quote).key, quoteMint: (boundQuoteForDesign(d.key) ?? quote).mint, ...quoteMetrics(initialQuoteReserves((boundQuoteForDesign(d.key) ?? quote).key), (boundQuoteForDesign(d.key) ?? quote).key) }}
-                    depth="flat"
-                    sizes="(max-width: 1023px) 140px, 120px"
+    <PageFrame className="cdx-archive">
+      <div className="cdx-archive__main">
+        {/* One header row from 1024px: the title, the count and the selected design, the search, the primary. */}
+        <PageHeader
+          title="Card designs"
+          context={
+            <>
+              <span className="cdx-archive__ctx">
+                <span aria-live="polite">
+                  {filtered ? (
+                    <>
+                      <span className="tabular-nums">{shown.length}</span> of{" "}
+                      <span className="tabular-nums">{CARD_DESIGNS.length}</span> designs
+                      {category === "all" ? "" : ` in ${group.name}`}
+                      {normalizedQuery ? ` matching “${query.trim()}”` : ""}
+                    </>
+                  ) : (
+                    <>
+                      <span className="tabular-nums">{CARD_DESIGNS.length}</span> designs
+                    </>
+                  )}
+                </span>
+              </span>
+              <span className="cdx-archive__ctx-sel">
+                {" · Selected: "}
+                <span className="cdx-archive__selected">{design.name}</span>
+              </span>
+            </>
+          }
+          toolbar={
+            <>
+              <div className="cdx-library__search">
+                <label className="sr-only" htmlFor="design-search">
+                  Search card designs
+                </label>
+                <Icon name="search" className="cdx-library__search-glyph" />
+                <input
+                  ref={searchRef}
+                  id="design-search"
+                  className="mdx-input"
+                  placeholder="Search designs"
+                  value={query}
+                  maxLength={40}
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  enterKeyHint="search"
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape" && query) {
+                      e.preventDefault();
+                      setQuery("");
+                    }
+                  }}
+                  type="search"
+                />
+                {query ? (
+                  <IconButton
+                    icon="close"
+                    label="Clear search"
+                    size="sm"
+                    className="cdx-library__clear"
+                    onClick={clearSearch}
                   />
+                ) : null}
+              </div>
+              {/* Phones: the collections as one select beside the search (six chips would take three lines). No counts:
+                  the header line already says how many match, and the field beside it keeps its placeholder at 360px.
+                  It sits outside the locked library, so it locks on its own while a pair change waits. */}
+              <div className="cdx-archive__collection">
+                <label className="sr-only" htmlFor="design-collection">
+                  Collection
+                </label>
+                <select
+                  id="design-collection"
+                  className="mdx-select"
+                  value={category}
+                  disabled={pairPending}
+                  onChange={(e) => setCategory(e.target.value)}
+                >
+                  {GROUPS.map((g) => (
+                    <option key={g.key} value={g.key}>
+                      {g.key === "all" ? "All designs" : g.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </>
+          }
+          right={<span className="cdx-archive__use">{primary}</span>}
+        />
+        <p className="sr-only" aria-live="polite">
+          {announce}
+        </p>
+        <div className="cdx-archive__body">
+          <section
+            ref={vitrineRef}
+            className="cdx-archive__vitrine"
+            aria-label="Selected design preview"
+          >
+            <div className="cdx-archive__card" key={design.key}>
+              <DesignStage card={card} />
+            </div>
+            <div className="cdx-archive__info">
+              <div className="cdx-archive__caption">
+                <h2 className="cdx-archive__name">{design.name}</h2>
+                <p className="cdx-archive__meta">Sample card</p>
+              </div>
+              <div className="cdx-archive__pair">
+                <QuoteAssetPicker
+                  value={quote.key}
+                  designKey={design.key}
+                  ticker="GLORB"
+                  compact
+                  confirmationRef={confirmRef}
+                  onPendingChange={setPairPending}
+                  onChange={(nextQuote, nextDesign) =>
+                    void navigate({
+                      search: { ...search, design: nextDesign, quote: nextQuote },
+                      replace: true,
+                      resetScroll: false,
+                    })
+                  }
+                />
+              </div>
+            </div>
+          </section>
+          <section className="cdx-library" aria-label="Card design library" inert={pairPending}>
+            <div className="cdx-library__filters">
+              <div className="mdx-chiprow cdx-library__chips" role="group" aria-label="Collection">
+                {GROUPS.map((g) => (
+                  <Chip
+                    key={g.key}
+                    pressed={category === g.key}
+                    count={groupCounts[g.key]}
+                    onClick={() => setCategory(g.key)}
+                  >
+                    {g.name}
+                  </Chip>
+                ))}
+              </div>
+              {category === "memes" ? (
+                <div className="cdx-library__pair-filter">
+                  <label htmlFor="design-pair-asset">Pair asset</label>
+                  <select
+                    id="design-pair-asset"
+                    className="mdx-select"
+                    value={memePairFilter}
+                    disabled={pairPending}
+                    onChange={(event) => setMemePairFilter(event.target.value)}
+                  >
+                    <option value="all">All pairs</option>
+                    {memePairAssets.map((asset) => (
+                      <option key={asset.key} value={asset.key}>
+                        {asset.symbol} · {asset.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                <span className="cdx-design-row__text">
-                  <strong>{d.name}</strong>
-                  <small>
-                    {boundQuoteForDesign(d.key)
-                      ? `${boundQuoteForDesign(d.key)!.symbol} · ${boundQuoteForDesign(d.key)!.kind === "stock" ? "Tokenized stock quote" : "Memecoin quote"}`
-                      : d.category === "classic" ? "Trading card classic" : d.category === "limited" ? "Limited edition finish" : "Premium foil"}
-                  </small>
-                </span>
-                <span className="cdx-design-row__arrow" aria-hidden>
-                  {design.key === d.key ? "✓" : "↗"}
-                </span>
-              </button>
-            ))}
-            {shown.length === 0 && (
-              <p className="cdx-empty" role="status">
-                No designs match “{query}”. Try another name.
-              </p>
+              ) : null}
+            </div>
+            {shown.length > 0 ? (
+              <AutoGrid
+                min="var(--tile-min-design)"
+                className="cdx-library__list"
+                label="Card designs"
+              >
+                {shown.map((d) => {
+                  const tileQuote = choiceQuote(d);
+                  const paired = !!boundQuoteForDesign(d.key) || category === "memes";
+                  const active = design.key === d.key && (!paired || quote.key === tileQuote.key);
+                  return (
+                    <li key={d.key}>
+                      <DesignTile
+                        design={d}
+                        pairSymbol={tileQuote.symbol}
+                        pressed={active}
+                        onPick={() => pick(d)}
+                        launch={{ design: d.key, quote: tileQuote.key }}
+                        sizes="(max-width: 767px) 45vw, 160px"
+                        card={{
+                          ...card,
+                          cardTemplate: d.key,
+                          level: d.materialLevel,
+                          quoteAssetKey: tileQuote.key,
+                          quoteMint: tileQuote.mint,
+                          ...quoteMetrics(initialQuoteReserves(tileQuote.key), tileQuote.key),
+                        }}
+                      />
+                    </li>
+                  );
+                })}
+              </AutoGrid>
+            ) : (
+              <EmptyState
+                compact
+                title={
+                  normalizedQuery
+                    ? `No designs match “${query.trim()}”`
+                    : `No designs in ${group.name}`
+                }
+                action={
+                  normalizedQuery ? (
+                    <Button variant="outline" size="sm" onClick={clearSearch}>
+                      Clear search
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="sm" onClick={() => setCategory("all")}>
+                      Show all designs
+                    </Button>
+                  )
+                }
+              />
             )}
-          </div>
-          <PageControls page={page} pages={pages} onPage={setPageIndex} label={`${shown.length} designs`} />
-          </>}
-          <p className="cdx-library__foot">
-            Stock pairs use tokenized quote assets; they do not grant equity.
-          </p>
-        </section>
+            <p className="cdx-library__foot">
+              {category === "memes"
+                ? "Meme & collector presets use the shown quote. Asset details identify the exact mint."
+                : "Stock pairs use tokenized quote assets; they do not grant equity."}
+            </p>
+          </section>
+        </div>
       </div>
+      {/* Phones and tablets: the selected design and the primary stay on screen above the tab bar. */}
+      <ActionBar label="Selected design" phoneOnly className="cdx-archive__bar">
+        <p className="cdx-archive__bar-text">
+          <strong>{design.name}</strong> <span>{quote.symbol} pair</span>
+        </p>
+        {primary}
+      </ActionBar>
     </PageFrame>
   );
 }

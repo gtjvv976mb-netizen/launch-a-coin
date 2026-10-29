@@ -265,5 +265,410 @@
     "initialVirtualQuoteReserves": "18127414916",
     "verifiedAt": "2026-10-28",
     "verificationSlot": 462347831
+  },
+  {
+    "key": "cards",
+    "symbol": "CARDS",
+    "name": "Collector Crypt",
+    "mint": "CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "collector",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-28",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "10870815306",
+    "verifiedAt": "2026-10-28",
+    "verificationSlot": 462491739,
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs",
+      "https://collectorcrypt.com/tokenomics"
+    ]
+  },
+  {
+    "key": "sv151",
+    "symbol": "SV151",
+    "name": "Scarlet & Violet 151",
+    "mint": "SV151D5pjygAKA8aJJcKzm4wFnRX5G92Fye94jQJk7g",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "collector",
+    "issuer": "Bedrock Foundation (custodian)",
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-28",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "13486851256",
+    "verifiedAt": "2026-10-28",
+    "verificationSlot": 462491739,
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "listingProvider": "Sunrise (Wormhole Labs)",
+    "listingProviderTerms": "https://sunrise.xyz/terms-of-service"
+  },
+  {
+    "key": "toad",
+    "symbol": "TOAD",
+    "name": "The Toad Pepe",
+    "mint": "A13oRB9FFaiUjfi6LdCg6p9ka1u8SfGkUFs4SKvPpump",
+    "decimals": 6,
+    "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-28",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "3219674850590",
+    "verifiedAt": "2026-10-28",
+    "verificationSlot": 462494325,
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs",
+      "https://pump.fun/coin/A13oRB9FFaiUjfi6LdCg6p9ka1u8SfGkUFs4SKvPpump"
+    ]
+  },
+  {
+    "key": "pengu",
+    "symbol": "PENGU",
+    "name": "Pudgy Penguins",
+    "mint": "2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-28",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "427226896490",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-28",
+    "verificationSlot": 462497910
+  },
+  {
+    "key": "giga",
+    "symbol": "GIGA",
+    "name": "GIGACHAD",
+    "mint": "63LfDmNb3MQ8mw9MtZ2To9bEA2M71kZUUGq5tiJxcqj9",
+    "decimals": 5,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-28",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "177226405970",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-28",
+    "verificationSlot": 462497910
+  },
+  {
+    "key": "spx",
+    "symbol": "SPX",
+    "name": "SPX6900 (Wormhole Solana representation)",
+    "mint": "J3NKxxXZcnNiMjKw9hYb2K4LUxgwB6t1FtPtQVsv3KFr",
+    "decimals": 8,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-28",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "867941152165",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "listingProvider": "Wormhole Portal",
+    "listingProviderTerms": "https://portalbridge.com/",
+    "verifiedAt": "2026-10-28",
+    "verificationSlot": 462497910
+  },
+  {
+    "key": "trump",
+    "symbol": "TRUMP",
+    "name": "OFFICIAL TRUMP",
+    "mint": "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-28",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "1930184077",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-28",
+    "verificationSlot": 462497910
+  },
+  {
+    "key": "useless",
+    "symbol": "USELESS",
+    "name": "USELESS COIN",
+    "mint": "Dz9mQ9NzkBcCsuGPFJ3r1bS4wgqKMHBPiVuniW8Mbonk",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-28",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "20424896024",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-28",
+    "verificationSlot": 462497910
+  },
+  {
+    "key": "chillguy",
+    "symbol": "CHILLGUY",
+    "name": "Just a chill guy",
+    "mint": "Df6yfrKC8kZE3KNkrHERKzAetSxbrWeniQfyJY4Jpump",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-28",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "333070045599",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-28",
+    "verificationSlot": 462497910
+  },
+  {
+    "key": "goat",
+    "symbol": "GOAT",
+    "name": "Goatseus Maximus",
+    "mint": "CzLSujWBLFsSjncfkh59rUFqvafWcY5tzedWJSuypump",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-29",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "233175635887",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-29",
+    "verificationSlot": 462558257
+  },
+  {
+    "key": "zerebro",
+    "symbol": "ZEREBRO",
+    "name": "zerebro",
+    "mint": "8x5VqbHA8D7NkD52uNuS5nnt3PwA8pLD34ymskeSo2Wn",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-29",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "109231897567",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-29",
+    "verificationSlot": 462558257
+  },
+  {
+    "key": "act",
+    "symbol": "ACT",
+    "name": "Act I : The AI Prophecy",
+    "mint": "GJAFwWjJ3vnTsrQVabjBVK2TYB1YtRCQXRDfDgUnpump",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-29",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "379840212990",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-29",
+    "verificationSlot": 462558257
+  },
+  {
+    "key": "pippin",
+    "symbol": "pippin",
+    "name": "Pippin",
+    "mint": "Dfh5DzRgSvvCFDoYc2ciTkMrbDfRKybA4SoFbPmApump",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-29",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "208254365784",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-29",
+    "verificationSlot": 462558257
+  },
+  {
+    "key": "vine",
+    "symbol": "VINE",
+    "name": "Vine Coin",
+    "mint": "6AJcP7wuLwmRYLBNbi825wgguaPsWzPBEHcHndpRpump",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-29",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "461532103258",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-29",
+    "verificationSlot": 462558257
+  },
+  {
+    "key": "aura",
+    "symbol": "aura",
+    "name": "aura",
+    "mint": "DtR4D9FtVoTX2569gaL837ZgrB6wNjj6tkmnX9Rdk9B2",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-29",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "426470201898",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-29",
+    "verificationSlot": 462558257
+  },
+  {
+    "key": "michi",
+    "symbol": "MICHI",
+    "name": "michi",
+    "mint": "AywAYdNJnSLSXwKWYxDciPjqGRnwp4iZdQptuuQTpump",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-29",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "1284214290492",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-29",
+    "verificationSlot": 462558257
+  },
+  {
+    "key": "cate",
+    "symbol": "CATE",
+    "name": "Catecoin",
+    "mint": "Ai66LHZG9MCzg1WKdawwqduVAXpNDUuV8M3uyq5ppump",
+    "decimals": 6,
+    "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-29",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "66439760654",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-29",
+    "verificationSlot": 462558257
+  },
+  {
+    "key": "ansem",
+    "symbol": "ANSEM",
+    "name": "The Black Bull",
+    "mint": "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump",
+    "decimals": 6,
+    "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-29",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "50650546667",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-29",
+    "verificationSlot": 462558257
+  },
+  {
+    "key": "bert",
+    "symbol": "Bert",
+    "name": "Bertram The Pomeranian",
+    "mint": "HgBRWfYxEfvPhtqkaeymCQtHCrKE46qQ43pKe8HCpump",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-29",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "278902341021",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-29",
+    "verificationSlot": 462558257
+  },
+  {
+    "key": "chillhouse",
+    "symbol": "CHILLHOUSE",
+    "name": "Chill House",
+    "mint": "GkyPYa7NnCFbduLknCfBfP7p8564X1VZhwZYJ6CZpump",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-29",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "3802387072666",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-29",
+    "verificationSlot": 462558257
+  },
+  {
+    "key": "usduc",
+    "symbol": "USDUC",
+    "name": "unstable coin",
+    "mint": "CB9dDufT3ZuQXqqSfa1c5kY935TEreyBw9XJXxHKpump",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "kind": "meme",
+    "issuer": null,
+    "issuerTerms": null,
+    "verifiedDate": "2026-10-29",
+    "admission": "quoteControl",
+    "initialVirtualQuoteReserves": "1412752265704",
+    "sourceUrls": [
+      "https://pump.fun/docs/custom-pairs"
+    ],
+    "verifiedAt": "2026-10-29",
+    "verificationSlot": 462558257
   }
 ]

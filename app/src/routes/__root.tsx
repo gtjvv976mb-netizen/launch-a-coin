@@ -15,6 +15,7 @@ import { getMe } from "../lib/mintdex/api";
 // repo by the marketplace meta API and read at BUILD time — no runtime fetch.
 import appMetaJson from "../app-meta.json";
 import { AppShell } from "../components/mintdex/AppShell";
+import { liveModeOpen, liveReadinessQuery } from "../components/carddex/live/readiness";
 import { SessionProvider } from "../components/mintdex/session";
 import { WalletMount } from "../components/chain/WalletMount";
 import { IS_SIM, MODE } from "../lib/mintdex/mode";
@@ -22,9 +23,11 @@ import { manifestFileName } from "../lib/mintdex/manifest";
 import { isDevnetTestSite } from "../lib/mintdex/site-host";
 import { PageNotFound } from "../components/mintdex/PageStatus";
 import { Button, ToastProvider } from "../components/mintdex/ui";
-import { markHydrated, View3DProvider } from "../components/mintdex/card3d";
+// Direct files, not the card3d barrel, so the card engine stays in the route chunks that draw cards.
+import { markHydrated } from "../components/mintdex/card3d/motion3d";
+import { View3DProvider } from "../components/mintdex/card3d/view3d";
 import { ROUTE_ERROR } from "../lib/mintdex/copy";
-import { SITE_DESCRIPTION } from "../lib/mintdex/seo";
+import { SITE_DESCRIPTION, SITE_OG_IMAGE, SITE_OG_IMAGE_ALT, absoluteUrl } from "../lib/mintdex/seo";
 import { readViewport } from "../lib/mintdex/viewport";
 
 declare const __HF_DESIGN_INSPECTOR__: boolean;
@@ -65,12 +68,17 @@ function toOwnAssetUrl(value: string | null | undefined): string | null {
  * canonical links follow SITE_ORIGIN (seo.ts): mintdex.fun while both hosts serve the same devnet site, then
  * devnet.mintdex.fun once MAINNET_SITE_LIVE is set.
  */
-function buildHead(meta: AppMeta, devnetSite = false) {
-  const title = meta.og_title ?? DEFAULT_TITLE;
+function buildHead(meta: AppMeta, devnetSite = false, notFound = false) {
+  // An unknown path (the root's not-found page, HTTP 404): its own title and description, and noindex (A11Y-11, F15).
+  const title = notFound ? "Page not found | Launch a Card" : (meta.og_title ?? DEFAULT_TITLE);
   // Always our own description, never app-meta.json's og_description: the marketplace meta API writes that
   // file with claims test mode cannot make ("every pump.fun coin"), and ours carries the mode suffix (P0-5).
-  const description = SITE_DESCRIPTION;
-  const ogImage = toOwnAssetUrl(meta.og_image_url);
+  const description = notFound
+    ? "This page is not on Launch a Card. Browse tokens and their cards on Discover, or go back home."
+    : SITE_DESCRIPTION;
+  // The site's own share image (Home's hero, 1200x630) unless app-meta.json names one (SEO-1).
+  const ownImage = toOwnAssetUrl(meta.og_image_url);
+  const ogImage = ownImage ?? absoluteUrl(SITE_OG_IMAGE);
   const ogVideo = toOwnAssetUrl(meta.og_video_url);
 
   return {
@@ -84,11 +92,11 @@ function buildHead(meta: AppMeta, devnetSite = false) {
       },
       { title },
       { name: "description", content: description },
-      { name: "theme-color", content: "#29231d" },
+      { name: "theme-color", content: "#0d0c0b" },
       { name: "application-name", content: "Launch a Card" },
       // Which build this is (launch-plan D4 and E checks: curl the HTML and read it). sim, devnet or mainnet.
       { name: "carddex-mode", content: MODE },
-      ...(devnetSite ? [{ name: "robots", content: "noindex" }] : []),
+      ...(devnetSite || notFound ? [{ name: "robots", content: "noindex" }] : []),
       { property: "og:site_name", content: "Launch a Card" },
       { property: "og:title", content: title },
       { property: "og:description", content: description },
@@ -100,20 +108,15 @@ function buildHead(meta: AppMeta, devnetSite = false) {
         ? [
             { property: "og:image", content: ogImage },
             { name: "twitter:image", content: ogImage },
+            ...(ownImage ? [] : [{ property: "og:image:alt", content: SITE_OG_IMAGE_ALT }, { name: "twitter:image:alt", content: SITE_OG_IMAGE_ALT }]),
           ]
         : []),
       ...(ogVideo ? [{ property: "og:video", content: ogVideo }] : []),
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      // Preload the chrome's current body and title face. Card fonts load only when a card paints.
-      {
-        rel: "preload",
-        href: "/fonts/instrument-sans-latin-wdth-normal.woff2",
-        as: "font",
-        type: "font/woff2",
-        crossOrigin: "anonymous" as const,
-      },
+      // No font preload (F17): Instrument Sans is not used early enough for one to pay off, and Chrome warned on
+      // every route that the preloaded file went unused. Its @font-face (font-display: swap) loads it on use.
       // The same wordless gold card-and-crown mark serves browser, mobile and installed-app branding.
       { rel: "icon", href: "/assets/brand/carddex.svg", type: "image/svg+xml" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/assets/brand/carddex-180.png" },
@@ -138,7 +141,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="grid h-full min-h-[60dvh] place-items-center px-4">
       <div className="flex max-w-md flex-col items-center gap-2 text-center">
         <h1 className="mdx-h1">{ROUTE_ERROR.title}</h1>
-        <p className="text-[15px] text-slate">{ROUTE_ERROR.body}</p>
+        <p className="text-body text-slate">{ROUTE_ERROR.body}</p>
         <div className="mt-4 flex items-center gap-5">
           <Button
             onClick={() => {
@@ -157,15 +160,19 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-async function loadRootData({location}:{location:{pathname:string;searchStr:string}}):Promise<{me:Awaited<ReturnType<typeof getMe>>|null;now:number;vp:ReturnType<typeof readViewport>;devnetSite:boolean}> {
+async function loadRootData({location,context}:{location:{pathname:string;searchStr:string};context:{queryClient:QueryClient}}):Promise<{me:Awaited<ReturnType<typeof getMe>>|null;now:number;vp:ReturnType<typeof readViewport>;devnetSite:boolean}> {
+  // Test mode is the default on /launch, so the demo session loads there too. Only a mainnet page that can really
+  // open (mode=live and liveModeOpen, from the same cached query the page uses, saved-launch recovery included) leaves it out.
+  const liveLaunch = location.pathname === "/launch" && new URLSearchParams(location.searchStr).get("mode") === "live" &&
+    liveModeOpen(await context.queryClient.ensureQueryData(liveReadinessQuery).catch(() => null));
   return {
-    me: IS_SIM && !(location.pathname === "/launch" && new URLSearchParams(location.searchStr).get("mode") !== "demo") ? await getMe() : null,
+    me: IS_SIM && !liveLaunch ? await getMe() : null,
     now: Date.now(), vp: readViewport(), devnetSite: isDevnetTestSite(),
   };
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: ({ loaderData }) => buildHead(appMeta, loaderData?.devnetSite ?? false),
+  head: ({ loaderData, match }) => buildHead(appMeta, loaderData?.devnetSite ?? false, !!match.globalNotFound),
   // `now` is the page's clock for its first frame (see useNow in hooks.ts): it is dehydrated with the
   // loader data, so server HTML and the hydrating client compute the same relative times. `vp` is the
   // viewport cookie (P1-20), so fitted grids lay out their server HTML for this screen.
@@ -181,19 +188,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 /**
- * Motion level before first paint: legacy saved Calm choices are superseded by the automatic-motion default
- * (owner 2026-10-18). A new explicit Calm choice uses mdx-motion-v2 and puts
- * html[data-motion="calm"] in place before anything animates. Full motion is the default for everyone: the device's
- * reduced motion setting no longer turns it off by itself (owner, 2026-10-17), and every page starts full (the
- * watchdog's lite lasts for one page). The only server and client difference on the page, so <html> carries
- * suppressHydrationWarning. The CSP allows inline scripts.
+ * Motion level before first paint. A stored Calm motion choice (mdx-motion-v2) wins in either direction: "calm"
+ * puts html[data-motion="calm"] in place, "full" keeps full motion and marks html[data-motion-pref="full"] so the
+ * CSS reduced-motion fallback stands down. With no stored choice, the device's reduced motion setting starts the
+ * page calm. Legacy keys (mdx-motion, mdx-motion-lite) are ignored. The only server and client difference on the
+ * page, so <html> carries suppressHydrationWarning. The CSP allows inline scripts.
  */
 const MOTION_SCRIPT =
-  'try{if(localStorage.getItem("mdx-motion-v2")==="calm")document.documentElement.dataset.motion="calm"}catch(e){}';
+  'var d=document.documentElement,v=null;try{v=localStorage.getItem("mdx-motion-v2")}catch(e){}try{if(v==="full")d.dataset.motionPref="full";if(v==="calm"||(v!=="full"&&matchMedia("(prefers-reduced-motion: reduce)").matches))d.dataset.motion="calm"}catch(e){}';
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" style={{ colorScheme: "light" }} suppressHydrationWarning>
+    <html lang="en" style={{ colorScheme: "dark" }} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: MOTION_SCRIPT }} />
         <HeadContent />

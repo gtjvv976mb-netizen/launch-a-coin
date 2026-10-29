@@ -10,13 +10,22 @@
   // Require an existing compatible CPU allowance; never purchase or upgrade a plan.
   "limits": {"cpu_ms": 30000},
   "assets": {"directory": "./dist/client", "binding": "ASSETS", "not_found_handling": "none"},
-  "routes": [{"pattern": "launchacard.fun", "custom_domain": true}, {"pattern": "www.launchacard.fun", "custom_domain": true}],
+  // Cloudflare for SaaS phase 2: launchacard.fun and www are custom hostnames on the launchacard.com zone (fallback
+  // edge.launchacard.com) and reach this Worker through its */* route only. The launchacard.fun Worker custom domains
+  // are gone; never add them back (they would replace the DNS-only CNAMEs and put the site on PLDT-blocked IPs).
+  "routes": [{"pattern": "*/*", "zone_name": "launchacard.com"}],
+  // A routed Worker cannot fetch() its own zone, so own-origin asset checks go through this binding.
+  "services": [{"binding": "SELF", "service": "launch-a-card"}],
   "vars": {
     "HF_ENV": "production", "APP_SLUG": "launch-a-card",
     "CARDDEX_PUBLIC_ORIGIN": "https://launchacard.fun",
     "CARDDEX_DEPLOYMENT_ENV": "production",
     // Configure CARDDEX_MAINNET_RPC_URL as a Worker secret with a provider endpoint.
-    "CARDDEX_LIVE_LAUNCH_ENABLED": "true"
+    // Two switches. CARDDEX_LIVE_LAUNCH_ENABLED ("true" only) opens new mainnet launches.
+    // CARDDEX_LIVE_RECOVERY_ENABLED (on unless "false") lets creators sign in and finish saved launches.
+    // To stop new launches in an incident, set only CARDDEX_LIVE_LAUNCH_ENABLED to "false": recovery keeps working.
+    "CARDDEX_LIVE_LAUNCH_ENABLED": "true",
+    "CARDDEX_LIVE_RECOVERY_ENABLED": "true"
   },
   "d1_databases": [{"binding": "DB", "database_name": "launch-a-card", "database_id": "ffc8ba69-4d9d-404c-9c3d-e4a7f187cb3a", "migrations_dir": "migrations"}],
   "r2_buckets": [{"binding": "STORAGE", "bucket_name": "launch-a-card"}]

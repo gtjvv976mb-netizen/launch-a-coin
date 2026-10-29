@@ -1,4 +1,9 @@
 /* Fixed creator-selected prints. Every face is clipped inside the same rounded physical slab. */
+/* Card micro-type (VD-07, moved from carddex-a11y.css): at hero size the footer plates keep a 10px floor; the plates
+ * keep their place and width, only the type grows into them. Unlayered with the card internals, as before. */
+@container (min-width: 280px) {
+  .mdx-card__foot { font-size: max(10px, 2.3cqw); }
+}
 .mdx-card[data-carddex-premium] { overflow: hidden; --h-rest: .43; --h-live: .85; --shine-rest: .3; --shine-live: .8; --rim-rest: .5; --rim-live: .9; }
 .mdx-card[data-carddex-premium]::after { content: ""; position: absolute; inset: .8%; z-index: 7; border-radius: 4.4% / 3.15%; pointer-events: none; box-shadow: inset 0 0 0 .24cqw rgb(255 250 226 / .65), inset 0 0 0 .8cqw rgb(10 9 17 / .3); }
 .mdx-card[data-carddex-premium] .mdx-card__frame { filter: saturate(1.1) contrast(1.06); }
@@ -140,12 +145,6 @@
 .cdx-design-back[data-back-layout="stock-aapl"] .cdx-design-back__seal { border-radius: 28%; }
 .cdx-design-back[data-back-layout="stock-mstr"] .cdx-design-back__seal { border-radius: 40%; }
 .cdx-design-back[data-back-layout="stock-coin"] .cdx-design-back__seal { box-shadow: 0 1.5cqw 3cqw #0007, 0 0 0 1.4cqw var(--design-base), 0 0 0 2cqw var(--design-metal), 0 0 0 2.8cqw var(--design-base), 0 0 0 3.1cqw var(--design-paper); }
-.cdx-hero-turntable { position: relative; width: 100%; }
-.cdx-hero-turntable__controls { position: relative; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 24px; }
-.cdx-hero-turntable__controls button { min-height: 44px; padding: 10px 14px; border: 1px solid currentColor; border-radius: 6px; background: transparent; font: 500 12px/1 var(--font-sans); transition: background-color .18s ease-out, transform .14s ease-out; }
-.cdx-hero-turntable__controls button:hover { background: #a56e3014; }
-.cdx-hero-turntable__controls button:active { transform: scale(.97); }
-.cdx-hero-turntable__controls button:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
 
 /* Optional verified Higgsfield prints. Missing or undecoded assets retain their native design. */
 .cdx-generated-front { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: fill; border-radius: inherit; pointer-events: none; opacity: 0; }
@@ -202,11 +201,29 @@
 .cdx-canonical-skin, .cdx-canonical-skin__surface { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: inherit; overflow: hidden; pointer-events: none; }
 .cdx-canonical-skin { z-index: 1; }
 .cdx-canonical-skin__loader { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
-.cdx-canonical-card > .mdx-card__art { z-index: 2; overflow: hidden; border-radius: .9cqw; background: var(--design-base); }
-.cdx-canonical-card > .mdx-card__art > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.cdx-canonical-skin__image { position: absolute; inset: 0; display: block; width: 100%; height: 100%; border-radius: inherit; pointer-events: none; }
+.cdx-canonical-skin__image[hidden] { display: none; }
+.cdx-canonical-card > .mdx-card__art { z-index: 2; overflow: hidden; border-radius: var(--canonical-art-radius); background: var(--design-base); }
+/* Keep creator art centered and color-faithful, matching the trusted NFT compositor. */
+.cdx-canonical-card > .mdx-card__art > img { display: block; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; filter: none; }
 .cdx-canonical-card > .mdx-card__art > img[hidden] { display: none; }
 .cdx-canonical-card__art-fallback { width: 100%; height: 100%; display: grid; place-items: center; color: var(--design-paper); font: italic 5cqw/1.3 var(--font-serif); }
-.cdx-canonical-card > :is(.mdx-card__name,.mdx-card__type,.mdx-card__text,.mdx-card__foot) { z-index: 3; color: var(--canonical-ink); background: transparent; box-shadow: none; }
+/* The placeholder sits on any design's base colour, so it carries the card's own text pair (the name and lore
+ * ink on the card's paper) on a small plate: readable on light and dark bases alike. */
+.cdx-canonical-card__art-fallback > span { padding: .4cqw 2.6cqw; border-radius: 999px; background: var(--canonical-paper); color: var(--canonical-ink); }
+.cdx-canonical-card > :is(.mdx-card__name,.mdx-card__type,.mdx-card__text) { z-index: 3; color: var(--canonical-ink); background: transparent; box-shadow: none; }
+.cdx-canonical-card > .mdx-card__name { padding-inline: var(--canonical-name-inset); gap: 2cqw; }
+.cdx-canonical-card .mdx-card__title { min-width: 0; font-size: var(--canonical-title); line-height: 1; }
+.cdx-canonical-card .mdx-card__numeral { font-size: var(--canonical-numeral); letter-spacing: 0; }
+.cdx-canonical-card > .mdx-card__type { padding-inline: var(--canonical-type-inset); gap: 2cqw; font-size: var(--canonical-type); }
+.cdx-canonical-card .mdx-card__ticker { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cdx-canonical-card .mdx-card__type > span:last-child { flex: none; white-space: nowrap; }
+.cdx-canonical-card > .mdx-card__text { padding: var(--canonical-details-top) var(--canonical-details-inset) var(--canonical-details-bottom); gap: 1.4cqw; }
+.cdx-canonical-card .mdx-card__lore { margin: 0; font-size: var(--canonical-lore); line-height: var(--canonical-lore-line); }
+.cdx-canonical-card .mdx-card__rows { gap: var(--canonical-row-gap); padding-top: var(--canonical-rows-top); }
+.cdx-canonical-card .mdx-card__row { min-width: 0; font-size: var(--canonical-row); line-height: var(--canonical-row-line); }
+.cdx-canonical-card .mdx-card__row > span { flex: none; }
+.cdx-canonical-card .mdx-card__row b { min-width: 0; max-width: 62%; overflow: hidden; text-overflow: ellipsis; }
 .cdx-canonical-card :is(.mdx-card__title,.mdx-card__numeral,.mdx-card__lore,.mdx-card__ticker,.mdx-card__row > span,.mdx-card__row b,.mdx-card__suffix) { color: var(--canonical-ink); }
 .cdx-canonical-card .mdx-card__rows { border-color: color-mix(in srgb, var(--canonical-ink) 22%, transparent); }
 .cdx-canonical-card .mdx-card__row i { border-color: color-mix(in srgb, var(--canonical-ink) 35%, transparent); }

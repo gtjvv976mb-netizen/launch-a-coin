@@ -59,7 +59,7 @@ export async function currentUser(): Promise<SessionUser | null> {
 
 export async function requireUser(): Promise<SessionUser> {
   const u = await currentUser();
-  if (!u) throw new UserError("Enter Launch a Card first to do that.");
+  if (!u) throw new UserError("Try the demo first to do that.");
   return u;
 }
 

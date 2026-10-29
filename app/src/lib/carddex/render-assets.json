@@ -1,832 +1,998 @@
 {
   "pokemon-classic": {
     "path": "/assets/carddex/render/pokemon-classic.png",
-    "sha256": "4d2f1f1abaf647af59023093be95164fd4a82d24d733dc271a8f6c5a7458ba10",
+    "sha256": "6341633164ee84c666750486e0000e491baebdd1bca816a46836d9117dff51ed",
+    "previewPath": "/assets/carddex/render/preview/pokemon-classic.png",
+    "previewSha256": "dd76c7b3f356d56b7e677ac0fd573affaf67444938be4c10210079c55ab3e61b",
     "sourceSha256": "f2335930f158850f763359f12d4e749cfee197c4aaa395318c8fe7f4a6c75ddc",
     "designKey": "pokemon-classic",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "pokemon-classic--stock": {
     "path": "/assets/carddex/render/pokemon-classic--stock.png",
-    "sha256": "9e9b7f2163a8eb406b67b15b5a5af9e88db17eee088f333c83ed9d349e7f368b",
+    "sha256": "6341633164ee84c666750486e0000e491baebdd1bca816a46836d9117dff51ed",
+    "previewPath": "/assets/carddex/render/preview/pokemon-classic--stock.png",
+    "previewSha256": "dd76c7b3f356d56b7e677ac0fd573affaf67444938be4c10210079c55ab3e61b",
     "sourceSha256": "f2335930f158850f763359f12d4e749cfee197c4aaa395318c8fe7f4a6c75ddc",
     "designKey": "pokemon-classic",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "pokemon-full-art": {
     "path": "/assets/carddex/render/pokemon-full-art.png",
-    "sha256": "c392470bcc6eff8e9d9c3c51874e59384e031d0c89f823bf467679542cc50123",
+    "sha256": "ff3f74e694c3d386722d98091567dea52a1d897b5193c735d83fea39024e43c9",
+    "previewPath": "/assets/carddex/render/preview/pokemon-full-art.png",
+    "previewSha256": "ead37764dbcd96c1308a66d38aa7e6369eee5f17a4e87ad91ee5037584b389b5",
     "sourceSha256": "f9d989dc9f1f17035020bce5c3e09dafcb4f942248d4642aa8f329de35f27842",
     "designKey": "pokemon-full-art",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "pokemon-full-art--stock": {
     "path": "/assets/carddex/render/pokemon-full-art--stock.png",
-    "sha256": "6a5f7fedd9c63c0f2f0e4ec8ca3d8240dac66a88744ea82c22ab6d9300d9e549",
+    "sha256": "ff3f74e694c3d386722d98091567dea52a1d897b5193c735d83fea39024e43c9",
+    "previewPath": "/assets/carddex/render/preview/pokemon-full-art--stock.png",
+    "previewSha256": "ead37764dbcd96c1308a66d38aa7e6369eee5f17a4e87ad91ee5037584b389b5",
     "sourceSha256": "f9d989dc9f1f17035020bce5c3e09dafcb4f942248d4642aa8f329de35f27842",
     "designKey": "pokemon-full-art",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "yugioh-monster": {
     "path": "/assets/carddex/render/yugioh-monster.png",
-    "sha256": "2f6f5472202115c8e55db3f66d9ec02424ca47141a27877253b9d29943c081ac",
+    "sha256": "8d4b997def7647a7932b2ccc9ca190215baf0364c3bf37e78b529f3c0c314351",
+    "previewPath": "/assets/carddex/render/preview/yugioh-monster.png",
+    "previewSha256": "abda257e6732c3f73ccd65c082500e84abb3dff1dfdf86d061a6dfd38d2170a1",
     "sourceSha256": "b1d9f578f0c2e5f98ca717ebf9630ace2b2cbe7be2246a67f2d732388f2c4e46",
     "designKey": "yugioh-monster",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "yugioh-monster--stock": {
     "path": "/assets/carddex/render/yugioh-monster--stock.png",
-    "sha256": "4128e466620a28957c2f782e0cc21c4f34356ffaf8932ebc96f70fc2c2f95b87",
+    "sha256": "8d4b997def7647a7932b2ccc9ca190215baf0364c3bf37e78b529f3c0c314351",
+    "previewPath": "/assets/carddex/render/preview/yugioh-monster--stock.png",
+    "previewSha256": "abda257e6732c3f73ccd65c082500e84abb3dff1dfdf86d061a6dfd38d2170a1",
     "sourceSha256": "b1d9f578f0c2e5f98ca717ebf9630ace2b2cbe7be2246a67f2d732388f2c4e46",
     "designKey": "yugioh-monster",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "yugioh-spell": {
     "path": "/assets/carddex/render/yugioh-spell.png",
-    "sha256": "68d5cbb84b1e5036362a70944fea68a5a51ca3221d73d246f874787d2b729509",
+    "sha256": "e640ffaeabc161913ccb73c10da0607937e9d400db1dd2d30d3b4e33ebfee6fb",
+    "previewPath": "/assets/carddex/render/preview/yugioh-spell.png",
+    "previewSha256": "cb24cfaf58a65e604f4aed7af476343f8e7711a956a6d6a23d7236f232856a55",
     "sourceSha256": "26d1fad1ed30ded30b4b76eed48574d040a666c9891d87fe7cdd46ff849cc2c5",
     "designKey": "yugioh-spell",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "yugioh-spell--stock": {
     "path": "/assets/carddex/render/yugioh-spell--stock.png",
-    "sha256": "98ceeb9d108af376724cdb54dad928c17676c36ccc41c8b0a2abb0eff399abae",
+    "sha256": "e640ffaeabc161913ccb73c10da0607937e9d400db1dd2d30d3b4e33ebfee6fb",
+    "previewPath": "/assets/carddex/render/preview/yugioh-spell--stock.png",
+    "previewSha256": "cb24cfaf58a65e604f4aed7af476343f8e7711a956a6d6a23d7236f232856a55",
     "sourceSha256": "26d1fad1ed30ded30b4b76eed48574d040a666c9891d87fe7cdd46ff849cc2c5",
     "designKey": "yugioh-spell",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "magic-etched": {
     "path": "/assets/carddex/render/magic-etched.png",
-    "sha256": "26b09db47a03d978ef5a276bb926233b64e9cc259cb80bb6c2d3c22b4f6f0b97",
+    "sha256": "f3c09bb577b83206c7eb8c9560ce771a4f21c98668b85a4b61983c3f2cfd43bd",
+    "previewPath": "/assets/carddex/render/preview/magic-etched.png",
+    "previewSha256": "4c99301b4d0b38c03c84414592c337e9b46710452540a5c655db996005a470b7",
     "sourceSha256": "692167de26e864de5f6f5eac550cc807a698dd6d504d66c9d5fe60a5403e4c91",
     "designKey": "magic-etched",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "magic-etched--stock": {
     "path": "/assets/carddex/render/magic-etched--stock.png",
-    "sha256": "102f2a8dc6179877a0a4ce68937966396510170a43bc37ec20412ee3c208b769",
+    "sha256": "f3c09bb577b83206c7eb8c9560ce771a4f21c98668b85a4b61983c3f2cfd43bd",
+    "previewPath": "/assets/carddex/render/preview/magic-etched--stock.png",
+    "previewSha256": "4c99301b4d0b38c03c84414592c337e9b46710452540a5c655db996005a470b7",
     "sourceSha256": "692167de26e864de5f6f5eac550cc807a698dd6d504d66c9d5fe60a5403e4c91",
     "designKey": "magic-etched",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "duel-masters": {
     "path": "/assets/carddex/render/duel-masters.png",
-    "sha256": "f18e4830315e3b1ec8d49733d4833a07797682e50a2a85515d90f7fe5cc55eb3",
+    "sha256": "fb1a2dca082437593f5864ecece64a89a4903b2f7326ba5a424f60c759f30e50",
+    "previewPath": "/assets/carddex/render/preview/duel-masters.png",
+    "previewSha256": "55b75827c980d8ca735ea89699c850cb064200d4de4dfa1795f4109e51820850",
     "sourceSha256": "9d64df6c4482698c77a2206f10a3803b0ddf14ecb10eaa613bd6cac56ecd1de6",
     "designKey": "duel-masters",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "duel-masters--stock": {
     "path": "/assets/carddex/render/duel-masters--stock.png",
-    "sha256": "3edc824a092af973c9eb51995786b1b4f93523179b964250a9a39d2d7ea78a70",
+    "sha256": "fb1a2dca082437593f5864ecece64a89a4903b2f7326ba5a424f60c759f30e50",
+    "previewPath": "/assets/carddex/render/preview/duel-masters--stock.png",
+    "previewSha256": "55b75827c980d8ca735ea89699c850cb064200d4de4dfa1795f4109e51820850",
     "sourceSha256": "9d64df6c4482698c77a2206f10a3803b0ddf14ecb10eaa613bd6cac56ecd1de6",
     "designKey": "duel-masters",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "one-piece": {
     "path": "/assets/carddex/render/one-piece.png",
-    "sha256": "77b48f5cb85467637dd1542b3c9a053653817e2918551197f436056a04b08102",
+    "sha256": "278853af8ddf232de7e218521e25447a80a9651d97bfe4bba41e43c61ce11d3f",
+    "previewPath": "/assets/carddex/render/preview/one-piece.png",
+    "previewSha256": "60e304ba11b2de92fd88a9b7171a9f7851a2604806ac788052f70d4076cde864",
     "sourceSha256": "b2a5545c49369d36a517931f46701369a89198d32dfb640967ce34553f512604",
     "designKey": "one-piece",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "one-piece--stock": {
     "path": "/assets/carddex/render/one-piece--stock.png",
-    "sha256": "41e3764c28bbc1247fb4b149f42657072caac560d8cd65da5f08688a0fd8960f",
+    "sha256": "278853af8ddf232de7e218521e25447a80a9651d97bfe4bba41e43c61ce11d3f",
+    "previewPath": "/assets/carddex/render/preview/one-piece--stock.png",
+    "previewSha256": "60e304ba11b2de92fd88a9b7171a9f7851a2604806ac788052f70d4076cde864",
     "sourceSha256": "b2a5545c49369d36a517931f46701369a89198d32dfb640967ce34553f512604",
     "designKey": "one-piece",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "obsidian-archive": {
     "path": "/assets/carddex/render/obsidian-archive.png",
-    "sha256": "c88bcb930848551ada6df003e45574cfb2a3bfcb5034f151ffa14a2cdfc766a4",
+    "sha256": "79ffb31fd94566f3188c45ea92d6df9b415c1d99f5aae58639e8ee073bf4e447",
+    "previewPath": "/assets/carddex/render/preview/obsidian-archive.png",
+    "previewSha256": "191f21177e8b4ee8c1bdbc5b75b964406d6953cdb9da92e86dc75c3f85728aa1",
     "sourceSha256": "2549b84261ed66950a506f2abb8cef9d7bb7073942f9ef952ab624f8cb5b397d",
     "designKey": "obsidian-archive",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "obsidian-archive--stock": {
     "path": "/assets/carddex/render/obsidian-archive--stock.png",
-    "sha256": "7509c368931d2d7ca79eb1296c8aadf4404fb94d022cc69ca0cc37d1b922fe84",
+    "sha256": "79ffb31fd94566f3188c45ea92d6df9b415c1d99f5aae58639e8ee073bf4e447",
+    "previewPath": "/assets/carddex/render/preview/obsidian-archive--stock.png",
+    "previewSha256": "191f21177e8b4ee8c1bdbc5b75b964406d6953cdb9da92e86dc75c3f85728aa1",
     "sourceSha256": "2549b84261ed66950a506f2abb8cef9d7bb7073942f9ef952ab624f8cb5b397d",
     "designKey": "obsidian-archive",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "stock-gme--stock": {
     "path": "/assets/carddex/render/stock-gme--stock.png",
-    "sha256": "5b7bff28654fed9d0ee694dd0417026dd199f04d6bcd118fb4c92c2ecea9ed87",
+    "sha256": "0700d186bcddc7c43bedd1cda24d47b0e35b03710bf9bab5bf7022770056579d",
+    "previewPath": "/assets/carddex/render/preview/stock-gme--stock.png",
+    "previewSha256": "42dd0df37781a2dea6bfba32ce5fb426bcb8546d69cd2734c46dc898974d4078",
     "sourceSha256": "544f174dd43d569d79ec2d5e99e4c8dc54d7ed8091a0855365c0d289a5ab85c6",
     "designKey": "stock-gme",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "stock-tsla--stock": {
     "path": "/assets/carddex/render/stock-tsla--stock.png",
-    "sha256": "4981ca9996461f4ab671d7d96280c5cc8ae5fc149a8b7549064a3187edc51b35",
+    "sha256": "2c0a92f1f094cadfb781d1f2f2f637a3c279c41089cc6ef1bb1ba4f370d66842",
+    "previewPath": "/assets/carddex/render/preview/stock-tsla--stock.png",
+    "previewSha256": "3a1f171656bf3fdfcaa31f9e5d040b6866877868b81c45490e5c5f747f36a4c8",
     "sourceSha256": "810373f2f98025574ec91ae8fa6f53cac8b1d0263027bccd36d8d3719ac33032",
     "designKey": "stock-tsla",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "stock-nvda--stock": {
     "path": "/assets/carddex/render/stock-nvda--stock.png",
-    "sha256": "9f79579e1e035acf978f39f0fd527ea6354c35435382b740da3e67d69b185061",
+    "sha256": "ae4f2642f017650c4f78e25a5e3c9f5dae81d58cc7a0d01eb9d5501c07059fe9",
+    "previewPath": "/assets/carddex/render/preview/stock-nvda--stock.png",
+    "previewSha256": "8577f66aae2175bc69ab032b727ef1014a0494f93397cae0aadfde0f19fb3c93",
     "sourceSha256": "69ea9aa4b083e8013ae8623d3804dcc0ac9b790d53449ca540b9cf075ecc6271",
     "designKey": "stock-nvda",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "stock-aapl--stock": {
     "path": "/assets/carddex/render/stock-aapl--stock.png",
-    "sha256": "6f6c532d442adcc0a63a98cdeb77d0e1b05695a62a04d52ec0ddf28795356623",
+    "sha256": "4d2c02e878f2ee510c35a1e1dba2cc94dc3e22de133bad21dfd59ed9cf43707f",
+    "previewPath": "/assets/carddex/render/preview/stock-aapl--stock.png",
+    "previewSha256": "edc94f81e3fc660d1c06ef63f18752a554bc31ef596572ad84b338f06a879264",
     "sourceSha256": "e27fbc01c5e19877f9c98b443f35261682e9538b1e1ecee697e394fb920b87bd",
     "designKey": "stock-aapl",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "stock-mstr--stock": {
     "path": "/assets/carddex/render/stock-mstr--stock.png",
-    "sha256": "eda72c82b082c008717d27d321b982853c12280114938c543bb65897fed57586",
+    "sha256": "f38a8a87dc5408ea7da7a786f535ddcde9e132b18391e9b932a5da13e605443f",
+    "previewPath": "/assets/carddex/render/preview/stock-mstr--stock.png",
+    "previewSha256": "b5d2d71844e3b75edf8b4ce5add1922a811285c30920890bbd2081295091f891",
     "sourceSha256": "947810c14e80d62934fef45af7a0bb6d142d726d42bbff52725e9917ef8e1ef8",
     "designKey": "stock-mstr",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "stock-coin--stock": {
     "path": "/assets/carddex/render/stock-coin--stock.png",
-    "sha256": "abdab07eba3a4097e4c0d8d554afda7396ac21025a9acbf39158b87253f5bb90",
+    "sha256": "5621eefacdfadbeb2d1ba3f837f070ac596cff17fbc7f95bfa17ff62dfd7efad",
+    "previewPath": "/assets/carddex/render/preview/stock-coin--stock.png",
+    "previewSha256": "cb9dc26cee43b270b04e0f3e79ab010262c171355c516eee19eaae0292a7d663",
     "sourceSha256": "a3043930f3089f9d70560c334585f8e4577f7f1fc7b8922f88f43d7ed9b8e98e",
     "designKey": "stock-coin",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "spark": {
     "path": "/assets/carddex/render/spark.png",
-    "sha256": "72c35cd4c81e85fca6437f98ce45059b43fac9baaa94ad3aca58506031ac8984",
+    "sha256": "9e48947896f70f10a5af9034283de98838c4eb7baaedd64a8c8147316d003864",
+    "previewPath": "/assets/carddex/render/preview/spark.png",
+    "previewSha256": "54a0c751100e5fe154962db6a6d578a7859541e4d43fd1bf11e8f67c56f3c52e",
     "sourceSha256": "829b638c5b4e609a73f85ea6d65aae48b58b66a74c06261cd7ab15bd21388067",
     "designKey": "spark",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "spark--stock": {
     "path": "/assets/carddex/render/spark--stock.png",
-    "sha256": "a1e3ae89579902080f3ac267e5fd8970c96d0b79562b99d371151a88483e74a8",
+    "sha256": "9e48947896f70f10a5af9034283de98838c4eb7baaedd64a8c8147316d003864",
+    "previewPath": "/assets/carddex/render/preview/spark--stock.png",
+    "previewSha256": "54a0c751100e5fe154962db6a6d578a7859541e4d43fd1bf11e8f67c56f3c52e",
     "sourceSha256": "829b638c5b4e609a73f85ea6d65aae48b58b66a74c06261cd7ab15bd21388067",
     "designKey": "spark",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "surge": {
     "path": "/assets/carddex/render/surge.png",
-    "sha256": "68206a37926917b472597c7f6faa2ec0254de14f80e793346136ddc1accab8fc",
+    "sha256": "d1a572eda71db838845ecd43328f273262e4716132c9c40d0ac617fa0b921263",
+    "previewPath": "/assets/carddex/render/preview/surge.png",
+    "previewSha256": "8a43735d9c7fb7707c9dce652aaaa1d2e8cd31455df0813d25a303cd56d310ba",
     "sourceSha256": "bb6e062d573b395897c842b3ee80a368e2ceb2c2e209662d003dba3cf9b463f4",
     "designKey": "surge",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "surge--stock": {
     "path": "/assets/carddex/render/surge--stock.png",
-    "sha256": "e7745290f95000a785744dc0ce18b8126592fd55e8b6a05ab42e2907334a6d43",
+    "sha256": "d1a572eda71db838845ecd43328f273262e4716132c9c40d0ac617fa0b921263",
+    "previewPath": "/assets/carddex/render/preview/surge--stock.png",
+    "previewSha256": "8a43735d9c7fb7707c9dce652aaaa1d2e8cd31455df0813d25a303cd56d310ba",
     "sourceSha256": "bb6e062d573b395897c842b3ee80a368e2ceb2c2e209662d003dba3cf9b463f4",
     "designKey": "surge",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "nova": {
     "path": "/assets/carddex/render/nova.png",
-    "sha256": "7dc8f50ab8a290cc9ba2d0e5478b39a6b01677948ca6c37d700824c31208eac1",
+    "sha256": "fd49c1eb5f4769d0738ec9f2d99fd4804923eaf58745971c69fe90569d32463c",
+    "previewPath": "/assets/carddex/render/preview/nova.png",
+    "previewSha256": "170c05497c8d7d9fe66e86e64b279df71c94d3851a282326ca0f1b369cb59563",
     "sourceSha256": "e7253092caf97a71e1628578745b6d3f898311a44ba98fe23ffbf259b89cf8ae",
     "designKey": "nova",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "nova--stock": {
     "path": "/assets/carddex/render/nova--stock.png",
-    "sha256": "23754c21e2473343556ff19595ed84ae44d9c39898aa6effb40df9c265524d21",
+    "sha256": "fd49c1eb5f4769d0738ec9f2d99fd4804923eaf58745971c69fe90569d32463c",
+    "previewPath": "/assets/carddex/render/preview/nova--stock.png",
+    "previewSha256": "170c05497c8d7d9fe66e86e64b279df71c94d3851a282326ca0f1b369cb59563",
     "sourceSha256": "e7253092caf97a71e1628578745b6d3f898311a44ba98fe23ffbf259b89cf8ae",
     "designKey": "nova",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "tide": {
     "path": "/assets/carddex/render/tide.png",
-    "sha256": "42ce033973af78bb6053531e09d8ec674c72677cdde3dec2053188b407848719",
+    "sha256": "882b02ba0549f8e3fbb910f06cadc5b964a2bcc357a381e07dae26ceb55a127e",
+    "previewPath": "/assets/carddex/render/preview/tide.png",
+    "previewSha256": "0c720cdf0b1368e28d15369bf197e149e98f5c254ab8fa795b38efb62946cbd2",
     "sourceSha256": "5cc8a991dbf2d67560643de8a5fe48167868845bf84bc8410152c9a2a62e741c",
     "designKey": "tide",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "tide--stock": {
     "path": "/assets/carddex/render/tide--stock.png",
-    "sha256": "a43e3da128d52e7ed81ba9c766291d872ae19e1e35a194e29c407f09ddb6533b",
+    "sha256": "882b02ba0549f8e3fbb910f06cadc5b964a2bcc357a381e07dae26ceb55a127e",
+    "previewPath": "/assets/carddex/render/preview/tide--stock.png",
+    "previewSha256": "0c720cdf0b1368e28d15369bf197e149e98f5c254ab8fa795b38efb62946cbd2",
     "sourceSha256": "5cc8a991dbf2d67560643de8a5fe48167868845bf84bc8410152c9a2a62e741c",
     "designKey": "tide",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "apex": {
     "path": "/assets/carddex/render/apex.png",
-    "sha256": "603deef80f9dbb88039579afae0206d985dca5c29b1ae85ba49df535804dcdfc",
+    "sha256": "fa373e2741aced6342f41b18a48eedc729649033cfa88db6dc320e1888d4730a",
+    "previewPath": "/assets/carddex/render/preview/apex.png",
+    "previewSha256": "48fdfeddd6ff13456f97498c9237ac790de08a9702ce6a7829d0f12fb3068db2",
     "sourceSha256": "8c6d422a6ce7e02e6ec15239e631e5eb5fa20b0c0727f4b62af32754f42e2b6a",
     "designKey": "apex",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "apex--stock": {
     "path": "/assets/carddex/render/apex--stock.png",
-    "sha256": "a59d8975b355d847d3aa0c2a448ea9462f80ae81887e0771ae8dbddf9b14e6d2",
+    "sha256": "fa373e2741aced6342f41b18a48eedc729649033cfa88db6dc320e1888d4730a",
+    "previewPath": "/assets/carddex/render/preview/apex--stock.png",
+    "previewSha256": "48fdfeddd6ff13456f97498c9237ac790de08a9702ce6a7829d0f12fb3068db2",
     "sourceSha256": "8c6d422a6ce7e02e6ec15239e631e5eb5fa20b0c0727f4b62af32754f42e2b6a",
     "designKey": "apex",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "ember": {
     "path": "/assets/carddex/render/ember.png",
-    "sha256": "e2ad628eea58b72aa943c1a0656e481beabd07f4301b205dc15ab759b2aedca3",
+    "sha256": "a3329292208c6df508f2d4e208777bd10c6fdd9477acd00b83619bdd7f2dc39a",
+    "previewPath": "/assets/carddex/render/preview/ember.png",
+    "previewSha256": "74298c6f23ed95a2be6ed9a268e4d6814be4e72cc212b2ae1e6479060bd56dc5",
     "sourceSha256": "b8718e25f305fec73c3103d3cead0e52229080246b3c18c64bf98d443ae735dc",
     "designKey": "ember",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "ember--stock": {
     "path": "/assets/carddex/render/ember--stock.png",
-    "sha256": "7a6d3538062bbc259a52dd1cd7e8b6defc9cf1b7383d78c051f440aca9e72611",
+    "sha256": "a3329292208c6df508f2d4e208777bd10c6fdd9477acd00b83619bdd7f2dc39a",
+    "previewPath": "/assets/carddex/render/preview/ember--stock.png",
+    "previewSha256": "74298c6f23ed95a2be6ed9a268e4d6814be4e72cc212b2ae1e6479060bd56dc5",
     "sourceSha256": "b8718e25f305fec73c3103d3cead0e52229080246b3c18c64bf98d443ae735dc",
     "designKey": "ember",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "bloom": {
     "path": "/assets/carddex/render/bloom.png",
-    "sha256": "d10c1da523597a182fbc95b68752032466a6a51bac7d61d82c6af0eacc6cd531",
+    "sha256": "fc5c65cdb421a6589677f042a6591b16befd82dd25cbc85bd79da47fbb86c208",
+    "previewPath": "/assets/carddex/render/preview/bloom.png",
+    "previewSha256": "6619ae2af96b7ce00fc76e113b5787dd4b761e8b658c01470518e6b6220a511d",
     "sourceSha256": "c3a67d407a2e3961ae3a7b639e9b2a23257b5a543910061ecb409c84c20213b2",
     "designKey": "bloom",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "bloom--stock": {
     "path": "/assets/carddex/render/bloom--stock.png",
-    "sha256": "a59ddbfd34613276efba8e74875d12334b026926c6e2c5804e474e682d5ee099",
+    "sha256": "fc5c65cdb421a6589677f042a6591b16befd82dd25cbc85bd79da47fbb86c208",
+    "previewPath": "/assets/carddex/render/preview/bloom--stock.png",
+    "previewSha256": "6619ae2af96b7ce00fc76e113b5787dd4b761e8b658c01470518e6b6220a511d",
     "sourceSha256": "c3a67d407a2e3961ae3a7b639e9b2a23257b5a543910061ecb409c84c20213b2",
     "designKey": "bloom",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "mythic": {
     "path": "/assets/carddex/render/mythic.png",
-    "sha256": "1e312b46770a9032025860149e72824cf8bc031493cfccf775417557588ce588",
+    "sha256": "61905238e76add610a3b4e3862055f5e1ade1524aa6b0a00d8809e7da8937f51",
+    "previewPath": "/assets/carddex/render/preview/mythic.png",
+    "previewSha256": "cc2970ae69d8ee5607ff23ea9e9983895ddb61192f3384856d67133e047605af",
     "sourceSha256": "0a032735b3e866438a4b0d8d11d6ed4079bcee966db7a4292fa1b5527d50affc",
     "designKey": "mythic",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "mythic--stock": {
     "path": "/assets/carddex/render/mythic--stock.png",
-    "sha256": "374a3d4b740bdee0cb5692341009006309353165d0c639784c6adbac73f96d61",
+    "sha256": "61905238e76add610a3b4e3862055f5e1ade1524aa6b0a00d8809e7da8937f51",
+    "previewPath": "/assets/carddex/render/preview/mythic--stock.png",
+    "previewSha256": "cc2970ae69d8ee5607ff23ea9e9983895ddb61192f3384856d67133e047605af",
     "sourceSha256": "0a032735b3e866438a4b0d8d11d6ed4079bcee966db7a4292fa1b5527d50affc",
     "designKey": "mythic",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "aurora": {
     "path": "/assets/carddex/render/aurora.png",
-    "sha256": "263654fcd7a706410ac37e0dab9a55baa409384ef7883b49aeadc46305af2b0e",
+    "sha256": "eeeb8c98638849cff064b0d8221e5a0255186eea3e86050cd8f67bc8d13704a3",
+    "previewPath": "/assets/carddex/render/preview/aurora.png",
+    "previewSha256": "193a768301ad592a017a332f5b40eacf8a0fb3f6ead97d7288f17a0dfe6ca19e",
     "sourceSha256": "aa4ff44a679980f4003e1319af828b51aa8c07a7597cccb41c3269aabc08a918",
     "designKey": "aurora",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "aurora--stock": {
     "path": "/assets/carddex/render/aurora--stock.png",
-    "sha256": "6b60362991950c51dbe6953f217d8f2fd26dfc47e9d8cefef5a95e31349ff493",
+    "sha256": "eeeb8c98638849cff064b0d8221e5a0255186eea3e86050cd8f67bc8d13704a3",
+    "previewPath": "/assets/carddex/render/preview/aurora--stock.png",
+    "previewSha256": "193a768301ad592a017a332f5b40eacf8a0fb3f6ead97d7288f17a0dfe6ca19e",
     "sourceSha256": "aa4ff44a679980f4003e1319af828b51aa8c07a7597cccb41c3269aabc08a918",
     "designKey": "aurora",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "relic": {
     "path": "/assets/carddex/render/relic.png",
-    "sha256": "fc8198b06972745f427c26e9aa5eca9c0390aa1d761a17e81fac07f0e77330f9",
+    "sha256": "155fb58a84d5ad6012a5702e709dd355c1979b1b322f728fb26fe6533102ef45",
+    "previewPath": "/assets/carddex/render/preview/relic.png",
+    "previewSha256": "866fc0d40ce6f04f118f8b84c2f7b304641b53d019f5752bf602ff5f71eabe6d",
     "sourceSha256": "be216297adb1d47381539ab01fb485a68659c93b0a85b808df63af422cd4aa73",
     "designKey": "relic",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "relic--stock": {
     "path": "/assets/carddex/render/relic--stock.png",
-    "sha256": "c5c75ab2c0374b507062c1a7b43eb94dc6fb095907961084fe4f03a1034161d1",
+    "sha256": "155fb58a84d5ad6012a5702e709dd355c1979b1b322f728fb26fe6533102ef45",
+    "previewPath": "/assets/carddex/render/preview/relic--stock.png",
+    "previewSha256": "866fc0d40ce6f04f118f8b84c2f7b304641b53d019f5752bf602ff5f71eabe6d",
     "sourceSha256": "be216297adb1d47381539ab01fb485a68659c93b0a85b808df63af422cd4aa73",
     "designKey": "relic",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "frost": {
     "path": "/assets/carddex/render/frost.png",
-    "sha256": "7f29aa6f2347d4ee7671d69de10bcaecd02517c035240df9da29edefd1fcbfce",
+    "sha256": "12922ea9731415887ae0eb8ac4f4896d41257177b27cf442fb0eb4daabfd4526",
+    "previewPath": "/assets/carddex/render/preview/frost.png",
+    "previewSha256": "2deeac43910744b396186bf14920534f492e2194d227370900a4244293cc7eeb",
     "sourceSha256": "33cc617dc7a611ce340ae52a84d0b22765803725a8e6191fc90fa38d17f15bae",
     "designKey": "frost",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "frost--stock": {
     "path": "/assets/carddex/render/frost--stock.png",
-    "sha256": "5b9ef836b014545e6c49ae70e6d0cbe57134882a7b8e846cc8c69f6bccc19b15",
+    "sha256": "12922ea9731415887ae0eb8ac4f4896d41257177b27cf442fb0eb4daabfd4526",
+    "previewPath": "/assets/carddex/render/preview/frost--stock.png",
+    "previewSha256": "2deeac43910744b396186bf14920534f492e2194d227370900a4244293cc7eeb",
     "sourceSha256": "33cc617dc7a611ce340ae52a84d0b22765803725a8e6191fc90fa38d17f15bae",
     "designKey": "frost",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "regal": {
     "path": "/assets/carddex/render/regal.png",
-    "sha256": "a435dbfd99b46d958f8e2bc6dac6ab9c8fb66e74e891ac2bed0795b7ad6a8da5",
+    "sha256": "4c2292691aff2cbfdd0385759a36bd8d46f0fc25581eff6b95a23145fdbeb8da",
+    "previewPath": "/assets/carddex/render/preview/regal.png",
+    "previewSha256": "3491cc6e8e4c4fddd4342b8727477a092d19c9395d4b7aba185230abc1ee75df",
     "sourceSha256": "f8e15999b446adf89026205d28496574e3ee23a81efc2df3dd2fcc0204010451",
     "designKey": "regal",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "regal--stock": {
     "path": "/assets/carddex/render/regal--stock.png",
-    "sha256": "d1016e837dcf3aaac933dee6f991ba3fdfd6423c5109b747864dccdb23183694",
+    "sha256": "4c2292691aff2cbfdd0385759a36bd8d46f0fc25581eff6b95a23145fdbeb8da",
+    "previewPath": "/assets/carddex/render/preview/regal--stock.png",
+    "previewSha256": "3491cc6e8e4c4fddd4342b8727477a092d19c9395d4b7aba185230abc1ee75df",
     "sourceSha256": "f8e15999b446adf89026205d28496574e3ee23a81efc2df3dd2fcc0204010451",
     "designKey": "regal",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "celestial": {
     "path": "/assets/carddex/render/celestial.png",
-    "sha256": "39910e67d7da297a60b339f0fb23081b609946676384b613b35f7a086fe273af",
+    "sha256": "d47b05169e84985ad559396dc802a22e6468d91a8c687897cd8b24e232e69f10",
+    "previewPath": "/assets/carddex/render/preview/celestial.png",
+    "previewSha256": "26234d0ff3e6dfdd9e7e924a9269f2793b3c86c3f1b3d680a6f96ceaedd3a008",
     "sourceSha256": "fb1fc5ae75eec88f692ef2178189af7fe1def648e8dc95bc00ff34544f228d69",
     "designKey": "celestial",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "celestial--stock": {
     "path": "/assets/carddex/render/celestial--stock.png",
-    "sha256": "06bce03f2cadf5b76f1650181c1fc58e3165ab331d60d1e3b9a55a21a88d14e5",
+    "sha256": "d47b05169e84985ad559396dc802a22e6468d91a8c687897cd8b24e232e69f10",
+    "previewPath": "/assets/carddex/render/preview/celestial--stock.png",
+    "previewSha256": "26234d0ff3e6dfdd9e7e924a9269f2793b3c86c3f1b3d680a6f96ceaedd3a008",
     "sourceSha256": "fb1fc5ae75eec88f692ef2178189af7fe1def648e8dc95bc00ff34544f228d69",
     "designKey": "celestial",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "legend": {
     "path": "/assets/carddex/render/legend.png",
-    "sha256": "192c16e319092f02ea73b2cc566eb95dc1ebf4dfed5184bce9319c9a256395c2",
+    "sha256": "d94c4c70d49f4acd90f7bb32f9c183b88bf26aaa0dac7bcfe2f89d7b6dfe8352",
+    "previewPath": "/assets/carddex/render/preview/legend.png",
+    "previewSha256": "f80116ca4fe5f95e7a11459b409f81fc8b29644d6c52999de7b0cefe81746e0f",
     "sourceSha256": "c04512958414fdf944088481552ee85e52f6a2a76829738ef0a662ed7b4670fb",
     "designKey": "legend",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "legend--stock": {
     "path": "/assets/carddex/render/legend--stock.png",
-    "sha256": "4e5cb78a2e282f7d4c8471d6c97ec848f8ac981ade81900beb58370a566af9db",
+    "sha256": "d94c4c70d49f4acd90f7bb32f9c183b88bf26aaa0dac7bcfe2f89d7b6dfe8352",
+    "previewPath": "/assets/carddex/render/preview/legend--stock.png",
+    "previewSha256": "f80116ca4fe5f95e7a11459b409f81fc8b29644d6c52999de7b0cefe81746e0f",
     "sourceSha256": "c04512958414fdf944088481552ee85e52f6a2a76829738ef0a662ed7b4670fb",
     "designKey": "legend",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "doge": {
     "path": "/assets/carddex/render/doge.png",
-    "sha256": "6d2a12c9b03c00423a60f5ed480246bd82d3224106431693c289ded9b66547a0",
+    "sha256": "f178d07a349cffc4cc4dcc0f121f388d1e4687c44f8b0b6ff442340ee3f56fe1",
+    "previewPath": "/assets/carddex/render/preview/doge.png",
+    "previewSha256": "37de77261a5693957f1c6fc01bfcb763202307511dbe8908985785169d901eb2",
     "sourceSha256": "76b971bf8e7b70af3bd6491b9ea785d2149a6e4d53964d8f4b7c110c846376ec",
     "designKey": "doge",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "pepe": {
     "path": "/assets/carddex/render/pepe.png",
-    "sha256": "e2c3c1ae56ac99e9015a362ee262a4b6bf24858bce8de469b70ad973c5a12cce",
+    "sha256": "888d58b30b9965a101a1f78c9c52e6d9146ec9a6fbadea19660136112b3bd8bf",
+    "previewPath": "/assets/carddex/render/preview/pepe.png",
+    "previewSha256": "43c2f30eea63b523a3c0c5c207950c65e18e42d9e1b7cc2efa42f20919aa362e",
     "sourceSha256": "47bf704875d6d606147af062afbbf204efeeb1ccb684c30d719b02acdbb32be2",
     "designKey": "pepe",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "pepe--stock": {
     "path": "/assets/carddex/render/pepe--stock.png",
-    "sha256": "9c464f20012e8b82d2b9a0ccb19ce82a4d70b62a6f13d8d7ef1eb384b02d6ba4",
+    "sha256": "888d58b30b9965a101a1f78c9c52e6d9146ec9a6fbadea19660136112b3bd8bf",
+    "previewPath": "/assets/carddex/render/preview/pepe--stock.png",
+    "previewSha256": "43c2f30eea63b523a3c0c5c207950c65e18e42d9e1b7cc2efa42f20919aa362e",
     "sourceSha256": "47bf704875d6d606147af062afbbf204efeeb1ccb684c30d719b02acdbb32be2",
     "designKey": "pepe",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "shib": {
     "path": "/assets/carddex/render/shib.png",
-    "sha256": "450ca4117f27d9918127e055a6b093b7572753234de000270c68f42e8951bd82",
+    "sha256": "04836adbd8b41d497388d31de02892b16417b87938773ad6e77cf96b204adce2",
+    "previewPath": "/assets/carddex/render/preview/shib.png",
+    "previewSha256": "0084a4886085a1852c12338bcbe97da5347451b1079626958467c30cf7bbf9f7",
     "sourceSha256": "e8755e9e5a81dddf7108e2911c768bc327b7e5385731576b701ad1d0c282d3a5",
     "designKey": "shib",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "shib--stock": {
     "path": "/assets/carddex/render/shib--stock.png",
-    "sha256": "353577af124c72744ca9ffb4087b8b9130e97bdffc4af239d3004a669b2e6f19",
+    "sha256": "04836adbd8b41d497388d31de02892b16417b87938773ad6e77cf96b204adce2",
+    "previewPath": "/assets/carddex/render/preview/shib--stock.png",
+    "previewSha256": "0084a4886085a1852c12338bcbe97da5347451b1079626958467c30cf7bbf9f7",
     "sourceSha256": "e8755e9e5a81dddf7108e2911c768bc327b7e5385731576b701ad1d0c282d3a5",
     "designKey": "shib",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "bonk": {
     "path": "/assets/carddex/render/bonk.png",
-    "sha256": "a72a1c06c04ea88b92f018df44d45e162afa9499cdf3c88f4e58990d1e7bfa26",
+    "sha256": "12e0158aa020f46d5fcea36d4444ba02fa25259a857afd85009b0655f6d3a964",
+    "previewPath": "/assets/carddex/render/preview/bonk.png",
+    "previewSha256": "7b45600bf11ffa055cd5863e7b12c6ba01c6a018d69e172670ffeb52b057f057",
     "sourceSha256": "ec6803f14d1194c53c0d52996fc2bda35e273b831ca2f97a47bf51a6455351f4",
     "designKey": "bonk",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "wif": {
     "path": "/assets/carddex/render/wif.png",
-    "sha256": "a63f9f2282fb495889a75ce5a4af9ec237a00cd67d4bd7642d705df7df462c43",
+    "sha256": "b244a83a43b8f5afe3134e77a3af9fdbe0eea6addc71210dbde687bb451c9c4d",
+    "previewPath": "/assets/carddex/render/preview/wif.png",
+    "previewSha256": "7efd02b09e13fafff3d1162b8272b0475049c5c8f4c2076d36bf21741ddb2520",
     "sourceSha256": "35b1d23d85e0805d4cbb1d1118c120259202258c1946ea9f5b180ffb1e092d31",
     "designKey": "wif",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "popcat": {
     "path": "/assets/carddex/render/popcat.png",
-    "sha256": "e581a9e8024ed7b776d237042a86dbb066f3dccee5c2801e05b75b6a8fce41ae",
+    "sha256": "7292be2da5db68ed58a195f7331c50f044aa571c85fe7692aa576f16e0f5c9bc",
+    "previewPath": "/assets/carddex/render/preview/popcat.png",
+    "previewSha256": "7a2d28a4438e75b3d30264d5cc349d82b9587c0bacae2c1955ae4ca54b54f274",
     "sourceSha256": "d34b06f3036019f2ee30c32548513e37e8a1efe70370ea0fc37e484a87d2a81c",
     "designKey": "popcat",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "popcat--stock": {
     "path": "/assets/carddex/render/popcat--stock.png",
-    "sha256": "26f6ad7b14504db387df0659dc8d3fe3660854c2d1c8f5d713505d8f25b27b2c",
+    "sha256": "7292be2da5db68ed58a195f7331c50f044aa571c85fe7692aa576f16e0f5c9bc",
+    "previewPath": "/assets/carddex/render/preview/popcat--stock.png",
+    "previewSha256": "7a2d28a4438e75b3d30264d5cc349d82b9587c0bacae2c1955ae4ca54b54f274",
     "sourceSha256": "d34b06f3036019f2ee30c32548513e37e8a1efe70370ea0fc37e484a87d2a81c",
     "designKey": "popcat",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "gamestop--stock": {
     "path": "/assets/carddex/render/gamestop--stock.png",
-    "sha256": "e0e92303a24a3cd523c490d585cc5829c11573616469893082deebc75eb9a0db",
+    "sha256": "7fec2e6f3b50e549121eed9ef89df146138b152b012ea666776cf05e70fa1084",
+    "previewPath": "/assets/carddex/render/preview/gamestop--stock.png",
+    "previewSha256": "4124a550a26edd8b9d6db792bf0b7345aead29def6c8979460271d9e71be1673",
     "sourceSha256": "55290091b1db2c128b45e1308a8d7fe43ad21939b88464aeee1fcc2458b83a00",
     "designKey": "gamestop",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "amc--stock": {
     "path": "/assets/carddex/render/amc--stock.png",
-    "sha256": "a37975e06348d703dbdfae1dd299b2b622dcfc6616ffa36243286c4c9f2eb07f",
+    "sha256": "a2ca5f81bb5cf0d707a8c87ccf95a99fb698c4fab2d31f927f84ca143a34668e",
+    "previewPath": "/assets/carddex/render/preview/amc--stock.png",
+    "previewSha256": "6a9509e7994214362211e9a8ebbd2bc1ea03284ec62c3de360b322af6949515a",
     "sourceSha256": "9c3c23241ed8033018fef444e18aba0603d319692c4ec26602dd517362441caf",
     "designKey": "amc",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "blackberry": {
     "path": "/assets/carddex/render/blackberry.png",
-    "sha256": "5feecff157d924ec429d96e97e4d3744dec1a6eb0bfdaeccfb4cd865c833dcbd",
+    "sha256": "2e850d78035f9b8a32806405371d1de4ecaf1adf6343ebc08b31afb55fc829e4",
+    "previewPath": "/assets/carddex/render/preview/blackberry.png",
+    "previewSha256": "725133b596029b0734c5066eaa420a9d4c8d16ff8c3656fd382f7e29e8b67b2b",
     "sourceSha256": "abeef03a108f25cb64bd1d16bd0f205f6cc24ab5e35b942741c7458bb6d2fc2d",
     "designKey": "blackberry",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "blackberry--stock": {
     "path": "/assets/carddex/render/blackberry--stock.png",
-    "sha256": "3eb30bb0cb04743815e4bfbed0c21378d9d8d99856b275283cb079edbea181c8",
+    "sha256": "2e850d78035f9b8a32806405371d1de4ecaf1adf6343ebc08b31afb55fc829e4",
+    "previewPath": "/assets/carddex/render/preview/blackberry--stock.png",
+    "previewSha256": "725133b596029b0734c5066eaa420a9d4c8d16ff8c3656fd382f7e29e8b67b2b",
     "sourceSha256": "abeef03a108f25cb64bd1d16bd0f205f6cc24ab5e35b942741c7458bb6d2fc2d",
     "designKey": "blackberry",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "nokia": {
     "path": "/assets/carddex/render/nokia.png",
-    "sha256": "8e4d602dd2da1ef574e99315e7226d515eb30f88c6cbe4b3410e1cc5d92d2a4c",
+    "sha256": "2401f4c2434d0ef3a2d52853bbf0c98e9d69c5be58459c21c3473a1bbeb46527",
+    "previewPath": "/assets/carddex/render/preview/nokia.png",
+    "previewSha256": "d8576a3ac996da79b03cb48638a72bb9531001bb53981b81a28bb26f585eed37",
     "sourceSha256": "d3b2e53d5c2b3946bef1b882598e70bf3c31be83ccc0c90439fa8ae6489fbba8",
     "designKey": "nokia",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "nokia--stock": {
     "path": "/assets/carddex/render/nokia--stock.png",
-    "sha256": "aa93acf811837efaa7b66dc43cba5746fdecb202e9035a729875ca9d8c6617a6",
+    "sha256": "2401f4c2434d0ef3a2d52853bbf0c98e9d69c5be58459c21c3473a1bbeb46527",
+    "previewPath": "/assets/carddex/render/preview/nokia--stock.png",
+    "previewSha256": "d8576a3ac996da79b03cb48638a72bb9531001bb53981b81a28bb26f585eed37",
     "sourceSha256": "d3b2e53d5c2b3946bef1b882598e70bf3c31be83ccc0c90439fa8ae6489fbba8",
     "designKey": "nokia",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "coinbase--stock": {
     "path": "/assets/carddex/render/coinbase--stock.png",
-    "sha256": "e9f0ce88f9532c73b74eac55eef3106352581dbe88c5fb0e9c7df6845e831cda",
+    "sha256": "1dbbfbb64492666002f46300184e31a3d337eceda4b0bd1d512742428ea6bc7a",
+    "previewPath": "/assets/carddex/render/preview/coinbase--stock.png",
+    "previewSha256": "b917dc4054e4ab138d3a724ab7342139d342af4dcaf45d3a3cbb4791beae5b22",
     "sourceSha256": "0ddc1fee240fb571ec9b167915d304bb193fbb5e14b7a4ca166563241139cebf",
     "designKey": "coinbase",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "binance": {
     "path": "/assets/carddex/render/binance.png",
-    "sha256": "4fbc5549c1bc46355da7aa6c6458283906b83dc5c5bb1a0d6f2841e0084b2234",
+    "sha256": "fe048a53c7a6571d0f4860ae31207269d83e49295dbdb302a7889d55b7aee79b",
+    "previewPath": "/assets/carddex/render/preview/binance.png",
+    "previewSha256": "e133d5e6fbc4566e90357ec863d099985dcdc27a54a067cedb14062be2ab47d1",
     "sourceSha256": "eebc858cf205d778af0d5e7db964d3e024c26ddcceab4d6f6e9dedbdb303dddf",
     "designKey": "binance",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "binance--stock": {
     "path": "/assets/carddex/render/binance--stock.png",
-    "sha256": "88639452d5d71381ab5bba9e5ec7c57fd7585f42982e691aa831523a1e0cf003",
+    "sha256": "fe048a53c7a6571d0f4860ae31207269d83e49295dbdb302a7889d55b7aee79b",
+    "previewPath": "/assets/carddex/render/preview/binance--stock.png",
+    "previewSha256": "e133d5e6fbc4566e90357ec863d099985dcdc27a54a067cedb14062be2ab47d1",
     "sourceSha256": "eebc858cf205d778af0d5e7db964d3e024c26ddcceab4d6f6e9dedbdb303dddf",
     "designKey": "binance",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "kraken": {
     "path": "/assets/carddex/render/kraken.png",
-    "sha256": "dee7f65ef8d05d6a316dc54f5e57ec5929196239e87f047db9a842ed1a1c6437",
+    "sha256": "133077667b2daa10bff7ff37790815a766f2323a00fe99e24ed07a807386994f",
+    "previewPath": "/assets/carddex/render/preview/kraken.png",
+    "previewSha256": "9d27aef31d9e31098ac4dbfa4d58adbb5b8092f0812856565bbba4fd7fb54d4b",
     "sourceSha256": "6f993b63a2db1b44a59ba372fdd3ab02382d76c507436d622753782440a8e12e",
     "designKey": "kraken",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "kraken--stock": {
     "path": "/assets/carddex/render/kraken--stock.png",
-    "sha256": "f4a51d2844a537b8e94908b835c4634e2e95bd684fd6dc0c9ec41d89160baef5",
+    "sha256": "133077667b2daa10bff7ff37790815a766f2323a00fe99e24ed07a807386994f",
+    "previewPath": "/assets/carddex/render/preview/kraken--stock.png",
+    "previewSha256": "9d27aef31d9e31098ac4dbfa4d58adbb5b8092f0812856565bbba4fd7fb54d4b",
     "sourceSha256": "6f993b63a2db1b44a59ba372fdd3ab02382d76c507436d622753782440a8e12e",
     "designKey": "kraken",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "strategy--stock": {
     "path": "/assets/carddex/render/strategy--stock.png",
-    "sha256": "2333d80c30119cef5df8082a94237feb6190cf27cd2fb7e2e521ca598e216b45",
+    "sha256": "399ff1741d2af926353a799f5e29c0341c28cf129719ff14c84eff384334064b",
+    "previewPath": "/assets/carddex/render/preview/strategy--stock.png",
+    "previewSha256": "84467613f41a081000c72baef8a18d32a8d594bda32fcabc195d6ab278cfe42b",
     "sourceSha256": "5e9ca52763c7428c88f88c995a0470016395723657ef364da20cd7a595133dd7",
     "designKey": "strategy",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "wildtype": {
     "path": "/assets/carddex/render/wildtype.png",
-    "sha256": "343c82bdf7dd8806fd6d262dcdec49fd5045674a8efa3fe942602acf9c59f300",
+    "sha256": "15e8d6c750bb6336bc97b11dee4a93e27f54b7073cbf8d3bdd431b7efe5fc9ca",
+    "previewPath": "/assets/carddex/render/preview/wildtype.png",
+    "previewSha256": "eb4442429c2770450d51ce781a3409b8630a9f836268f317217f7022cb5879ba",
     "sourceSha256": "01e471c5292398e76b4e38d934e1536a9a6be1c1200ebf4ef5bb147dfdffe318",
     "designKey": "wildtype",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "wildtype--stock": {
     "path": "/assets/carddex/render/wildtype--stock.png",
-    "sha256": "33ad421c2f5c851a1ed277ee4ef63a2869fa47dd83319ab50bff3cc2d30aae88",
+    "sha256": "15e8d6c750bb6336bc97b11dee4a93e27f54b7073cbf8d3bdd431b7efe5fc9ca",
+    "previewPath": "/assets/carddex/render/preview/wildtype--stock.png",
+    "previewSha256": "eb4442429c2770450d51ce781a3409b8630a9f836268f317217f7022cb5879ba",
     "sourceSha256": "01e471c5292398e76b4e38d934e1536a9a6be1c1200ebf4ef5bb147dfdffe318",
     "designKey": "wildtype",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "ronin": {
     "path": "/assets/carddex/render/ronin.png",
-    "sha256": "ab60dd1131466d65d95d782ea59567b8501d5107610e9c8caf0d3cb3885c0fdc",
+    "sha256": "ad7c4ba2a23b05a3b43d5e442e2e47bf0c4ba1bcfcc1a4e1d0e4d5b888049f86",
+    "previewPath": "/assets/carddex/render/preview/ronin.png",
+    "previewSha256": "e1d71c3aa61ffea8ec8ce8e6f191ad863904432029f0b585e984b53648d140fe",
     "sourceSha256": "659c7c59565b425ac69d77964b1f88e56065b8b1e489681b5c14c66a632cd8fb",
     "designKey": "ronin",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "ronin--stock": {
     "path": "/assets/carddex/render/ronin--stock.png",
-    "sha256": "1ead61d69cc96465f824d0f6577e85667cbf39c022f0f5a7719fd037e8878eb3",
+    "sha256": "ad7c4ba2a23b05a3b43d5e442e2e47bf0c4ba1bcfcc1a4e1d0e4d5b888049f86",
+    "previewPath": "/assets/carddex/render/preview/ronin--stock.png",
+    "previewSha256": "e1d71c3aa61ffea8ec8ce8e6f191ad863904432029f0b585e984b53648d140fe",
     "sourceSha256": "659c7c59565b425ac69d77964b1f88e56065b8b1e489681b5c14c66a632cd8fb",
     "designKey": "ronin",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "astral": {
     "path": "/assets/carddex/render/astral.png",
-    "sha256": "59b275a70f1517702f1aca0d956f3ec59fddeb77979e372f8c73c5fa5ed585ad",
+    "sha256": "4e02ec549c9a6dfe5b09762910262d60d4a8ca85016800242df1c328ae6dab49",
+    "previewPath": "/assets/carddex/render/preview/astral.png",
+    "previewSha256": "ec3ca2b83a2d70baec13df0c509b3b1129c34d16ba6d9167d7019c921d214b8a",
     "sourceSha256": "6912eeef22690132595b441a850eaa0d8dddd21bae405086428e85230f41ba35",
     "designKey": "astral",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "astral--stock": {
     "path": "/assets/carddex/render/astral--stock.png",
-    "sha256": "218f3c3c9042e4ef21b84f1ae7d0b434b5ef2d8f41020ecfe231caf508796cfe",
+    "sha256": "4e02ec549c9a6dfe5b09762910262d60d4a8ca85016800242df1c328ae6dab49",
+    "previewPath": "/assets/carddex/render/preview/astral--stock.png",
+    "previewSha256": "ec3ca2b83a2d70baec13df0c509b3b1129c34d16ba6d9167d7019c921d214b8a",
     "sourceSha256": "6912eeef22690132595b441a850eaa0d8dddd21bae405086428e85230f41ba35",
     "designKey": "astral",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "neon-circuit": {
     "path": "/assets/carddex/render/neon-circuit.png",
-    "sha256": "0ea1a43cecd3a85e2051cc50e4a020b2ad0613b9b0d0fd7da7b87a6874b66530",
+    "sha256": "1b32c3db969ab254f663e7daec49573f89539301777e231ea10c94921368da71",
+    "previewPath": "/assets/carddex/render/preview/neon-circuit.png",
+    "previewSha256": "215ba85ab3f556f4433d086aaf88c4e22e0856d432d39a5009192d2d95ada83b",
     "sourceSha256": "901b5975a0e663ccf6311ce35bec261c0576e02978d40cbd7dbc4d36f60b3393",
     "designKey": "neon-circuit",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "neon-circuit--stock": {
     "path": "/assets/carddex/render/neon-circuit--stock.png",
-    "sha256": "ce3e8ec9e167b6d9e0a409726dfcf513b0dd366fc05c880713c44ac2084ae877",
+    "sha256": "1b32c3db969ab254f663e7daec49573f89539301777e231ea10c94921368da71",
+    "previewPath": "/assets/carddex/render/preview/neon-circuit--stock.png",
+    "previewSha256": "215ba85ab3f556f4433d086aaf88c4e22e0856d432d39a5009192d2d95ada83b",
     "sourceSha256": "901b5975a0e663ccf6311ce35bec261c0576e02978d40cbd7dbc4d36f60b3393",
     "designKey": "neon-circuit",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "sovereign": {
     "path": "/assets/carddex/render/sovereign.png",
-    "sha256": "79298b7aa9f8fdb80ffc983fdb95696a1cbb63074d3f04f17d2545daeb7eb2f8",
+    "sha256": "13017a64364d0ff728f8d0d4b528857f9b86a929b230107fdfaebae83841256c",
+    "previewPath": "/assets/carddex/render/preview/sovereign.png",
+    "previewSha256": "32a8990e0a6a0199047e51e45c828d8ef39201ab8e8e91b1727f3fd3034a0983",
     "sourceSha256": "4d4986d94eca1f0d0660c325443e050d36448d3384b15f396e357565db826c46",
     "designKey": "sovereign",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "sovereign--stock": {
     "path": "/assets/carddex/render/sovereign--stock.png",
-    "sha256": "1ddcff91822b159e328c03a6d810b02fcaa16fcb66447da7748b0f018fd63205",
+    "sha256": "13017a64364d0ff728f8d0d4b528857f9b86a929b230107fdfaebae83841256c",
+    "previewPath": "/assets/carddex/render/preview/sovereign--stock.png",
+    "previewSha256": "32a8990e0a6a0199047e51e45c828d8ef39201ab8e8e91b1727f3fd3034a0983",
     "sourceSha256": "4d4986d94eca1f0d0660c325443e050d36448d3384b15f396e357565db826c46",
     "designKey": "sovereign",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "abyssal": {
     "path": "/assets/carddex/render/abyssal.png",
-    "sha256": "ae3ad4a1c8d82e4b0cb493bad9968e23f096dd8ca9718b84ab67aa12bf0ef3cd",
+    "sha256": "4761f05ca322498df02eeb714bbaad40171a7024b77972a0b5dcf86664825c76",
+    "previewPath": "/assets/carddex/render/preview/abyssal.png",
+    "previewSha256": "d1b9ca011046fd2d1aedf20190b643d6b15bf10ddc79481c51cef05df763aaec",
     "sourceSha256": "9ad2255e0eb88f4d84f9ba370356a604fb698b07b1cbc84b5f76be34a604c26e",
     "designKey": "abyssal",
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "abyssal--stock": {
     "path": "/assets/carddex/render/abyssal--stock.png",
-    "sha256": "7fccc7ec2e9afdcf5c685c56b5a5d6b18ee5ca1d937589108f5a1dad46f281fb",
+    "sha256": "4761f05ca322498df02eeb714bbaad40171a7024b77972a0b5dcf86664825c76",
+    "previewPath": "/assets/carddex/render/preview/abyssal--stock.png",
+    "previewSha256": "d1b9ca011046fd2d1aedf20190b643d6b15bf10ddc79481c51cef05df763aaec",
     "sourceSha256": "9ad2255e0eb88f4d84f9ba370356a604fb698b07b1cbc84b5f76be34a604c26e",
     "designKey": "abyssal",
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v1"
+    "rendererVersion": "launchacard-canonical-v2.1"
   }
 }

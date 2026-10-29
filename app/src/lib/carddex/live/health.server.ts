@@ -12,6 +12,8 @@ type Dependencies = {
   fetch?: RpcFetch;
   now?: () => number;
   timeoutMs?: number;
+  /** The D1 migrations this build needs that the database lacks (limits.server.ts missingMigrations). */
+  schema?: () => Promise<string[]>;
 };
 
 class RpcProbeFailure extends Error {
@@ -90,19 +92,27 @@ export function createLiveHealthHandler(dependencies: Dependencies) {
       rpc = await cached.result;
     }
     const configured = readiness.configured && configuredRpc(endpoint);
-    const ok = configured && rpc.status === "healthy";
+    // A deploy that skipped `wrangler d1 migrations apply` shows here (REG-2): migration numbers only, never an error.
+    let schema: { ok: boolean; missing: string[] } | { ok: false; status: "unavailable" } | undefined;
+    if (dependencies.schema) {
+      try { const missing = await dependencies.schema(); schema = { ok: missing.length === 0, missing }; }
+      catch { schema = { ok: false, status: "unavailable" }; }
+    }
+    const ok = configured && rpc.status === "healthy" && (schema?.ok ?? true);
     return Response.json({
       ok,
       readiness: { configured, enabled: readiness.enabled, ready: readiness.ready && ok,
+        recoveryEnabled: readiness.recoveryEnabled, recoveryReady: readiness.recoveryReady && ok,
         network: readiness.network, publicOrigin: readiness.publicOrigin },
       rpc,
+      ...(schema ? { schema } : {}),
     }, { status: ok ? 200 : 503, headers: { "cache-control": "no-store", "x-content-type-options": "nosniff" } });
   };
 }
 
 let productionHandler: Promise<ReturnType<typeof createLiveHealthHandler>> | undefined;
 export async function serveLiveHealth(): Promise<Response> {
-  productionHandler ??= Promise.all([import("../../bindings.server"), import("./config.server")]).then(([{ bindings }, { liveReadiness }]) =>
-    createLiveHealthHandler({ readiness: liveReadiness, rpcUrl: () => bindings().CARDDEX_MAINNET_RPC_URL }));
+  productionHandler ??= Promise.all([import("../../bindings.server"), import("./config.server"), import("./limits.server")]).then(([{ bindings }, { liveReadiness }, { missingMigrations }]) =>
+    createLiveHealthHandler({ readiness: liveReadiness, rpcUrl: () => bindings().CARDDEX_MAINNET_RPC_URL, schema: missingMigrations }));
   return (await productionHandler)();
 }

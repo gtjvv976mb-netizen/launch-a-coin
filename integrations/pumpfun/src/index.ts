@@ -6,7 +6,10 @@ import {
   Connection, PublicKey, type AccountInfo, type Commitment,
   type GetMultipleAccountsConfig, type RpcResponseAndContext,
 } from "@solana/web3.js";
-import { AccountState, getDefaultAccountState, getPausableConfig, unpackMint } from "@solana/spl-token";
+import {
+  AccountState, getDefaultAccountState, getPausableConfig, getPermanentDelegate, getTransferFeeConfig, getTransferHook, unpackMint,
+  type Mint,
+} from "@solana/spl-token";
 import verifiedCatalog from "../../../reports/pump-pair-assets-2026-10-28.json";
 import { isCardDesignKey } from "../../../app/src/lib/carddex/designs";
 import { resolveLaunchQuote } from "../../../app/src/lib/carddex/pairs";
@@ -77,13 +80,8 @@ export function immutable<T>(value: T): T {
  * No transaction, blockhash, signature, initial buy, upload or NFT is submitted.
  * Signing integration must refresh this plan, review costs and verify confirmation.
  */
-export function reviewLaunchInput(input: PrepareLaunchInput) {
-  const asset = PAIR_ASSETS.find((candidate) => candidate.key === input.quoteKey);
-  if (!asset) throw new Error("Choose a verified CardDex pair asset");
-  const creator = publicKey(input.creator, "creator");
-  const mint = publicKey(input.mint, "mint");
-  const quoteMint = new PublicKey(asset.mint);
-  if (mint.equals(creator) || mint.equals(quoteMint)) throw new Error("A distinct new mint public key is required");
+/** The coin's own create_v2 fields: name, symbol and metadata URI. Returns the reviewed URI. */
+export function reviewTokenFields(input: Pick<PrepareLaunchInput, "name" | "symbol" | "tokenMetadataUri">): string {
   if (typeof input.name !== "string" || !input.name.trim() || Buffer.byteLength(input.name, "utf8") > 32 || /[\x00-\x1f]/.test(input.name)) {
     throw new Error("Coin name must contain 1–32 UTF-8 bytes");
   }
@@ -92,6 +90,17 @@ export function reviewLaunchInput(input: PrepareLaunchInput) {
   }
   const tokenMetadataUri = publicUri(input.tokenMetadataUri, "token metadata");
   if (Buffer.byteLength(tokenMetadataUri, "utf8") > 200) throw new Error("Token metadata URI exceeds 200 bytes");
+  return tokenMetadataUri;
+}
+
+export function reviewLaunchInput(input: PrepareLaunchInput) {
+  const asset = PAIR_ASSETS.find((candidate) => candidate.key === input.quoteKey);
+  if (!asset) throw new Error("Choose a verified CardDex pair asset");
+  const creator = publicKey(input.creator, "creator");
+  const mint = publicKey(input.mint, "mint");
+  const quoteMint = new PublicKey(asset.mint);
+  if (mint.equals(creator) || mint.equals(quoteMint)) throw new Error("A distinct new mint public key is required");
+  const tokenMetadataUri = reviewTokenFields(input);
   if (!input.card || !isCardDesignKey(input.card.designKey) || !(input.card.designKey in designAssets)) {
     throw new Error("A reviewed canonical card design key is required");
   }
@@ -113,6 +122,31 @@ export function reviewLaunchInput(input: PrepareLaunchInput) {
   };
   return { asset, creator, mint, quoteMint, tokenMetadataUri, card };
 }
+
+/**
+ * Token-2022 quote extensions read at prepare time, so a later catalog or mint change cannot slip through. A transfer
+ * fee (SDK 4.1.0 prices buys without it, so the minimum output would be wrong and the buy would fail simulation) or a
+ * transfer-hook program (an extra program would run inside the buy) refuses the quote outright. A permanent delegate
+ * (every tokenized-stock quote has one) is reported: wallets warn when a transaction spends such a token.
+ */
+export function quoteIssuerControls(mint: Mint) {
+  const fee = getTransferFeeConfig(mint);
+  if (fee && [fee.olderTransferFee, fee.newerTransferFee].some((entry) => entry.transferFeeBasisPoints > 0 || entry.maximumFee > 0n)) {
+    throw new Error("Pair mint charges a transfer fee this launch cannot price");
+  }
+  const hook = getTransferHook(mint);
+  if (hook && !hook.programId.equals(PublicKey.default)) throw new Error("Pair mint runs a transfer-hook program");
+  const delegate = getPermanentDelegate(mint);
+  return { permanentDelegate: !!delegate && !delegate.delegate.equals(PublicKey.default) };
+}
+/**
+ * Whether a live launch may spend a permanent-delegate quote (the tokenized stocks) in its first buy. Wallets warn on
+ * any transaction that moves such a token (Phantom's Token-2022 guidance), so by default those launches go without an
+ * initial buy: the coin is created with the stock quote, and buying happens afterwards on pump.fun. Set true to
+ * allow the buy again; the review already tells the creator about the notice before the wallet opens.
+ */
+export const ALLOW_PERMANENT_DELEGATE_QUOTE_BUY = false;
+export const PERMANENT_DELEGATE_BUY_REFUSAL = "Wallets warn about tokenized-stock quotes in a first buy (the stock token has issuer controls); launch without an initial buy, then buy on pump.fun after launch";
 
 export async function preparePumpLaunchPlan(
   input: PrepareLaunchInput,
@@ -160,6 +194,7 @@ export async function preparePumpLaunchPlan(
     getDefaultAccountState(mintState)?.state === AccountState.Frozen) {
     throw new Error("Pair mint is uninitialized, paused or frozen by default");
   }
+  const issuerControls = quoteIssuerControls(mintState);
   if (resolved.initialVirtualQuoteReserves.lten(0)) throw new Error("Pair asset has no positive starting reserves");
   const instruction = await PUMP_SDK.createV2Instruction({
     mint, user: creator, creator, name: input.name, symbol: input.symbol,
@@ -190,6 +225,7 @@ export async function preparePumpLaunchPlan(
     preparedAt: (options.now?.() ?? new Date()).toISOString(),
     verifiedSlot: snapshot.context.slot, genesisHash,
     admission: resolved.source,
+    quoteIssuerControls: issuerControls,
     initialVirtualQuoteReserves: resolved.initialVirtualQuoteReserves.toString(),
     binding, bindingSha256: hash(JSON.stringify(binding)),
     createInstruction: serializedInstruction,

@@ -116,19 +116,20 @@
  * mdx-name, mdx-plinth, mdx-aside, mdx-main, mdx-pair, mdx-h1, mdx-h2, mdx-display, mdx-small, mdx-micro,
  * mdx-unit, mdx-mini, mdx-label, mdx-input, mdx-select, mdx-menu-trigger, mdx-drop (+ data-over), mdx-range
  * (+ --fill, --tier), mdx-progress (+ __fill, --tier), mdx-menu, mdx-menu-item, mdx-menu-check, mdx-pop,
- * mdx-dialog, mdx-overlay, mdx-row (+ data-new, inset focus ring), mdx-thumb, mdx-live, mdx-step-dot, mdx-lift,
+ * mdx-dialog, mdx-overlay, mdx-row (+ data-new, inset focus ring), mdx-thumb, mdx-live, mdx-step-dot,
  * mdx-enter (+ --i), mdx-check, mdx-btn__done, mdx-btn[data-feedback], mdx-toast__x, mdx-toast__action, mdx-badge
  * (+ --dot), mdx-suggest, mdx-skip,
- * mdx-stagger, mdx-page, mdx-tick, mdx-lot-in, mdx-lot-out (+ --d), mdx-fade, mdx-skeleton, mdx-hit, mdx-routebar
- * (+ data-phase), mdx-livepause, mdx-draw, mdx-dot-in, mdx-grid-in, mdx-chip-pop, data-pending on tabs; utilities
+ * mdx-stagger, mdx-page, mdx-tick, mdx-fade, mdx-skeleton, mdx-hit, mdx-routebar (+ data-phase), mdx-livepause,
+ * mdx-draw, mdx-grid-in, data-pending on tabs; utilities
  * num and addr; variants short:, wide:, xwide:, fit:. Tokens: rounded-{chip,row,field,pop,panel,aside,pill},
- * shadow-{ring,rest,raise,lift,float,modal}, ease-{room,spring,exit,sheen}, --t-* durations, --stagger.
+ * shadow-{ring,rest,raise,lift,float,modal}, ease-{room,exit,sheen}, --t-* durations, --stagger.
  */
-import * as Dialog from "@radix-ui/react-dialog";
 import { Link, type LinkProps } from "@tanstack/react-router";
 import {
   Fragment,
+  Suspense,
   createContext,
+  lazy,
   useCallback,
   useContext,
   useEffect,
@@ -147,19 +148,16 @@ import {
 } from "react";
 
 import { thumbSources } from "../../lib/mintdex/art";
-import {
-  CardBack,
-  CardDeck,
-  CardMotionCell,
-  CardMotionProvider,
-  fanVars,
-  gather,
-  motionLevel,
-  prefetchGather,
-  setCalm,
-  useFreshMount,
-  useMotionLevel,
-} from "./card3d";
+import { Icon, type IconName } from "./icons";
+// The card sheets stay in the global stylesheet, first, where the card3d barrel import used to put them: every
+// page that shows a card back (the 404 included) needs them, and the cascade keeps its order.
+import "../../themed-card-backs.css";
+import "../../carddex-cards.css";
+// Direct card3d files, never the barrel: this module is in every page's first download, the card engine is not.
+import { CardDeck } from "./card3d/CardBack";
+import { CardMotionCell, CardMotionProvider, gather, prefetchGather } from "./card3d/context";
+import { fanVars } from "./card3d/light";
+import { motionLevel, setCalm, useFreshMount, useMotionLevel } from "./card3d/motion3d";
 import { copyKey, copyText } from "../../lib/mintdex/clipboard";
 import { LAMPORTS } from "../../lib/mintdex/constants";
 import { MODE_COPY } from "../../lib/mintdex/copy";
@@ -167,8 +165,11 @@ import { sol } from "../../lib/mintdex/format";
 import { frameMiniSrc, tierForLevel } from "../../lib/mintdex/tiers";
 import { ancestry, focusNear, focusPageHome } from "./focus";
 import { Sheet, useIsPhone } from "./sheet";
+import { useOpenedOnce } from "./opened-once";
+import { tabDomId, tabKeys, tabPanelDomId } from "../carddex/ViewTabs";
 
 export { ancestry, focusNear, focusPageHome };
+export { Icon, type IconName };
 
 /** Every card is a Pokemon card: 63 x 88 mm. */
 export const CARD_ASPECT = 63 / 88;
@@ -195,7 +196,7 @@ export function GenIcon({
     <span
       aria-hidden
       className={`mdx-icon ${className}`}
-      style={{ "--s": `${size}px`, "--src": `url(/assets/icons/${name}.png)` } as CSSProperties}
+      style={{ "--s": `${size}px`, "--src": `url(/assets/icons/mask/${name}.webp)` } as CSSProperties}
     />
   );
 }
@@ -226,8 +227,13 @@ export function Hallmark({ size = 28, className = "" }: { size?: number; classNa
 
 // ---------------------------------------------------------------- buttons and links
 
-/** "outline" renders the secondary recipe (a sheet pill with a hairline ring); the name is kept for call sites. */
-export type ButtonVariant = "primary" | "outline" | "ghost" | "chip" | "buy" | "sell";
+/**
+ * One recipe per variant (mintdex.css @layer components, .mdx-btn): "primary" is the cream pill (one per view),
+ * "outline" renders the secondary recipe (a quiet nested pill; the name is kept for call sites), "ghost" is text
+ * with a track hover, "danger" a destructive confirm, "chip" a quick amount. "buy"/"sell" stay for the inherited
+ * chain pages only.
+ */
+export type ButtonVariant = "primary" | "outline" | "ghost" | "danger" | "chip" | "buy" | "sell";
 export type ButtonSize = "md" | "sm" | "lg";
 
 export function buttonClass({
@@ -376,6 +382,7 @@ export function TextLink({
   to,
   params,
   search,
+  hash,
   href,
   target,
   rel,
@@ -388,6 +395,7 @@ export function TextLink({
   to?: LinkProps["to"];
   params?: LinkProps["params"];
   search?: LinkProps["search"];
+  hash?: LinkProps["hash"];
   href?: string;
   target?: string;
   rel?: string;
@@ -404,6 +412,7 @@ export function TextLink({
         to={to}
         params={params}
         search={search}
+        hash={hash}
         onClick={onClick}
         className={cls}
         aria-label={ariaLabel}
@@ -440,16 +449,100 @@ export function TextLink({
 }
 
 function Chevron({ dir }: { dir: "left" | "right" }) {
+  return <Icon name={dir === "left" ? "chevron-left" : "chevron-right"} />;
+}
+
+/**
+ * An icon-only button: a 36px circle (32 with size="sm") with a 16px glyph, reaching the hit size through ::after.
+ * `label` is required: it is the accessible name and the tooltip. Icon-only is for close, search, menu, help,
+ * chevrons and the card-corner 3D button; everything else gets words (Button with an icon child).
+ * tone "quiet": transparent with a track hover (bars, dialogs, the search clear); "secondary": the nested pill.
+ */
+export function IconButton({
+  icon,
+  label,
+  tone = "quiet",
+  size = "md",
+  className = "",
+  type = "button",
+  disabled,
+  onClick,
+  ref,
+  ...rest
+}: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
+  icon: IconName;
+  label: string;
+  tone?: "quiet" | "secondary";
+  size?: "md" | "sm";
+  ref?: Ref<HTMLButtonElement>;
+}) {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden fill="none">
-      <path
-        d={dir === "left" ? "M8.75 3.5 5.25 7l3.5 3.5" : "M5.25 3.5 8.75 7l-3.5 3.5"}
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <button
+      ref={ref}
+      type={type}
+      aria-label={label}
+      title={label}
+      aria-disabled={disabled || undefined}
+      onClick={disabled ? undefined : onClick}
+      className={cx(
+        "mdx-btn mdx-btn--icon",
+        tone === "quiet" ? "mdx-btn--ghost" : "mdx-btn--outline",
+        size === "sm" && "mdx-btn--sm",
+        className,
+      )}
+      {...rest}
+    >
+      <Icon name={icon} />
+    </button>
+  );
+}
+
+/**
+ * A filter chip (Discover and Designs categories): a track pill at the control height, ink label, an optional
+ * count in caption slate ("Classics 7"). Pressed is aria-pressed (ink fill, ground label). One row, never wrapping:
+ * put chips in a `.mdx-chiprow` (nowrap, scrolls sideways with an edge fade when it overflows).
+ */
+export function Chip({
+  pressed = false,
+  count,
+  onClick,
+  children,
+  className = "",
+}: {
+  pressed?: boolean;
+  count?: number;
+  onClick?: () => void;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <button type="button" aria-pressed={pressed} onClick={onClick} className={cx("mdx-chip", className)}>
+      {children}
+      {count != null ? <span className="mdx-chip__count num">{count}</span> : null}
+    </button>
+  );
+}
+
+/**
+ * A read-only status pill, never interactive: 20px tall, 12/600. tone "neutral" (track and slate: "optional",
+ * "you", "Simulated"), "up" and "down" (the soft market pair), "ink" (a count that needs action), "gold" (a data
+ * mark only, e.g. the current period; never on chrome).
+ */
+export function Badge({
+  tone = "neutral",
+  children,
+  className = "",
+  title,
+}: {
+  tone?: "neutral" | "up" | "down" | "ink" | "gold";
+  children: ReactNode;
+  className?: string;
+  title?: string;
+}) {
+  return (
+    <span className={cx("mdx-tag", className)} data-tone={tone} title={title}>
+      {children}
+    </span>
   );
 }
 
@@ -505,6 +598,8 @@ export function Tabs<T extends string | number>({
   label,
   size = "md",
   className = "",
+  panels = false,
+  idBase,
 }: {
   value: T;
   options: Array<TabOption<T>>;
@@ -512,10 +607,18 @@ export function Tabs<T extends string | number>({
   label: string;
   size?: "md" | "sm";
   className?: string;
+  /** The options switch the panel below (role="tablist" with arrow keys), not a value such as a chart range. */
+  panels?: boolean;
+  /** With panels: ids for the tabs and their shared panel (tabPanelProps(idBase, value) on the panel). */
+  idBase?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState<{ x: number; w: number } | null>(null);
   const [ready, setReady] = useState(false);
+  // The thumb's laid-out width. A move animates transform only (translateX + scaleX from this width); once it
+  // lands, the width takes the new size with transitions off (data-snap) so the pill's ends are round again.
+  const [base, setBase] = useState<number | null>(null);
+  const [snap, setSnap] = useState(false);
   // Layout effect on the client (measure before paint), plain effect on the server (where it never runs).
   const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
   useIsoLayoutEffect(() => {
@@ -524,7 +627,7 @@ export function Tabs<T extends string | number>({
     let alive = true;
     const measure = () => {
       if (!alive) return;
-      const b = root.querySelector<HTMLElement>('.mdx-tabs__tab[aria-pressed="true"]');
+      const b = root.querySelector<HTMLElement>(".mdx-tabs__tab[data-selected]");
       const next = b ? { x: b.offsetLeft, w: b.offsetWidth } : null;
       setThumb((prev) =>
         prev && next && prev.x === next.x && prev.w === next.w ? prev : next,
@@ -541,6 +644,15 @@ export function Tabs<T extends string | number>({
     };
   }, [value, options.length]);
   useEffect(() => {
+    // Before the first painted measurement nothing animates: the width simply follows.
+    if (thumb && (base == null || !ready) && base !== thumb.w) setBase(thumb.w);
+  }, [thumb, base, ready]);
+  useEffect(() => {
+    if (!snap) return;
+    const id = requestAnimationFrame(() => setSnap(false));
+    return () => cancelAnimationFrame(id);
+  }, [snap]);
+  useEffect(() => {
     if (!thumb || ready) return;
     // Transitions only after the first painted measurement.
     const id = requestAnimationFrame(() => setReady(true));
@@ -549,12 +661,13 @@ export function Tabs<T extends string | number>({
   return (
     <div
       ref={ref}
-      role="group"
+      role={panels ? "tablist" : "group"}
       aria-label={label}
+      onKeyDown={panels ? tabKeys : undefined}
       data-measured={thumb ? "" : undefined}
       data-ready={ready ? "" : undefined}
       className={cx(
-        "mdx-tabs mdx-noscrollbar max-w-full max-lg:overflow-x-auto",
+        "mdx-tabs",
         size === "sm" && "mdx-tabs--sm",
         className,
       )}
@@ -562,21 +675,26 @@ export function Tabs<T extends string | number>({
       <span
         aria-hidden
         className="mdx-tabs__thumb"
-        style={{ "--x": `${thumb?.x ?? 0}px`, "--w": `${thumb?.w ?? 0}px` } as CSSProperties}
+        data-snap={snap || undefined}
+        style={
+          {
+            "--x": `${thumb?.x ?? 0}px`,
+            "--w": `${base ?? thumb?.w ?? 0}px`,
+            "--s": thumb && base ? thumb.w / base : 1,
+          } as CSSProperties
+        }
+        onTransitionEnd={(e) => {
+          if (e.propertyName !== "transform" || !thumb || base === thumb.w) return;
+          setSnap(true);
+          setBase(thumb.w);
+        }}
       />
       {options.map((o) => {
         const content = (
           <>
             {o.level ? <FrameMini level={o.level} /> : null}
-            <span>
-              {o.label}
-              {o.count != null ? (
-                <>
-                  {" "}
-                  (<span className="num">{o.count}</span>)
-                </>
-              ) : null}
-            </span>
+            <span>{o.label}</span>
+            {o.count != null ? <span className="mdx-tabs__count">{o.count}</span> : null}
           </>
         );
         return (
@@ -584,7 +702,13 @@ export function Tabs<T extends string | number>({
             key={String(o.value)}
             type="button"
             className="mdx-tabs__tab"
-            aria-pressed={o.value === value}
+            role={panels ? "tab" : undefined}
+            id={panels && idBase ? tabDomId(idBase, String(o.value)) : undefined}
+            aria-controls={panels && idBase ? tabPanelDomId(idBase) : undefined}
+            aria-pressed={panels ? undefined : o.value === value}
+            aria-selected={panels ? o.value === value : undefined}
+            tabIndex={panels && o.value !== value ? -1 : undefined}
+            data-selected={o.value === value || undefined}
             disabled={o.disabled}
             onClick={() => onChange(o.value)}
           >
@@ -654,7 +778,7 @@ export function SortMenu<T extends string>({
   const id = useId();
   return (
     <div className={cx("inline-flex h-10 flex-none items-center gap-2 max-lg:h-11", className)}>
-      <label htmlFor={id} className={cx("text-[13px] text-slate", labelClassName)}>
+      <label htmlFor={id} className={cx("text-body text-slate", labelClassName)}>
         {label}
       </label>
       <select
@@ -692,9 +816,9 @@ export function Pager({
   const p = Math.min(Math.max(0, page), pages - 1);
   return (
     <div className={cx("flex flex-none items-center gap-2", className)}>
-      <span className="mr-1 whitespace-nowrap text-[13px] text-slate" aria-live="polite">
-        Page <span className="num text-[14px] text-ink">{p + 1}</span> of{" "}
-        <span className="num text-[14px] text-ink">{pages}</span>
+      <span className="mr-1 whitespace-nowrap text-body text-slate" aria-live="polite">
+        Page <span className="num text-body text-ink">{p + 1}</span> of{" "}
+        <span className="num text-body text-ink">{pages}</span>
       </span>
       <ChevronButton
         dir="left"
@@ -777,6 +901,9 @@ export function Stepper({
         )}
       </svg>
     </button>
+  ) : playing !== undefined ? (
+    // Calm turns the button off after hydration: an empty slot of the same size keeps the row from shifting.
+    <span aria-hidden className="h-8 w-8 flex-none max-lg:h-11 max-lg:w-11" />
   ) : null;
   return (
     <div
@@ -789,11 +916,14 @@ export function Stepper({
       <span className="sr-only" aria-live="polite">
         {announce ?? `${i + 1} of ${count}`}
       </span>
-      {/* Phones: 44px tall dot targets up to 32px wide that share the row's spare width, so any count fits
-          beside the two 44px chevrons. */}
+      {/* Phones: ten 44px dot targets cannot fit beside the two 44px chevrons, so a "3 / 10" count stands in
+          for the dots and the chevrons step (A11Y-2). Desktop: 40px dot targets around the small visible dot. */}
+      <span aria-hidden className="mdx-step-count num hidden max-lg:inline">
+        {i + 1} / {count}
+      </span>
       <div
         className={cx(
-          "flex min-w-0 items-center",
+          "flex min-w-0 items-center max-lg:hidden",
           !cluster && "max-lg:flex-1",
           dotsOnly && (align === "start" ? "-ml-1.5" : "flex-1 justify-center"),
         )}
@@ -808,8 +938,7 @@ export function Stepper({
             aria-label={`Show card ${k + 1} of ${count}`}
             aria-current={k === i || undefined}
             className={cx(
-              "grid h-6 w-6 place-items-center rounded-pill max-lg:h-11 max-lg:w-auto max-lg:min-w-0",
-              dotsOnly ? "max-lg:flex-[0_1_44px]" : "max-lg:flex-[0_1_32px]",
+              "grid h-10 w-10 flex-none place-items-center rounded-pill",
             )}
           >
             <span className="mdx-step-dot" data-active={k === i || undefined} />
@@ -861,15 +990,15 @@ export function Field({
         <label htmlFor={htmlFor} className="mdx-label mb-0">
           {label}
         </label>
-        {right ? <span className="text-[12px] text-slate">{right}</span> : null}
+        {right ? <span className="text-caption text-slate">{right}</span> : null}
       </div>
       {children}
       {error ? (
-        <p id={helpId} role="alert" className="mt-1.5 text-[13px] leading-[1.45] text-down">
+        <p id={helpId} role="alert" className="mt-1.5 text-body leading-[1.45] text-down">
           {error}
         </p>
       ) : help ? (
-        <p id={helpId} className="mt-1.5 text-[13px] leading-[1.45] text-slate">
+        <p id={helpId} className="mt-1.5 text-body leading-[1.45] text-slate">
           {help}
         </p>
       ) : null}
@@ -899,7 +1028,7 @@ export function Input({
       className={cx(
         "mdx-input",
         size === "lg" && "h-12",
-        numeric && "num text-[20px]",
+        numeric && "num text-title",
         prefix != null && "pl-8",
         suffix != null && "pr-14",
         className,
@@ -911,13 +1040,13 @@ export function Input({
   return (
     <div className="relative">
       {prefix != null && (
-        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[15px] text-slate">
+        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-body text-slate">
           {prefix}
         </span>
       )}
       {input}
       {suffix != null && (
-        <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[14px] text-slate">
+        <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-body text-slate">
           {suffix}
         </span>
       )}
@@ -927,12 +1056,14 @@ export function Input({
 
 // ---------------------------------------------------------------- values
 
+/** Figure sizes on the type scale (12 / 14 / 16 / 20 / 24, and the one 30px lead figure a screen may have). */
 const NUM_SIZE = {
-  xs: "text-[13px] leading-[1.3]",
-  sm: "text-[14px] leading-[1.3]",
-  md: "text-[17px] leading-[1.2]",
-  lg: "text-[20px] leading-[1.1]",
-  hero: "text-[clamp(32px,5.6vh,44px)] leading-none tracking-[-0.01em]",
+  xs: "text-caption",
+  sm: "text-body",
+  md: "text-lead",
+  lg: "text-title",
+  xl: "text-heading",
+  hero: "text-figure tracking-[-0.01em]",
 } as const;
 const NUM_TONE = { ink: "text-ink", slate: "text-slate", inherit: "" } as const;
 
@@ -1055,10 +1186,9 @@ export function LabelNum({
 }
 
 /**
- * Direction is never color alone: a triangle (inline SVG, the font has no geometric shapes) plus the
- * absolute percentage. One decimal under 100%. Zero renders "0.0%" in slate with no triangle.
- * `pill` sets it on a soft green or red pill (track for zero): only the Coin hero and the Home caption;
- * dense rows keep the plain colored text.
+ * A signed change: "+4.1%" in --color-up, "−2.3%" in --color-down, tabular; direction is in the sign, never colour
+ * alone. One decimal under 100%. Zero renders "0.0%" in slate with no sign. `pill` sets it on the soft pair (track
+ * for zero): the Coin hero and the Home caption; dense rows keep the plain coloured text (mintdex.css .mdx-change).
  */
 export function Change({
   v,
@@ -1076,41 +1206,21 @@ export function Change({
 }) {
   const pct = Number.isFinite(v) ? Math.abs(v * 100) : 0;
   const text = pct >= 100 ? pct.toFixed(0) : pct.toFixed(1);
-  const pillCls = "inline-flex h-[22px] items-center gap-1 rounded-pill px-2";
   if (text === "0.0") {
     if (hideZero) return null;
     return (
-      <span className={cx("num text-slate", pill && cx(pillCls, "bg-track"), className)}>
+      <span className={cx("mdx-change num", className)} data-dir="flat" data-pill={pill || undefined}>
         <span className="sr-only">No change {period}: </span>0.0%
       </span>
     );
   }
   const up = v > 0;
+  // The sign carries the direction in the text, so it is read too ("plus 4.1 percent"); never colour alone. U+2212 is
+  // the typographic minus. A plain text node, so a screen's span rules never put the sign on its own line.
   return (
-    <span
-      className={cx(
-        "num",
-        pill ? pillCls : "inline-flex items-baseline gap-1",
-        up ? "text-up" : "text-down",
-        pill && (up ? "bg-up-soft" : "bg-down-soft"),
-        className,
-      )}
-    >
-      <svg
-        width="7"
-        height="6"
-        viewBox="0 0 7 6"
-        aria-hidden
-        fill="currentColor"
-        className="flex-none self-center"
-        style={up ? undefined : { transform: "rotate(180deg)" }}
-      >
-        <path d="M3.5 0 7 6H0z" />
-      </svg>
-      <span>
-        <span className="sr-only">{up ? "Up" : "Down"} </span>
-        {text}%<span className="sr-only"> {period}</span>
-      </span>
+    <span className={cx("mdx-change num", className)} data-dir={up ? "up" : "down"} data-pill={pill || undefined}>
+      {up ? "+" : "\u2212"}
+      {text}%<span className="sr-only"> {period}</span>
     </span>
   );
 }
@@ -1147,7 +1257,7 @@ export function Address({
 
   if (!address) {
     return (
-      <span className={cx("text-[13px] text-slate", className)}>
+      <span className={cx("text-body text-slate", className)}>
         Address ends in mint, assigned at launch.
       </span>
     );
@@ -1224,7 +1334,7 @@ export function Address({
               {copied ? <CheckIcon size={12} /> : <CopyGlyph />}
             </span>
           ) : (
-            <span className="whitespace-nowrap text-[13px] font-medium text-ink underline-offset-4 group-hover:underline">
+            <span className="whitespace-nowrap text-body font-medium text-ink underline-offset-4 group-hover:underline">
               {copied ? "Copied" : MODE_COPY.copyAddress}
             </span>
           )}
@@ -1322,7 +1432,7 @@ export function TierTag({
         "inline-flex items-center gap-1.5 font-medium text-ink",
         !plain && "rounded-pill py-0.5 pl-1.5 pr-2.5",
         !plain && (size === "md" ? "min-h-7" : "min-h-6"),
-        size === "md" ? "text-[14px]" : "text-[13px]",
+        size === "md" ? "text-body" : "text-body",
         className,
       )}
       style={plain ? undefined : { background: t.tint }}
@@ -1354,8 +1464,8 @@ export function Thumb({ src, size = 36, alt = "" }: { src: string; size?: number
   );
 }
 
-/** The flat neon stops avatars pick from (never a gradient). The dark initial on each is 9:1 or better. */
-const AVATAR = ["#3dffb5", "#38d9ff", "#b49bff", "#ff8be0", "#ffe45c"] as const;
+/** The flat warm stops avatars pick from (never a gradient; tokens in carddex-theme.css). The dark initial on each is 10:1 or better. */
+const AVATAR = ["var(--avatar-1)", "var(--avatar-2)", "var(--avatar-3)", "var(--avatar-4)", "var(--avatar-5)"] as const;
 
 export function Avatar({
   handle,
@@ -1371,10 +1481,10 @@ export function Avatar({
     <span
       aria-hidden
       className={cx(
-        "grid flex-none place-items-center rounded-pill font-semibold leading-none text-[#05070c]",
+        "grid flex-none place-items-center rounded-pill font-semibold leading-none text-on-cta",
         className,
       )}
-      style={{ width: size, height: size, fontSize: Math.round(size * 0.44), background: stop }}
+      style={{ width: size, height: size, fontSize: size < 32 ? 12 : size < 40 ? 14 : 16, background: stop }}
     >
       {handle.slice(0, 1).toUpperCase()}
     </span>
@@ -1412,7 +1522,7 @@ export function LiveDot({
 }
 
 /**
- * Pause or resume live updates (P1-17, WCAG 2.2.2): a small slate text button for a live list's header. The
+ * Pause or resume live updates (P1-17, WCAG 2.2.2): a small text button for a live list's header. The
  * choice is kept per viewer in this browser and applies to every live list.
  */
 export function LivePause({
@@ -1449,11 +1559,20 @@ export function LivePause({
 /**
  * The Calm motion switch (refs/alive-3d-spec.md 10.2): a role="switch" pill that turns every ambient loop, 3D
  * turn and celebration into the still version (setCalm keeps the choice in this browser and sets
- * html[data-motion] live). It is the only thing that turns motion off: full motion is the default for everyone and
- * the switch is open to every visitor, whatever the device's reduced motion setting (owner, 2026-10-17). Its state
- * renders after mount: the server HTML shows it off and disabled until hydration, same size.
+ * html[data-motion] live). A device that asks for reduced motion starts it on; the switch stays the visitor's
+ * override in either direction. Its state renders after mount: the server HTML shows it off and disabled until
+ * hydration, same size.
  */
-export function CalmSwitch({ className = "", size = "sm" }: { className?: string; size?: "sm" | "md" }) {
+export function CalmSwitch({
+  className = "",
+  size = "sm",
+  compact = false,
+}: {
+  className?: string;
+  size?: "sm" | "md";
+  /** The top bar's form: the words in caption slate beside the pill, no full-width row. */
+  compact?: boolean;
+}) {
   const level = useMotionLevel();
   const [state, setState] = useState<{ ready: boolean; on: boolean }>({ ready: false, on: false });
   useEffect(() => {
@@ -1462,12 +1581,8 @@ export function CalmSwitch({ className = "", size = "sm" }: { className?: string
   const locked = !state.ready;
   // The row is the switch's label, so a tap anywhere on it (the words included) toggles, not only the 36px pill.
   return (
-    <label className={cx("flex min-h-11 items-center justify-between gap-3", className)}>
-      <span className="min-w-0">
-        <span className={cx("block font-medium text-ink", size === "md" ? "text-[15px]" : "text-[13px]")}>
-          Calm motion
-        </span>
-      </span>
+    <label className={cx("mdx-calm", compact && "mdx-calm--compact", className)} data-size={size}>
+      <span className="mdx-calm__label">Calm motion</span>
       <button
         type="button"
         role="switch"
@@ -1501,48 +1616,117 @@ export function PageFrame({
   className?: string;
 }) {
   return (
-    <div className={cx("flex min-h-0 flex-col gap-6 short:gap-4 lg:h-full", className)}>
+    <div className={cx("mdx-frame", className)}>
       {children}
     </div>
   );
 }
 
 /**
- * The 56px page header row: h1 + one context line on the left, view controls on the right.
- * Desktop keeps the context to one line (ellipsis); phones let it wrap.
+ * The page header row (density R6): h1 (24px) and one context line (14px) on the left; an optional toolbar (search,
+ * sort, filters, a segmented range), then `aside`, then the actions on the right, all on ONE row, at most
+ * --pagehead-h (56px) tall from 1024px. A toolbar that fits beside the title goes here, never in a second row under
+ * it. Desktop keeps the context to one line (ellipsis); phones let it wrap, and the toolbar and actions wrap onto
+ * the next line at full width.
  */
 export function PageHeader({
   title,
   context,
   right,
+  aside,
+  toolbar,
+  back,
   wrapContext = false,
   className = "",
 }: {
   title: ReactNode;
+  /** One line about the data or the object (the finding, the count, the scope), 14px slate, at every width. */
   context?: ReactNode;
+  /** At most one primary (ButtonLink/Button) and one secondary or IconButton. */
   right?: ReactNode;
+  /** A data block before `right` (the coin's market cap Stat): bottom-aligned with the context line. */
+  aside?: ReactNode;
+  /** View controls that would otherwise make a toolbar row under the title: a search field, a SortMenu, chips. */
+  toolbar?: ReactNode;
+  /** Phones only: a 44px utility row above the title (a TextLink back to the list). */
+  back?: ReactNode;
   wrapContext?: boolean;
   className?: string;
 }) {
   return (
-    <header
-      className={cx(
-        "flex flex-none flex-wrap items-end justify-between gap-x-6 gap-y-3 lg:flex-nowrap",
-        wrapContext ? "lg:min-h-14" : "lg:h-14",
-        className,
-      )}
-    >
-      <div className="min-w-0">
+    <header className={cx("mdx-pagehead", className)} data-wrap={wrapContext || undefined} data-toolbar={toolbar ? "" : undefined}>
+      {back ? <div className="mdx-pagehead__back">{back}</div> : null}
+      <div className="mdx-pagehead__text">
         {/* One line on desktop (fitted header row); phones let a long title wrap instead of cutting it. */}
-        <h1 className="mdx-h1 -mb-1 pb-1 lg:truncate max-lg:[text-wrap:balance]">{title}</h1>
-        {context ? (
-          <p className={cx("mt-1 text-[13px] leading-[1.45] text-slate", !wrapContext && "lg:truncate")}>{context}</p>
-        ) : null}
+        <h1 className="mdx-h1 mdx-pagehead__title">{title}</h1>
+        {context ? <p className="mdx-pagehead__context">{context}</p> : null}
       </div>
-      {right ? (
-        <div className="flex min-w-0 max-w-full flex-none items-center gap-6">{right}</div>
+      {toolbar || aside || right ? (
+        <div className="mdx-pagehead__right">
+          {toolbar ? <div className="mdx-pagehead__tools">{toolbar}</div> : null}
+          {aside}
+          {right}
+        </div>
       ) : null}
     </header>
+  );
+}
+
+/**
+ * The phone sticky action bar (density R7): a screen's primary action (Launch, Buy) stays on screen while the page
+ * scrolls. Below 1024px it sticks to the bottom of <main>, just above the tab bar (and above the keyboard, which
+ * hides the tab bar), full bleed across the gutters, on the ground with a 1px top rule. From 1024px it sits in the
+ * flow where it is placed, unless `phoneOnly` hides it there (the screen shows the same action inline). Put it as
+ * the LAST child of the view root, so it can stick for the whole page; one per screen. `label` names the region.
+ */
+export function ActionBar({
+  label,
+  children,
+  phoneOnly = false,
+  className = "",
+}: {
+  label: string;
+  children: ReactNode;
+  phoneOnly?: boolean;
+  className?: string;
+}) {
+  return (
+    <div role="region" aria-label={label} className={cx("mdx-actionbar", className)} data-phone-only={phoneOnly || undefined}>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * Tiles in an auto-fill grid (density R3): as many columns as fit, each at least `min` (default --tile-min: 150px on
+ * phones, 176px from 768px), so a wider screen gets more columns, not bigger tiles. Renders a <ul role="list">;
+ * pass <li> children. `max` caps a tile's width when a short list should not stretch (e.g. "220px").
+ */
+export function AutoGrid({
+  children,
+  min,
+  max,
+  className = "",
+  label,
+  ref,
+}: {
+  children: ReactNode;
+  min?: string;
+  max?: string;
+  className?: string;
+  label?: string;
+  ref?: Ref<HTMLUListElement>;
+}) {
+  return (
+    <ul
+      ref={ref}
+      role="list"
+      aria-label={label}
+      className={cx("mdx-autogrid", className)}
+      style={{ ...(min ? { "--grid-min": min } : null), ...(max ? { "--grid-max": max } : null) } as CSSProperties}
+    >
+      {children}
+    </ul>
   );
 }
 
@@ -1591,42 +1775,148 @@ export function SectionHead({
           heading
         )}
         {right == null ? null : typeof right === "string" ? (
-          <span className="flex-none text-[13px] text-slate">{right}</span>
+          <span className="flex-none text-body text-slate">{right}</span>
         ) : (
-          <span className="flex-none text-[13px]">{right}</span>
+          <span className="flex-none text-body">{right}</span>
         )}
       </div>
     </div>
   );
 }
 
+export type StatItem = {
+  label: string;
+  /** The figure. Missing is a grey dash: pass null (never "--" or a made-up zero). */
+  value: ReactNode | null;
+  unit?: ReactNode;
+  /** A signed change shown after the figure (Change v), or any small node such as a Badge. */
+  change?: ReactNode;
+  /** One caption line under the figure ("of 1,000,000", "vs 24h ago"). */
+  sub?: ReactNode;
+  watch?: number;
+  tick?: boolean;
+};
+
+/**
+ * KPIs as type in one divided container (house rule: no tile per KPI, no icon, no sparkline): a 12px slate label
+ * above a tabular figure, cells split by 1px hairlines; two columns at 360px. `lead` sets the first figure as the
+ * screen's one 30px lead figure (Portfolio total, the coin's market cap); the others stay at 24 (`size="lg"`) or
+ * 16 (`size="md"`). `KpiGroup` is the same component under the name the screens use.
+ */
 export function Stats({
   items,
   size = "md",
   cols,
+  lead = false,
+  strip = false,
   className = "",
 }: {
-  items: Array<{ label: string; value: ReactNode; unit?: ReactNode; watch?: number; tick?: boolean }>;
+  items: StatItem[];
   size?: "md" | "lg";
   cols?: number;
+  lead?: boolean;
+  /** One row at every width (density R6 KPI strip): compact 8px/12px cells that shrink, never two rows on phones. */
+  strip?: boolean;
   className?: string;
 }) {
   return (
     <dl
-      className={cx("grid gap-4", className)}
-      style={{ gridTemplateColumns: `repeat(${cols ?? items.length}, minmax(0, 1fr))` }}
+      className={cx("mdx-kpis", className)}
+      data-size={size}
+      data-strip={strip || undefined}
+      style={{ "--kpi-cols": cols ?? items.length } as CSSProperties}
     >
-      {items.map((it) => (
-        <div key={it.label} className="min-w-0">
-          <dt className="mdx-micro truncate">{it.label}</dt>
-          <dd className="mt-1 truncate">
-            <Num size={size === "lg" ? "lg" : "md"} unit={it.unit} watch={it.watch} tick={it.tick}>
-              {it.value}
-            </Num>
-          </dd>
-        </div>
-      ))}
+      {items.map((it, i) => {
+        const value = (
+          <>
+            {it.value == null ? (
+              <span className="mdx-dash" aria-label="Not available">
+                {"\u2014"}
+              </span>
+            ) : (
+              <Num size={lead && i === 0 ? "hero" : size === "lg" ? "xl" : "md"} unit={it.unit} watch={it.watch} tick={it.tick}>
+                {it.value}
+              </Num>
+            )}
+            {it.change != null ? <span className="mdx-kpi__change">{it.change}</span> : null}
+          </>
+        );
+        return (
+          <div key={it.label} className="mdx-kpi" data-lead={(lead && i === 0) || undefined}>
+            <dt className="mdx-kpi__label">{it.label}</dt>
+            {/* One definition per term: a sub line (the curve track) shares its figure's <dd>, so no definition
+                reads empty when the figure is hidden from screen readers. */}
+            {it.sub != null ? (
+              <dd>
+                <div className="mdx-kpi__value">{value}</div>
+                <div className="mdx-kpi__sub">{it.sub}</div>
+              </dd>
+            ) : (
+              <dd className="mdx-kpi__value">{value}</dd>
+            )}
+          </div>
+        );
+      })}
     </dl>
+  );
+}
+export const KpiGroup = Stats;
+
+/**
+ * The signature element: the bonding-curve track. Every pump.fun coin is on a curve until it graduates; the gold
+ * fill is the true ratio (no stub at zero), the label reads "Curve 64%" and, past graduation, "Graduated". It is a
+ * meter (a measured level, not progress on a task) with a text value, so a screen reader hears "Curve 64%, 36% left
+ * to graduation". Missing data is a grey dash. `size="sm"` (tiles, rows) drops the trailing note and hides its visible
+ * label from screen readers (the meter's value says the same words, once, inside a link's name); `note` overrides the
+ * note ("Graduates at 85 SOL").
+ */
+export function CurveTrack({
+  progress,
+  graduated = false,
+  size = "md",
+  label = "Curve",
+  note,
+  className = "",
+}: {
+  /** 0..1 (CoinSummary.curveProgress); null or undefined when the coin has no curve data. */
+  progress: number | null | undefined;
+  graduated?: boolean;
+  size?: "sm" | "md";
+  label?: string;
+  note?: ReactNode;
+  className?: string;
+}) {
+  const known = progress != null && Number.isFinite(progress);
+  const pct = known ? Math.round(Math.min(1, Math.max(0, progress)) * 100) : 0;
+  const done = graduated || (known && pct >= 100);
+  const valueText = !known
+    ? `${label}: not available`
+    : done
+      ? `${label} complete: graduated`
+      : `${label} ${pct}%, ${100 - pct}% left to graduation`;
+  return (
+    <div className={cx("mdx-curve", className)} data-size={size} data-done={done || undefined}>
+      <div className="mdx-curve__head" aria-hidden={size === "sm" || undefined}>
+        <span className="mdx-curve__label">
+          {label}{" "}
+          {known ? <span className="num">{done ? "100%" : `${pct}%`}</span> : <span className="mdx-dash">{"\u2014"}</span>}
+        </span>
+        {size === "md" ? (
+          <span className="mdx-curve__note">{note ?? (done ? "Graduated" : known ? "to graduation" : null)}</span>
+        ) : null}
+      </div>
+      <div
+        className="mdx-curve__track"
+        role="meter"
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={known ? pct : undefined}
+        aria-valuetext={valueText}
+      >
+        {known && pct > 0 ? <span className="mdx-curve__fill" style={{ width: `${done ? 100 : pct}%` }} /> : null}
+      </div>
+    </div>
   );
 }
 
@@ -1679,24 +1969,24 @@ export function Caption({
 }) {
   return (
     <div className={cx("mdx-caption", className)}>
-      {no != null ? <span className="mdx-plate text-[15px] leading-[1.3] text-slate">{no}</span> : null}
+      {no != null ? <span className="mdx-plate text-body leading-[1.3] text-slate">{no}</span> : null}
       {/* mt-0 cancels the accent guard's -4px top margin: its 4px top padding is the gap under No. */}
       <As className="mdx-name mt-0 truncate">{name}</As>
       {level != null ? (
         <TierTag level={level} size="md" suffix={tierSuffix} className="mt-2 self-start" />
       ) : null}
       {rows?.length ? (
-        <dl className="mdx-leaders mt-4 flex flex-col gap-2">
+        <dl className="mdx-leaders mdx-caption__rows">
           {rows.map((r, i) => (
             <div key={i}>
-              <dt className="text-[13px] text-slate">{r.label}</dt>
+              <dt className="text-body text-slate">{r.label}</dt>
               <dd>{r.value}</dd>
             </div>
           ))}
         </dl>
       ) : null}
       {children}
-      {link ? <div className="mt-4">{link}</div> : null}
+      {link ? <div className="mdx-caption__link">{link}</div> : null}
     </div>
   );
 }
@@ -1725,12 +2015,12 @@ export function GridCaption({
   return (
     <div className={cx("mdx-gridcap", stack && "mdx-gridcap--stack", className)}>
       <div className="flex h-5 items-baseline justify-between gap-2 leading-5">
-        <span className="mdx-gridcap__name min-w-0 truncate text-[14px] font-semibold text-ink">
+        <span className="mdx-gridcap__name min-w-0 truncate text-body font-semibold text-ink">
           {name}
         </span>
-        {value != null ? <span className="num flex-none text-[14px] text-ink">{value}</span> : null}
+        {value != null ? <span className="num flex-none text-body text-ink">{value}</span> : null}
       </div>
-      <div className="mdx-gridcap__sub flex h-[18px] items-baseline justify-between gap-2 text-[13px] leading-[18px]">
+      <div className="mdx-gridcap__sub flex h-[18px] items-baseline justify-between gap-2 text-body leading-[18px]">
         <span className="min-w-0 truncate">{sub}</span>
         {subRight != null ? <span className="flex flex-none items-center">{subRight}</span> : null}
       </div>
@@ -2105,67 +2395,6 @@ export function Shelf<T>({
   );
 }
 
-/**
- * Centered empty state: the card back in its tray on a ledge, a title, one sentence, one optional action. `hero`
- * (signed-out Portfolio): a larger held back over a slow holo glow, with two more backs fanned behind it that
- * drift (paused offscreen, in a hidden tab and under dialogs; still under calm).
- */
-export function EmptyState({
-  title,
-  body,
-  action,
-  hero = false,
-  className = "",
-}: {
-  title: ReactNode;
-  body?: ReactNode;
-  action?: ReactNode;
-  hero?: boolean;
-  className?: string;
-}) {
-  const fanRef = useRef<HTMLDivElement>(null);
-  usePauseGate(fanRef, { margin: "0px" });
-  return (
-    <div className={cx("grid h-full min-h-[320px] place-items-center px-4 py-8", className)}>
-      <div className="flex max-w-[360px] flex-col items-center text-center">
-        {hero ? (
-          <div ref={fanRef} className="mdx-fan">
-            <div aria-hidden className="mdx-fan__aura">
-              <i />
-            </div>
-            <div aria-hidden className="mdx-fan__card mdx-fan__card--l">
-              <div className="mdx-fan__float">
-                <CardBack />
-              </div>
-            </div>
-            <div aria-hidden className="mdx-fan__card mdx-fan__card--r">
-              <div className="mdx-fan__float">
-                <CardBack />
-              </div>
-            </div>
-            <Pocket className="mdx-fan__hero [--pocket:6px]">
-              <CardBack depth="hand" />
-            </Pocket>
-          </div>
-        ) : (
-          // 6px at every width (delta 4): the phone 4px rule exists for the 12px shelf gap, and this card has no
-          // neighbors and stays 112px wide on phones. The back is a held card: it breathes, peeks and its seal
-          // follows the pointer (calm: still).
-          <Pocket className="w-[112px] [--pocket:6px]">
-            <CardBack depth="hand" />
-          </Pocket>
-        )}
-        <Ledge className={hero ? "w-[260px]" : "w-[200px]"} />
-        <p className="mt-4 text-[17px] font-semibold leading-[1.3] tracking-[-0.01em] text-ink">
-          {title}
-        </p>
-        {body ? <p className="mt-1 text-pretty text-[13px] leading-[1.45] text-slate">{body}</p> : null}
-        {action ? <div className="mt-4">{action}</div> : null}
-      </div>
-    </div>
-  );
-}
-
 /** Skeleton block in the shape of the final row or card, with the one infinite shimmer (static under reduced motion). */
 export function Skeleton({
   className = "",
@@ -2187,7 +2416,7 @@ export function Skeleton({
 
 // ---------------------------------------------------------------- modal
 
-type ModalProps = {
+export type ModalProps = {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   title: string;
@@ -2210,70 +2439,22 @@ export function Modal(props: ModalProps) {
       </Sheet>
     );
   }
-  return <DialogModal {...props} />;
+  return <LazyDialogModal {...props} />;
 }
 
-function DialogModal({ open, onOpenChange, title, description, children, width = 440 }: ModalProps) {
-  // Modals open without a Radix Trigger, so Radix has nothing to refocus on close and focus would fall
-  // to <body>. Remember what had focus when the dialog opened and hand focus back to it on close.
-  const returnTo = useRef<HTMLElement | null>(null);
-  const returnChain = useRef<HTMLElement[]>([]);
+const loadDialogModal = () => import("./dialog-modal");
+const DialogModal = lazy(loadDialogModal);
+
+/** Radix Dialog is a lazy chunk: it mounts on first open (useOpenedOnce), so it stays out of every page's first download. */
+function LazyDialogModal(props: ModalProps) {
+  if (!useOpenedOnce(props.open, loadDialogModal)) return null;
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="mdx-overlay fixed inset-0 z-50 bg-[var(--overlay)]" />
-        <Dialog.Content
-          className="mdx-dialog fixed left-1/2 top-1/2 z-50 flex w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 flex-col rounded-aside bg-plinth p-6 text-ink shadow-modal outline-none max-lg:rounded-panel"
-          style={{ maxWidth: width }}
-          onOpenAutoFocus={() => {
-            const el = document.activeElement;
-            returnTo.current = el instanceof HTMLElement && el !== document.body ? el : null;
-            returnChain.current = ancestry(returnTo.current);
-          }}
-          onCloseAutoFocus={(e) => {
-            const el = returnTo.current;
-            returnTo.current = null;
-            e.preventDefault();
-            if (el?.isConnected) el.focus({ preventScroll: true });
-            // The opener left with the action (an accepted bid's row, a signed-out button that became another):
-            // keep the place next to where it was, with a visible ring, instead of <body> or the ringless main.
-            else focusNear(returnChain.current);
-          }}
-          // No description: drop aria-describedby so screen readers do not read the title twice
-          // (this explicit undefined is also how Radix opts out of its missing-description check).
-          {...(description ? null : { "aria-describedby": undefined })}
-        >
-          <div className="mdx-dialog__head flex flex-none items-start justify-between gap-4">
-            <Dialog.Title className="pt-1 text-[18px] font-semibold leading-[1.3] tracking-[-0.01em] text-ink">
-              {title}
-            </Dialog.Title>
-            {/* 32px circle on desktop, 44px on phones (backlog P1-25); the negative margins keep the glyph put. */}
-            <Dialog.Close
-              className="-mr-2 -mt-1 grid h-8 w-8 flex-none place-items-center rounded-pill text-ink transition-colors duration-(--t-fast) ease-room hover:bg-track max-lg:-mr-3.5 max-lg:-mt-2.5 max-lg:h-11 max-lg:w-11"
-              aria-label="Close"
-            >
-              <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden>
-                <path
-                  d="M2.5 2.5l9 9M11.5 2.5l-9 9"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </Dialog.Close>
-          </div>
-          {description ? (
-            <Dialog.Description className="sr-only">{description}</Dialog.Description>
-          ) : null}
-          {/* Cards inside a dialog lift in after its entrance (M11) and keep moving while it is open. */}
-          <div className="mdx-dialog__body min-h-0 flex-1">
-            <CardMotionProvider enter="liftin">{children}</CardMotionProvider>
-          </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+    <Suspense fallback={null}>
+      <DialogModal {...props} />
+    </Suspense>
   );
 }
+
 
 // ---------------------------------------------------------------- toasts
 
@@ -2493,7 +2674,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           hold.current.focus = false;
           resume();
         }}
-        className="pointer-events-none fixed inset-x-4 bottom-[calc(76px_+_env(safe-area-inset-bottom))] z-[60] flex flex-col items-stretch gap-2 lg:bottom-4 lg:left-[calc(var(--rail-w)_+_16px)] lg:right-auto lg:w-[min(400px,calc(100vw_-_var(--rail-w)_-_32px))]"
+        className="mdx-toasts"
       >
         {toasts.map((t) => (
           <div
@@ -2502,15 +2683,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             data-kind={t.kind}
             data-leaving={t.leaving ? "" : undefined}
             className={cx(
-              "mdx-toast pointer-events-auto flex items-center gap-3 rounded-pop py-2 pl-4 pr-2 leading-[1.4] shadow-float",
-              t.kind === "err" ? "bg-down text-[#1a0208]" : "bg-sheet text-ink",
-              t.kind === "level" ? "mdx-toast--level text-[15px] font-semibold" : "text-[14px]",
+              "mdx-toast pointer-events-auto flex items-center gap-3",
+              t.kind === "level" && "mdx-toast--level",
             )}
           >
             {t.kind === "ok" ? (
               <span
                 aria-hidden
-                className="grid h-[18px] w-[18px] flex-none place-items-center rounded-pill bg-neon text-neon-ink"
+                className="mdx-toast__ok grid h-[18px] w-[18px] flex-none place-items-center rounded-pill"
               >
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                   <path
@@ -2539,11 +2719,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               onClick={() => dismiss(t.id)}
               className="mdx-toast__x grid h-8 w-8 flex-none place-items-center self-start rounded-pill max-lg:h-11 max-lg:w-11 max-lg:-my-1.5"
             >
-              <svg width="12" height="12" viewBox="0 0 14 14" aria-hidden>
+              <svg width="16" height="16" viewBox="0 0 14 14" aria-hidden>
                 <path
-                  d="M2.5 2.5l9 9M11.5 2.5l-9 9"
+                  d="M3 3l8 8M11 3l-8 8"
                   stroke="currentColor"
-                  strokeWidth="1.6"
+                  strokeWidth="1.5"
                   strokeLinecap="round"
                 />
               </svg>
@@ -2721,9 +2901,8 @@ export function usePageKeys(
 
 /**
  * The one reduced motion check for JS motion (false on the server). Every JS-driven moment asks it; CSS
- * motion is switched off by the calm block in mintdex.css. Only the Calm motion switch (html[data-motion="calm"],
- * set by the head script from localStorage or live by setCalm) turns motion off: full motion is the default for
- * everyone, and the device's prefers-reduced-motion setting no longer turns it off by itself (owner, 2026-10-17).
+ * motion is switched off by the calm block in mintdex.css. html[data-motion="calm"] is set by the head script (a
+ * stored Calm choice, or the device's reduced motion setting when nothing is stored) or live by setCalm.
  */
 export function prefersReducedMotion() {
   if (typeof window === "undefined") return false;
@@ -2922,9 +3101,11 @@ export function useFlip(ref: { current: HTMLElement | null }, order: Array<strin
       const from = prev.get(r.dataset.flip!);
       const to = now.get(r.dataset.flip!);
       if (from == null || to == null || from === to) continue;
+      // A layout move (website-standard motion-values.md, Springs row: layout 0.3s, no bounce): 300ms on the house
+      // movement curve.
       r.animate([{ transform: `translateY(${from - to}px)` }, { transform: "none" }], {
-        duration: 420,
-        easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        duration: 300,
+        easing: "cubic-bezier(0.76, 0, 0.24, 1)",
       });
     }
     // The joined key stands for the order.

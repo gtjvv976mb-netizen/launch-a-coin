@@ -1,8 +1,36 @@
+> **RELEASE NOTICE (29 Oct 2026, from the Claude session): production runs `eef8f51e-eb19-456f-899e-4699180c4030`**
+> (tag `rc-integration-a7d447d`, branch `claude/integration`): Codex's 6b453309 content (every meme pair, verified side by
+> side) + the true-black-flat restyle, the density pass and the mainnet hardening, with D1 migrations 0001-0015 applied
+> remotely. **Build any later release on `claude/integration`; publishing an older tree (including Codex's folder) would
+> revert all of it.** The Cloudflare for SaaS cutover is complete: launchacard.fun and www are DNS-only CNAMEs to
+> `edge.launchacard.com`, and `app/wrangler.production.jsonc` carries only the `*/*` route on launchacard.com. Never re-add
+> launchacard.fun Worker custom domains. Publish with `wrangler versions upload` + `versions deploy` only.
+> Rollback: `wrangler rollback c908f2e2-b47e-4db6-9df3-6de7a2884143` (previous release) or `6b453309-2236-4491-b93b-90504490d703`
+> (Codex's last; see README for the published_at note).
+
+> **DEPLOY NOTICE (28 Oct 2026, from the Claude session): read before any `wrangler deploy`.**
+> PLDT (Philippines) blocks the two Cloudflare IPs of the launchacard.fun zone. The site is being moved behind
+> Cloudflare for SaaS on the new zone **launchacard.com** (custom hostnames launchacard.fun + www, fallback
+> `edge.launchacard.com`, Worker route `*/*` on zone launchacard.com). `www.launchacard.fun` is already a DNS-only
+> CNAME to `edge.launchacard.com`.
+> - `app/wrangler.production.jsonc` here now carries the phase-1 config (adds the `*/*` route on launchacard.com and a
+>   `SELF` service binding) and `app/src/lib/carddex/live/assets.server.ts` reads own-origin assets via ASSETS/SELF,
+>   because a routed Worker cannot fetch() its own zone. **Do not revert these four files** (also bindings.server.ts and
+>   routes/api/live/health.ts). Deploying an older config would drop the route and, run non-interactively, overwrite the
+>   www CNAME with a Custom Domain, putting the site back on the blocked IPs and breaking launch prepare.
+> - After the apex cutover the two `custom_domain` routes must be removed from the config before any later deploy.
+> - Production self-check: `GET /api/live/health?self=1` must return `{"ok":true,...}`.
+> - Live version 947f7fc4 = your working tree of 70b4ec76 + this hotfix (branch `claude/prod-snapshot` in ~/code/lac-wt-prod).
+
+29 October release follow-up: current Worker version is **6b453309-2236-4491-b93b-90504490d703**, adding 12 verified meme pairs while retaining 9709a88f's card-consistency fixes and 947f7fc4's SaaS hotfix. It was published with `versions upload`/`versions deploy` only; no triggers or DNS changed. The cutover warning above still applies. See `reports/launch-a-card-meme-pairs-expansion-2026-10-29.md` and the previous card-consistency release record before any later publication.
+
 # Launch a Card (internal project: CardDex)
 
 Read HANDOFF.md and README.md before work. This is an independent project forked from MintDex. Do not change or deploy MintDex.
 
 Use the user-level web-design-workflow skill for frontend work. Preserve the rounded 3D card, both-face shimmer and touch controls.
+
+Card artwork requirement (owner instruction, 29 October 2026): use **Higgsfield for all new and redesigned card artwork**, including fronts, backs, limited editions, stock/meme themes and custom card-based logos. Do not silently substitute built-in image_gen, another image provider, or code-drawn decorative artwork. Follow `creative/higgsfield/WORKFLOW.md` for matched references, the shared print template, provenance and visual checks. Deterministic content composition, responsive layout, exports and motion remain code responsibilities. Existing verified Higgsfield designs may be reused for supported pair presets; do not describe reuse as newly generated custom artwork. The provider preference does not extend any previously approved credit allocation.
 
 Product: token launches with one creator-selected NFT card design. No automatic evolution, NFT sales, bids, auctions or royalties. Token buy/sell trading remains. Designs must persist through launch, reads and token trades.
 

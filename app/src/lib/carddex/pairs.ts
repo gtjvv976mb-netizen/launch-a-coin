@@ -1,7 +1,8 @@
 import verifiedAssets from "./pair-assets.json";
-import { isCardDesignKey } from "./designs";
+import { CARD_DESIGNS, isCardDesignKey } from "./designs";
+import { DESIGN_QUOTE_KEYS, MEME_PAIR_PRESETS, PREFERRED_PAIR_DESIGNS } from "./design-pairings";
 
-export const PAIR_ASSET_KEYS = ["sol", "usdc", "gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc", "doge", "fartcoin", "pnut", "moodeng", "troll", "bonk", "wif"] as const;
+export const PAIR_ASSET_KEYS = ["sol", "usdc", "gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc", "doge", "fartcoin", "pnut", "moodeng", "troll", "bonk", "wif", "cards", "sv151", "toad", "pengu", "giga", "spx", "trump", "useless", "chillguy", "goat", "zerebro", "act", "pippin", "vine", "aura", "michi", "cate", "ansem", "bert", "chillhouse", "usduc"] as const;
 export type PairAssetKey = typeof PAIR_ASSET_KEYS[number];
 export type PairAsset = {
   key: PairAssetKey;
@@ -10,7 +11,7 @@ export type PairAsset = {
   mint: string;
   decimals: number;
   tokenProgram: string;
-  kind: "native" | "stable" | "stock" | "meme";
+  kind: "native" | "stable" | "stock" | "meme" | "collector";
   issuer: string | null;
   issuerTerms: string | null;
   listingProvider?: string;
@@ -26,7 +27,7 @@ export type PairAsset = {
 export const PAIR_ASSETS: readonly Readonly<PairAsset>[] = Object.freeze(verifiedAssets.map(asset => Object.freeze(asset as PairAsset)));
 const BY_KEY = new Map<string, Readonly<PairAsset>>(PAIR_ASSETS.map(asset => [asset.key, asset]));
 export const PAIR_ASSETS_SOURCE = "https://pump.fun/docs/custom-pairs";
-export const PAIR_ASSETS_VERIFIED_AT = "2026-10-28";
+export const PAIR_ASSETS_VERIFIED_AT = "2026-10-29";
 
 export function isPairAssetKey(value: unknown): value is PairAssetKey {
   return typeof value === "string" && BY_KEY.has(value);
@@ -39,10 +40,7 @@ export function getPairAsset(key?: string | null): Readonly<PairAsset> {
   return asset;
 }
 
-const DESIGN_QUOTES: Readonly<Record<string, PairAssetKey>> = Object.freeze({
-  "stock-gme": "gmex", "stock-tsla": "tslax", "stock-nvda": "nvdax", "stock-aapl": "aaplx", "stock-mstr": "mstrx", "stock-coin": "coinx",
-  gamestop: "gmex", amc: "amc", coinbase: "coinx", strategy: "mstrx", doge: "doge", bonk: "bonk", wif: "wif",
-});
+const DESIGN_QUOTES: Readonly<Record<string, PairAssetKey>> = DESIGN_QUOTE_KEYS;
 
 export function boundQuoteForDesign(designKey?: string): Readonly<PairAsset> | null {
   const key = designKey ? DESIGN_QUOTES[designKey] : undefined;
@@ -72,5 +70,18 @@ export function getTradingPair(ticker: string, quoteKey?: string | null): string
 }
 
 export function preferredDesignForQuote(key: string): string | null {
-  return ({gmex:"stock-gme",tslax:"stock-tsla",nvdax:"stock-nvda",aaplx:"stock-aapl",mstrx:"stock-mstr",coinx:"stock-coin",amc:"amc",doge:"doge",bonk:"bonk",wif:"wif"} as Record<string,string>)[key] ?? null;
+  return PREFERRED_PAIR_DESIGNS[key] ?? null;
+}
+
+/** Optional collector/meme finish presets never rewrite a stored or default quote. */
+export function recommendedMemeQuoteForDesign(designKey: string, preferredQuoteKey?: string): Readonly<PairAsset> | null {
+  const choices = MEME_PAIR_PRESETS.filter(preset => preset.design === designKey);
+  const preset = choices.find(choice => choice.quote === preferredQuoteKey) ?? choices[0];
+  return preset ? getPairAsset(preset.quote) : null;
+}
+
+/** Matches both permanent bindings and explicitly selectable themed presets. */
+export function matchingDesignsForQuote(key: string) {
+  const presets = new Set(MEME_PAIR_PRESETS.filter(preset => preset.quote === key).map(preset => String(preset.design)));
+  return CARD_DESIGNS.filter(design => boundQuoteForDesign(design.key)?.key === key || presets.has(design.key));
 }

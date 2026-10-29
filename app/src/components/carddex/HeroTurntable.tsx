@@ -1,16 +1,23 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cardLabel, useCardSlots, type CardData } from "../mintdex/MintCard";
 import { Card3DView } from "../mintdex/card3d/Card3D";
-import { Engine, motionLevel, type Body } from "../mintdex/card3d/motion3d";
+import { Engine, motionLevel, useMotionLevel, type Body } from "../mintdex/card3d/motion3d";
 import type { Card3DHandle } from "../mintdex/card3d/types";
+import { CardControlButton, CardControls } from "./CardControls";
 
 /** A full revolution in the shared engine, with the same rounded slab, both-face lighting and touch input. */
-export function HeroTurntable({ card, className = "", playing: controlled, onPlayingChange, followEdits = false, viewportFit = false }: {
+export function HeroTurntable({ card, className = "", playing: controlled, onPlayingChange, followEdits = false, viewportFit = false, controls, sizes = "(max-width: 767px) 40vw, (max-width: 1279px) 260px, 400px" }: {
   card: CardData; className?: string; playing?: boolean; onPlayingChange?: (playing: boolean) => void; followEdits?: boolean; viewportFit?: boolean;
+  /** More CardControlButtons for the end of the row (Launch's View in 3D), so the row keeps one even gap. */
+  controls?: ReactNode;
+  /** The card's laid-out width as an img sizes value. The default: 140-172px on phones (Launch), about 250px to
+   * 1279px, up to 420px wider. */
+  sizes?: string;
 }) {
   const [localPlaying, setLocalPlaying] = useState(true);
+  const level = useMotionLevel();
   const playing = controlled ?? localPlaying;
-  const slots = useCardSlots(card, { ascend: "ascend", art: "fade", priority: true, sizes: "(max-width: 767px) 72vw, 400px", hand: true });
+  const slots = useCardSlots(card, { ascend: "ascend", art: "fade", priority: true, sizes, hand: true });
   useEffect(() => {
     const body = slots.ctl.current?.body;
     if (!body || !viewportFit) return;
@@ -31,7 +38,12 @@ export function HeroTurntable({ card, className = "", playing: controlled, onPla
   };
   useEffect(() => {
     const body = slots.ctl.current?.body;
-    if (!playing && body) body.flip.snap(body.flip.x);
+    // Pause settles the card on its nearest front face (F7), never frozen edge-on or showing its back; calm snaps.
+    if (!playing && body && !slots.ctl.current?.busy) {
+      const front = Math.round(body.flip.x / 360) * 360;
+      if (motionLevel() === "calm") body.flip.snap(front);
+      else body.flip.t = front;
+    }
     lastFrame.current = 0;
     Engine.kick();
   }, [playing]);
@@ -53,9 +65,12 @@ export function HeroTurntable({ card, className = "", playing: controlled, onPla
   const setRef = (handle: Card3DHandle | null) => { slots.handle.current = handle; };
   return <div className={`cdx-hero-turntable ${viewportFit ? "cdx-hero-turntable--viewport" : ""} ${className}`}>
     <Card3DView depth="hand" label={cardLabel(card)} faces={slots.faces} front={slots.front} swap={slots.swap} flippable tapTurns drag="turn" idle={playing ? "breathe" : "none"} ground="shadow" gyro focusable arrowsTurn seed={card.dexNo} backSizes="(max-width: 767px) 72vw, 400px" ctlRef={slots.ctl} ref={setRef} frame={frame} onInteract={() => { lastInput.current = performance.now(); }} onSwapped={slots.onSwapped} onSettled={slots.onSettled} />
-    <div className="cdx-hero-turntable__controls">
-      <button type="button" onClick={() => { lastInput.current = performance.now(); slots.handle.current?.turnOver(); }} aria-label="Turn card over">Turn over</button>
-      <button type="button" onClick={toggle} aria-pressed={!playing}>{playing ? "Pause rotation" : "Resume rotation"}</button>
-    </div>
+    {/* The compact card-controls row (CardControls): icon pills with their names as tooltips. Only full motion
+        turns the card, so calm and reduced motion leave Pause out. Pause swaps its name, so it is not a toggle. */}
+    <CardControls className="cdx-hero-turntable__controls">
+      <CardControlButton icon="turn-over" label="Turn over" onClick={() => { lastInput.current = performance.now(); slots.handle.current?.turnOver(); }} />
+      {level === "full" ? <CardControlButton icon={playing ? "pause" : "play"} label={playing ? "Pause spin" : "Resume spin"} onClick={toggle} /> : null}
+      {controls}
+    </CardControls>
   </div>;
 }

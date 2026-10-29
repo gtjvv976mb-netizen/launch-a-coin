@@ -32,8 +32,8 @@ export function webManifestText(mode: ManifestMode): string {
     description: DESCRIPTION[mode],
     start_url: "/",
     display: "standalone",
-    background_color: "#f6edcd",
-    theme_color: "#29231d",
+    background_color: "#0d0c0b",
+    theme_color: "#0d0c0b",
     icons: [
       { src: "/assets/brand/carddex-192.png", sizes: "192x192", type: "image/png" },
       { src: "/assets/brand/carddex-512.png", sizes: "512x512", type: "image/png" },

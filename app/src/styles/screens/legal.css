@@ -1,0 +1,273 @@
+/* Legal (/legal) screen sheet. Owned by the "overlays" screen group (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css).
+ * A Read screen on the dark ground (routes/legal.tsx), one document that grows with its text (main is the one
+ * scroller). The text keeps a ~65-character measure (46ch); the space beside it carries the contents and the short
+ * version (density R3), never nothing:
+ *   from 1024px  contents | text | the short version across the column, the spare width shared by the two gaps;
+ *                both side columns sticky where the screen is tall enough to hold them whole (never scrolling on
+ *                their own). Contents 200 / 264 from 1280, the short version 220 / 264 up to 400.
+ *   768-1023px   the four section links pinned under the top bar across both columns, then the text beside the
+ *                short version (sticky under the links).
+ *   under 768px  the section links pinned, the short version, the text.
+ * Tokens: carddex-theme.css. */
+
+.cdx-legal__layout {
+  /* 46ch of Instrument Sans (its 0 is 0.666em), about 65 characters a line (it averages ~0.69ch a glyph). In em, not
+   * ch: the fallback face's 0 is narrower, so a ch track moved the whole column when the web font swapped in (CLS). */
+  --legal-measure: 30.63em;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-section);
+}
+
+/* ---- the four section links (phones and tablets): pinned under the top bar while the text scrolls */
+/* Sticky offsets count from main's content edge, so the row climbs over main's top padding (16px) to sit flush
+ * under the top bar. The links wrap onto a second line rather than scroll sideways (density R2). */
+.cdx-legal__jump {
+  position: sticky;
+  top: -16px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 24px;
+  margin-inline: calc(var(--main-pad) * -1);
+  padding-inline: var(--main-pad);
+  border-bottom: 1px solid var(--color-hairline);
+  background: var(--color-ground);
+}
+.cdx-legal__jump a {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--hit);
+  min-height: var(--hit);
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  color: var(--color-slate);
+  font-size: var(--text-body);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color var(--t-hover) ease;
+}
+.cdx-legal__jump a[aria-current] {
+  border-bottom-color: var(--color-ink);
+  color: var(--color-ink);
+}
+.cdx-legal__jump a:focus-visible { outline-offset: -2px; }
+/* Short landscape phones: the pinned row would cost a third of the screen, so it scrolls with the page. */
+@media (max-height: 599.98px) {
+  .cdx-legal__jump { position: static; }
+}
+
+/* ---- contents (from 1024px) */
+.cdx-legal__toc { display: none; }
+.cdx-legal__toc-head {
+  margin-bottom: 4px;
+  padding-left: 13px;
+  color: var(--color-placeholder);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  font-weight: 500;
+}
+.cdx-legal__toc ol { list-style: none; }
+.cdx-legal__toc a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: var(--hit);
+  padding: 4px 0 4px 13px;
+  border-left: 1px solid var(--color-hairline);
+  color: var(--color-slate);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  text-decoration: none;
+  text-wrap: pretty;
+  transition: color var(--t-hover) ease;
+}
+.cdx-legal__toc ol ol a { padding-left: 25px; }
+.cdx-legal__toc-section { font-weight: 500; }
+.cdx-legal__toc-section[data-open] { color: var(--color-ink); }
+/* Only the section in view lists its topics: four rows plus at most nine. */
+.cdx-legal__toc-section:not([data-open]) + ol { display: none; }
+.cdx-legal__toc a[aria-current] { color: var(--color-ink); }
+.cdx-legal__toc a[aria-current]::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: -1px;
+  width: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--color-ink);
+}
+.cdx-legal__toc a:focus-visible { outline-offset: -2px; border-radius: var(--radius-chip); }
+@media (hover: hover) and (pointer: fine) {
+  .cdx-legal__jump a:hover,
+  .cdx-legal__toc a:hover { color: var(--color-ink); }
+}
+
+/* ---- the short version */
+.cdx-legal__summary {
+  padding: var(--pad-panel);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+}
+.cdx-legal__summary h2 {
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.cdx-legal__summary ul {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  padding-left: 18px;
+  list-style: disc;
+}
+.cdx-legal__summary li {
+  color: var(--color-slate);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  text-wrap: pretty;
+}
+.cdx-legal__summary li::marker { color: var(--color-placeholder); }
+
+/* ---- the text */
+.cdx-legal__doc { min-width: 0; padding-bottom: 16px; }
+.cdx-legal__doc > section + section { margin-top: 32px; }
+.cdx-legal__doc h2 {
+  font-size: var(--text-title);
+  line-height: var(--text-title--line-height);
+  font-weight: 600;
+  color: var(--color-ink);
+  text-wrap: balance;
+  scroll-margin-top: calc(var(--hit) + 16px);
+}
+.cdx-legal__doc h3 {
+  max-width: var(--legal-measure);
+  margin-top: 16px;
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  font-weight: 600;
+  color: var(--color-ink);
+  text-wrap: balance;
+  scroll-margin-top: calc(var(--hit) + 16px);
+}
+.cdx-legal__doc h2 + h3 { margin-top: 8px; }
+/* Headings take focus after a jump (screen readers land on them); the scroll is the visible answer. */
+.cdx-legal__doc :is(h2, h3):focus { outline: none; }
+.cdx-legal__doc p {
+  max-width: var(--legal-measure);
+  margin-top: 8px;
+  color: var(--color-ink);
+  font-size: var(--text-lead);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+/* An operator fact still to supply: an obvious marked slot, never a guess (kept as it was). */
+.cdx-legal__fill { padding:0 4px; border:1px dashed var(--color-hype); border-radius:var(--radius-chip); background:var(--color-tint); color:var(--color-ink); font-weight:600; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+.cdx-legal__fees {
+  width: 100%;
+  max-width: 640px;
+  margin-top: 16px;
+  border-collapse: collapse;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+.cdx-legal__fees th,
+.cdx-legal__fees td {
+  padding: 12px 16px 12px 0;
+  border-bottom: 1px solid var(--color-rule);
+  text-align: left;
+  vertical-align: top;
+  color: var(--color-ink);
+}
+.cdx-legal__fees td { color: var(--color-slate); }
+.cdx-legal__fees thead th {
+  padding-block: 8px;
+  border-bottom-color: var(--color-hairline);
+  color: var(--color-slate);
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  font-weight: 500;
+}
+.cdx-legal__fees tbody th { width: 40%; font-weight: 600; }
+.cdx-legal__fees tbody tr:last-child > * { border-bottom: 0; }
+@media (max-width: 639.98px) {
+  .cdx-legal__fees tbody th { width: 44%; }
+}
+
+/* ---- from 768px: the text beside the short version, the section links pinned across both. The layout's own font
+ * size is the text's, so the track equals the paragraphs' measure. The links' grid area spans every row
+ * (a sticky box never leaves its area) while their box stays in the first row. */
+@media (min-width: 768px) {
+  .cdx-legal__layout {
+    display: grid;
+    grid-template-columns: min(var(--legal-measure), 100% - 224px) minmax(200px, 400px);
+    grid-template-rows: calc(var(--hit) + 1px) auto;
+    grid-template-areas:
+      ". ."
+      "doc summary";
+    justify-content: space-between;
+    align-items: start;
+    gap: var(--gap-section) 24px;
+    font-size: var(--text-lead);
+  }
+  .cdx-legal__jump {
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+    align-self: start;
+  }
+  .cdx-legal__doc { grid-area: doc; }
+  .cdx-legal__summary { grid-area: summary; }
+}
+@media (min-width: 768px) and (min-height: 600px) {
+  .cdx-legal__summary {
+    position: sticky;
+    top: calc(var(--hit) + 1px); /* 16px under the pinned links */
+  }
+}
+
+/* ---- from 1024px: contents | text | the short version */
+@media (min-width: 1024px) {
+  .cdx-legal__layout {
+    --toc-w: 200px;
+    --sum-min: 220px;
+    --gap-x: 32px;
+    grid-template-columns:
+      var(--toc-w)
+      min(var(--legal-measure), 100% - var(--toc-w) - var(--sum-min) - 2 * var(--gap-x))
+      minmax(var(--sum-min), 400px);
+    grid-template-rows: auto;
+    grid-template-areas: "toc doc summary";
+    column-gap: var(--gap-x);
+  }
+  .cdx-legal__jump { display: none; }
+  .cdx-legal__toc {
+    grid-area: toc;
+    display: block;
+  }
+  .cdx-legal__doc :is(h2, h3) { scroll-margin-top: 16px; }
+}
+@media (min-width: 1280px) {
+  .cdx-legal__layout {
+    --toc-w: 264px;
+    --sum-min: 264px;
+    --gap-x: 48px;
+  }
+}
+/* Sticky side columns, each only where the screen holds it whole (16px under the top bar). */
+@media (min-width: 1024px) and (min-height: 600px) {
+  .cdx-legal__summary { top: 0; }
+}
+@media (min-width: 1024px) and (min-height: 760px) {
+  .cdx-legal__toc {
+    position: sticky;
+    top: 0;
+  }
+}
+/* Tall screens list every topic (22 rows); shorter ones the current section's, every other section one click away. */
+@media (min-width: 1024px) and (min-height: 1040px) {
+  .cdx-legal__toc-section:not([data-open]) + ol { display: block; }
+}

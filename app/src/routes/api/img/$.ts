@@ -3,11 +3,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { bindings } from "../../../lib/bindings.server";
 import { artVariantKey, pickArtWidth } from "../../../lib/mintdex/server/art.server";
 
+// An uploaded image is never a document: opened directly, it runs nothing and loads nothing (the page CSP is not used).
+const IMAGE_CSP = "default-src 'none'; sandbox";
 const NOT_FOUND = () =>
   new Response("Not found", {
     status: 404,
     // Short, so an upload that lands a moment later is not hidden for long.
-    headers: { "cache-control": "public, max-age=60", "x-content-type-options": "nosniff" },
+    headers: { "cache-control": "public, max-age=60", "x-content-type-options": "nosniff", "content-security-policy": IMAGE_CSP },
   });
 
 /**
@@ -37,6 +39,7 @@ export const Route = createFileRoute("/api/img/$")({
           "content-type": obj.httpMetadata?.contentType ?? "application/octet-stream",
           "cache-control": "public, max-age=31536000, immutable",
           "x-content-type-options": "nosniff",
+          "content-security-policy": IMAGE_CSP,
           etag: obj.httpEtag,
         };
         // onlyIf matched the client's copy: R2 returns the object's metadata without a body.

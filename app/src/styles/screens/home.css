@@ -1,0 +1,972 @@
+/* Home (/) screen sheet. Owned by the home screen group (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css).
+ * true-black-flat, Operate mode: the featured card on a calm surface panel (no halo, glows or ambient loops), the
+ * pulse blocks on surface panels, elevation by lightness alone, gold only on the curve fill.
+ *
+ * Density (.taste-skill/density/rules.md): one page at every width, main the one scroller, nothing hidden behind a
+ * tab, a dot or a toggle.
+ * - from 1280: the header row carries the Collection KPI strip; the body is the stage (5fr, a sticky column no taller
+ *   than the screen) beside the pulse (7fr): Trending, Recent activity, Launched on pump.fun. At 1440x900 all of it
+ *   is on the first screen and the stage meets the pulse's bottom edge.
+ * - 1024 to 1279: the stage (13fr) beside Trending, Recent activity, Collection and Launched (11fr).
+ * - under 1024: one column in reading order: the header row (title and Launch on one line), the card on the ground
+ *   (sized so its market line and the first line of picks fit the first screen), Trending, Recent activity,
+ *   Collection, Launched. Phones held sideways put the card beside its caption. */
+
+/* ---------------------------------------------------------------- geometry */
+.cdx-home {
+  /* The desktop stage's cap: the screen less the top bar, main's padding (16 + 16), the header row and its gap (the
+   * rules.md stage formula): 928 at 1920x1080, 748 at 1440x900, 648 at 1280x800, 616 at 1024x768. */
+  --home-stage-h: calc(
+    var(--cdx-app-height, 100dvh) - var(--topbar-h) - 32px - var(--pagehead-h) - var(--gap-page)
+  );
+  /* The stage's floor: a 240px card with its turn room (1.517W) plus the stage chrome (panel padding 32, the
+   * caption, its 12px margin, the picks' 12px margin and their 40px line: about 200). */
+  --home-stage-min: 564px;
+  /* Under 1024: the card's widest, and what the first screen spends around it (main's padding, the header row,
+   * its gap, the caption and its margin, the picks' margin and their first 44px line), so the market line and the
+   * picks stay in view: a 271px card at 390x844, 242px at 360x800. */
+  --home-card-max: 320px;
+  --home-phone-chrome: 332px;
+  /* A Launched tile's narrowest track: two tiles side by side in a panel from about 650px. */
+  --home-launch-min: 320px;
+}
+@media (min-width: 640px) {
+  .cdx-home {
+    /* Tablets: a 400px card; the caption sits beside the market figure, so less of the screen goes around it. */
+    --home-card-max: 400px;
+    --home-phone-chrome: 260px;
+  }
+}
+
+/* ---------------------------------------------------------------- the card's lean
+ * Keep this the sheet's first rule for the turntable class (no scoped rule ending in it above): tests/card3d/pose.test.ts
+ * reads the first match in the file for the lean. */
+.mdx-tt {
+  width: var(--W);
+  padding-block: calc(var(--W) * 0.05);
+  /* The featured card rests turned a little, lit from that side (light.ts restLight and restAngle of rx 5, ry 10). */
+  --hand-ry: 10;
+  --hand-a: 11.18;
+  --hand-px: 0.778;
+}
+/* 0.06W above and below on the desktop stage: the swap's arc is short there (turnArcScale 0.2); the near edge of a
+ * turning card may run some 0.04W further, into the caption's 12px margin, never onto it. */
+@media (min-width: 1024px) {
+  .cdx-home .mdx-tt {
+    padding-block: calc(var(--W) * 0.06);
+  }
+}
+.mdx-tt__card {
+  position: relative;
+  z-index: 3;
+  display: block;
+  -webkit-user-drag: none;
+}
+/* card3d.css is unlayered: the calm stage drops the design-colour halo and the prism ring that turns behind it. */
+.cdx-home .mdx-card3d__halo {
+  display: none !important;
+}
+
+/* ---------------------------------------------------------------- the header row */
+/* Under 1024: the title and Launch a coin share the first line, the context runs under both (about 80px at 390,
+ * where the row it replaces took 117). */
+@media (max-width: 1023.98px) {
+  .cdx-home .mdx-pagehead {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "title action" "context context";
+    align-items: center;
+    gap: 4px 12px;
+  }
+  .cdx-home .mdx-pagehead__text {
+    display: contents;
+  }
+  .cdx-home .mdx-pagehead__title {
+    grid-area: title;
+  }
+  .cdx-home .mdx-pagehead__context {
+    grid-area: context;
+    margin-top: 0;
+  }
+  .cdx-home .mdx-pagehead__right {
+    grid-area: action;
+    width: auto;
+  }
+}
+
+/* ---------------------------------------------------------------- the body grid */
+.cdx-home__body {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--gap-section);
+}
+/* The stage spans the pulse's rows. The last row is flexible, so if the stage's floor is taller than an empty pulse
+ * the slack falls under the last block, never between blocks. */
+@media (min-width: 1024px) {
+  .cdx-home__body {
+    grid-template-columns: minmax(0, 13fr) minmax(0, 11fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+    grid-template-areas: "stage trending" "stage activity" "stage collection" "stage launched";
+  }
+  .cdx-home__stage {
+    grid-area: stage;
+  }
+  .cdx-home-trending {
+    grid-area: trending;
+  }
+  .cdx-home-activity {
+    grid-area: activity;
+  }
+  .cdx-home-collection[data-place="body"] {
+    grid-area: collection;
+  }
+  .cdx-home-launched {
+    grid-area: launched;
+  }
+}
+@media (min-width: 1280px) {
+  .cdx-home__body {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas: "stage trending" "stage activity" "stage launched";
+  }
+}
+
+/* ---------------------------------------------------------------- the stage: the featured card */
+/* Under 1024: on the ground, edge to edge of the column. From 1024: a surface panel that stretches to the pulse
+ * beside it, at least the floor and at most the screen; it sticks while the pulse scrolls past where the window is
+ * tall enough (rules.md R1: a sticky column never taller than the screen, never scrolling in itself). */
+.cdx-home__stage {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+@media (min-width: 1024px) {
+  .cdx-home__stage {
+    align-self: stretch;
+    min-height: var(--home-stage-min);
+    max-height: max(var(--home-stage-min), var(--home-stage-h));
+    padding: var(--pad-panel);
+    border-radius: var(--radius-panel);
+    background: var(--color-surface);
+  }
+}
+@media (min-width: 1024px) and (min-height: 720px) {
+  .cdx-home__stage {
+    position: sticky;
+    top: 0;
+  }
+}
+/* The card's box. Desktop: a size container (the stretched stage gives it a definite height) and the card takes
+ * what fits: its 88/63 height plus 0.06W of turn room above and below (1.517W). Under 1024: the card is sized from
+ * the column and the small viewport height (not the visual viewport, so the keyboard never resizes it), its height
+ * plus 0.05W each side (1.497W). */
+.cdx-home__display {
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  container-type: inline-size;
+}
+.cdx-home__lot {
+  --W: max(
+    200px,
+    min(
+      var(--home-card-max),
+      80cqw,
+      calc((100svh - var(--topbar-h) - var(--tabbar-h) - var(--home-phone-chrome)) / 1.497)
+    )
+  );
+  display: flex;
+  justify-content: center;
+}
+@media (min-width: 1024px) {
+  .cdx-home__display {
+    min-height: 0;
+    flex: 1;
+    container-type: size;
+  }
+  .cdx-home__lot {
+    --W: min(400px, calc(100cqh / 1.517), 100cqw);
+  }
+}
+
+/* ---------------------------------------------------------------- the market line under the card */
+.cdx-home__caption {
+  flex: none;
+  container-type: inline-size;
+  margin-top: 12px;
+}
+.cdx-home-lot__head {
+  display: flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+/* Turn over, then View coin, 8px apart: two 32px pills with 40/44px hits. */
+.cdx-home-lot__actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+/* Its name above it, right-aligned so it never leaves the column. */
+.cdx-home-lot__actions .cdx-card-control[data-tip]::before {
+  right: 0;
+  left: auto;
+  transform: none;
+}
+/* The name, then "$TICKER · Ronin design" on its baseline; the meta gives way first. */
+.cdx-home-lot__id {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 8px;
+}
+.cdx-home-lot__name {
+  min-width: 0;
+  flex: 0 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cdx-home-lot__meta {
+  min-width: 0;
+  flex: 0 100 auto;
+  overflow: hidden;
+  font-size: var(--text-body);
+  line-height: 20px;
+  color: var(--color-slate);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cdx-home-lot__empty {
+  margin-top: 4px;
+  font-size: var(--text-body);
+  line-height: 20px;
+  color: var(--color-slate);
+  text-wrap: pretty;
+}
+.cdx-home-lot__market {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+@container (min-width: 380px) {
+  .cdx-home-lot__market {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: end;
+    gap: 24px;
+  }
+}
+.cdx-home-lot__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-caption);
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--color-slate);
+}
+.cdx-home-lot__figure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin-top: 4px;
+}
+.cdx-home-lot__change {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.cdx-home-lot__period {
+  font-size: var(--text-caption);
+  color: var(--color-slate);
+}
+/* The curve track's note line sits on the figure's baseline row: room for its 6px track under the label. */
+.cdx-home-lot__curve {
+  padding-bottom: 6px;
+}
+/* Under 1024 the ticker and design line goes (the card face shows both), so the card keeps the first screen. */
+@media (max-width: 1023.98px) {
+  .cdx-home__caption {
+    margin-top: 8px;
+  }
+  .cdx-home-lot__meta {
+    display: none;
+  }
+  .cdx-home-lot__market {
+    margin-top: 8px;
+  }
+}
+
+/* ---------------------------------------------------------------- the picks: every featured coin, one click */
+/* A wrapping row of the coins' art (no sideways scroll at any width), Pause at its end on the first line. */
+.cdx-home__picks-row {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+}
+.cdx-home__picks {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+}
+/* Each pick is a hit-sized square (40 under a fine pointer, 44 on touch) around the 36px art; its corner is
+ * concentric with the art's 10px one. The art sits back a little until it is chosen, hovered or focused. */
+.cdx-home__pick {
+  position: relative;
+  display: grid;
+  width: var(--hit);
+  height: var(--hit);
+  flex: none;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: calc(10px + (var(--hit) - 36px) / 2);
+  background: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--t-press) var(--ease-out);
+}
+/* Press: the house scale(0.96), on touch and mouse alike (the art comes forward with it). */
+.cdx-home__pick:active {
+  transform: scale(0.96);
+}
+.cdx-home__pick .mdx-thumb {
+  opacity: 0.72;
+  -webkit-user-drag: none;
+  transition: opacity var(--t-hover) ease;
+}
+.cdx-home__pick:active .mdx-thumb {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cdx-home__pick:active {
+    transform: none;
+  }
+}
+.cdx-home__pick[aria-checked="true"] .mdx-thumb,
+.cdx-home__pick:focus-visible .mdx-thumb {
+  opacity: 1;
+}
+/* The chosen coin: a 2px ink ring at the pick's edge (gold is data, never a selection). Shown at once. */
+.cdx-home__pick::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.cdx-home__pick[aria-checked="true"]::after {
+  border-color: var(--color-ink);
+}
+@media (hover: hover) and (pointer: fine) {
+  .cdx-home__pick:hover .mdx-thumb {
+    opacity: 1;
+  }
+  .cdx-home__pick:not([aria-checked="true"]):hover::after {
+    border-color: var(--color-control-border);
+  }
+}
+/* The coin's name above its pick (desktop): the card-controls tooltip recipe (carddex.css), on hover after a beat
+ * and on keyboard focus at once. The first pick and Pause anchor to their own edge, so nothing pokes past the stage. */
+@media (min-width: 1024px) {
+  .cdx-home__pick[data-tip]::before {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    z-index: 2;
+    padding: 4px 8px;
+    border-radius: var(--radius-row);
+    background: var(--color-float);
+    box-shadow: var(--shadow-pop); /* taste-skill-ignore: a tooltip floats (the shared tooltip recipe) */
+    color: var(--color-ink);
+    font-size: var(--text-caption);
+    font-weight: 500;
+    line-height: 16px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(-50%);
+    transition: opacity var(--t-fast) ease;
+  }
+  .cdx-home__pick[data-tip]:first-child::before {
+    left: 0;
+    transform: none;
+  }
+  .cdx-home__pick[data-tip]:focus-visible::before {
+    opacity: 1;
+    transition: none;
+  }
+}
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .cdx-home__pick[data-tip]:hover::before {
+    opacity: 1;
+    transition-delay: 400ms;
+  }
+  /* Warm (AppShell useWarmTips): the next pick's name opens at once. */
+  :root[data-tips-warm] .cdx-home__pick[data-tip]:hover::before {
+    transition: none;
+  }
+}
+/* Pause: the 36px card-control pill (its hit area reaches 40/44 through .mdx-btn::after), centred on the first line
+ * of picks. Calm never advances the cards, so there is nothing to pause: hidden from the first paint. */
+.cdx-home__play {
+  margin-top: calc((var(--hit) - var(--btn-h)) / 2);
+  margin-left: auto;
+}
+.cdx-home__play[data-tip]::before {
+  right: 0;
+  left: auto;
+  transform: none;
+}
+:root[data-motion="calm"] .cdx-home__play {
+  display: none;
+}
+:root[data-motion="calm"] .cdx-home__pick,
+:root[data-motion="calm"] .cdx-home__pick .mdx-thumb,
+:root[data-motion="calm"] .cdx-home__pick[data-tip]::before {
+  transition: none;
+}
+:root[data-motion="calm"] .cdx-home__pick:active {
+  transform: none;
+}
+
+/* Phone tilt (iOS asks first): in the flow under the picks. card3d.css is unlayered and right-aligns the row. */
+.cdx-home__gyro {
+  display: flex;
+  justify-content: center !important;
+  padding: 8px 0 0 !important;
+}
+
+/* Phones held sideways (the 29 October landscape card fix, in the one-scroller layout): the card has its own column
+ * from the top of the view, beside the header row, its market line, picks and tilt chip, and is sized from the height
+ * between the top bar and the tab bar (less main's padding), so the whole turning card is in the first screen even at
+ * 568x320. The view still grows with its content: the pulse follows full width below and main scrolls. The stage is
+ * a subgrid of the view's grid (its role and handlers stay on it); only the plain body wrapper steps aside. */
+@media (min-width: 560px) and (max-width: 1023.98px) and (max-height: 500px) {
+  .cdx-home {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    align-content: start;
+    gap: 0 24px;
+  }
+  .cdx-home > .mdx-pagehead {
+    grid-row: 1;
+    grid-column: 2;
+  }
+  .cdx-home__body {
+    display: contents;
+  }
+  .cdx-home__stage {
+    display: grid;
+    grid-row: 1 / span 4;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    grid-template-rows: subgrid;
+  }
+  .cdx-home__display {
+    grid-row: 1 / -1;
+    grid-column: 1;
+    align-self: start;
+  }
+  .cdx-home__caption {
+    grid-row: 2;
+    grid-column: 2;
+  }
+  .cdx-home__picks-row {
+    grid-row: 3;
+    grid-column: 2;
+    container: picks-row / inline-size;
+  }
+  .cdx-home__gyro {
+    grid-row: 4;
+    grid-column: 2;
+  }
+  .cdx-home__body > :not(.cdx-home__stage) {
+    grid-column: 1 / -1;
+    margin-top: var(--gap-section);
+  }
+  .cdx-home__lot {
+    --W: max(
+      120px,
+      min(320px, 80cqw, calc((100svh - var(--topbar-h) - var(--tabbar-h) - 32px) / 1.497))
+    );
+  }
+}
+/* Ten picks that cannot share one line beside Pause (10 x 44 + 8 + 44) split five and five, never nine and one. */
+@container picks-row (max-width: 491.98px) {
+  .cdx-home__picks:has(> :nth-child(10)) {
+    display: grid;
+    grid-template-columns: repeat(5, var(--hit));
+  }
+}
+
+/* ---------------------------------------------------------------- pulse panels */
+.cdx-home-panel {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--gap-head);
+  padding: var(--pad-panel);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  container-type: inline-size;
+}
+/* The section head's right side: the slate meta (the list's basis, the bots note, Real · Solana mainnet), then the
+ * head's one control. The two section-head controls read alike (chrome-16): Pause takes See all's ink and size. */
+.cdx-home-head__right {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+.cdx-home-panel__meta {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-caption);
+  line-height: 20px;
+  color: var(--color-slate);
+  white-space: nowrap;
+}
+/* Rows bleed 8px into the panel padding so their hover and focus fill keeps the text on the panel's text edge. */
+.cdx-home-panel__list {
+  display: flex;
+  flex-direction: column;
+  margin-inline: -8px;
+}
+/* Taller desktop screens get more rows, not more empty ground (density D5; index.tsx renders 10 of each): 5 Trending
+ * and 6 activity rows below 1024px wide or 1000px tall (1440x900 as before), 7 and 9 from 1000px tall (1920x1080),
+ * all 10 from 1300px (2560x1440). */
+@media (max-width: 1023.98px), (max-height: 999.98px) {
+  .cdx-home-trending .cdx-home-panel__list > li:nth-child(n + 6),
+  .cdx-home-activity .cdx-home-panel__list > :nth-child(n + 7) {
+    display: none;
+  }
+}
+@media (min-width: 1024px) and (min-height: 1000px) and (max-height: 1299.98px) {
+  .cdx-home-trending .cdx-home-panel__list > li:nth-child(n + 8),
+  .cdx-home-activity .cdx-home-panel__list > :nth-child(n + 10) {
+    display: none;
+  }
+}
+.cdx-home-panel__error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding-block: 8px;
+  font-size: var(--text-body);
+  line-height: 20px;
+  color: var(--color-slate);
+}
+
+/* Rows: a nested step on hover (fine pointers only, 120ms colour), the inset ring and fill on keyboard focus
+ * (mintdex.css); a tap on touch keeps the shared press (mintdex.css, hover: none). */
+.cdx-feed-coin,
+.cdx-feed-event {
+  transition: background-color var(--t-hover) ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cdx-feed-coin:hover,
+  .cdx-feed-event:hover {
+    background-color: var(--color-nested);
+  }
+}
+.cdx-feed-coin:focus-visible,
+.cdx-feed-event:focus-visible {
+  background-color: var(--color-nested);
+}
+
+/* Trending row. Narrow panels: two lines on a 52px pitch (rank, the 28px thumb, the name and ticker over the curve,
+ * the market cap over the change at the right edge, tabular). */
+.cdx-feed-coin {
+  display: grid;
+  min-height: var(--row-h);
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px;
+}
+.cdx-feed-coin[data-ranked] {
+  grid-template-columns: 20px 28px minmax(0, 1fr) auto;
+}
+.cdx-feed-coin__rank {
+  overflow: clip;
+  font-size: var(--text-caption);
+  color: var(--color-slate);
+}
+.cdx-feed-coin__id {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+.cdx-feed-coin__name {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 6px;
+  font-size: var(--text-body);
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.cdx-feed-coin__ticker {
+  flex: none;
+  font-size: var(--text-caption);
+  font-weight: 500;
+  color: var(--color-slate);
+}
+/* The curve as one small line: "Curve 64%" then a 4px track (the CurveTrack sm, laid out in a row). */
+.cdx-feed-coin .mdx-curve {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.cdx-feed-coin .mdx-curve__label {
+  font-weight: 500;
+  color: var(--color-slate);
+}
+.cdx-feed-coin .mdx-curve__track {
+  flex: 1;
+  max-width: 88px;
+}
+.cdx-feed-coin__figures {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.cdx-feed-coin__cap {
+  font-size: var(--text-body);
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+.cdx-feed-coin__change {
+  font-size: var(--text-caption);
+  line-height: 16px;
+}
+
+/* Activity row. Narrow panels: the thumb, then who and the time over what they did (slate, the amount and ticker in
+ * ink), on a 52px pitch. */
+.cdx-feed-event {
+  display: grid;
+  min-width: 0;
+  min-height: 48px;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 6px 8px;
+}
+.cdx-feed-event .mdx-thumb {
+  margin-top: 6px;
+}
+.cdx-feed-event__text {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "who time" "what what";
+  column-gap: 8px;
+  font-size: var(--text-body);
+  line-height: 20px;
+}
+.cdx-feed-event__who {
+  display: flex;
+  min-width: 0;
+  grid-area: who;
+  align-items: baseline;
+  color: var(--color-ink);
+}
+.cdx-feed-event__bot {
+  flex: none;
+  font-size: var(--text-caption);
+  color: var(--color-slate);
+  white-space: pre;
+}
+.cdx-feed-event__what {
+  min-width: 0;
+  grid-area: what;
+  color: var(--color-slate);
+  overflow-wrap: anywhere;
+}
+.cdx-feed-event__amount,
+.cdx-feed-event__ticker {
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+.cdx-feed-event__time {
+  grid-area: time;
+  font-size: var(--text-caption);
+  color: var(--color-slate);
+  white-space: nowrap;
+}
+
+/* Wide panels (at least 500px of text width: 1280 and up, tablets, phones held sideways): each row is one --row-h
+ * line. Trending: rank | thumb | name $TICKER | curve | market cap | change, the name and the curve sharing the spare
+ * width (the signature track gets it, not a void). Activity: thumb | who | what | time ago; the handle truncates,
+ * what they did may wrap rather than cut an amount. */
+@container (min-width: 500px) {
+  .cdx-feed-coin[data-ranked] {
+    grid-template-columns: 16px 28px minmax(120px, 1fr) minmax(112px, 1fr) 80px 64px;
+    padding-block: 4px;
+  }
+  .cdx-feed-coin__id,
+  .cdx-feed-coin__figures {
+    display: contents;
+  }
+  .cdx-feed-coin .mdx-curve__track {
+    max-width: none;
+  }
+  .cdx-feed-coin__cap,
+  .cdx-feed-coin__change {
+    justify-self: end;
+    text-align: right;
+  }
+  /* On one line the change is a figure in its own column, not a note under the cap: data size. */
+  .cdx-feed-coin__change {
+    font-size: var(--text-body);
+    line-height: 20px;
+  }
+  .cdx-feed-event {
+    min-height: var(--row-h);
+    align-items: center;
+    padding-block: 4px;
+  }
+  .cdx-feed-event .mdx-thumb {
+    margin-top: 0;
+  }
+  /* The handle column is the same width in every row (not fitted to each handle), so what they did starts on one
+   * edge down the list and reads as a table. */
+  .cdx-feed-event__text {
+    grid-template-columns: minmax(0, 14em) minmax(0, 1fr) auto;
+    grid-template-areas: "who what time";
+    column-gap: 12px;
+  }
+}
+
+/* ---------------------------------------------------------------- collection KPIs (simulated) */
+/* The strip (Stats strip) in both places: type on the surface it sits on (no second fill), hairlines between the
+ * cells, the first cell on its block's text edge. */
+.cdx-home-collection .mdx-kpis {
+  /* Never narrower than a cell's own label and figure (no "All-time volu…" at 360); the spare width is shared. */
+  grid-template-columns: repeat(var(--kpi-cols, 3), minmax(max-content, 1fr));
+  border-radius: 0;
+  background: none;
+}
+.cdx-home-collection .mdx-kpi {
+  padding: 0 12px;
+}
+.cdx-home-collection .mdx-kpi:first-child {
+  padding-left: 0;
+}
+/* In the pulse (under 1280): the heading above the strip in a narrow panel, beside it from 520px. */
+.cdx-home-collection__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-head);
+}
+.cdx-home-collection__head {
+  display: flex;
+  min-height: 32px;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+@container (min-width: 520px) {
+  .cdx-home-collection__body {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+  .cdx-home-collection__body .mdx-kpis {
+    flex: 1;
+  }
+}
+/* In the header row (from 1280): the three cells, each as wide as its label and figure (24px between them, the
+ * hairline in the middle), then the Simulated tag after the last figure; at most 44px tall, bottom-aligned with the
+ * context line. */
+.cdx-home-collection[data-place="head"] {
+  display: none;
+}
+.cdx-home-collection[data-place="head"] .mdx-kpis {
+  grid-template-columns: repeat(var(--kpi-cols, 3), max-content);
+}
+.cdx-home-collection__sim {
+  flex: none;
+  align-self: flex-end;
+}
+@media (min-width: 1280px) {
+  .cdx-home-collection[data-place="head"] {
+    display: flex;
+    max-height: 44px;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .cdx-home-collection[data-place="body"] {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------- launched on pump.fun (real launches) */
+/* Every launch the endpoint returns (at most 12) as tiles in an auto-fill grid: two columns in the wide pulse and on
+ * tablets, one in the 1024 pulse and on phones. */
+/* No launches yet: the line holds one row of tiles (8 + the 56px card + 8), the placeholder's height. */
+.cdx-home-launched > .mdx-empty {
+  min-height: 72px;
+}
+.cdx-home-launched__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--home-launch-min), 100%), 1fr));
+  gap: var(--gap-head);
+}
+/* A tile on the nested step: the card (40 x 56, the card's own 63/88), name over $TICKER, design and time, then the
+ * links: under the name in a narrow tile, stacked at the right from 340px. The tile is the size container. */
+.cdx-feed-launch {
+  min-width: 0;
+  container-type: inline-size;
+  padding: 8px 12px;
+  border-radius: var(--radius-row);
+  background: var(--color-nested);
+}
+.cdx-feed-launch__body {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 40px minmax(0, 1fr);
+  grid-template-areas: "card id" "card links";
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 4px;
+}
+@container (min-width: 340px) {
+  .cdx-feed-launch__body {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    grid-template-areas: "card id links";
+  }
+}
+.cdx-feed-launch__card {
+  display: block;
+  width: 40px;
+  height: 56px;
+  overflow: hidden;
+  grid-area: card;
+  border-radius: 3px;
+  background: var(--color-raised);
+  outline: 1px solid var(--image-outline);
+  outline-offset: -1px;
+}
+.cdx-feed-launch__card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cdx-feed-launch__id {
+  display: flex;
+  min-width: 0;
+  grid-area: id;
+  flex-direction: column;
+  align-self: end;
+}
+@container (min-width: 340px) {
+  .cdx-feed-launch__id {
+    align-self: center;
+  }
+}
+.cdx-feed-launch__name {
+  overflow: hidden;
+  font-size: var(--text-body);
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--color-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cdx-feed-launch__meta {
+  overflow: hidden;
+  font-size: var(--text-caption);
+  line-height: 16px;
+  color: var(--color-slate);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cdx-feed-launch__links {
+  display: flex;
+  min-width: 0;
+  grid-area: links;
+  flex-wrap: wrap;
+  align-items: center;
+  align-self: start;
+  gap: 4px 16px;
+  font-size: var(--text-caption);
+  line-height: 16px;
+}
+@container (min-width: 340px) {
+  .cdx-feed-launch__links {
+    flex-direction: column;
+    align-items: flex-end;
+    align-self: center;
+    gap: 4px;
+  }
+}
+.cdx-feed-launch__links .mdx-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+/* Loading: flat bars at the tile's real size (no shimmer), so nothing shifts when the list lands. */
+.cdx-feed-launch[data-skeleton] .cdx-feed-launch__body {
+  grid-template-columns: 40px minmax(0, 1fr);
+  grid-template-areas: "card id";
+}
+.cdx-feed-launch__bar {
+  display: block;
+  height: 12px;
+  margin-block: 4px;
+  border-radius: var(--radius-chip);
+  background: var(--color-raised);
+}
+.cdx-feed-launch__bar[data-w="name"] {
+  width: min(120px, 60%);
+  height: 14px;
+}
+.cdx-feed-launch__bar[data-w="meta"] {
+  width: min(168px, 80%);
+}
+.cdx-feed-launch[data-skeleton] .cdx-feed-launch__id {
+  align-self: center;
+}
+
+/* ---------------------------------------------------------------- motion
+ * State feedback only (Operate mode): the caption fades 160ms on a swap, rows tint on hover, an arriving activity
+ * row takes the wash once, Trending rows glide on a reorder (useFlip, off under calm), a pick's art steps forward on
+ * hover (120ms opacity) and its ring appears at once. The card is the card engine. */
+@media (forced-colors: active) {
+  .cdx-feed-launch__card,
+  .cdx-feed-launch__bar {
+    border: 1px solid CanvasText; /* taste-skill-ignore: forced colours drop fills, so the blank card keeps an edge */
+  }
+  .cdx-home__pick::after {
+    border-color: Canvas;
+  }
+  .cdx-home__pick[aria-checked="true"]::after {
+    border-color: Highlight;
+  }
+}

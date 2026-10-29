@@ -1,0 +1,52 @@
+# Workers Static Assets response headers (copied to dist/client by Vite). HTML comes from the Worker
+# (src/server.ts), which sets its own Cache-Control. Rules here must not overlap: a header set by two
+# matching rules is joined with a comma.
+
+# Every static file (scripts, styles, fonts, images) gets the hardening headers the Worker adds to its own responses.
+# Only these two names here, so no other rule's header is joined with them.
+/*
+  X-Content-Type-Options: nosniff
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+
+# Vite output: every .js and .css file directly under /assets/ is content-hashed (index-DBl4CYSZ.js).
+/assets/*.js
+  Cache-Control: public, max-age=31536000, immutable
+/assets/*.css
+  Cache-Control: public, max-age=31536000, immutable
+
+# Self-hosted fonts. A changed font gets a new file name.
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Versioned art copies (name.v1.webp): a new version gets a new name.
+/assets/creatures/w320/*
+  Cache-Control: public, max-age=31536000, immutable
+/assets/creatures/w96/*
+  Cache-Control: public, max-age=31536000, immutable
+/assets/creatures/w480/*
+  Cache-Control: public, max-age=31536000, immutable
+/assets/creatures/w640/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Unversioned images keep their names when re-exported: cache for a day, then revalidate in the background.
+# :file matches one path segment only, so the versioned w96/w320/w480/w640 copies above keep their single rule.
+/assets/creatures/:file
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/assets/carddex/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/assets/brand/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/assets/editions/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/assets/frames/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/assets/icons/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/assets/plates/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/og/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+# The workers.dev mirror stays out of search (the Worker adds the same header to its own responses).
+https://launch-a-card.gtjvv976mb.workers.dev/*
+  X-Robots-Tag: noindex

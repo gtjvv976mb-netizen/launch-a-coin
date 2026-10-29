@@ -32,18 +32,24 @@ function devnetConnectSrc(): string {
 }
 const CONNECT_SRC = IS_CHAIN ? devnetConnectSrc() : `'self' https:${EXTRA_DEV_SRC}`;
 
-// Direct Launch a Card hosts require framing protection around wallet actions.
-// Keep the separately hosted design preview's framing policy intact.
+// Every Launch a Card host requires framing protection around wallet actions: launchacard.fun and its subdomains, the
+// launchacard.com SaaS zone (launchacard.com, the edge.launchacard.com fallback origin and any host its */* route
+// answers) and the workers.dev mirror. Keep the separately hosted design preview's framing policy intact.
 const OWNED_SITE_HOSTS = new Set([
   'launchacard.fun',
   'www.launchacard.fun',
   'launch-a-card.gtjvv976mb.workers.dev',
 ]);
+export function isOwnedSiteHost(hostname: string): boolean {
+  return OWNED_SITE_HOSTS.has(hostname) || /^(?:[a-z0-9-]+\.)*launchacard\.(?:fun|com)\.?$/i.test(hostname);
+}
 
 export function applySecurityHeaders(response: Response, requestUrl?: URL): Response {
   const headers = new Headers(response.headers);
-  const ownedSite = requestUrl != null && OWNED_SITE_HOSTS.has(requestUrl.hostname);
-  headers.set(
+  const ownedSite = requestUrl != null && isOwnedSiteHost(requestUrl.hostname);
+  // A response that set its own policy keeps it (public launch images and metadata send default-src 'none'); every
+  // other response gets the page policy.
+  if (!headers.has('Content-Security-Policy')) headers.set(
     'Content-Security-Policy',
     "default-src 'self'; " +
       // Optional Cloudflare Web Analytics beacon injected at the edge.
@@ -52,13 +58,16 @@ export function applySecurityHeaders(response: Response, requestUrl?: URL): Resp
       "font-src 'self' data:; " +
       `img-src 'self' data: blob: https:${EXTRA_DEV_SRC}; media-src 'self' https:${EXTRA_DEV_SRC}; ` +
       `connect-src ${CONNECT_SRC}; ` +
-      "base-uri 'self'; form-action 'self'" + (ownedSite ? "; frame-ancestors 'self'" : ''),
+      "object-src 'none'; base-uri 'self'; form-action 'self'" + (ownedSite ? "; frame-ancestors 'self'" : ''),
   );
+  else if (ownedSite && !/frame-ancestors/.test(headers.get('Content-Security-Policy') ?? '')) {
+    headers.set('Content-Security-Policy', `${headers.get('Content-Security-Policy')}; frame-ancestors 'self'`);
+  }
   if (ownedSite) headers.set('X-Frame-Options', 'SAMEORIGIN');
   headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
   headers.set('X-Content-Type-Options', 'nosniff');
   headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
   headers.set('X-XSS-Protection', '0');
   return new Response(response.body, {
     status: response.status,

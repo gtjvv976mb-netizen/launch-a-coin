@@ -185,8 +185,8 @@ async function summarize(rows: CoinRaw[], [holders, bids, before, vol]: AggRows)
       tradingPair: getTradingPair(r.ticker, asset.key),
       ...metrics,
       cardTemplate: design.key,
-      stockTicker: design.stock?.ticker ?? null,
-      tokenPair: design.stock?.pair ?? null,
+      stockTicker: asset.kind === "stock" ? asset.referenceTicker ?? null : null,
+      tokenPair: asset.kind === "stock" ? getTradingPair(r.ticker, asset.key) : null,
       level: design.materialLevel,
       liveLevel: design.materialLevel,
       change24h: base > 0 ? metrics.priceQuote / base - 1 : 0,
@@ -330,7 +330,7 @@ function eventsQuery(limit: number) {
     `SELECT e.id, e.kind, e.coin_id, c.name, c.ticker, c.image, c.quote_asset_key, c.quote_mint, u.handle, u.is_npc AS npc, e.amount, e.level, e.created_at
        FROM events e JOIN coins c ON c.id = e.coin_id LEFT JOIN users u ON u.id = e.user_id
       WHERE e.kind IN ('launch', 'buy', 'sell') AND c.hidden = 0
-      ORDER BY e.id DESC LIMIT ?`,
+      ORDER BY e.created_at DESC, e.id DESC LIMIT ?`,
     limit,
   );
 }
@@ -344,7 +344,8 @@ export async function getHome(): Promise<HomeData & Rev> {
   const [raw, h, b, p, v, events, players, rev] = await readBatch(
     allCoinsQuery(),
     ...aggQueries(Date.now() - DAY),
-    eventsQuery(8),
+    // Home renders up to 10 rows of each (taller screens show more of them, home.css).
+    eventsQuery(10),
     q<{ n: number }>("SELECT COUNT(*) AS n FROM users WHERE is_npc = 0"),
     revQuery(),
   );
@@ -355,7 +356,7 @@ export async function getHome(): Promise<HomeData & Rev> {
     const best = sortCoins(coins.filter((c) => c.cardTemplate === design.key), "mcap")[0];
     if (best) featured.push(best);
   }
-  const trending = sortCoins(coins).slice(0, 6);
+  const trending = sortCoins(coins).slice(0, 10);
   return {
     featured,
     trending,
@@ -363,7 +364,8 @@ export async function getHome(): Promise<HomeData & Rev> {
     stats: {
       coins: coins.length,
       deedSales: 0,
-      volume: coins.some(coin => coin.volume === null) ? null : coins.reduce((s, c) => s + (c.volume ?? 0), 0),
+      // Unknown (a grey dash) only once a coin with no SOL reference has traded; an untraded one adds nothing.
+      volume: coins.some(coin => coin.volume === null && coin.volumeQuote !== "0") ? null : coins.reduce((s, c) => s + (c.volume ?? 0), 0),
       volumeByQuote: sumAtomsByQuote(coins.map(coin => [coin.quoteAssetKey, coin.volumeQuote])),
       players: players[0]?.n ?? 0,
     },
@@ -758,7 +760,7 @@ export type LaunchInput = {
   cardTemplate?: string;
   quoteAssetKey?: string;
   quoteMint?: string;
-  /** Optional catalog echoes, checked for consistency; these never establish a stock association. */
+  /** Optional quote echoes, checked for consistency; these never establish a stock association. */
   stockTicker?: string;
   tokenPair?: string;
 };
@@ -786,11 +788,13 @@ export async function launchCoin(user: SessionUser, input: LaunchInput): Promise
   if (!isCardDesignKey(cardTemplate)) throw new UserError("Choose an available card design.");
   const design = getCardDesign(cardTemplate);
   const asset = launchQuote(cardTemplate, input);
-  if (input.stockTicker !== undefined && input.stockTicker !== design.stock?.ticker) {
-    throw new UserError("The stock reference must match the selected card design.");
+  const stockTicker = asset.kind === "stock" ? asset.referenceTicker : undefined;
+  const tokenPair = asset.kind === "stock" ? getTradingPair(ticker, asset.key) : undefined;
+  if (input.stockTicker !== undefined && input.stockTicker !== stockTicker) {
+    throw new UserError("The stock reference must match the selected quote asset.");
   }
-  if (input.tokenPair !== undefined && input.tokenPair !== design.stock?.pair) {
-    throw new UserError("The reference pair must match the selected card design.");
+  if (input.tokenPair !== undefined && input.tokenPair !== tokenPair) {
+    throw new UserError("The reference pair must match the selected token and quote asset.");
   }
   if (name.length < 2 || name.length > 24) throw new UserError("Names are 2 to 24 characters.");
   if (!TICKER_RE.test(ticker)) throw new UserError("Tickers are 2 to 8 letters or numbers.");

@@ -7,6 +7,7 @@ import { frameLayout, tierForLevel } from "../../lib/mintdex/tiers";
 import { CardPrint, boxStyle } from "./CardPrint";
 import { GeneratedCardFront, generatedCardStyle } from "../carddex/GeneratedCardArt";
 import { useImageFailure } from "./image-state";
+import "../../editions-card.css";
 
 export type EditionCardProps = {
   edition: Edition | EditionKey;
@@ -172,7 +173,7 @@ export function EditionCard({ edition: input, card, compact = false, priority = 
             onLoad={tokenArt.onLoad}
           />
         ) : null}
-        {!card.image || failed ? <span className={failed ? "mdx-edition__art-unavailable" : "mdx-edition__art-empty"}>{failed ? "Token artwork unavailable" : "Your token art"}</span> : null}
+        {!card.image || failed ? <span className={failed ? "mdx-edition__art-unavailable" : "mdx-edition__art-empty"}>{failed ? "Coin artwork unavailable" : "Your coin art"}</span> : null}
       </div>
       <GeneratedCardFront cardTemplate={card.cardTemplate} priority={priority} />
       <CardPrint card={card} layout={layout} tier={tier} preview />

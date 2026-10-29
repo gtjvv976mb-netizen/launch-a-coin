@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useState,
   type FormEvent,
@@ -20,7 +21,7 @@ import { FLOW, MODE_COPY } from "../../lib/mintdex/copy";
 import type { Me } from "../../lib/mintdex/types";
 import { setMe } from "./hooks";
 import { isCoarsePointer } from "./sheet";
-import { ViewportPages } from "../carddex/live/ViewportPages";
+import { useLiveLaunchOpen } from "../carddex/live/readiness";
 import {
   Button,
   CalmSwitch,
@@ -166,7 +167,6 @@ function EnterDialog({
   const [handle, setHandle] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [page, setPage] = useState(0);
   const qc = useQueryClient();
   const toast = useToast();
 
@@ -181,7 +181,6 @@ function EnterDialog({
     if (open) {
       setHandle("");
       setError(null);
-      setPage(0);
     }
   }, [open]);
 
@@ -223,15 +222,14 @@ function EnterDialog({
     if (then) setTimeout(then.run, 0);
   }
 
+  // One page (coin-26): what the demo is, the handle, then Cancel and the one primary.
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="Enter Launch a Card">
-      {page === 0 ? <div className="cdx-enter-intro cdx-overlay-deck">
-        <div className="cdx-overlay-copy">
-          <p>{reason ?? "Pick a handle to launch tokens and build your collection."}{MODE_COPY.enterGift ? ` ${MODE_COPY.enterGift}` : null}</p>
-          {MODE_COPY.accountNote ? <p>{MODE_COPY.accountNote}</p> : null}
-        </div>
-        <div className="cdx-overlay-actions"><span aria-live="polite">1 / 2</span><Button onClick={() => setPage(1)}>Choose a handle</Button></div>
-      </div> : <form onSubmit={submit} className="cdx-enter-form cdx-overlay-deck" noValidate>
+    <Modal open={open} onOpenChange={onOpenChange} title="Try the demo">
+      <form onSubmit={submit} className="cdx-enter" noValidate>
+        <p className="cdx-enter__intro">
+          {reason ?? "Pick a handle to launch coins and build your collection."}
+          {MODE_COPY.enterGift ? ` ${MODE_COPY.enterGift}` : null}
+        </p>
         <Field
           label="Handle"
           htmlFor="handle"
@@ -257,50 +255,67 @@ function EnterDialog({
             aria-describedby="handle-help"
           />
         </Field>
-        <div className="cdx-enter-submit mdx-sheet-foot">
-          <Button variant="outline" onClick={() => setPage(0)}>Back</Button>
+        {MODE_COPY.accountNote ? <p className="cdx-enter__note">{MODE_COPY.accountNote}</p> : null}
+        <div className="cdx-overlay-actions mdx-sheet-foot">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          {/* Enabled with an empty handle too (one primary rule): a press says why under the field. */}
           <Button
             type="submit"
-            disabled={!valid}
-            onBlocked={() => setError(invalidReason)}
             pending={busy}
-            pendingLabel="Entering..."
+            pendingLabel="Starting..."
           >
-            {intent ? intent.label : "Enter Launch a Card"}
+            {intent ? intent.label : "Start the demo"}
           </Button>
         </div>
-      </form>}
+      </form>
     </Modal>
   );
 }
 
 // ---------------------------------------------------------------- guide (every figure from copy.ts and tiers.ts)
 
-const STEPS: Array<{ title: string; body: string; visual: ReactNode; phoneVisual?: boolean }> = [
+type GuideStep = { title: string; body: string };
+/** While mainnet launches are off, the guide describes the test mode people can actually use, test funds first. */
+const DEMO_STEPS: GuideStep[] = [
   {
-    title: "Launch your token",
-    body: "Give your token a name, ticker and artwork. Choose its supported quote asset, then review the pump.fun launch in your wallet.",
-    visual: null,
+    title: "Launch your coin",
+    body: "Launches run in test mode with test SOL. Real mainnet launches are not open yet. Give your token a name, ticker and artwork, and choose its quote asset.",
   },
   {
     title: "Choose its permanent card",
-    body: "Pick a premium design before launch. After the token is verified, approve the separate one-of-one NFT card delivery to your creator wallet.",
-    visual: null,
+    body: "Pick a premium design before launch. Your coin launches on a simulated pump.fun curve and its one-of-one card goes into your demo collection.",
   },
   {
     title: "Trade the token. Keep the card.",
-    body: "Open your real token on pump.fun and keep the separate card NFT in your wallet. The demo collection lets you explore with test funds.",
-    visual: null,
+    body: "Trade your test token with test funds and keep its card in your collection. No real token or NFT is minted.",
+  },
+];
+/** The wallet-launch guide, used only once the owner turns mainnet launches on. */
+const LIVE_STEPS: GuideStep[] = [
+  {
+    title: "Launch your coin",
+    body: "Give your coin a name, ticker and artwork. Choose its supported quote asset, then review the pump.fun launch in your wallet.",
+  },
+  {
+    title: "Choose its permanent card",
+    body: "Pick a premium design before launch. After the coin is verified, approve the separate one-of-one NFT card delivery to your creator wallet.",
+  },
+  {
+    title: "Trade the coin. Keep the card.",
+    body: "Open your real coin on pump.fun and keep the separate card NFT in your wallet. The demo lets you explore with test SOL.",
   },
 ];
 
-const FEE_ROWS: Array<{ label: string; value: string }> = IS_SIM
-  ? [{ label: "Demo collection", value: "Demo balances and trades are simulated. Wallet launches show real network costs separately before you sign." }]
-  : [{ label: "Token trading", value: "Review the fee and price impact shown before confirming a trade." }];
+const feeRows = (liveOpen: boolean): Array<{ label: string; value: string }> => IS_SIM
+  ? [{ label: "Demo", value: liveOpen ? "Demo balances and trades are simulated. Wallet launches show real network costs separately before you sign." : "Demo balances and trades are simulated with test funds." }]
+  : [{ label: "Coin trading", value: "Review the fee and price impact shown before confirming a trade." }];
 
 /**
- * The guide keeps all three steps, fees, legal links and motion settings on explicit pages.
- * The same bounded deck is used in desktop dialogs and phone sheets. Linkable with ?guide=1.
+ * The guide, one page (density R4): the three steps, then costs and risks beside Calm motion, then one primary:
+ * Done, or (signed out) Try the demo beside Not now. Desktop dialogs show the steps as three wells in a row; phone
+ * sheets as a numbered list. Linkable with ?guide=1.
  */
 function GuideDialog({
   open,
@@ -312,13 +327,67 @@ function GuideDialog({
   onEnter: () => void;
 }) {
   const me = useMe();
+  const liveOpen = useLiveLaunchOpen(open);
+  const STEPS = liveOpen || !IS_SIM ? LIVE_STEPS : DEMO_STEPS;
+  const FEE_ROWS = feeRows(liveOpen);
+  const idBase = useId();
+  const close = () => onOpenChange(false);
+  const invite = () => {
+    close();
+    // The demo dialog rises once the guide has left and handed focus back to its opener (so Escape returns there).
+    window.setTimeout(onEnter, 260);
+  };
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="How Launch a Card works" width={560}>
-      <div className="cdx-overlay-deck"><ViewportPages label="How Launch a Card works pages" pages={[
-        ...STEPS.map(s => <section key={s.title} className="cdx-overlay-copy"><h3>{s.title}</h3><p>{s.body}</p>{s.visual}</section>),
-        <section key="fees" className="cdx-overlay-copy"><h3>Costs and risks</h3>{MODE_COPY.guideNote ? <p>{MODE_COPY.guideNote}</p> : null}<dl>{FEE_ROWS.map(r => <div key={r.label}><dt className="font-semibold text-ink">{r.label}</dt><dd>{r.value}</dd></div>)}</dl><TextLink to="/legal" onClick={() => onOpenChange(false)}>Terms, privacy and risks</TextLink></section>,
-        <section key="settings" className="cdx-overlay-copy"><h3>Make it yours</h3><CalmSwitch size="md" />{!me ? <Button block onClick={() => { onOpenChange(false); onEnter(); }}>{IS_SIM ? "Enter Launch a Card" : CONNECT_COPY.connect}</Button> : null}</section>,
-      ]} /></div>
+    <Modal open={open} onOpenChange={onOpenChange} title="How Launch a Card works" width={720}>
+      <div className="cdx-guide">
+        <ol className="cdx-guide__steps" role="list">
+          {STEPS.map((s, i) => (
+            <li key={s.title} className="cdx-guide__step">
+              <span className="cdx-guide__n num" aria-hidden>
+                {i + 1}
+              </span>
+              <h3 id={`${idBase}-${i}`}>{s.title}</h3>
+              <p>{s.body}</p>
+            </li>
+          ))}
+        </ol>
+        <div className="cdx-guide__more">
+          <div className="cdx-overlay-copy">
+            <h3>Costs and risks</h3>
+            {MODE_COPY.guideNote ? <p>{MODE_COPY.guideNote}</p> : null}
+            <dl className="cdx-guide__facts">
+              {FEE_ROWS.map((r) => (
+                <div key={r.label}>
+                  <dt>{r.label}</dt>
+                  <dd>{r.value}</dd>
+                </div>
+              ))}
+            </dl>
+            <TextLink to="/legal" hash="fees" onClick={close}>
+              Fees, terms and risks
+            </TextLink>
+          </div>
+          <div className="cdx-overlay-copy">
+            <h3>Make it yours</h3>
+            <div className="cdx-guide__calm">
+              <p>Calm motion holds the cards still. Buttons and menus still respond.</p>
+              <CalmSwitch size="md" />
+            </div>
+          </div>
+        </div>
+        <div className="cdx-overlay-actions mdx-sheet-foot">
+          {me ? (
+            <Button onClick={close}>Done</Button>
+          ) : (
+            <>
+              <Button variant="outline" onClick={close}>
+                Not now
+              </Button>
+              <Button onClick={invite}>{IS_SIM ? "Try the demo" : CONNECT_COPY.connect}</Button>
+            </>
+          )}
+        </div>
+      </div>
     </Modal>
   );
 }

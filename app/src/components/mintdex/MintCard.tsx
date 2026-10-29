@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type CSSProperties, type Ref } from "react";
 import { getCardDesign, type CardDesign } from "../../lib/carddex/designs";
 import { CanonicalCardFace } from "../carddex/CanonicalCardFace";
-import { generatedCardAssets } from "../../lib/carddex/generated-assets";
+import { canonicalSkinAsset, canonicalSkinSrcSet, phoneSkin } from "../carddex/CanonicalCardSkin";
+import { generatedCardAssets, generatedSrcSet } from "../../lib/carddex/generated-assets";
 import { marketCapText } from "../../lib/carddex/quote-display";
 import "../../carddex-cards.css";
 
@@ -100,9 +101,11 @@ export function preloadCard(card: CardData, sizes: string, level = card.level): 
   if (typeof window === "undefined") return Promise.resolve();
   const design = cardDesign(card);
   const generated = generatedCardAssets(design.key);
-  const jobs: Promise<unknown>[] = [{source:generated.front,small:generated.front320},{source:generated.back,small:generated.back320}].filter(asset=>asset.source).map(({source,small}) => {
+  const skin = canonicalSkinAsset(design.key,card.quoteAssetKey);
+  const back = generated.back;
+  const jobs: Promise<unknown>[] = [{source:skin?.path,srcset:skin?canonicalSkinSrcSet(skin,phoneSkin()):undefined},{source:back,srcset:back&&generated.back320?generatedSrcSet(generated.back320,back):undefined}].filter(asset=>asset.source).map(({source,srcset}) => {
     const image = new Image();
-    if (small) { image.srcset = `${small} 320w, ${source} 1260w`; image.sizes = sizes; }
+    if (srcset) { image.srcset = srcset; image.sizes = sizes; }
     image.src = source!; image.decoding = "async";
     return image.decode().catch(() => undefined);
   });
@@ -151,6 +154,8 @@ type FaceProps = {
   eager?: boolean;
   /** Frame mini plus 96 px art, no lights (ghosts, far coverflow cards). */
   lite?: boolean;
+  /** A close-look viewer (Inspect, the 3D turntable): the full-size skin on every screen. */
+  full?: boolean;
 };
 
 /**
@@ -166,7 +171,7 @@ type RenderFaceProps = FaceProps & { mode: "flat" | "3d" | "lite"; className?: s
 function Face(input: RenderFaceProps) {
   const card = designedCard(input.card);
   const design = cardDesign(card);
-  return <CanonicalCardFace card={card} design={design} priority={input.priority || input.eager} sizes={input.sizes} compact={input.compact} lite={input.mode === "lite"} className={input.className} style={input.style} label={input.mode === "flat" ? cardLabel(card) : undefined} />;
+  return <CanonicalCardFace card={card} design={design} priority={input.priority} eager={!input.priority && input.eager} sizes={input.sizes} compact={input.compact} lite={input.mode === "lite"} full={input.full} className={input.className} style={input.style} label={input.mode === "flat" ? cardLabel(card) : undefined} />;
 }
 
 /**
@@ -227,7 +232,7 @@ type FixedSlots = { id: number; rev: number; slots: FixedSlot[]; front: string; 
 /** A fixed creator print; only an explicit design selection or artwork edit stages a new face. */
 export function useCardSlots(
   card: CardData,
-  o: { ascend: "ascend" | "ascend-short"; art: CardSwap; compact?: boolean; priority?: boolean; sizes?: string; hand: boolean },
+  o: { ascend: "ascend" | "ascend-short"; art: CardSwap; compact?: boolean; priority?: boolean; sizes?: string; hand: boolean; full?: boolean },
 ) {
   const design = cardDesign(card);
   const base = (): FixedSlots => ({ id: card.dexNo, rev: 0, slots: [{ key: `D${design.key}:0`, design: design.key, image: card.image }], front: `D${design.key}:0`, swap: "instant" });
@@ -256,7 +261,7 @@ export function useCardSlots(
   }, [card.name, card.ticker, card.lore, o.hand]);
   const faces: FaceSlot[] = view.slots.map((slot) => {
     const print = designedCard({ ...card, cardTemplate: slot.design, image: slot.image });
-    return { key: slot.key, tier: cardLight(print), backTheme: cardBackTheme(print), node: <Face mode="3d" card={print} compact={o.compact} priority={!!o.priority && slot.key === view.front} sizes={o.sizes} eager={slot.key !== view.front} /> };
+    return { key: slot.key, tier: cardLight(print), backTheme: cardBackTheme(print), node: <Face mode="3d" card={print} compact={o.compact} priority={!!o.priority && slot.key === view.front} sizes={o.sizes} eager={slot.key !== view.front} full={o.full} /> };
   });
   return {
     faces, front: view.front, swap: view.swap, level: getCardDesign(shownSlot.design).materialLevel,

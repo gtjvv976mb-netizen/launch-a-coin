@@ -10,7 +10,8 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { findCoinSlug, type ChainCoinNotFound as Why } from "../../../lib/chain/data";
 import { COIN_NOT_FOUND } from "../../../lib/mintdex/copy";
 import { looksLikeAddress } from "../../../lib/mintdex/seo";
-import { Button, ButtonLink, EmptyState, TextLink } from "../../mintdex/ui";
+import { Button, ButtonLink, TextLink } from "../../mintdex/ui";
+import { EmptyState } from "../../mintdex/empty-state";
 import { NET_NAME, NET_SHORT } from "../../../lib/chain/env";
 
 const routeApi = /* @__PURE__ */ getRouteApi("/coin/$id");

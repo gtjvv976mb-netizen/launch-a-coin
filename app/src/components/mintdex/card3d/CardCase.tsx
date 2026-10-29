@@ -14,7 +14,8 @@ import { paintAcrylic } from "./extrude";
 import { CasePlate, caseBox } from "./case-chrome";
 import { GyroChip } from "./GyroChip";
 import { InspectDialog, prefetchInspect } from "./InspectDialog";
-import { motionLevel, type Body } from "./motion3d";
+import { motionLevel, useMotionLevel, type Body } from "./motion3d";
+import { CardControlButton } from "../../carddex/CardControls";
 import type { Card3DHandle, Card3DProps } from "./types";
 
 export type CardCaseProps = {
@@ -86,10 +87,12 @@ export function CaseScene({
   onInspect,
   turntable = true,
 }: CaseSceneProps) {
-  const slots = useCardSlots(card, { ascend: "ascend", art: "print", priority, sizes, hand: true });
+  // Inspect is opened to look closely: its face keeps the full-size skin on phones too (CanonicalCardSkin `full`).
+  const slots = useCardSlots(card, { ascend: "ascend", art: "print", priority, sizes, hand: true, full: kind === "inspect" });
   const tier = tierForLevel(slots.level);
   const [said, setSaid] = useState("");
   const [paused, setPaused] = useState(false);
+  const level = useMotionLevel();
   const [labeled, setLabeled] = useState(variant === "labeled");
   const edgesHost = useRef<HTMLDivElement>(null);
   const lastInput = useRef(0);
@@ -154,6 +157,7 @@ export function CaseScene({
       data-controls={controls}
       data-kind={kind}
       data-near={nearNext ? "" : undefined}
+      data-paused={turntable && paused ? "" : undefined}
       style={style}
     >
       <Card3DView
@@ -203,28 +207,32 @@ export function CaseScene({
         poseFront={<CasePlate card={card} side="front" />}
       />
       {controls !== "none" || extraControl ? (
-        <div className="mdx-case__controls">
+        // The compact card-controls row (density R6): icon pills that carry their names (a tooltip on hover and
+        // focus), 36px under a fine pointer and 44px on touch, so the case keeps its room.
+        <div className="mdx-case__controls cdx-card-controls" role="group" aria-label="Card controls">
           {controls !== "none" ? (
             <>
-              <button
-                type="button"
-                className="mdx-case__btn"
-                aria-label="Turn over"
+              <CardControlButton
+                icon="turn-over"
+                label="Turn over"
                 onClick={() => {
                   touched();
                   slots.ctl.current?.turnOver(1, true);
                 }}
-              >
-                <svg aria-hidden viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12.8 5.1a5.2 5.2 0 1 0 .2 5.6M12.8 1.9v3.6H9.2" />
-                </svg>
-                <span className="mdx-case__btn-label">Turn over</span>
-              </button>
-              {turntable ? <button type="button" className="mdx-case__btn" aria-pressed={paused} onClick={() => {
-                const body = slots.ctl.current?.body;
-                if (!paused && body) body.flip.snap(body.flip.x);
-                setPaused((value) => !value);
-              }}>{paused ? "Resume" : "Pause"}</button> : null}
+              />
+              {/* Pause spin / Resume spin: the glyph and name swap. Only full motion turns the case, so calm and
+                  reduced motion leave the button out and the row closes up. */}
+              {turntable && level === "full" ? (
+                <CardControlButton
+                  icon={paused ? "play" : "pause"}
+                  label={paused ? "Resume spin" : "Pause spin"}
+                  onClick={() => {
+                    const body = slots.ctl.current?.body;
+                    if (!paused && body) body.flip.snap(body.flip.x);
+                    setPaused((value) => !value);
+                  }}
+                />
+              ) : null}
               {onInspect ? inspectBtn(onInspect) : null}
             </>
           ) : null}
