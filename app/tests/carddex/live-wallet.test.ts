@@ -7,6 +7,7 @@ import { base58, fromBase58, hexHash, LIVE_PROGRAMS, parseLiveTransaction, parti
   addEphemeralSignature, fromBase64, oversizedPlanError, planForWallet, planIsStale, refreshKeepsReview, signingOrderFor, signPlanWithWallet, validateWalletFirstResult, WALLET_CHANGED_TRANSACTION, WalletChangedTransaction } from "../../src/components/carddex/live/transaction";
 import { liveModeOpen } from "../../src/components/carddex/live/mode";
 import { signForLaunch, WALLET_RETRY_NOTICE } from "../../src/components/carddex/live/launch-flow";
+import { BUY_DOES_NOT_FIT, liveBuyRefusal, STOCK_BUY_WARNS } from "../../src/components/carddex/live/buy-fit";
 import { messageOf, payerGuardData, phantomGuarded, tokenGuardData, unsignedTransaction } from "../../../integrations/pumpfun/tests/message-fixtures";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
@@ -420,5 +421,14 @@ describe("the wallet step with one page-first retry", () => {
       refresh: async () => { refreshes++; return { ...plan, review: { ...plan.review, totalDebitLamports: "9999999" } }; }, walletSign: wallet.sign });
     expect(refreshes).toBe(1); expect(wallet.shown).toHaveLength(1);
     expect(step).toMatchObject({ status: "changed" });
+  });
+});
+
+describe("the initial-buy refusal copy", () => {
+  test("names a tokenized-stock quote's own reason, the size reason otherwise, and nothing when the buy fits", () => {
+    expect(liveBuyRefusal({ buyFits: true, buyBlocked: null })).toBeNull();
+    expect(liveBuyRefusal({ buyFits: false, buyBlocked: "issuer-controls" })).toBe(STOCK_BUY_WARNS);
+    expect(liveBuyRefusal({ buyFits: false, buyBlocked: null })).toBe(BUY_DOES_NOT_FIT);
+    expect(liveBuyRefusal({ buyFits: false })).toBe(BUY_DOES_NOT_FIT);
   });
 });
