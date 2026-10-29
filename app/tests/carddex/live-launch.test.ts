@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { ed25519 } from "@noble/curves/ed25519";
 import { base58Encode } from "../../../chain/sdk/src/bytes";
-import { getPairAsset } from "../../src/lib/carddex/pairs";
+import { boundQuoteForDesign, getPairAsset } from "../../src/lib/carddex/pairs";
 import { MEME_PAIR_PRESETS } from "../../src/lib/carddex/design-pairings";
 import renderAssets from "../../src/lib/carddex/render-assets.json";
 import { CARD_RENDERER_VERSION } from "../../src/lib/carddex/card-template";
@@ -136,7 +136,9 @@ describe("isolated real-launch server lifecycle", () => {
     expect(sqlite.query("SELECT COUNT(*) AS n FROM coins").get()).toEqual({n: 0});
     expect(sendCalls).toBe(0);
   });
-  for (const [cardTemplate, quoteKey] of [["pokemon-classic", "sol"], ["pokemon-full-art", "tslax"], ["pepe", "sol"], ["pepe", "gmex"], ...["ember", "relic", "tide", "neon-circuit", "frost", "mythic", "celestial", "regal", "wildtype", "aurora"].map(design => [design, "sol"])]) test(`saved ${cardTemplate}/${quoteKey} intent retains its existing quote and committed print`, async () => {
+  const neutralPresetDesigns = [...new Set(MEME_PAIR_PRESETS.map(preset => preset.design))].filter(design => !boundQuoteForDesign(design));
+  const legacyPairs = [["pokemon-full-art", "tslax"], ["pepe", "gmex"], ...neutralPresetDesigns.map(design => [design, "sol"] as const)];
+  for (const [cardTemplate, quoteKey] of legacyPairs) test(`saved ${cardTemplate}/${quoteKey} intent retains its existing quote and committed print`, async () => {
     const quote = getPairAsset(quoteKey), original = await input({cardTemplate, quoteAssetKey: quote.key, quoteMint: quote.mint});
     const prepared = await service.prepareLiveLaunch(creator, original);
     // Existing intents must recover without being reinterpreted by the new chooser presets.
@@ -167,14 +169,14 @@ describe("isolated real-launch server lifecycle", () => {
       expect(await loadRendererAsset(atlas.path)).toEqual(new Uint8Array(readFileSync(resolve(import.meta.dir, "../../public", `.${atlas.path}`))));
     } finally { Object.assign(atlas, original); }
   });
-  test("new launches require the current print while saved intents retain their committed images", async () => {
+  for (const previousVersion of ["launchacard-canonical-v1", "launchacard-canonical-v2"]) test("new launches require the current print while saved intents retain their committed images: " + previousVersion, async () => {
     const original = await input();
-    sqlite.query("UPDATE live_compositions SET renderer_version = 'launchacard-canonical-v1'").run();
+    sqlite.query("UPDATE live_compositions SET renderer_version = ?").run(previousVersion);
     await expect(service.prepareLiveLaunch(creator, original)).rejects.toThrow("Compose the canonical");
     expect(prepareCalls).toBe(0);
     sqlite.query("UPDATE live_compositions SET renderer_version = ?").run(COMPOSITION_VERSION);
     const prepared = await service.prepareLiveLaunch(creator, original);
-    sqlite.query("UPDATE live_compositions SET renderer_version = 'launchacard-canonical-v1'").run();
+    sqlite.query("UPDATE live_compositions SET renderer_version = ?").run(previousVersion);
     const recovered = await service.prepareLiveLaunch(creator, original);
     expect(recovered.intent.id).toBe(prepared.intent.id);
     expect(recovered.intent.assets).toEqual(prepared.intent.assets);

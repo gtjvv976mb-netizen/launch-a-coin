@@ -209,3 +209,22 @@ body { overflow:clip; }
 /* The full-turn projection has spare room above its caption; center that envelope below the headline. */
 @media(min-width:360px) and (max-width:1023px) { .cdx-viewport .cdx-home__lot .mdx-tt { translate:0 12px; } }
 @media(max-width:359px) { .cdx-viewport .cdx-home__lot .mdx-tt { translate:0 2px; } }
+/* A landscape phone gives the rotating card its own column instead of subtracting a caption from its height. */
+@media(min-width:560px) and (max-width:1023px) and (max-height:440px) {
+ .cdx-viewport:has(.cdx-home) .mdx-mhead { display:none; }
+ .cdx-viewport .cdx-home { position:relative; }
+ .cdx-home-mobile-tabs { position:absolute; top:0; left:184px; right:122px; z-index:2; }
+ .cdx-home-mobile-tabs button { min-height:44px; }
+ .cdx-viewport .cdx-home__intro { min-height:44px; }
+ .cdx-viewport .cdx-home__intro .mdx-display { font-size:22px; white-space:nowrap; }
+ .cdx-viewport .cdx-home__copy { display:none; }
+ .cdx-viewport .cdx-home__launch { min-height:44px; }
+ .cdx-viewport .cdx-home__lot { display:grid; grid-template-columns:minmax(0,1fr) minmax(262px,1fr); grid-template-rows:minmax(0,1fr) auto auto; column-gap:16px; justify-items:center; --W:min(230px,calc((100cqh - 24px)/1.636825),calc((50cqw - 24px)/1.26)); }
+ .cdx-viewport .cdx-home__lot .mdx-tt { grid-column:1; grid-row:1 / -1; translate:0 0; }
+ .cdx-viewport .cdx-home__caption { grid-column:2; grid-row:1; align-self:end; width:100%; max-width:360px; margin:0; }
+ .cdx-viewport .cdx-home__caption .mdx-leaders { grid-column:1 / -1; }
+ .cdx-viewport .cdx-home__caption .mdx-caption > div:last-child { grid-row:1; }
+ .cdx-viewport .cdx-home__touchtools { grid-column:2; grid-row:2; margin:4px 0 0; }
+ .cdx-viewport .cdx-home__controls { grid-column:2; grid-row:3; margin:4px 0 0; min-height:44px; }
+ .cdx-viewport .cdx-home__aside { padding-top:48px; }
+}

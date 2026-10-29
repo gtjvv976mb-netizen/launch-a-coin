@@ -38,7 +38,7 @@
         "Only published CARDS, SV151 and TOAD quotes were appended after the owner chose supported meme pairs only. Existing identities, reviewed starting reserves and bindings are unchanged.",
         "CARDS and SV151 have collector classification; a themed finish does not assert backing, endorsement or affiliation.",
         "PEPEqnuuCDbBC89p1u9vpnP1KQ2oj1xTcQBsjt9X55m is admitted by the on-chain QuoteControl account but absent from the public Supported Pair Assets table when reviewed. It is excluded from the selectable catalog, per owner direction to use published supported pairs only.",
-        "The Pokémon-named candidate D42TjMjz5H7toPu5md5KBXreZkCSdZMEfLQwmBhJXvb1 is a separate unlisted pumpCoin quote, not CARDS or SV151; it is excluded.",
+        "The Pok\u00e9mon-named candidate D42TjMjz5H7toPu5md5KBXreZkCSdZMEfLQwmBhJXvb1 is a separate unlisted pumpCoin quote, not CARDS or SV151; it is excluded.",
         "The existing jade frog finish offers an explicit TOAD preset. TOAD is The Toad Pepe at its own exact supported mint, never renamed or represented as PEPE."
       ],
       "excludedCandidates": [
@@ -48,7 +48,7 @@
           "reason": "Absent from the public Supported Pair Assets table; owner chose supported pairs only."
         },
         {
-          "symbol": "Pokémon",
+          "symbol": "Pok\u00e9mon",
           "mint": "D42TjMjz5H7toPu5md5KBXreZkCSdZMEfLQwmBhJXvb1",
           "reason": "Unlisted pumpCoin quote and ambiguous user identity; owner chose supported pairs only."
         }
@@ -79,6 +79,20 @@
         "All six are initialized, unpaused, extension-free SPL Token mints, directly admitted by QuoteControl, with positive starting reserves. Runtime launch preparation still reads fresh state.",
         "SPX is the published Wormhole Solana representation of SPX6900, retains its Wormhole mint authority, and is labelled with Wormhole Portal listing-provider terms. It is a memecoin, not an equity or index fund.",
         "POPCAT has no exact entry in the published supported list at review and remains excluded."
+      ]
+    },
+    "moreMemeExpansion20261029": {
+      "at": "2026-10-28T17:18:59.388Z",
+      "reviewedDateAsiaManila": "2026-10-29",
+      "slot": 462558257,
+      "createV2Enabled": true,
+      "quoteControlMintCount": 224,
+      "rawEvidenceDirectory": "output/more-meme-pairs-2026-10-29",
+      "notes": [
+        "Only exact GOAT, ZEREBRO, ACT, pippin, VINE, aura, MICHI, CATE, ANSEM, Bert, CHILLHOUSE and USDUC entries from the public Supported Pair Assets table were appended. The previous25 objects, identities and reviewed reserve snapshots are unchanged.",
+        "All12 are directly admitted by QuoteControl, initialized with6 decimals, no mint/freeze authority and positive starting reserves. CATE and ANSEM use Token2022 with MetadataPointer and TokenMetadata only; the other10 use legacy SPL Token. No paused/default-frozen or transfer-fee extensions were observed.",
+        "USDUC is the published unstable coin memecoin and is not classified as a stable asset. Exact contract addresses remain authoritative; similarly named assets are not substituted.",
+        "The fixture keeps its prior Global/QuoteControl bytes because all12 are already admitted. Most starting-reserve parameters have changed since that earlier capture; new registry values reflect this fresh capture. Runtime preparation resolves current state instead of treating either snapshot as permanent."
       ]
     }
   },
@@ -527,6 +541,234 @@
       ],
       "mintVerificationSlot": 462497910,
       "admissionVerificationSlot": 462497910
+    },
+    {
+      "key": "goat",
+      "symbol": "GOAT",
+      "name": "Goatseus Maximus",
+      "mint": "CzLSujWBLFsSjncfkh59rUFqvafWcY5tzedWJSuypump",
+      "decimals": 6,
+      "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "kind": "meme",
+      "issuer": null,
+      "issuerTerms": null,
+      "verifiedDate": "2026-10-29",
+      "admission": "quoteControl",
+      "initialVirtualQuoteReserves": "233175635887",
+      "sourceUrls": [
+        "https://pump.fun/docs/custom-pairs"
+      ],
+      "mintVerificationSlot": 462558257,
+      "admissionVerificationSlot": 462558257
+    },
+    {
+      "key": "zerebro",
+      "symbol": "ZEREBRO",
+      "name": "zerebro",
+      "mint": "8x5VqbHA8D7NkD52uNuS5nnt3PwA8pLD34ymskeSo2Wn",
+      "decimals": 6,
+      "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "kind": "meme",
+      "issuer": null,
+      "issuerTerms": null,
+      "verifiedDate": "2026-10-29",
+      "admission": "quoteControl",
+      "initialVirtualQuoteReserves": "109231897567",
+      "sourceUrls": [
+        "https://pump.fun/docs/custom-pairs"
+      ],
+      "mintVerificationSlot": 462558257,
+      "admissionVerificationSlot": 462558257
+    },
+    {
+      "key": "act",
+      "symbol": "ACT",
+      "name": "Act I : The AI Prophecy",
+      "mint": "GJAFwWjJ3vnTsrQVabjBVK2TYB1YtRCQXRDfDgUnpump",
+      "decimals": 6,
+      "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "kind": "meme",
+      "issuer": null,
+      "issuerTerms": null,
+      "verifiedDate": "2026-10-29",
+      "admission": "quoteControl",
+      "initialVirtualQuoteReserves": "379840212990",
+      "sourceUrls": [
+        "https://pump.fun/docs/custom-pairs"
+      ],
+      "mintVerificationSlot": 462558257,
+      "admissionVerificationSlot": 462558257
+    },
+    {
+      "key": "pippin",
+      "symbol": "pippin",
+      "name": "Pippin",
+      "mint": "Dfh5DzRgSvvCFDoYc2ciTkMrbDfRKybA4SoFbPmApump",
+      "decimals": 6,
+      "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "kind": "meme",
+      "issuer": null,
+      "issuerTerms": null,
+      "verifiedDate": "2026-10-29",
+      "admission": "quoteControl",
+      "initialVirtualQuoteReserves": "208254365784",
+      "sourceUrls": [
+        "https://pump.fun/docs/custom-pairs"
+      ],
+      "mintVerificationSlot": 462558257,
+      "admissionVerificationSlot": 462558257
+    },
+    {
+      "key": "vine",
+      "symbol": "VINE",
+      "name": "Vine Coin",
+      "mint": "6AJcP7wuLwmRYLBNbi825wgguaPsWzPBEHcHndpRpump",
+      "decimals": 6,
+      "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "kind": "meme",
+      "issuer": null,
+      "issuerTerms": null,
+      "verifiedDate": "2026-10-29",
+      "admission": "quoteControl",
+      "initialVirtualQuoteReserves": "461532103258",
+      "sourceUrls": [
+        "https://pump.fun/docs/custom-pairs"
+      ],
+      "mintVerificationSlot": 462558257,
+      "admissionVerificationSlot": 462558257
+    },
+    {
+      "key": "aura",
+      "symbol": "aura",
+      "name": "aura",
+      "mint": "DtR4D9FtVoTX2569gaL837ZgrB6wNjj6tkmnX9Rdk9B2",
+      "decimals": 6,
+      "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "kind": "meme",
+      "issuer": null,
+      "issuerTerms": null,
+      "verifiedDate": "2026-10-29",
+      "admission": "quoteControl",
+      "initialVirtualQuoteReserves": "426470201898",
+      "sourceUrls": [
+        "https://pump.fun/docs/custom-pairs"
+      ],
+      "mintVerificationSlot": 462558257,
+      "admissionVerificationSlot": 462558257
+    },
+    {
+      "key": "michi",
+      "symbol": "MICHI",
+      "name": "michi",
+      "mint": "AywAYdNJnSLSXwKWYxDciPjqGRnwp4iZdQptuuQTpump",
+      "decimals": 6,
+      "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "kind": "meme",
+      "issuer": null,
+      "issuerTerms": null,
+      "verifiedDate": "2026-10-29",
+      "admission": "quoteControl",
+      "initialVirtualQuoteReserves": "1284214290492",
+      "sourceUrls": [
+        "https://pump.fun/docs/custom-pairs"
+      ],
+      "mintVerificationSlot": 462558257,
+      "admissionVerificationSlot": 462558257
+    },
+    {
+      "key": "cate",
+      "symbol": "CATE",
+      "name": "Catecoin",
+      "mint": "Ai66LHZG9MCzg1WKdawwqduVAXpNDUuV8M3uyq5ppump",
+      "decimals": 6,
+      "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "kind": "meme",
+      "issuer": null,
+      "issuerTerms": null,
+      "verifiedDate": "2026-10-29",
+      "admission": "quoteControl",
+      "initialVirtualQuoteReserves": "66439760654",
+      "sourceUrls": [
+        "https://pump.fun/docs/custom-pairs"
+      ],
+      "mintVerificationSlot": 462558257,
+      "admissionVerificationSlot": 462558257
+    },
+    {
+      "key": "ansem",
+      "symbol": "ANSEM",
+      "name": "The Black Bull",
+      "mint": "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump",
+      "decimals": 6,
+      "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "kind": "meme",
+      "issuer": null,
+      "issuerTerms": null,
+      "verifiedDate": "2026-10-29",
+      "admission": "quoteControl",
+      "initialVirtualQuoteReserves": "50650546667",
+      "sourceUrls": [
+        "https://pump.fun/docs/custom-pairs"
+      ],
+      "mintVerificationSlot": 462558257,
+      "admissionVerificationSlot": 462558257
+    },
+    {
+      "key": "bert",
+      "symbol": "Bert",
+      "name": "Bertram The Pomeranian",
+      "mint": "HgBRWfYxEfvPhtqkaeymCQtHCrKE46qQ43pKe8HCpump",
+      "decimals": 6,
+      "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "kind": "meme",
+      "issuer": null,
+      "issuerTerms": null,
+      "verifiedDate": "2026-10-29",
+      "admission": "quoteControl",
+      "initialVirtualQuoteReserves": "278902341021",
+      "sourceUrls": [
+        "https://pump.fun/docs/custom-pairs"
+      ],
+      "mintVerificationSlot": 462558257,
+      "admissionVerificationSlot": 462558257
+    },
+    {
+      "key": "chillhouse",
+      "symbol": "CHILLHOUSE",
+      "name": "Chill House",
+      "mint": "GkyPYa7NnCFbduLknCfBfP7p8564X1VZhwZYJ6CZpump",
+      "decimals": 6,
+      "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "kind": "meme",
+      "issuer": null,
+      "issuerTerms": null,
+      "verifiedDate": "2026-10-29",
+      "admission": "quoteControl",
+      "initialVirtualQuoteReserves": "3802387072666",
+      "sourceUrls": [
+        "https://pump.fun/docs/custom-pairs"
+      ],
+      "mintVerificationSlot": 462558257,
+      "admissionVerificationSlot": 462558257
+    },
+    {
+      "key": "usduc",
+      "symbol": "USDUC",
+      "name": "unstable coin",
+      "mint": "CB9dDufT3ZuQXqqSfa1c5kY935TEreyBw9XJXxHKpump",
+      "decimals": 6,
+      "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "kind": "meme",
+      "issuer": null,
+      "issuerTerms": null,
+      "verifiedDate": "2026-10-29",
+      "admission": "quoteControl",
+      "initialVirtualQuoteReserves": "1412752265704",
+      "sourceUrls": [
+        "https://pump.fun/docs/custom-pairs"
+      ],
+      "mintVerificationSlot": 462558257,
+      "admissionVerificationSlot": 462558257
     }
   ]
 }

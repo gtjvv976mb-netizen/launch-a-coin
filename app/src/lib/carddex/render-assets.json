@@ -9,7 +9,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "pokemon-classic--stock": {
     "path": "/assets/carddex/render/pokemon-classic--stock.png",
@@ -21,7 +21,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "pokemon-full-art": {
     "path": "/assets/carddex/render/pokemon-full-art.png",
@@ -33,7 +33,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "pokemon-full-art--stock": {
     "path": "/assets/carddex/render/pokemon-full-art--stock.png",
@@ -45,7 +45,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "yugioh-monster": {
     "path": "/assets/carddex/render/yugioh-monster.png",
@@ -57,7 +57,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "yugioh-monster--stock": {
     "path": "/assets/carddex/render/yugioh-monster--stock.png",
@@ -69,7 +69,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "yugioh-spell": {
     "path": "/assets/carddex/render/yugioh-spell.png",
@@ -81,7 +81,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "yugioh-spell--stock": {
     "path": "/assets/carddex/render/yugioh-spell--stock.png",
@@ -93,7 +93,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "magic-etched": {
     "path": "/assets/carddex/render/magic-etched.png",
@@ -105,7 +105,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "magic-etched--stock": {
     "path": "/assets/carddex/render/magic-etched--stock.png",
@@ -117,7 +117,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "duel-masters": {
     "path": "/assets/carddex/render/duel-masters.png",
@@ -129,7 +129,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "duel-masters--stock": {
     "path": "/assets/carddex/render/duel-masters--stock.png",
@@ -141,7 +141,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "one-piece": {
     "path": "/assets/carddex/render/one-piece.png",
@@ -153,7 +153,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "one-piece--stock": {
     "path": "/assets/carddex/render/one-piece--stock.png",
@@ -165,7 +165,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "obsidian-archive": {
     "path": "/assets/carddex/render/obsidian-archive.png",
@@ -177,7 +177,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "obsidian-archive--stock": {
     "path": "/assets/carddex/render/obsidian-archive--stock.png",
@@ -189,7 +189,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "stock-gme--stock": {
     "path": "/assets/carddex/render/stock-gme--stock.png",
@@ -201,7 +201,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "stock-tsla--stock": {
     "path": "/assets/carddex/render/stock-tsla--stock.png",
@@ -213,7 +213,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "stock-nvda--stock": {
     "path": "/assets/carddex/render/stock-nvda--stock.png",
@@ -225,7 +225,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "stock-aapl--stock": {
     "path": "/assets/carddex/render/stock-aapl--stock.png",
@@ -237,7 +237,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "stock-mstr--stock": {
     "path": "/assets/carddex/render/stock-mstr--stock.png",
@@ -249,7 +249,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "stock-coin--stock": {
     "path": "/assets/carddex/render/stock-coin--stock.png",
@@ -261,7 +261,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "spark": {
     "path": "/assets/carddex/render/spark.png",
@@ -273,7 +273,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "spark--stock": {
     "path": "/assets/carddex/render/spark--stock.png",
@@ -285,7 +285,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "surge": {
     "path": "/assets/carddex/render/surge.png",
@@ -297,7 +297,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "surge--stock": {
     "path": "/assets/carddex/render/surge--stock.png",
@@ -309,7 +309,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "nova": {
     "path": "/assets/carddex/render/nova.png",
@@ -321,7 +321,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "nova--stock": {
     "path": "/assets/carddex/render/nova--stock.png",
@@ -333,7 +333,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "tide": {
     "path": "/assets/carddex/render/tide.png",
@@ -345,7 +345,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "tide--stock": {
     "path": "/assets/carddex/render/tide--stock.png",
@@ -357,7 +357,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "apex": {
     "path": "/assets/carddex/render/apex.png",
@@ -369,7 +369,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "apex--stock": {
     "path": "/assets/carddex/render/apex--stock.png",
@@ -381,7 +381,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "ember": {
     "path": "/assets/carddex/render/ember.png",
@@ -393,7 +393,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "ember--stock": {
     "path": "/assets/carddex/render/ember--stock.png",
@@ -405,7 +405,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "bloom": {
     "path": "/assets/carddex/render/bloom.png",
@@ -417,7 +417,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "bloom--stock": {
     "path": "/assets/carddex/render/bloom--stock.png",
@@ -429,7 +429,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "mythic": {
     "path": "/assets/carddex/render/mythic.png",
@@ -441,7 +441,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "mythic--stock": {
     "path": "/assets/carddex/render/mythic--stock.png",
@@ -453,7 +453,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "aurora": {
     "path": "/assets/carddex/render/aurora.png",
@@ -465,7 +465,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "aurora--stock": {
     "path": "/assets/carddex/render/aurora--stock.png",
@@ -477,7 +477,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "relic": {
     "path": "/assets/carddex/render/relic.png",
@@ -489,7 +489,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "relic--stock": {
     "path": "/assets/carddex/render/relic--stock.png",
@@ -501,7 +501,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "frost": {
     "path": "/assets/carddex/render/frost.png",
@@ -513,7 +513,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "frost--stock": {
     "path": "/assets/carddex/render/frost--stock.png",
@@ -525,7 +525,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "regal": {
     "path": "/assets/carddex/render/regal.png",
@@ -537,7 +537,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "regal--stock": {
     "path": "/assets/carddex/render/regal--stock.png",
@@ -549,7 +549,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "celestial": {
     "path": "/assets/carddex/render/celestial.png",
@@ -561,7 +561,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "celestial--stock": {
     "path": "/assets/carddex/render/celestial--stock.png",
@@ -573,7 +573,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "legend": {
     "path": "/assets/carddex/render/legend.png",
@@ -585,7 +585,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "legend--stock": {
     "path": "/assets/carddex/render/legend--stock.png",
@@ -597,7 +597,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "doge": {
     "path": "/assets/carddex/render/doge.png",
@@ -609,7 +609,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "pepe": {
     "path": "/assets/carddex/render/pepe.png",
@@ -621,7 +621,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "pepe--stock": {
     "path": "/assets/carddex/render/pepe--stock.png",
@@ -633,7 +633,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "shib": {
     "path": "/assets/carddex/render/shib.png",
@@ -645,7 +645,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "shib--stock": {
     "path": "/assets/carddex/render/shib--stock.png",
@@ -657,7 +657,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "bonk": {
     "path": "/assets/carddex/render/bonk.png",
@@ -669,7 +669,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "wif": {
     "path": "/assets/carddex/render/wif.png",
@@ -681,7 +681,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "popcat": {
     "path": "/assets/carddex/render/popcat.png",
@@ -693,7 +693,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "popcat--stock": {
     "path": "/assets/carddex/render/popcat--stock.png",
@@ -705,7 +705,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "gamestop--stock": {
     "path": "/assets/carddex/render/gamestop--stock.png",
@@ -717,7 +717,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "amc--stock": {
     "path": "/assets/carddex/render/amc--stock.png",
@@ -729,7 +729,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "blackberry": {
     "path": "/assets/carddex/render/blackberry.png",
@@ -741,7 +741,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "blackberry--stock": {
     "path": "/assets/carddex/render/blackberry--stock.png",
@@ -753,7 +753,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "nokia": {
     "path": "/assets/carddex/render/nokia.png",
@@ -765,7 +765,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "nokia--stock": {
     "path": "/assets/carddex/render/nokia--stock.png",
@@ -777,7 +777,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "coinbase--stock": {
     "path": "/assets/carddex/render/coinbase--stock.png",
@@ -789,7 +789,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "binance": {
     "path": "/assets/carddex/render/binance.png",
@@ -801,7 +801,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "binance--stock": {
     "path": "/assets/carddex/render/binance--stock.png",
@@ -813,7 +813,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "kraken": {
     "path": "/assets/carddex/render/kraken.png",
@@ -825,7 +825,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "kraken--stock": {
     "path": "/assets/carddex/render/kraken--stock.png",
@@ -837,7 +837,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "strategy--stock": {
     "path": "/assets/carddex/render/strategy--stock.png",
@@ -849,7 +849,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "wildtype": {
     "path": "/assets/carddex/render/wildtype.png",
@@ -861,7 +861,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "wildtype--stock": {
     "path": "/assets/carddex/render/wildtype--stock.png",
@@ -873,7 +873,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "ronin": {
     "path": "/assets/carddex/render/ronin.png",
@@ -885,7 +885,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "ronin--stock": {
     "path": "/assets/carddex/render/ronin--stock.png",
@@ -897,7 +897,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "astral": {
     "path": "/assets/carddex/render/astral.png",
@@ -909,7 +909,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "astral--stock": {
     "path": "/assets/carddex/render/astral--stock.png",
@@ -921,7 +921,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "neon-circuit": {
     "path": "/assets/carddex/render/neon-circuit.png",
@@ -933,7 +933,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "neon-circuit--stock": {
     "path": "/assets/carddex/render/neon-circuit--stock.png",
@@ -945,7 +945,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "sovereign": {
     "path": "/assets/carddex/render/sovereign.png",
@@ -957,7 +957,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "sovereign--stock": {
     "path": "/assets/carddex/render/sovereign--stock.png",
@@ -969,7 +969,7 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "abyssal": {
     "path": "/assets/carddex/render/abyssal.png",
@@ -981,7 +981,7 @@
     "kind": "plain",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   },
   "abyssal--stock": {
     "path": "/assets/carddex/render/abyssal--stock.png",
@@ -993,6 +993,6 @@
     "kind": "stock",
     "width": 1260,
     "height": 1760,
-    "rendererVersion": "launchacard-canonical-v2"
+    "rendererVersion": "launchacard-canonical-v2.1"
   }
 }

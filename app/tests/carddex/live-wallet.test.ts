@@ -3,6 +3,7 @@ import { ed25519 } from "@noble/curves/ed25519.js";
 import { parseLiveAmount, formatLiveAmount } from "../../src/components/carddex/live/amounts";
 import { getPairAsset, PAIR_ASSETS } from "../../src/lib/carddex/pairs";
 import { MEME_PAIR_PRESETS } from "../../src/lib/carddex/design-pairings";
+import { CARD_DESIGNS } from "../../src/lib/carddex/designs";
 import { base58, fromBase58, hexHash, LIVE_PROGRAMS, parseLiveTransaction, partiallySignPlan, toBase64, validateLivePlan, validateWalletResult, destroyEphemeralSigner, type ExpectedPlan, type TransactionPlan } from "../../src/components/carddex/live/transaction";
 
 // Deterministic, unfunded test-only signers. No wallet, RPC or network is used.
@@ -82,7 +83,8 @@ describe("creator-wallet transaction commitments", () => {
       expect(() => validateLivePlan(token.plan, {...token.expected, quoteTokenProgram: wrongProgram})).toThrow();
       expect(() => validateLivePlan(token.plan, {...token.expected, quoteDecimals: token.expected.quoteDecimals + 1})).toThrow("quote or initial buy changed");
       expect(() => validateLivePlan(token.plan, {...token.expected, quoteMint: getPairAsset("sol").mint})).toThrow("quote or initial buy changed");
-      expect(() => validateLivePlan(nft.plan, {...nft.expected, cardTemplate: "spark"})).toThrow("card NFT attributes");
+      const wrongDesign = CARD_DESIGNS.find(candidate => candidate.key !== design)!.key;
+      expect(() => validateLivePlan(nft.plan, {...nft.expected, cardTemplate: wrongDesign})).toThrow("card NFT attributes");
       expect(() => validateLivePlan(nft.plan, {...nft.expected, quoteMint: getPairAsset("sol").mint})).toThrow("quote or initial buy changed");
       // Matching review labels and decimal precision do not make a different mint valid.
       const replacement = PAIR_ASSETS.find(asset => asset.key !== quoteKey && asset.decimals === token.expected.quoteDecimals)!;

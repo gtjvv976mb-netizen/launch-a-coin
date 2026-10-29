@@ -1,5 +1,7 @@
 # Launch a Card production setup — 28 October 2026
 
+**Later release:** the owner authorized publishing the verified card fronts and stock/meme pairing expansion. Current version is `70b4ec76-b521-4469-8ba3-02ba6670f42d`, tag `card-fronts-meme-pairs`, at 100% traffic. Existing infrastructure and secret configuration remain unchanged. See the [release record](launch-a-card-meme-release-2026-10-28.md). The earlier setup and viewport versions below preserve historical evidence.
+
 The owner explicitly authorized the production setup with “do it” after the mainnet readiness checklist. Work is restricted to Launch a Card; MintDex resources and credentials were not reused.
 
 ## Provisioned and deployed
