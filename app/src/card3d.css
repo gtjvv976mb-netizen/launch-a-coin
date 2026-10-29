@@ -2468,7 +2468,7 @@
 @media (hover: hover) {
   .mdx-case__btn:hover {
     transform: translateY(-1px);
-    background: rgb(22 30 46 / 0.94);
+    background: var(--color-tint); /* D1 hover step (was MintDex navy) */
   }
 }
 .mdx-case__btn:active {
