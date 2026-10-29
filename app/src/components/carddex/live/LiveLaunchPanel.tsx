@@ -44,11 +44,14 @@ export type LiveLaunchHandle = { submit(): void; startAnother(): void; /** The t
  * `status` is what the launch waits on, or why it stopped, for one line beside the bar's button.
  */
 export type LivePrimary = { kind: "submit" | "startAnother"; label: string; pendingLabel?: string; pending: boolean; disabled: boolean; blockedByPair: boolean; status?: { text: string; alert: boolean } | null };
-type Busy = "ownership" | "artwork" | "preparing" | "refreshing" | "wallet" | "submitting" | "confirming" | "recovering" | null;
+// coinImage: a new launch's first prepare, where the server also makes the coin's turning image. Every other prepare
+// (a saved launch prepared again, the buy-fit check, the card) is "preparing" and makes no image.
+type Busy = "ownership" | "artwork" | "coinImage" | "preparing" | "refreshing" | "wallet" | "submitting" | "confirming" | "recovering" | null;
 const BUSY_COPY: Record<NonNullable<Busy>, string> = {
   ownership: SIGN_IN_COPY,
   artwork: "Preparing your artwork and complete card image…",
-  preparing: "Making your turning coin image and checking the quote asset, balances and exact transaction costs…",
+  coinImage: "Making your turning coin image and checking the quote asset, balances and exact transaction costs…",
+  preparing: "Checking the current quote asset, balances and exact transaction costs…",
   refreshing: "Getting a fresh transaction so your wallet sees current costs…",
   wallet: WALLET_OPEN_COPY,
   submitting: "Submitting the transaction you approved…",
@@ -306,7 +309,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
       creator.current = address; draftAtPrepare.current = draft;
       setBusy("artwork");
       const assets = await composeCreatorCard({ card, tokenMint: tokenKey.current.address, artwork: draft.artwork, website: draft.website, xUrl: draft.xUrl });
-      assertCurrent(version, address); setBusy("preparing");
+      assertCurrent(version, address); setBusy("coinImage");
       const input: LivePrepareInput = {
         idempotencyKey: idempotencyKey.current, tokenMint: tokenKey.current.address, nftMint: nftKey.current.address,
         name: draft.name, symbol: draft.symbol, description: draft.description, website: draft.website, xUrl: draft.xUrl, cardTemplate: draft.cardTemplate,
@@ -830,6 +833,7 @@ type Stage = { state: "todo" | "active" | "done" | "stopped"; text: string };
 const PHASE: Record<NonNullable<Busy>, string> = {
   ownership: "Waiting for your wallet to sign in",
   artwork: "Preparing your artwork",
+  coinImage: "Making your coin image",
   preparing: "Preparing the transaction",
   refreshing: "Refreshing the transaction",
   wallet: "Waiting for your wallet",

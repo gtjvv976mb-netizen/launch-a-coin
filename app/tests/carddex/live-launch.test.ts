@@ -45,7 +45,7 @@ let env: Record<string, unknown>;
 // keepAlive stands for waitUntil: it records each promise the Worker would keep running after a closed tab.
 let keptAlive = 0;
 mock.module("../../src/lib/bindings.server", () => ({bindings: () => env, keepAlive: <T,>(promise: Promise<T>) => { keptAlive++; return promise; }}));
-let tokenMediaCalls = 0, tokenMediaTooLarge = false;
+let tokenMediaCalls = 0, tokenMediaTooLarge = false, tokenMediaArtwork: Uint8Array | null = null;
 function tokenGif() {
   // Valid single-frame GIF on a square logical canvas. Real frame encoding is
   // exercised by creator-print tests; lifecycle tests never invoke a renderer.
@@ -55,8 +55,8 @@ function tokenGif() {
   return bytes;
 }
 mock.module("../../src/lib/carddex/live/compose.server", () => ({
-  composeCreatorTokenMedia: async () => {
-    tokenMediaCalls++;
+  composeCreatorTokenMedia: async (input: {artwork: Uint8Array}) => {
+    tokenMediaCalls++; tokenMediaArtwork = input.artwork;
     if (tokenMediaTooLarge) throw new TokenAnimationTooLarge();
     return {tokenImage: tokenGif(), tokenPoster: image(1024, 1024), mimeType: "image/gif", format: TOKEN_ANIMATION_FORMAT, posterFormat: TOKEN_IMAGE_FORMAT};
   },
@@ -155,7 +155,7 @@ beforeEach(() => {
   for (const name of readdirSync(migrations).filter(name => name.endsWith(".sql")).sort()) { const sql = readFileSync(resolve(migrations, name), "utf8"); if (sql.replace(/--[^\n]*/g, "").trim()) sqlite.exec(sql); }
   env = {DB: localD1, STORAGE: storage, CARDDEX_DEPLOYMENT_ENV: "production", CARDDEX_PUBLIC_ORIGIN: "https://launchacard.fun", CARDDEX_MAINNET_RPC_URL: "https://rpc.example.test", CARDDEX_LIVE_LAUNCH_ENABLED: "true"};
   tokenVerified = nftVerified = replaceable = uncertain = false; prepareCalls = nftPrepareCalls = sendCalls = 0; receiptCreator = null;
-  tokenMediaCalls = 0; tokenMediaTooLarge = false;
+  tokenMediaCalls = 0; tokenMediaTooLarge = false; tokenMediaArtwork = null;
   tokenInputs = []; nftInputs = [];
   tokenVerifyHook = nftVerifyHook = nftPrepareHook = nftReplaceHook = undefined;
   sizes = {createBytes: 950, buyBytes: 1200}; measured = []; preSend = "ready"; savedAtCheck = [];
@@ -326,6 +326,8 @@ describe("isolated real-launch server lifecycle", () => {
     const nftJson = await (await fetch(prepared.intent.nftMetadataUri)).json() as any;
     const tokenImage = prepared.intent.assets.tokenImage!, tokenPoster = prepared.intent.assets.tokenPoster!;
     expect(tokenMediaCalls).toBe(1);
+    // The coin image is made from the committed artwork bytes, nothing else.
+    expect(tokenMediaArtwork).toEqual(image(128, 128));
     expect(prepared.intent.assets.artwork).toEqual(original.assets.artwork);
     expect(prepared.intent.assets.cardImage).toEqual(original.assets.cardImage);
     expect(prepared.intent.assets.caseImage).toEqual(original.assets.caseImage);
@@ -379,6 +381,22 @@ describe("isolated real-launch server lifecycle", () => {
     expect(tokenMediaCalls).toBe(0);
     expect(prepareCalls).toBe(0);
     expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 0});
+  });
+  test("artwork bytes that change between the ownership check and the coin image are refused before rendering", async () => {
+    const original = await input(), routed = globalThis.fetch;
+    let artworkReads = 0;
+    // The first read (the ownership check) is the committed artwork; the second (the coin image's own read) is not.
+    globalThis.fetch = (async (request: Request | string | URL, init?: RequestInit) => {
+      const url = typeof request === "string" ? request : request instanceof URL ? request.href : request.url;
+      if (url === original.assets.artwork.url && ++artworkReads > 1) return new Response(image(256, 256), {headers: {"content-type": "image/png"}});
+      return routed(request, init);
+    }) as typeof fetch;
+    try { await expect(service.prepareLiveLaunch(creator, original)).rejects.toThrow("does not match its committed content"); }
+    finally { globalThis.fetch = routed; }
+    expect(artworkReads).toBe(2);
+    expect(tokenMediaCalls).toBe(0); expect(prepareCalls).toBe(0);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 0});
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_assets WHERE mime_type IN ('image/gif', 'application/json')").get()).toEqual({n: 0});
   });
   test("a coin image over the size limit refuses the launch in plain words, before metadata or any RPC", async () => {
     tokenMediaTooLarge = true;

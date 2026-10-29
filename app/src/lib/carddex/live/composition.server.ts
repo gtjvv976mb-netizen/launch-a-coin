@@ -72,7 +72,10 @@ export function composeTokenAssets(wallet:string,fields:LiveComposeInput,assets:
     // Stored inside its own function, so the encoded GIF (up to 12 MB) is unreachable before it is read back below.
     const stored = await (async () => {
       const {composeCreatorTokenMedia}=await import("./compose.server");
-      const media=await composeCreatorTokenMedia(creatorImageInput(wallet,fields,assets.artwork,await fetchPublicBytes(assets.artwork.url),assets.artwork.mimeType),{loadAsset:loadRendererAsset})
+      // The coin image is made only from the exact artwork the composition committed (read again here, so checked again).
+      const art=await fetchPublicBytes(assets.artwork.url);
+      if(await sha256(art)!==assets.artwork.sha256)throw new UserError("The public launch image does not match its committed content.");
+      const media=await composeCreatorTokenMedia(creatorImageInput(wallet,fields,assets.artwork,art,assets.artwork.mimeType),{loadAsset:loadRendererAsset})
         .catch(error=>{throw error instanceof Error&&error.name==="TokenAnimationTooLarge"?new UserError(TOKEN_IMAGE_TOO_LARGE):error;});
       return {tokenImage:await putPublicAsset(wallet,media.tokenImage,"image/gif"),tokenPoster:await putPublicAsset(wallet,media.tokenPoster,"image/png"),format:media.format,posterFormat:media.posterFormat};
     })();
