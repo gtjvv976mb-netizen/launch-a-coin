@@ -1,0 +1,173 @@
+{
+ "direction": "D1 Logo Ground (owner's logo colours, dark): ground #26120b, panels #33190f, cream #f3e7cf, gold #b3843a, card red #b10407",
+ "approved": "Owner: 'USE HIGGSFIELD'; asked for premium samples, then 'make the background moving and premium, and the buttons also premium' (D1 chosen as the recommended look; owner did not name one)",
+ "spent_credits": 38.0,
+ "reused": {
+  "spark-burst.mp4": "Kling 3.0 Turbo job 887f1864-3cc2-45e6-a7ee-2dd342e03279 (sample round), audio stripped, 1280w",
+  "corner-tab.webp": "cropped from the owner's logo (creative/brand/launch-a-card-logo-source.webp), not generated"
+ },
+ "jobs": [
+  {
+   "master": "creative/higgsfield/site-d1/stage-backdrop.webp",
+   "job_id": "3c141242-b76b-4f5e-9dc3-02fc377066a6",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_142201_3c141242-b76b-4f5e-9dc3-02fc377066a6.png",
+   "model": "gpt_image_2_5 high 2k 16:9",
+   "credits": 2.75,
+   "original_png_sha256": "a31ba41154f983de37ea209d0d1220d8b8ef60fdd2f71300c9b78a8156a8f77f"
+  },
+  {
+   "master": "creative/higgsfield/site-d1/stage-backdrop-phone.webp",
+   "job_id": "03041385-a51c-4d73-a8be-6ecdc832b8a0",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_142158_03041385-a51c-4d73-a8be-6ecdc832b8a0.png",
+   "model": "gpt_image_2_5 high 2k 9:16",
+   "credits": 2.75,
+   "original_png_sha256": "cfbf9767b0d0d1c973f04a5adc20cb4dc9ce9d3c8645c4b9d8e99b16a14c51b9"
+  },
+  {
+   "master": "creative/higgsfield/site-d1/panel-suede.webp",
+   "job_id": "56274091-bde5-4a43-a55f-0ecbc3ffa46a",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_142157_56274091-bde5-4a43-a55f-0ecbc3ffa46a.png",
+   "model": "gpt_image_2_5 high 1k 1:1",
+   "credits": 1.5,
+   "original_png_sha256": "340b839a5e415054723a228a0abc8e242b49eb7b29a876bb61a5334f99b8f309"
+  },
+  {
+   "master": "creative/higgsfield/site-d1/button-primary.webp",
+   "job_id": "4322a963-f95a-42ba-9466-8b27bf21e8d2",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_142157_4322a963-f95a-42ba-9466-8b27bf21e8d2.png",
+   "model": "gpt_image_2_5 high 1k 21:9 transparent",
+   "credits": 1.5,
+   "original_png_sha256": "0e1d7725fe0db54da82b1039f74710884e46d9df16f95174f8d848370c4db3f5"
+  },
+  {
+   "master": "creative/higgsfield/site-d1/button-secondary.webp",
+   "job_id": "613bc999-7bbc-4d48-b38b-95ec1a09c7b5",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_142239_613bc999-7bbc-4d48-b38b-95ec1a09c7b5.png",
+   "model": "gpt_image_2_5 high 1k 21:9 transparent",
+   "credits": 1.5,
+   "original_png_sha256": "210210cfbf0a8928ab398cc6e6c231178353578870d56c60f7a8716c4132c882"
+  },
+  {
+   "master": "creative/higgsfield/site-d1/controls-small.webp",
+   "job_id": "7d447e6a-8591-40dd-b5d2-d0ede7f998ad",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_142239_7d447e6a-8591-40dd-b5d2-d0ede7f998ad.png",
+   "model": "gpt_image_2_5 high 1k 21:9 transparent",
+   "credits": 1.5,
+   "original_png_sha256": "8acfe72006065cf54254b938b5af4245e3ff576cb85c73a0c62a8b25b4ee0ce9"
+  },
+  {
+   "master": "creative/higgsfield/site-d1/glint.webp",
+   "job_id": "74dc460b-a4fc-4ead-9ba2-d58fc0799e06",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_142240_74dc460b-a4fc-4ead-9ba2-d58fc0799e06.png",
+   "model": "gpt_image_2_5 high 1k 21:9 transparent",
+   "credits": 1.5,
+   "original_png_sha256": "05648b391f9d501c82d431b87b1237f5087c1464105e504e2fedeba0b6dd460d"
+  },
+  {
+   "master": "creative/higgsfield/site-d1/stage-loop.mp4",
+   "job_id": "43cdff95-8e1b-4bb0-bf33-dc8f6f83112f",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_142233_43cdff95-8e1b-4bb0-bf33-dc8f6f83112f.mp4",
+   "model": "minimax_h3_max 768p 5s, start=end=stage-backdrop job 3c141242",
+   "credits": 12.5,
+   "sha256": "066095343babea632a28b65ea0f8e863270cba882f56aa9ef041a6ce61b1492e"
+  },
+  {
+   "master": "creative/higgsfield/site-d1/stage-loop-phone.mp4",
+   "job_id": "af2e08de-6bdc-40a0-94f4-5041dc948af8",
+   "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_142235_af2e08de-6bdc-40a0-94f4-5041dc948af8.mp4",
+   "model": "minimax_h3_max 768p 5s, start=end=stage-backdrop-phone job 03041385",
+   "credits": 12.5,
+   "sha256": "6ca38c87e1483dd32865ede5a5629ddf01bff51027d6b5585fe503c244b97ae2"
+  }
+ ],
+ "derivatives": {
+  "app/public/assets/site/d1/btn-icon.webp": {
+   "bytes": 11666,
+   "sha256": "6b3a29446b91edae7f25f09b14a1535ec478fc44db944ec2703b9d84bb01c1d9"
+  },
+  "app/public/assets/site/d1/btn-primary-hover.webp": {
+   "bytes": 15850,
+   "sha256": "72925e758c50a51e624d39f68964d13090091f4a88c1b6bf22b45104983538f9"
+  },
+  "app/public/assets/site/d1/btn-primary.webp": {
+   "bytes": 14882,
+   "sha256": "64dee28f5597bc7c919ad9364314a058a4e7f13ebec1c40547aaeae87b751e5e"
+  },
+  "app/public/assets/site/d1/btn-secondary-pressed.webp": {
+   "bytes": 22520,
+   "sha256": "0699c4fd9c9c256e34488d251687e802a3255fc97b4fe758db5e6eb1cf5e984a"
+  },
+  "app/public/assets/site/d1/btn-secondary.webp": {
+   "bytes": 28378,
+   "sha256": "300288bb9ad5b7cd52259a9cae6a406398080c8cc57390b2281481116b68d7c7"
+  },
+  "app/public/assets/site/d1/chip.webp": {
+   "bytes": 10334,
+   "sha256": "dc9cf68b936789f0934f0bb4340a04df45ceaeb6139c6ac11de68aa6cceb8b60"
+  },
+  "app/public/assets/site/d1/corner-tab.webp": {
+   "bytes": 5582,
+   "sha256": "3698917057592dc0660758d266340e0738e95400344b4c053e7dde51f4ab7626"
+  },
+  "app/public/assets/site/d1/glint.webp": {
+   "bytes": 79098,
+   "sha256": "1e6074ad13f93b0e4861ae7f0d094d72be53e5c7253d984441da85bd4937934f"
+  },
+  "app/public/assets/site/d1/panel-suede-768.webp": {
+   "bytes": 10772,
+   "sha256": "99e74646b708ce0e4272db43e1123cc98bf55bf92fc51b8d7a446b8afa7b2ad2"
+  },
+  "app/public/assets/site/d1/spark-burst.mp4": {
+   "bytes": 254875,
+   "sha256": "19e12dd0b854bd6925f2398ed5f2dadf1121d5c2c2d46369a93784acf8a705d2"
+  },
+  "app/public/assets/site/d1/stage-1600.webp": {
+   "bytes": 57344,
+   "sha256": "f8ef8108a9c64a66e4bdabbfa521c2849de15c2cf48e400db8489015b8649d08"
+  },
+  "app/public/assets/site/d1/stage-2400.webp": {
+   "bytes": 121228,
+   "sha256": "ef9a54a72c2200c207bcf56bf1864d2c454cc971d4e041f47bc420a4cee59658"
+  },
+  "app/public/assets/site/d1/stage-loop-1344.mp4": {
+   "bytes": 449941,
+   "sha256": "2e73428cac587c183c7c97872217684018c9524dc79eba55ea8f798e8b3abbcf"
+  },
+  "app/public/assets/site/d1/stage-loop-1344.webm": {
+   "bytes": 77683,
+   "sha256": "a1dc004e7c852167e3af1fafff585ee88bd01dd5c40ac19e84b33f7cecab362a"
+  },
+  "app/public/assets/site/d1/stage-loop-phone-768.mp4": {
+   "bytes": 441205,
+   "sha256": "45dcaba3b51948894c1d87aefb8e13de120df6e0c56e62b4341b7e2a2d8139c7"
+  },
+  "app/public/assets/site/d1/stage-loop-phone-768.webm": {
+   "bytes": 66869,
+   "sha256": "cef945eecec841502b9a662a25b35247d6f2fbd60a6c270bcd3517c381e89477"
+  },
+  "app/public/assets/site/d1/stage-loop-phone-poster.webp": {
+   "bytes": 22694,
+   "sha256": "a8b3be166476351de71dbe8559fb72eded9da97d67c656064e04853f5346661a"
+  },
+  "app/public/assets/site/d1/stage-loop-poster.webp": {
+   "bytes": 24738,
+   "sha256": "43d38ae60418b720396f4a3f9e723355a0db71ab7f5c8a07003df0d2d484894a"
+  },
+  "app/public/assets/site/d1/stage-phone-780.webp": {
+   "bytes": 35440,
+   "sha256": "24214de29a6f3e52ab881d826b543d9237f3abb1cad37b5225e1b0b44b0949eb"
+  },
+  "app/public/assets/site/d1/toggle-off.webp": {
+   "bytes": 12906,
+   "sha256": "d8b20ce84f8545cf92d872fd6abd4382de4aecaae9a383397d460e1b9039b45b"
+  },
+  "app/public/assets/site/d1/toggle-on.webp": {
+   "bytes": 10216,
+   "sha256": "e3b7570c1ddaecd014c33d65be5f32f58c88c998c8607691ab1fb1f32ea4acc0"
+  }
+ },
+ "notes": [
+  "Loops: seam (first vs last frame) mean diff ~1 of 255; glow breathes strongly, so play at playbackRate 0.5.",
+  "Button skins were cut from the kits by alpha column runs and clipped to their pill silhouettes (the primary kit carried a faint grey box)."
+ ]
+}
