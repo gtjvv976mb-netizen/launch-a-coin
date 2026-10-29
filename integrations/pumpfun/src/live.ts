@@ -4,7 +4,7 @@ import bs58 from "bs58";
 import BN from "bn.js";
 import {
   AddressLookupTableAccount, AddressLookupTableProgram, ComputeBudgetProgram, Connection, PublicKey, TransactionInstruction,
-  TransactionMessage, VersionedTransaction, type AccountInfo, type VersionedMessage,
+  TransactionMessage, VersionedTransaction, type AccountInfo, type ParsedInnerInstruction, type VersionedMessage,
   type VersionedTransactionResponse,
 } from "@solana/web3.js";
 import {
@@ -172,6 +172,24 @@ export function transactionBytes(message: VersionedMessage): number {
     shortVec(message.compiledInstructions.length) + instructions + (message.version === 0 ? shortVec(message.addressTableLookups.length) + lookups : 0);
 }
 
+const PAYER_DEBITS = new Set(["transfer", "createAccount", "createAccountWithSeed", "transferWithSeed"]);
+/**
+ * SOL the payer sends in a simulation: the System transfers and account creations it funds (only the System program
+ * can debit a system-owned wallet), from the RPC's parsed inner instructions. Null when the RPC returned none, or
+ * anything unreadable, so the caller falls back to comparing balances.
+ */
+export function simulatedPayerOutflow(inner: ParsedInnerInstruction[] | null | undefined, payer: string): bigint | null {
+  if (!Array.isArray(inner)) return null;
+  let total = 0n;
+  for (const group of inner) for (const ix of group.instructions ?? []) {
+    if (!("parsed" in ix) || ix.program !== "system" || !PAYER_DEBITS.has(ix.parsed?.type) || ix.parsed?.info?.source !== payer) continue;
+    const amount = ix.parsed.info.lamports;
+    if (!Number.isSafeInteger(amount) || amount < 0) return null;
+    total += BigInt(amount);
+  }
+  return total;
+}
+
 async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", instructions: TransactionInstruction[],
   minimumTokensOut: string, options: LiveOptions) {
   const id = identity(input), connection = options.connection;
@@ -213,7 +231,7 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
   const computeUnitLimit = Math.min(1_400_000, Math.max(100_000, Math.ceil(consumed * 1.2) + GUARD_COMPUTE_MARGIN));
   const transaction = compile(computeUnitLimit);
   const [simulation, fee] = await Promise.all([
-    connection.simulateTransaction(transaction, { sigVerify: false, replaceRecentBlockhash: false, commitment: "confirmed",
+    connection.simulateTransaction(transaction, { sigVerify: false, replaceRecentBlockhash: false, commitment: "confirmed", innerInstructions: true,
       accounts: { encoding: "base64", addresses: [input.creator] } }),
     connection.getFeeForMessage(transaction.message, "confirmed"),
   ]);
@@ -224,12 +242,16 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
   const payerAfter = safeLamports(payerAfterAccount.lamports, "Simulated wallet balance");
   const totalFee = safeLamports(fee.value, "Network fee");
   const priorityFee = (BigInt(computeUnitLimit) * BigInt(microLamports) + 999_999n) / 1_000_000n;
-  const debit = payerBefore > payerAfter ? payerBefore - payerAfter : 0n;
+  // The debit from the final simulation itself (its post-balance already carries the fee): one slot, so a balance that
+  // moved between the earlier read and the simulation cannot skew the review or the balance check.
+  const outflow = simulatedPayerOutflow(simulation.value.innerInstructions, input.creator);
+  const debit = outflow !== null ? outflow + totalFee : payerBefore > payerAfter ? payerBefore - payerAfter : 0n;
   const totalDebit = debit > totalFee ? debit : totalFee;
+  const balance = outflow !== null ? payerAfter + debit : payerBefore;
   const nativeBuy = kind === "token" && id.asset.key === "sol" ? id.buy : 0n;
   const rentAndProgram = totalDebit > totalFee + nativeBuy ? totalDebit - totalFee - nativeBuy : 0n;
   const reserveBuffer = 50_000n;
-  if (payerBefore < totalDebit + reserveBuffer) throw new Error(`Insufficient SOL: keep at least ${(totalDebit + reserveBuffer).toString()} lamports for this transaction and its buffer`);
+  if (balance < totalDebit + reserveBuffer) throw new Error(`Insufficient SOL: keep at least ${(totalDebit + reserveBuffer).toString()} lamports for this transaction and its buffer`);
   const requiredSigners = transaction.message.staticAccountKeys.slice(0, transaction.message.header.numRequiredSignatures).map((key) => key.toBase58());
   const expectedSigner = kind === "token" ? input.mint : input.nftMint;
   if (requiredSigners.length !== 2 || !requiredSigners.includes(input.creator) || !requiredSigners.includes(expectedSigner)) throw new Error("Unexpected transaction signer set");
@@ -253,7 +275,7 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
       networkFeeLamports: (totalFee > priorityFee ? totalFee - priorityFee : 0n).toString(),
       priorityFeeLamports: priorityFee.toString(), rentAndProgramCostLamports: rentAndProgram.toString(),
       totalDebitLamports: totalDebit.toString(), reserveBufferLamports: reserveBuffer.toString(),
-      walletBalanceLamports: payerBefore.toString(), computeUnitLimit, microLamportsPerComputeUnit: microLamports,
+      walletBalanceLamports: balance.toString(), computeUnitLimit, microLamportsPerComputeUnit: microLamports,
       // The signed wire size equals this unsigned one: both signature slots are already in the bytes.
       transactionBytes: serialized.length, packetLimit: PACKET_LIMIT, walletSizeTarget: WALLET_SIZE_TARGET,
       lookupTable: transaction.message.addressTableLookups.length ? PUMP_LOOKUP_TABLE.address : null,

@@ -370,6 +370,31 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     });
   });
 
+  test("the cost review takes the debit from the simulation's own inner instructions when the RPC returns them", async () => {
+    const input = defaultInput(), rpc = mockRpc(), simulate = rpc.connection.simulateTransaction;
+    const system = (type: string, source: string, lamports: number) => ({ program: "system", programId: PublicKey.default, parsed: { type, info: { source, lamports } } });
+    rpc.connection.simulateTransaction = (async (transaction: unknown, config: any) => {
+      const result: any = await simulate(transaction as never, config);
+      if (config.innerInstructions) result.value.innerInstructions = [{ index: 2, instructions: [system("createAccount", input.creator, 1_500_000), system("transfer", input.creator, 3_000),
+        system("transfer", "SomeoneElse1111111111111111111111111111111", 9_999), system("allocate", input.creator, 0)] }];
+      return result;
+    }) as never;
+    // The earlier balance read is stale (the wallet was funded since): the review must not use it.
+    rpc.accounts.set(input.creator, info(PublicKey.default, new Uint8Array(), 1_000));
+    const plan = await prepareTokenTransaction(input, { connection: rpc.connection });
+    expect(plan.review.totalDebitLamports).toBe(String(1_503_000 + 11_000));
+    expect(plan.review.walletBalanceLamports).toBe(String(9_990_000_000 + 1_503_000 + 11_000));
+    expect(plan.review.rentAndProgramCostLamports).toBe("1503000");
+    rpc.connection.simulateTransaction = (async (transaction: unknown, config: any) => {
+      const result: any = await simulate(transaction as never, config);
+      if (config.innerInstructions) result.value.innerInstructions = [{ index: 2, instructions: [system("transfer", input.creator, 1.5)] }];
+      return result;
+    }) as never;
+    // Anything unreadable falls back to comparing the balances (here the stale read refuses the launch).
+    await expect(prepareTokenTransaction(input, { connection: rpc.connection })).rejects.toThrow("Insufficient SOL");
+    expect(rpc.sent()).toBe(0);
+  });
+
   test("simulation failure prevents offering a transaction to the wallet", async () => {
     const rpc = mockRpc(); rpc.simulationError({ InstructionError: [2, "InsufficientFunds"] });
     await expect(prepareTokenTransaction(defaultInput(), { connection: rpc.connection })).rejects.toThrow("simulation failed");
