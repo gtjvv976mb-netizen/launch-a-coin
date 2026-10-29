@@ -27,15 +27,14 @@ import { sol, tokens } from "../lib/mintdex/format";
 import { pageHead, sentences } from "../lib/mintdex/seo";
 import { oneOf, searchSchema, text } from "../lib/mintdex/search";
 import { LaunchCardPreview } from "../components/carddex/live/LaunchCardPreview";
-import { CardDesignPicker } from "../components/carddex/CardDesignPicker";
-import { DEFAULT_CARD_DESIGN, getCardDesign, isCardDesignKey } from "../lib/carddex/designs";
-import { allowedQuotesForDesign, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, isPairAssetKey, type PairAssetKey } from "../lib/carddex/pairs";
+import { PairHud } from "../components/carddex/PairHud";
+import { getCardDesign } from "../lib/carddex/designs";
+import { getPairAsset, isPairAssetKey, type PairAssetKey } from "../lib/carddex/pairs";
 import { formatQuoteAmount, initialQuoteReserves, maxInitialBuyQuoteAtoms, parseQuoteAmount, quoteMetrics } from "../lib/carddex/quote-simulation";
 import { quoteFixed } from "../lib/carddex/quote-display";
 import { CREATION_MCAP_LABEL } from "../lib/carddex/card-template";
-import { QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
 import type { LiveLaunchHandle, LivePrimary } from "../components/carddex/live/LiveLaunchPanel";
-import { firstProblem, enterTarget, type FormCheck } from "../components/carddex/launch-form";
+import { draftPair, firstProblem, enterTarget, launchDesign, pairFromSearch, type FormCheck } from "../components/carddex/launch-form";
 import { liveReadinessQuery, useLiveLaunchOpen, useLiveRecoveryOpen } from "../components/carddex/live/readiness";
 import { formatLiveAmount, parseLiveAmount } from "../components/carddex/live/amounts";
 import { BUY_FIT_AFTER_SIGN_IN, liveBuyOff, useLiveBuyFit, useLiveBuyRefusal } from "../components/carddex/live/buy-fit";
@@ -58,7 +57,7 @@ export const Route = createFileRoute("/launch")({
       path: "/launch",
       title: "Launch a coin | Launch a Card",
       description: sentences(
-        "Choose a permanent card design, add your coin details and preview its one-of-one card",
+        "Pick your coin's pair and its card design comes with it. Add your coin details and preview its one-of-one card",
         "Try the full launch as a demo with test SOL",
       ),
     }),
@@ -178,13 +177,13 @@ function linkError(value: string, kind: "web" | "x"): string | null {
 
 type FieldKey = "name" | "ticker" | "website" | "x";
 /** The form's checks, in DOM order: the first one that fails takes focus (Launch pressed, or Enter in a field). */
-type ProblemKey = "name" | "ticker" | "art" | "pair" | "buy" | "website" | "x" | "terms";
+type ProblemKey = "name" | "ticker" | "art" | "buy" | "website" | "x" | "terms";
 
 /**
- * Below 1024px (MintDex's lg; launch.css uses the same query): the live card and the design chips sit in the form
- * beside and under Name and Ticker; from 1024px they have the preview column. One turntable and one chip row are
- * mounted, in whichever place shows. The server HTML draws both places (null here), so a phone paints its card before
- * hydration (it is the screen's LCP); the place that does not show drops out once the page has hydrated.
+ * Below 1024px (MintDex's lg; launch.css uses the same query): the live card sits in the form beside Name and
+ * Ticker, with the pair HUD under them; from 1024px the card has the preview column. One turntable is mounted, in
+ * whichever place shows. The server HTML draws both places (null here), so a phone paints its card before hydration
+ * (it is the screen's LCP); the place that does not show drops out once the page has hydrated.
  */
 const PHONE_CARD_MQ = "(max-width: 1023.98px)";
 function subscribePhoneCard(cb: () => void) {
@@ -209,9 +208,10 @@ function useSettledValue<T>(value: T, ms: number): T {
 // ---------------------------------------------------------------- view
 
 /**
- * mintdex.fun's one-page Launch: the form panel (Name | Ticker, Card art | Description, Pair, More options, then the
- * ticket with the one primary at its foot) beside the live card and its design chips. No steps and no separate
- * review; Enter never submits (it moves on to the next field that needs something, or to the primary).
+ * mintdex.fun's one-page Launch: the form panel (Name | Ticker, the pair HUD, Card art | Description, More options,
+ * then the ticket with the one primary at its foot) beside the live card. The pair picks the card: choosing a pair
+ * shows its design on the live card, and there is no separate design choice. No steps and no separate review; Enter
+ * never submits (it moves on to the next field that needs something, or to the primary).
  */
 function Launch() {
   const me = useMe();
@@ -270,25 +270,23 @@ function Launch() {
     previousMode.current = live;
     setPreview(null); setImageUrl(null); setPreparedArt(null); setShowErrors(false);
   }, [live]);
-  const [designKey, setDesignKey] = useState(() =>
-    isCardDesignKey(search.design) ? search.design : DEFAULT_CARD_DESIGN,
-  );
-  const [quoteKey, setQuoteKey] = useState<PairAssetKey>(() => {
-    const bound = boundQuoteForDesign(designKey);
-    return bound?.key ?? (isPairAssetKey(search.quote) ? search.quote : defaultQuoteForDesign(designKey).key);
-  });
+  // The pair picks the card (launch-form.ts): ?quote= opens on that pair, an older ?design= link on that design's pair,
+  // anything else on SOL. The card's design always follows the pair, except that a saved mainnet launch keeps the
+  // design it was saved with (one prepared before this rule may carry another); any pair pick ends that.
+  const [quoteKey, setQuoteKey] = useState<PairAssetKey>(() => pairFromSearch(search).pair);
+  const [savedDesign, setSavedDesign] = useState<string | null>(null);
+  const designKey = launchDesign(quoteKey, savedDesign);
   const [pairNotice, setPairNotice] = useState("");
-  const [pairPending, setPairPending] = useState(false);
   const design = getCardDesign(designKey);
   const quoteAsset = getPairAsset(quoteKey);
   const restoreLiveIntent = useCallback((intent: LiveLaunchIntent | null) => {
     setLiveMint(intent?.tokenMint ?? null); setLiveCreator(intent?.creatorWallet ?? null);
+    setSavedDesign(intent ? getCardDesign(intent.cardTemplate).key : null);
     if (!intent) return;
     // A finished launch leaves no draft behind: the next visit starts empty, not with this coin's name and ticker.
     if (intent.status === "complete") writeDraft(null);
     setName(intent.name); setTicker(intent.symbol); setLore(intent.description);
     setWebsite(intent.website ?? ""); setXUrl(intent.xUrl ?? "");
-    setDesignKey(getCardDesign(intent.cardTemplate).key);
     if (isPairAssetKey(intent.quoteAssetKey)) setQuoteKey(intent.quoteAssetKey);
     // The saved launch's own initial buy, as a plain decimal in its quote ("" for none).
     const buy = intent.initialBuyQuoteBaseUnits;
@@ -296,17 +294,15 @@ function Launch() {
     setPreview(intent.assets.artwork.url);
   }, []);
   useEffect(() => {
-    const nextDesign = isCardDesignKey(search.design) ? search.design : DEFAULT_CARD_DESIGN;
-    const bound = boundQuoteForDesign(nextDesign);
-    const requested = isPairAssetKey(search.quote) ? search.quote : undefined;
-    const nextQuote = bound?.key ?? requested ?? defaultQuoteForDesign(nextDesign).key;
-    setDesignKey(nextDesign);
-    setQuoteKey(nextQuote);
+    const next = pairFromSearch(search);
+    setQuoteKey(next.pair);
+    setSavedDesign(null);
     setDevBuy("");
-    setPairNotice(search.quote && !isPairAssetKey(search.quote) ? `That quote is unavailable. ${getPairAsset(nextQuote).symbol} selected.` : bound && requested && requested !== bound.key ? `${getCardDesign(nextDesign).name} uses ${bound.symbol}.` : "");
+    setPairNotice(next.notice);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.design, search.quote]);
 
-  // Restore the saved draft once, after the URL's design and quote are applied. A design in the URL wins.
+  // Restore the saved draft once, after the URL's pair is applied. A pair (or design) in the URL wins.
   // The mode is known from the first render (the loader read readiness on the server), so `live` here is the
   // page's real mode, not a test-mode placeholder. A step saved by the old step-by-step form is ignored.
   // Recovery-only mainnet waits: its locked fields fill from a saved launch, and a draft there would read as one.
@@ -323,10 +319,9 @@ function Launch() {
     if (d) {
       setName(str(d.name).slice(0, 24)); setTicker(str(d.ticker).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8));
       setLore(str(d.lore).slice(0, 280)); setWebsite(str(d.website)); setXUrl(str(d.xUrl));
-      const savedDesign = str(d.designKey), savedQuote = str(d.quoteKey);
-      if (!search.design && !search.quote && isCardDesignKey(savedDesign) && isPairAssetKey(savedQuote) && allowedQuotesForDesign(savedDesign).some(a => a.key === savedQuote)) {
-        setDesignKey(savedDesign); setQuoteKey(savedQuote); setDevBuy(str(d.devBuy));
-      }
+      // The draft's pair comes back (its card follows); an older draft's separate design is not used.
+      const savedPair = draftPair(d);
+      if (!search.design && !search.quote && savedPair) { setQuoteKey(savedPair); setDevBuy(str(d.devBuy)); }
       // Only an uploaded demo image can come back; prepared mainnet art lives in memory.
       if (!live && typeof d.imageUrl === "string" && d.imageUrl.startsWith("/")) { setImageUrl(d.imageUrl); setPreview(d.imageUrl); }
     }
@@ -342,7 +337,6 @@ function Launch() {
   const xRef = useRef<HTMLInputElement>(null);
   const devRef = useRef<HTMLInputElement>(null);
   const loreRef = useRef<HTMLTextAreaElement>(null);
-  const pairConfirmationRef = useRef<HTMLDivElement>(null);
 
   useEffect(
     () => () => {
@@ -410,7 +404,6 @@ function Launch() {
     !xError &&
     !devError &&
     !balanceError &&
-    !pairPending &&
     !uploading;
 
   // An error shows once the field is left with something in it, or after Launch is pressed.
@@ -513,7 +506,6 @@ function Launch() {
     { key: "name", ok: nameOk },
     { key: "ticker", ok: tickerOk },
     { key: "art", ok: hasArt && !uploading },
-    { key: "pair", ok: !pairPending },
     { key: "buy", ok: !devError && !(balanceError && devQuote?.ok) },
     { key: "website", ok: !websiteError },
     { key: "x", ok: !xError },
@@ -521,7 +513,7 @@ function Launch() {
     { key: "terms", ok: !(live && termsNeeded) },
   ];
   const problemRefs: Record<Exclude<ProblemKey, "terms">, RefObject<HTMLElement | null>> = {
-    name: nameRef, ticker: tickerRef, art: artRef, pair: pairConfirmationRef, buy: devRef, website: websiteRef, x: xRef,
+    name: nameRef, ticker: tickerRef, art: artRef, buy: devRef, website: websiteRef, x: xRef,
   };
   const problemEl = (key: ProblemKey) => key === "terms" ? liveRef.current?.terms() : problemRefs[key].current;
   /** A problem inside More options opens it first (a closed disclosure's fields cannot take focus). */
@@ -550,7 +542,7 @@ function Launch() {
     const target = enterTarget(checks());
     if (target === "primary") land(visiblePrimary());
     else {
-      if (target !== "pair" && target !== "terms") setTouched((t) => ({ ...t, [target]: true }));
+      if (target !== "terms") setTouched((t) => ({ ...t, [target]: true }));
       if (inMore(target) && !moreOpen) {
         setMoreOpen(true);
         requestAnimationFrame(() => land(problemEl(target)));
@@ -628,10 +620,6 @@ function Launch() {
   /** Only a press of the primary gets here (Enter in a field is caught above). */
   function submit(e: FormEvent) {
     e.preventDefault();
-    if (pairPending) {
-      focusFirstProblem();
-      return;
-    }
     if (live) {
       if (!ready && !liveLocked && !recoveryOnly) { setShowErrors(true); focusFirstProblem(); return; }
       liveRef.current?.submit();
@@ -673,18 +661,15 @@ function Launch() {
     mintAddress: live ? liveMint : undefined,
     lore: lore.trim() || undefined,
   };
-  const changePair = (nextQuote: PairAssetKey, nextDesign: string) => {
+  /** A pair pick is a card pick: the preview shows the pair's design at once. An initial buy is in the old pair's
+   * unit, so it is cleared (and the line under the HUD says so). */
+  const pickPair = (next: PairAssetKey) => {
     if (live && liveLocked) return;
-    if (!isCardDesignKey(nextDesign) || !allowedQuotesForDesign(nextDesign).some(a => a.key === nextQuote)) return;
-    const changed = nextQuote !== quoteKey;
-    setDesignKey(nextDesign);
-    setQuoteKey(nextQuote);
-    if (changed) setDevBuy("");
-    setPairNotice(changed ? `Pair changed to ${getPairAsset(nextQuote).symbol}.${devBuy ? " Initial buy cleared." : ""}` : "");
-  };
-  const pick = (key: string) => {
-    if (!isCardDesignKey(key)) return;
-    changePair(boundQuoteForDesign(key)?.key ?? quoteKey, key);
+    if (next === quoteKey && !savedDesign) return;
+    setSavedDesign(null);
+    setQuoteKey(next);
+    if (next !== quoteKey && devBuy) { setDevBuy(""); setPairNotice("Initial buy cleared."); }
+    else setPairNotice("");
   };
 
   // Recovery-only mainnet mode: the fields wait for a saved launch to fill them, and stay locked once it does. They
@@ -754,8 +739,7 @@ function Launch() {
       data-launch-primary=""
       pending={demoPending}
       pendingLabel="Creating your coin…"
-      disabled={pairPending || (!!me && uploading)}
-      onBlocked={pairPending ? focusFirstProblem : undefined}
+      disabled={!!me && uploading}
       feedback={feedback("launch")}
       successLabel="Created"
     >
@@ -780,18 +764,13 @@ function Launch() {
         </dl>
       </details>
       <p className="cdx-launch-fee-note">Launch a Card charges no platform fee. <TextLink to="/how" hash="fees">Details</TextLink></p>
-      {/* What stops the launch, said beside the button: the balance check, a pending pair change, the server's reason. */}
+      {/* What stops the launch, said beside the button: the balance check, the server's reason. */}
       {balanceError ? <PagedMessage text={balanceError} alert /> : null}
-      {pairPending ? <p className="cdx-pair-notice" role="status">Confirm the pair change first.</p> : null}
       {launchError ? <PagedMessage text={launchError} alert /> : null}
       <div className="cdx-launch-go">{demoButton}</div>
     </section>
   );
 
-  // ------------------------------------------------ the live card and the design chips (one place each: form or column)
-  const designPicker = (
-    <CardDesignPicker variant="inline" seedReady={draftReady} value={designKey} onChange={pick} onPairChange={changePair} quoteAssetKey={quoteKey} ticker={ticker} previewCard={previewCard} disabled={locked} />
-  );
   const spacer = <div aria-hidden className="cdx-launch-spacer" />;
 
   return (
@@ -803,8 +782,8 @@ function Launch() {
         </div>
         {liveOpen || recoveryOpen ? (
           <nav className="cdx-launch-mode" aria-label="Launch mode">
-            <Link to="/launch" search={{ design: designKey, quote: quoteKey, mode: "live" }} aria-label={liveOpen ? "Mainnet wallet launch" : "Finish a saved mainnet launch"} aria-current={live ? "page" : undefined}>{liveOpen ? "Mainnet" : "Saved launch"}</Link>
-            <Link to="/launch" search={{ design: designKey, quote: quoteKey, mode: "demo" }} aria-current={!live ? "page" : undefined}>Demo</Link>
+            <Link to="/launch" search={{ quote: quoteKey, mode: "live" }} aria-label={liveOpen ? "Mainnet wallet launch" : "Finish a saved mainnet launch"} aria-current={live ? "page" : undefined}>{liveOpen ? "Mainnet" : "Saved launch"}</Link>
+            <Link to="/launch" search={{ quote: quoteKey, mode: "demo" }} aria-current={!live ? "page" : undefined}>Demo</Link>
           </nav>
         ) : null}
       </header>
@@ -870,7 +849,13 @@ function Launch() {
               {phoneCard !== false ? <section aria-label="Your card preview" className="cdx-launch-stage cdx-launch-stage--phone"><LaunchCardPreview card={previewCard} /></section> : null}
             </div>
           </div>
-          {phoneCard !== false ? <div className="cdx-launch-phonepicker lg:hidden">{designPicker}</div> : null}
+          {spacer}
+
+          {/* The pair HUD: picking a pair picks the card (the live card shows its design). Under Name and Ticker, so
+              on phones it sits right under the card it changes. */}
+          <div className="cdx-launch-f cdx-launch-f--pair">
+            <PairHud value={quoteKey} onChange={pickPair} ticker={ticker} live={live} disabled={locked} balance={!live && me ? quoteFixed(quoteBalance, quoteKey) : undefined} notice={pairNotice} />
+          </div>
           {spacer}
 
           {/* Card art and Description side by side, as on MintDex. */}
@@ -908,12 +893,6 @@ function Launch() {
             <Field label="Description" htmlFor="lore" className="cdx-launch-f cdx-launch-f--lore" right={<span className="num" aria-hidden>{lore.length}/280</span>} help={live ? "Permanent once your coin is created." : undefined}>
               <textarea ref={loreRef} disabled={locked} id="lore" rows={3} maxLength={280} value={lore} onChange={e => setLore(e.target.value)} placeholder="King of the swamp. Jiggles under pressure, never breaks." aria-describedby="lore-help" className="mdx-input cdx-launch-description" />
             </Field>
-          </div>
-          {spacer}
-
-          <div className="cdx-launch-f cdx-launch-f--pair">
-            <QuoteAssetPicker variant="inline" value={quoteKey} designKey={designKey} ticker={ticker || "TICKER"} onChange={changePair} onPendingChange={setPairPending} confirmationRef={pairConfirmationRef} live={live} disabled={locked} balance={!live && me ? quoteFixed(quoteBalance, quoteKey) : undefined} />
-            {pairNotice && !pairPending ? <p className="cdx-pair-notice" role="status">{pairNotice}</p> : null}
           </div>
           {spacer}
 
@@ -1019,19 +998,16 @@ function Launch() {
 
           {/* The ticket: the costs, the total and the one primary, at the panel's foot (MintDex). */}
           <div className="cdx-launch-foot" data-live={live || undefined}>
-            {live ? <Suspense fallback={<div className="mdx-skeleton cdx-launch-live-skeleton" aria-hidden />}><LiveLaunchPanel ref={liveRef} launchesOpen={liveOpen} notice={buyDropped ? buyOffText : null} card={previewCard} draft={liveDraft} draftKey={draftKey} initialBuy={liveBuyText} slippageBps={slippageBps} ready={readyList} pairPending={pairPending} onLockedChange={setLiveLocked} onBusyChange={setLiveBusy} onTermsNeeded={setTermsNeeded} onIntentLoaded={restoreLiveIntent} onStartAnother={startAnotherLive} onPrimary={setLivePrimary} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /></Suspense> : demoTicket}
+            {live ? <Suspense fallback={<div className="mdx-skeleton cdx-launch-live-skeleton" aria-hidden />}><LiveLaunchPanel ref={liveRef} launchesOpen={liveOpen} notice={buyDropped ? buyOffText : null} card={previewCard} draft={liveDraft} draftKey={draftKey} initialBuy={liveBuyText} slippageBps={slippageBps} ready={readyList} onLockedChange={setLiveLocked} onBusyChange={setLiveBusy} onTermsNeeded={setTermsNeeded} onIntentLoaded={restoreLiveIntent} onStartAnother={startAnotherLive} onPrimary={setLivePrimary} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /></Suspense> : demoTicket}
           </div>
         </form>
 
-        {/* From 1024px: the live card on its ledge, then the design chips (MintDex's preview column). */}
+        {/* From 1024px: the live card on its ledge (MintDex's preview column). It is the pair's design. */}
         <section aria-label="Live preview" className="cdx-launch-preview flex min-w-0 flex-col max-lg:hidden">
           {phoneCard !== true ? (
-            <>
-              <div className="cdx-launch-stage cdx-launch-stage--column">
-                <LaunchCardPreview card={previewCard} />
-              </div>
-              <div className="cdx-launch-preview__cap">{designPicker}</div>
-            </>
+            <div className="cdx-launch-stage cdx-launch-stage--column">
+              <LaunchCardPreview card={previewCard} />
+            </div>
           ) : null}
         </section>
       </div>

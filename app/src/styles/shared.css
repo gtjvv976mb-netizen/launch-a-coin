@@ -748,17 +748,6 @@
 .cdx-overlay--sheet .cdx-overlay__body .mdx-sheet-foot {
   box-shadow: 0 var(--sheet-pad-b) 0 var(--color-surface); /* taste-skill-ignore: the same flat band */
 }
-/* The Launch design browser (density D4): on desktop the dialog takes the page column's width (more tracks, a
- * shorter scroll); on phones the sheet opens at full height, its top just under the top bar. */
-.cdx-overlay--dialog:has(.cdx-design-browser) {
-  width: min(calc(100vw - 64px), var(--column));
-}
-.cdx-overlay--sheet:has(.cdx-design-browser) {
-  height: calc(var(--cdx-app-height, 100dvh) - var(--topbar-h));
-  max-height: none;
-  max-width: none;
-}
-
 /* ---------------------------------------------------------------- dialog content
  * Body copy is one or two sentences of 14px slate; a heading inside a dialog is never larger than its title.
  * Actions sit on the right, [secondary] [primary], with one primary, 16px below the content. */

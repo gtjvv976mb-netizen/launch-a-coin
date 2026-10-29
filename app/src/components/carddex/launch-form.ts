@@ -1,57 +1,36 @@
-import { CARD_DESIGNS, isCardDesignKey } from "../../lib/carddex/designs";
-import { allowedQuotesForDesign, getPairAsset, isPairAssetKey, matchingDesignsForQuote, preferredDesignForQuote } from "../../lib/carddex/pairs";
+import { isCardDesignKey, type CardDesignKey } from "../../lib/carddex/designs";
+import { DEFAULT_PAIR, designForPair, getPairAsset, isPairAssetKey, pairForDesign, type PairAssetKey } from "../../lib/carddex/pairs";
 
 /**
- * Pure helpers for the one-page Launch form (routes/launch.tsx): the suggested-design row and the designs matched to
- * its quote, the quick initial-buy amounts, and where focus goes when the form is incomplete. No React, no DOM;
- * tested in tests/carddex/launch-form.test.ts.
+ * Pure helpers for the one-page Launch form (routes/launch.tsx): which pair the page opens on and which card it shows
+ * (the pair picks the card), the quick initial-buy amounts, and where focus goes when the form is incomplete. No
+ * React, no DOM; tested in tests/carddex/launch-form.test.ts.
  */
-
-/** Which matched designs a quote has ("Matching meme designs"): stock, meme and collector quotes; none for SOL or USDC. */
-export type MatchFamily = "stock" | "meme" | "collector";
-
-export function matchFamily(quoteKey: string): MatchFamily | null {
-  if (!isPairAssetKey(quoteKey)) return null;
-  const { kind } = getPairAsset(quoteKey);
-  return kind === "stock" || kind === "meme" || kind === "collector" ? kind : null;
-}
 
 /**
- * The designs matched to a stock, meme or collector quote (the designs bound to it and its explicit meme-pair
- * presets, design-pairings.ts), the quote's preferred finish first. Empty for SOL, USDC and unknown keys.
+ * The pair a Launch address opens on: ?quote= names it; an older ?design= link opens on that design's own pair; a
+ * design no pair has, or nothing, opens on SOL without a word. An unknown ?quote= opens on SOL and says so.
  */
-export function matchedDesignKeys(quoteKey: string): string[] {
-  if (!matchFamily(quoteKey)) return [];
-  const keys: string[] = matchingDesignsForQuote(quoteKey).map((design) => design.key);
-  const preferred = preferredDesignForQuote(quoteKey);
-  return preferred && keys.includes(preferred) ? [preferred, ...keys.filter((key) => key !== preferred)] : keys;
-}
-
-/** The suggested designs beside the chosen one: the quote they were picked for, and the keys in their slots. */
-export type DesignRow = { quote: string; keys: readonly string[] };
-
-/** The row holds this many designs; the screen shows the first 3, 5 or all 6 by width (launch.css). */
-export const DESIGN_ROW_SIZE = 6;
-
-/**
- * The row of designs a creator can pick with one tap. It stays still while they pick inside it (only the pressed
- * state moves), so a swatch never jumps under the pointer:
- *   - seeded from the current design, then the designs matched to the quote (its preferred finish first), then the
- *     trading-card classics that take the quote (no duplicates);
- *   - re-seeded when the quote changes;
- *   - a current design that is not in the row (picked from All designs, or arriving in the URL) takes the first slot.
- */
-export function designRow(prev: DesignRow | null, current: string, quoteKey: string, n = DESIGN_ROW_SIZE): DesignRow {
-  if (prev && prev.quote === quoteKey) {
-    if (prev.keys.includes(current)) return prev;
-    return { quote: quoteKey, keys: [current, ...prev.keys.slice(1)] };
+export function pairFromSearch(search: { quote?: string; design?: string }): { pair: PairAssetKey; notice: string } {
+  if (search.quote) {
+    if (isPairAssetKey(search.quote)) return { pair: search.quote, notice: "" };
+    return { pair: DEFAULT_PAIR, notice: `That pair is unavailable. ${getPairAsset(DEFAULT_PAIR).symbol} selected.` };
   }
-  const keys: string[] = [];
-  const add = (key: string) => { if (keys.length < n && isCardDesignKey(key) && !keys.includes(key)) keys.push(key); };
-  add(current);
-  for (const key of matchedDesignKeys(quoteKey)) add(key);
-  for (const design of CARD_DESIGNS) if (design.category === "classic" && allowedQuotesForDesign(design.key).some(a => a.key === quoteKey)) add(design.key);
-  return { quote: quoteKey, keys };
+  return { pair: pairForDesign(search.design)?.key ?? DEFAULT_PAIR, notice: "" };
+}
+
+/**
+ * The card the form launches with and the preview shows: the pair's own design. A saved mainnet launch keeps the
+ * design it was saved with (one prepared before the pair picked the card may carry another), until a pair is picked.
+ */
+export function launchDesign(pair: string, savedDesign?: string | null): CardDesignKey {
+  if (savedDesign && isCardDesignKey(savedDesign)) return savedDesign;
+  return designForPair(pair) ?? designForPair(DEFAULT_PAIR)!;
+}
+
+/** A draft this browser kept: its pair, if it is still offered (an older draft's separate design is not used). */
+export function draftPair(draft: { quoteKey?: unknown } | null | undefined): PairAssetKey | null {
+  return isPairAssetKey(draft?.quoteKey) ? draft.quoteKey : null;
 }
 
 /** The quick initial-buy amounts (the coin page's buy amounts), in the quote's own units. */

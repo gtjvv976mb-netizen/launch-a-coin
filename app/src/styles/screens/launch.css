@@ -1,10 +1,10 @@
 /* Launch (/launch) in mintdex.fun's one-page Launch format (routes/launch.tsx). Unlayered, like the other restored
- * MintDex sheets. Tokens: carddex-theme.css. Also styles the live launch panel, the design library dialog and the pair
- * picker (QuoteAssetPicker is also shown on Designs, which places it in designs.css).
- *   desktop (>=1024): the form panel (it scrolls on its own) | the preview column: the live card on its ledge, its
- *     controls row, then the design chips. The form reads Name | Ticker, Card art | Description, Pair, the More
- *     options disclosure, then the ticket at its foot (content rules, the total, the fee line, the one primary).
- *   phones: one column; the live card beside Name and Ticker, the design chips under them; the page scrolls. */
+ * MintDex sheets. Tokens: carddex-theme.css. Also styles the live launch panel and the pair HUD (PairHud: the pair
+ * picks the card, so there is no separate design choice).
+ *   desktop (>=1024): the form panel (it scrolls on its own) | the preview column: the live card on its ledge and its
+ *     controls row. The form reads Name | Ticker, the pair HUD, Card art | Description, the More options disclosure,
+ *     then the ticket at its foot (content rules, the total, the fee line, the one primary).
+ *   phones: one column; the live card beside Name and Ticker, the pair HUD under them; the page scrolls. */
 
 .cdx-launch {
   /* The live card's controls row under its ledge (12px + 40px; 44px on touch). */
@@ -123,7 +123,7 @@
 @media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
   .cdx-launch .cdx-card-control { width: 40px; height: 40px; }
 }
-/* The preview column (desktop): the card as large as the column's free height allows, then the chips. */
+/* The preview column (desktop): the card as large as the column's free height allows. */
 .cdx-launch-preview { min-height: 0; padding-top: 24px; }
 @media (max-height: 820px) { .cdx-launch-preview { padding-top: 16px; } }
 .cdx-launch-stage--column { position: relative; display: flex; min-height: 0; flex: 1 1 0px; align-items: flex-end; justify-content: center; container-type: size; }
@@ -138,7 +138,6 @@
   background: linear-gradient(to right, transparent, var(--color-hairline) 8%, var(--color-hairline) 92%, transparent) top / 100% 1px no-repeat; /* taste-skill-ignore: mintdex.fun ledge or image scrim */
   pointer-events: none;
 }
-.cdx-launch-preview__cap { flex: none; width: min(100%, 460px); margin-inline: auto; padding: 12px 0 8px; }
 /* Phones: the card in the form's 140px column, three 44px controls 4px apart under it. */
 .cdx-launch-stage--phone .cdx-launch-card { --cw: 140px; }
 .cdx-launch-stage--phone .cdx-hero-turntable__controls { gap: 4px; }
@@ -192,205 +191,156 @@
 .cdx-launch-ready__status { font-size: 12px; line-height: 16px; color: var(--color-down-hover); }
 .cdx-launch-ready__status:empty { display: none; }
 
-/* The pickers' selects stand as tall as the inputs beside them (44px). */
-.cdx-pair-picker .mdx-select--field,
-.cdx-pair-change .mdx-select--field,
-.cdx-pair-matching .mdx-select--field { height: 44px; }
-
-/* ------------------------------------------------ the design chips (CardDesignPicker inline; chip styles: designs.css) */
-.cdx-design-picker { display: grid; min-width: 0; justify-items: start; gap: 0; }
-.cdx-design-picker > .mdx-label { margin-bottom: 8px; }
-.cdx-design-picker__help { margin-top: 8px; font-size: 14px; line-height: 20px; color: var(--color-slate); text-wrap: pretty; }
-.cdx-design-picker__browse { margin-top: 16px; }
-.cdx-design-picker .cdx-pair-badge { width: 100%; }
-.cdx-design-picker--inline { justify-items: start; gap: 8px; }
-.cdx-design-picker__head { display: flex; align-items: baseline; gap: 8px; }
-.cdx-design-picker__head .mdx-label { margin: 0; }
-.cdx-design-picker__kept { font-size: 12px; line-height: 1.3; color: var(--color-slate); }
-/* A stock, meme or collector quote: its matched designs by name, over the chips that hold them. */
-.cdx-design-picker__matched { font-size: 13px; line-height: 1.45; color: var(--color-slate); text-wrap: pretty; }
-.cdx-design-picker__matched strong { color: var(--color-ink); font-weight: 500; }
-.cdx-design-picker__chips { display: flex; min-width: 0; flex-wrap: wrap; gap: 8px; }
-/* Four suggestions (the current design first); the rest are one link away in the library. */
-.cdx-design-picker__chips > li:nth-child(n + 5) { display: none; }
-.cdx-design-picker__all { font-size: 13px; font-weight: 500; }
-
-/* The library dialog: every design in the collection, in an auto-fill grid that grows in the dialog's scrolling body;
- * the collection filter stays at the body's top. */
-.cdx-design-browser { display: grid; min-width: 0; gap: 12px; }
-.cdx-design-browser__filters {
-  position: sticky;
-  top: -4px;
-  z-index: 1;
+/* ------------------------------------------------ the pair HUD (PairHud): the pair picks the card
+ * The label row (Pair, what it does, the /how#pairs link), then the console: a sunken suede well on the wall colour
+ * with the logo's gold rim, holding the group filter and the search on one row when it is wide enough, then every pair
+ * as a tile (a radio group). The chosen tile wears the gold rim and a check. Under the console, the chosen pair's line
+ * and its safety facts. No design names, thumbnails or swatches: the live card is the design. */
+.cdx-pair-hud { display: grid; min-width: 0; gap: 10px; }
+.cdx-pair-hud__head { display: flex; min-width: 0; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+.cdx-pair-hud__head .mdx-label { margin: 0; }
+.cdx-pair-hud__sub { min-width: 0; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+.cdx-pair-hud__head .mdx-link { margin-left: auto; font-size: 13px; font-weight: 500; }
+.cdx-pair-hud__console {
   display: grid;
-  gap: 8px;
-  margin: -4px -4px 0;
-  padding: 4px;
-  background: var(--color-surface);
-}
-.cdx-overlay--sheet .cdx-design-browser__filters { top: -16px; margin: -16px calc(var(--sheet-pad) * -1) 0; padding: 16px var(--sheet-pad) 8px; }
-.cdx-design-browser__chips { margin: 0; padding: 0; }
-.cdx-design-browser__collection { display: none; }
-/* Phones, and any screen held sideways: the six chips would take two rows of a short screen, so one select. */
-@media (max-width: 767.98px), (max-height: 500px) {
-  .cdx-design-browser__chips { display: none; }
-  .cdx-design-browser__collection { display: grid; }
-}
-.cdx-design-browser__collection .mdx-label,
-.cdx-design-browser__filter .mdx-label { margin-bottom: 4px; }
-.cdx-design-browser__filter { display: grid; gap: 0; max-width: 360px; }
-/* Short screens (a phone held sideways): Collection and Pair asset share one row, so the tiles keep the room. */
-@media (max-height: 500px) {
-  .cdx-design-browser__filters { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; column-gap: 12px; }
-  .cdx-design-browser__filter { max-width: none; }
-  .cdx-design-browser__collection .mdx-label,
-  .cdx-design-browser__filter .mdx-label { margin-bottom: 2px; }
-  .cdx-overlay--sheet .cdx-design-browser__filters { padding-top: 12px; }
-}
-.cdx-design-browser__grid { padding: 4px 0; }
-.cdx-design-browser__choice {
-  position: relative;
-  display: flex;
-  width: 100%;
   min-width: 0;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 8px;
-  border-radius: var(--radius-row);
-  background: transparent;
-  color: var(--color-ink);
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--radius-pop);
+  background: linear-gradient(rgb(var(--rgb-wall) / var(--suede-veil)), rgb(var(--rgb-wall) / var(--suede-veil))), var(--material-suede) 0 0 / var(--suede-size) repeat, var(--color-wall); /* taste-skill-ignore: one flat tint over the suede photo tile, not a gradient */
+  box-shadow: var(--rim-gold-soft), inset 0 1px 0 rgb(var(--rgb-light) / 0.04); /* taste-skill-ignore: D1 direction, the logo's gold rim on a sunken well */
   container-type: inline-size;
-  transition: background-color var(--t-hover) ease;
 }
-.cdx-design-browser__choice[aria-pressed="true"] { background: var(--color-nested); outline: 2px solid var(--color-ink); outline-offset: -2px; }
-.cdx-design-browser__choice:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; }
-.cdx-design-browser__choice:disabled { cursor: not-allowed; opacity: 0.5; }
-@media (hover: hover) and (pointer: fine) {
-  .cdx-design-browser__choice:not([aria-pressed="true"]):hover:not(:disabled) { background: var(--color-track); }
+@container (max-width: 300px) {
+  .cdx-pair-hud__controls, .cdx-pair-hud__grid { margin-inline: -4px; }
 }
-.cdx-design-browser__art { flex: none; width: min(160px, 84cqw); }
-.cdx-design-browser__art > .mdx-card { width: 100%; }
-.cdx-design-browser__choice > strong { display: block; width: 100%; min-height: 2.6em; color: var(--color-ink); font-size: var(--text-caption); line-height: 16px; font-weight: 600; overflow-wrap: anywhere; text-align: center; }
-.cdx-design-browser__quote { font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); white-space: nowrap; }
-.cdx-design-browser__quote[data-bound="true"] { color: var(--color-ink); font-weight: 500; }
-.cdx-design-browser__meta { display: flex; min-height: 20px; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; }
-@media (max-width: 560px) {
-  .cdx-design-browser__choice { padding: 8px 4px; }
+.cdx-pair-hud__controls { display: grid; min-width: 0; gap: 8px; }
+@container (min-width: 540px) {
+  .cdx-pair-hud__controls { grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 12px; }
 }
-/* Short screens held sideways: each tile is one row (a 64px card beside its name and pair), so whole tiles show
- * under the filters and the first stays clear of them. */
-@media (max-height: 440px) {
-  .cdx-design-browser__choice {
-    display: grid;
-    grid-template-columns: 64px minmax(0, 1fr);
-    grid-template-rows: auto auto;
-    align-content: center;
-    justify-items: start;
-    gap: 4px 8px;
-    padding: 6px;
-    text-align: left;
-  }
-  .cdx-design-browser__art { grid-row: 1 / span 2; width: 64px; }
-  .cdx-design-browser__choice > strong { min-height: 0; align-self: end; text-align: left; }
-  .cdx-design-browser__meta { align-self: start; justify-content: flex-start; }
+/* The group filter: MintDex's segmented track in its small type, each option a 40px target (44px on touch). */
+.cdx-pair-hud .mdx-tabs--sm { height: 40px; }
+.cdx-pair-hud .mdx-tabs--sm :is(.mdx-tabs__tab, .mdx-tabs__thumb) { height: 32px; }
+.cdx-pair-hud .mdx-tabs--sm .mdx-tabs__tab { min-width: 0; justify-content: center; padding: 0 12px; }
+.cdx-pair-hud .mdx-tabs--sm .mdx-tabs__tab::before { content: ""; position: absolute; inset: -4px 0; }
+.cdx-pair-hud .mdx-tabs--fill .mdx-tabs__tab { flex: 1 1 auto; }
+@container (min-width: 540px) {
+  .cdx-pair-hud .mdx-tabs--fill { width: auto; }
 }
-
-/* ------------------------------------------------ the pair picker (Launch's Pair field; also the Designs preview) */
-.cdx-pair-picker { display: grid; min-width: 0; gap: 0; }
-.cdx-pair-picker__head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 8px; }
-.cdx-pair-picker__head .mdx-label { margin: 0; }
-.cdx-pair-picker__head > span { font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
-.cdx-pair-picker__hint { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin-top: 8px; font-size: var(--text-body); line-height: 20px; }
-.cdx-pair-picker__hint strong { color: var(--color-ink); font-weight: 600; }
-.cdx-pair-picker__hint > span,
-.cdx-pair-picker__binding { color: var(--color-slate); }
-.cdx-pair-picker__binding,
-.cdx-pair-design-match { margin-top: 8px; font-size: var(--text-body); line-height: 20px; }
-.cdx-pair-design-match { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; color: var(--color-slate); }
-.cdx-pair-design-match strong { min-width: 0; overflow-wrap: anywhere; color: var(--color-ink); font-weight: 600; }
-.cdx-pair-matching { min-width: 0; margin-top: 16px; }
-.cdx-pair-matching__toggle {
+@media (pointer: coarse), (max-width: 1023.98px) {
+  .cdx-pair-hud .mdx-tabs--sm { height: 44px; }
+  .cdx-pair-hud .mdx-tabs--sm :is(.mdx-tabs__tab, .mdx-tabs__thumb) { height: 36px; }
+}
+@container (max-width: 300px) {
+  .cdx-pair-hud .mdx-tabs--sm .mdx-tabs__tab { padding: 0 6px; }
+}
+/* The search: the glyph inside, a quiet clear button at the end (Discover's field, one size down). */
+.cdx-pair-hud__search { position: relative; min-width: 0; }
+.cdx-pair-hud__search .mdx-input { width: 100%; height: 40px; padding-left: 36px; padding-right: 44px; }
+.cdx-pair-hud__search .mdx-input::-webkit-search-cancel-button { display: none; }
+@media (pointer: coarse), (max-width: 1023.98px) {
+  .cdx-pair-hud__search .mdx-input { height: 44px; font-size: 16px; }
+}
+.cdx-pair-hud__glyph { position: absolute; top: 50%; left: 12px; color: var(--color-slate); pointer-events: none; transform: translateY(-50%); }
+.cdx-pair-hud__clear { position: absolute; top: 50%; right: 2px; transform: translateY(-50%); }
+/* The tiles: as many 116px tracks as fit (two on a 360px phone, five in the desktop form panel). */
+.cdx-pair-hud__grid { display: grid; min-width: 0; grid-template-columns: repeat(auto-fill, minmax(116px, 1fr)); gap: 6px; }
+.cdx-pair-tile {
   position: relative;
-  display: flex;
-  width: 100%;
-  min-height: var(--hit);
+  display: grid;
+  min-width: 0;
+  min-height: 44px;
+  grid-template-columns: 24px minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  border-top: 1px solid var(--color-hairline); /* taste-skill-ignore: mintdex.fun table rule */
+  column-gap: 8px;
+  padding: 5px 8px;
+  border-radius: var(--radius-row);
+  background: var(--color-plinth);
+  box-shadow: inset 0 0 0 1px var(--color-hairline); /* taste-skill-ignore: mintdex.fun ring/selected mark */
   color: var(--color-ink);
-  font-size: var(--text-body);
-  font-weight: 500;
   text-align: left;
-  transition: color var(--t-hover) ease;
+  transition:
+    background-color var(--t-fast) var(--ease-room),
+    box-shadow var(--t-fast) var(--ease-room),
+    transform var(--t-press) var(--ease-out);
 }
-.cdx-pair-matching__toggle > svg { flex: none; transition: transform var(--t-fast) var(--ease-in-out); }
-.cdx-pair-matching__toggle[aria-expanded="true"] > svg { transform: rotate(180deg); }
-.cdx-pair-matching__toggle:focus-visible { outline-offset: 2px; }
-.cdx-pair-matching__toggle:disabled { cursor: not-allowed; color: var(--color-slate); }
-.cdx-pair-matching__body { display: grid; justify-items: start; gap: 12px; padding: 4px 0 8px; }
-.cdx-pair-matching__body p { font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
-.cdx-pair-matching__body > button { max-width: 100%; }
-.cdx-pair-picker--viewport { margin: 0; padding: 0; border: 0; }
-.cdx-pair-picker--viewport .cdx-pair-design-match,
-.cdx-pair-picker--viewport .cdx-pair-matching { margin-top: 12px; }
+.cdx-pair-tile__mono {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--color-sheet);
+  box-shadow: inset 0 0 0 1px rgb(var(--rgb-gold) / 0.55); /* taste-skill-ignore: mintdex.fun ring/selected mark */
+  color: var(--color-neon-text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  transition: background-color var(--t-fast) var(--ease-room), color var(--t-fast) var(--ease-room);
+}
+.cdx-pair-tile__text { display: grid; min-width: 0; }
+.cdx-pair-tile__sym { overflow: hidden; font-size: 13px; line-height: 16px; font-weight: 600; font-stretch: 85%; letter-spacing: 0.01em; text-overflow: ellipsis; white-space: nowrap; }
+.cdx-pair-tile__name { overflow: hidden; font-size: var(--text-caption); line-height: 15px; color: var(--color-slate); text-overflow: ellipsis; white-space: nowrap; }
+.cdx-pair-tile[aria-checked="true"] {
+  background: var(--color-sheet);
+  box-shadow: 0 0 0 1.5px var(--color-neon); /* taste-skill-ignore: mintdex.fun ring/selected mark (the gold rim, no glow) */
+}
+.cdx-pair-tile[aria-checked="true"] .cdx-pair-tile__mono { background: var(--color-neon); color: var(--color-neon-ink); }
+.cdx-pair-tile[aria-checked="true"] .cdx-pair-tile__name { color: var(--color-ink); }
+.cdx-pair-tile__check {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--color-neon);
+  box-shadow: 0 0 0 2px var(--color-wall); /* taste-skill-ignore: the check's cut-out ring on the well */
+  color: var(--color-neon-ink);
+}
+.cdx-pair-tile:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; }
+.cdx-pair-tile:active:not(:disabled) { transform: scale(0.96); }
+.cdx-pair-tile:disabled { cursor: not-allowed; opacity: 0.55; }
+.cdx-pair-tile[aria-checked="true"]:disabled { opacity: 0.8; }
+@media (hover: hover) and (pointer: fine) {
+  .cdx-pair-tile:not([aria-checked="true"]):hover:not(:disabled) { background: var(--color-tint); }
+}
+.cdx-pair-hud__empty { grid-column: 1 / -1; padding: 6px 2px; font-size: 13px; line-height: 20px; color: var(--color-slate); }
+.cdx-pair-hud__empty .mdx-link { font-weight: 500; color: var(--color-ink); }
+/* The chosen pair under the console: its line (and the demo balance), then its safety facts. */
+.cdx-pair-hud__picked { display: grid; min-width: 0; gap: 2px; }
+.cdx-pair-hud__line { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; font-size: var(--text-body); line-height: 20px; }
+.cdx-pair-hud__line strong { min-width: 0; color: var(--color-ink); font-weight: 600; overflow-wrap: anywhere; }
+.cdx-pair-hud__line > span { color: var(--color-slate); }
+.cdx-pair-hud__picked .cdx-pair-meta { margin-top: 4px; }
+.cdx-pair-hud__picked .cdx-pair-notice { margin-top: 6px; }
+/* The check appears at once (arrow keys select as they move, and keyboard steps get no animation). Reduced motion
+ * and Calm: a press does not scale either (the colour change stays). */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion-pref="full"]) .cdx-pair-tile:active:not(:disabled) { transform: none; }
+}
+:root[data-motion="calm"] .cdx-pair-tile:active:not(:disabled) { transform: none; }
 
-/* The mint and the terms behind one disclosure. */
-.cdx-pair-details { min-width: 0; margin-top: 16px; }
-.cdx-pair-disclosure { min-width: 0; margin-top: 16px; border-top: 1px solid var(--color-hairline); } /* taste-skill-ignore: mintdex.fun table rule */
-.cdx-pair-details > .cdx-pair-disclosure { margin-top: 0; }
-.cdx-pair-disclosure > summary {
-  display: flex;
-  min-height: var(--hit);
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  color: var(--color-ink);
-  font-size: var(--text-body);
-  font-weight: 500;
-  list-style: none;
-  cursor: pointer;
-}
-.cdx-pair-disclosure > summary::-webkit-details-marker { display: none; }
-.cdx-pair-disclosure > summary > svg { flex: none; transition: transform var(--t-fast) var(--ease-in-out); }
-.cdx-pair-disclosure[open] > summary > svg { transform: rotate(180deg); }
-.cdx-pair-details__body { display: grid; gap: 8px; padding: 12px; border-radius: var(--radius-row); background: var(--color-nested); font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
-.cdx-pair-details__label { margin-top: 4px; font-size: var(--text-caption); line-height: 16px; }
 .cdx-pair-mint { display: inline-flex; max-width: 100%; align-items: flex-start; gap: 4px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
 .cdx-pair-mint > span { min-width: 0; }
-.cdx-pair-mint > svg,
-.cdx-pair-details__links .mdx-link > svg { flex: none; margin-top: 4px; }
-.cdx-pair-details__links { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-block: 4px; }
-.cdx-pair-details__links .mdx-link,
+.cdx-pair-mint > svg { flex: none; margin-top: 4px; }
 .cdx-live-stage__links .mdx-link,
 .cdx-live-block .mdx-link { display: inline-flex; align-items: center; gap: 4px; }
-.cdx-pair-details__links .mdx-link > svg,
 .cdx-live-stage__links .mdx-link > svg { margin-top: 0; }
-
-/* Switching to a quote the design cannot use: the question, the compatible design, two answers. */
-.cdx-pair-change { display: grid; gap: 8px; padding: 16px; border-radius: var(--radius-row); background: var(--color-nested); font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
-.cdx-pair-change > p strong { color: var(--color-ink); }
-.cdx-pair-change > .mdx-label { margin: 8px 0 0; }
-.cdx-pair-change__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .cdx-pair-notice { font-size: var(--text-body); line-height: 20px; color: var(--color-ink); }
+.cdx-pair-notice:empty { display: none; }
 
-/* The pair line beside a design (Designs; the non-compact picker). */
-.cdx-pair-badge { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 4px 12px; margin-top: 12px; padding: 8px 0; border-block: 1px solid var(--color-hairline); font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
-.cdx-pair-badge strong { color: var(--color-ink); font-size: var(--text-body); line-height: 20px; font-weight: 600; overflow-wrap: anywhere; }
-.cdx-pair-badge--compact { gap: 4px 8px; }
-
-/* Field selects in these pickers: 16px on touch, as the inputs are (no iOS zoom). */
+/* Field selects: 16px on touch, as the inputs are (no iOS zoom). */
 @media (pointer: coarse), (max-width: 1023.98px) {
-  :is(.cdx-launch, .cdx-pair-picker, .cdx-design-browser, .cdx-live-panel) .mdx-select--field { font-size: var(--text-lead); }
+  :is(.cdx-launch, .cdx-live-panel) .mdx-select--field { font-size: var(--text-lead); }
 }
-.cdx-pair-picker .mdx-select--field,
-.cdx-design-picker .mdx-select--field,
 .cdx-live-panel .mdx-select--field { text-overflow: ellipsis; }
 
 
-/* Launch's inline picker: the asset and issuer, the full mint (it wraps anywhere), the review date, the terms on one
- * line that wraps, then what the quote does and does not do. */
+/* The pair's safety facts under the HUD (QuoteAssetMeta): the asset and issuer, the full mint (it wraps anywhere), the
+ * review date, the terms on one line that wraps, then what the quote does and does not do. */
 .cdx-pair-meta { display: grid; min-width: 0; gap: 2px; margin-top: 8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); overflow-wrap: anywhere; }
 .cdx-pair-meta__asset strong { color: var(--color-ink); font-weight: 500; }
 .cdx-pair-meta__links { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 12px; }
@@ -398,8 +348,6 @@
 /* The mint starts beside its label and fills each line (break-all), rather than dropping whole to the next one. */
 .cdx-pair-meta .cdx-pair-mint { display: inline; word-break: break-all; }
 .cdx-pair-meta .cdx-pair-mint > svg { display: inline-block; margin: 0 0 0 2px; vertical-align: -1px; }
-.cdx-pair-picker--inline .cdx-pair-change { margin-top: 8px; }
-.cdx-pair-picker--inline .cdx-pair-picker__hint { margin-top: 6px; }
 
 /* ------------------------------------------------ the mainnet panel (live mode: the ticket's body) */
 .cdx-live-panel { display: grid; min-width: 0; gap: 16px; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
@@ -514,6 +462,4 @@
 @media (prefers-reduced-motion: reduce) {
   .cdx-launch-more__chev,
   .cdx-launch-total__more > svg { transition: none; }
-  .cdx-pair-matching__toggle > svg,
-  .cdx-pair-disclosure > summary > svg { transition: none; }
 }

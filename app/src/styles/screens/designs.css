@@ -5,7 +5,8 @@
  *     full-height aside: the design table (it scrolls on its own) and the selected design with its pair.
  *   phones: the tabs scroll sideways; the coverflow shows the near neighbours peeking in; a strip of design chips;
  *     then the selected design's plinth. The page scrolls as a document.
- * Also here: the design chip and miniature shared with Launch's design chips (CardDesignPicker inline). */
+ * The pair picks the card, so the tabs are the pair groups and every design shows its pair. Also here: the design
+ * chip and the miniature. */
 
 .cdx-designs {
   /* The centre card's controls row (Turn over, Pause, View in 3D) under its ledge: 12px + a 40px row, 44px on touch. */
@@ -17,34 +18,9 @@
   }
 }
 
-/* ------------------------------------------------ the collections (Tabs) and the exact pair filter */
+/* ------------------------------------------------ the pair groups (Tabs) */
 .cdx-designs .mdx-design-collections {
   scroll-padding-inline: 16px;
-}
-.cdx-designs__pairfilter {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 10px;
-}
-.cdx-designs__pairfilter .mdx-label {
-  flex: none;
-  margin: 0;
-}
-.cdx-designs__pairfilter .mdx-select {
-  height: 40px;
-  width: 260px;
-  min-width: 0;
-  max-width: 100%;
-}
-@media (max-width: 1023.98px) {
-  .cdx-designs__pairfilter {
-    width: 100%;
-  }
-  .cdx-designs__pairfilter .mdx-select {
-    width: auto;
-    flex: 1;
-  }
 }
 
 /* ------------------------------------------------ the coverflow: the centre turntable stands on the ledge, its controls
@@ -148,7 +124,7 @@
   .cdx-cf-cap__go { grid-area: go; margin: 0; }
 }
 
-/* ------------------------------------------------ the design chip and miniature (this strip; Launch's design chips) */
+/* ------------------------------------------------ the design chip and miniature (the phone strip) */
 .cdx-design-mini {
   display: inline-block;
   flex: none;
@@ -206,13 +182,11 @@
     background: var(--color-tint);
   }
 }
-/* "Match": the chip's design is matched to the quote (Launch). Gold on the chip reads at 7:1. */
-.cdx-design-chip__match {
-  margin-left: -2px;
-  font-size: 11px;
+/* The chip's pair, after its design's name (gold text on the chip reads at 7:1). */
+.cdx-design-chip__pair {
+  font-size: 12px;
   line-height: 1;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-weight: 600;
   color: var(--color-neon-text);
 }
 
@@ -369,18 +343,17 @@
   color: var(--color-slate);
   text-wrap: pretty;
 }
+/* The design's pair: its symbol and name (a design no pair has says it is kept by existing coins). */
 .cdx-designs__pair {
   min-width: 0;
-  margin-top: 6px;
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-slate);
 }
-/* The pair picker in the aside: its controls in the aside's width, the details one tap away. */
-.cdx-designs__pair .cdx-pair-picker__hint {
-  margin-top: 6px;
-  font-size: 13px;
-}
-.cdx-designs__pair .cdx-pair-details,
-.cdx-designs__pair .cdx-pair-matching {
-  margin-top: 8px;
+.cdx-designs__pair strong {
+  color: var(--color-ink);
+  font-weight: 600;
 }
 
 /* ------------------------------------------------ reduced motion and Calm: no travel, no press scale */

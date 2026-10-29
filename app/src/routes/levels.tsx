@@ -4,38 +4,21 @@ import { searchSchema, text } from "../lib/mintdex/search";
 import { HeroTurntable } from "../components/carddex/HeroTurntable";
 import { useViewIn3D } from "../components/carddex/CardControls";
 import { MintCard, type CardData } from "../components/mintdex/MintCard";
-import { Button, ButtonLink, Tabs, TextLink } from "../components/mintdex/ui";
+import { ButtonLink, Tabs, TextLink } from "../components/mintdex/ui";
 import { COLLECTION, DesignMini } from "../components/carddex/GalleryTile";
-import {
-  CARD_DESIGNS,
-  DEFAULT_CARD_DESIGN,
-  getCardDesign,
-  isCardDesignKey,
-  type CardDesign,
-} from "../lib/carddex/designs";
+import { getCardDesign, isCardDesignKey, type CardDesign } from "../lib/carddex/designs";
 import { pageHead } from "../lib/mintdex/seo";
-import {
-  PAIR_ASSETS,
-  allowedQuotesForDesign,
-  boundQuoteForDesign,
-  defaultQuoteForDesign,
-  getPairAsset,
-  isPairAssetKey,
-  preferredDesignForQuote,
-  recommendedMemeQuoteForDesign,
-  type PairAsset,
-} from "../lib/carddex/pairs";
-import { MEME_PAIR_PRESETS } from "../lib/carddex/design-pairings";
-import { DESIGN_GROUPS, inDesignGroup } from "../components/carddex/design-groups";
+import { defaultQuoteForDesign, designForPair, isPairAssetKey, pairForDesign, type PairAsset } from "../lib/carddex/pairs";
+import { PAIR_GROUPS, isPairGroup, pairGroupOf, pairsInGroup, shortPairName, type PairGroup } from "../components/carddex/pair-groups";
 import { initialQuoteReserves, quoteMetrics } from "../lib/carddex/quote-simulation";
-import { QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
 
 /**
- * Designs (/levels), in mintdex.fun's Designs format: the collections as segmented tabs, the selected design at the
- * centre of a coverflow (its neighbours fanned back on either side), its name and the one primary under the ledge,
- * and the design table in a full-height aside that scrolls on its own (on phones: a strip of design chips, then the
- * selected design's plinth). No unlock thresholds, slider or level-up: a coin keeps the one design its creator picks.
- * Styles: styles/screens/designs.css. Every explanation lives at /how#cards and /how#pairs.
+ * Designs (/levels), in mintdex.fun's Designs format: the pair groups as segmented tabs, the selected design at the
+ * centre of a coverflow (its neighbours fanned back on either side), its name, its pair and the one primary under the
+ * ledge, and the design table in a full-height aside that scrolls on its own (on phones: a strip of design chips, then
+ * the selected design's plinth). The pair picks the card, so this shows the one design of each launchable pair, and
+ * its primary opens Launch on that pair. A design no pair has (kept by coins made with it) still opens from a link,
+ * with no launch action. Styles: styles/screens/designs.css. Every explanation lives at /how#cards and /how#pairs.
  */
 
 /** The selected design on its turntable, with the stage's three controls (Turn over, Pause, View in 3D). */
@@ -50,6 +33,11 @@ function DesignStage({ card }: { card: CardData }) {
   );
 }
 
+/** Every launchable design, with its pair, in the pairs' reading order (pair-groups.ts). */
+type PairedDesign = { design: CardDesign; pair: Readonly<PairAsset> };
+const PAIRED: readonly PairedDesign[] = pairsInGroup("all").map((pair) => ({ pair, design: getCardDesign(designForPair(pair.key)!) }));
+const pairedIn = (group: PairGroup) => PAIRED.filter(({ pair }) => group === "all" || pairGroupOf(pair) === group);
+
 export const Route = createFileRoute("/levels")({
   validateSearch: searchSchema({
     design: text(),
@@ -63,20 +51,12 @@ export const Route = createFileRoute("/levels")({
     pageHead({
       path: "/levels",
       title: "Card designs | Launch a Card",
-      description: `${CARD_DESIGNS.length} card designs. Pick the one your coin keeps for good, from trading-card classics to limited-edition foil artwork.`,
+      description: `${PAIRED.length} card designs, one for each pair. Pick a pair and your coin keeps its card for good.`,
     }),
   component: Designs,
 });
-// The collections and their membership are shared with Launch's All designs dialog (design-groups.ts).
-const GROUPS = DESIGN_GROUPS;
-
-const matchesCategory = inDesignGroup;
-const memePairKeys = new Set<string>(MEME_PAIR_PRESETS.map((preset) => preset.quote));
-const memePairAssets = PAIR_ASSETS.filter((asset) => memePairKeys.has(asset.key));
-const matchesMemePair = (design: CardDesign, quoteKey: string) =>
-  MEME_PAIR_PRESETS.some((preset) => preset.design === design.key && preset.quote === quoteKey);
-/** A design's catalogue number ("No. 07"), the plate MintDex prints before a name. */
-const catalogueNo = (d: CardDesign) => String(CARD_DESIGNS.findIndex((x) => x.key === d.key) + 1).padStart(2, "0");
+/** A launchable design's catalogue number ("No. 07") among the pairs, the plate MintDex prints before a name. */
+const catalogueNo = (d: CardDesign) => String(PAIRED.findIndex((x) => x.design.key === d.key) + 1).padStart(2, "0");
 
 /**
  * A side card's place in the coverflow (mintdex.fun's values): `n` steps from the centre, fanned back 52deg, each
@@ -102,55 +82,17 @@ function Designs() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/levels" });
   const key = search.design ?? search.icon ?? search.edition;
-  const collection = search.collection === "icons" ? "limited" : search.collection;
-  const category = GROUPS.some((group) => group.key === collection) ? collection! : "all";
-  const selected = isCardDesignKey(key) ? getCardDesign(key) : null;
-  const preferred = isPairAssetKey(search.quote) ? preferredDesignForQuote(search.quote) : null;
-  const family = category === "stocks" ? "stock" : category === "memes" ? "meme" : null;
-  const fallback = family
-    ? (CARD_DESIGNS.find((d) => d.key === preferred && matchesCategory(d, category)) ??
-      CARD_DESIGNS.find((d) => matchesCategory(d, category)))
-    : null;
-  const design = selected ?? fallback ?? getCardDesign(DEFAULT_CARD_DESIGN);
-  const [memePairFilter, setMemePairFilter] = useState("all");
-  // A pair change that needs a compatible design waits for its confirmation (QuoteAssetPicker): the collections, the
-  // pair filter, the table, the strip and the coverflow lock, and the primary reads "Confirm pair first" and takes
-  // focus to the confirmation.
-  const [pairPending, setPairPending] = useState(false);
-  const confirmRef = useRef<HTMLDivElement>(null);
-  const focusConfirm = () => confirmRef.current?.focus();
-  useEffect(() => {
-    if (!pairPending) return;
-    // A safety net only: the confirmation sits beside the selected design and focus never moves on its own. Two
-    // frames, so the check sees the panel at its new height.
-    let raf = requestAnimationFrame(() => {
-      raf = requestAnimationFrame(() => confirmRef.current?.scrollIntoView({ block: "nearest" }));
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [pairPending]);
-  const requestedQuote = isPairAssetKey(search.quote) ? getPairAsset(search.quote) : null;
-  const quote =
-    boundQuoteForDesign(design.key) ??
-    (requestedQuote && allowedQuotesForDesign(design.key).some((a) => a.key === requestedQuote.key)
-      ? requestedQuote
-      : ((category === "memes" ? recommendedMemeQuoteForDesign(design.key) : null) ??
-        defaultQuoteForDesign(design.key)));
-  const filterPair = category === "memes" ? (memePairAssets.find((asset) => asset.key === memePairFilter) ?? null) : null;
-  /** The quote a design previews with here: its bound quote, the meme pair in view, else the current quote. */
-  const choiceQuote = (d: CardDesign, pair: PairAsset | null = filterPair): PairAsset =>
-    boundQuoteForDesign(d.key) ??
-    (category === "memes"
-      ? recommendedMemeQuoteForDesign(d.key, pair?.key ?? (d.key === design.key ? quote.key : undefined))
-      : null) ??
-    (allowedQuotesForDesign(d.key).some((a) => a.key === quote.key) ? quote : defaultQuoteForDesign(d.key));
-  const shown = useMemo(
-    () =>
-      CARD_DESIGNS.filter(
-        (d) => matchesCategory(d, category) && (!filterPair || matchesMemePair(d, filterPair.key)),
-      ),
-    [category, filterPair?.key],
-  );
-  const index = shown.findIndex((d) => d.key === design.key);
+  // Older links used the design collections (memes, stocks, classic...): the pair groups keep memes and stocks.
+  const group: PairGroup = isPairGroup(search.collection) ? search.collection : "all";
+  const shown = useMemo(() => pairedIn(group), [group]);
+  // A design from the link (one no pair has still opens, with no launch action), else the linked pair's design,
+  // else the group's first.
+  const linked = isCardDesignKey(key) ? getCardDesign(key) : isPairAssetKey(search.quote) ? getCardDesign(designForPair(search.quote)!) : null;
+  const design = linked ?? shown[0]?.design ?? PAIRED[0]!.design;
+  const pair = pairForDesign(design.key);
+  // The sample card's quote: the design's pair; a design no pair has shows the quote coins made with it read as.
+  const quote = pair ?? defaultQuoteForDesign(design.key);
+  const index = shown.findIndex((d) => d.design.key === design.key);
   const sampleMetrics = quoteMetrics(initialQuoteReserves(quote.key), quote.key);
   const card: CardData = {
     cardTemplate: design.key,
@@ -168,74 +110,39 @@ function Designs() {
     lore: "A small creature with a very big world to discover.",
     ownerHandle: "you",
   };
-  const cardIn = (d: CardDesign): CardData => {
-    const q = choiceQuote(d);
-    return {
-      ...card,
-      cardTemplate: d.key,
-      level: d.materialLevel,
-      quoteAssetKey: q.key,
-      quoteMint: q.mint,
-      ...quoteMetrics(initialQuoteReserves(q.key), q.key),
-    };
-  };
+  const cardIn = ({ design: d, pair: p }: PairedDesign): CardData => ({
+    ...card,
+    cardTemplate: d.key,
+    level: d.materialLevel,
+    quoteAssetKey: p.key,
+    quoteMint: p.mint,
+    ...quoteMetrics(initialQuoteReserves(p.key), p.key),
+  });
   // A pick keeps you on the page (comparing designs is pick, look, pick again); the caption and this line say what is
   // selected.
   const [announce, setAnnounce] = useState("");
-  const go = (d: CardDesign, q: PairAsset, say = true) => {
-    if (say) setAnnounce(`${d.name} selected, GLORB / ${q.symbol} pair.`);
+  const go = (d: PairedDesign, say = true) => {
+    if (say) setAnnounce(`${d.design.name} selected, ${d.pair.symbol} pair.`);
+    void navigate({ search: { ...search, design: d.design.key, quote: undefined, icon: undefined, edition: undefined }, replace: true, resetScroll: false });
+  };
+  const setGroup = (next: string) => {
+    // The selected design stays when the group holds it; otherwise the group's first.
+    const target = isPairGroup(next) ? next : "all";
+    const list = pairedIn(target);
+    const nextDesign = list.find((d) => d.design.key === design.key) ?? list[0]!;
     void navigate({
-      search: { ...search, design: d.key, quote: q.key },
+      search: { ...search, collection: target === "all" ? undefined : target, design: nextDesign.design.key, quote: undefined, icon: undefined, edition: undefined },
       replace: true,
       resetScroll: false,
     });
   };
-  const pick = (d: CardDesign) => {
-    if (pairPending) return;
-    go(d, choiceQuote(d));
-  };
-  const setCategory = (next: string) => {
-    if (pairPending) return;
-    setMemePairFilter("all");
-    // The selected design stays when the collection holds it; otherwise the collection's own first (a paired
-    // collection opens on the requested quote's preferred design).
-    const nextDesign = matchesCategory(design, next)
-      ? design
-      : (CARD_DESIGNS.find((d) => d.key === preferred && matchesCategory(d, next)) ??
-        CARD_DESIGNS.find((d) => matchesCategory(d, next)) ??
-        design);
-    const nextQuote =
-      boundQuoteForDesign(nextDesign.key) ??
-      (next === "memes" ? recommendedMemeQuoteForDesign(nextDesign.key, nextDesign.key === design.key ? quote.key : undefined) : null) ??
-      (allowedQuotesForDesign(nextDesign.key).some((a) => a.key === quote.key) ? quote : defaultQuoteForDesign(nextDesign.key));
-    void navigate({
-      search: {
-        ...search,
-        collection: next === "all" ? undefined : next,
-        design: nextDesign.key,
-        quote: nextQuote.key,
-      },
-      replace: true,
-      resetScroll: false,
-    });
-  };
-  /** The exact pair filter (Meme pairs): only the designs preset for that asset, previewed in it. */
-  const setPairFilter = (next: string) => {
-    if (pairPending) return;
-    setMemePairFilter(next);
-    const pair = memePairAssets.find((asset) => asset.key === next) ?? null;
-    if (!pair) return;
-    const nextDesign = matchesMemePair(design, pair.key)
-      ? design
-      : CARD_DESIGNS.find((d) => matchesCategory(d, "memes") && matchesMemePair(d, pair.key));
-    if (nextDesign) go(nextDesign, choiceQuote(nextDesign, pair), false);
-  };
-  // A design that is not in the collection in view (an old link, a filter that dropped it) gives the centre to the
-  // collection's first, so the coverflow, the table and the strip always mark the same design.
+  // A launchable design that is not in the group in view (an old link, a group that does not hold it) gives the centre
+  // to the group's first, so the coverflow, the table and the strip always mark the same design. A design no pair has
+  // keeps the centre: it is shown from its link, outside the list.
   useEffect(() => {
-    if (index === -1 && shown.length && !pairPending) go(shown[0]!, choiceQuote(shown[0]!), false);
+    if (index === -1 && pair && shown.length) go(shown[0]!, false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, shown, pairPending]);
+  }, [index, shown, pair?.key]);
 
   // The table's sliding mark and the strip follow the selection: the row (or chip) scrolls into its own box's view,
   // never the page.
@@ -254,34 +161,26 @@ function Designs() {
     const strip = stripRef.current;
     const chip = strip?.querySelector<HTMLElement>(`[data-design="${design.key}"]`);
     if (strip && chip && strip.clientWidth) strip.scrollLeft = chip.offsetLeft - (strip.clientWidth - chip.offsetWidth) / 2;
-  }, [design.key, category, filterPair?.key]);
+  }, [design.key, group]);
 
-  const primary = pairPending ? (
-    <Button disabled onBlocked={focusConfirm}>
-      Confirm pair first
-    </Button>
-  ) : (
-    <ButtonLink to="/launch" search={{ design: design.key, quote: quote.key }}>
-      Use this design
+  // The one primary: Launch on this design's pair (its card comes with it). A design no pair has offers none.
+  const primary = pair ? (
+    <ButtonLink to="/launch" search={{ quote: pair.key }}>
+      Use this pair
     </ButtonLink>
-  );
+  ) : null;
   const collectionName = COLLECTION[design.category];
   const fan = index === -1 ? [] : shown.map((d, i) => ({ d, n: i - index })).filter(({ n }) => n !== 0 && Math.abs(n) <= FAN_REACH);
 
   return (
     <div className="cdx-designs flex min-h-0 min-w-0 flex-col gap-4 lg:h-full" data-testid="design-collections">
-      <nav aria-label="Design collections" className="flex-none" inert={pairPending}>
+      <nav aria-label="Pair groups" className="flex-none">
         <Tabs
-          label="Design collections"
-          value={category}
-          onChange={(v) => setCategory(String(v))}
+          label="Pair groups"
+          value={group}
+          onChange={(v) => setGroup(String(v))}
           className="mdx-noscrollbar mdx-design-collections max-w-full max-lg:overflow-x-auto"
-          options={GROUPS.map((g) => ({
-            value: g.key,
-            label: g.name,
-            count: CARD_DESIGNS.filter((d) => matchesCategory(d, g.key)).length,
-            disabled: pairPending,
-          }))}
+          options={PAIR_GROUPS.map((g) => ({ value: g.key, label: g.name, count: pairedIn(g.key).length }))}
         />
       </nav>
       <p className="sr-only" aria-live="polite">
@@ -295,49 +194,28 @@ function Designs() {
             <header className="flex flex-none flex-wrap items-end justify-between gap-x-6 gap-y-3 lg:min-h-14 lg:flex-nowrap">
               <div className="min-w-0">
                 <h1 className="mdx-h1 -mb-1 pb-1 lg:truncate max-lg:[text-wrap:balance]">
-                  Same coin. {CARD_DESIGNS.length} designs.
+                  Same coin. {PAIRED.length} designs.
                 </h1>
                 <p className="mt-1 text-[13px] leading-[1.45] text-slate">
-                  Your coin keeps its design for good.{" "}
+                  Your pair picks your card.{" "}
                   <TextLink to="/how" hash="cards">
                     Details
                   </TextLink>
                 </p>
               </div>
-              {category === "memes" ? (
-                <div className="cdx-designs__pairfilter" inert={pairPending}>
-                  <label htmlFor="design-pair-asset" className="mdx-label">
-                    Pair
-                  </label>
-                  <select
-                    id="design-pair-asset"
-                    className="mdx-select"
-                    value={memePairFilter}
-                    disabled={pairPending}
-                    onChange={(event) => setPairFilter(event.target.value)}
-                  >
-                    <option value="all">All pairs</option>
-                    {memePairAssets.map((asset) => (
-                      <option key={asset.key} value={asset.key}>
-                        {asset.symbol} · {asset.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              ) : null}
             </header>
             <section aria-label="Design preview" className="flex min-h-0 min-w-0 flex-1 flex-col">
               <div className="mdx-cf cdx-cf relative -mx-4 flex justify-center overflow-clip px-4 pt-2 lg:-mx-2 lg:min-h-[240px] lg:flex-1 lg:px-2 lg:[container-type:size]">
                 <div className="mdx-cf__stage relative flex h-full w-full items-end justify-center">
                   {/* The neighbours: pointer shortcuts only (the table and the strip are the keyboard's way). */}
-                  <div aria-hidden className="mdx-cf__track" inert={pairPending}>
+                  <div aria-hidden className="mdx-cf__track">
                     {fan.map(({ d, n }) => (
                       <div
-                        key={d.key}
+                        key={d.design.key}
                         className="mdx-cf__item"
                         data-near={Math.abs(n) === 1 || undefined}
                         style={fanStyle(n, 20 - Math.abs(n))}
-                        onClick={() => pick(d)}
+                        onClick={() => go(d)}
                       >
                         <MintCard card={cardIn(d)} depth="flat" sizes="(max-width: 1023px) 200px, 312px" />
                       </div>
@@ -350,36 +228,36 @@ function Designs() {
               </div>
               {/* The caption under the ledge: the plate, the name, its collection and pair, the one primary. */}
               <div className="cdx-cf-cap">
-                <span className="mdx-plate cdx-cf-cap__no">No. {catalogueNo(design)}</span>
+                {pair ? <span className="mdx-plate cdx-cf-cap__no">No. {catalogueNo(design)}</span> : null}
                 <span className="cdx-cf-cap__name">{design.name}</span>
                 <span data-chip="" className="cdx-cf-cap__chip">
                   <DesignMini design={design} />
                   <span>
                     {collectionName}
-                    <span className="text-slate"> · {quote.symbol} pair</span>
+                    <span className="text-slate"> · {pair ? `${pair.symbol} pair` : "Existing coins only"}</span>
                   </span>
                 </span>
-                <span className="cdx-cf-cap__go">{primary}</span>
+                {primary ? <span className="cdx-cf-cap__go">{primary}</span> : null}
               </div>
-              {/* Phones: the designs as one strip of chips (MintDex's .mdx-strip). */}
+              {/* Phones: the designs as one strip of chips (MintDex's .mdx-strip), each with its pair. */}
               <div
                 ref={stripRef}
                 role="group"
                 aria-label="Designs"
                 className="mdx-strip cdx-designs__strip -mx-4 mt-3 flex flex-none px-4 py-0.5 lg:hidden"
-                inert={pairPending}
               >
                 {shown.map((d) => (
                   <button
-                    key={d.key}
+                    key={d.design.key}
                     type="button"
-                    data-design={d.key}
-                    aria-pressed={d.key === design.key}
+                    data-design={d.design.key}
+                    aria-pressed={d.design.key === design.key}
                     className="cdx-design-chip"
-                    onClick={() => pick(d)}
+                    onClick={() => go(d)}
                   >
-                    <DesignMini design={d} />
-                    <span className="cdx-design-chip__name">{d.name}</span>
+                    <DesignMini design={d.design} />
+                    <span className="cdx-design-chip__name">{d.design.name}</span>
+                    <span className="cdx-design-chip__pair num">{d.pair.symbol}</span>
                   </button>
                 ))}
               </div>
@@ -398,27 +276,25 @@ function Designs() {
               role="group"
               aria-label={`Designs, ${shown.length}`}
               className="cdx-ladder mdx-scroll max-lg:hidden"
-              inert={pairPending}
             >
               {shown.map((d) => {
-                const q = choiceQuote(d);
-                const pressed = d.key === design.key;
+                const pressed = d.design.key === design.key;
                 return (
                   <button
-                    key={d.key}
+                    key={d.design.key}
                     type="button"
-                    data-design={d.key}
+                    data-design={d.design.key}
                     aria-pressed={pressed}
-                    aria-label={`${d.name}, ${q.symbol} pair`}
+                    aria-label={`${d.design.name}, ${d.pair.symbol} pair`}
                     className="mdx-ladrow cdx-ladrow"
-                    onClick={() => pick(d)}
+                    onClick={() => go(d)}
                   >
                     <span aria-hidden className="mdx-plate cdx-ladrow__no">
-                      {catalogueNo(d)}
+                      {catalogueNo(d.design)}
                     </span>
-                    <DesignMini design={d} className="mdx-mini" />
-                    <span className="cdx-ladrow__name">{d.name}</span>
-                    <span className="cdx-ladrow__pair num">{q.symbol}</span>
+                    <DesignMini design={d.design} className="mdx-mini" />
+                    <span className="cdx-ladrow__name">{d.design.name}</span>
+                    <span className="cdx-ladrow__pair num">{d.pair.symbol}</span>
                   </button>
                 );
               })}
@@ -432,23 +308,15 @@ function Designs() {
                 <span className="cdx-designs__tagline">{collectionName}</span>
               </h2>
               <p className="cdx-designs__desc">{design.description}</p>
-              <div className="cdx-designs__pair">
-                <QuoteAssetPicker
-                  value={quote.key}
-                  designKey={design.key}
-                  ticker="GLORB"
-                  compact
-                  confirmationRef={confirmRef}
-                  onPendingChange={setPairPending}
-                  onChange={(nextQuote, nextDesign) =>
-                    void navigate({
-                      search: { ...search, design: nextDesign, quote: nextQuote },
-                      replace: true,
-                      resetScroll: false,
-                    })
-                  }
-                />
-              </div>
+              <p className="cdx-designs__pair">
+                {pair ? (
+                  <>
+                    <strong>{pair.symbol}</strong> <span>{shortPairName(pair)}</span>
+                  </>
+                ) : (
+                  <span>Existing coins only. No pair offers this design.</span>
+                )}
+              </p>
             </div>
           </aside>
         </div>

@@ -77,8 +77,8 @@ function unwrap<T extends object>(result: LiveResult<T>): T {
 }
 const brief = (value: string) => `${value.slice(0, 5)}…${value.slice(-5)}`;
 
-export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOpen, notice, initialBuy = null, slippageBps = 100, ready, onInvalid, onLockedChange, onBusyChange, onTermsNeeded, onIntentLoaded, onStartAnother, onPrimary, ref }: {
-  draft: LiveLaunchDraft | null; card: CardData; pairPending: boolean; launchesOpen: boolean; notice?: string | null; onInvalid(): void;
+export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, initialBuy = null, slippageBps = 100, ready, onInvalid, onLockedChange, onBusyChange, onTermsNeeded, onIntentLoaded, onStartAnother, onPrimary, ref }: {
+  draft: LiveLaunchDraft | null; card: CardData; launchesOpen: boolean; notice?: string | null; onInvalid(): void;
   /** Changes whenever a draft field does (the page's string of them): a connect that was waiting to launch stops. */
   draftKey: string;
   /** The initial buy as typed, with its unit ("0.5 SOL"), or null for none. */
@@ -272,7 +272,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
     // Wiring: a saved launch this tab still holds (prepared, or a coin that can be prepared again: launch-flow
     // coinRetryable) continues from its prepared input; its details and terms were accepted when it was saved.
     const continuing = () => !!(preparedInput.current && tokenKey.current && (pendingIntent.current?.status === "prepared" || coinRetryable(pendingIntent.current, true)));
-    if (!continuing() && (pairPending || !draft)) { onInvalid(); return; }
+    if (!continuing() && !draft) { onInvalid(); return; }
     if (!canLaunch) { setError(canRecover ? RECOVERY_ONLY : "Mainnet launch setup must be ready before a transaction can be prepared."); return; }
     if (!continuing() && !terms) { setError(TERMS_NEEDED); termsRef.current?.focus(); return; }
     if (!getLiveWalletSnapshot().address) { launchPending.current = "launch"; setConnectOpen(true); return; }
@@ -643,7 +643,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
             : unsignable ? { kind: "submit", label: "Discard unused draft", pending: !!busy, disabled: !canRecover, blockedByPair: false }
             : intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current ? { kind: "submit", label: "Check confirmation", pending: !!busy, disabled: !canRecover, blockedByPair: false }
               : !intent && !canLaunch && canRecover ? { kind: "submit", label: "Find saved launch", pending: !!busy, disabled: false, blockedByPair: false }
-                : { kind: "submit", label: !wallet.address ? "Connect wallet to launch" : notSent === "token" ? "Prepare again" : "Review mainnet launch", pendingLabel: "Preparing…", pending: !!busy, disabled: !canLaunch || pairPending, blockedByPair: pairPending };
+                : { kind: "submit", label: !wallet.address ? "Connect wallet to launch" : notSent === "token" ? "Prepare again" : "Review mainnet launch", pendingLabel: "Preparing…", pending: !!busy, disabled: !canLaunch, blockedByPair: false };
   // What the bar says beside its button: the step it waits on, or why the launch stopped (the panel's alert below
   // the primary announces it; the bar's line is for the eye).
   const statusText = busy ? PHASE[busy] : error || "";
@@ -751,7 +751,6 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
       </ol>
       {intent?.status === "nft_pending" && !busy && !error ? <p>The coin is verified. Issue its separate one-of-one card to the same creator wallet.</p> : null}
     </section> : showFresh ? <p className="cdx-live-next">{oneApproval ? ONE_APPROVAL_NEXT : SEPARATE_APPROVALS_NEXT}</p> : null}
-    {pairPending ? <p role="status">Confirm or cancel the quote change under Pair before preparing a transaction.</p> : null}
     {/* The page's initial-buy notice, unless the alert above already says the same words. */}
     {notice && !intent && notice !== error ? <p role="status">{notice}</p> : null}
 
