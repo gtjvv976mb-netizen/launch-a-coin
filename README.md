@@ -6,7 +6,8 @@ Independent project based on MintDex, publicly branded **Launch a Card** at **ht
 
 ## Included
 
-- 48 creator-selectable designs: seven trading-card classics, 15 premium material designs, 20 limited editions and six dedicated stock-reference designs.
+- **The pair picks the card** (owner, 30 October 2026; branch `claude/classic-mintdex`, not yet deployed): a creator picks the pair (the quote asset) in one pair HUD on Launch, and the card preview shows that pair's design at once. Every one of the 37 reviewed pairs has exactly one design (`PAIR_DESIGNS` in `app/src/lib/carddex/design-pairings.ts`): DOGE gets Doge, and so on; SOL keeps One Piece and USDC gets Duel Masters. The demo launch, the live card composition and a live first prepare refuse a design that is not the pair's own; saved launches, coin reads, trades and the coin image GIF keep whatever they stored.
+- 48 designs in all: seven trading-card classics, 15 premium material designs, 20 limited editions and six dedicated stock-reference designs. 37 are launchable (one per pair); the other 11 (Pokémon Prism, Yu-Gi-Oh! Monster, Shib, Popcat, GameStop, BlackBerry, Nokia, Coinbase, Binance, Kraken, Strategy) are kept only by coins already made with them.
 - Matching text-free Higgsfield front/back artwork for all 48 designs, with the creator's token image and live card content composed above the frame.
 - One shared Launch a Card v2 front: every design uses aligned name, larger artwork, ticker/pair and description/statistics panels. Bottom platform/owner labels, coin numbers and both footer slots are removed; matching themed material completes the bottom edge. Only frame art, textured paper, material, foil and reverse change.
 - Card-first compact launch form, one full 3D preview, artwork upload, token metadata and disclosed optional initial buy.
@@ -15,8 +16,7 @@ Independent project based on MintDex, publicly branded **Launch a Card** at **ht
 - Local pump.fun-style token curve, buys/sells, charts, activity, holdings and NFT card collection.
 - Existing rounded 3D slab, both-face 360° shimmer, touch rotation, viewer and case.
 - Fixed designs: market cap never changes the selected design.
-- Six premium stock finishes and their matching limited editions select reviewed pump.fun tokenized-stock quotes. DOGE, BONK and WIF finishes also select their matching quote. Neutral finishes can explicitly select any of 37 reviewed assets. Historical coins keep their stored quote, including SOL.
-- Meme/collector presets pair Obsidian Archive with CARDS, Pokémon Classic/Prism with SV151 or CARDS, Jade Reliquary with TOAD, and the existing Doge/BONK/WIF finishes with their matching assets. These explicit chooser presets preserve historical neutral design identities. CARDS/SV151 are labelled collector tokens; ambiguous PEPE and POKEMON quote candidates are excluded.
+- Stock pairs launch with their stock finishes (GMEX GameStop Arcade, TSLAX Tesla Current, NVDAX NVIDIA Silicon, AAPLX Apple Titanium, MSTRX Strategy Reserve, COINX Coinbase Vault, AMC its limited edition); DOGE, BONK and WIF with their own finishes; CARDS with Obsidian Archive, SV151 with Pokémon Classic and TOAD with Jade Reliquary. Historical coins keep their stored design and quote, including SOL with any design. CARDS/SV151 are labelled collector tokens; ambiguous PEPE and POKEMON quote candidates are excluded.
 - Exact quote mint, decimals and token program persist with the permanent design. Local launches, buys/sells, balances, fees, charts and portfolio values use the selected asset's units; stock/memecoin quantities are not treated as SOL or given an invented USD price.
 - No NFT sales, listings, bids or royalties. Removed endpoints reject before database writes; SQL triggers provide another boundary.
 

@@ -23,7 +23,7 @@ export const Route = createFileRoute("/how")({
       path: "/how",
       title: "How it works | Launch a Card",
       description:
-        "Launch a pump.fun coin with one creator-picked card design. Pairs, trading, wallet approvals, fees and the demo, in short.",
+        "Launch a pump.fun coin whose pair picks its card design. Pairs, trading, wallet approvals, fees and the demo, in short.",
     }),
   component: How,
 });
@@ -36,11 +36,11 @@ type Step = { title: string; body: string };
 const DEMO_STEPS: Step[] = [
   {
     title: "Launch your coin",
-    body: "Give it a name, ticker and artwork, and choose its quote asset. The demo runs on test SOL.",
+    body: "Give it a name, ticker and artwork, and pick its pair. The demo runs on test SOL.",
   },
   {
-    title: "Choose its card",
-    body: "Pick one premium design before launch. Its one-of-one card goes into your demo collection.",
+    title: "The pair picks its card",
+    body: "Each pair has one card design, shown as you pick. Its one-of-one card goes into your demo collection.",
   },
   {
     title: "Trade the coin. Keep the card.",
@@ -50,11 +50,11 @@ const DEMO_STEPS: Step[] = [
 const LIVE_STEPS: Step[] = [
   {
     title: "Launch your coin",
-    body: "Give it a name, ticker and artwork. Choose its quote asset, then review the pump.fun launch in your wallet.",
+    body: "Give it a name, ticker and artwork. Pick its pair, then review the pump.fun launch in your wallet.",
   },
   {
-    title: "Choose its card",
-    body: "Pick one premium design before launch. After the coin is verified, approve its one-of-one card to your wallet.",
+    title: "The pair picks its card",
+    body: "Each pair has one card design, shown as you pick. After the coin is verified, approve its one-of-one card to your wallet.",
   },
   {
     title: "Trade the coin. Keep the card.",
@@ -81,10 +81,12 @@ const SECTIONS: Section[] = [
     title: "Launch a coin",
     body: (
       <ul>
-        <li>Name, ticker and artwork are all you need. Everything else has a default.</li>
+        <li>Name, ticker and artwork are all you need. Everything else has a default: the pair starts on SOL.</li>
+        <li>Pick a pair and its card comes with it. The card beside the form shows that pair's design at once.</li>
         <li>The ticker takes 2 to 8 letters or numbers (A to Z, 0 to 9).</li>
         <li>Card art: PNG, JPG, WEBP or GIF up to 12 MB. Square works best. You can also drop the image on the box.</li>
         <li>The card beside the form is a live preview. It changes as you edit.</li>
+        <li>The pair panel filters by Memes, Stocks, Collector and Base (SOL and USDC), and searches by symbol or name.</li>
         <li>More options holds your website, X link, an optional initial buy and its slippage.</li>
         <li>The exact initial buy and slippage show before your wallet opens.</li>
         <li>
@@ -101,14 +103,13 @@ const SECTIONS: Section[] = [
     title: "Your card",
     body: (
       <ul>
-        <li>Every coin has one card. Its creator picks the design before launch.</li>
+        <li>Every coin has one card, and its pair picks the design: one pair, one design. DOGE gets the Doge card.</li>
+        <li>SOL and USDC have no design of their own: SOL gets One Piece and USDC gets Duel Masters.</li>
         <li>The design is printed on the card and kept for good. Market cap never changes it.</li>
-        <li>The token trades. Its creator holds the separate one-of-one card chosen at launch.</li>
-        <li>Choosing another design in the library keeps your coin details and artwork.</li>
-        <li>
-          Designs shows one sample coin in every design, grouped as Classics, Premium, Stock pairs, Meme pairs and
-          Limited.
-        </li>
+        <li>The token trades. Its creator holds the separate one-of-one card made at launch.</li>
+        <li>Picking another pair keeps your coin details and artwork; only the pair and its card change.</li>
+        <li>Designs shows one sample coin in each pair's design, grouped as Memes, Stocks, Collector and Base.</li>
+        <li>Designs with no pair are kept by the coins already made with them. They are not offered for new coins.</li>
         <li>In the demo the card goes into your demo collection. On mainnet it is permanent once your coin is created.</li>
         <li>There are no card sales, bids, auctions or royalties. The card NFT gives no token ownership or stock rights.</li>
       </ul>
@@ -120,11 +121,11 @@ const SECTIONS: Section[] = [
     title: "Pairs",
     body: (
       <ul>
-        <li>Every coin trades against one quote asset: SOL, a meme or collector token, or a tokenized stock.</li>
-        <li>SOL is the native quote. Meme and collector presets use the quote shown.</li>
-        <li>The Pair field shows the exact mint, its issuer and when it was reviewed. The mint is checked again before wallet review.</li>
-        <li>Choosing another quote offers a matching design. Your pick stays a preview until you apply it.</li>
-        <li>The quote asset funds the optional initial buy, so changing the pair clears it. SOL also pays network and account costs.</li>
+        <li>Every coin trades against one pair (its quote asset): SOL, USDC, a meme or collector token, or a tokenized stock.</li>
+        <li>The pair picks the card. Each pair has exactly one design, so choosing the pair and the design is one choice.</li>
+        <li>SOL is pump.fun's default pair and gets the One Piece design. USDC gets Duel Masters.</li>
+        <li>Under the pair panel: the exact mint, its issuer and when it was reviewed. The mint is checked again before wallet review.</li>
+        <li>The pair funds the optional initial buy, so changing the pair clears it. SOL also pays network and account costs.</li>
         <li>Stock pairs use tokenized quote assets. They grant no equity: your coin is not company shares.</li>
         <li>Each quote asset has its own issuer terms, availability and risks.</li>
         {IS_SIM ? <li>Demo pairs use no real assets.</li> : null}
@@ -161,7 +162,7 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <ol className="cdx-how__ol">
-          <li>Choose your card design and its exact quote asset. Add your token name, ticker and artwork.</li>
+          <li>Pick your coin's pair: its card design comes with it. Add your token name, ticker and artwork.</li>
           <li>Connect your creator wallet and sign an ownership message. It starts your launch session and spends nothing.</li>
           <li>Review the token creation costs and any initial buy, then approve the pump.fun transaction in your wallet.</li>
           <li>After the token is verified, approve its one-of-one card NFT to that same wallet. Some wallets sign both in one approval.</li>
