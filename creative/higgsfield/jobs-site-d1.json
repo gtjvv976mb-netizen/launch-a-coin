@@ -230,6 +230,12 @@
    "sha256": "a619961fb64cfcde65c52dda1c959b3016843598d30dcb4c0251377ce3b348dc",
    "from": "app/public/assets/site/d1/toggle-on.webp",
    "how": "display-size copy (Pillow LANCZOS, WebP) for the page weight; same art, no generation"
+  },
+  "app/public/assets/site/d1/panel-suede-512.webp": {
+   "bytes": 2364,
+   "sha256": "58fd2f6349d190d9b6be99458d27c9c43419e004b44071108510d1d9bb971275",
+   "from": "app/public/assets/site/d1/panel-suede-768.webp",
+   "how": "display-size copy (Pillow LANCZOS, WebP q85) for the page weight; same art, no generation"
   }
  },
  "notes": [

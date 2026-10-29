@@ -174,10 +174,11 @@ export function burst(
 }
 
 /** M14: 120 particles from both bottom corners, 1 in 9 a mini card, holo palette plus the tier sheen, 2.4 s. */
-export function confetti(extra: string[] = []) {
+export function confetti(extra: string[] = [], only = false) {
   const H = window.innerHeight;
   const W = window.innerWidth;
-  const colors = HOLO.concat(["#c2307f", "#2f6fd0", "#0f8a68", "#ffd36b"], extra);
+  // `only`: the site's own celebration (a launch) throws just the palette it passes; card reveals keep the foil mix.
+  const colors = only && extra.length ? extra : HOLO.concat(["#c2307f", "#2f6fd0", "#0f8a68", "#ffd36b"], extra);
   const list: P[] = [];
   for (const side of [0, 1]) {
     for (let i = 0; i < 60; i++) {

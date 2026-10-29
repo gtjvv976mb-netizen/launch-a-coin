@@ -74,8 +74,8 @@ body[data-scroll-locked] .mdx-holo-ink {
 .mdx-sky__veil {
   inset: 0;
   background:
-    radial-gradient(56% 40% at 52% 16%, rgb(var(--rgb-wall) / var(--stage-veil-glow)), rgb(var(--rgb-wall) / 0) 72%),
-    linear-gradient(to bottom, rgb(var(--rgb-wall) / var(--stage-veil-top)) 0%, rgb(var(--rgb-wall) / var(--stage-veil-mid)) 46%, rgb(var(--rgb-wall) / var(--stage-veil-foot)) 100%);
+    radial-gradient(56% 40% at 52% 16%, rgb(var(--rgb-wall) / var(--stage-veil-glow)), rgb(var(--rgb-wall) / 0) 72%), /* taste-skill-ignore: a neutral scrim over the moving picture, for text contrast */
+    linear-gradient(to bottom, rgb(var(--rgb-wall) / var(--stage-veil-top)) 0%, rgb(var(--rgb-wall) / var(--stage-veil-mid)) 46%, rgb(var(--rgb-wall) / var(--stage-veil-foot)) 100%); /* taste-skill-ignore: the same neutral scrim, darkest where titles sit */
 }
 /* The aurora: two layers of soft amber glows (radial gradients, no filter) that drift and turn slowly. Two layers,
  * not one per glow: each moving layer costs its full size in raster memory (spec 9.1 layer budget). */

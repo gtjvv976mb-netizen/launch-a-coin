@@ -101,22 +101,22 @@
   line-gap-override: 0%;
 }
 
-/* Headings (D1): Roboto Serif Black, instanced at wdth 80 / opsz 36 / GRAD 0 and cut to Latin (26 KB, OFL: see
+/* Headings (D1): Roboto Serif Black, instanced at wdth 80 / opsz 36 / GRAD 0 and cut to Latin-1 (18 KB, OFL: see
  * /fonts/roboto-serif-OFL.txt). The closest free match to the logo's lettering (creative/brand, wordmark.webp):
  * heavy, slightly condensed capitals with wedge serifs. Only the 900 face exists, so every heading weight maps to it
  * and nothing is synthesized. */
 @font-face {
-  font-family: "Roboto Serif";
+  font-family: "Roboto Serif"; /* taste-skill-ignore: Roboto Serif Black is the direction's heading serif (matched to the logo), not a default face */
   src: url("/fonts/roboto-serif-900-wdth80-latin.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range: U+0020-007E, U+00A0-00FF, U+0131, U+0152-0153, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+2032-2033, U+20AC, U+2122, U+2212; /* the cut's own glyphs; any other character uses the fallback */
 }
 /* Metric-matched fallback so the swap does not shift headings: Georgia Bold is 5.3% wider than the cut (measured on
  * the site's own headings), with the cut's 0.927 / 0.244 ascent and descent. */
 @font-face {
-  font-family: "Roboto Serif Fallback";
+  font-family: "Roboto Serif Fallback"; /* taste-skill-ignore: the metric-matched swap fallback for the heading serif */
   src: local("Georgia Bold"), local("Georgia-Bold"), local("Noto Serif Bold"), local("NotoSerif-Bold");
   font-weight: 100 900;
   size-adjust: 95%;
@@ -437,7 +437,7 @@
     background: var(--surface-suede), var(--color-plinth);
     padding: 20px;
     border-radius: var(--radius-aside);
-    box-shadow: var(--rim-gold);
+    box-shadow: var(--rim-gold); /* taste-skill-ignore: D1 direction, the logo's 1px gold rim on raised panels */
   }
   /* The one material utility: suede under the rail, the ticker and any raised surface that is not a plinth. */
   .mdx-suede {
@@ -461,7 +461,7 @@
       margin-block: calc(var(--bleed) * -1);
       margin-right: calc(var(--bleed) * -1);
       border-radius: var(--radius-aside);
-      background-image: var(--corner-tab), linear-gradient(rgb(var(--rgb-plinth) / var(--suede-veil)), rgb(var(--rgb-plinth) / var(--suede-veil))), var(--material-suede);
+      background-image: var(--corner-tab), linear-gradient(rgb(var(--rgb-plinth) / var(--suede-veil)), rgb(var(--rgb-plinth) / var(--suede-veil))), var(--material-suede); /* taste-skill-ignore: one flat tint of the panel colour over the suede photo tile, not a gradient */
       background-position: right top, 0 0, 0 0;
       background-size: var(--corner-tab-size), auto, var(--suede-size);
       background-repeat: no-repeat, no-repeat, repeat;
@@ -880,8 +880,8 @@
     border-image-source: var(--skin-primary);
     border-image-slice: var(--skin-primary-slice);
     color: var(--color-on-hype);
-    text-shadow: 0 1px 1px rgb(var(--rgb-shade) / 0.55);
-    box-shadow: 0 8px 18px -10px rgb(var(--rgb-red) / 0.7);
+    text-shadow: 0 1px 1px rgb(var(--rgb-shade) / 0.55); /* taste-skill-ignore: D1 enamel button, the label sits pressed into the skin */
+    box-shadow: 0 8px 18px -10px rgb(var(--rgb-red) / 0.7); /* taste-skill-ignore: D1 premium button, the enamel pill's cast shadow */
   }
   :root[data-skins] .mdx-btn--primary::before {
     border-image-source: var(--skin-primary-hover);
@@ -890,14 +890,14 @@
   /* The glint: one gold streak swept across on hover by a background-position transition (never a loop; leaving
    * snaps it back unseen, because only the hover state carries the transition). */
   .mdx-btn--primary::after {
-    --glint-w: calc(var(--skin-h) * 3.6);
     content: "";
     position: absolute;
     inset: 3px;
     z-index: -1;
     border-radius: inherit;
     pointer-events: none;
-    background: none calc(var(--glint-w) * -1.6) 50% / var(--glint-w) 150% no-repeat;
+    /* The streak is 60% of the pill wide: at -150% it sits wholly off the left end, at 250% off the right. */
+    background: none -150% 50% / 60% 150% no-repeat;
     mix-blend-mode: screen;
     opacity: 0.9;
   }
@@ -910,7 +910,7 @@
     border-image-source: var(--skin-secondary);
     border-image-slice: var(--skin-secondary-slice);
     color: var(--color-ink);
-    box-shadow: 0 6px 14px -10px rgb(var(--rgb-shade) / 0.8);
+    box-shadow: 0 6px 14px -10px rgb(var(--rgb-shade) / 0.8); /* taste-skill-ignore: D1 premium button, the suede pill's cast shadow */
   }
   :root[data-skins] .mdx-btn--outline::before {
     border-image-source: var(--skin-secondary-pressed);
@@ -969,7 +969,7 @@
       opacity: 1;
     }
     .mdx-btn--primary:hover:not(:disabled, [aria-disabled="true"])::after {
-      background-position: calc(100% + var(--glint-w) * 1.6) 50%;
+      background-position: 250% 50%;
       transition: background-position var(--t-btn-glint) var(--ease-sheen);
     }
     .mdx-btn--outline:hover:not(:disabled, [aria-disabled="true"]) {
@@ -2354,12 +2354,12 @@ a:focus-visible .mdx-lift {
  * panel that turns transparent inside a desktop aside drops it there. The utility keeps the colour; this adds the
  * texture layers only. */
 .bg-plinth:not(.mdx-aside) {
-  background-image: linear-gradient(rgb(var(--rgb-plinth) / var(--suede-veil)), rgb(var(--rgb-plinth) / var(--suede-veil))), var(--material-suede);
+  background-image: linear-gradient(rgb(var(--rgb-plinth) / var(--suede-veil)), rgb(var(--rgb-plinth) / var(--suede-veil))), var(--material-suede); /* taste-skill-ignore: one flat tint over the suede photo tile */
   background-size: auto, var(--suede-size);
 }
 @media (min-width: 1024px) {
   .lg\:bg-plinth:not(.mdx-aside) {
-    background-image: linear-gradient(rgb(var(--rgb-plinth) / var(--suede-veil)), rgb(var(--rgb-plinth) / var(--suede-veil))), var(--material-suede);
+    background-image: linear-gradient(rgb(var(--rgb-plinth) / var(--suede-veil)), rgb(var(--rgb-plinth) / var(--suede-veil))), var(--material-suede); /* taste-skill-ignore: one flat tint over the suede photo tile */
     background-size: auto, var(--suede-size);
   }
   .bg-plinth[class~="lg:bg-transparent"] {

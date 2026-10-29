@@ -45,16 +45,16 @@
   --color-on-neon: #26120b;
   --color-zap: #e3c07c; /* light gold: focus rings, links on hover, the second glow (9.4:1) */
   --color-hype: #b10407; /* the logo's card red: primary buttons, corner tabs, launches (fills only) */
-  --color-hype-ink: #f2715f; /* card red lifted for text on the dark ramp (5.7:1, 5.0:1 on sheet) */
+  --color-hype-ink: #f6767a; /* card red lifted for text on the dark ramp, kept a true red (6.1:1, 5.4:1 on sheet) */
   --color-on-hype: #f3e7cf; /* cream on the card-red fill (5.9:1) */
 
   /* ---- market: green and red only ever mean the market, always with a sign or a triangle */
   --color-up: #8cc79a; /* 8.4:1 */
   --color-up-hover: #a6d6b0;
   --color-up-soft: rgb(140 199 154 / 0.14);
-  --color-down: #f08a7c; /* 6.7:1 */
-  --color-down-hover: #f4a296;
-  --color-down-soft: rgb(240 138 124 / 0.14);
+  --color-down: #f78c8c; /* a true red, never rust (7.0:1) */
+  --color-down-hover: #f9a3a3;
+  --color-down-soft: rgb(247 140 140 / 0.14);
   --color-warn: #e0b456;
   --color-warn-soft: rgb(224 180 86 / 0.14);
 
@@ -142,11 +142,11 @@
   --rgb-gold-hi: 214 168 96; /* lit gold (glow cores, the amber halo) */
   --rgb-zap: 227 192 124; /* light gold (focus) */
   --rgb-red: 177 4 7; /* card red */
-  --rgb-red-hi: 242 113 95; /* card red lifted (glows on the dark ramp) */
+  --rgb-red-hi: 246 118 122; /* card red lifted (glows on the dark ramp) */
   --rgb-bronze: 140 90 40; /* the deep stop between gold and chocolate (aurora, holo) */
   --rgb-amber: 222 150 62; /* the stage's breathing glow (the loop's own amber) */
   --rgb-up: 140 199 154;
-  --rgb-down: 240 138 124;
+  --rgb-down: 247 140 140;
   --rgb-shade: 10 4 2; /* warm black */
   --rgb-light: 255 246 228; /* warm white: sheens, highlights, scanlines */
 
@@ -181,11 +181,11 @@
 
   /* ---- materials (Higgsfield D1, app/public/assets/site/d1). The suede tile sits under raised surfaces at
    * --suede-veil opacity of the panel colour over it, so text contrast stays within 3% of the flat panel. */
-  --material-suede: url("/assets/site/d1/panel-suede-768.webp");
+  --material-suede: url("/assets/site/d1/panel-suede-512.webp"); /* a 2 KB 512px copy of panel-suede-768.webp: at 18% the grain reads the same */
   --suede-size: 384px 384px;
   --suede-veil: 0.82; /* how much of the panel colour lies over the tile (the tile shows at 18%) */
   --surface-suede:
-    linear-gradient(rgb(var(--rgb-plinth) / var(--suede-veil)), rgb(var(--rgb-plinth) / var(--suede-veil))),
+    linear-gradient(rgb(var(--rgb-plinth) / var(--suede-veil)), rgb(var(--rgb-plinth) / var(--suede-veil))), /* taste-skill-ignore: one flat tint over the suede photo tile, not a gradient */
     var(--material-suede) 0 0 / var(--suede-size) repeat;
   --corner-tab: url("/assets/site/d1/corner-tab-72.webp"); /* the logo's own red corner (72px copy of corner-tab.webp) */
   --corner-tab-size: 34px; /* on a panel's top-right corner */

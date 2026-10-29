@@ -48,7 +48,7 @@ let lastAt = 0;
 export function bigBurst(
   colors: string[],
   at?: { x: number; y: number },
-  opts: { confetti?: boolean; label?: string } = {},
+  opts: { confetti?: boolean; label?: string; paletteOnly?: boolean } = {},
 ) {
   if (typeof window === "undefined" || calm()) return;
   // One at a time: two unlocks landing together play one burst.
@@ -136,7 +136,7 @@ export function bigBurst(
         }),
       160,
     );
-    if (opts.confetti) fx.confetti(palette);
+    if (opts.confetti) fx.confetti(palette, opts.paletteOnly);
   });
 }
 
@@ -146,9 +146,10 @@ export function tierBurst(level: number, at?: { x: number; y: number }) {
   bigBurst(tierColors(level), at, { confetti: level >= 7, label: `${t.name} unlocked` });
 }
 
-/** After a successful launch: confetti in the site's gold, ivory and card red (carddex-theme.css --light-*). */
+/** After a successful launch: confetti in the site's own gold, cream and card red only (carddex-theme.css --light-*),
+ *  no foil pastels. */
 export function launchBurst(at?: { x: number; y: number }) {
-  bigBurst(lights(1, 2, 3, 4, 5), at, { confetti: true });
+  bigBurst(lights(1, 2, 3, 4, 5), at, { confetti: true, paletteOnly: true });
 }
 
 /**
