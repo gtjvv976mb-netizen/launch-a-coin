@@ -41,7 +41,20 @@ export type LiveLaunchIntent = {
    * current card address; absent from other responses.
    */
   approvedCard?: LiveApprovedCard | null;
+  /**
+   * Set by getLiveLaunchIntent when the saved launch could not be confirmed as it stands (it never throws for a chain
+   * problem, so a saved launch always loads and can be discarded or prepared again). Absent when the check found nothing
+   * to say or was not run.
+   */
+  chainCheck?: LiveChainCheck;
 };
+/**
+ * What the last chain check of a saved launch found. "failed-on-chain": its transaction landed and failed, so nothing
+ * was created. "expired-unlanded": its saved transaction can no longer land and never did. Both can be prepared again
+ * with the same keys (or discarded) once the server proves nothing can still land. "unchecked": Solana could not be
+ * checked now; the launch is unchanged.
+ */
+export type LiveChainCheck = { state: "failed-on-chain" | "expired-unlanded" | "unchecked"; kind: "token" | "nft"; reason: string };
 export type LiveApprovedCard = { messageSha256: string; transactionBase64: string; nftMint: string };
 /**
  * `unsendable`: the server did not send this signed transaction and never will, so its stage is prepared again.

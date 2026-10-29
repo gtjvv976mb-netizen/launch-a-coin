@@ -56,10 +56,22 @@ export type LiveConnection = Pick<Connection,
 export type LiveOptions = { connection: LiveConnection; now?: () => Date };
 export type VerifyOptions = { connection: LiveConnection; signature?: string; expectedMessageSha256?: string };
 
+/** Longest a single RPC call may take before it is abandoned: a hung provider must not leave a launch step spinning. */
+export const RPC_TIMEOUT_MS = 20_000;
+type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
+/** A fetch that gives every RPC request its own timeout, unless the caller already set a signal. */
+export function rpcFetchWithTimeout(base: FetchLike, timeoutMs = RPC_TIMEOUT_MS): FetchLike {
+  return (input, init) => base(input, { ...init, signal: init?.signal ?? AbortSignal.timeout(timeoutMs) });
+}
 export function createMainnetConnection(rpcUrl: string): Connection {
   const url = new URL(rpcUrl);
   if (url.protocol !== "https:" || url.username || url.password) throw new Error("A server-side HTTPS mainnet RPC URL is required");
-  return new Connection(rpcUrl, "confirmed");
+  // A timed-out read fails like any provider error: the pre-send paths keep the signed bytes and say "not sent".
+  return new Connection(rpcUrl, { commitment: "confirmed", fetch: rpcFetchWithTimeout((input, init) => globalThis.fetch(input, init)) as never });
+}
+/** A transaction the chain processed and failed: nothing it would have created exists. Its network fee was charged. */
+export class TransactionFailedOnChain extends Error {
+  constructor(readonly chainError: unknown) { super(`Transaction failed: ${JSON.stringify(chainError)}`); this.name = "TransactionFailedOnChain"; }
 }
 
 function digest(bytes: Uint8Array): string {
@@ -415,7 +427,8 @@ export function creatorNftInstructions(input: LiveLaunchInput): TransactionInstr
 }
 
 function signedTransactionDetails(transaction: VersionedTransactionResponse, expectedMessageSha256?: string) {
-  if (!transaction.meta || transaction.meta.err) throw new Error(`The finalized transaction failed: ${JSON.stringify(transaction.meta?.err)}`);
+  if (!transaction.meta) throw new Error("The finalized transaction has no status");
+  if (transaction.meta.err) throw new TransactionFailedOnChain(transaction.meta.err);
   const message = transaction.transaction.message;
   const messageSha256 = digest(message.serialize());
   if (expectedMessageSha256 && expectedMessageSha256 !== messageSha256) throw new Error("The finalized transaction message differs from the approved plan");
@@ -449,7 +462,7 @@ async function finalizedTransaction(connection: LiveConnection, signature: strin
     connection.getSignatureStatuses([signature], { searchTransactionHistory: true }),
   ]);
   const state = status.value[0];
-  if (state?.err) throw new Error(`Transaction failed: ${JSON.stringify(state.err)}`);
+  if (state?.err) throw new TransactionFailedOnChain(state.err);
   return transaction && state?.confirmationStatus === "finalized" ? transaction : null;
 }
 
@@ -714,6 +727,18 @@ export async function checkSignedWalletTransaction(input: SignedInput, options: 
  * and these exact signed bytes, then call this. Transport uncertainty returns the same signature; never replace or
  * re-sign it.
  */
+/**
+ * The RPC's own answer to a send, when it gave one: a JSON-RPC error from sendTransaction (a failed preflight, a
+ * minimum context slot not reached, a malformed transaction) means that node did not forward these bytes, while
+ * "already processed" means the chain has them. Anything else (a timeout, a dropped connection, an HTTP error) leaves
+ * the outcome unknown. web3.js reports RPC errors as SendTransactionError, with the node's message.
+ */
+function rpcSendAnswer(error: unknown): { refused: true; reason: string } | { landed: true } | null {
+  const message = (error as { transactionMessage?: unknown } | null)?.transactionMessage;
+  if (!(error instanceof Error) || error.name !== "SendTransactionError" || typeof message !== "string") return null;
+  if (/already been processed|AlreadyProcessed/i.test(message)) return { landed: true };
+  return { refused: true, reason: message.slice(0, 300) };
+}
 export async function broadcastSignedWalletTransaction(input: SignedInput, options: { connection: LiveConnection }) {
   const validated = validateSignedWalletTransaction(input.plan, input.transactionBase64);
   const connection = options.connection;
@@ -724,9 +749,32 @@ export async function broadcastSignedWalletTransaction(input: SignedInput, optio
     if (signature !== validated.signature) throw new Error("RPC returned an unexpected transaction signature");
     return { status: "submitted" as const, signature };
   } catch (error) {
+    const answer = rpcSendAnswer(error);
+    if (answer && "landed" in answer) return { status: "submitted" as const, signature: validated.signature };
+    // Refused by the node: not forwarded this time. The saved bytes can still be sent again until they expire.
+    if (answer) return { status: "refused" as const, signature: validated.signature, reason: answer.reason };
     return { status: "submission-uncertain" as const, signature: validated.signature,
       reason: error instanceof Error ? error.message : "RPC transport failed" };
   }
+}
+
+/**
+ * Sends saved signed bytes again while they can still land, for a launch whose confirmation is still pending (a dropped
+ * send, a provider error, a closed tab). Always safe: the same bytes carry the same signature and land at most once.
+ * Read-only first: a signature the chain already has is never sent again, and bytes past `lastValidBlockHeight` (the
+ * saved bound, which covers a wallet-refreshed blockhash) are reported as expired. The node's preflight still runs, so
+ * a transaction that would now fail is refused rather than charged. Never signs anything.
+ */
+export async function resendSignedWalletTransaction(input: SignedInput & { lastValidBlockHeight: number }, options: { connection: LiveConnection }) {
+  const validated = validateSignedWalletTransaction(input.plan, input.transactionBase64);
+  const connection = options.connection;
+  const status = (await connection.getSignatureStatuses([validated.signature], { searchTransactionHistory: true })).value[0];
+  if (status) return { status: "landed" as const, signature: validated.signature, err: status.err ?? null };
+  const height = await connection.getBlockHeight("confirmed");
+  if (!Number.isSafeInteger(input.lastValidBlockHeight) || height > input.lastValidBlockHeight) return { status: "expired" as const, signature: validated.signature };
+  const sent = await broadcastSignedWalletTransaction(input, options);
+  return sent.status === "submitted" ? { status: "resent" as const, signature: validated.signature, blocksLeft: input.lastValidBlockHeight - height }
+    : { status: "not-resent" as const, signature: validated.signature, reason: sent.reason };
 }
 
 /** Checks, then broadcasts, for callers that keep no state between the two. */

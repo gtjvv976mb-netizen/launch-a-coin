@@ -269,3 +269,52 @@ describe("sign-in text", () => {
     expect(liveSignInText(input, creator)).toBe(`launchacard.fun wants you to sign in with your Solana account:\n${creator}\n\n${input.statement}\n\nURI: ${ORIGIN}\nVersion: 1\nChain ID: mainnet\nNonce: abcdef123456\nIssued At: ${input.issuedAt}\nExpiration Time: ${input.expirationTime}`);
   });
 });
+
+describe("a launch that outlives the page view, and its confirmation (REL-4, REL-9)", () => {
+  const signer = () => ({ address: creator, seed: new Uint8Array(32).fill(5) });
+  test("an unfinished launch is kept for the next mount, wiped only once it is over or replaced", () => {
+    const tokenKey = signer(), nftKey = signer();
+    const session = { creator, tokenKey, nftKey, idempotencyKey: "request-1", preparedInput: null, draftAtPrepare: null };
+    flow.keepLaunchSession(session);
+    expect(flow.keptLaunchSession()).toEqual(session);
+    // Kept again by the same panel: the same keys survive.
+    flow.keepLaunchSession(session);
+    expect(tokenKey.seed.every(byte => byte === 5)).toBe(true);
+    // Replaced by another launch's card key: the old card key is wiped, the coin key is kept.
+    const nextNft = signer();
+    flow.keepLaunchSession({ ...session, nftKey: nextNft });
+    expect(nftKey.seed.every(byte => byte === 0)).toBe(true); expect(tokenKey.seed.every(byte => byte === 5)).toBe(true);
+    // Nothing left to keep: everything is wiped and the store is empty.
+    flow.keepLaunchSession({ creator: null, tokenKey: null, nftKey: null, idempotencyKey: null, preparedInput: null, draftAtPrepare: null });
+    expect(flow.keptLaunchSession()).toBeNull();
+    expect(tokenKey.seed.every(byte => byte === 0) && nextNft.seed.every(byte => byte === 0)).toBe(true);
+    const last = signer();
+    flow.keepLaunchSession({ ...session, tokenKey: last, nftKey: null });
+    flow.dropLaunchSession();
+    expect(flow.keptLaunchSession()).toBeNull(); expect(last.seed.every(byte => byte === 0)).toBe(true);
+  });
+  test("confirmation polls about 90 seconds, stops when verified or expired, and a failure ends it", async () => {
+    const waits: number[] = [], wait = async (ms: number) => { waits.push(ms); };
+    let checks = 0;
+    expect(await flow.confirmUntilSettled({ wait, check: async () => ({ done: ++checks === 3 }) })).toBe("done");
+    expect(checks).toBe(3); expect(waits).toEqual([2000, 2000]);
+    checks = 0;
+    expect(await flow.confirmUntilSettled({ wait, check: async () => ({ done: false, delivery: ++checks === 2 ? "expired" : "resent" }) })).toBe("expired");
+    expect(checks).toBe(2);
+    checks = 0; waits.length = 0;
+    expect(await flow.confirmUntilSettled({ wait, check: async () => { checks++; return { done: false, delivery: "resent" }; } })).toBe("pending");
+    expect(checks).toBe(flow.CONFIRM_MAX_POLLS); expect(checks * flow.CONFIRM_POLL_MS).toBeGreaterThanOrEqual(80_000);
+    expect(waits).toHaveLength(flow.CONFIRM_MAX_POLLS - 1);
+    await expect(flow.confirmUntilSettled({ wait, check: async () => { throw new Error("Your coin transaction failed on Solana"); } })).rejects.toThrow("failed on Solana");
+  });
+  test("a coin is prepared again from this tab only after a failed or expired send, and only while the tab holds its keys", () => {
+    const stage = (state: "failed-on-chain" | "expired-unlanded" | "unchecked", status = "token_pending") => ({ status, chainCheck: { state, kind: "token" as const, reason: "" } });
+    expect(flow.coinRetryable(stage("failed-on-chain"), true)).toBe(true);
+    expect(flow.coinRetryable(stage("expired-unlanded"), true)).toBe(true);
+    expect(flow.coinRetryable(stage("unchecked"), true)).toBe(false);
+    expect(flow.coinRetryable(stage("failed-on-chain"), false)).toBe(false);
+    expect(flow.coinRetryable(stage("failed-on-chain", "nft_pending"), true)).toBe(false);
+    expect(flow.coinRetryable({ status: "token_pending" }, true)).toBe(false);
+    expect(flow.coinRetryable(null, true)).toBe(false);
+  });
+});

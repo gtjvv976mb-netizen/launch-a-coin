@@ -49,9 +49,28 @@ export function walletBatchWallets(value: string | undefined): string[] {
   return walletList(value, DEFAULT_WALLET_BATCH).filter(name => !NEVER_BATCH_WALLETS.includes(name.toLowerCase()));
 }
 /**
+ * The two switches, read the same forgiving way (trimmed, any case), so an operator typing "False" or "0" during an
+ * incident gets what they meant. New launches open only on "true"; recovery is paused by "false", "0", "off" or "no".
+ * Any other recovery value keeps recovery on and is logged, since it is probably a typo.
+ */
+const switchValue = (value: string | undefined) => (value ?? "").trim().toLowerCase();
+export function launchSwitchOn(value: string | undefined) { return switchValue(value) === "true"; }
+const RECOVERY_OFF_VALUES = new Set(["false", "0", "off", "no"]);
+let warnedRecoveryValue: string | undefined;
+export function recoverySwitchOn(value: string | undefined) {
+  const normalized = switchValue(value);
+  if (RECOVERY_OFF_VALUES.has(normalized)) return false;
+  if (normalized && !["true", "1", "on", "yes"].includes(normalized) && warnedRecoveryValue !== normalized) {
+    warnedRecoveryValue = normalized;
+    console.warn("CARDDEX_LIVE_RECOVERY_ENABLED has an unrecognized value; recovery stays on", JSON.stringify({length: normalized.length}));
+  }
+  return true;
+}
+/**
  * Two switches. CARDDEX_LIVE_LAUNCH_ENABLED="true" opens new launches (compose, a new intent, the coin transaction
- * before it is sent). CARDDEX_LIVE_RECOVERY_ENABLED stays on unless it is exactly "false": sign-in, saved launches,
- * confirmations, the card stage and discards. Turning off new launches never strands a creator mid-launch.
+ * before it is sent). CARDDEX_LIVE_RECOVERY_ENABLED stays on unless it says off ("false", "0", "off" or "no"):
+ * sign-in, saved launches, confirmations, the card stage and discards. Turning off new launches never strands a
+ * creator mid-launch.
  */
 export function liveReadiness(): LiveReadiness {
   const env = bindings();
@@ -63,7 +82,7 @@ export function liveReadiness(): LiveReadiness {
   if (!rpcConfigured(env.CARDDEX_MAINNET_RPC_URL)) blockers.push("Configure the server-only mainnet RPC endpoint.");
   if (env.CARDDEX_DEPLOYMENT_ENV !== "production") blockers.push("A separate public Launch a Card production deployment is required; local storage is not durable public hosting.");
   const configured = blockers.length === 0;
-  const enabled = env.CARDDEX_LIVE_LAUNCH_ENABLED === "true", recoveryEnabled = env.CARDDEX_LIVE_RECOVERY_ENABLED !== "false";
+  const enabled = launchSwitchOn(env.CARDDEX_LIVE_LAUNCH_ENABLED), recoveryEnabled = recoverySwitchOn(env.CARDDEX_LIVE_RECOVERY_ENABLED);
   if (!recoveryEnabled) blockers.push(RECOVERY_OFF);
   if (!enabled) blockers.push(LAUNCHES_OFF);
   const recoveryReady = configured && recoveryEnabled;
@@ -77,6 +96,14 @@ export function requireLiveConfig(scope: "launch" | "recovery") {
   const readiness = liveReadiness();
   if (!(scope === "launch" ? readiness.ready : readiness.recoveryReady)) throw new UserError((scope === "launch" ? readiness.blockers : readiness.blockers.filter(blocker => blocker !== LAUNCHES_OFF)).join(" "));
   return { origin: readiness.publicOrigin!, rpcUrl: bindings().CARDDEX_MAINNET_RPC_URL! };
+}
+/**
+ * The Origin check alone, without the readiness switches: sign-out must work while recovery is paused (SEC-7), so a
+ * creator can always end their session during an incident.
+ */
+export function assertSiteOrigin(requestOrigin: string | null) {
+  const origin = publicOrigin(bindings().CARDDEX_PUBLIC_ORIGIN);
+  if (!origin || requestOrigin !== origin) throw new UserError("Open the configured Launch a Card site to authorize this wallet action.");
 }
 export function assertLiveOrigin(requestOrigin: string | null) {
   const { origin } = requireLiveConfig("recovery");

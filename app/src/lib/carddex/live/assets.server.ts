@@ -18,17 +18,66 @@ export function sniffLiveImage(bytes: Uint8Array): string | null {
   if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 && bytes[8] === 0x57 && bytes[9] === 0x45) return "image/webp";
   return null;
 }
+/**
+ * Stores a content-addressed launch asset. Bytes already stored under the same hash are not written again (a retried
+ * prepare or compose re-uploads nothing), only granted to this wallet. A new asset is not public yet: it becomes public
+ * when a launch saves it (publishLaunchAssets), and until then only this Worker's own verification read can fetch it.
+ */
 export async function putPublicAsset(wallet: string, bytes: Uint8Array, mimeType: string): Promise<LiveAsset> {
   requireLiveConfig("launch");
   if (!EXT[mimeType] || bytes.length === 0 || bytes.length > MAX_BYTES) throw new UserError("The public asset has an unsupported format or size.");
   const hash = await sha256(bytes), key = `live/${hash}.${EXT[mimeType]}`;
   const size = mimeType === "application/json" ? null : imageSize(bytes);
-  await bindings().STORAGE!.put(key, bytes, {httpMetadata: {contentType: mimeType, cacheControl: IMMUTABLE}, customMetadata: {sha256: hash}});
+  const known = await one<{storage_key: string}>("SELECT storage_key FROM live_assets WHERE sha256 = ?", hash);
+  if (!(known?.storage_key === key && await bindings().STORAGE!.head(key))) {
+    await bindings().STORAGE!.put(key, bytes, {httpMetadata: {contentType: mimeType, cacheControl: IMMUTABLE}, customMetadata: {sha256: hash}});
+  }
   await db().batch([
     stmt("INSERT OR IGNORE INTO live_assets (sha256, storage_key, mime_type, byte_length, width, height, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)", hash, key, mimeType, bytes.length, size?.w ?? null, size?.h ?? null, Date.now()),
     stmt("INSERT OR IGNORE INTO live_asset_grants (wallet, sha256) VALUES (?, ?)", wallet, hash),
   ]);
   return {sha256: hash, url: assetUrl(hash, mimeType), mimeType, bytes: bytes.length};
+}
+/** The digest in a /m/ metadata URI back to the metadata's sha256 (hex), or null when it is not one. */
+export function metadataShaFromUri(uri: string): string | null {
+  const digest = /\/m\/([A-Za-z0-9_-]{43})$/.exec(uri)?.[1];
+  if (!digest) return null;
+  try {
+    const bytes = Uint8Array.from(atob(digest.replaceAll("-", "+").replaceAll("_", "/") + "="), char => char.charCodeAt(0));
+    const sha = Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+    return bytes.length === 32 && metadataDigest(sha) === digest ? sha : null;
+  } catch { return null; }
+}
+/**
+ * Makes a launch's assets public, in the batch that saves the launch: its coin and card metadata URIs are fixed from
+ * then on, so everything they point to is served to anyone (wallets, pump.fun, explorers) and never unpublished.
+ */
+export function publishLaunchAssets(shas: string[], now: number) {
+  const list = [...new Set(shas.filter(sha => /^[a-f0-9]{64}$/.test(sha)))];
+  return stmt(`UPDATE live_assets SET published_at = ? WHERE published_at IS NULL AND sha256 IN (${list.map(() => "?").join(", ")})`, now, ...list);
+}
+/** The header this Worker's own verification read carries to fetch an asset no launch has published yet. */
+const ASSET_CHECK_HEADER = "x-launch-a-card-asset-check";
+let assetCheckKey: Promise<string> | undefined;
+/** A random server-only key, created once per deployment in D1 and cached per isolate. Never sent to a browser. */
+function assetCheck(): Promise<string> {
+  assetCheckKey ??= (async () => {
+    const fresh = Array.from(crypto.getRandomValues(new Uint8Array(32)), byte => byte.toString(16).padStart(2, "0")).join("");
+    await stmt("INSERT OR IGNORE INTO live_settings (key, value) VALUES ('asset_check_key', ?)", fresh).run();
+    const row = await one<{value: string}>("SELECT value FROM live_settings WHERE key = 'asset_check_key'");
+    if (!row?.value) throw new Error("The asset check key is missing");
+    return row.value;
+  })().catch(error => { assetCheckKey = undefined; throw error; });
+  return assetCheckKey;
+}
+async function isAssetCheck(request: Request | undefined) {
+  const sent = request?.headers.get(ASSET_CHECK_HEADER);
+  if (!sent) return false;
+  const key = await assetCheck().catch(() => null);
+  if (!key || sent.length !== key.length) return false;
+  let diff = 0;
+  for (let i = 0; i < key.length; i++) diff |= key.charCodeAt(i) ^ sent.charCodeAt(i);
+  return diff === 0;
 }
 /** Behind Cloudflare for SaaS this Worker runs on a zone route, and a routed Worker cannot fetch() its own zone.
  * Static files come straight from ASSETS, Worker-served paths (/m/, /api/live/assets/) through the SELF service
@@ -55,8 +104,11 @@ export async function fetchPublicBytes(url: string, maxBytes = MAX_BYTES): Promi
   const parsed = new URL(url);
   if (parsed.origin !== origin || parsed.search || parsed.hash || parsed.username || parsed.password) throw new UserError("Public launch assets must use the configured Launch a Card origin.");
   // Workers rejects redirect:"error" before sending a request. Manual mode keeps
-  // this same-origin check intact; every 3xx fails the !ok check below.
-  const response = await fetchOwnOrigin(url, {redirect: "manual", signal: AbortSignal.timeout(15_000), headers: {accept: "image/png,image/webp,image/jpeg,application/json"}});
+  // this same-origin check intact; every 3xx fails the !ok check below. Launch assets not yet published are read with
+  // this Worker's own check key, which goes only to this configured origin.
+  const headers: Record<string, string> = {accept: "image/png,image/webp,image/jpeg,application/json"};
+  if (/^\/(?:m|api\/live\/assets)\//.test(parsed.pathname)) headers[ASSET_CHECK_HEADER] = await assetCheck();
+  const response = await fetchOwnOrigin(url, {redirect: "manual", signal: AbortSignal.timeout(15_000), headers});
   if (!response.ok || Number(response.headers.get("content-length") ?? 0) > maxBytes) throw new UserError("A public launch asset is not reachable or exceeds the size limit.");
   const bytes = new Uint8Array(await response.arrayBuffer());
   if (bytes.length > maxBytes) throw new UserError("A public launch asset exceeds the size limit.");
@@ -78,21 +130,31 @@ export async function verifyPublicJson(asset: LiveAsset, expected: unknown) {
   const bytes = await fetchPublicBytes(asset.url, 1024 * 1024);
   if (await sha256(bytes) !== asset.sha256 || new TextDecoder().decode(bytes) !== JSON.stringify(expected)) throw new UserError("The public metadata does not match this immutable launch.");
 }
-export async function serveLiveAsset(filename: string): Promise<Response> {
-  if (!/^[a-f0-9]{64}\.(png|jpg|webp|json)$/.test(filename)) return new Response("Not found", {status: 404});
+// Not cached anywhere: an asset that is not public yet may be published a moment later.
+const notFound = () => new Response("Not found", {status: 404, headers: {"cache-control": "no-store", "x-content-type-options": "nosniff", "content-security-policy": "default-src 'none'; sandbox"}});
+/**
+ * GET /api/live/assets/<sha>.<ext> (and /m/<digest>). A published asset is public, immutable and readable from any
+ * origin. One no launch has published is served only to this Worker's own verification read, uncached; anyone else
+ * gets 404. A D1 outage serves stored bytes as public rather than taking every launched coin's image offline.
+ */
+export async function serveLiveAsset(filename: string, request?: Request): Promise<Response> {
+  if (!/^[a-f0-9]{64}\.(png|jpg|webp|json)$/.test(filename)) return notFound();
+  let published = true;
+  try {
+    const row = await one<{published_at: number | null}>("SELECT published_at FROM live_assets WHERE sha256 = ?", filename.slice(0, 64));
+    published = row?.published_at != null;
+    if (!row || !published && !await isAssetCheck(request)) return notFound();
+  } catch { /* D1 unavailable: serve below. */ }
   const object = await bindings().STORAGE?.get(`live/${filename}`);
-  if (!object) return new Response("Not found", {status: 404});
+  if (!object) return notFound();
   return new Response(object.body as unknown as ReadableStream, {headers: {
-    "content-type": object.httpMetadata?.contentType ?? "application/octet-stream", "cache-control": IMMUTABLE,
-    "x-content-type-options": "nosniff", "access-control-allow-origin": "*", "content-security-policy": "default-src 'none'", etag: object.httpEtag,
+    "content-type": object.httpMetadata?.contentType ?? "application/octet-stream", "cache-control": published ? IMMUTABLE : "no-store",
+    "x-content-type-options": "nosniff", ...(published ? {"access-control-allow-origin": "*"} : {}),
+    "content-security-policy": "default-src 'none'; sandbox", etag: object.httpEtag,
   }});
 }
-export async function serveLiveMetadata(digest: string): Promise<Response> {
-  if (!/^[A-Za-z0-9_-]{43}$/.test(digest)) return new Response("Not found", {status: 404});
-  try {
-    const bytes = Uint8Array.from(atob(digest.replaceAll("-", "+").replaceAll("_", "/") + "="), char => char.charCodeAt(0));
-    const sha = Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
-    if (bytes.length !== 32 || metadataDigest(sha) !== digest) return new Response("Not found", {status: 404});
-    return serveLiveAsset(`${sha}.json`);
-  } catch { return new Response("Not found", {status: 404}); }
+export async function serveLiveMetadata(digest: string, request?: Request): Promise<Response> {
+  if (!/^[A-Za-z0-9_-]{43}$/.test(digest)) return notFound();
+  const sha = metadataShaFromUri(`/m/${digest}`);
+  return sha ? serveLiveAsset(`${sha}.json`, request) : notFound();
 }

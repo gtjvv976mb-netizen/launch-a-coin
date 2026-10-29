@@ -1,9 +1,10 @@
 import { ed25519 } from "@noble/curves/ed25519.js";
 import {
-  fromBase58, PAIR_FRESH_MS, planForWallet, planIsStale, refreshKeepsReview, signPlansWithWallet, signPlanWithWallet, toBase64,
+  destroyEphemeralSigner, fromBase58, PAIR_FRESH_MS, planForWallet, planIsStale, refreshKeepsReview, signPlansWithWallet, signPlanWithWallet, toBase64,
   WalletBatchUnsupported, WalletChangedTransaction,
   type EphemeralSigner, type ExpectedPlan, type SigningOrder, type TransactionPlan,
 } from "./transaction";
+import type { LiveChainCheck, LivePrepareInput } from "../../../lib/carddex/live/types";
 import { liveSignInInputProblem, liveSignInOutputProblem, liveSignInProblem, type LiveSignInInput } from "../../../lib/carddex/live/sign-in";
 import { SignInWrongSite, walletRejected } from "./wallet-errors";
 
@@ -205,4 +206,68 @@ export async function proveOwnership(step: {
   const signature = await step.signMessage(new TextEncoder().encode(challenge.message), address);
   await step.verifyMessage({ challengeId: challenge.challengeId, wallet: address, signatureBase64: toBase64(signature) });
   return { address, method: "message", prompts };
+}
+
+// ---------------------------------------------------------------- the launch kept across route changes (REL-4)
+
+/**
+ * What an unfinished launch needs to continue in this tab: the new coin and card keys, the request id and the exact
+ * prepared input. The panel hands it here when it unmounts (a route change), and takes it back when it mounts again,
+ * so leaving /launch mid-launch and coming back can still sign, instead of leaving a prepared launch nobody can sign.
+ * Memory only, like the keys themselves: a reload or a closed tab still loses it (the saved launch can then be
+ * discarded once it expires). The keys are destroyed only once the launch no longer needs them (dropLaunchSession).
+ */
+export type LaunchSession<Draft = unknown> = {
+  creator: string | null; tokenKey: EphemeralSigner | null; nftKey: EphemeralSigner | null;
+  idempotencyKey: string | null; preparedInput: LivePrepareInput | null; draftAtPrepare: Draft | null;
+};
+let keptSession: LaunchSession | null = null;
+/** Keeps the panel's launch for its next mount; an empty one clears the store. */
+export function keepLaunchSession(session: LaunchSession) {
+  const holds = session.tokenKey || session.nftKey || session.preparedInput || session.idempotencyKey;
+  if (keptSession && (!holds || keptSession.tokenKey !== session.tokenKey)) destroyEphemeralSigner(keptSession.tokenKey);
+  if (keptSession && (!holds || keptSession.nftKey !== session.nftKey)) destroyEphemeralSigner(keptSession.nftKey);
+  keptSession = holds ? { ...session } : null;
+}
+/** The launch kept by an earlier mount, if any (read without clearing it, so a double mount reads the same). */
+export function keptLaunchSession<Draft>(): LaunchSession<Draft> | null { return keptSession as LaunchSession<Draft> | null; }
+/** The launch is over (finished, abandoned or replaced): its keys are wiped and nothing is kept. */
+export function dropLaunchSession() {
+  if (keptSession) { destroyEphemeralSigner(keptSession.tokenKey); destroyEphemeralSigner(keptSession.nftKey); }
+  keptSession = null;
+}
+
+// ---------------------------------------------------------------- confirmation and the saved launch's next step
+
+/** About how long a sent transaction can take to land and finalize before its ~150-block approval runs out. */
+export const CONFIRM_POLL_MS = 2_000, CONFIRM_MAX_POLLS = 45;
+export const STILL_CONFIRMING = "Sent. Solana is still finalizing it, which usually takes under a minute. Check again in a moment; nothing more is sent or charged.";
+/** Shown when this tab no longer holds a prepared launch's new coin key (a reload): it cannot be signed here. */
+export const PREPARED_WITHOUT_KEY = "This browser no longer holds this launch's new coin key, so it can't be signed here. Discard the draft under Saved launches about a minute after it was prepared, then launch again.";
+/**
+ * Polls a sent transaction's confirmation (each check also sends the saved bytes again while they can land, on the
+ * server) until it is verified, the server reports the bytes expired unlanded, or about 90 seconds pass, roughly a
+ * transaction's whole approval window. A failed-on-chain refusal is thrown by `check` and ends it. Never signs.
+ */
+export async function confirmUntilSettled(step: {
+  check: () => Promise<{ done: boolean; delivery?: string }>;
+  wait?: (ms: number) => Promise<void>; maxPolls?: number;
+}): Promise<"done" | "expired" | "pending"> {
+  const wait = step.wait ?? (ms => new Promise<void>(resolve => setTimeout(resolve, ms)));
+  for (let count = 0, max = step.maxPolls ?? CONFIRM_MAX_POLLS; count < max; count++) {
+    const result = await step.check();
+    if (result.done) return "done";
+    if (result.delivery === "expired") return "expired";
+    if (count < max - 1) await wait(CONFIRM_POLL_MS);
+  }
+  return "pending";
+}
+/**
+ * Whether a saved coin whose transaction can no longer land (it failed on Solana, or expired unlanded) can be prepared
+ * again from this tab, with the same mint and details: only while this tab still holds its keys and prepared input.
+ * The server decides whether it is safe (nothing it signed can still land).
+ */
+export function coinRetryable(stage: { status: string; chainCheck?: LiveChainCheck } | null, holdsKeys: boolean): boolean {
+  if (!stage || !holdsKeys || stage.status !== "token_pending") return false;
+  return stage.chainCheck?.kind === "token" && (stage.chainCheck.state === "failed-on-chain" || stage.chainCheck.state === "expired-unlanded");
 }

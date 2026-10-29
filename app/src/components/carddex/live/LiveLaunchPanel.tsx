@@ -23,7 +23,8 @@ import {
   validateLivePlan, type EphemeralSigner, type ExpectedPlan, type SigningOrder, type TransactionPlan,
 } from "./transaction";
 import {
-  CARD_APPROVAL_EXPIRED, CARD_APPROVED_READY, CARD_APPROVED_WAITING, cardNext, PAIR_SINGLE_NOTICE, signForLaunch, signLaunchPair, SIGN_IN_COPY,
+  CARD_APPROVAL_EXPIRED, CARD_APPROVED_READY, CARD_APPROVED_WAITING, cardNext, coinRetryable, confirmUntilSettled, dropLaunchSession, keepLaunchSession,
+  keptLaunchSession, PAIR_SINGLE_NOTICE, PREPARED_WITHOUT_KEY, signForLaunch, signLaunchPair, SIGN_IN_COPY, STILL_CONFIRMING,
   WALLET_RETRY_NOTICE, type PairPlans,
 } from "./launch-flow";
 import { connectForLaunch, signInCreator } from "./ownership";
@@ -93,8 +94,10 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, notice
   useEffect(() => { if (reviewOpen) setReviewPage(0); }, [reviewOpen, plan]);
   const acceptPlan = (next: TransactionPlan) => { planAt.current = Date.now(); setPlan(next); };
   const showPlan = (next: TransactionPlan) => { acceptPlan(next); held.current = null; setNotSent(null); setResend(null); setUncertain(false); setReviewNotice(null); setReviewOpen(true); };
-  const tokenKey = useRef<EphemeralSigner | null>(null), nftKey = useRef<EphemeralSigner | null>(null);
-  const idempotencyKey = useRef<string | null>(null), creator = useRef<string | null>(null);
+  // Wiring: an unfinished launch from an earlier visit to /launch in this tab (launch-flow keepLaunchSession, REL-4).
+  const [kept] = useState(() => keptLaunchSession<LiveLaunchDraft>());
+  const tokenKey = useRef<EphemeralSigner | null>(kept?.tokenKey ?? null), nftKey = useRef<EphemeralSigner | null>(kept?.nftKey ?? null);
+  const idempotencyKey = useRef<string | null>(kept?.idempotencyKey ?? null), creator = useRef<string | null>(kept?.creator ?? null);
   const running = useRef(false), generation = useRef(0), mounted = useRef(true);
   const connectButton = useRef<HTMLButtonElement>(null), termsRef = useRef<HTMLInputElement>(null);
   const pendingIntent = useRef<LiveLaunchIntent | null>(null);
@@ -108,8 +111,8 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, notice
   // Launch pressed with no wallet connected: the wallet list opens, the chosen wallet connects (and signs in within the
   // same prompt where it has solana:signIn, ownership.ts), and the launch then continues on its own.
   const launchPending = useRef(false), [continueLaunch, setContinueLaunch] = useState(false);
-  const draftAtPrepare = useRef<LiveLaunchDraft | null>(null);
-  const preparedInput = useRef<LivePrepareInput | null>(null);
+  const draftAtPrepare = useRef<LiveLaunchDraft | null>(kept?.draftAtPrepare ?? null);
+  const preparedInput = useRef<LivePrepareInput | null>(kept?.preparedInput ?? null);
   // New launches and recovery are separate switches: a saved launch stays reachable while new ones are off.
   const canLaunch = launchesOpen && readiness.data?.ready === true;
   const canRecover = canLaunch || readiness.data?.recoveryReady === true;
@@ -120,8 +123,10 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, notice
     mounted.current = true;
     return () => {
       mounted.current = false; generation.current++;
-      destroyEphemeralSigner(tokenKey.current); destroyEphemeralSigner(nftKey.current);
-      tokenKey.current = null; nftKey.current = null;
+      // Wiring: kept for the next mount instead of destroyed (a route change mid-launch); launch-flow wipes the keys
+      // once the launch no longer needs them.
+      keepLaunchSession({ creator: creator.current, tokenKey: tokenKey.current, nftKey: nftKey.current, idempotencyKey: idempotencyKey.current,
+        preparedInput: preparedInput.current, draftAtPrepare: draftAtPrepare.current });
     };
   }, []);
   const assertCurrent = (version: number, address: string) => {
@@ -137,7 +142,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, notice
       setPairCard(null);
       rememberIntent(next.creatorWallet, null); pendingIntent.current = null;
       destroyEphemeralSigner(tokenKey.current); destroyEphemeralSigner(nftKey.current);
-      tokenKey.current = null; nftKey.current = null; preparedInput.current = null;
+      tokenKey.current = null; nftKey.current = null; preparedInput.current = null; dropLaunchSession();
       idempotencyKey.current = null; creator.current = null; draftAtPrepare.current = null; held.current = null;
       if (mounted.current) { setIntent(null); setPlan(null); setUncertain(false); setNotSent(null); setResend(null); setTerms(false); }
       return;
@@ -199,19 +204,22 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, notice
       const saved = savedIntent(wallet.address!);
       if (saved) {
         const response = await getLiveLaunchIntent({ data: { intentId: saved } });
-        if (!canceled && response.ok) retain(response.intent);
+        if (!canceled && response.ok) { retain(response.intent); if (response.intent.chainCheck) setError(response.intent.chainCheck.reason); }
       }
     }).catch(() => undefined);
     return () => { canceled = true; };
   }, [wallet.address, canRecover]);
 
   async function prepareDraft() {
-    if (pairPending || !draft) { onInvalid(); return; }
+    // Wiring: a saved launch this tab still holds (prepared, or a coin that can be prepared again: launch-flow
+    // coinRetryable) continues from its prepared input; its details and terms were accepted when it was saved.
+    const continuing = () => !!(preparedInput.current && tokenKey.current && (pendingIntent.current?.status === "prepared" || coinRetryable(pendingIntent.current, true)));
+    if (!continuing() && (pairPending || !draft)) { onInvalid(); return; }
     if (!canLaunch) { setError(canRecover ? RECOVERY_ONLY : "Mainnet launch setup must be ready before a transaction can be prepared."); return; }
-    if (!terms) { setError("Confirm the mainnet launch terms before continuing."); termsRef.current?.focus(); return; }
+    if (!continuing() && !terms) { setError("Confirm the mainnet launch terms before continuing."); termsRef.current?.focus(); return; }
     if (!getLiveWalletSnapshot().address) { launchPending.current = true; connectButton.current?.click(); return; }
     await operate(async (address, version) => {
-      if (pendingIntent.current?.status === "prepared" && preparedInput.current && tokenKey.current) {
+      if (continuing() && preparedInput.current && tokenKey.current) {
         await authenticate(address, version); setBusy("preparing");
         const response = unwrap(await prepareLiveLaunch({ data: { ...preparedInput.current, withCard: pairMode() } }));
         assertCurrent(version, address); retain(response.intent);
@@ -231,6 +239,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, notice
         setError("This saved launch needs recovery. Check its existing coin before preparing anything new."); return;
       }
       if (creator.current && creator.current !== address) throw new Error("Reconnect the wallet that owns this prepared launch.");
+      if (!draft) { onInvalid(); return; }
       await authenticate(address, version);
       if (draft.initialBuyQuoteBaseUnits !== "0") {
         // Nothing is uploaded for a buy that cannot fit the one coin transaction.
@@ -319,15 +328,29 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, notice
     const current = pendingIntent.current;
     if (!current) return;
     setBusy("confirming");
-    for (let count = 0; count < 12; count++) {
-      assertCurrent(version, address);
-      const data = { intentId: current.id, signature, messageSha256 };
-      const response = unwrap(await (kind === "token" ? confirmLiveToken({ data }) : confirmLiveCreatorNft({ data })));
-      assertCurrent(version, address); retain(response.intent);
-      if (kind === "token" ? response.intent.status === "nft_pending" || response.intent.status === "complete" : response.intent.status === "complete") { held.current = null; setUncertain(false); setPlan(null); return; }
-      await new Promise(resolve => setTimeout(resolve, 2000));
-    }
-    setError("The transaction is still being verified. Your saved launch can be checked again without creating another coin.");
+    // Wiring: launch-flow.ts confirmUntilSettled polls for about 90 seconds; each check also sends the saved bytes
+    // again on the server while they can still land.
+    // Expired unlanded or failed on Solana: the saved launch, read once more, says why and offers Prepare again or Discard.
+    const reread = async (fallback: string) => {
+      const found = await getLiveLaunchIntent({ data: { intentId: current.id } }).catch(() => null);
+      assertCurrent(version, address); setUncertain(false);
+      if (found?.ok) retain(found.intent);
+      return new Error(found?.ok && found.intent.chainCheck ? found.intent.chainCheck.reason : fallback);
+    };
+    let settled: Awaited<ReturnType<typeof confirmUntilSettled>>;
+    try {
+      settled = await confirmUntilSettled({ check: async () => {
+        assertCurrent(version, address);
+        const data = { intentId: current.id, signature, messageSha256 };
+        const response = unwrap(await (kind === "token" ? confirmLiveToken({ data }) : confirmLiveCreatorNft({ data })));
+        assertCurrent(version, address); retain(response.intent);
+        const done = kind === "token" ? response.intent.status === "nft_pending" || response.intent.status === "complete" : response.intent.status === "complete";
+        if (done) { held.current = null; setUncertain(false); setPlan(null); }
+        return { done, delivery: "delivery" in response ? response.delivery : undefined };
+      } });
+    } catch (error) { throw await reread(error instanceof Error ? error.message : "The launch paused. Check this saved launch again."); }
+    if (settled === "expired") throw await reread("Your transaction expired before it landed, so nothing was charged. Check this saved launch again.");
+    if (settled === "pending") setError(STILL_CONFIRMING);
   }
   /**
    * The same stage prepared again with the same keys and saved draft: a new plan row and blockhash, nothing else.
@@ -474,6 +497,8 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, notice
       await authenticate(address, version); setBusy("recovering");
       const found = unwrap(await getLiveLaunchIntent({ data: { intentId: current.id } })).intent;
       assertCurrent(version, address); retain(found);
+      // Wiring: a check that found a failed, expired or unreachable transaction says so (the saved launch's chain check).
+      if (found.chainCheck) { setUncertain(false); setError(found.chainCheck.reason); return; }
       const kind = found.status === "token_pending" ? "token" : found.status === "nft_pending" && found.nftSignature ? "nft" : null;
       const signature = kind === "token" ? found.tokenSignature : kind === "nft" ? found.nftSignature : null;
       if (kind && signature) {
@@ -484,6 +509,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, notice
         setUncertain(false);
         const signed = held.current;
         if (signed?.intentId === found.id && unsentStageNext(found, signed.kind, false) === "resend") setResend(signed.kind);
+        else if (found.status === "prepared" && !tokenKey.current) setError(PREPARED_WITHOUT_KEY);
       }
     });
   }
@@ -515,7 +541,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, notice
     await connectForLaunch(walletName);
     launchPending.current = false; setContinueLaunch(true);
   };
-  useImperativeHandle(ref, () => ({ submit: () => { if (resend) void sendAgain(); else if (intent?.status === "nft_pending" && cardApproved && !intent.nftSignature) void sendApprovedCard(); else if (intent?.status === "nft_pending") void prepareNft(); else if (intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current) void checkConfirmation(); else if (!intent && !canLaunch && canRecover) void recover(wallet.address ? savedIntent(wallet.address) ?? undefined : undefined); else if (intent?.status !== "complete") void prepareDraft(); } }));
+  useImperativeHandle(ref, () => ({ submit: () => { if (resend) void sendAgain(); else if (intent?.status === "nft_pending" && cardApproved && !intent.nftSignature) void sendApprovedCard(); else if (intent?.status === "nft_pending") void prepareNft(); else if (coinRetryable(intent, !!tokenKey.current && !!preparedInput.current)) void prepareDraft(); else if (intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current) void checkConfirmation(); else if (!intent && !canLaunch && canRecover) void recover(wallet.address ? savedIntent(wallet.address) ?? undefined : undefined); else if (intent?.status !== "complete") void prepareDraft(); } }));
   const selected = intent ? getPairAsset(intent.quoteAssetKey) : getPairAsset(card.quoteAssetKey);
   const currentTitle = intent?.status === "complete" ? "Your coin and card are on mainnet" : intent?.status === "nft_pending" ? "Coin verified. Your card is next." : intent?.status === "token_pending" ? "Coin transaction submitted" : "Create through your wallet";
   const reviewIntent = intent;
@@ -590,7 +616,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, notice
       {!wallet.address ? <LiveWalletButton buttonRef={connectButton} quiet connect={connectInPanel} onClose={() => { launchPending.current = false; }} /> : <p className="cdx-live-address">Creator wallet · {brief(wallet.address)}{!wallet.mainnet ? " · Switch to mainnet" : ""}</p>}
     </div>
     <div className="cdx-live-actions">
-      {intent?.status === "complete" ? <Button variant="outline" block onClick={() => { rememberIntent(intent.creatorWallet, null); pendingIntent.current = null; setIntent(null); setPlan(null); setPairCard(null); keepApproved(null); preparedInput.current = null; draftAtPrepare.current = null; idempotencyKey.current = null; creator.current = null; setTerms(false); }}>Start another launch</Button> : resend ? <Button block pending={!!busy} disabled={!canRecover} onClick={() => void sendAgain()}>Send again</Button> : intent?.status === "nft_pending" && cardApproved && !intent.nftSignature ? <Button block pending={!!busy} disabled={!canRecover} onClick={() => void sendApprovedCard()}>Send your approved card</Button> : intent?.status === "nft_pending" ? <Button block pending={!!busy} disabled={!canRecover} onClick={() => void prepareNft()}>{notSent === "nft" ? "Prepare again" : "Review card NFT issuance"}</Button> : intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current ? <Button block pending={!!busy} disabled={!canRecover} onClick={() => void checkConfirmation()}>Check confirmation</Button> : !intent && !canLaunch && canRecover ? <Button block pending={!!busy} onClick={() => void recover(wallet.address ? savedIntent(wallet.address) ?? undefined : undefined)}>Find saved launch</Button> : <Button type="submit" block pending={!!busy} pendingLabel="Preparing…" disabled={!canLaunch || pairPending} onBlocked={pairPending ? onInvalid : undefined}>{notSent === "token" ? "Prepare again" : "Review mainnet launch"}</Button>}
+      {intent?.status === "complete" ? <Button variant="outline" block onClick={() => { rememberIntent(intent.creatorWallet, null); pendingIntent.current = null; setIntent(null); setPlan(null); setPairCard(null); keepApproved(null); preparedInput.current = null; draftAtPrepare.current = null; idempotencyKey.current = null; creator.current = null; setTerms(false); }}>Start another launch</Button> : resend ? <Button block pending={!!busy} disabled={!canRecover} onClick={() => void sendAgain()}>Send again</Button> : intent?.status === "nft_pending" && cardApproved && !intent.nftSignature ? <Button block pending={!!busy} disabled={!canRecover} onClick={() => void sendApprovedCard()}>Send your approved card</Button> : intent?.status === "nft_pending" ? <Button block pending={!!busy} disabled={!canRecover} onClick={() => void prepareNft()}>{notSent === "nft" ? "Prepare again" : "Review card NFT issuance"}</Button> : coinRetryable(intent, !!tokenKey.current && !!preparedInput.current) ? <Button block pending={!!busy} disabled={!canLaunch} onClick={() => void prepareDraft()}>Prepare again</Button> : intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current ? <Button block pending={!!busy} disabled={!canRecover} onClick={() => void checkConfirmation()}>Check confirmation</Button> : !intent && !canLaunch && canRecover ? <Button block pending={!!busy} onClick={() => void recover(wallet.address ? savedIntent(wallet.address) ?? undefined : undefined)}>Find saved launch</Button> : <Button type="submit" block pending={!!busy} pendingLabel="Preparing…" disabled={!canLaunch || pairPending} onBlocked={pairPending ? onInvalid : undefined}>{notSent === "token" ? "Prepare again" : "Review mainnet launch"}</Button>}
       {intent?.status === "nft_pending" && (intent.nftSignature || uncertain) ? <Button variant="outline" block pending={!!busy} disabled={!canRecover} onClick={() => void checkConfirmation()}>Check card confirmation</Button> : null}
     </div>
 
@@ -601,7 +627,7 @@ export function LiveLaunchPanel({ draft, card, pairPending, launchesOpen, notice
         <div><dt>Quote asset</dt><dd>{selected.symbol}</dd></div>
         <div><dt>Card design</dt><dd>{getCardDesign(intent.cardTemplate).name}</dd></div>
       </dl>
-      <p className="cdx-live-meta">These launch details are locked to this saved request.</p>
+      <p className="cdx-live-meta">These launch details are locked to this saved request. Reference {intent.id.slice(0, 8)}.</p>
     </section> : null}
 
     {canRecover ? <details className="cdx-live-saved">

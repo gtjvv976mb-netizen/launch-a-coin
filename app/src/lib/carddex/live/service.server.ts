@@ -3,14 +3,15 @@ import type { LiveLaunchInput, WalletTransactionPlan } from "../../../../../inte
 import reviewedDesigns from "../../../../../integrations/pumpfun/src/design-assets.json";
 import { getCardDesign } from "../designs";
 import { getPairAsset, isPairAssetKey } from "../pairs";
+import * as runtime from "../../bindings.server";
 import { clearGuard, db, guard, one, q, readBatch, stmt, UserError } from "../../mintdex/server/db.server";
-import { fetchPublicBytes, metadataUriPlaceholder, putPublicAsset, putPublicJson, validateOwnedAsset, verifyPublicJson } from "./assets.server";
+import { fetchPublicBytes, metadataShaFromUri, metadataUriPlaceholder, publishLaunchAssets, putPublicAsset, putPublicJson, validateOwnedAsset, verifyPublicJson } from "./assets.server";
 import { sha256, walletBytes } from "./auth.server";
 import { COMPOSITION_VERSION, requireTrustedComposition } from "./composition.server";
 import { BUY_DOES_NOT_FIT, STOCK_BUY_WARNS } from "./copy";
 import { requireLiveConfig } from "./config.server";
 import { normalizeLiveFields, normalizeLiveIdentity } from "./validation.server";
-import { LIVE_PACKET_LIMIT, type LiveApprovedCard, type LiveAssets, type LiveLaunchIntent, type LivePrepareInput, type LiveStage } from "./types";
+import { LIVE_PACKET_LIMIT, type LiveApprovedCard, type LiveAssets, type LiveChainCheck, type LiveLaunchIntent, type LivePrepareInput, type LiveStage } from "./types";
 
 type Payload = {input: Omit<LiveLaunchInput, "nftMint">; assets: LiveAssets; fields: ReturnType<typeof normalizeLiveFields>};
 type IntentRow = {id: string; creator_wallet: string; token_mint: string; nft_mint: string; quote_key: string; quote_mint: string; design_key: string; payload_sha256: string; payload_json: string; binding_sha256: string; token_metadata_uri: string; nft_metadata_uri: string; status: LiveStage; token_signature: string | null; nft_signature: string | null; token_receipt_json: string | null; nft_receipt_json: string | null; created_at: number; updated_at: number};
@@ -20,6 +21,8 @@ const landedMessageSha256 = (plan: PlanRow) => plan.signed_message_sha256 ?? pla
 /** The block height after which this plan's transaction, signed or not, can no longer land. */
 const planExpiry = (plan: PlanRow) => Math.max((JSON.parse(plan.plan_json) as WalletTransactionPlan).lastValidBlockHeight, plan.effective_last_valid_block_height ?? 0);
 const connection = () => sdk.createMainnetConnection(requireLiveConfig("recovery").rpcUrl);
+/** runtime.keepAlive (waitUntil), or the promise itself where the runtime module has none. */
+const kept = <T,>(promise: Promise<T>) => typeof runtime.keepAlive === "function" ? runtime.keepAlive(promise) : promise;
 function adapterInput(row: IntentRow): LiveLaunchInput { return {...(JSON.parse(row.payload_json) as Payload).input, nftMint: row.nft_mint}; }
 function publicIntent(row: IntentRow): LiveLaunchIntent {
   const payload = JSON.parse(row.payload_json) as Payload;
@@ -31,9 +34,37 @@ function publicIntent(row: IntentRow): LiveLaunchIntent {
     tokenMetadataUri: row.token_metadata_uri, nftMetadataUri: row.nft_metadata_uri, assets: payload.assets,
     tokenSignature: row.token_signature, nftSignature: row.nft_signature, createdAt: row.created_at, updatedAt: row.updated_at};
 }
-async function chain<T>(fn: () => Promise<T>): Promise<T> {
+/** A launch transaction that landed and failed on Solana: nothing it would have created exists. */
+export class LaunchFailedOnChain extends UserError {
+  constructor(readonly kind: "token" | "nft") { super(kind === "token" ? COIN_FAILED : CARD_FAILED); }
+}
+const COIN_FAILED = "Your coin transaction failed on Solana, so no coin was created (only its network fee was charged). Prepare it again with the same details once it expires, or discard it.";
+const CARD_FAILED = "Your card transaction failed on Solana, so no card was created (only its network fee was charged). Prepare the card again.";
+const STILL_VALID = "Your previous transaction can still land for up to about a minute. Wait a moment, then try again.";
+/** Provider and SDK failures as a creator reads them: no URLs, and plain words for the expiry gates. */
+function plainChainError(error: unknown, kind: "token" | "nft") {
+  if (error instanceof Error && error.name === "TransactionFailedOnChain") return new LaunchFailedOnChain(kind);
+  const message = (error instanceof Error ? error.message : "The mainnet provider could not verify this launch.").replace(/https?:\/\/\S+/g, "[provider]");
+  return new UserError(/can still land/.test(message) ? STILL_VALID : message.slice(0, 500));
+}
+async function chain<T>(fn: () => Promise<T>, kind: "token" | "nft" = "token"): Promise<T> {
   try { return await fn(); }
-  catch (error) { throw new UserError((error instanceof Error ? error.message : "The mainnet provider could not verify this launch.").replace(/https?:\/\/\S+/g, "[provider]").slice(0, 500)); }
+  catch (error) { throw plainChainError(error, kind); }
+}
+/** Log text without keys, addresses, hashes or URLs. */
+const redact = (text: string) => text.replace(/https?:\/\/\S+/g, "[provider]").replace(/[1-9A-HJ-NP-Za-km-z]{32,}/g, "[key]").replace(/[a-f0-9]{40,}/gi, "[hash]").slice(0, 200);
+/**
+ * One structured line per launch stage change and refusal (REL-6), so a failed mainnet launch can be traced after the
+ * fact by its intent id (the support reference is its first 8 characters). Never addresses, keys, signatures or URLs.
+ */
+export function logLaunchEvent(event: string, fields: {intentId?: string; kind?: "token" | "nft"; reason?: string} & Record<string, string | number | boolean | undefined>) {
+  console.info("live_launch_event", JSON.stringify({event, ...fields, ...(fields.reason ? {reason: redact(fields.reason)} : {})}));
+}
+/** Every plan row a launch may have: far above any real launch, so a loop or abuse cannot grow it without bound. */
+export const MAX_PLANS_PER_INTENT = 120;
+async function assertPlanRoom(intentId: string) {
+  const plans = await one<{n: number}>("SELECT COUNT(*) AS n FROM live_launch_transactions WHERE intent_id = ?", intentId);
+  if ((plans?.n ?? 0) >= MAX_PLANS_PER_INTENT) throw new UserError("This launch was prepared too many times. Discard it once its transactions expire, then start again.");
 }
 async function ownedIntent(wallet: string, id: string): Promise<IntentRow> {
   requireLiveConfig("recovery");
@@ -168,23 +199,53 @@ export async function checkLiveLaunchSize(wallet: string, raw: {name: string; sy
   const buyFits = size.buyBytes <= size.limit && !size.buyBlocked, createFits = size.createBytes <= size.limit;
   return {limit: size.limit, bytes, fits: buy ? buyFits : createFits, buyBytes: size.buyBytes, buyFits, createBytes: size.createBytes, createFits, buyBlocked: size.buyBlocked ?? null};
 }
+/** Every launch asset the coin and card metadata reference: the three images, both design copies and both metadata files. */
+function launchAssetShas(payload: Payload) {
+  return [payload.assets.artwork.sha256, payload.assets.cardImage.sha256, payload.assets.caseImage.sha256,
+    payload.input.card.frontSha256, payload.input.card.backSha256, payload.input.nftMetadataSha256 ?? "",
+    metadataShaFromUri(payload.input.tokenMetadataUri) ?? ""];
+}
+/**
+ * A coin whose submitted transactions can no longer land and never created it (it failed on Solana, or it expired
+ * unlanded) goes back to "prepared" with the same mint and details, so the creator signs once more without
+ * recomposing. The proof is the abandon gate: finalized block height past every saved bound, and no mint at that bank
+ * or newer. Old plan rows and their bytes stay as they were; only the intent's pending signature is cleared.
+ */
+async function retireUnlandedCoin(wallet: string, row: IntentRow): Promise<IntentRow> {
+  const [plans] = await readBatch(q<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = 'token'", row.id));
+  const expiry = Math.max(...plans.map(planExpiry));
+  try { await chain(() => sdk.assertTokenMintReplaceable(adapterInput(row), {connection: connection(), lastValidBlockHeight: expiry})); }
+  catch (error) {
+    if (error instanceof UserError && /already exists/.test(error.message)) throw new UserError("A token transaction was already submitted. Recover its confirmation before preparing another launch.");
+    throw error;
+  }
+  await guardedBatch([snapshotGuard(row), clearGuard(), planSetGuard(row.id, "token", plans), clearGuard(),
+    stmt("UPDATE live_launch_intents SET status = 'prepared', token_signature = NULL, token_receipt_json = NULL, updated_at = ? WHERE id = ? AND status = 'token_pending'", Date.now(), row.id)]);
+  logLaunchEvent("coin_retired", {intentId: row.id, kind: "token", plans: plans.length});
+  return ownedIntent(wallet, row.id);
+}
 export async function prepareLiveLaunch(wallet: string, raw: LivePrepareInput) {
   requireLiveConfig("launch");
   if (!/^[a-zA-Z0-9_-]{8,100}$/.test(raw.idempotencyKey)) throw new UserError("Use a stable launch request identifier.");
   const fields = normalizeLiveFields(raw);
   const requestedHash = await sha256(JSON.stringify({creator: wallet, fields, assets: raw.assets, initialBuyQuoteBaseUnits: raw.initialBuyQuoteBaseUnits, slippageBps: raw.slippageBps}));
-  const existing = await one<IntentRow>("SELECT * FROM live_launch_intents WHERE token_mint = ? OR (creator_wallet = ? AND idempotency_key = ?)", fields.tokenMint, wallet, raw.idempotencyKey);
-  if (existing) {
-    if (existing.creator_wallet !== wallet || existing.payload_sha256 !== requestedHash) throw new UserError("This mint or request identifier is already bound to different launch details.");
-    if (existing.status === "abandoned") throw new UserError("This unused draft was safely abandoned. Start with a fresh mint and request identifier.");
-    if (existing.status === "nft_pending" || existing.status === "complete") return {intent: publicIntent(existing), transaction: null, card: null};
-    if (existing.status === "token_pending") throw new UserError("A token transaction was already submitted. Recover its confirmation before preparing another launch.");
-    const pending = await one<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = 'token' ORDER BY created_at DESC LIMIT 1", existing.id);
-    if (pending?.signature) throw new UserError("A token transaction was already submitted. Recover its confirmation before preparing another launch.");
+  const found = await one<IntentRow>("SELECT * FROM live_launch_intents WHERE token_mint = ? OR (creator_wallet = ? AND idempotency_key = ?)", fields.tokenMint, wallet, raw.idempotencyKey);
+  if (found) {
+    if (found.creator_wallet !== wallet || found.payload_sha256 !== requestedHash) throw new UserError("This mint or request identifier is already bound to different launch details.");
+    if (found.status === "abandoned") throw new UserError("This unused draft was safely abandoned. Start with a fresh mint and request identifier.");
+    if (found.status === "nft_pending" || found.status === "complete") return {intent: publicIntent(found), transaction: null, card: null};
+    // A submitted coin that failed on Solana or expired without landing is prepared again with the same mint, once
+    // nothing it signed can still land (retireUnlandedCoin). The mint is fixed, so this can never make a second coin.
+    const existing = found.status === "token_pending" ? await retireUnlandedCoin(wallet, found) : found;
+    if (existing.token_signature) throw new UserError("A token transaction was already submitted. Recover its confirmation before preparing another launch.");
+    await assertPlanRoom(existing.id);
     const [transaction, ahead] = await Promise.all([chain(() => sdk.prepareTokenTransaction(adapterInput(existing), {connection: connection()})), raw.withCard ? prepareCardAhead(adapterInput(existing)) : null]);
     const card = cardFits(transaction, ahead);
     await savePlan(existing, transaction, card); return {intent: publicIntent(existing), transaction, card};
   }
+  // One coin in flight per wallet (REL-5): another device or a cleared browser must recover the submitted coin first.
+  const inFlight = await one<{id: string}>("SELECT id FROM live_launch_intents WHERE creator_wallet = ? AND status = 'token_pending' LIMIT 1", wallet);
+  if (inFlight) throw new UserError("Finish or discard your saved launch first: its coin transaction was already sent. Find it under Saved launches.");
   const payload = await preparePayload(wallet, raw);
   // With withCard, the card plan is prepared alongside (prepareCardAhead) and saved in the same batch as the coin's.
   const [transaction, ahead] = await Promise.all([chain(() => sdk.prepareTokenTransaction({...payload.input, nftMint: raw.nftMint}, {connection: connection()})),
@@ -196,8 +257,15 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareInput) {
       stmt("INSERT INTO live_launch_intents (id, idempotency_key, creator_wallet, token_mint, nft_mint, quote_key, quote_mint, design_key, payload_sha256, payload_json, binding_sha256, token_metadata_uri, nft_metadata_uri, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'prepared', ?, ?)", id, raw.idempotencyKey, wallet, fields.tokenMint, raw.nftMint, fields.quoteAssetKey, fields.quoteMint, fields.cardTemplate, requestedHash, JSON.stringify(payload), transaction.bindingSha256, payload.input.tokenMetadataUri, payload.input.card.nftMetadataUri, now, now),
       stmt("INSERT INTO live_launch_transactions (id, intent_id, kind, message_sha256, plan_json, status, created_at, updated_at) VALUES (?, ?, 'token', ?, ?, 'prepared', ?, ?)", crypto.randomUUID(), id, transaction.messageSha256, JSON.stringify(transaction), now, now),
       ...(card ? [insertPlan(id, card, now)] : []),
+      // From here the coin and card metadata URIs are fixed, so what they point to becomes public.
+      publishLaunchAssets(launchAssetShas(payload), now),
     ]);
   } catch (error) {
+    // Only a uniqueness conflict means another request reserved this mint or request id; anything else saved nothing.
+    if (!/constraint|unique/i.test(error instanceof Error ? error.message : String(error))) {
+      console.error("Live launch could not be saved", error);
+      throw new UserError("The launch could not be saved. Nothing was sent. Try again.");
+    }
     const concurrent = await one<IntentRow>("SELECT * FROM live_launch_intents WHERE token_mint = ? AND creator_wallet = ?", fields.tokenMint, wallet);
     if (!concurrent || concurrent.payload_sha256 !== requestedHash) throw new UserError("This launch mint or request identifier is already reserved.");
     await savePlan(concurrent, transaction, card); return {intent: publicIntent(concurrent), transaction, card};
@@ -217,20 +285,44 @@ async function confirmationPlan(row: IntentRow, kind: "token" | "nft", input: {s
 function verifyReceipt(row: IntentRow, receipt: {creatorWallet: string; tokenMint: string; quoteMint: string; nftMint: string}) {
   if (receipt.creatorWallet !== row.creator_wallet || receipt.tokenMint !== row.token_mint || receipt.quoteMint !== row.quote_mint || receipt.nftMint !== row.nft_mint) throw new UserError("The chain receipt does not match this immutable launch.");
 }
+type Delivery = Awaited<ReturnType<typeof sdk.resendSignedWalletTransaction>>["status"];
+/**
+ * Saved signed bytes whose confirmation is still pending are sent again while they can land (REL-3): a dropped send,
+ * a provider error or a closed tab no longer leaves a launch to expire. Only submitted bytes (a saved signature), never
+ * a card held for its coin. The answer feeds the saved launch's chain check; null when it could not be checked.
+ */
+async function resendPending(row: IntentRow, plan: PlanRow): Promise<Delivery | null> {
+  if (!plan.signature || !plan.signed_transaction_base64) return null;
+  try {
+    const result = await sdk.resendSignedWalletTransaction({plan: JSON.parse(plan.plan_json) as WalletTransactionPlan, transactionBase64: plan.signed_transaction_base64, lastValidBlockHeight: planExpiry(plan)}, {connection: connection()});
+    if (result.status !== "landed") logLaunchEvent(result.status === "expired" ? "expired_unlanded" : result.status, {intentId: row.id, kind: plan.kind,
+      ...(result.status === "resent" ? {blocksLeft: result.blocksLeft} : {}), ...(result.status === "not-resent" ? {reason: result.reason} : {})});
+    return result.status;
+  } catch (error) {
+    logLaunchEvent("resend_unchecked", {intentId: row.id, kind: plan.kind, reason: error instanceof Error ? error.message : "unknown"});
+    return null;
+  }
+}
 export async function confirmLiveToken(wallet: string, input: {intentId: string; signature: string; messageSha256?: string}) {
   const row = await ownedIntent(wallet, input.intentId), plan = await confirmationPlan(row, "token", input);
   if (["nft_pending", "complete"].includes(row.status) && row.token_signature !== input.signature) throw new UserError("This token already has a different finalized launch signature.");
   if (row.token_receipt_json && JSON.parse(row.token_receipt_json).status === "verified") return {intent: publicIntent(row), receipt: JSON.parse(row.token_receipt_json) as Awaited<ReturnType<typeof sdk.verifyTokenLaunch>>};
-  const receipt = await chain(() => sdk.verifyTokenLaunch(adapterInput(row), {connection: connection(), signature: input.signature, expectedMessageSha256: landedMessageSha256(plan)}));
+  let receipt: Awaited<ReturnType<typeof sdk.verifyTokenLaunch>>;
+  try { receipt = await chain(() => sdk.verifyTokenLaunch(adapterInput(row), {connection: connection(), signature: input.signature, expectedMessageSha256: landedMessageSha256(plan)})); }
+  catch (error) { if (error instanceof LaunchFailedOnChain) logLaunchEvent("landed_failed", {intentId: row.id, kind: "token"}); throw error; }
   verifyReceipt(row, receipt);
-  if (receipt.status === "pending" && !plan.signature) return {intent: publicIntent(await ownedIntent(wallet, row.id)), receipt};
+  // A pending receipt is recorded only for the launch's current submitted bytes: never for a plan that was not sent,
+  // nor for one a retired coin left behind (proven unable to land), so an old signature never replaces the current one.
+  if (receipt.status === "pending" && (!plan.signature || row.status === "prepared" || row.token_signature !== input.signature)) return {intent: publicIntent(await ownedIntent(wallet, row.id)), receipt};
   await guardedBatch([
     snapshotGuard(row), clearGuard(),
     guard("EXISTS (SELECT 1 FROM live_launch_transactions WHERE id = ? AND (signature IS NULL OR signature = ?))", plan.id, input.signature), clearGuard(),
     stmt("UPDATE live_launch_transactions SET signature = ?, status = ?, updated_at = ? WHERE id = ?", input.signature, receipt.status === "verified" ? "confirmed" : "pending", Date.now(), plan.id),
     stmt("UPDATE live_launch_intents SET token_signature = ?, token_receipt_json = ?, status = CASE WHEN status IN ('nft_pending','complete') THEN status ELSE ? END, updated_at = ? WHERE id = ?", input.signature, JSON.stringify(receipt), receipt.status === "verified" ? "nft_pending" : "token_pending", Date.now(), row.id),
   ]);
-  return {intent: publicIntent(await ownedIntent(wallet, row.id)), receipt};
+  if (receipt.status === "verified") logLaunchEvent("verified", {intentId: row.id, kind: "token"});
+  const delivery = receipt.status === "pending" ? await resendPending(row, plan) : null;
+  return {intent: publicIntent(await ownedIntent(wallet, row.id)), receipt, ...(delivery ? {delivery} : {})};
 }
 export async function confirmLiveCreatorNft(wallet: string, input: {intentId: string; signature: string; messageSha256?: string}) {
   const row = await ownedIntent(wallet, input.intentId);
@@ -238,7 +330,9 @@ export async function confirmLiveCreatorNft(wallet: string, input: {intentId: st
   if (row.status === "complete" && row.nft_signature && row.nft_signature !== input.signature) throw new UserError("This creator NFT is already finalized under another signature.");
   if (row.nft_receipt_json && JSON.parse(row.nft_receipt_json).status === "verified") return {intent: publicIntent(row), receipt: JSON.parse(row.nft_receipt_json) as Awaited<ReturnType<typeof sdk.verifyCreatorNft>>};
   const plan = await confirmationPlan(row, "nft", input);
-  const receipt = await chain(() => sdk.verifyCreatorNft(adapterInput(row), {connection: connection(), signature: input.signature, expectedMessageSha256: landedMessageSha256(plan)}));
+  let receipt: Awaited<ReturnType<typeof sdk.verifyCreatorNft>>;
+  try { receipt = await chain(() => sdk.verifyCreatorNft(adapterInput(row), {connection: connection(), signature: input.signature, expectedMessageSha256: landedMessageSha256(plan)}), "nft"); }
+  catch (error) { if (error instanceof LaunchFailedOnChain) logLaunchEvent("landed_failed", {intentId: row.id, kind: "nft"}); throw error; }
   verifyReceipt(row, receipt);
   if (receipt.status === "pending" && !plan.signature) return {intent: publicIntent(await ownedIntent(wallet, row.id)), receipt};
   await guardedBatch([
@@ -247,7 +341,9 @@ export async function confirmLiveCreatorNft(wallet: string, input: {intentId: st
     stmt("UPDATE live_launch_transactions SET signature = ?, status = ?, updated_at = ? WHERE id = ?", input.signature, receipt.status === "verified" ? "confirmed" : "pending", Date.now(), plan.id),
     stmt("UPDATE live_launch_intents SET nft_signature = ?, nft_receipt_json = ?, status = CASE WHEN status = 'complete' THEN status ELSE ? END, updated_at = ? WHERE id = ?", input.signature, JSON.stringify(receipt), receipt.status === "verified" ? "complete" : "nft_pending", Date.now(), row.id),
   ]);
-  return {intent: publicIntent(await ownedIntent(wallet, row.id)), receipt};
+  if (receipt.status === "verified") logLaunchEvent("verified", {intentId: row.id, kind: "nft"});
+  const delivery = receipt.status === "pending" ? await resendPending(row, plan) : null;
+  return {intent: publicIntent(await ownedIntent(wallet, row.id)), receipt, ...(delivery ? {delivery} : {})};
 }
 async function completeExistingNft(row: IntentRow, receipt: Awaited<ReturnType<typeof sdk.verifyCreatorNft>>) {
   verifyReceipt(row, receipt);
@@ -267,6 +363,7 @@ export async function prepareLiveCreatorNft(wallet: string, input: {intentId: st
   // A same-key retry still needs to retire the previous submitted signature. Its old transaction
   // must be unable to land before a fresh blockhash/message can replace that pending stage.
   if (nextMint !== row.nft_mint || row.nft_signature !== null) {
+    const keyChanged = nextMint !== row.nft_mint;
     walletBytes(nextMint);
     const [previous] = await readBatch(q<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = 'nft'", row.id));
     // Signed bytes with a wallet-refreshed blockhash can outlive their plan: wait past whichever ends later.
@@ -278,7 +375,9 @@ export async function prepareLiveCreatorNft(wallet: string, input: {intentId: st
     ]);
     row = await ownedIntent(wallet, row.id);
     if (row.nft_mint !== nextMint) throw new UserError("The NFT issuance changed in another tab. Refresh this launch.");
+    logLaunchEvent("nft_rotated", {intentId: row.id, kind: "nft", keyChanged});
   }
+  await assertPlanRoom(row.id);
   const result = await chain(() => sdk.prepareCreatorNftTransaction(adapterInput(row), {connection: connection(), tokenSignature: row.token_signature!, tokenMessageSha256: landedMessageSha256(tokenPlan)}));
   if ("receipt" in result) { await completeExistingNft(row, result.receipt); return {intent: publicIntent(await ownedIntent(wallet, row.id)), transaction: null}; }
   await savePlan(row, result); return {intent: publicIntent(row), transaction: result};
@@ -295,23 +394,59 @@ async function approvedCard(row: IntentRow): Promise<LiveApprovedCard | null> {
   if (!(JSON.parse(newest.plan_json) as WalletTransactionPlan).requiredSigners.includes(row.nft_mint)) return null;
   return {messageSha256: newest.message_sha256, transactionBase64: newest.signed_transaction_base64, nftMint: row.nft_mint};
 }
+const COIN_EXPIRED = "Your coin transaction expired before it landed, so no coin was created and nothing was charged. Prepare it again with the same details, or discard it.";
+const CARD_EXPIRED = "Your card transaction expired before it landed, so nothing was charged for the card. Prepare the card again.";
+/** A chain check that could not finish, as the saved launch reports it: the launch itself is unchanged. */
+function uncheckedLaunch(error: unknown, kind: "token" | "nft", intentId: string): LiveChainCheck {
+  if (error instanceof LaunchFailedOnChain) return {state: "failed-on-chain", kind, reason: error.message};
+  logLaunchEvent("check_unavailable", {intentId, kind, reason: error instanceof Error ? error.message : "unknown"});
+  const what = kind === "token" ? "this coin" : "this card";
+  return {state: "unchecked", kind, reason: `Solana could not confirm ${what} right now. Your saved launch is unchanged; check again in a moment.`};
+}
+/**
+ * A saved launch, after checking the chain for its pending stage (and sending saved bytes again while they can land).
+ * It never throws for a chain or verification problem (REL-1): the stored launch is returned with `chainCheck`, so the
+ * page can always show it, discard it or prepare it again. Only a missing launch, another wallet's launch or paused
+ * recovery throws.
+ */
 export async function getLiveLaunchIntent(wallet: string, id: string): Promise<LiveLaunchIntent> {
   let row = await ownedIntent(wallet, id);
+  let chainCheck: LiveChainCheck | undefined;
   if (row.status === "token_pending") {
-    const [plans] = await readBatch(q<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = 'token' AND signature IS NOT NULL ORDER BY created_at DESC LIMIT 20", id));
-    for (const plan of plans) {
-      const result = await confirmLiveToken(wallet, {intentId: id, signature: plan.signature!, messageSha256: plan.message_sha256});
-      if (result.intent.status !== "token_pending") break;
-    }
+    const [signed] = await readBatch(q<PlanRow>("SELECT * FROM live_launch_transactions WHERE intent_id = ? AND kind = 'token' AND signature IS NOT NULL ORDER BY created_at DESC LIMIT 20", id));
+    // The current submission (a retired coin's older signatures can no longer land).
+    const current = signed.filter(plan => plan.signature === row.token_signature), plans = current.length ? current : signed;
+    try {
+      const deliveries: (Delivery | null)[] = [];
+      for (const plan of plans) {
+        const result = await confirmLiveToken(wallet, {intentId: id, signature: plan.signature!, messageSha256: plan.message_sha256});
+        deliveries.push("delivery" in result ? result.delivery ?? null : null);
+        if (result.intent.status !== "token_pending") break;
+      }
+      if (plans.length && deliveries.length === plans.length && deliveries.every(delivery => delivery === "expired")) chainCheck = {state: "expired-unlanded", kind: "token", reason: COIN_EXPIRED};
+    } catch (error) { chainCheck = uncheckedLaunch(error, "token", id); }
     row = await ownedIntent(wallet, id);
   }
-  if (row.status === "nft_pending") {
-    const receipt = await chain(() => sdk.verifyCreatorNft(adapterInput(row), {connection: connection()}));
-    if (await completeExistingNft(row, receipt)) row = await ownedIntent(wallet, id);
+  if (row.status === "nft_pending" && row.nft_signature) {
+    // The submitted card, by its signature: verified, or sent again while it can still land.
+    try {
+      const result = await confirmLiveCreatorNft(wallet, {intentId: id, signature: row.nft_signature});
+      if ("delivery" in result && result.delivery === "expired") chainCheck = {state: "expired-unlanded", kind: "nft", reason: CARD_EXPIRED};
+    } catch (error) { chainCheck = uncheckedLaunch(error, "nft", id); }
+    row = await ownedIntent(wallet, id);
+  }
+  if (row.status === "nft_pending" && chainCheck?.state !== "failed-on-chain") {
+    // Any card the creator's wallet holds completes the launch by its account alone, whatever happened to a signature.
+    try {
+      const receipt = await chain(() => sdk.verifyCreatorNft(adapterInput(row), {connection: connection()}), "nft");
+      if (await completeExistingNft(row, receipt)) chainCheck = undefined;
+    } catch (error) { chainCheck ??= uncheckedLaunch(error, "nft", id); }
+    row = await ownedIntent(wallet, id);
   }
   // A resumed page (a closed tab) reads the approved card here and sends it once the coin is verified. A finished or
   // abandoned launch has none to send, so it reads exactly as listed.
-  return {...publicIntent(row), ...(["prepared", "token_pending", "nft_pending"].includes(row.status) ? {approvedCard: await approvedCard(row)} : {})};
+  return {...publicIntent(row), ...(["prepared", "token_pending", "nft_pending"].includes(row.status) ? {approvedCard: await approvedCard(row)} : {}),
+    ...(chainCheck ? {chainCheck} : {})};
 }
 export async function listLiveLaunchIntents(wallet: string) {
   requireLiveConfig("recovery");
@@ -326,6 +461,7 @@ export async function abandonLiveLaunchIntent(wallet: string, input: {intentId: 
   const expiry = Math.max(...plans.map(planExpiry));
   await chain(() => sdk.assertTokenMintReplaceable(adapterInput(row), {connection: connection(), lastValidBlockHeight: expiry}));
   await guardedBatch([snapshotGuard(row), clearGuard(), planSetGuard(row.id, "token", plans), clearGuard(), stmt("UPDATE live_launch_intents SET status = 'abandoned', updated_at = ? WHERE id = ? AND status IN ('prepared','token_pending')", Date.now(), row.id)]);
+  logLaunchEvent("abandoned", {intentId: row.id, kind: "token", from: row.status});
   return {intent: publicIntent(await ownedIntent(wallet, row.id))};
 }
 /**
@@ -337,7 +473,7 @@ export class UnsendableTransaction extends UserError {
 }
 /** What the client sees of a failed live operation: only a UserError's message, and whether the stage is prepared again. */
 export function liveFailure(error: unknown) {
-  return {ok: false as const, error: error instanceof UserError ? error.message : "The real launch could not proceed. Your demo balances were not used.",
+  return {ok: false as const, error: error instanceof UserError ? error.message : "The launch paused. Nothing was sent unless your saved launch says so.",
     ...(error instanceof UnsendableTransaction ? {unsendable: true as const, ...(error.expired ? {expired: true as const} : {})} : {})};
 }
 // A refusal before any broadcast. With nothing saved, an unsendable stage is prepared again and any other refusal
@@ -402,15 +538,20 @@ export async function submitLiveTransaction(wallet: string, input: {intentId: st
       : stmt("UPDATE live_launch_intents SET nft_signature = ?, updated_at = ? WHERE id = ? AND status = 'nft_pending'", signed.signature, now, row.id),
   ]);
   try {
-    if (checked.status === "landed") return {intent: publicIntent(await ownedIntent(wallet, row.id)), signature: signed.signature, submission: "submitted" as const};
-    const result = await sdk.broadcastSignedWalletTransaction({plan, transactionBase64: signed.transactionBase64}, {connection: connection()});
+    if (checked.status === "landed") { logLaunchEvent("landed_before_send", {intentId: row.id, kind: input.kind}); return {intent: publicIntent(await ownedIntent(wallet, row.id)), signature: signed.signature, submission: "submitted" as const}; }
+    // Kept alive past a closed tab (waitUntil): the bytes are saved above, and this send must not be cancelled.
+    const result = await kept(sdk.broadcastSignedWalletTransaction({plan, transactionBase64: signed.transactionBase64}, {connection: connection()}));
     if (result.signature !== signed.signature) throw new UserError("The provider returned another transaction signature.");
+    logLaunchEvent(result.status === "submitted" ? "sent" : result.status === "refused" ? "send_refused" : "send_uncertain", {intentId: row.id, kind: input.kind,
+      ...(result.status !== "submitted" ? {reason: result.reason} : {}), ...(input.walletName ? {wallet: input.walletName} : {})});
+    // Refused or uncertain: the saved bytes are sent again by every confirmation check while they can still land.
     return {intent: publicIntent(await ownedIntent(wallet, row.id)), signature: signed.signature,
-      submission: result.status === "submission-uncertain" ? "unknown" as const : "submitted" as const,
-      ...(result.status === "submission-uncertain" ? {warning: "The provider did not return a definitive submission result. Recover this saved signature before authorizing anything else."} : {})};
+      submission: result.status === "submitted" ? "submitted" as const : "unknown" as const,
+      ...(result.status === "refused" ? {warning: `Solana's RPC did not accept this transaction yet (${redact(result.reason)}). It is saved and is sent again while it can still land.`}
+        : result.status === "submission-uncertain" ? {warning: "The provider did not return a definitive submission result. The saved transaction is checked and sent again while it can still land."} : {})};
   } catch {
     return {intent: publicIntent(await ownedIntent(wallet, row.id)), signature: signed.signature, submission: "unknown" as const,
-      warning: "The provider did not return a definitive submission result. Check this saved signature before authorizing anything else."};
+      warning: "The provider did not return a definitive submission result. The saved transaction is checked and sent again while it can still land."};
   }
 }
 /**

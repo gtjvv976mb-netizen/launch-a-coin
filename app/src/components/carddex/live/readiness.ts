@@ -40,7 +40,7 @@ export function useLiveLaunchOpen(active = true): boolean {
 
 /**
  * True when a creator can still reach a saved mainnet launch (readiness.recoveryReady: configured, and
- * CARDDEX_LIVE_RECOVERY_ENABLED is not "false"), including while new launches are off.
+ * CARDDEX_LIVE_RECOVERY_ENABLED is not off: "false", "0", "off" or "no"), including while new launches are off.
  */
 export function useLiveRecoveryOpen(active = true): boolean {
   const readiness = useLiveReadiness(active);

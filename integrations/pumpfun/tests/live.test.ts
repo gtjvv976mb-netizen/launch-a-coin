@@ -11,6 +11,7 @@ import { getAssetV1AccountDataSerializer as rawAssetSerializer } from "@metaplex
 import { getPluginRegistryV1AccountDataSerializer as rawRegistrySerializer } from "@metaplex-foundation/mpl-core/dist/src/generated/types/pluginRegistryV1AccountData.js";
 import { publicKey as umiKey } from "@metaplex-foundation/umi";
 import { MAINNET_GENESIS_HASH, PAIR_ASSETS } from "../src/index.ts";
+import { RPC_TIMEOUT_MS, TransactionFailedOnChain, resendSignedWalletTransaction, rpcFetchWithTimeout } from "../src/live.ts";
 import { CORE_PROGRAM_ID, PACKET_LIMIT, PUMP_LOOKUP_TABLE, REFRESHED_BLOCKHASH_MARGIN, WALLET_SIZE_TARGET, pinnedLookupTable, SignedTransactionNotSent, assertNftMintReplaceable, broadcastSignedWalletTransaction, checkSignedWalletTransaction, assertTokenMintReplaceable, creatorNftInstructions, describeWalletChange, measureTokenTransaction, prepareCreatorNftAheadOfCoin, prepareCreatorNftTransaction, prepareTokenTransaction, recoverCreatorLaunch, sendSignedWalletTransaction, transactionBytes, validateSignedWalletTransaction, verifyCreatorNft, verifyTokenLaunch, type LiveConnection, type LiveLaunchInput, type WalletTransactionPlan } from "../src/live.ts";
 import fixture from "./fixtures/mainnet-pair-accounts-2026-10-28.json";
 import feeFixture from "./fixtures/mainnet-fee-account-2026-10-28.json";
@@ -581,6 +582,66 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     expect(await checkSignedWalletTransaction(signed, { connection: rpc.connection })).toMatchObject({ status: "landed", signature, err: { InstructionError: [2, "Custom"] } });
     await expect(sendSignedWalletTransaction(signed, { connection: rpc.connection })).rejects.toThrow("already failed");
     expect(rpc.sent()).toBe(1);
+  });
+});
+
+describe("landing and recovery helpers (mock RPC only)", () => {
+  // What web3.js throws when the RPC answers sendTransaction with a JSON-RPC error (here: a failed preflight).
+  const rpcError = (transactionMessage: string) => Object.assign(new Error(`Simulation failed. \nMessage: ${transactionMessage}.`), { name: "SendTransactionError", transactionMessage });
+  const signedFor = async (rpc: ReturnType<typeof mockRpc>) => {
+    const plan = await prepareTokenTransaction(defaultInput(), { connection: rpc.connection });
+    const tx = VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64")); tx.sign([creatorKey, tokenKey]); // Synthetic keys, mock RPC.
+    return { plan, transactionBase64: Buffer.from(tx.serialize()).toString("base64"), signature: bs58.encode(tx.signatures[0]) };
+  };
+  test("a transaction that landed and failed is its own error, for the signature status and for the finalized meta", async () => {
+    const input = defaultInput(), rpc = mockRpc(), plan = await prepareTokenTransaction(input, { connection: rpc.connection });
+    rpc.remember(plan, tokenSignature);
+    const failure = { InstructionError: [2, { Custom: 6001 }] };
+    const statuses = rpc.connection.getSignatureStatuses;
+    rpc.connection.getSignatureStatuses = async () => ({ context: { slot }, value: [{ slot, confirmations: null, err: failure, confirmationStatus: "finalized" }] }) as any;
+    const fromStatus = await verifyTokenLaunch(input, { connection: rpc.connection, signature: tokenSignature }).catch((error) => error);
+    expect(fromStatus).toBeInstanceOf(TransactionFailedOnChain); expect(fromStatus.name).toBe("TransactionFailedOnChain"); expect(fromStatus.chainError).toEqual(failure);
+    rpc.connection.getSignatureStatuses = statuses;
+    rpc.transactions.get(tokenSignature).meta.err = failure;
+    await expect(verifyTokenLaunch(input, { connection: rpc.connection, signature: tokenSignature })).rejects.toBeInstanceOf(TransactionFailedOnChain);
+  });
+  test("a send the RPC answered with an error is refused (not forwarded), 'already processed' is landed, anything else is uncertain", async () => {
+    const rpc = mockRpc(), signed = await signedFor(rpc);
+    rpc.connection.sendRawTransaction = async () => { throw rpcError("Transaction simulation failed: Error processing Instruction 2: custom program error: 0x1"); };
+    expect(await broadcastSignedWalletTransaction(signed, { connection: rpc.connection })).toEqual({ status: "refused", signature: signed.signature, reason: "Transaction simulation failed: Error processing Instruction 2: custom program error: 0x1" });
+    rpc.connection.sendRawTransaction = async () => { throw rpcError("Transaction simulation failed: This transaction has already been processed"); };
+    expect(await broadcastSignedWalletTransaction(signed, { connection: rpc.connection })).toEqual({ status: "submitted", signature: signed.signature });
+    rpc.connection.sendRawTransaction = async () => { throw new Error("fetch failed"); };
+    expect((await broadcastSignedWalletTransaction(signed, { connection: rpc.connection })).status).toBe("submission-uncertain");
+  });
+  test("saved bytes are sent again only while they can land and the chain does not have them", async () => {
+    const rpc = mockRpc(), signed = await signedFor(rpc), resend = (lastValidBlockHeight: number) => resendSignedWalletTransaction({ ...signed, lastValidBlockHeight }, { connection: rpc.connection });
+    expect(await resend(1200)).toEqual({ status: "resent", signature: signed.signature, blocksLeft: 200 });
+    expect(rpc.sent()).toBe(1);
+    rpc.height(1201);
+    expect(await resend(1200)).toEqual({ status: "expired", signature: signed.signature });
+    // A wallet-refreshed bound beyond the plan's keeps it sendable.
+    expect((await resend(1264)).status).toBe("resent");
+    expect(rpc.sent()).toBe(2);
+    rpc.remember(signed.plan, signed.signature);
+    expect(await resend(1264)).toEqual({ status: "landed", signature: signed.signature, err: null });
+    expect(rpc.sent()).toBe(2);
+    rpc.transactions.clear(); rpc.height(1000);
+    rpc.connection.sendRawTransaction = async () => { throw rpcError("Transaction simulation failed: Blockhash not found"); };
+    expect(await resend(1200)).toEqual({ status: "not-resent", signature: signed.signature, reason: "Transaction simulation failed: Blockhash not found" });
+    // Never other bytes than the plan's.
+    await expect(resendSignedWalletTransaction({ plan: signed.plan, transactionBase64: signed.plan.transactionBase64, lastValidBlockHeight: 1200 }, { connection: rpc.connection })).rejects.toThrow("invalid signature");
+  });
+  test("every RPC request gets a timeout unless the caller set its own signal", async () => {
+    const seen: (AbortSignal | null | undefined)[] = [];
+    const wrapped = rpcFetchWithTimeout(async (_input, init) => { seen.push(init?.signal); return new Response("{}"); });
+    await wrapped("https://rpc.invalid", { method: "POST" });
+    const own = new AbortController().signal;
+    await wrapped("https://rpc.invalid", { method: "POST", signal: own });
+    expect(seen[0]).toBeInstanceOf(AbortSignal); expect(seen[0]!.aborted).toBe(false); expect(seen[1]).toBe(own);
+    expect(RPC_TIMEOUT_MS).toBeLessThanOrEqual(30_000);
+    const timed = rpcFetchWithTimeout(async (_input, init) => new Promise<Response>((_resolve, reject) => init!.signal!.addEventListener("abort", () => reject(init!.signal!.reason))), 5);
+    await expect(timed("https://rpc.invalid")).rejects.toThrow();
   });
 });
 
