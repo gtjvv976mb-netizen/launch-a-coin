@@ -1,200 +1,131 @@
-/* Portfolio (/portfolio) screen sheet. Owned by the "coin" screen group (.taste-skill/restyle/ownership.md). Layer: cdx
- * (styles.css). Tokens: carddex-theme.css. A list page with no tabs (density R4): it grows with its content and main
- * scrolls once; nothing here scrolls on its own. The KPI strip, then Coins, Cards and Test balances side by side from
- * 1280 (coins and cards beside each other, the balances under them, from 768; one column on phones). Each list shows
- * its first rows, then one "Show all" that expands in place. */
-.cdx-portfolio { gap: var(--gap-page); }
-.cdx-portfolio .mdx-pagehead__right { gap: 12px; }
-.cdx-portfolio__sim { margin-left: 4px; }
+/* Portfolio (/portfolio), MintDex's format: the header, one stats row, the section tabs, one fitted page of rows or
+ * cards (usePageCapacity) and the pager. Desktop fills the screen and nothing scrolls; phones scroll the page.
+ * Signed out: the header and the fanned card backs (EmptyState hero). Markup: routes/portfolio.tsx. Unlayered;
+ * tokens: carddex-theme.css. */
 
-/* ---- the figures: one strip. Total value leads (30px) with its 24h move; test SOL, coins and cards beside it */
-.cdx-portfolio__kpis { flex: none; grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr)); }
-.cdx-portfolio__kpis .mdx-kpi:not([data-lead]) .mdx-kpi__value > .num { font-size: var(--text-title); line-height: 26px; }
-.cdx-portfolio__chg { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-caption); color: var(--color-slate); }
-
-/* Loading: each value a flat bar at its real size (no layout shift when the data lands). */
-.cdx-bar { display: inline-block; vertical-align: middle; border-radius: var(--radius-chip); }
-.cdx-bar--kpi { width: 120px; height: 24px; }
-.cdx-bar--name { width: 120px; height: 14px; }
-.cdx-bar--sub { width: 80px; height: 12px; }
-.cdx-bar--fig { width: 72px; height: 14px; }
-/* No travelling shine on these bars (app screens load flat). */
-.cdx-portfolio .mdx-skeleton::after { content: none; }
-
-/* ---- sections */
-.cdx-portfolio__grid { display: grid; min-width: 0; grid-template-columns: minmax(0, 1fr); align-items: start; gap: var(--gap-section); }
-.cdx-portfolio__panel {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: var(--gap-head);
-  padding: var(--pad-panel);
-  border-radius: var(--radius-panel);
-  background: var(--color-surface);
+@media (min-width: 1024px) {
+  .cdx-portfolio { height: 100%; }
 }
-/* Show all / Show fewer: a quiet text button on the list's left edge (its label aligned with the rows). */
-.cdx-portfolio__more { display: flex; min-height: var(--hit); align-items: center; margin-left: -12px; }
-.cdx-portfolio__caption { padding-top: 8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-placeholder); }
+.cdx-portfolio .mdx-pagehead__right { gap: 16px; }
 
-/* ---- holdings: whole-row links, two lines in narrow panes, one line of four columns in wide ones (container query) */
-.cdx-holdings { container-type: inline-size; min-width: 0; }
-.cdx-holdings__head { display: none; }
-.cdx-holding {
-  position: relative;
-  isolation: isolate;
+/* ---- the stats row: three figures on one plinth */
+.cdx-portfolio__summary {
   display: grid;
-  min-height: 52px;
-  grid-template-columns: 32px minmax(0, 1fr) auto;
+  flex: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 24px;
+  padding: 16px 20px;
+  border-radius: var(--radius-panel);
+  background: color-mix(in srgb, var(--color-plinth) 90%, transparent);
+  box-shadow: var(--shadow-ring);
+}
+.cdx-portfolio__summary > div { min-width: 0; }
+.cdx-portfolio__summary dd { display: flex; align-items: baseline; gap: 4px; margin-top: 4px; }
+.cdx-portfolio__summary .num { font-stretch: 85%; }
+.cdx-portfolio__plus { color: var(--color-slate); font-size: var(--text-lead); }
+@media (max-width: 639.98px) {
+  .cdx-portfolio__summary { gap: 8px 12px; padding: 12px 16px; }
+  .cdx-portfolio__summary .mdx-num, .cdx-portfolio__summary .num { font-size: var(--text-lead); }
+}
+
+.cdx-portfolio__tabs { align-self: flex-start; }
+@media (max-width: 1023.98px) {
+  .cdx-portfolio__tabs { width: 100%; }
+  .cdx-portfolio__tabs .mdx-tabs__tab { flex: 1 1 0; justify-content: center; }
+}
+
+/* ---- the page of rows: fills the frame on desktop (measured for the fitted page); phones list it all. */
+@media (min-width: 1024px) {
+  .cdx-portfolio__rows { flex: 1 1 0; min-height: 0; }
+}
+
+/* ---- coins: one plinth of whole-row links. Wide: Coin · Held · Value · 24h · Design under a head row; narrow:
+ * name over ticker and amount, value over the 24h change. */
+.cdx-holdings { overflow: hidden; padding: 8px; border-radius: var(--radius-panel); background: color-mix(in srgb, var(--color-plinth) 90%, transparent); box-shadow: var(--shadow-ring); }
+.cdx-holdings__head,
+.cdx-holding {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  padding-block: 8px;
-  color: var(--color-ink);
+  padding-inline: 12px;
 }
-/* Rules sit between square rows; the hover tint is a rounded layer behind the row, so the rules never bend (browse-17). */
-.cdx-holding + .cdx-holding { border-top: 1px solid var(--color-rule); } /* taste-skill-ignore: the rules between holdings rows (a table drawn as links) */
-.cdx-holding::before {
-  content: "";
-  position: absolute;
-  inset: 2px -8px;
-  z-index: -1;
-  border-radius: var(--radius-row);
-  background: var(--color-raised);
-  opacity: 0;
-  transition: opacity var(--t-hover) ease;
+.cdx-holdings__head { display: none; height: 40px; border-bottom: 1px solid var(--color-hairline); }
+.cdx-holdings__rows > * + * { border-top: 1px solid var(--color-rule); }
+.cdx-holding { min-height: 64px; border-radius: var(--radius-row); color: var(--color-ink); transition: background-color var(--t-fast) var(--ease-room); }
+@media (hover: hover) {
+  .cdx-holding:hover { background: var(--color-tint); }
+  .cdx-holding:hover .cdx-holding__name { text-decoration: underline; text-underline-offset: 3px; }
 }
-@media (hover: hover) and (pointer: fine) {
-  .cdx-holding:hover::before { opacity: 1; }
-  .cdx-holding:hover .cdx-holding__name { text-decoration-line: underline; text-decoration-color: var(--color-control-border); text-underline-offset: 3px; }
-}
-.cdx-holding:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; border-radius: var(--radius-row); }
-.cdx-holding:active::before { opacity: 1; }
-.cdx-holding__thumb { display: block; width: 32px; height: 32px; border-radius: 9px; }
-.cdx-holding__id { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
-.cdx-holding__name { overflow: hidden; font-size: var(--text-body); font-weight: 600; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
-.cdx-holding__sub { overflow: hidden; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); text-overflow: ellipsis; white-space: nowrap; }
-.cdx-holding__value { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
+.cdx-holding:focus-visible { outline: 2px solid var(--color-zap); outline-offset: -2px; background: var(--color-tint); }
+.cdx-holding__id { display: flex; min-width: 0; align-items: center; gap: 12px; }
+.cdx-holding__name { display: block; overflow: hidden; font-size: 15px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.cdx-holding__sub { display: block; overflow: hidden; font-size: var(--text-caption); color: var(--color-slate); text-overflow: ellipsis; white-space: nowrap; }
+.cdx-holding__value { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
 .cdx-holding__chg-sub { font-size: var(--text-caption); }
 .cdx-holding__held,
 .cdx-holding__chg,
 .cdx-holding__design { display: none; }
-.cdx-holding--loading { pointer-events: none; }
-/* One line from 600px, with Value the widest figure column: a quote value with its unit ("9,999.99 CHILLHOUSE") needs
- * about 170px. Narrower panes (the three-panel row at 1440 and 1920) keep the two-line row. */
-@container (min-width: 600px) {
+@media (min-width: 1024px) {
+  /* Value is wide enough for "9,999.99 CHILLHOUSE" (VIS-2). */
   .cdx-holdings__head,
-  .cdx-holding {
-    grid-template-columns: 24px minmax(0, 1.6fr) minmax(0, 0.9fr) minmax(0, 1.5fr) 64px;
-    gap: 12px;
-  }
-  .cdx-holding { min-height: var(--row-h); padding-block: 4px; }
-  /* !important: Thumb sizes itself inline (its 32px narrow-row size); a one-line row takes the 24px thumb. */
-  .cdx-holding .mdx-thumb,
-  .cdx-holding__thumb { width: 24px !important; height: 24px !important; border-radius: 7px !important; }
-  .cdx-holding__id { flex-direction: row; align-items: baseline; gap: 8px; }
-  .cdx-holding__name { flex: 0 1 auto; }
-  .cdx-holding__sub { flex: 1 1 0; min-width: 0; }
-  .cdx-holdings__head {
-    display: grid;
-    height: 32px;
-    align-items: center;
-    border-bottom: 1px solid var(--color-hairline); /* taste-skill-ignore: the holdings table's head rule */
-    font-size: var(--text-caption);
-    font-weight: 500;
-    color: var(--color-slate);
-  }
-  .cdx-holdings__head span:first-child { grid-column: 1 / 3; }
-  .cdx-holdings__head span:not(:first-child) { text-align: right; }
+  .cdx-holding { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(170px, 1fr) 80px minmax(0, 1fr); gap: 20px; }
+  .cdx-holdings__head { display: grid; }
+  .cdx-holdings__head > :nth-child(2),
+  .cdx-holdings__head > :nth-child(3),
+  .cdx-holdings__head > :nth-child(4) { text-align: right; }
   .cdx-holding__held,
-  .cdx-holding__chg { display: block; text-align: right; }
-  .cdx-holding__design { display: inline; }
-  .cdx-holding__held { font-size: var(--text-body); }
-  .cdx-holding__value { flex-direction: row; justify-content: flex-end; }
-  .cdx-holding__held-sub,
+  .cdx-holding__chg { display: block; text-align: right; font-size: var(--text-body); }
+  .cdx-holding__design { display: block; overflow: hidden; font-size: var(--text-caption); color: var(--color-slate); text-overflow: ellipsis; white-space: nowrap; }
   .cdx-holding__chg-sub { display: none; }
-  .cdx-holding__chg { font-size: var(--text-body); }
 }
 
-/* ---- cards: an auto-fill grid of tiles at least --tile-min-design wide, the View in 3D chip on the card's corner */
-.cdx-portfolio__cards { row-gap: 20px; padding: 8px 4px 4px; }
-.cdx-portfolio__tile { min-width: 0; }
-.cdx-portfolio__card { display: flex; min-width: 0; flex-direction: column; gap: 12px; color: var(--color-ink); }
-.cdx-portfolio__cap { display: flex; min-width: 0; flex-direction: column; gap: 2px; padding-inline: 2px; }
-.cdx-portfolio__capname { overflow: hidden; font-size: var(--text-body); font-weight: 600; line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
-.cdx-portfolio__capsub { overflow: hidden; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); text-overflow: ellipsis; white-space: nowrap; }
-@media (hover: hover) and (pointer: fine) {
-  .cdx-portfolio__card:hover .cdx-portfolio__capname { text-decoration-line: underline; text-decoration-color: var(--color-control-border); text-underline-offset: 3px; }
+/* ---- cards: a fitted grid of trays, the caption under each */
+.cdx-portfolio__cards {
+  display: grid;
+  height: 100%;
+  grid-template-columns: repeat(var(--page-columns, 2), minmax(0, 1fr));
+  grid-auto-rows: max-content;
+  gap: 20px;
+  align-content: start;
 }
-.cdx-portfolio__card:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 4px; border-radius: var(--radius-row); }
-/* !important: the card's coloured glow and prism ring come from the unlayered card3d.css; on this flat ground the
- * card itself is the colour. */
-.cdx-portfolio .mdx-card3d__halo { display: none !important; }
-
-/* ---- test balances: a table of rules and alignment at the list row height, numbers right-aligned and tabular */
-.cdx-balances { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: var(--text-body); }
-.cdx-balances th,
-.cdx-balances td { height: var(--row-h); padding: 0; border-bottom: 1px solid var(--color-rule); }
-.cdx-balances thead th { height: 32px; border-bottom-color: var(--color-hairline); font-size: var(--text-caption); font-weight: 500; text-align: left; color: var(--color-slate); }
-.cdx-balances thead th:first-child { width: 46%; }
-.cdx-balances tbody tr:last-child > * { border-bottom: 0; }
-.cdx-balances .cdx-balances__n { width: 27%; padding-left: 8px; text-align: right; font-variant-numeric: tabular-nums; }
-.cdx-balances tbody th { max-width: 0; overflow: hidden; font-weight: 400; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
-.cdx-balances tbody th:focus { outline: none; }
-.cdx-balances tbody th:focus-visible { outline: 2px solid var(--color-zap); outline-offset: -2px; }
-.cdx-balances__sym { font-weight: 600; color: var(--color-ink); }
-.cdx-balances__name { margin-left: 8px; color: var(--color-slate); }
-
-/* ---- signed out: the coins frame (its header row) holds the collection invitation */
-.cdx-portfolio--out .cdx-portfolio-empty { min-height: 0; padding-block: 0 16px; }
-
-/* ================================================================ arrangements */
-@media (max-width: 767.98px) {
-  .cdx-portfolio__kpis--out { display: none; }
-  /* The total takes the first row; test SOL, coins and cards share the second, split by hairlines, without subs. */
-  .cdx-portfolio__kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .cdx-portfolio__kpis .mdx-kpi[data-lead] { grid-column: 1 / -1; }
-  .cdx-portfolio__kpis .mdx-kpi:nth-child(2) { box-shadow: inset 0 1px 0 var(--color-hairline); } /* taste-skill-ignore: the strip's row hairline */
-  .cdx-portfolio__kpis .mdx-kpi:nth-child(n + 3) { box-shadow: inset 1px 1px 0 var(--color-hairline); } /* taste-skill-ignore: the strip's cell hairlines */
-  .cdx-portfolio__kpis .mdx-kpi:not([data-lead]) .mdx-kpi__value > .num { font-size: var(--text-lead); line-height: 24px; }
-  .cdx-portfolio__kpis .mdx-kpi:not([data-lead]) .mdx-kpi__sub { display: none; }
-  /* A third of the phone's width: the loading bar keeps inside its cell. */
-  .cdx-portfolio__kpis .mdx-kpi:not([data-lead]) .cdx-bar--kpi { width: 64px; height: 20px; }
+.cdx-portfolio__cards > li { display: flex; min-width: 0; justify-content: center; }
+.cdx-portfolio__tile { width: 100%; max-width: 200px; }
+.cdx-portfolio__card { display: block; min-width: 0; color: var(--color-ink); }
+.cdx-portfolio__cap { display: flex; flex-direction: column; gap: 2px; padding: 12px 2px 0; }
+.cdx-portfolio__capname { overflow: hidden; font-size: 15px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; text-underline-offset: 3px; }
+.cdx-portfolio__capsub { overflow: hidden; font-size: var(--text-caption); color: var(--color-slate); text-overflow: ellipsis; white-space: nowrap; }
+@media (hover: hover) {
+  .cdx-portfolio__card:hover .cdx-portfolio__capname { text-decoration: underline; }
 }
-/* 768 to 1279: coins beside cards, the balances under both at full width. */
-@media (min-width: 768px) {
-  .cdx-portfolio__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-areas: "coins cards" "balances balances";
-  }
-  .cdx-portfolio__coins { grid-area: coins; }
-  .cdx-portfolio__deck { grid-area: cards; }
-  .cdx-portfolio__balances { grid-area: balances; }
-}
-/* 1280 up: three columns, coins | cards | balances. */
-@media (min-width: 1280px) {
-  .cdx-portfolio__grid {
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) clamp(340px, 28%, 420px);
-    grid-template-areas: "coins cards balances";
-  }
-}
-/* A new account (no coins, no cards; portfolio.tsx data-fresh), density D6: one line with both ways in across the
- * column, then every balance under it at full width, in two halves side by side from 1024px. */
-.cdx-portfolio__grid[data-fresh] {
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: "empty" "balances";
-}
-.cdx-portfolio__none { grid-area: empty; }
-.cdx-portfolio__none-actions { display: inline-flex; flex-wrap: wrap; gap: 8px; }
-.cdx-balances-split { display: grid; min-width: 0; gap: 0 32px; }
-@media (min-width: 1024px) {
-  .cdx-balances-split { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
-}
-/* One list below 1024px: the first half, then Show all opens the second in place (its header stays for screen readers
- * only). From 1024px both halves show and the toggle goes. */
+.cdx-portfolio__card:focus-visible .cdx-portfolio__capname { text-decoration: underline; }
 @media (max-width: 1023.98px) {
-  .cdx-balances-split:not([data-open]) > [data-part="second"] { display: none; }
-  .cdx-balances[data-part="second"] thead th { height: 0; overflow: hidden; border: 0; clip-path: inset(50%); white-space: nowrap; }
-  .cdx-balances-split[data-open] .cdx-balances[data-part="first"] tbody tr:last-child > * { border-bottom: 1px solid var(--color-rule); }
+  .cdx-portfolio__cards { gap: 16px 12px; }
 }
-@media (min-width: 1024px) {
-  .cdx-balances-more { display: none; }
+
+/* ---- balances: one tile per quote asset */
+.cdx-balance-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--page-columns, 1), minmax(0, 1fr));
+  grid-auto-rows: max-content;
+  gap: 8px;
 }
+.cdx-balance-grid > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-width: 0;
+  align-items: baseline;
+  gap: 2px 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-row);
+  background: var(--color-plinth);
+  box-shadow: var(--shadow-ring);
+}
+.cdx-balance-grid dt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cdx-balance-grid__sym { font-size: 15px; font-weight: 600; color: var(--color-ink); }
+.cdx-balance-grid__name { font-size: var(--text-caption); color: var(--color-slate); }
+.cdx-balance-grid dd { text-align: right; font-size: 15px; color: var(--color-ink); overflow-wrap: anywhere; }
+.cdx-balance-grid .cdx-balance-grid__in { grid-column: 1 / -1; text-align: left; font-size: var(--text-caption); color: var(--color-slate); }
+
+/* ---- signed out: the fan fills the frame */
+.cdx-portfolio--out .cdx-portfolio-empty { flex: 1 1 auto; }

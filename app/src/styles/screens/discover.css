@@ -1,0 +1,44 @@
+/* Discover (/discover), MintDex's format: the header row (Discover and the count | the Design and Sort pills), then
+ * the shelf (Shelf in ui.tsx: trays on ledges, captions; the deal, the lean and the shuffle live in alive.css and
+ * card3d.css). Desktop fits one page of cards to the screen and nothing scrolls; phones put the search field on top
+ * and scroll the page, two cards up. Markup: routes/discover.tsx. Unlayered; tokens: carddex-theme.css. */
+
+@media (min-width: 1024px) {
+  .cdx-dex { height: 100%; }
+}
+.cdx-dex__head .mdx-pagehead__tools { gap: 20px; }
+.cdx-dex__pill { display: inline-flex; align-items: center; gap: 10px; }
+.cdx-dex__pill-label { font-size: 15px; color: var(--color-slate); }
+@media (max-width: 1023.98px) {
+  /* Phones: the pills read "All designs" and "Trending" with no label beside them (the label stays for readers). */
+  .cdx-dex__pill-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .cdx-dex__head { flex-wrap: nowrap; align-items: flex-end; }
+  .cdx-dex__head .mdx-pagehead__right { width: auto; flex-wrap: nowrap; }
+  .cdx-dex__head .mdx-pagehead__tools { width: auto; flex-wrap: nowrap; gap: 8px; justify-content: flex-end; }
+  .cdx-dex__head .mdx-select { max-width: 42vw; text-overflow: ellipsis; }
+}
+@media (max-width: 379.98px) {
+  .cdx-dex__head { flex-wrap: wrap; }
+  .cdx-dex__head .mdx-pagehead__right,
+  .cdx-dex__head .mdx-pagehead__tools { width: 100%; justify-content: flex-start; }
+}
+
+/* The shelf's room: the rest of the frame (measured for the fitted grid). */
+.cdx-dex__body { position: relative; min-height: 0; flex: 1 1 auto; }
+@media (min-width: 1024px) {
+  .cdx-dex__body { display: flex; flex-direction: column; justify-content: center; }
+}
+
+/* Phones: the search field over the title, a 48px field with the glyph inside and a quiet clear button. */
+.cdx-dex__search { position: relative; min-width: 0; }
+.cdx-dex__search .mdx-input { width: 100%; height: 48px; padding-left: 44px; padding-right: 48px; font-size: 16px; }
+.cdx-dex__search .mdx-input::-webkit-search-cancel-button { display: none; }
+.cdx-dex__search-glyph { position: absolute; top: 50%; left: 16px; color: var(--color-slate); pointer-events: none; transform: translateY(-50%); }
+.cdx-dex__clear { position: absolute; top: 50%; right: 4px; transform: translateY(-50%); }
+/* The pills: 40px under a fine pointer (dense desktop UI), 44px on touch (mintdex.css sets 44 below 1024). */
+@media (min-width: 1024px) {
+  .cdx-dex__head .mdx-select { height: 40px; }
+}
+@media (min-width: 1024px) and (pointer: coarse) {
+  .cdx-dex__head .mdx-select { height: 44px; }
+}

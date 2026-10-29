@@ -1,13 +1,14 @@
 /**
- * The browse screens' gallery tiles (Discover's coins, the Designs library). One tile = the card, unchanged, and a
- * short caption under it in the UI face with tabular figures. The card is the picture and the only colour; the
- * caption is ink and slate, and gold appears only as the curve fill (CurveTrack). Styles: styles/screens/browse.css.
+ * Discover's coin tiles (styles/screens/browse.css) and the design miniature the Designs table, strip and Launch's
+ * design chips share (styles/screens/designs.css). One tile = the card, unchanged, and a short caption under it in
+ * the UI face with tabular figures.
  */
 import { Link } from "@tanstack/react-router";
+import type { CSSProperties } from "react";
 
 import { MintCard, type CardData } from "../mintdex/MintCard";
 import { View3DHost, type View3DItem } from "../mintdex/card3d";
-import { ButtonLink, Change, CurveTrack } from "../mintdex/ui";
+import { Change, CurveTrack } from "../mintdex/ui";
 import { getCardDesign, type CardDesign } from "../../lib/carddex/designs";
 import { marketCapText } from "../../lib/carddex/quote-display";
 import type { CoinSummary } from "../../lib/mintdex/types";
@@ -81,7 +82,8 @@ export function CoinTile({
   );
 }
 
-const COLLECTION: Record<CardDesign["category"], string> = {
+/** A design's collection, as the Designs table, its caption and Launch's library name it. */
+export const COLLECTION: Record<CardDesign["category"], string> = {
   classic: "Classic",
   premium: "Premium",
   limited: "Limited",
@@ -89,57 +91,17 @@ const COLLECTION: Record<CardDesign["category"], string> = {
 };
 
 /**
- * A Designs library tile: a button that previews the design (aria-pressed when it is the selected one), and its own
- * "Use" link that goes straight to /launch with this design and the pair the tile shows (one click, density R5). The
- * card is a flat print of the sample coin in this design; the caption names it, then its collection and the pair it
- * launches with ("Classic · SOL pair"). Selected: the nested fill and a 2px inset ink ring (the shared "selected" mark;
- * no check over the print's name banner), never a gold fill; the ring is an outline, so selecting never changes the
- * tile's size.
+ * A design's miniature: a 12 x 17 card shape in the design's own three colours (its palette), the way the MintDex
+ * chrome names a design with a frame mini. Pale palettes keep an edge from the image outline. Decorative: the name
+ * always sits beside it.
  */
-export function DesignTile({
-  design,
-  card,
-  pairSymbol,
-  pressed,
-  onPick,
-  launch,
-  sizes,
-}: {
-  design: CardDesign;
-  /** The sample coin dressed in this design (and this tile's quote). */
-  card: CardData;
-  pairSymbol: string;
-  pressed: boolean;
-  onPick: () => void;
-  /** Where "Use" goes: /launch with this design and the quote the tile shows. */
-  launch: { design: string; quote: string };
-  sizes: string;
-}) {
+export function DesignMini({ design, className = "" }: { design: CardDesign; className?: string }) {
+  const [a, b, c] = design.palette;
   return (
-    <div className="cdx-design-tile" data-selected={pressed || undefined}>
-      <button
-        type="button"
-        className="cdx-design-tile__pick"
-        aria-pressed={pressed}
-        onClick={onPick}
-      >
-        <span className="cdx-design-tile__art" aria-hidden>
-          <MintCard card={card} depth="flat" sizes={sizes} />
-        </span>
-        <span className="cdx-design-tile__name">{design.name}</span>
-        <span className="cdx-design-tile__meta">
-          {COLLECTION[design.category]} · {pairSymbol} pair
-        </span>
-      </button>
-      <ButtonLink
-        to="/launch"
-        search={launch}
-        variant="outline"
-        size="sm"
-        className="cdx-design-tile__use"
-      >
-        Use<span className="sr-only"> {design.name}</span>
-      </ButtonLink>
-    </div>
+    <span
+      aria-hidden
+      className={`cdx-design-mini ${className}`}
+      style={{ "--d1": a, "--d2": b, "--d3": c } as CSSProperties}
+    />
   );
 }

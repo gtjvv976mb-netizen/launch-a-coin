@@ -10,6 +10,7 @@ import type { CardData } from "../mintdex/MintCard";
 import { CanonicalCardFace } from "./CanonicalCardFace";
 import { PairBadge } from "./QuoteAssetPicker";
 import { designRow, matchFamily, matchedDesignKeys, type DesignRow } from "./launch-form";
+import { DesignMini } from "./GalleryTile";
 
 const memePairKeys = new Set<string>(MEME_PAIR_PRESETS.map(preset => preset.quote));
 const memePairAssets = PAIR_ASSETS.filter(asset => memePairKeys.has(asset.key));
@@ -89,7 +90,7 @@ export function CardDesignPicker({
   // in the chosen collection is laid out (the dialog body scrolls); the collection filter stays at its top. The
   // dialog takes the page column's width (overlays.css), so a wide screen gets more tracks and less scrolling.
   const library = (
-    <Modal open={open && !disabled} onOpenChange={setOpen} title="Choose your card design" description="Your coin in each permanent design. Choosing one keeps your coin details and artwork." width={1600}>
+    <Modal open={open && !disabled} onOpenChange={setOpen} title="Choose your card design" description="Your details and art stay as they are." width={1600}>
       <div className="cdx-design-browser" data-vaul-no-drag>
         <div className="cdx-design-browser__filters">
           {/* Collections: wrapping chips from 768px, one select on phones (chips would run past two lines). */}
@@ -135,11 +136,12 @@ export function CardDesignPicker({
 
   if (variant === "inline") {
     const keys = (row ?? designRow(null, value, quoteKey)).keys;
-    // A stock, meme or collector quote names its matched designs (design-pairings.ts) above the row, and each matched
-    // swatch carries the quote, so the suggestion reads as the match it is. Picking one keeps the quote.
+    // A stock, meme or collector quote names its matched designs (design-pairings.ts) above the chips, and each matched
+    // chip carries "Match", so the suggestion reads as the match it is. Picking one keeps the quote.
     const family = matchFamily(quoteKey);
     const matched = matchedDesignKeys(quoteKey);
     const symbol = getPairAsset(quoteKey).symbol;
+    // MintDex's design chips under the live card (a pill per design: its miniature, its name), then the library link.
     return (
       <div className={`cdx-design-picker cdx-design-picker--inline ${className}`}>
         <div className="cdx-design-picker__head">
@@ -152,29 +154,26 @@ export function CardDesignPicker({
             <strong>{matched.map(key => getCardDesign(key).name).join(", ")}</strong>
           </p>
         ) : null}
-        <ul className="cdx-design-picker__swatches" aria-labelledby={`${id}-label`}>
+        <ul className="cdx-design-picker__chips" aria-labelledby={`${id}-label`}>
           {keys.map(key => {
             const design = getCardDesign(key);
             const bound = boundQuoteForDesign(key);
             const isMatch = !!family && matched.includes(key);
             return <li key={key}>
               {/* Named by its visible name (label in name, WCAG 2.5.3); the pair it launches with is sr-only text. */}
-              <button type="button" className="cdx-design-picker__swatch" aria-pressed={value === key} disabled={disabled} onClick={() => { if (!disabled && value !== key) onChange(key); }}>
-                <span className="cdx-design-picker__face" aria-hidden><CanonicalCardFace card={cardIn(baseCard, design, quoteKey)} design={design} compact lite sizes="96px" /></span>
-                <span className="cdx-design-picker__name">{design.name}</span>
-                {/* "Match" (the line above names the quote): a symbol such as CHILLHOUSE is wider than a swatch. */}
-                {isMatch ? <span className="cdx-design-picker__match" aria-hidden>Match</span> : null}
+              <button type="button" className="cdx-design-chip" aria-pressed={value === key} disabled={disabled} onClick={() => { if (!disabled && value !== key) onChange(key); }}>
+                <DesignMini design={design} />
+                <span className="cdx-design-chip__name">{design.name}</span>
+                {/* "Match" (the line above names the quote): a symbol such as CHILLHOUSE is wider than a chip. */}
+                {isMatch ? <span className="cdx-design-chip__match" aria-hidden>Match</span> : null}
                 <span className="sr-only">, {isMatch ? `matched to ${symbol}` : bound ? `${bound.symbol} pair` : "any pair"}</span>
               </button>
             </li>;
           })}
-          <li className="cdx-design-picker__all">
-            <button type="button" className="cdx-design-picker__swatch cdx-design-picker__more" disabled={disabled} aria-haspopup="dialog" onClick={browse}>
-              <span className="cdx-design-picker__more-icon" aria-hidden><Icon name="chevron-right" /></span>
-              <span className="cdx-design-picker__name">All {CARD_DESIGNS.length} designs</span>
-            </button>
-          </li>
         </ul>
+        <button type="button" className="mdx-link mdx-hit cdx-design-picker__all" disabled={disabled} aria-haspopup="dialog" onClick={browse}>
+          See all {CARD_DESIGNS.length} designs
+        </button>
         {library}
       </div>
     );

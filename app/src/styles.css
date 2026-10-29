@@ -48,10 +48,15 @@
 /* Interim: the release candidate's screen sheets for the screens not yet restored to the MintDex format. Each
  * screen's owner deletes its sheet and this import when the screen is restored. */
 @import "./styles/screens/browse.css" layer(legacy);
-@import "./styles/screens/coin.css" layer(legacy);
-@import "./styles/screens/launch.css" layer(legacy);
-@import "./styles/screens/legal.css" layer(legacy);
-@import "./styles/screens/portfolio.css" layer(legacy);
+/* Restored screens (MintDex format, unlayered like the other restored sheets): coin, Discover, legal and 404,
+ * portfolio. */
+@import "./styles/screens/coin.css";
+@import "./styles/screens/discover.css";
+/* Launch and Designs (MintDex format; designs.css also holds the design chip both screens use). */
+@import "./styles/screens/launch.css";
+@import "./styles/screens/designs.css";
+@import "./styles/screens/legal.css";
+@import "./styles/screens/portfolio.css";
 
 @custom-variant dark (&:where([data-theme="default-dark"], [data-theme="default-dark"] *));
 

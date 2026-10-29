@@ -1,32 +1,28 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
-import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { num, oneOf, searchSchema } from "../../lib/mintdex/search";
 
 import {
-  BackToDiscover,
-  CardFacts,
-  CoinAbout,
-  CoinCase,
-  CoinMarket,
+  ActionColumn,
+  CoinCardPane,
+  CoinDetails,
+  CoinHeader,
+  CoinObject,
+  CoinPhoneHero,
+  CoinStats,
   LoreEditor,
   McapChart,
-  TokenFacts,
-  TradeActionBar,
-  TradePanel,
   TradesList,
-  useSectionParam,
-  useTradeTicket,
 } from "../../components/mintdex/coin";
 import { revPoll } from "../../components/mintdex/hooks";
-import { LaunchedDialog, ShareButton, SimTag, coinShare } from "../../components/mintdex/trust";
-import { Modal, PageHeader, TextLink } from "../../components/mintdex/ui";
+import { LaunchedDialog } from "../../components/mintdex/trust";
+import { Ledge, Modal, Tabs, TextLink, prefersReducedMotion } from "../../components/mintdex/ui";
 import { EmptyState } from "../../components/mintdex/empty-state";
 import { ChainCoinNotFound } from "../../components/chain/pages/ChainCoinNotFound";
 import { ChainCoinView } from "../../components/chain/pages/ChainCoinPage";
 import { chainCoinHead, chainCoinLoader, type ChainCoinRoute } from "../../lib/chain/data";
 import { getCoin, getCoinRoute } from "../../lib/mintdex/api";
-import { atName } from "../../lib/mintdex/format";
 import { COIN_NOT_FOUND, IS_SIM, MODE_COPY } from "../../lib/mintdex/copy";
 import {
   NOINDEX_COINS,
@@ -40,41 +36,24 @@ import {
 import { getCardDesign } from "../../lib/carddex/designs";
 import type { CoinDetail, CoinPage } from "../../lib/mintdex/types";
 
-/** The coin's card art as an img sizes value: about 168px on phones, the 240 to 300px column on tablets, 320px up. */
-const CASE_SIZES = "(max-width: 767px) 180px, (max-width: 1023px) 300px, 320px";
-
 /**
- * Keyboard order follows the reading order on screen (density R8): the grid places every section by its area, so the
- * DOM order can follow each arrangement without moving anything. Phones read the card, its figures, the ticket, the
- * chart, the trades and About; tablets put the figures first; desktop reads the card, the centre column (figures,
- * chart, trades), then the ticket, with About last, or before the ticket where the ticket runs beside it (1280 x 860
- * and up). The server sends the phone order; a wider screen reorders once it hydrates.
+ * Phone sections (P1-5, MintDex): Trade | Card | Chart, one at a time under the hero, kept in ?tab= so a shared or
+ * notification link opens its section. Older links keep working: ?tab=trades opens Chart (the trades sit under the
+ * chart) and ?tab=details opens Card (the coin details sit under the card). Desktop shows every section; nothing
+ * scrolls to a section.
  */
-type CoinOrder = "phone" | "tablet" | "desk" | "deskTall";
-type CoinSection = "card" | "market" | "side" | "chart" | "trades" | "details";
-const COIN_ORDER: Record<CoinOrder, CoinSection[]> = {
-  phone: ["card", "market", "side", "chart", "trades", "details"],
-  tablet: ["market", "card", "side", "chart", "trades", "details"],
-  desk: ["card", "market", "chart", "trades", "side", "details"],
-  deskTall: ["card", "market", "chart", "trades", "details", "side"],
-};
-const ORDER_QUERIES = ["(min-width: 1280px) and (min-height: 860px)", "(min-width: 1024px)", "(min-width: 768px)"] as const;
-function subscribeCoinOrder(cb: () => void) {
-  const lists = ORDER_QUERIES.map((q) => window.matchMedia(q));
-  for (const l of lists) l.addEventListener("change", cb);
-  return () => { for (const l of lists) l.removeEventListener("change", cb); };
-}
-function currentCoinOrder(): CoinOrder {
-  const [tall, desk, tablet] = ORDER_QUERIES.map((q) => window.matchMedia(q).matches);
-  return tall ? "deskTall" : desk ? "desk" : tablet ? "tablet" : "phone";
-}
-function useCoinOrder(): CoinOrder {
-  return useSyncExternalStore(subscribeCoinOrder, currentCoinOrder, () => "phone");
-}
+type CoinTab = "trade" | "card" | "chart";
+const TAB_OPTIONS: Array<{ value: CoinTab; label: string }> = [
+  { value: "trade", label: "Trade" },
+  { value: "card", label: "Card" },
+  { value: "chart", label: "Chart" },
+];
+const tabOf = (tab: string | undefined): CoinTab =>
+  tab === "card" || tab === "details" ? "card" : tab === "chart" || tab === "trades" ? "chart" : "trade";
 
 /**
  * ?minted=1: the launcher just minted this card, so the page opens "Your card is live" once (P1-12).
- * ?tab=card|chart|trade|trades|details: an old section link; the page scrolls to that section (useSectionParam).
+ * ?tab=card|chart|trades|details: the phone section that shows (Trade when absent; see tabOf). Desktop shows all.
  */
 const coinSearch = searchSchema({
   minted: num(true),
@@ -140,23 +119,21 @@ function CoinNotFound() {
 }
 
 /*
- * Layout (styles/screens/coin.css). One page that scrolls once (main), with no tabs at any width. One DOM order at
- * every width, the reading and Tab order: the card (case, controls, the card's facts), the market strip, the trade
- * ticket (with the token's facts on tall desktop windows), the chart, the activity, About; then the dialogs and the
- * phone action bar. CSS grid areas place them:
- * - 1280 and up: sticky card column | the strip over the chart, the activity and About | the sticky ticket.
- * - 1024 to 1279: the same three tracks, narrower (the card's and token's facts move into About).
- * - 768 to 1023: the strip across, then the card column beside the ticket, the chart, the activity and About; the
- *   Buy or Sell submit sits in the action bar.
- * - Phones: the card beside the market figures, then the ticket, the chart, the activity and About; the action
- *   bar holds the submit. Old ?tab= links scroll to their section (data-section).
+ * Layout (MintDex's coin page). One grid, three arrangements:
+ * - 1280 and up: object column (the cased card on its ledge, its caption and Coin details) | market column (header
+ *   row, stats, one plinth block with the chart and the recent trades) | action column (plinth, full height, bleeding
+ *   to the content edges). It fits one screen; the trades and the action column scroll inside their panels.
+ * - 1024 to 1279: the object column folds away. A 96px card stands on a short ledge left of the header and stats,
+ *   the caption moves under them, and main scrolls.
+ * - Phones (P1-5): the column wrappers dissolve (`contents`). A compact hero (112px card, name, market cap, design)
+ *   and the Trade | Card | Chart tabs, sticky under the header, then one section at a time. The section lives in
+ *   ?tab=, rendered by the server, and CSS (.mdx-coin[data-tab]) hides the others.
  */
 function CoinView() {
   const initial = Route.useLoaderData();
   const { id } = Route.useParams();
-  const { minted, tab } = Route.useSearch();
+  const { minted } = Route.useSearch();
   const navigate = Route.useNavigate();
-  useSectionParam(tab, () => void navigate({ search: (p) => ({ ...p, tab: undefined }), replace: true, resetScroll: false }));
   // "Your card is live" opens after mount (never in the server HTML) and only for the coin's launcher, so a
   // pasted ?minted=1 link shows nothing to anyone else. Closing it drops ?minted from the URL.
   const isLauncher = !!initial?.viewer?.isCreator;
@@ -189,11 +166,11 @@ function CoinView() {
       />
     );
   }
-  // Keyed by coin: another coin starts with a fresh ticket, case and lists.
+  // Keyed by coin: another coin starts with a fresh ticket, case and lists, and the entrance plays again.
   return <CoinScreen key={page.coin.id} page={page} loreOpen={loreOpen} setLoreOpen={setLoreOpen} launched={launched} setLaunched={setLaunched} />;
 }
 
-/** The coin page itself, once there is a page: the ticket's state lives here (useTradeTicket needs the page). */
+/** The coin page itself, once there is a page. */
 function CoinScreen({
   page,
   loreOpen,
@@ -207,79 +184,100 @@ function CoinScreen({
   launched: boolean;
   setLaunched: (open: boolean) => void;
 }) {
-  const { minted } = Route.useSearch();
+  const { minted, tab: tabParam } = Route.useSearch();
+  const tab = tabOf(tabParam);
   const navigate = Route.useNavigate();
-  const ticket = useTradeTicket(page);
+  const heroRef = useRef<HTMLElement>(null);
   const { coin, trades } = page;
-  const design = getCardDesign(coin.cardTemplate);
   // The newest trade (trades run oldest first): each new one jolts the case.
   const latestTradeId = trades.length ? trades[trades.length - 1].id : null;
-  const order = useCoinOrder();
-  const sections: Record<CoinSection, ReactNode> = {
-    card: (
-      <section key="card" data-section="card" className="cdx-coin-screen__object" aria-label={`${coin.name} collectible card`}>
-        <div className="cdx-coin-screen__case">
-          <CoinCase coin={coin} latestTradeId={latestTradeId} priority inspect={false} sizes={CASE_SIZES} />
-        </div>
-        <CardFacts page={page} className="cdx-coin-screen__facts" />
-      </section>
-    ),
-    market: <CoinMarket key="market" coin={coin} />,
-    side: (
-      <div key="side" data-section="trade" className="cdx-coin-screen__side">
-        <TradePanel page={page} ticket={ticket} />
-        <TokenFacts page={page} className="cdx-coin-screen__token" />
+
+  const setTab = (next: CoinTab) => {
+    void navigate({
+      search: (p) => ({ ...p, tab: next === "trade" ? undefined : next }),
+      replace: true,
+      resetScroll: false,
+    });
+    // When the tabs are stuck under the header (scrolled into a long section), bring the new section's top just
+    // under them instead of leaving the reader halfway down a shorter one.
+    const tabs = heroRef.current?.nextElementSibling as HTMLElement | null | undefined;
+    if (!tabs) return;
+    const stuck = tabs.getBoundingClientRect().top <= parseFloat(getComputedStyle(tabs).top || "0") + 1;
+    if (stuck && heroRef.current) {
+      const top = heroRef.current.getBoundingClientRect().bottom + window.scrollY - (parseFloat(getComputedStyle(tabs).top) || 0);
+      window.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    }
+  };
+
+  return (
+    <div
+      data-tab={tab}
+      className={[
+        // Tablets in portrait keep the phone sections in a centered 600px column.
+        "mdx-page mdx-coin cdx-coin grid grid-cols-[minmax(0,1fr)] gap-3 md:max-lg:mx-auto md:max-lg:w-full md:max-lg:max-w-[600px]",
+        "lg:grid-cols-[96px_minmax(0,1fr)_304px] lg:grid-rows-[auto_auto_auto_1fr] lg:gap-x-5 lg:gap-y-4",
+        "xl:h-full xl:min-h-[600px] xl:grid-cols-[264px_minmax(0,1fr)_320px] xl:grid-rows-[minmax(0,1fr)] xl:gap-5",
+        "wide:grid-cols-[300px_minmax(0,1fr)_360px] xwide:grid-cols-[340px_minmax(0,1fr)_380px]",
+      ].join(" ")}
+    >
+      {/* Phones: the compact hero and the section tabs (sticky under the header). */}
+      <CoinPhoneHero ref={heroRef} coin={coin} onCard={() => setTab("card")} className="order-1 lg:hidden" />
+      <div className="mdx-coin__tabs sticky z-20 order-2 -mx-4 bg-wall px-4 py-1.5 lg:hidden">
+        <Tabs value={tab} options={TAB_OPTIONS} onChange={setTab} label="Coin sections" className="mdx-tabs--fill" />
       </div>
-    ),
-    chart: (
-      <div key="chart" data-section="chart" className="cdx-coin-screen__chart">
-        <McapChart
-          trades={trades}
-          tradeCount={coin.trades}
-          currentUsd={coin.mcapUsd}
-          currentQuote={coin.mcapQuote}
-          quoteAssetKey={coin.quoteAssetKey}
-          createdAt={coin.createdAt}
-          level={coin.level}
-        />
-      </div>
-    ),
-    trades: (
-      <div key="trades" data-section="trades" className="cdx-coin-screen__activity">
-        <TradesList trades={trades} count={coin.trades} />
-      </div>
-    ),
-    details: (
-      <div key="details" data-section="details" className="cdx-coin-screen__details">
-        <CoinAbout
+      <CoinCardPane coin={coin} latestTradeId={latestTradeId} className="order-4 lg:hidden" />
+
+      {/* The object: the cased card on the ledge, then its caption and the details. */}
+      <div className="contents xl:flex xl:min-h-0 xl:flex-col xl:[grid-area:1/1/2/2]">
+        <div aria-hidden className="mdx-case-spacer hidden xl:block xl:min-h-0 xl:flex-[1_1_0%] xl:max-h-[72px]" />
+        <section
+          aria-label={`${coin.name} collectible card`}
+          className="order-1 flex flex-col max-lg:hidden lg:order-none lg:self-end lg:[grid-area:1/1/3/2] xl:min-h-0 xl:max-h-[calc(264px*173.683/112+65px)] xl:flex-[1000_1_0%] xl:self-stretch wide:max-h-[calc(300px*173.683/112+65px)] xwide:max-h-[calc(340px*173.683/112+65px)]"
+        >
+          <div className="relative flex justify-center pt-6 lg:pt-0 xl:min-h-0 xl:flex-1 xl:items-end xl:justify-start xl:[container-type:size]">
+            <CoinObject coin={coin} latestTradeId={latestTradeId} />
+          </div>
+          <Ledge />
+        </section>
+        <CoinDetails
           page={page}
           onEdit={() => setLoreOpen(true)}
-          cardFacts={<CardFacts page={page} className="cdx-coin-about__card" />}
+          pane="card"
+          className="order-5 lg:order-none lg:[grid-area:3/1/4/3] xl:mt-4 xl:flex-none"
         />
       </div>
-    ),
-  };
-  return (
-    <div className="mdx-frame cdx-coin-screen">
-      <PageHeader
-        title={coin.name}
-        context={
-          <>
-            ${coin.ticker} · {design.name} design ·{" "}
-            {/* One unit for line breaking: the handle never wraps away from "launched by", so the web font's swap
-                cannot move it between lines (CLS). */}
-            <span className="cdx-coin-screen__by">
-              launched by {atName(coin.creatorHandle)}
-              {coin.creatorIsBot ? " (bot)" : ""}
-            </span>
-            {/* Below 1024 the Simulated tag ends the context line (the title row keeps its room for the name). */}
-            <span className="cdx-coin-screen__simtag"><SimTag /></span>
-          </>
-        }
-        back={<BackToDiscover compact />}
-        right={<><span className="cdx-coin-screen__simtag--wide"><SimTag /></span><ShareButton {...coinShare(coin)} label={`Share ${coin.name}`} /></>}
-      />
-      <div className="cdx-coin-screen__grid">{COIN_ORDER[order].map((key) => sections[key])}</div>
+
+      {/* The market: header row, stats, chart and recent trades. */}
+      <div className="contents xl:flex xl:min-h-0 xl:flex-col xl:gap-4 xl:[grid-area:1/2/2/3]">
+        <CoinHeader
+          coin={coin}
+          className="max-lg:hidden lg:order-none lg:self-end lg:[grid-area:1/2/2/3] xl:h-14 xl:flex-none xl:flex-nowrap xl:self-stretch"
+        />
+        <CoinStats coin={coin} pane="chart" className="order-7 max-lg:pt-1 lg:order-none lg:[grid-area:2/2/3/3] xl:flex-none" />
+        <div className="cdx-coin-market contents lg:flex lg:flex-col lg:rounded-panel lg:bg-plinth lg:p-4 lg:shadow-ring lg:[grid-area:4/1/5/3] xl:min-h-0 xl:flex-1">
+          <McapChart
+            trades={trades}
+            tradeCount={coin.trades}
+            currentUsd={coin.mcapUsd}
+            currentQuote={coin.mcapQuote}
+            quoteAssetKey={coin.quoteAssetKey}
+            createdAt={coin.createdAt}
+            level={coin.level}
+            pane="chart"
+            className="order-8 rounded-panel bg-plinth p-4 lg:order-none lg:rounded-none lg:bg-transparent lg:p-0 xl:min-h-0 xl:flex-[1.15]"
+          />
+          <TradesList
+            trades={trades}
+            count={coin.trades}
+            pane="chart"
+            className="order-9 rounded-panel bg-plinth p-4 lg:order-none lg:mt-4 lg:rounded-none lg:bg-transparent lg:p-0 xl:min-h-0 xl:flex-1"
+          />
+        </div>
+      </div>
+
+      {/* The actions: the trade ticket, then the card. */}
+      <ActionColumn page={page} className="lg:[grid-area:1/3/5/4] xl:[grid-area:1/3/2/4]" />
+
       <Modal open={loreOpen} onOpenChange={setLoreOpen} title="Edit description">
         <LoreEditor coinId={coin.id} lore={coin.lore} onDone={() => setLoreOpen(false)} />
       </Modal>
@@ -291,8 +289,6 @@ function CoinScreen({
           if (!o && minted) void navigate({ search: (p) => ({ ...p, minted: undefined }), replace: true, resetScroll: false });
         }}
       />
-      {/* Last child of the view root, so it sticks for the whole page (density R7). */}
-      <TradeActionBar ticket={ticket} />
     </div>
   );
 }

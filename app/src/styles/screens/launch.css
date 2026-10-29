@@ -1,290 +1,187 @@
-/* Launch (/launch): the one-page launch form, the live launch panel UI, the design and pair pickers (QuoteAssetPicker
- * is also shown on Designs; browse styles its placement only). Owned by the "launch" screen group
- * (.taste-skill/restyle/ownership.md). Layer: cdx (styles.css). Tokens: carddex-theme.css.
- *
- * The one question: "Is my coin and its card ready, and what will it cost?" Three blocks answer it, on screen together
- * at desktop: the form (every field, nothing behind a step), the live card, and the ticket (every cost line, the total
- * and the one Launch button). Density rules R1-R8 (.taste-skill/density/rules.md).
- *   desktop (>=1024): form | card | ticket, three tracks across the column; the card and the demo ticket stick while
- *     the form scrolls (each is shorter than the screen; the taller live ticket scrolls with the page).
- *   tablet (768-1023, taller than 500): form | a side column (the card, then the cost summary).
- *   phones and landscape phones: the live card (turnable, with its controls) beside Name and Ticker in the fields
- *     panel, the rest of the form, the cost summary, and the page's action bar (total + the primary).
- * Elevation by lightness alone: the fields panel and the ticket are the surfaces; the card stands on the ground.
- * No gold here: the card is the only colour. */
+/* Launch (/launch) in mintdex.fun's one-page Launch format (routes/launch.tsx). Unlayered, like the other restored
+ * MintDex sheets. Tokens: carddex-theme.css. Also styles the live launch panel, the design library dialog and the pair
+ * picker (QuoteAssetPicker is also shown on Designs, which places it in designs.css).
+ *   desktop (>=1024): the form panel (it scrolls on its own) | the preview column: the live card on its ledge, its
+ *     controls row, then the design chips. The form reads Name | Ticker, Card art | Description, Pair, the More
+ *     options disclosure, then the ticket at its foot (content rules, the total, the fee line, the one primary).
+ *   phones: one column; the live card beside Name and Ticker, the design chips under them; the page scrolls. */
 
-/* ------------------------------------------------ the page */
 .cdx-launch {
-  gap: var(--gap-page);
-  /* The three desktop tracks: the card track holds a 240-420px card, the ticket a 264-340px column. */
-  --launch-card-col: clamp(256px, 28%, 440px);
-  --launch-ticket-col: clamp(264px, 22%, 340px);
-  /* The height a sticky column may take: the screen less the top bar, main's padding, the header row and its gap. */
-  --launch-avail: calc(var(--cdx-app-height, 100dvh) - var(--topbar-h) - 32px - var(--pagehead-h) - var(--gap-page));
+  /* The live card's controls row under its ledge (12px + 40px; 44px on touch). */
+  --controls-h: 52px;
 }
-.cdx-launch .mdx-pagehead__context { min-height: 20px; }
-/* The header (and the Mainnet | Demo switch) paints above the turning card, whose projection can swing past its stage. */
-.cdx-launch > .mdx-pagehead { position: relative; z-index: 1; }
+@media (pointer: coarse), (max-width: 1023.98px) {
+  .cdx-launch {
+    --controls-h: 56px;
+  }
+}
 .cdx-launch-draft { display: inline; }
 .cdx-launch-draft .mdx-link { font-weight: 500; color: var(--color-ink); }
 
-/* Mainnet | Demo: the segmented look (a track pill, the current mode on the nested thumb). Links, not tabs: each
- * mode is its own address. */
+/* Mainnet | Demo: the segmented look (a track pill, the current mode on the sheet thumb). Links, not tabs: each mode
+ * is its own address. */
 .cdx-launch-mode { display: inline-flex; flex: none; gap: 0; padding: 4px; border-radius: var(--radius-pill); background: var(--color-track); }
 .cdx-launch-mode a {
   position: relative;
   display: inline-flex;
-  height: calc(var(--control-h) - 8px);
+  height: 32px;
   align-items: center;
   padding: 0 14px;
   border-radius: var(--radius-pill);
   color: var(--color-slate);
-  font-size: var(--text-body);
+  font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
-  transition: color var(--t-hover) ease, background-color var(--t-hover) ease;
+  transition: color var(--t-fast) var(--ease-room), background-color var(--t-fast) var(--ease-room);
 }
-.cdx-launch-mode a::before { content: ""; position: absolute; inset: -4px 0; }
-.cdx-launch-mode a[aria-current] { background: var(--color-raised); outline: 1px solid var(--color-control-border); outline-offset: -1px; color: var(--color-ink); font-weight: 600; }
+.cdx-launch-mode a::before { content: ""; position: absolute; inset: -6px 0; }
+.cdx-launch-mode a[aria-current] { background: var(--color-sheet); box-shadow: var(--shadow-raise), 0 0 0 1px rgb(var(--rgb-gold) / 0.35); color: var(--color-ink); font-weight: 600; } /* taste-skill-ignore: mintdex.fun ring/selected mark */
 .cdx-launch-mode a:focus-visible { outline: 2px solid var(--color-zap); outline-offset: -2px; }
 @media (hover: hover) and (pointer: fine) { .cdx-launch-mode a:not([aria-current]):hover { color: var(--color-ink); } }
 
-/* ------------------------------------------------ the grid: one DOM, three arrangements */
-/* Phones and landscape phones: one column (the fields with the card in them, the cost summary); the side column's
- * stage is not rendered there (launch.tsx usePhoneCard). */
-.cdx-launch-grid { display: flex; min-width: 0; flex-direction: column; gap: var(--gap-section); }
-.cdx-launch-side { display: block; min-width: 0; }
-.cdx-launch .cdx-create-preview { display: none; }
-@media (min-width: 768px) and (max-width: 1023.98px) and (min-height: 500.02px) {
-  .cdx-launch-grid { display: grid; grid-template-columns: minmax(0, 1fr) 264px; align-items: start; }
-  .cdx-launch-side { display: flex; flex-direction: column; gap: var(--gap-section); }
-  .cdx-launch .cdx-create-preview { display: flex; }
+/* ------------------------------------------------ the form panel */
+/* The turning card's projection can swing past its column: the panel paints above it. */
+.cdx-launch-form { position: relative; z-index: 1; }
+@media (max-width: 1023.98px) {
+  .cdx-launch-form { padding: 16px; border-radius: var(--radius-panel); }
 }
-/* A tall tablet holds the demo side column whole: it sticks while the form scrolls (the live one is taller). */
-@media (min-width: 768px) and (max-width: 1023.98px) and (min-height: 900px) {
-  .cdx-launch-side:not(:has(.cdx-launch-ticket[data-live])) { position: sticky; top: 0; align-self: start; }
-}
-@media (min-width: 1024px) {
-  .cdx-launch-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) var(--launch-card-col) var(--launch-ticket-col);
-    align-items: start;
-  }
-  /* The card and the ticket become the grid's second and third tracks. */
-  .cdx-launch-side { display: contents; }
-  .cdx-launch .cdx-create-preview { display: flex; }
-}
-
-/* ------------------------------------------------ the fields panel */
-/* The turning card's projection can swing over its neighbours: the panels paint above it. */
-.cdx-launch-fields,
-.cdx-launch-ticket { position: relative; z-index: 1; min-width: 0; }
-.cdx-launch-fields { display: grid; gap: var(--gap-section); container: launch-fields / inline-size; }
-.cdx-launch-fields__note { font-size: var(--text-body); line-height: 20px; color: var(--color-ink); }
+.cdx-launch-fields__note { font-size: 13px; line-height: 1.45; color: var(--color-ink); }
 .cdx-launch-f { min-width: 0; }
-.cdx-launch-required { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px var(--gap-section); }
-/* Optional fields, visible (no accordion): one fieldset under the required three. */
-.cdx-launch-more { min-inline-size: 0; margin: 0; padding: 0; border: 0; }
-.cdx-launch-more__legend { padding: 0; margin-bottom: 8px; font-size: var(--text-body); line-height: 20px; font-weight: 600; color: var(--color-slate); }
-.cdx-launch-more__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px var(--gap-section); }
-.cdx-launch-more__grid > * { min-width: 0; }
+/* Desktop: the groups share the panel's spare height (MintDex's spacers: 12px to 56px each); phones use the gap. */
+.cdx-launch-spacer { display: none; }
+@media (min-width: 1024px) {
+  .cdx-launch-spacer { display: block; flex: 1 1 0px; min-height: 8px; max-height: 56px; }
+}
 
-/* Artwork: a dropzone with the image (or its slot) and what to do, then what it takes and Remove under it. */
-.cdx-launch .cdx-launch-art {
-  display: flex;
-  width: 100%;
-  min-height: 88px;
-  /* The dropzone primitive centres a grid; this one is a row (the slot, then what to do). */
-  place-items: initial;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 12px;
-  padding: 12px;
-  /* Concentric with the slot inside it: the 8px field corner plus the 12px padding. */
-  border-radius: var(--radius-panel);
-  text-align: left;
+/* Name and Ticker: one row (1fr | 180px) from 1024px; below, stacked beside the live card. */
+.cdx-launch-ident { display: grid; grid-template-columns: minmax(0, 1fr) 140px; align-items: start; gap: 16px; }
+.cdx-launch-ident__fields { display: flex; min-width: 0; flex-direction: column; gap: 16px; }
+@media (min-width: 1024px) {
+  .cdx-launch-ident { grid-template-columns: minmax(0, 1fr) 180px; }
+  .cdx-launch-ident__fields { display: contents; }
 }
-.cdx-launch-art__frame {
-  display: grid;
-  width: 64px;
-  height: 64px;
-  flex: none;
-  place-items: center;
-  overflow: hidden;
-  border-radius: var(--radius-field);
-  background: var(--color-track);
-  color: var(--color-ink);
-}
-/* Preparing: the slot is a flat bar at the image's size (no shimmer gradient). */
-.cdx-launch-art__frame[data-busy] { background: var(--color-raised); }
-.cdx-launch-art__image { width: 100%; height: 100%; object-fit: cover; outline: 1px solid var(--image-outline); outline-offset: -1px; border-radius: inherit; }
-.cdx-launch-art__copy { display: grid; min-width: 0; gap: 2px; }
-.cdx-launch-art__copy strong { font-size: var(--text-body); line-height: 20px; font-weight: 600; color: var(--color-ink); }
-.cdx-launch-art__copy > span { font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+
+/* Card art | Description: the dropzone square beside the description, which starts the square's height. */
+.cdx-launch-artrow { --art: 112px; display: grid; grid-template-columns: var(--art) minmax(0, 1fr); gap: 16px; }
+@media (min-width: 640px) { .cdx-launch-artrow { --art: 136px; } }
+@media (min-width: 1024px) and (max-height: 820px) { .cdx-launch-artrow { --art: 112px; } }
+@media (min-width: 1024px) and (min-height: 960px) { .cdx-launch-artrow { --art: 176px; } }
+.cdx-launch .cdx-launch-art { width: 100%; aspect-ratio: 1; padding: 0; }
 .cdx-launch .cdx-launch-art:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; }
 .cdx-launch .cdx-launch-art:disabled { cursor: not-allowed; opacity: 0.6; }
 @media (hover: hover) and (pointer: fine) {
-  .cdx-launch .cdx-launch-art:hover:not(:disabled) { border-color: var(--color-slate); background: var(--color-raised); }
+  .cdx-launch .cdx-launch-art:hover:not(:disabled) { border-color: var(--color-slate); background: var(--color-tint); }
 }
-.cdx-launch-art__spec { display: flex; align-items: baseline; gap: 12px; margin-top: 6px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
-.cdx-launch-art__spec > span { min-width: 0; flex: 1; }
-.cdx-launch-art__remove { flex: none; font-size: var(--text-caption); font-weight: 500; color: var(--color-ink); }
-
-/* Field areas follow the panel's own width (named container queries), not the screen's. */
-@container launch-fields (min-width: 360px) {
-  .cdx-launch-required { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .cdx-launch-f--art { grid-column: 1 / -1; }
-}
-@container launch-fields (min-width: 400px) {
-  .cdx-launch-more__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .cdx-launch-f--design,
-  .cdx-launch-f--pair,
-  .cdx-launch-f--buy,
-  .cdx-launch-f--lore { grid-column: 1 / -1; }
-}
-@container launch-fields (min-width: 520px) {
-  .cdx-launch-f--pair,
-  .cdx-launch-f--buy { grid-column: auto; }
-}
-/* Wide (600px of fields and up): Name and Ticker beside the artwork, and the description beside the two links. */
-@container launch-fields (min-width: 600px) {
-  .cdx-launch-required {
-    grid-template-areas: "name art" "ticker art";
-    grid-template-rows: auto 1fr;
-  }
-  .cdx-launch-f--name { grid-area: name; }
-  .cdx-launch-f--ticker { grid-area: ticker; }
-  .cdx-launch-f--art { grid-area: art; }
-  .cdx-launch-more__grid {
-    grid-template-areas: "design design" "pair buy" "lore website" "lore x";
-  }
-  .cdx-launch-f--design { grid-area: design; }
-  .cdx-launch-f--pair { grid-area: pair; }
-  .cdx-launch-f--buy { grid-area: buy; }
-  .cdx-launch-f--lore { grid-area: lore; }
-  .cdx-launch-f--website { grid-area: website; }
-  .cdx-launch-f--x { grid-area: x; }
-  /* The artwork cell is as tall as Name and Ticker together: its dropzone takes what the label and spec leave. */
-  .cdx-launch-f--art { display: flex; flex-direction: column; }
-  .cdx-launch .cdx-launch-art { flex: 1; min-height: 120px; }
-  .cdx-launch-art__frame { width: 96px; height: 96px; }
-}
-
-/* The live card's phone place (density V1, R8): the turnable card and its controls in the first column, Name and
- * Ticker beside it, the artwork under both (beside them when the panel is wide, as a phone held sideways). The same
- * query as launch.tsx PHONE_CARD_MQ; elsewhere the slot is not shown and the card has its own track. */
-.cdx-launch-f--card { display: none; }
-@media (max-width: 767.98px), (max-width: 1023.98px) and (max-height: 500px) {
-  .cdx-launch { --launch-phone-card: clamp(140px, 44%, 172px); }
-  .cdx-launch-required {
-    grid-template-columns: var(--launch-phone-card) minmax(0, 1fr);
-    grid-template-areas: "card name" "card ticker" "card ." "art art";
-    /* The card is taller than Name and Ticker: the spare height goes to the empty third row, not between them. */
-    grid-template-rows: auto auto 1fr;
-  }
-  .cdx-launch-required > .cdx-launch-f--card { display: block; grid-area: card; min-width: 0; }
-  .cdx-launch-required > .cdx-launch-f--name { grid-area: name; }
-  .cdx-launch-required > .cdx-launch-f--ticker { grid-area: ticker; }
-  .cdx-launch-required > .cdx-launch-f--art { grid-area: art; }
-  /* Before hydration places the card, the empty slot holds its size: the card (63:88) and the controls row. */
-  .cdx-launch-f--card:empty::before { content: ""; display: block; aspect-ratio: 63 / 88; margin-bottom: 56px; }
-  .cdx-launch .cdx-launch-f--card .cdx-create-preview { --cw: 100cqw; display: flex; gap: 0; padding-top: 0; }
-  /* Three 44px controls in the 140px column: 4px apart, so they keep one row. */
-  .cdx-launch-f--card .cdx-card-controls { gap: 4px; }
-}
-@media (max-width: 1023.98px) and (max-height: 500px) {
-  .cdx-launch { --launch-phone-card: 140px; }
-}
-@container launch-fields (min-width: 600px) {
-  @media (max-width: 767.98px), (max-width: 1023.98px) and (max-height: 500px) {
-    .cdx-launch-required {
-      grid-template-columns: var(--launch-phone-card) minmax(0, 1fr) minmax(0, 1fr);
-      grid-template-areas: "card name art" "card ticker art" "card . art";
-    }
-  }
-}
-
-/* The description grows with its text (three lines to start); it never scrolls on its own. Browsers without
+.cdx-launch-art__image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cdx-launch-art__copy { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0 8px; pointer-events: none; }
+.cdx-launch-art__copy strong { font-size: 13px; line-height: 1.3; font-weight: 600; color: var(--color-ink); }
+.cdx-launch-art__copy > span { font-size: 12px; line-height: 1.3; color: var(--color-slate); }
+/* With an image: the two lines on a scrim at the square's foot, so the button keeps its visible name. */
+.cdx-launch-art__copy[data-over-image] { position: absolute; inset: auto 0 0; gap: 0; padding: 18px 6px 6px; background: linear-gradient(to bottom, transparent, rgb(var(--rgb-shade) / 0.82)); } /* taste-skill-ignore: mintdex.fun ledge or image scrim */
+.cdx-launch-art__copy[data-over-image] > span { color: var(--color-ink); }
+@media (pointer: coarse) { #art-sub { display: none; } }
+.cdx-launch-art__remove { margin-top: 6px; font-size: 12px; font-weight: 500; color: var(--color-ink); }
+/* The description grows with its text from the square's height; it never scrolls on its own. Browsers without
  * field-sizing are sized by launch.tsx. */
-.cdx-launch .cdx-launch-description { min-block-size: 84px; resize: none; overflow: hidden; field-sizing: content; }
+.cdx-launch .cdx-launch-description { height: auto; min-block-size: var(--art); padding-block: 10px; resize: none; overflow: hidden; field-sizing: content; line-height: 1.45; }
 
-/* The initial buy: the amount, then one row of quick amounts (None, 0.1, 0.5, 1, 5), then its note. */
-.cdx-launch-quick { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: 8px; margin-top: 8px; }
-.cdx-launch-quick .mdx-btn { padding-inline: 0; }
-/* Selected: the shared "selected" mark (raised fill, an ink ring), never the primary's cream (one primary a screen). */
-.cdx-launch-quick .mdx-btn[aria-pressed="true"] { background: var(--color-raised); color: var(--color-ink); outline: 2px solid var(--color-ink); outline-offset: -2px; }
-.cdx-launch-quick .mdx-btn[aria-pressed="true"]:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; }
-.cdx-launch-note { display: grid; gap: 4px; margin-top: 8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
-.cdx-launch-note__error { color: var(--color-down); font-size: var(--text-body); line-height: 20px; }
-.cdx-launch-slippage { margin-top: 8px; font-size: var(--text-body); line-height: 20px; }
-/* The live ticket's Total waits on the review: its words take the row beside the short label. */
-.cdx-launch-cost > div[data-total]:has(> .cdx-live-later) > dt { flex: none; }
+/* The initial buy (inside More options): the amount, then its note. */
+.cdx-launch-note { display: grid; gap: 4px; font-size: 13px; line-height: 1.45; color: var(--color-slate); }
+.cdx-launch-note__error { color: var(--color-down); }
+.cdx-launch-slippage { font-size: 14px; line-height: 20px; }
 
-/* Focus moved to a field that needs something lands clear of the screen's edges (main's scroll-padding adds the
- * action bar on phones, carddex-viewport.css). A field also keeps its label row (and counter) above it in view. */
+/* More options: MintDex's disclosure (a chevron, the title, what it holds). */
+.cdx-launch-more { min-width: 0; }
+.cdx-launch-more > summary { display: flex; min-height: 44px; align-items: center; gap: 8px; margin-inline: -4px; padding-inline: 4px; border-radius: 10px; cursor: pointer; list-style: none; }
+.cdx-launch-more > summary::-webkit-details-marker { display: none; }
+.cdx-launch-more > summary:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 0; }
+.cdx-launch-more__chev { flex: none; color: var(--color-slate); transition: transform var(--t-fast) var(--ease-room); }
+.cdx-launch-more[open] .cdx-launch-more__chev { transform: rotate(90deg); }
+.cdx-launch-more__title { flex: none; font-size: 14px; font-weight: 500; color: var(--color-ink); }
+.cdx-launch-more__sub { min-width: 0; overflow: hidden; font-size: 13px; color: var(--color-slate); text-overflow: ellipsis; white-space: nowrap; }
+.cdx-launch-more__body { display: grid; gap: 16px; padding: 8px 0 4px; }
+.cdx-launch-links { display: grid; gap: 16px; }
+.cdx-launch-buy { display: grid; gap: 8px 16px; }
+@media (min-width: 640px) {
+  .cdx-launch-links { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .cdx-launch-buy { grid-template-columns: 180px minmax(0, 1fr); align-items: end; }
+  .cdx-launch-buy .cdx-launch-note { padding-bottom: 4px; }
+}
+
+/* Focus moved to a field that needs something lands clear of the screen's edges. */
 .cdx-launch :is(button, [tabindex="-1"]) { scroll-margin-block: 16px; }
 .cdx-launch :is(input, textarea, select) { scroll-margin-block: 48px 16px; }
 
-/* ------------------------------------------------ the card's stage: the card, its controls and one caption */
-.cdx-create-preview {
-  /* Phones never show it; the tablet side column: the column's width; desktop: the track or the screen's height. */
-  --cw: min(calc(100cqw - 16px), 420px);
-  min-width: 0;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding-top: 8px;
-  container: launch-card / inline-size;
-}
-@media (min-width: 1024px) {
-  /* The column is the card plus 80px (8 above, the 12 + 36 control row, 8, the 16px caption), never taller than
-   * the screen, so it can stick. */
-  .cdx-create-preview { --cw: min(calc(100cqw - 16px), calc((var(--launch-avail) - 80px) * 0.7159), 420px); }
-}
-@media (min-width: 1024px) and (min-height: 600px) {
-  .cdx-create-preview { position: sticky; top: 0; align-self: start; }
-}
-/* The card is its stage's width (card3d.css, unlayered, sets .mdx-card3d to 100%), so the stage takes --cw: a wider
- * column must not grow the card past the screen's height. */
-.cdx-launch-card { position: relative; width: min(100%, var(--cw)); }
+/* ------------------------------------------------ the live card: on its ledge, the controls row under it */
+.cdx-launch-card { position: relative; width: var(--cw); max-width: 100%; margin-inline: auto; }
 .cdx-launch-card .cdx-hero-turntable { width: 100%; }
-.cdx-launch-card .mdx-card3d { width: var(--cw); margin-inline: auto; }
+.cdx-launch-card .mdx-card3d { width: 100%; margin-inline: auto; }
 .cdx-hero-turntable--viewport .mdx-card3d { perspective: 4000px; }
-/* The calm stage: no rainbow pool or prism ring behind the launch card; it stands on the ground with its own
- * contact shadow. !important: the halo is painted by the unlayered card3d.css, which a layered rule cannot beat. */
-.cdx-launch-card .mdx-card3d__halo { display: none !important; }
-.cdx-create-preview__note { font-size: var(--text-caption); line-height: 16px; color: var(--color-placeholder); text-align: center; }
-
-/* ------------------------------------------------ the ticket: every cost line, the total, the one primary */
-.cdx-launch-ticket__panel { display: grid; min-width: 0; }
-@media (min-width: 1024px) and (min-height: 700px) {
-  /* The demo ticket is shorter than the screen, so it sticks beside the form; the live one scrolls with the page. */
-  .cdx-launch-ticket:not([data-live]) { position: sticky; top: 0; align-self: start; }
+/* The calm stage: no rainbow pool or prism ring behind the launch card; it stands on its ledge with its own shadow. */
+.cdx-launch-card .mdx-card3d__halo { display: none; }
+.cdx-launch .cdx-hero-turntable__controls { height: var(--controls-h); flex-wrap: nowrap; align-items: flex-start; gap: 8px; padding-top: 12px; }
+@media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
+  .cdx-launch .cdx-card-control { width: 40px; height: 40px; }
 }
-.cdx-launch-demo { display: grid; min-width: 0; gap: 12px; }
-.cdx-launch-ticket__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.cdx-launch-section { font-size: var(--text-lead); line-height: 24px; font-weight: 600; color: var(--color-ink); }
+/* The preview column (desktop): the card as large as the column's free height allows, then the chips. */
+.cdx-launch-preview { min-height: 0; padding-top: 24px; }
+@media (max-height: 820px) { .cdx-launch-preview { padding-top: 16px; } }
+.cdx-launch-stage--column { position: relative; display: flex; min-height: 0; flex: 1 1 0px; align-items: flex-end; justify-content: center; container-type: size; }
+.cdx-launch-stage--column .cdx-launch-card { --cw: min(calc(100cqw - 48px), calc((100cqh - var(--controls-h)) * 0.715909), 480px); }
+.cdx-launch-stage--column::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--controls-h) - 5px);
+  height: 5px;
+  background: linear-gradient(to right, transparent, var(--color-hairline) 8%, var(--color-hairline) 92%, transparent) top / 100% 1px no-repeat; /* taste-skill-ignore: mintdex.fun ledge or image scrim */
+  pointer-events: none;
+}
+.cdx-launch-preview__cap { flex: none; width: min(100%, 460px); margin-inline: auto; padding: 12px 0 8px; }
+/* Phones: the card in the form's 140px column, three 44px controls 4px apart under it. */
+.cdx-launch-stage--phone .cdx-launch-card { --cw: 140px; }
+.cdx-launch-stage--phone .cdx-hero-turntable__controls { gap: 4px; }
 
-/* Cost: line items right-aligned on one edge, the total under a hairline. */
+/* ------------------------------------------------ the ticket at the form's foot */
+.cdx-launch-foot { display: grid; min-width: 0; margin-top: auto; }
+.cdx-launch-ticket { display: grid; min-width: 0; gap: 8px; }
+.cdx-launch-rules { font-size: 13px; line-height: 1.45; color: var(--color-slate); text-wrap: pretty; }
+/* Total: up to … , "What is included" opens the lines (MintDex). */
+.cdx-launch-total > summary { display: flex; min-height: 40px; align-items: center; justify-content: space-between; gap: 12px; margin-inline: -4px; padding-inline: 4px; border-radius: 10px; cursor: pointer; list-style: none; }
+@media (pointer: coarse) { .cdx-launch-total > summary { min-height: 44px; } }
+.cdx-launch-total > summary::-webkit-details-marker { display: none; }
+.cdx-launch-total > summary:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 0; }
+.cdx-launch-total__value { min-width: 0; font-size: 15px; line-height: 1.3; color: var(--color-ink); }
+.cdx-launch-total__value > .num { font-weight: 600; }
+.cdx-launch-total__more { display: inline-flex; flex: none; align-items: center; gap: 4px; font-size: 13px; color: var(--color-slate); }
+.cdx-launch-total__more > svg { transition: transform var(--t-fast) var(--ease-room); }
+.cdx-launch-total[open] .cdx-launch-total__more > svg { transform: rotate(180deg); }
+.cdx-launch-total .cdx-launch-cost { margin: 4px 0 8px; }
+.cdx-launch-total .cdx-launch-cost > div { min-height: 0; padding-block: 2px; }
+.cdx-launch-total .cdx-launch-cost :is(dt, dd) { font-size: 13px; line-height: 1.45; }
+
+/* Cost lines (the demo's What is included, the live panel's ticket and review): right-aligned on one edge. */
 .cdx-launch-cost { display: grid; min-width: 0; }
 .cdx-launch-cost > div { display: flex; min-height: 32px; align-items: baseline; justify-content: space-between; gap: 12px; padding-block: 6px; }
-.cdx-launch-cost dt { min-width: 0; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
-.cdx-launch-cost dd { min-width: 0; flex: none; font-size: var(--text-body); line-height: 20px; color: var(--color-ink); text-align: right; font-variant-numeric: tabular-nums; }
-.cdx-launch-cost > div[data-total] { margin-top: 4px; border-top: 1px solid var(--color-hairline); padding-top: 10px; }
-.cdx-launch-cost > div[data-total] :is(dt, dd) { color: var(--color-ink); font-size: var(--text-lead); line-height: 24px; font-weight: 600; }
-.cdx-launch-cost > div[data-total] .mdx-unit { font-size: var(--text-body); font-weight: 500; }
+.cdx-launch-cost dt { min-width: 0; font-size: 14px; line-height: 20px; color: var(--color-slate); }
+.cdx-launch-cost dd { min-width: 0; flex: none; font-size: 14px; line-height: 20px; color: var(--color-ink); text-align: right; font-variant-numeric: tabular-nums; }
+.cdx-launch-cost > div[data-total] { margin-top: 4px; border-top: 1px solid var(--color-hairline); padding-top: 10px; } /* taste-skill-ignore: mintdex.fun table rule */
+.cdx-launch-cost > div[data-total] :is(dt, dd) { color: var(--color-ink); font-size: 16px; line-height: 24px; font-weight: 600; }
+.cdx-launch-cost > div[data-total] .mdx-unit { font-size: 14px; font-weight: 500; }
 .cdx-launch-cost__plus { color: var(--color-slate); font-weight: 500; }
-.cdx-launch-ticket__note,
-.cdx-launch-rules { font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); text-wrap: pretty; }
-.cdx-launch-fee-note { font-size: var(--text-caption); line-height: 16px; color: var(--color-ink); text-wrap: pretty; }
+/* The live ticket's Total waits on the review: its words take the row beside the short label. */
+.cdx-launch-cost > div[data-total]:has(> .cdx-live-later) > dt { flex: none; }
+.cdx-launch-ticket__note { font-size: 13px; line-height: 1.45; color: var(--color-slate); text-wrap: pretty; }
+.cdx-launch-fee-note { font-size: 13px; line-height: 1.45; color: var(--color-ink); text-wrap: pretty; }
+.cdx-launch-go { display: grid; margin-top: 4px; }
 .cdx-launch-live-skeleton { height: 420px; border-radius: var(--radius-row); }
 
-/* Required to launch: three words on one row, each with its mark (a check, a short dash, or after a press a warning:
- * icon and colour together, never colour alone). The to-do mark is a status, not a control: a dash, never a ring a
- * radio button would have. */
+/* Required to launch (the live panel's `ready` slot): three words, each with its mark (a check, a short dash, or
+ * after a press a warning: icon and colour together, never colour alone). */
 .cdx-launch-ready { display: grid; gap: 4px; }
 .cdx-launch-ready > ul { display: flex; flex-wrap: wrap; gap: 4px 16px; }
-.cdx-launch-ready li { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
+.cdx-launch-ready li { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; line-height: 20px; color: var(--color-slate); }
 .cdx-launch-ready__mark { display: grid; width: 16px; height: 16px; flex: none; place-items: center; border: 1.5px solid var(--color-hairline); border-radius: var(--radius-pill); }
 .cdx-launch-ready li[data-state="todo"] .cdx-launch-ready__mark { border-color: transparent; }
 .cdx-launch-ready li[data-state="todo"] .cdx-launch-ready__mark::before { content: ""; width: 8px; height: 2px; border-radius: var(--radius-pill); background: var(--color-placeholder); }
@@ -292,108 +189,31 @@
 .cdx-launch-ready li[data-state="done"] .cdx-launch-ready__mark { border-color: var(--color-up-soft); background: var(--color-up-soft); color: var(--color-up); }
 .cdx-launch-ready li[data-state="missing"] { color: var(--color-down-hover); }
 .cdx-launch-ready li[data-state="missing"] .cdx-launch-ready__mark { border-color: var(--color-down-soft); background: var(--color-down-soft); }
-.cdx-launch-ready__status { font-size: var(--text-caption); line-height: 16px; color: var(--color-down-hover); }
+.cdx-launch-ready__status { font-size: 12px; line-height: 16px; color: var(--color-down-hover); }
 .cdx-launch-ready__status:empty { display: none; }
 
-/* The primary: in the ticket from 1024px; below that the page's action bar carries it. */
-.cdx-launch-go { display: grid; }
-@media (max-width: 1023.98px) {
-  .cdx-launch-go,
-  .cdx-launch .cdx-live-primary { display: none; }
-}
-.cdx-launch-go__short { display: none; }
-@media (max-width: 380px) {
-  .cdx-launch-bar .cdx-launch-go__long { display: none; }
-  .cdx-launch-bar .cdx-launch-go__short { display: inline; }
-}
+/* The pickers' selects stand as tall as the inputs beside them (44px). */
+.cdx-pair-picker .mdx-select--field,
+.cdx-pair-change .mdx-select--field,
+.cdx-pair-matching .mdx-select--field { height: 44px; }
 
-/* The action bar (phones and tablets): the total over its label at the left, the primary filling the rest. */
-.cdx-launch-bar__total { display: grid; flex: none; gap: 0; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
-.cdx-launch-bar__total > span:last-child { color: var(--color-ink); font-size: var(--text-body); line-height: 20px; font-weight: 600; white-space: nowrap; }
-.cdx-launch-bar__total .cdx-launch-cost__plus { display: block; font-size: var(--text-caption); line-height: 16px; }
-.cdx-launch-bar--live { flex-wrap: wrap; row-gap: 6px; }
-.cdx-launch-bar--live > .mdx-btn { width: 100%; }
-/* The live bar's one status line over its button: the step it waits on, or why the launch stopped (two lines at most;
- * the ticket below holds the whole message). */
-.cdx-launch-bar__status { display: flex; flex: 1 0 100%; min-width: 0; align-items: flex-start; gap: 6px; font-size: var(--text-caption); line-height: 16px; color: var(--color-ink); }
-.cdx-launch-bar__status > span { display: -webkit-box; min-width: 0; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; }
-.cdx-launch-bar__status[data-alert] { color: var(--color-down-hover); }
-.cdx-launch-bar__status > svg { flex: none; }
-/* The bar's button shrinks and wraps its words before it would push the page sideways (WCAG 1.4.12 text spacing). */
-.cdx-launch-bar .mdx-btn { min-width: 0; flex: 1 1 auto; white-space: normal; text-wrap: balance; }
-
-/* ------------------------------------------------ landscape phones: height is what is short */
-@media (max-width: 1023.98px) and (max-height: 500px) {
-  .cdx-launch { gap: 12px; }
-}
-/* The shortest phones held sideways (568x320): the top bar steps aside so a field and the bar fit. Not from 740px,
- * where the top bar carries the navigation (shell.css) in place of the tab bar. */
-@media (min-width: 560px) and (max-width: 739.98px) and (max-height: 360px) {
-  .cdx-viewport:has(.cdx-launch) .cdx-topbar { display: none; }
-}
-
-/* ------------------------------------------------ the design picker: the chosen design, suggestions, All designs */
+/* ------------------------------------------------ the design chips (CardDesignPicker inline; chip styles: designs.css) */
 .cdx-design-picker { display: grid; min-width: 0; justify-items: start; gap: 0; }
 .cdx-design-picker > .mdx-label { margin-bottom: 8px; }
-.cdx-design-picker__help { margin-top: 8px; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); text-wrap: pretty; }
+.cdx-design-picker__help { margin-top: 8px; font-size: 14px; line-height: 20px; color: var(--color-slate); text-wrap: pretty; }
 .cdx-design-picker__browse { margin-top: 16px; }
 .cdx-design-picker .cdx-pair-badge { width: 100%; }
-.cdx-design-picker--inline { justify-items: stretch; container: launch-swatches / inline-size; }
-.cdx-design-picker__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.cdx-design-picker--inline { justify-items: start; gap: 8px; }
+.cdx-design-picker__head { display: flex; align-items: baseline; gap: 8px; }
 .cdx-design-picker__head .mdx-label { margin: 0; }
-.cdx-design-picker__kept { font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
-/* A stock, meme or collector quote: its matched designs by name, over the row that holds them. */
-.cdx-design-picker__matched { margin-bottom: 8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); text-wrap: pretty; }
+.cdx-design-picker__kept { font-size: 12px; line-height: 1.3; color: var(--color-slate); }
+/* A stock, meme or collector quote: its matched designs by name, over the chips that hold them. */
+.cdx-design-picker__matched { font-size: 13px; line-height: 1.45; color: var(--color-slate); text-wrap: pretty; }
 .cdx-design-picker__matched strong { color: var(--color-ink); font-weight: 500; }
-/* A fixed count of cells by width (4, 6 or 7, the last is All designs), so no empty track is left at the end; the
- * suggestions past the count are not rendered for the eye or for focus. */
-.cdx-design-picker__swatches { --swatch-n: 4; display: grid; grid-template-columns: repeat(var(--swatch-n), minmax(0, 96px)); gap: 8px; }
-.cdx-design-picker__swatches > li { min-width: 0; }
-.cdx-design-picker__swatches > li:nth-child(n + 4):not(.cdx-design-picker__all) { display: none; }
-@container launch-swatches (min-width: 448px) {
-  .cdx-design-picker__swatches { --swatch-n: 6; }
-  .cdx-design-picker__swatches > li:nth-child(n + 4):not(.cdx-design-picker__all) { display: block; }
-  .cdx-design-picker__swatches > li:nth-child(n + 6):not(.cdx-design-picker__all) { display: none; }
-}
-@container launch-swatches (min-width: 524px) {
-  .cdx-design-picker__swatches { --swatch-n: 7; }
-  .cdx-design-picker__swatches > li:nth-child(n + 6):not(.cdx-design-picker__all) { display: block; }
-}
-.cdx-design-picker__swatch {
-  position: relative;
-  display: grid;
-  width: 100%;
-  /* The row's cells share one height, so a matched swatch's extra line leaves no ragged outline. */
-  height: 100%;
-  align-content: start;
-  gap: 4px;
-  padding: 4px;
-  border-radius: var(--radius-row);
-  color: var(--color-slate);
-  text-align: center;
-  transition: background-color var(--t-hover) ease, color var(--t-hover) ease, transform var(--t-press) var(--ease-out);
-}
-.cdx-design-picker__face { display: block; width: 100%; }
-.cdx-design-picker__face > .mdx-card { width: 100%; }
-/* Two lines at most ("Yu-Gi-Oh! Monster" and "Yu-Gi-Oh! Spell" must not read the same), the full name in the label. */
-.cdx-design-picker__name { display: -webkit-box; min-height: 32px; overflow: hidden; font-size: var(--text-caption); line-height: 16px; font-weight: 500; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; }
-/* A design matched to the quote (in the ink of the library's "CHILLHOUSE pair" line); one line. */
-.cdx-design-picker__match { overflow: hidden; color: var(--color-ink); font-size: var(--text-caption); line-height: 16px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
-/* It reads straight under the name: a one-line name gives the caption its second line, so the row keeps its height. */
-.cdx-design-picker__name:has(+ .cdx-design-picker__match) { min-height: 0; }
-.cdx-design-picker__name + .cdx-design-picker__match { margin-top: -4px; }
-.cdx-design-picker__swatch[aria-pressed="true"] { background: var(--color-nested); color: var(--color-ink); outline: 2px solid var(--color-ink); outline-offset: -2px; }
-.cdx-design-picker__swatch[aria-pressed="true"] .cdx-design-picker__name { font-weight: 600; }
-.cdx-design-picker__swatch:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; }
-.cdx-design-picker__swatch:active:not(:disabled) { transform: scale(0.96); }
-.cdx-design-picker__swatch:disabled { cursor: not-allowed; opacity: 0.5; }
-@media (hover: hover) and (pointer: fine) {
-  .cdx-design-picker__swatch:not([aria-pressed="true"]):hover:not(:disabled) { background: var(--color-track); color: var(--color-ink); }
-}
-/* All designs: a cell the size of a swatch, the card's shape in outline with a chevron. */
-.cdx-design-picker__more { align-content: start; color: var(--color-ink); }
-.cdx-design-picker__more-icon { display: grid; aspect-ratio: 63 / 88; width: 100%; place-items: center; border-radius: 6px; background: var(--color-nested); }
-.cdx-design-picker__more .cdx-design-picker__name { text-wrap: balance; }
+.cdx-design-picker__chips { display: flex; min-width: 0; flex-wrap: wrap; gap: 8px; }
+/* Four suggestions (the current design first); the rest are one link away in the library. */
+.cdx-design-picker__chips > li:nth-child(n + 5) { display: none; }
+.cdx-design-picker__all { font-size: 13px; font-weight: 500; }
 
 /* The library dialog: every design in the collection, in an auto-fill grid that grows in the dialog's scrolling body;
  * the collection filter stays at the body's top. */
@@ -498,7 +318,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border-top: 1px solid var(--color-hairline);
+  border-top: 1px solid var(--color-hairline); /* taste-skill-ignore: mintdex.fun table rule */
   color: var(--color-ink);
   font-size: var(--text-body);
   font-weight: 500;
@@ -518,7 +338,7 @@
 
 /* The mint and the terms behind one disclosure. */
 .cdx-pair-details { min-width: 0; margin-top: 16px; }
-.cdx-pair-disclosure { min-width: 0; margin-top: 16px; border-top: 1px solid var(--color-hairline); }
+.cdx-pair-disclosure { min-width: 0; margin-top: 16px; border-top: 1px solid var(--color-hairline); } /* taste-skill-ignore: mintdex.fun table rule */
 .cdx-pair-details > .cdx-pair-disclosure { margin-top: 0; }
 .cdx-pair-disclosure > summary {
   display: flex;
@@ -604,7 +424,7 @@
 /* Progress: two transactions, each a row with its stage in words (Preparing, Waiting for your wallet, Sending,
  * Confirmed) and its links once there is something to open. */
 .cdx-live-stages { display: grid; gap: 0; }
-.cdx-live-stage { display: flex; gap: 12px; padding-block: 12px; border-bottom: 1px solid var(--color-rule); }
+.cdx-live-stage { display: flex; gap: 12px; padding-block: 12px; border-bottom: 1px solid var(--color-rule); } /* taste-skill-ignore: mintdex.fun table rule */
 .cdx-live-stage:last-child { border-bottom: 0; }
 .cdx-live-stage__mark { display: grid; width: 24px; height: 24px; flex: none; place-items: center; border-radius: var(--radius-pill); background: var(--color-nested); color: var(--color-slate); font-size: var(--text-caption); font-weight: 600; }
 .cdx-live-stage[data-state="active"] .cdx-live-stage__mark { background: var(--color-ink); color: var(--color-on-cta); }
@@ -626,12 +446,12 @@
 .cdx-live-net { font-size: var(--text-caption); line-height: 16px; font-weight: 500; color: var(--color-slate); }
 .cdx-live-next { font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
 /* In the ticket the wallet preview is a quiet list in the ticket's caption size (the review dialog keeps its own). */
-.cdx-launch-ticket .cdx-live-wallet-notice { gap: 8px; }
-.cdx-launch-ticket .cdx-live-wallet-notice-title { font-size: var(--text-body); line-height: 20px; }
-.cdx-launch-ticket .cdx-live-wallet-notice-list { gap: 4px; }
-.cdx-launch-ticket .cdx-live-wallet-notice-list > li { font-size: var(--text-caption); line-height: 16px; }
-.cdx-launch-ticket .cdx-live-wallet-notice-list > li::before { top: 6px; }
-.cdx-launch-ticket .cdx-live-wallet-notice-safety { padding: 8px 12px; font-size: var(--text-caption); line-height: 16px; }
+.cdx-launch-foot .cdx-live-wallet-notice { gap: 8px; }
+.cdx-launch-foot .cdx-live-wallet-notice-title { font-size: var(--text-body); line-height: 20px; }
+.cdx-launch-foot .cdx-live-wallet-notice-list { gap: 4px; }
+.cdx-launch-foot .cdx-live-wallet-notice-list > li { font-size: var(--text-caption); line-height: 16px; }
+.cdx-launch-foot .cdx-live-wallet-notice-list > li::before { top: 6px; }
+.cdx-launch-foot .cdx-live-wallet-notice-safety { padding: 8px 12px; font-size: var(--text-caption); line-height: 16px; }
 .cdx-live-wallet-line { margin-top: -8px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
 .cdx-live-terms { gap: 8px; }
 .cdx-live-terms > p { font-size: var(--text-caption); line-height: 16px; }
@@ -684,8 +504,8 @@
 
 /* ------------------------------------------------ reduced motion and Calm: no scale on press, colour changes only */
 @media (prefers-reduced-motion: reduce) {
-  .cdx-design-picker__swatch:active:not(:disabled) { transform: none; }
+  .cdx-launch-more__chev,
+  .cdx-launch-total__more > svg { transition: none; }
   .cdx-pair-matching__toggle > svg,
   .cdx-pair-disclosure > summary > svg { transition: none; }
 }
-:root[data-motion="calm"] .cdx-design-picker__swatch:active { transform: none; }
