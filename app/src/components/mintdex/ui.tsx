@@ -108,8 +108,7 @@
  *   LiveDot        pulse, paused. The 6px live dot; pings on mount and when pulse changes (at most every 2s);
  *                  slate and still while paused.
  *   LivePause      paused (req), onChange (req). "Pause" / "Resume" live updates, for a live list's header.
- *   Hallmark       size = 28. The logo mark (the wordless card); 28 and 32 are
- *                  pixel-hinted at 1x.
+ *   Hallmark       size = 28. The logo mark: the logo card without its lettering.
  *   GenIcon        name (req), size. Mask icon in currentColor (rail and mobile tab bar only).
  *
  * CSS classes (src/mintdex.css): mdx-ledge, mdx-pocket (+ --pocket, mdx-pocket--featured), mdx-leaders, mdx-plate,
