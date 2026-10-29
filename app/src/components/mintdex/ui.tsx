@@ -1522,7 +1522,7 @@ export function LiveDot({
 }
 
 /**
- * Pause or resume live updates (P1-17, WCAG 2.2.2): a small slate text button for a live list's header. The
+ * Pause or resume live updates (P1-17, WCAG 2.2.2): a small text button for a live list's header. The
  * choice is kept per viewer in this browser and applies to every live list.
  */
 export function LivePause({

@@ -185,7 +185,7 @@
 .cdx-legal__fees thead th {
   padding-block: 8px;
   border-bottom-color: var(--color-hairline);
-  color: var(--color-placeholder);
+  color: var(--color-slate);
   font-size: var(--text-caption);
   line-height: var(--text-caption--line-height);
   font-weight: 500;

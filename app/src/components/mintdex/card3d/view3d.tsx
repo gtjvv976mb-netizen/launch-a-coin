@@ -282,10 +282,10 @@ export function View3DButton({
       ref={ref}
       type="button"
       className={`mdx-v3dbtn ${className}`}
-      // The name starts with the words of the tooltip (WCAG 2.5.3).
+      // The name starts with the words of the tooltip (WCAG 2.5.3); the tooltip is CSS (viewer.css), never title=.
       aria-label={`View in 3D: ${item.card.name}`}
       aria-haspopup="dialog"
-      title="View in 3D"
+      data-tip="View in 3D"
       data-v3d-btn={id}
       onPointerEnter={prefetchView3D}
       onFocus={prefetchView3D}

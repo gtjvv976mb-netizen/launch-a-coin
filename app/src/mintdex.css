@@ -1251,7 +1251,8 @@
   .mdx-live[data-paused] {
     background: var(--color-slate);
   }
-  /* Pause or resume live updates: a small slate text button in a live list's header. */
+  /* Pause or resume live updates: a small text button in a live list's header (Home's activity, the coin page's
+   * Activity), the body size in ink beside the slate meta it sits with. */
   .mdx-livepause {
     display: inline-flex;
     align-items: center;
@@ -1260,16 +1261,16 @@
     border: 0;
     border-radius: var(--radius-chip);
     background: none;
-    font-size: 13px;
+    font-size: var(--text-body);
     font-weight: 500;
     line-height: 1;
-    color: var(--color-slate);
+    color: var(--color-ink);
     cursor: pointer;
     transition: color var(--t-fast) var(--ease-room);
   }
-  @media (hover: hover) {
+  @media (hover: hover) and (pointer: fine) {
     .mdx-livepause:hover {
-      color: var(--color-ink);
+      color: var(--color-slate);
     }
   }
   .mdx-livepause:focus-visible {

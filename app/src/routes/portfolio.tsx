@@ -299,16 +299,14 @@ function Collection({ me }: { me: NonNullable<Me> }) {
     <div className="mdx-frame cdx-portfolio">
       <PageHeader
         title="Portfolio"
-        context={<>@{me.handle} · test wallet</>}
+        // The Simulated tag ends the context line, as on Discover and the coin page, so it never takes a row of its own.
+        context={<>@{me.handle} · test wallet <SimTag className="cdx-portfolio__sim" /></>}
         right={
-          <>
-            <SimTag />
-            {me.canFaucet ? (
-              <Button variant="outline" pending={pending === "faucet"} pendingLabel="Claiming..." onClick={() => void run("faucet", () => claimFaucet(), FLOW.faucetSent, { keys: [["portfolio"]] })}>
-                {FLOW.claimFaucet}
-              </Button>
-            ) : null}
-          </>
+          me.canFaucet ? (
+            <Button variant="outline" pending={pending === "faucet"} pendingLabel="Claiming..." onClick={() => void run("faucet", () => claimFaucet(), FLOW.faucetSent, { keys: [["portfolio"]] })}>
+              {FLOW.claimFaucet}
+            </Button>
+          ) : undefined
         }
       />
       <KpiGroup items={items} lead strip className="cdx-portfolio__kpis" />

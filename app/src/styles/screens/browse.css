@@ -484,10 +484,6 @@
   .cdx-archive__use {
     display: none;
   }
-  /* Whatever is scrolled into view (a focused tile, the waiting pair change) stops above the sticky action bar. */
-  .cdx-archive__main :is(a, button, input, select, summary, [tabindex]) {
-    scroll-margin-bottom: calc(var(--actionbar-h) + 8px);
-  }
 }
 .cdx-archive__collection {
   display: none;
@@ -740,11 +736,12 @@
   }
 }
 
-/* The action bar (below 1024px): the selected design's name over its pair, then the primary. */
+/* The action bar (below 1024px): the selected design's name over its pair, then the primary filling the rest (the
+ * shared ActionBar rule, as on Launch and the coin page); a long name ellipsizes before the primary shrinks. */
 .cdx-archive__bar-text {
   display: grid;
   min-width: 0;
-  flex: 1;
+  flex: 0 1 auto;
   margin: 0;
 }
 .cdx-archive__bar-text > strong {
@@ -763,7 +760,4 @@
   color: var(--color-slate);
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.cdx-archive__bar .mdx-btn {
-  flex: none;
 }

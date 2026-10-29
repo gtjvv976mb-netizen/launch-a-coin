@@ -163,7 +163,6 @@
   --gap-head: 8px; /* a section head to its list */
   --gap-grid: 12px; /* between tiles in an auto-fill grid */
   --pad-panel: 12px; /* panel padding on phones; 16px from 768px */
-  --pad-overlay: 16px; /* 24px for desktop dialogs */
   --row-h: 44px; /* a list or table row on touch; 40px under a fine pointer */
   --pagehead-h: 56px; /* the page header row at desktop: title 24 + meta 14 + actions on one row */
   --tile-min: 150px; /* the smallest tile track in an auto-fill grid on phones; 176px from 768px */
@@ -220,11 +219,6 @@
     --page-gutter: 24px;
     --pad-panel: 16px;
     --tile-min: 176px;
-  }
-}
-@media (min-width: 1024px) {
-  :root {
-    --pad-overlay: 24px;
   }
 }
 @media (min-width: 1280px) {

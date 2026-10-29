@@ -5,6 +5,7 @@
  * its first rows, then one "Show all" that expands in place. */
 .cdx-portfolio { gap: var(--gap-page); }
 .cdx-portfolio .mdx-pagehead__right { gap: 12px; }
+.cdx-portfolio__sim { margin-left: 4px; }
 
 /* ---- the figures: one strip. Total value leads (30px) with its 24h move; test SOL, coins and cards beside it */
 .cdx-portfolio__kpis { flex: none; grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr)); }

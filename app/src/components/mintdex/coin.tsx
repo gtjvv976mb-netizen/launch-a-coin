@@ -86,6 +86,7 @@ import {
   FrameMini,
   Icon,
   KpiGroup,
+  LivePause,
   Modal,
   Num,
   SectionHead,
@@ -1015,15 +1016,7 @@ export function TradesList({
               <span className="text-slate">
                 <span className="num">{total.toLocaleString("en-US")}</span> {total === 1 ? "trade" : "trades"}
               </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                aria-label={live.paused ? "Resume live updates" : "Pause live updates"}
-                onClick={() => live.setPaused(!live.paused)}
-              >
-                <Icon name={live.paused ? "play" : "pause"} />
-                {live.paused ? "Resume" : "Pause"}
-              </Button>
+              <LivePause paused={live.paused} onChange={live.setPaused} />
             </span>
           ) : undefined
         }

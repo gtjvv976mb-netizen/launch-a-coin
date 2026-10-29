@@ -499,15 +499,6 @@
   color: var(--color-slate);
   white-space: nowrap;
 }
-.cdx-home-panel .mdx-livepause {
-  font-size: var(--text-body);
-  color: var(--color-ink);
-}
-@media (hover: hover) and (pointer: fine) {
-  .cdx-home-panel .mdx-livepause:hover {
-    color: var(--color-slate);
-  }
-}
 /* Rows bleed 8px into the panel padding so their hover and focus fill keeps the text on the panel's text edge. */
 .cdx-home-panel__list {
   display: flex;

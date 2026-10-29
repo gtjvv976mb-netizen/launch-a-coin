@@ -76,6 +76,37 @@
   width: 30px;
   height: 30px;
 }
+/* In the case's card-controls row it shows its name like the row's other pills (.cdx-card-control, carddex.css):
+ * hover after a beat, keyboard focus at once, never on touch. Its ::before is free there (card3d.css clears it). */
+.mdx-case .mdx-v3dbtn--case[data-tip]::before {
+  content: attr(data-tip);
+  position: absolute;
+  inset: auto auto calc(100% + 6px) 50%;
+  z-index: 2;
+  padding: 4px 8px;
+  border-radius: var(--radius-row);
+  background: var(--color-float);
+  box-shadow: var(--shadow-pop); /* taste-skill-ignore: a tooltip floats over the card, like the row's other tips */
+  color: var(--color-ink);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-50%);
+  transition: opacity var(--t-fast) ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mdx-case .mdx-v3dbtn--case[data-tip]:hover::before {
+    opacity: 1;
+    transition-delay: 400ms;
+  }
+}
+.mdx-case .mdx-v3dbtn--case[data-tip]:focus-visible::before {
+  opacity: 1;
+  transition: none;
+}
 
 /* ---------------------------------------------------------------- the 3D viewer
  * The card as large as the window allows (density R8): --W is the card's width, --W-room the width of what the

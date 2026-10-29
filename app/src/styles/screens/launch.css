@@ -185,11 +185,9 @@
 /* The live ticket's Total waits on the review: its words take the row beside the short label. */
 .cdx-launch-cost > div[data-total]:has(> .cdx-live-later) > dt { flex: none; }
 
-/* Focus moved to a field that needs something lands clear of the screen's edges (and of the action bar on phones). */
+/* Focus moved to a field that needs something lands clear of the screen's edges (main's scroll-padding adds the
+ * action bar on phones, carddex-viewport.css). */
 .cdx-launch :is(input, textarea, select, button, [tabindex="-1"]) { scroll-margin-block: 16px; }
-@media (max-width: 1023.98px) {
-  .cdx-launch :is(input, textarea, select, button, [tabindex="-1"]) { scroll-margin-block: 16px calc(var(--actionbar-h) + 16px); }
-}
 
 /* ------------------------------------------------ the preview row (phones and landscape phones) */
 .cdx-launch-row {
@@ -426,8 +424,7 @@
   .cdx-design-browser__art { width: min(100px, 70cqw); }
 }
 
-/* ------------------------------------------------ the pair picker (Launch's Pair field; also the Designs pair tab) */
-.cdx-app .cdx-library .cdx-pair-picker { min-width: 0; }
+/* ------------------------------------------------ the pair picker (Launch's Pair field; also the Designs preview) */
 .cdx-pair-picker { display: grid; min-width: 0; gap: 0; }
 .cdx-pair-picker__head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 8px; }
 .cdx-pair-picker__head .mdx-label { margin: 0; }

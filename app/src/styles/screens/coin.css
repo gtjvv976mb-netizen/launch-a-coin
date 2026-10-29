@@ -338,11 +338,7 @@
 .cdx-coin-screen__token { display: none; margin: 0 var(--pad-panel); padding-block: 4px 8px; border-top: 1px solid var(--color-hairline); } /* taste-skill-ignore: the ticket and its token table share one surface; the table's top rule */
 
 /* ---- the phone action bar: what the trade spends, then the Buy or Sell submit (44px). Below 1024 it covers the
- * bottom of main, so anything focused or scrolled into view on this screen stops above it (WCAG 2.4.11): a scroll
- * margin on the screen's own controls and rows (a scroll-padding on main, the shared fix, would replace this). */
-@media (max-width: 1023.98px) {
-  .cdx-coin-screen :is(a, button, input, [tabindex], tr):not(.mdx-actionbar *) { scroll-margin-bottom: calc(var(--actionbar-h) + 8px); }
-}
+ * bottom of main; main's scroll-padding (carddex-viewport.css) keeps focused and scrolled-to rows above it. */
 .cdx-trade-bar__spend { flex: 1 1 40%; min-width: 0; overflow: hidden; font-size: var(--text-body); color: var(--color-slate); text-overflow: ellipsis; white-space: nowrap; }
 .cdx-trade-bar__spend:empty { display: none; }
 .cdx-trade-bar .cdx-trade-bar__submit { flex: 1 1 60%; min-width: 0; height: var(--btn-h-lg); }

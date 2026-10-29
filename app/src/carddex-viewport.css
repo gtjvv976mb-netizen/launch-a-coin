@@ -22,6 +22,11 @@ body { overflow:clip; }
 /* Views grow with their content and are at least main's height. A view never sets height:100% on itself or its
    panels to fill the screen: that is what made panels scroll inside the page. */
 .cdx-viewport-main > :first-child { min-height:100%; }
+/* Below 1024 a screen's ActionBar sticks over main's bottom edge, so whatever is focused or scrolled into view stops
+   above it (WCAG 2.4.11), on every screen that has one. */
+@media (max-width:1023.98px) {
+  .cdx-viewport .cdx-viewport-main:has(.mdx-actionbar) { scroll-padding-bottom:calc(var(--actionbar-h) + 8px); }
+}
 
 /* Pagers (components/carddex/Viewport.tsx): primitives a screen may still use for content that does not fit. */
 .cdx-page-controls { display:flex; flex:none; min-height:var(--hit); align-items:center; justify-content:space-between; gap:8px; font-size:var(--text-caption); color:var(--color-slate); }
