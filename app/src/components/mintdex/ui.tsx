@@ -108,7 +108,7 @@
  *   LiveDot        pulse, paused. The 6px live dot; pings on mount and when pulse changes (at most every 2s);
  *                  slate and still while paused.
  *   LivePause      paused (req), onChange (req). "Pause" / "Resume" live updates, for a live list's header.
- *   Hallmark       size = 28. The Holo Seal: a serif M on pastel foil in a hexagon seal; 28 and 32 are
+ *   Hallmark       size = 28. The logo mark (the wordless card); 28 and 32 are
  *                  pixel-hinted at 1x.
  *   GenIcon        name (req), size. Mask icon in currentColor (rail and mobile tab bar only).
  *
@@ -201,14 +201,9 @@ export function GenIcon({
   );
 }
 
-/** Sizes with a pixel-hinted seal for 1x screens (brand/src/logo.py SMALL). */
-const HINTED_SEAL = new Set([28, 32]);
-
 /**
- * The Holo Seal: a serif M on pastel foil in a hexagon seal (light version), the logo in the rail and the
- * mobile header.
- * The seal fills the square box's height. 1x screens get the seal hand-hinted for 28 or 32 px;
- * 2x and up (and every other size) get the vector.
+ * The mark: the Launch a Card logo card without its lettering (creative/brand/README.md), beside the lettered
+ * wordmark in the rail and alone in the phone header, centred in a square box of the given size.
  */
 export function Hallmark({ size = 28, className = "" }: { size?: number; className?: string }) {
   const svg = "/assets/brand/carddex.svg";

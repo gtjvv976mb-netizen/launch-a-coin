@@ -117,7 +117,7 @@ function buildHead(meta: AppMeta, devnetSite = false, notFound = false) {
       { rel: "stylesheet", href: appCss },
       // No font preload (F17): Instrument Sans is not used early enough for one to pay off, and Chrome warned on
       // every route that the preloaded file went unused. Its @font-face (font-display: swap) loads it on use.
-      // The same wordless gold card-and-crown mark serves browser, mobile and installed-app branding.
+      // The owner's logo (creative/brand/README.md): the wordless card as the favicon, the whole logo as app icons.
       { rel: "icon", href: "/assets/brand/carddex.svg", type: "image/svg+xml" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/assets/brand/carddex-180.png" },
       // One manifest per mode under its own name (lib/mintdex/manifest.ts; vite.config.ts emits it).

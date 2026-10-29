@@ -38,7 +38,8 @@ export function webManifestText(mode: ManifestMode): string {
       { src: "/assets/brand/carddex-192.png", sizes: "192x192", type: "image/png" },
       { src: "/assets/brand/carddex-512.png", sizes: "512x512", type: "image/png" },
       {
-        src: "/assets/brand/carddex-512.png",
+        // The card inside the 80% safe circle, so a round mask keeps its corners.
+        src: "/assets/brand/carddex-maskable-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",

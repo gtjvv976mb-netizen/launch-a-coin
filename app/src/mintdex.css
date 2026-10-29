@@ -2188,14 +2188,24 @@ a:focus-visible .mdx-lift {
   color: var(--color-ink);
   text-decoration: none;
 }
+/* The name is the logo's own lettering (creative/brand/README.md): a white alpha mask (2.244:1) painted in the ink
+ * token, so it follows the theme. The text stays in the DOM, hidden behind the mask; the link carries the name. */
 .mdx-lockup__name {
-  font-family: var(--font-title);
-  font-size: 19px;
-  font-weight: 700;
-  font-stretch: 85%;
-  line-height: 1;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
+  display: block;
+  width: calc(26px * 2.244);
+  height: 26px;
+  overflow: hidden;
+  background-color: currentColor;
+  color: var(--color-ink);
+  font-size: 0;
+  -webkit-mask: url(/assets/brand/wordmark.webp) center / contain no-repeat;
+  mask: url(/assets/brand/wordmark.webp) center / contain no-repeat;
+}
+@media (forced-colors: active) {
+  .mdx-lockup__name {
+    forced-color-adjust: none;
+    background-color: CanvasText;
+  }
 }
 /* The status strip above the page: one 13/20 slate line centred on the walnut panel, a hairline under it. MintDex's
  * strip is 53px tall at every width (its 44px X link); ours keeps that height so the ticker and page sit where
