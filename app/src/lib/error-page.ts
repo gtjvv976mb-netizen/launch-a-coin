@@ -9,7 +9,7 @@ export function renderErrorPage(): string {
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>This page did not load | Launch a Card</title>
+    <title>Page didn't load | Launch a Card</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
     <meta name="theme-color" content="#14110d" />
@@ -37,8 +37,7 @@ export function renderErrorPage(): string {
   </head>
   <body>
     <main>
-      <h1>This page did not load</h1>
-      <p>Something went wrong on our side. Try again, or head back home.</p>
+      <h1>Page didn't load</h1>
       <div class="actions">
         <button type="button" onclick="location.reload()">Try again</button>
         <a href="/">Go home</a>

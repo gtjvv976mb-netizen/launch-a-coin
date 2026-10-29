@@ -817,15 +817,9 @@
   padding-top: 4px; /* 16px below the field with the 12px gap */
 }
 
-/* ---------------------------------------------------------------- How Launch a Card works (session.tsx GuideDialog)
- * One page (density R4): the three steps, then costs and risks beside Calm motion, then the one primary. Dialogs
- * (720px): the steps as three nested wells in a row (elevation by lightness only; no border, no lift, no gold), then
- * the two secondary blocks in two columns. Sheets: the steps as a numbered list, each block under the last. */
-.cdx-guide {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
+/* ---------------------------------------------------------------- the three guide steps (routes/how.tsx)
+ * The numbered steps at the top of /how (formerly the How it works dialog): a number column beside each step's
+ * title and line. Their row layout and the rest of the page are in styles/screens/how.css. */
 .cdx-guide__steps {
   display: grid;
   gap: 20px;
@@ -850,55 +844,12 @@
   line-height: 24px;
   font-weight: 500;
 }
-.cdx-guide__step h3 {
-  color: var(--color-ink);
-  font-size: 17px;
-  line-height: 24px;
-  font-weight: 600;
-  text-wrap: balance;
-}
 .cdx-guide__step p {
   overflow-wrap: anywhere;
   color: var(--color-slate);
   font-size: 15px;
   line-height: 1.5;
   text-wrap: pretty;
-}
-.cdx-guide__more {
-  display: grid;
-  gap: 12px;
-  padding-top: 16px;
-  border-top: 1px solid var(--color-hairline);
-  font-size: 14px;
-  line-height: 1.45;
-}
-.cdx-guide__mode {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 4px 16px;
-  color: var(--color-ink);
-}
-.cdx-guide__facts {
-  display: grid;
-  gap: 6px;
-  color: var(--color-slate);
-}
-.cdx-guide__facts > div {
-  display: grid;
-  grid-template-columns: minmax(72px, auto) minmax(0, 1fr);
-  gap: 12px;
-}
-.cdx-guide__facts dt {
-  color: var(--color-ink);
-  font-weight: 500;
-}
-.cdx-guide__calm {
-  border-top: 1px solid var(--color-rule);
-}
-.cdx-guide__actions .mdx-btn {
-  min-height: 48px;
 }
 
 /* ---------------------------------------------------------------- confirm (confirm.tsx) */

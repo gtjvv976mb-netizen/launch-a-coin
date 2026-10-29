@@ -1,11 +1,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getRouteApi, useNavigate, useRouterState } from "@tanstack/react-router";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
-  useId,
   useMemo,
   useState,
   type FormEvent,
@@ -13,7 +12,6 @@ import {
 } from "react";
 
 import { requestWallet, useChainMe, useChainRequireMe } from "../../lib/chain/identity";
-import { CONNECT_COPY } from "../../lib/chain/connect-copy";
 import { enter, getMe } from "../../lib/mintdex/api";
 import { IS_SIM } from "../../lib/mintdex/mode";
 import { HANDLE_RE, isReservedHandle } from "../../lib/mintdex/constants";
@@ -21,14 +19,11 @@ import { FLOW, MODE_COPY } from "../../lib/mintdex/copy";
 import type { Me } from "../../lib/mintdex/types";
 import { setMe } from "./hooks";
 import { isCoarsePointer } from "./sheet";
-import { useLiveLaunchOpen } from "../carddex/live/readiness";
 import {
   Button,
-  CalmSwitch,
   Field,
   Input,
   Modal,
-  TextLink,
   useToast,
 } from "./ui";
 
@@ -99,7 +94,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [enterOpen, setEnterOpen] = useState(false);
   const [reason, setReason] = useState<string | undefined>();
   const [intent, setIntent] = useState<Intent | undefined>();
-  const [guideOpen, setGuideOpen] = useState(false);
   const openEnter = useCallback((r?: string, i?: Intent) => {
     // Devnet has no handle login: the wallet is the identity, so "enter" opens the wallet picker and finishes the
     // action once a wallet connects (lib/chain/identity.ts requestWallet).
@@ -108,32 +102,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setIntent(i);
     setEnterOpen(true);
   }, []);
-  const openGuide = useCallback(() => setGuideOpen(true), []);
-  const value = useMemo(() => ({ openEnter, openGuide }), [openEnter, openGuide]);
-
-  // A linkable guide (P1-7): any page with ?guide=1 opens it after load (never in the server HTML); closing
-  // it drops the flag, so Back and a refresh do not reopen it.
+  // The guide is a page now (/how, the words rule): every "How it works" entry opens it.
   const navigate = useNavigate();
-  const linked = useRouterState({
-    select: (st) => {
-      const g = (st.location.search as { guide?: unknown }).guide;
-      return g === 1 || g === "1";
-    },
-  });
-  useEffect(() => {
-    if (linked) setGuideOpen(true);
-  }, [linked]);
-  const onGuideChange = (o: boolean) => {
-    setGuideOpen(o);
-    if (!o && linked) {
-      void navigate({
-        to: ".",
-        search: (prev: Record<string, unknown>) => ({ ...prev, guide: undefined }),
-        replace: true,
-        resetScroll: false,
-      } as never);
-    }
-  };
+  const openGuide = useCallback(() => void navigate({ to: "/how" }), [navigate]);
+  const value = useMemo(() => ({ openEnter, openGuide }), [openEnter, openGuide]);
+  // An old ?guide=1 link redirects to /how in the root route's beforeLoad.
   return (
     <SessionCtx.Provider value={value}>
       {children}
@@ -148,7 +121,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           intent={intent}
         />
       ) : null}
-      <GuideDialog open={guideOpen} onOpenChange={onGuideChange} onEnter={() => openEnter()} />
     </SessionCtx.Provider>
   );
 }
@@ -185,9 +157,7 @@ function EnterDialog({
   }, [open]);
 
   // A handle that cannot be used says why on the spot (Enter or the button), not only through the static help.
-  const invalidReason = clean
-    ? "Handles need 3 to 16 characters: letters, numbers or underscores."
-    : "Pick a handle first.";
+  const invalidReason = clean ? "Use 3 to 16 letters, numbers or underscores." : "Pick a handle first.";
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -222,18 +192,19 @@ function EnterDialog({
     if (then) setTimeout(then.run, 0);
   }
 
-  // One page (coin-26): what the demo is, the handle, then Cancel and the one primary.
+  // One page (coin-26): the gift (or why the demo opened), the handle, then Cancel and the one primary. What the demo
+  // is lives on /how#demo.
   return (
     <Modal open={open} onOpenChange={onOpenChange} title="Try the demo">
       <form onSubmit={submit} className="cdx-enter" noValidate>
         <p className="cdx-enter__intro">
-          {reason ?? "Pick a handle to launch coins and build your collection."}
-          {MODE_COPY.enterGift ? ` ${MODE_COPY.enterGift}` : null}
+          {reason ? `${reason} ` : null}
+          {MODE_COPY.enterGift}
         </p>
         <Field
           label="Handle"
           htmlFor="handle"
-          help="3 to 16 characters: letters, numbers or underscores."
+          help="3 to 16 letters, numbers or underscores."
           error={error ?? undefined}
         >
           <Input
@@ -270,117 +241,6 @@ function EnterDialog({
           </Button>
         </div>
       </form>
-    </Modal>
-  );
-}
-
-// ---------------------------------------------------------------- guide (every figure from copy.ts and tiers.ts)
-
-type GuideStep = { title: string; body: string };
-/** While mainnet launches are off, the guide describes the test mode people can actually use, test funds first. */
-const DEMO_STEPS: GuideStep[] = [
-  {
-    title: "Launch your coin",
-    body: "Launches run in test mode with test SOL. Real mainnet launches are not open yet. Give your token a name, ticker and artwork, and choose its quote asset.",
-  },
-  {
-    title: "Choose its permanent card",
-    body: "Pick a premium design before launch. Your coin launches on a simulated pump.fun curve and its one-of-one card goes into your demo collection.",
-  },
-  {
-    title: "Trade the token. Keep the card.",
-    body: "Trade your test token with test funds and keep its card in your collection. No real token or NFT is minted.",
-  },
-];
-/** The wallet-launch guide, used only once the owner turns mainnet launches on. */
-const LIVE_STEPS: GuideStep[] = [
-  {
-    title: "Launch your coin",
-    body: "Give your coin a name, ticker and artwork. Choose its supported quote asset, then review the pump.fun launch in your wallet.",
-  },
-  {
-    title: "Choose its permanent card",
-    body: "Pick a premium design before launch. After the coin is verified, approve the separate one-of-one NFT card delivery to your creator wallet.",
-  },
-  {
-    title: "Trade the coin. Keep the card.",
-    body: "Open your real coin on pump.fun and keep the separate card NFT in your wallet. The demo lets you explore with test SOL.",
-  },
-];
-
-const feeRows = (liveOpen: boolean): Array<{ label: string; value: string }> => IS_SIM
-  ? [{ label: "Demo", value: liveOpen ? "Demo balances and trades are simulated. Wallet launches show real network costs separately before you sign." : "Demo balances and trades are simulated with test funds." }]
-  : [{ label: "Coin trading", value: "Review the fee and price impact shown before confirming a trade." }];
-
-/**
- * The guide, one page (MintDex's "How MintDex works"): the three numbered steps, the mode line and terms link, the
- * costs, Calm motion, then one primary: Done, or (signed out) Try the demo. Linkable with ?guide=1.
- */
-function GuideDialog({
-  open,
-  onOpenChange,
-  onEnter,
-}: {
-  open: boolean;
-  onOpenChange: (o: boolean) => void;
-  onEnter: () => void;
-}) {
-  const me = useMe();
-  const liveOpen = useLiveLaunchOpen(open);
-  const STEPS = liveOpen || !IS_SIM ? LIVE_STEPS : DEMO_STEPS;
-  const FEE_ROWS = feeRows(liveOpen);
-  const idBase = useId();
-  const close = () => onOpenChange(false);
-  const invite = () => {
-    close();
-    // The demo dialog rises once the guide has left and handed focus back to its opener (so Escape returns there).
-    window.setTimeout(onEnter, 260);
-  };
-  return (
-    <Modal open={open} onOpenChange={onOpenChange} title="How Launch a Card works" width={560}>
-      {/* MintDex's guide: the three numbered steps, a rule, the mode line with the terms link, the costs, then one
-          full-width primary. Calm motion sits just above it (phones signed out have no other switch). */}
-      <div className="cdx-guide">
-        <ol className="cdx-guide__steps" role="list">
-          {STEPS.map((s, i) => (
-            <li key={s.title} className="cdx-guide__step">
-              <span className="cdx-guide__n num" aria-hidden>
-                {i + 1}
-              </span>
-              <h3 id={`${idBase}-${i}`}>{s.title}</h3>
-              <p>{s.body}</p>
-            </li>
-          ))}
-        </ol>
-        <div className="cdx-guide__more">
-          <div className="cdx-guide__mode">
-            <p>{MODE_COPY.guideNote || "Costs and risks"}</p>
-            <TextLink to="/legal" hash="fees" onClick={close}>
-              Terms, privacy and risks
-            </TextLink>
-          </div>
-          <dl className="cdx-guide__facts">
-            {FEE_ROWS.map((r) => (
-              <div key={r.label}>
-                <dt>{r.label}</dt>
-                <dd>{r.value}</dd>
-              </div>
-            ))}
-          </dl>
-          <CalmSwitch size="md" className="cdx-guide__calm" />
-        </div>
-        <div className="cdx-guide__actions mdx-sheet-foot">
-          {me ? (
-            <Button block onClick={close}>
-              Done
-            </Button>
-          ) : (
-            <Button block onClick={invite}>
-              {IS_SIM ? "Try the demo" : CONNECT_COPY.connect}
-            </Button>
-          )}
-        </div>
-      </div>
     </Modal>
   );
 }

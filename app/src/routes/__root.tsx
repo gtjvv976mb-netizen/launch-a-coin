@@ -4,6 +4,7 @@ import {
   Outlet,
   Scripts,
   createRootRouteWithContext,
+  redirect,
   useRouter,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
@@ -141,7 +142,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="grid h-full min-h-[60dvh] place-items-center px-4">
       <div className="flex max-w-md flex-col items-center gap-2 text-center">
         <h1 className="mdx-h1">{ROUTE_ERROR.title}</h1>
-        <p className="text-body text-slate">{ROUTE_ERROR.body}</p>
+        {ROUTE_ERROR.body ? <p className="text-body text-slate">{ROUTE_ERROR.body}</p> : null}
         <div className="mt-4 flex items-center gap-5">
           <Button
             onClick={() => {
@@ -173,6 +174,12 @@ async function loadRootData({location,context}:{location:{pathname:string;search
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: ({ loaderData, match }) => buildHead(appMeta, loaderData?.devnetSite ?? false, !!match.globalNotFound),
+  // An old linkable guide (P1-7: any page with ?guide=1) lands on the details page, /how, on the server and the client.
+  // The parameter is typed by hand: inferring it from the route tree makes the root's type circular.
+  beforeLoad: ({ location }: { location: { search: unknown } }) => {
+    const g = (location.search as { guide?: unknown } | undefined)?.guide;
+    if (g === 1 || g === "1") throw redirect({ to: "/how", replace: true });
+  },
   // `now` is the page's clock for its first frame (see useNow in hooks.ts): it is dehydrated with the
   // loader data, so server HTML and the hydrating client compute the same relative times. `vp` is the
   // viewport cookie (P1-20), so fitted grids lay out their server HTML for this screen.

@@ -1,20 +1,19 @@
-import { useState } from "react";
-import { IconButton, Modal } from "../../mintdex/ui";
+import { Link } from "@tanstack/react-router";
+import { Icon } from "../../mintdex/ui";
 
+/**
+ * The mainnet launch's help control: a link to the wallet steps on /how#wallet (the words rule: the steps that used to
+ * open in a dialog here live on that page). `compact`: the phone header's 44px help icon, the same look as the shell's
+ * help button on every other route.
+ */
 export function LiveLaunchGuide({ compact = false }: { compact?: boolean }) {
-  const [open, setOpen] = useState(false);
-  return <>
-    {/* The same help control as the shell's guide button on every other route (IconButton "help"). */}
-    {compact ? <IconButton icon="help" label="How wallet launch works" onClick={() => setOpen(true)} aria-haspopup="dialog" />
-      : <button type="button" onClick={() => setOpen(true)} className="mdx-link mdx-hit" aria-haspopup="dialog">How wallet launch works</button>}
-    <Modal open={open} onOpenChange={setOpen} title="A token and your own trading card" description="The mainnet launch uses your connected creator wallet and separate transaction reviews.">
-      <ol className="cdx-live-guide">
-        <li>Choose your permanent card design and its exact quote asset. Add your token name, ticker and artwork.</li>
-        <li>Connect your creator wallet and sign an ownership message. This message authorizes your launch session and spends no funds.</li>
-        <li>Review the actual token creation costs and any optional initial buy, then approve the pump.fun transaction in your wallet.</li>
-        <li>After the token is verified, review a separate transaction to issue its one-of-one card NFT to that same wallet. There are no NFT royalties, bids or marketplace listings.</li>
-        <li>If the token succeeds before the card, resume card issuance from this page. Your token is not created again.</li>
-      </ol>
-    </Modal>
-  </>;
+  return compact ? (
+    <Link to="/how" hash="wallet" aria-label="How it works" title="How it works" className="mdx-btn mdx-btn--icon mdx-btn--ghost">
+      <Icon name="help" />
+    </Link>
+  ) : (
+    <Link to="/how" hash="wallet" className="mdx-link mdx-hit">
+      How it works
+    </Link>
+  );
 }

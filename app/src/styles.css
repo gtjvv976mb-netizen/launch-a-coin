@@ -56,6 +56,8 @@
 @import "./styles/screens/launch.css";
 @import "./styles/screens/designs.css";
 @import "./styles/screens/legal.css";
+/* How it works (/how): the details the screens link to. */
+@import "./styles/screens/how.css";
 @import "./styles/screens/portfolio.css";
 
 @custom-variant dark (&:where([data-theme="default-dark"], [data-theme="default-dark"] *));

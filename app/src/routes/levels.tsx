@@ -4,7 +4,7 @@ import { searchSchema, text } from "../lib/mintdex/search";
 import { HeroTurntable } from "../components/carddex/HeroTurntable";
 import { useViewIn3D } from "../components/carddex/CardControls";
 import { MintCard, type CardData } from "../components/mintdex/MintCard";
-import { Button, ButtonLink, Tabs } from "../components/mintdex/ui";
+import { Button, ButtonLink, Tabs, TextLink } from "../components/mintdex/ui";
 import { COLLECTION, DesignMini } from "../components/carddex/GalleryTile";
 import {
   CARD_DESIGNS,
@@ -299,9 +299,9 @@ function Designs() {
                 </h1>
                 <p className="mt-1 text-[13px] leading-[1.45] text-slate">
                   Your coin keeps its design for good.{" "}
-                  <a className="mdx-link mdx-hit" href="/how#cards">
+                  <TextLink to="/how" hash="cards">
                     Details
-                  </a>
+                  </TextLink>
                 </p>
               </div>
               {category === "memes" ? (

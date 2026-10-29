@@ -34,6 +34,7 @@ import { Ticker } from "./Ticker";
 // The live launch sheet stays here (lazy chrome below) so the global CSS keeps its order.
 import "../../carddex-live.css";
 import { useLiveRecoveryOpen } from "../carddex/live/readiness";
+import { LiveLaunchGuide } from "../carddex/live/LiveLaunchGuide";
 import { ConfirmDialog } from "./confirm";
 import {
   Avatar,
@@ -50,9 +51,8 @@ import {
 } from "./ui";
 
 // Live launch chrome shows only on /launch?mode=live. Its wallet code (wallet-standard, ed25519) loads on demand so
-// it stays out of every page's first download.
+// it stays out of every page's first download; its help control is a plain link to /how#wallet.
 const LiveWalletButton = lazy(() => import("../carddex/live/LiveWalletButton").then((m) => ({ default: m.LiveWalletButton })));
-const LiveLaunchGuide = lazy(() => import("../carddex/live/LiveLaunchGuide").then((m) => ({ default: m.LiveLaunchGuide })));
 
 type TabPath = "/" | "/discover" | "/launch" | "/market" | "/levels" | "/portfolio";
 
@@ -525,9 +525,9 @@ export function StartOverDialog({
         if (await leave(handle)) onOpenChange(false);
       }}
     >
+      {/* The consequence in two short lines; the rest is on /how#demo. */}
       <p>
-        You leave @{handle} on this browser for good. Its tokens and cards stay with
-        @{handle}, and nobody can enter it again, you included. The handle stays taken.
+        Nobody can enter @{handle} again, you included. Its coins and cards stay with it.
       </p>
     </ConfirmDialog>
   );
@@ -572,14 +572,9 @@ function WalletBlock() {
 
   if (!me) {
     return (
-      <div className="flex flex-col gap-3">
-        <Button block onClick={() => openEnter()}>
-          Try the demo
-        </Button>
-        {MODE_COPY.railStart ? (
-          <p className="text-[12px] leading-[1.3] text-slate">Test funds. No wallet needed.</p>
-        ) : null}
-      </div>
+      <Button block onClick={() => openEnter()}>
+        Try the demo
+      </Button>
     );
   }
 
@@ -601,7 +596,6 @@ function Rail({
   liveLaunch?: boolean;
 }) {
   const me = useMe();
-  const { openGuide } = useSessionUi();
   return (
     <aside className="mdx-rail mdx-scroll hidden w-[224px] flex-none flex-col overflow-y-auto overflow-x-hidden px-4 pb-4 pt-5 lg:flex">
       {/* The test-mode pill sits inline beside the wordmark (backlog P0-5), so it adds no rail row. */}
@@ -615,20 +609,21 @@ function Rail({
         <RailNav pending={pending} />
       </div>
       <div className="mt-auto flex flex-col gap-3 pt-6">
-        {/* Two quiet links, each at least 24px tall (WCAG 2.5.8 target size). */}
+        {/* Two quiet links, each at least 24px tall (WCAG 2.5.8 target size): the details page (MintDex's "How MintDex
+            works" item, in the same place) and the terms. On a mainnet launch the first lands on the wallet steps. */}
         <div className="flex flex-col items-start gap-0.5">
-          {liveLaunch ? <Suspense fallback={null}><LiveLaunchGuide /></Suspense> : <button
-            type="button"
-            onClick={openGuide}
+          <Link
+            to="/how"
+            hash={liveLaunch ? "wallet" : undefined}
             className="mdx-link inline-flex min-h-6 items-center text-[14px]"
           >
-            How Launch a Card works
-          </button>}
+            How it works
+          </Link>
           <Link
             to="/legal"
             className="mdx-link inline-flex min-h-6 items-center text-[14px] font-normal text-slate"
           >
-            Terms, privacy and risks
+            Terms &amp; risks
           </Link>
         </div>
         {liveLaunch ? (
@@ -727,8 +722,8 @@ function GuideGlyph() {
 }
 
 /**
- * The account sheet (P1-6): handle and wallet, then Portfolio, the faucet with its timer, How Launch a Card works,
- * Terms, privacy and risks, and Start over. On devnet this is where wallet connect, disconnect, the address
+ * The account sheet (P1-6): handle and wallet, then Portfolio, the faucet with its timer, How it works (/how),
+ * Terms & risks, and Start over. On devnet this is where wallet connect, disconnect, the address
  * copy and the network badge go.
  */
 function AccountSheet({
@@ -740,7 +735,6 @@ function AccountSheet({
   open: boolean;
   onOpenChange: (o: boolean) => void;
 }) {
-  const { openGuide } = useSessionUi();
   const [confirm, setConfirm] = useState(false);
   const close = () => onOpenChange(false);
   const { faucet, leave, busy, leaving } = useWalletActions(close);
@@ -783,18 +777,11 @@ function AccountSheet({
           >
             {busy ? "Claiming..." : faucetLabelOf(me)}
           </button>
-          <button
-            type="button"
-            className="mdx-menu-item text-[15px]"
-            onClick={() => {
-              close();
-              afterSheet(openGuide);
-            }}
-          >
-            How Launch a Card works
-          </button>
+          <Link to="/how" className="mdx-menu-item text-[15px]" onClick={close}>
+            How it works
+          </Link>
           <Link to="/legal" className="mdx-menu-item text-[15px]" onClick={close}>
-            Terms, privacy and risks
+            Terms &amp; risks
           </Link>
           <button
             type="button"
@@ -827,7 +814,7 @@ function AccountSheet({
  */
 function MobileHeader({ liveLaunch = false }: { liveLaunch?: boolean }) {
   const me = useMe();
-  const { openEnter, openGuide } = useSessionUi();
+  const { openEnter } = useSessionUi();
   const [account, setAccount] = useState(false);
   const unread = unreadOf(me);
   return (
@@ -838,10 +825,12 @@ function MobileHeader({ liveLaunch = false }: { liveLaunch?: boolean }) {
       <div className="-mr-1.5 ml-auto flex items-center gap-1">
         <SearchButton />
         {liveLaunch ? (
-          <Suspense fallback={null}>
+          <>
             <LiveLaunchGuide compact />
-            <LiveWalletButton compact />
-          </Suspense>
+            <Suspense fallback={null}>
+              <LiveWalletButton compact />
+            </Suspense>
+          </>
         ) : !IS_SIM ? (
           <ChainHeaderAccount />
         ) : me ? (
@@ -870,14 +859,13 @@ function MobileHeader({ liveLaunch = false }: { liveLaunch?: boolean }) {
           </button>
         ) : (
           <>
-            <button
-              type="button"
-              onClick={openGuide}
-              aria-label="How Launch a Card works"
+            <Link
+              to="/how"
+              aria-label="How it works"
               className="grid h-11 w-11 place-items-center rounded-pill text-ink transition-colors duration-(--t-fast) ease-room hover:bg-track"
             >
               <GuideGlyph />
-            </button>
+            </Link>
             <Button className="ml-1" onClick={() => openEnter()}>
               <span className="max-[359px]:hidden">Try the demo</span>
               <span className="hidden max-[359px]:inline">Demo</span>
@@ -1198,7 +1186,7 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
         ) : liveLaunch ? (
           <StatusStrip testId="live-launch-note" lead="Solana mainnet" rest="Wallet approval required." />
         ) : IS_SIM ? (
-          <StatusStrip testId="local-demo-note" lead="Demo" rest="Test SOL and simulated trading." />
+          <StatusStrip testId="local-demo-note" lead="Demo" rest="Test SOL only." />
         ) : null}
         <MobileHeader liveLaunch={liveLaunch} />
         {/* The activity ticker (MintDex): the real feed, scrolling; still and scrollable under Calm motion. */}

@@ -46,7 +46,7 @@ export const Route = createFileRoute("/portfolio")({
 });
 
 /** The one short link to the details this page no longer spells out. */
-const DETAILS = <TextLink href="/how#demo">How it works</TextLink>;
+const DETAILS = <TextLink to="/how" hash="demo">How it works</TextLink>;
 
 /** Desktop pages its lists to the screen (MintDex); phones list everything and the page scrolls. */
 const DESK_QUERY = "(min-width: 1024px)";
@@ -150,7 +150,6 @@ function SignedOut() {
         hero
         className="cdx-portfolio-empty"
         title="See your cards here"
-        body="Try the demo to collect coins and cards."
         action={<div className="flex flex-col items-center gap-3"><Button onClick={() => openEnter()}>Try the demo</Button><TextLink to="/discover">Explore coins</TextLink></div>}
       />
     </PageFrame>
@@ -245,7 +244,7 @@ function Collection({ me }: { me: NonNullable<Me> }) {
           <EmptyState
             compact
             title="Couldn't load."
-            action={<Button variant="outline" size="sm" pending={isFetching} pendingLabel="Retrying..." onClick={() => void refetch()}>Retry</Button>}
+            action={<Button variant="outline" size="sm" pending={isFetching} pendingLabel="Trying again..." onClick={() => void refetch()}>Try again</Button>}
           />
         ) : !data ? (
           <div className="grid gap-3" aria-busy="true" aria-label="Loading your portfolio">
@@ -257,12 +256,12 @@ function Collection({ me }: { me: NonNullable<Me> }) {
           data.deeds.length ? (
             <Cards rows={data.deeds.slice(from, from + perPage)} />
           ) : (
-            <EmptyState title="No cards yet" body="Launch a coin to get its card." action={<ButtonLink to="/launch">Launch a coin</ButtonLink>} />
+            <EmptyState title="No cards yet" action={<ButtonLink to="/launch">Launch a coin</ButtonLink>} />
           )
         ) : data.holdings.length ? (
           <Holdings rows={data.holdings.slice(from, from + perPage)} />
         ) : (
-          <EmptyState title="No coins yet" body="Buy one or launch your own." action={<ButtonLink to="/discover">Discover coins</ButtonLink>} />
+          <EmptyState title="No coins yet" action={<ButtonLink to="/discover">Explore coins</ButtonLink>} />
         )}
       </div>
       {pages > 1 ? (

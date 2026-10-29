@@ -1,8 +1,8 @@
 /**
  * The page-level not-found and error states, one look everywhere (the root and the router's defaults; MintDex's
- * format): the empty state's card back in its tray on the ledge, centred in the page, then one title, one sentence
- * and two actions (a button and a "Go home" link). The title is also the page's h1 for screen readers and the route
- * announcer, which lands focus on a page's h1 after a page change. Styles: styles/screens/legal.css (.cdx-notfound).
+ * format): the empty state's card back in its tray on the ledge, centred in the page, then one short title and two
+ * actions (a button and a "Go home" link), with no sentence under the title. The title is also the page's h1 for
+ * screen readers and the route announcer, which lands focus on a page's h1 after a page change. Styles: styles/screens/legal.css (.cdx-notfound).
  * The server's own 500 page (lib/error-page.ts) draws the same words in the same colours without the app.
  */
 import { lazy, Suspense, type ReactNode } from "react";
@@ -14,14 +14,14 @@ import { Button, ButtonLink, TextLink } from "./ui";
 // Server HTML hydrates once the chunk is in; a client-side miss shows the h1 until then.
 const EmptyState = lazy(() => import("./empty-state").then((m) => ({ default: m.EmptyState })));
 
-function StatusPage({ title, body, action }: { title: string; body: string; action: ReactNode }) {
+function StatusPage({ title, body, action }: { title: string; body?: string; action: ReactNode }) {
   return (
     <div className="mdx-page cdx-notfound">
       <h1 className="sr-only">{title}</h1>
       <Suspense fallback={null}>
         <EmptyState
           title={<span aria-hidden>{title}</span>}
-          body={body}
+          body={body || undefined}
           action={<div className="cdx-notfound__actions">{action}</div>}
         />
       </Suspense>

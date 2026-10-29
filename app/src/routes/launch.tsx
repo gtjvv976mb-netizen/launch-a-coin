@@ -69,13 +69,11 @@ export const Route = createFileRoute("/launch")({
 
 // The screen carries the fewest words that let someone act; every explanation lives at /how#launch (and its
 // #fees, #pairs, #wallet, #demo and #recovery sections), one short link away.
-const ENTER_TO_UPLOAD = "Try the demo to upload card art and launch.";
+const ENTER_TO_UPLOAD = "Start the demo to upload art.";
 /** Mainnet mode while new launches are off: a creator can still finish a saved launch. */
 const MAINNET_RECOVERY = "Finish a saved launch.";
 /** Screen-reader text only: the field's rule (the error repeats it when it fails). */
 const TICKER_HELP = "2 to 8 letters or numbers (A to Z, 0 to 9).";
-/** The page's one link to the details (the /how page; a plain link until that route exists). */
-const HOW = "/how#launch";
 
 // ---------------------------------------------------------------- draft
 
@@ -719,7 +717,7 @@ function Launch() {
           <span aria-hidden> · </span>
         </span>
       ) : null}
-      <a className="mdx-link mdx-hit" href={HOW}>How it works</a>
+      <TextLink to="/how" hash="launch">How it works</TextLink>
     </>
   );
 
@@ -761,13 +759,13 @@ function Launch() {
       feedback={feedback("launch")}
       successLabel="Created"
     >
-      {!me ? "Try the demo to launch" : uploading ? "Uploading art…" : "Create demo coin"}
+      {!me ? "Try the demo" : uploading ? "Uploading art…" : "Create demo coin"}
     </Button>
   );
   // MintDex's ticket: the content rules, the total with "What is included" behind it, the fee line, the one primary.
   const demoTicket = (
     <section className="cdx-launch-ticket" aria-labelledby={`${viewId}-total`}>
-      <p className="cdx-launch-rules">By creating this coin you agree to the <TextLink to="/legal" hash="terms">content rules</TextLink>.</p>
+      <p className="cdx-launch-rules">By creating this coin you agree to the <TextLink to="/legal" hash="content-rules">content rules</TextLink>.</p>
       <details className="cdx-launch-total">
         <summary>
           <span id={`${viewId}-total`} className="cdx-launch-total__value" aria-live="polite">
@@ -781,7 +779,7 @@ function Launch() {
           <div><dt>Initial buy</dt><dd>{devQuote?.ok ? <><span className="num">{quoteKey === "sol" ? sol(devQuote.solIn, 3) : formatQuoteAmount(devQuote.solIn, quoteKey)}</span> <span className="mdx-unit">test {quoteAsset.symbol}</span></> : "None"}</dd></div>
         </dl>
       </details>
-      <p className="cdx-launch-fee-note">Launch a Card charges no platform fee. <a className="mdx-link mdx-hit" href="/how#fees">Details</a></p>
+      <p className="cdx-launch-fee-note">Launch a Card charges no platform fee. <TextLink to="/how" hash="fees">Details</TextLink></p>
       {/* What stops the launch, said beside the button: the balance check, a pending pair change, the server's reason. */}
       {balanceError ? <PagedMessage text={balanceError} alert /> : null}
       {pairPending ? <p className="cdx-pair-notice" role="status">Confirm the pair change first.</p> : null}
@@ -899,7 +897,8 @@ function Launch() {
                 {preview && !uploading ? <img src={preview} alt="" draggable={false} className="cdx-launch-art__image" /> : null}
                 <span className="cdx-launch-art__copy" data-over-image={preview && !uploading ? "" : undefined}>
                   <strong id="art-cta">{uploading ? "Preparing…" : preview ? "Replace image" : "Add image"}</strong>
-                  <span id="art-sub">{preview ? "or drop another" : "or drop it here"}</span>
+                  {/* Part of the button's name only: the drop hint is on /how#launch. */}
+                  <span id="art-sub" className="sr-only">{preview ? "or drop another" : "or drop it here"}</span>
                 </span>
               </button>
               <p id="art-spec" className="sr-only">PNG, JPG, WEBP or GIF up to 12 MB. Square works best.</p>
@@ -922,7 +921,7 @@ function Launch() {
             <summary>
               <Icon name="chevron-right" size={16} className="cdx-launch-more__chev" />
               <span className="cdx-launch-more__title">More options</span>
-              <span className="cdx-launch-more__sub">Website, X link, initial buy</span>
+              <span className="cdx-launch-more__sub">Links, initial buy</span>
             </summary>
             <div className="cdx-launch-more__body">
               <div className="cdx-launch-links">
@@ -1038,7 +1037,7 @@ function Launch() {
       </div>
 
       <ConfirmDialog open={resetOpen} onOpenChange={setResetOpen} title="Clear this draft?" tone="danger" cancelLabel="Keep editing" confirmLabel="Clear draft" onConfirm={startOver}>
-        <p>Clears every field and the art. This cannot be undone.</p>
+        <p>Every field and the art. This can't be undone.</p>
       </ConfirmDialog>
     </div>
   );

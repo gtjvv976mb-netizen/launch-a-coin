@@ -1,0 +1,86 @@
+/* How it works (/how), MintDex's reading format (like /legal): the title row, the section list (a column from 1024px,
+ * a row on phones) beside one plinth panel. The panel opens with the guide's three numbered steps (the
+ * .cdx-guide__step look from styles/shared.css, in a row from 768px), then one anchored section per topic, in two
+ * columns from 1280px. From 1024px the frame fills the screen and the panel scrolls on its own; phones scroll the
+ * page. Unlayered; tokens: carddex-theme.css. */
+
+@media (min-width: 1024px) {
+  .cdx-how { height: 100%; }
+}
+.cdx-how__layout { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; gap: 16px; }
+@media (min-width: 1024px) {
+  .cdx-how__layout { display: grid; grid-template-columns: 176px minmax(0, 1fr); align-items: stretch; gap: 20px; }
+}
+
+/* ---- the section list: the same tabs as /legal */
+.cdx-how__nav ul { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.cdx-how__nav ul::-webkit-scrollbar { display: none; }
+@media (min-width: 1024px) {
+  .cdx-how__nav ul { flex-direction: column; overflow: visible; }
+}
+.cdx-how__tab {
+  display: flex;
+  min-width: 44px;
+  height: 44px;
+  flex: none;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: var(--radius-field);
+  color: var(--color-slate);
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color var(--t-fast) var(--ease-room), color var(--t-fast) var(--ease-room);
+}
+@media (hover: hover) {
+  .cdx-how__tab:hover { background: var(--color-track); color: var(--color-ink); }
+}
+.cdx-how__tab[aria-current] { background: var(--color-sheet); box-shadow: var(--shadow-raise); color: var(--color-ink); font-weight: 600; }
+@media (min-width: 1024px) and (pointer: fine) {
+  .cdx-how__tab { height: 40px; }
+}
+
+/* ---- the panel */
+.cdx-how__doc {
+  min-height: 0;
+  padding: 24px;
+  border-radius: var(--radius-panel);
+  background: color-mix(in srgb, var(--color-plinth) 90%, transparent);
+  box-shadow: var(--shadow-ring);
+  outline: none;
+}
+@media (min-width: 1024px) {
+  .cdx-how__doc { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--color-hairline) transparent; }
+}
+@media (max-width: 639.98px) {
+  .cdx-how__doc { padding: 16px; }
+}
+
+/* The three steps: a numbered list, a row of three from 768px, over a hairline. */
+.cdx-how__steps { padding-bottom: 24px; border-bottom: 1px solid var(--color-hairline); }
+@media (min-width: 768px) {
+  .cdx-how__steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+}
+.cdx-how__step-title { color: var(--color-ink); font-size: 17px; line-height: 24px; font-weight: 600; text-wrap: balance; }
+
+/* The sections: two columns from 1280px, each section kept whole. */
+.cdx-how__sections { display: grid; gap: 8px 40px; padding-top: 24px; }
+@media (min-width: 1280px) {
+  .cdx-how__sections { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+}
+.cdx-how__section { padding-bottom: 20px; scroll-margin-top: 16px; }
+@media (max-width: 1023.98px) {
+  /* Phones: the sticky header covers the top of the page. */
+  .cdx-how__section { scroll-margin-top: calc(var(--mhead-h, 56px) + 12px); }
+}
+.cdx-how__section h2 { width: fit-content; font-size: 17px; font-weight: 600; line-height: 1.3; color: var(--color-ink); }
+.cdx-how__section h2:focus { outline: none; }
+.cdx-how__section h2:focus-visible { border-radius: var(--radius-chip); box-shadow: var(--glow-focus); }
+.cdx-how__section h3 { margin-top: 14px; font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--color-ink); }
+.cdx-how__section p,
+.cdx-how__section li { max-width: 34em; margin-top: 6px; font-size: 15px; line-height: 1.5; color: var(--color-slate); text-wrap: pretty; }
+.cdx-how__section ul { padding-left: 20px; list-style: disc; }
+.cdx-how__section .cdx-how__ol { padding-left: 22px; list-style: decimal; }
+.cdx-how__section li::marker { color: var(--color-placeholder); }
+.cdx-how__section .cdx-how__safety { color: var(--color-ink); font-weight: 500; }
+.cdx-how__calm { max-width: 320px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--color-rule); }

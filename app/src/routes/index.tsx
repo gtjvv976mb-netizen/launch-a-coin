@@ -20,7 +20,6 @@ import {
 } from "../components/mintdex/card3d";
 import { CoinRow, EventItem, LaunchedItem, LaunchedSkeleton } from "../components/mintdex/feeds";
 import { MintCardFace, faceSlot, type CardData } from "../components/mintdex/MintCard";
-import { useSessionUi } from "../components/mintdex/session";
 import { prefersReducedMotion, revPoll, useNow, usePageKeys } from "../components/mintdex/hooks";
 import {
   ButtonLink,
@@ -45,7 +44,7 @@ import { CARD_BIDDING_SUSPENDED } from "../lib/mintdex/card-bidding";
 import { fetchLiveLaunches } from "../lib/carddex/live/launches";
 import { getCardDesign } from "../lib/carddex/designs";
 import { marketCapText, marketCapWatch } from "../lib/carddex/quote-display";
-import { EXPLORE_COINS, HOME_COPY, IS_SIM, MODE_COPY, WORDS } from "../lib/mintdex/copy";
+import { EXPLORE_COINS, HOME_COPY, IS_SIM, WORDS } from "../lib/mintdex/copy";
 import { sol, usdCompact } from "../lib/mintdex/format";
 import { tierForLevel } from "../lib/mintdex/tiers";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_ORIGIN, pageHead } from "../lib/mintdex/seo";
@@ -439,16 +438,16 @@ function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
 
 /** The hero's two buttons: on the first screen from 1024px up, under the featured card on phones (the tab bar
  *  carries Launch and Discover there too). */
-function HeroActions({ className = "", guide }: { className?: string; guide?: () => void }) {
+function HeroActions({ className = "", guide = false }: { className?: string; guide?: boolean }) {
   return (
     <div className={cx("flex flex-wrap items-center gap-x-2 gap-y-3", className)}>
       <ButtonLink to="/launch">Launch a coin</ButtonLink>
       <ButtonLink to="/discover" variant="ghost">
         {EXPLORE_COINS}
       </ButtonLink>
-      {/* The guide from the first screen (P1-7), desktop only: phones have the header's guide button. */}
+      {/* The details page from the first screen (P1-7), desktop only: phones have the header's help button. */}
       {guide ? (
-        <TextLink onClick={guide} className="ml-2 text-[14px]">
+        <TextLink to="/how" className="ml-2 text-[14px]">
           {HOME_COPY.howItWorks}
         </TextLink>
       ) : null}
@@ -489,12 +488,11 @@ function LaunchedSection({ now }: { now: number }) {
           ) : undefined
         }
       />
-      <p className="text-[12px] leading-4 text-slate">Real launches on Solana mainnet</p>
       {launches.isPending ? (
         <LaunchedSkeleton rows={1} />
       ) : launches.isError && !rows.length ? (
         <div role="alert" className="cdx-home-launched__error">
-          <p>Couldn't load the launch list. Check your connection, then try again.</p>
+          <p>Couldn't load launches.</p>
           <TextLink onClick={() => void launches.refetch()} disabled={launches.isFetching}>
             {launches.isFetching ? "Trying again…" : "Try again"}
           </TextLink>
@@ -507,7 +505,7 @@ function LaunchedSection({ now }: { now: number }) {
         </ul>
       ) : (
         <p className="cdx-home-launched__empty">
-          No coins launched yet. Be the first.{" "}
+          No launches yet.{" "}
           <TextLink to="/launch">Launch a coin</TextLink>
         </p>
       )}
@@ -530,7 +528,6 @@ function Home() {
     refetchInterval: IS_SIM ? 15_000 : CHAIN_POLL_MS,
   });
   const now = useNow();
-  const { openGuide } = useSessionUi();
   const level = useMotionLevel();
   // The devnet test site's banner already says devnet SOL has no real value: the hero leaves its own line out.
 
@@ -882,12 +879,12 @@ function Home() {
               the page already says what is real, so the hero keeps one line. */}
           <p className="cdx-home__copy mdx-home-arrival mdx-home-arrival--copy">
             {!IS_SIM && CARD_BIDDING_SUSPENDED
-              ? "Choose one premium design for your coin. Keep it from day one."
+              ? "Pick one premium design. Keep it from day one."
               : WORDS.heroBid}
           </p>
           {/* MintDex: Launch a coin, Explore coins and How it works on the first screen from 1024px up; phones put the
               pair under the featured card (the tab bar carries Launch and Discover too). */}
-          <HeroActions className="cdx-home__actions mdx-home-arrival mdx-home-arrival--actions max-lg:hidden" guide={openGuide} />
+          <HeroActions className="cdx-home__actions mdx-home-arrival mdx-home-arrival--actions max-lg:hidden" guide />
         </div>
 
         {/* The featured cards (P1-21): a carousel of one slide at a time that turns to the next coin by itself,
@@ -1123,15 +1120,14 @@ function Home() {
         </section>
         <LaunchedSection now={now} />
         <section className="flex min-h-0 flex-1 flex-col gap-1">
-          {/* "Activity" (MintDex), never "Live activity": in test mode most rows are demo bots, and the line under the
-              heading says so. */}
+          {/* "Activity" (MintDex), never "Live activity": in test mode most rows are demo bots, each tagged "bot"
+              (what that means is on /how#demo). */}
           <SectionHead
             title="Activity"
             live={recent ? activity[0].id : undefined}
             livePaused={live.paused}
             right={activity.length ? <LivePause paused={live.paused} onChange={live.setPaused} /> : undefined}
           />
-          {MODE_COPY.botsNote ? <p className="text-[12px] leading-4 text-slate">{MODE_COPY.botsNote}</p> : null}
           <p className="sr-only" role="status" aria-live="polite">
             {live.said}
           </p>

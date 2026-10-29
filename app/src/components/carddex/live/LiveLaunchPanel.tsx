@@ -745,7 +745,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
     {showFresh ? <section className="cdx-live-wallet-notice" aria-labelledby="cdx-live-notice">
       <h3 id="cdx-live-notice" className="cdx-live-wallet-notice-title">{oneApproval ? "What your wallet will show for your coin and card" : "What your wallet will show for your coin"}</h3>
       <ul className="cdx-live-wallet-notice-list">{walletNoticePreview({ hasBuy: !!initialBuy, siteHost, oneApproval }).map(item => <li key={item.key} data-notice={item.key}>{item.text}</li>)}</ul>
-      <p className="cdx-live-wallet-notice-safety">{WALLET_NOTICE_COPY.safety}</p>
+      <p className="cdx-live-wallet-notice-safety">{WALLET_NOTICE_COPY.safety} <TextLink to="/how" hash="wallet">Details</TextLink></p>
     </section> : null}
 
     {intent ? <section className="cdx-live-block" aria-labelledby="cdx-live-saved">

@@ -214,7 +214,7 @@ function Discover() {
             <span className="num">{coins.length}</span> {coins.length === 1 ? "coin" : "coins"}
             {trimmed ? <> for “{trimmed}” · <TextLink onClick={() => setQuery("")}>Clear</TextLink></> : null}
             {" · "}
-            <TextLink href="/how#cards">How it works</TextLink>
+            <TextLink to="/how" hash="cards">How it works</TextLink>
             <span className="sr-only" role="status">{said}</span>
           </>
         }
@@ -254,7 +254,6 @@ function Discover() {
         ) : (
           <EmptyState
             title="No coins yet"
-            body="Launch the first one."
             action={<TextLink to="/launch">Launch a coin</TextLink>}
           />
         )}

@@ -311,7 +311,7 @@ export function CardPanel({ page, pane, className = "" }: { page: CoinPage; pane
       <h3 className="cdx-coin-card__sub">The token</h3>
       <TokenFacts page={page} />
       {asset.kind === "stock" ? <p className="cdx-coin-card__note">Stock-paired. Your coin is not company shares.</p> : null}
-      <p className="cdx-coin-card__foot"><TextLink href="/how#cards">How it works</TextLink></p>
+      <p className="cdx-coin-card__foot"><TextLink to="/how" hash="cards">How it works</TextLink></p>
     </section>
   );
 }
@@ -362,7 +362,7 @@ export function CoinDetails({
                 X profile <Icon name="external" size={12} />
               </TextLink>
             ) : null}
-            <TextLink href="/how#trading">How it works</TextLink>
+            <TextLink to="/how" hash="trading">How it works</TextLink>
             {isOwner ? (
               <TextLink onClick={onEdit}>Edit description</TextLink>
             ) : (
@@ -475,7 +475,7 @@ export function DesignProgress({ coin, className = "" }: { coin: CoinDetail; cla
   const design = getCardDesign(coin.cardTemplate);
   return (
     <p className={cx("text-body text-slate", className)}>
-      <span className="font-medium text-ink">{design.name}</span> is kept for good.
+      <span className="sr-only">{design.name} </span>Design kept for good.
     </p>
   );
 }
@@ -678,7 +678,7 @@ function ReportDialog({
             () => reportCoin({ data: { coinId: coin.id, reason } }),
             (res) =>
               res.first
-                ? "Report sent. Coins that break the content rules are hidden."
+                ? "Report sent."
                 : "You already reported this card.",
             // Nothing on screen changes: no refetch.
             { keys: [] },
@@ -689,7 +689,7 @@ function ReportDialog({
         <fieldset>
           <legend className="text-body text-slate">
             What breaks the{" "}
-            <TextLink to="/legal" hash="terms" onClick={() => onOpenChange(false)}>
+            <TextLink to="/legal" hash="content-rules" onClick={() => onOpenChange(false)}>
               content rules
             </TextLink>
             ?
@@ -1181,7 +1181,7 @@ const EMPTY = <span className="mdx-dash">{"—"}</span>;
 type TicketMessage = { kind: "error" | "warning" | "info"; text: ReactNode; plain: string };
 
 /** The ticket's foot: what this trade is and is not, in the coin's own quote ("Test DOGE on a simulated curve."). */
-const ticketNote = (symbol: string) => IS_SIM ? `Test ${symbol} on a simulated curve. Nothing is sent on chain.` : "";
+const ticketNote = (symbol: string) => IS_SIM ? `Test ${symbol}. Nothing is sent on chain.` : "";
 
 /** A summary of the quote for screen readers, debounced so typing does not chatter (P1-9 step 3). */
 function useDebounced<T>(value: T, ms: number) {

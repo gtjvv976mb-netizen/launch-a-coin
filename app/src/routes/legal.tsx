@@ -356,7 +356,7 @@ function Legal() {
             ))}
           </ul>
           <p className="cdx-legal__more">
-            <TextLink href="/how">How it works</TextLink>
+            <TextLink to="/how">How it works</TextLink>
           </p>
         </nav>
         <div ref={docRef} className="cdx-legal__doc mdx-scroll" tabIndex={-1}>

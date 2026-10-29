@@ -456,10 +456,6 @@
 .cdx-live-terms { gap: 8px; }
 .cdx-live-terms > p { font-size: var(--text-caption); line-height: 16px; }
 
-/* The guide (dialog or sheet). The wallet chooser is mintdex/wallet-connect.tsx, styled in overlays.css. */
-.cdx-live-guide { display: grid; gap: 12px; padding-left: 20px; list-style: decimal; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }
-.cdx-live-guide li::marker { color: var(--color-ink); font-weight: 600; font-variant-numeric: tabular-nums; }
-
 /* The wallet review dialog: one page (the costs, what your wallet will show, the addresses), Continue under it. */
 /* The dialog is a fixed-height deck: it takes the height the review needs (up to the screen), and the page region
  * is the one part that scrolls when a short screen cannot hold it, so nothing ever overlaps. */

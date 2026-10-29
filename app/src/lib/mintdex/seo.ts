@@ -28,10 +28,10 @@ export const SITE_OG_IMAGE = "/og/launch-a-card-1200x630.jpg";
 export const SITE_OG_IMAGE_ALT = "Launch a Card: a token's one-of-one trading card under the headline Every coin is a card";
 
 /** Static pages listed in the sitemap. */
-export const STATIC_PATHS = ["/", "/discover", "/launch", "/levels", "/legal"] as const;
+export const STATIC_PATHS = ["/", "/discover", "/launch", "/levels", "/how", "/legal"] as const;
 
 /** When the static pages last changed in a way search engines should notice. Bump by hand, never per request. */
-export const STATIC_LASTMOD = "2026-10-28";
+export const STATIC_LASTMOD = "2026-10-29";
 
 /**
  * Coin pages and /portfolio stay out of search while coins are simulated (decision C4). SEO-3, checked 2026-10-28:

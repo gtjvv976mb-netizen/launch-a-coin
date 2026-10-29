@@ -161,7 +161,6 @@ function CoinView() {
       <EmptyState
         className="mdx-page"
         title={COIN_NOT_FOUND.title}
-        body={COIN_NOT_FOUND.unknown}
         action={<TextLink to="/discover">{COIN_NOT_FOUND.action}</TextLink>}
       />
     );
