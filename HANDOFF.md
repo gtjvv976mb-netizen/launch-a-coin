@@ -1,5 +1,24 @@
 # 30 October simplicity pass on `claude/classic-mintdex` — not deployed
 
+**Release status (30 October).** Pushed as `claude/classic-mintdex`, PR #3 (base `claude/integration`). Final commit 95fd09e. The main session re-ran the gates: TypeScript, 499 app tests, 125 pumpfun tests and the build. It also ran a local production-build browser check:
+- cold demo launches at 1440, 390 and 360 open the pair's design (TSLAX stock-tsla, DOGE doge, SOL one-piece), with 1 upload each;
+- buy and 50% sell work in TOAD and SOL;
+- 27 route checks show 0 errors;
+- typed "1,500", "1,5" and "12,345" read as 1500, 1.5 and 12345.
+
+**Not deployed: Cloudflare refuses the upload.**
+- First, R2 was off (code 10136). The owner re-enabled it.
+- Then the account had dropped to the **Free Workers plan**, which refuses `limits.cpu_ms` (code 100328). Retried after the fix pass, with the same refusal.
+- Production stays on eef8f51e.
+- Do not remove `limits.cpu_ms` to get past this. Launches render card images and the 64-frame coin GIF on the server, far beyond Free's 10 ms of CPU.
+
+Once Workers Paid is back:
+1. Run `versions upload` (tag `rc-simple-95fd09e`) with `-c wrangler.production.jsonc`.
+2. Run `versions deploy` at 100% only (see the GIF rollback caveat below).
+3. Probe `/api/live/health` and the main routes.
+
+No migrations or Worker config changed since a7d447d.
+
 Owner request: "make sure the site is the simpliest to use and utilize". 24 planned changes, one commit per area (Launch, Demo entry, Coin page, Portfolio, Discover, Home, How it works and Designs, Shell), inside the MintDex format and the D1 palette. Measurements: headless Chromium at 1440x900, 390x844 and 360x800; before = the base build b4332b5 measured with the same scripts, or the walkers' numbers where a demo account was needed. Evidence: the session scratchpad `simple/build/` (`measure.json`, `results/`, `shots/`).
 
 - **Launch.** Signed out, Add image opens the file picker on the first press; the art is held in the page and uploaded when Create starts the demo, so the one demo prompt comes at Create ("Start the demo and launch $TICKER"; 21 words, was 31). Home to a created coin: 4 clicks at 1440 (was 5); cold DOGE launch 6 taps (was 7), cold TSLAX on phones 8 (was 9). Phone pair strip two tiles tall: 2,564 px long (was 4,976), 4 tiles in view (was 2), TSLAX ends at 2,016 px (target 2,000; was 4,026), +50 px of height, so the phone Create button needs 50 px more scroll (523 at 390, was 473). Desktop grid 5 columns and 394 px (was 4 and 494): Card art 100 px higher, Create needs 410 px of panel scroll (was 510); 7 tiles no longer repeat their symbol as a name. The buy cap shows exact and rounded down ("Up to 27,781.11 test DOGE.", NVDAX 10.10 accepted); 999999999 gets the cap message. The full-mint link is a 44 px target on touch (was 31), text unchanged.

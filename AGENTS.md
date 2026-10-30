@@ -34,7 +34,7 @@ Card artwork requirement (owner instruction, 29 October 2026): use **Higgsfield 
 
 Token GIF clarification (owner, later 29 October 2026): the **existing website card designs and thin turntable geometry are already approved**. Export those directly for the token GIF, with market cap removed from that image. Do not generate a thicker card, slab, case or replacement design for this export. The rejected Higgsfield motion study is retained only as provenance; it must not be installed or published. This is an export task using existing Higgsfield artwork, not authorization for further paid redesigns.
 
-Product: token launches with one creator-selected NFT card design. No automatic evolution, NFT sales, bids, auctions or royalties. Token buy/sell trading remains. Designs must persist through launch, reads and token trades.
+Product: token launches with one NFT card design, chosen by the creator's pair: each pump.fun pair has exactly one design (SOL One Piece, USDC Duel Masters), and Launch never offers a separate design picker. No automatic evolution, NFT sales, bids, auctions or royalties. Token buy/sell trading remains. Designs must persist through launch, reads and token trades.
 
 Default is isolated local simulation. Never sign transactions, move SOL, publish or deploy without specific authorization. No MintDex bindings, wallets, sessions, APIs or shared data. Never read private wallet/secret files or copy credentials.
 
