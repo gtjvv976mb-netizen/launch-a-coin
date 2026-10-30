@@ -839,6 +839,15 @@ function MobileHeader({ liveLaunch = false }: { liveLaunch?: boolean }) {
         ) : !IS_SIM ? (
           <ChainHeaderAccount />
         ) : me ? (
+          <>
+            {/* How it works stays one tap away once signed in (Terms & risks is linked from it). */}
+            <Link
+              to="/how"
+              aria-label="How it works"
+              className="grid h-11 w-11 place-items-center rounded-pill text-ink transition-colors duration-(--t-fast) ease-room hover:bg-track"
+            >
+              <GuideGlyph />
+            </Link>
           <button
             type="button"
             onClick={() => setAccount(true)}
@@ -846,11 +855,12 @@ function MobileHeader({ liveLaunch = false }: { liveLaunch?: boolean }) {
             aria-label={`Wallet, @${me.handle}, ${sol(me.balance, 2)} SOL${BALANCE_NOTE}${unread ? `, ${unread} new` : ""}`}
             className="flex h-11 items-center gap-2 rounded-pill pl-2 pr-1 transition-colors duration-(--t-fast) ease-room hover:bg-track"
           >
+            {/* The unit says test SOL: once the status strip has scrolled away, the balance alone must not read as SOL. */}
             <span className="whitespace-nowrap">
               <Num size="sm" watch={me.balance} tick className="text-[15px]!">
                 {sol(me.balance, 2)}
               </Num>
-              <span className="text-[13px] font-medium text-slate">&nbsp;SOL</span>
+              <span className="text-[13px] font-medium text-slate">&nbsp;{MODE_COPY.walletUnit}</span>
             </span>
             <span className="relative">
               <Avatar handle={me.handle} size={30} />
@@ -862,6 +872,7 @@ function MobileHeader({ liveLaunch = false }: { liveLaunch?: boolean }) {
               ) : null}
             </span>
           </button>
+          </>
         ) : (
           <>
             <Link

@@ -20,6 +20,7 @@ import type { EventRow } from "../../lib/mintdex/types";
 import { getPairAsset } from "../../lib/carddex/pairs";
 import { quoteAtoms } from "../../lib/carddex/quote-display";
 import { revPoll, useNow } from "./hooks";
+import { BOT_HINT } from "../../lib/mintdex/copy";
 import { FrameMini, Thumb, solFigure, usePauseGate } from "./ui";
 
 /** Seconds each row takes to cross (the strip's speed is the same whatever the row count). */
@@ -115,6 +116,13 @@ function Row({ e, copy }: { e: EventRow; copy: boolean }) {
         <Thumb src={e.image} size={20} />
         <span className="mdx-ticker__tag">{k.tag}</span>
         <span className="mdx-ticker__sym">${e.ticker}</span>
+        {/* A demo bot's trade says so, as Home's Activity rows do (trust.tsx BotTag's chip and words, written out here so
+            the shell does not load that module). */}
+        {IS_SIM && e.isBot ? (
+          <span title={BOT_HINT} className="mdx-tag mdx-ticker__bot">
+            bot<span className="sr-only">, {BOT_HINT.toLowerCase()}</span>
+          </span>
+        ) : null}
         {tier ? (
           <span className="mdx-ticker__amt">
             <FrameMini level={e.level} className="mr-1 inline-block align-[-3px]" />
@@ -174,18 +182,20 @@ export function Ticker() {
     return <div ref={ref} className="mdx-ticker" aria-hidden data-empty="" />;
   }
   const dur = `${Math.max(24, rows.length * SEC_PER_ROW)}s`;
+  // In the demo the strip never says "Live": its rows are test trades, many by demo bots.
+  const recentName = IS_SIM ? "Demo" : "Live";
   return (
     <div
       ref={ref}
       className="mdx-ticker"
       role="region"
-      aria-label={recent ? "Live activity" : "Past activity"}
+      aria-label={recent ? `${recentName} activity` : "Past activity"}
       data-activity={recent ? "live" : "past"}
       data-held={held || undefined}
     >
       <span className="mdx-ticker__live" aria-hidden>
         <span className={recent ? "mdx-live" : "mdx-ticker__past-dot"} />
-        {recent ? "Live" : "Past activity"}
+        {recent ? recentName : "Past activity"}
       </span>
       <div className="mdx-ticker__view">
         <ul className="mdx-ticker__track" style={{ "--dur": dur } as CSSProperties}>
@@ -202,7 +212,7 @@ export function Ticker() {
         type="button"
         className="mdx-ticker__pause"
         aria-pressed={held}
-        aria-label={`${held ? "Play" : "Pause"} ${recent ? "live" : "past"} activity`}
+        aria-label={`${held ? "Play" : "Pause"} ${recent ? recentName.toLowerCase() : "past"} activity`}
         onClick={() => setHeld((h) => !h)}
       >
         {held ? (
