@@ -1,4 +1,4 @@
-# 30 October simplicity pass on `claude/classic-mintdex` — not deployed
+# 30 October simplicity pass on `claude/classic-mintdex` — live as f441569e
 
 **Release status (30 October).** Pushed as `claude/classic-mintdex`, PR #3 (base `claude/integration`). Final commit 95fd09e. The main session re-ran the gates: TypeScript, 499 app tests, 125 pumpfun tests and the build. It also ran a local production-build browser check:
 - cold demo launches at 1440, 390 and 360 open the pair's design (TSLAX stock-tsla, DOGE doge, SOL one-piece), with 1 upload each;
@@ -6,18 +6,18 @@
 - 27 route checks show 0 errors;
 - typed "1,500", "1,5" and "12,345" read as 1500, 1.5 and 12345.
 
-**Not deployed: Cloudflare refuses the upload.**
-- First, R2 was off (code 10136). The owner re-enabled it.
-- Then the account had dropped to the **Free Workers plan**, which refuses `limits.cpu_ms` (code 100328). Retried after the fix pass, with the same refusal.
-- Production stays on eef8f51e.
-- Do not remove `limits.cpu_ms` to get past this. Launches render card images and the 64-frame coin GIF on the server, far beyond Free's 10 ms of CPU.
-
-Once Workers Paid is back:
-1. Run `versions upload` (tag `rc-simple-95fd09e`) with `-c wrangler.production.jsonc`.
-2. Run `versions deploy` at 100% only (see the GIF rollback caveat below).
-3. Probe `/api/live/health` and the main routes.
-
-No migrations or Worker config changed since a7d447d.
+**Published.** The release is live at 100% as **f441569e-08a0-4e40-b3a3-f3a14810d614**, tag `rc-simple-d98e5fd`. It was switched 2026-10-30 09:05:49 UTC (17:05:49 Asia/Manila), with the previous version eef8f51e. Only `versions upload` + `versions deploy` ran. Remote migrations: none pending (0015 is the last).
+- Live check, read-only:
+  - `/api/live/health` reports ok, ready, rpc healthy and schema ok.
+  - The 8 main routes return 200 on launchacard.fun; www returns 308 to the same path.
+  - Headless Chromium at 1440x900, 390x844 and 360x800 found 0 console errors, 0 failed requests and no sideways scroll on 24 pages.
+  - Launch shows all 37 pairs; DOGE turns the card to Doge; Add image opens the file picker with no dialog; the safety lines are present.
+  - The only non-GET request was Cloudflare's own analytics beacon.
+- Incident before the release:
+  - On 30 October Cloudflare first refused uploads because R2 was off (code 10136). The owner re-enabled R2.
+  - Uploads were then refused because the account was on the Free Workers plan, which rejects `limits.cpu_ms` (code 100328).
+  - The owner switched back to Workers Paid. The first uploads after that were still refused for a short while, then one was accepted with the config unchanged.
+  - Keep `limits.cpu_ms`: it equals Paid's default (30 s), and it makes any upload fail loudly if the account drops to Free again.
 
 Owner request: "make sure the site is the simpliest to use and utilize". 24 planned changes, one commit per area (Launch, Demo entry, Coin page, Portfolio, Discover, Home, How it works and Designs, Shell), inside the MintDex format and the D1 palette. Measurements: headless Chromium at 1440x900, 390x844 and 360x800; before = the base build b4332b5 measured with the same scripts, or the walkers' numbers where a demo account was needed. Evidence: the session scratchpad `simple/build/` (`measure.json`, `results/`, `shots/`).
 
