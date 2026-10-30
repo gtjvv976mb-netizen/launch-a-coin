@@ -1,7 +1,7 @@
 import {describe,expect,test} from "bun:test";
 import {renderToStaticMarkup} from "react-dom/server";
 import {QuoteAssetMeta} from "../../src/components/carddex/QuoteAssetMeta";
-import {PAIR_ASSETS,isDirectPair} from "../../src/lib/carddex/pairs";
+import {PAIR_ASSETS,chargesTransferFee,isDirectPair} from "../../src/lib/carddex/pairs";
 import {STAGED_PAIR_DESIGNS} from "../../src/lib/carddex/pair-designs";
 
 const DIRECT_LINE = "Not on pump.fun's public pairs list; admitted on-chain";
@@ -20,6 +20,8 @@ describe("pair catalogue provenance",()=>{
           expect(meta).toContain(`${DIRECT_LINE} (checked ${asset.verifiedAt}).`);
           expect(meta.match(/admitted on-chain/g)).toHaveLength(1);
         }else expect(meta).not.toContain(DIRECT_LINE);
+        // A transfer-fee pair (ZCAT) says why mainnet can't use it, in mainnet mode only.
+        expect(meta.includes("its mint charges a transfer fee")).toBe(live && chargesTransferFee(asset.key));
       }
     }
   });
