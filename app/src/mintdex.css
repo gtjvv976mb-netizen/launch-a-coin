@@ -615,7 +615,9 @@
     align-items: center;
     justify-content: center;
     gap: 4px;
-    font-size: var(--type-min, 12px);
+    /* The bar is a fixed --tabbar-h, so a larger browser font size grows the label only until a fifth of the
+     * screen holds "Portfolio" (12px at the default size). */
+    font-size: min(var(--type-min, 12px), max(12px, 4vw));
     font-weight: 500;
     line-height: 1;
     color: var(--color-slate);
@@ -1097,10 +1099,10 @@
     cursor: not-allowed;
   }
 
-  /* Phones (backlog P1-25): 44px touch targets. Small buttons and chips grow to 44 (min-height also beats
+  /* Phones (backlog P1-25), and touch screens at any width (an iPad held sideways): 44px touch targets. Small buttons and chips grow to 44 (min-height also beats
    * a height utility such as Accept's h-7), chevrons become 44px circles, segmented tracks 44px, range
    * options at least 44 wide, and .mdx-hit widens a text link's hit area without moving its text. */
-  @media (max-width: 1023.98px) {
+  @media (max-width: 1023.98px), (pointer: coarse) {
     .mdx-btn--sm,
     .mdx-btn--chip {
       --skin-h: 44px;
@@ -1235,11 +1237,15 @@
     cursor: pointer;
     transition: background-color var(--t-fast) var(--ease-room);
   }
-  /* Phones (P1-25): the sort select and the design menu trigger are 44px pills. */
-  @media (max-width: 1023.98px) {
+  /* Phones and touch screens (P1-25): the sort select and the design menu trigger are 44px pills, and the select's
+   * text is 16px so iOS Safari does not zoom the page when it takes focus. */
+  @media (max-width: 1023.98px), (pointer: coarse) {
     .mdx-select,
     .mdx-menu-trigger {
       height: 44px;
+    }
+    .mdx-select {
+      font-size: 16px;
     }
   }
 
@@ -2267,9 +2273,10 @@ a:focus-visible .mdx-lift {
     height: 44px;
     flex-direction: row;
     gap: 6px;
+    font-size: min(var(--type-min, 12px), max(12px, 2vw));
   }
   .mdx-main {
-    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+    padding-bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom));
   }
 }
 /* While the on-screen keyboard is up the tab bar steps aside, so a keyboard that resizes the page

@@ -947,7 +947,7 @@ function MobileTabs({ pending }: { pending: boolean }) {
           key={t.to}
           to={t.to}
           activeOptions={{ exact: !!t.exact }}
-          className="mdx-mtab h-16"
+          className="mdx-mtab h-(--tabbar-h)"
           data-active={i === active}
           aria-current={i === active ? "location" : undefined}
           data-pending={(pending && i === active) || undefined}
@@ -1316,7 +1316,7 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
           data-scroll-restoration-id="content"
           tabIndex={-1}
           aria-busy={pending || undefined}
-          className="cdx-viewport-main mdx-main mdx-scroll min-h-0 flex-1 p-4 pb-[calc(80px_+_env(safe-area-inset-bottom))] [--main-pad:16px] max-lg:overflow-x-clip lg:overflow-x-hidden lg:overflow-y-auto lg:p-6 lg:[--main-pad:24px] short:p-4 short:[--main-pad:16px]">
+          className="cdx-viewport-main mdx-main mdx-scroll min-h-0 flex-1 p-4 pb-[calc(var(--tabbar-h)_+_16px_+_env(safe-area-inset-bottom))] [--main-pad:16px] max-lg:overflow-x-clip lg:overflow-x-hidden lg:overflow-y-auto lg:p-6 lg:[--main-pad:24px] short:p-4 short:[--main-pad:16px]">
           {/* MintDex's phone tilt prompt at the top of the card pages (Home and the coin case carry their own). */}
           {PHONE_TILT_PAGES.has(path) ? (
             <div className="mdx-phone-tilt mdx-phone-tilt--page flex lg:hidden">
