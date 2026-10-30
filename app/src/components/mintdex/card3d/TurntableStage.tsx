@@ -557,7 +557,6 @@ export default function TurntableStage({
                 <button
                   type="button"
                   className="mdx-v3d__btn"
-                  aria-pressed={paused}
                   onClick={() => setPaused((v) => !v)}
                   data-v3d="play"
                 >
@@ -616,7 +615,8 @@ export default function TurntableStage({
           <div
             ref={setStage}
             className="mdx-v3d__stage"
-            tabIndex={-1}
+            // A tab stop (A11Y-3): the dialog opens on it, and Tab goes on to Pause spin, Flip and Close.
+            tabIndex={0}
             style={{ "--glow-c": icon?.palette[1] ?? tier.ring } as CSSProperties}
           >
             <div ref={zoomRef} className="mdx-v3d__zoom" data-cased={item.cased ? "" : undefined}>

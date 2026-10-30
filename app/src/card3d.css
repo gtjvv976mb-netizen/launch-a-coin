@@ -2896,6 +2896,11 @@
 .mdx-v3d__stage[data-dragging] {
   cursor: grabbing;
 }
+/* The stage is a tab stop (the arrow keys turn the card), so it shows the focus ring inside its edge. */
+.mdx-v3d__stage:focus-visible {
+  outline: 2px solid var(--color-zap);
+  outline-offset: -2px;
+}
 .mdx-v3d__zoom {
   --W: min(70vw, 360px, calc((100dvh - 300px) * 63 / 88));
   position: relative;

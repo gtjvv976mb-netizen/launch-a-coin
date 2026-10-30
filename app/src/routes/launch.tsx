@@ -946,7 +946,8 @@ function Launch() {
                 data-filled={preview ? "true" : undefined}
                 // The name is the visible words (WCAG 2.5.3), so "click Add image" works by voice.
                 aria-labelledby="art-cta art-sub"
-                aria-describedby="art-spec"
+                // The error (Field's art-help) first, then the spec (A11Y-4).
+                aria-describedby={artMsg ? "art-help art-spec" : "art-spec"}
                 aria-invalid={artMsg ? true : undefined}
                 aria-busy={uploading || undefined}
                 onClick={() => fileRef.current?.click()}
@@ -962,7 +963,7 @@ function Launch() {
                   <span id="art-sub" className="sr-only">{preview ? "or drop another" : "or drop it here"}</span>
                 </span>
               </button>
-              <p id="art-spec" className="sr-only">PNG, JPG, WEBP or GIF up to 12 MB. Square works best.</p>
+              <p id="art-spec" className="sr-only">Required. PNG, JPG, WEBP or GIF up to 12 MB. Square works best.</p>
               {preview && !locked && !uploading ? <button type="button" className="mdx-link mdx-hit cdx-launch-art__remove" aria-label="Remove artwork" onClick={removeArt}>Remove</button> : null}
               <input disabled={locked} ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="sr-only" tabIndex={-1} aria-hidden onChange={(e) => { handleFile(e.target.files?.[0]); e.target.value = ""; }} />
             </Field>

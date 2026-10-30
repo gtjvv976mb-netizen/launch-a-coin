@@ -71,8 +71,8 @@
 }
 .cdx-how__section { padding-bottom: 20px; scroll-margin-top: 16px; }
 @media (max-width: 1023.98px) {
-  /* Phones: the sticky header covers the top of the page. */
-  .cdx-how__section { scroll-margin-top: calc(var(--mhead-h, 56px) + 12px); }
+  /* Phones: html's scroll-padding (mintdex.css) clears the sticky header; 4px more keeps the 12px gap. */
+  .cdx-how__section { scroll-margin-top: 4px; }
 }
 .cdx-how__section h2 { width: fit-content; font-family: var(--font-title); font-size: 17px; font-weight: 900; line-height: 1.3; color: var(--color-ink); }
 .cdx-how__section h2:focus { outline: none; }

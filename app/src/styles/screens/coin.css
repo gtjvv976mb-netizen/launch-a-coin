@@ -238,11 +238,7 @@
 .cdx-trade-ticket__msg .mdx-glyph { margin-top: 2px; }
 .cdx-trade-ticket__note { margin-top: -4px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); text-align: center; }
 /* Phones: a quick amount brings the button and its note into view (coin.tsx revealSubmit), stopping 8px above the tab
- * bar, so a trade needs no scroll and the quote rows stay in view above them. */
-@media (max-width: 1023.98px) {
-  .cdx-trade-ticket__submit,
-  .cdx-trade-ticket__note { scroll-margin-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 8px); }
-}
+ * bar (html's scroll-padding-bottom, mintdex.css), so a trade needs no scroll and the quote rows stay in view above them. */
 
 /* ---------------------------------------------------------------- the case's control row on this page: Turn over,
  * Inspect and the 3D circle as MintDex's outline pills (card3d.css draws the buttons; this sets their row). */

@@ -1397,8 +1397,8 @@ export function useTradeTicket(page: CoinPage) {
   }
 
   /**
-   * Phones: once a quick amount is in, the button and its note come into view just above the tab bar (scroll-margin in
-   * coin.css), at once and only as far as needed, so the trade takes no scroll and the quote rows above stay in view.
+   * Phones: once a quick amount is in, the button and its note come into view just above the tab bar (html's
+   * scroll-padding-bottom, mintdex.css), at once and only as far as needed, so the trade takes no scroll and the quote rows above stay in view.
    * The ticket does not stick over them: the fee and slippage rows are read before the press.
    */
   function revealSubmit() {

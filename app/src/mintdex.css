@@ -715,7 +715,7 @@
   }
   .mdx-tabs:not([data-measured]) .mdx-tabs__tab[data-selected] {
     background: var(--color-sheet);
-    box-shadow: var(--shadow-raise), 0 0 0 1px rgb(var(--rgb-gold) / 0.35);
+    box-shadow: var(--shadow-raise), 0 0 0 1px rgb(var(--rgb-gold));
   }
   .mdx-tabs__thumb {
     position: absolute;
@@ -728,7 +728,7 @@
     transform-origin: left center;
     border-radius: var(--radius-pill);
     background: var(--color-sheet);
-    box-shadow: var(--shadow-raise), 0 0 0 1px rgb(var(--rgb-gold) / 0.35), 0 0 14px -4px rgb(var(--rgb-gold) / 0.5);
+    box-shadow: var(--shadow-raise), 0 0 0 1px rgb(var(--rgb-gold)), 0 0 14px -4px rgb(var(--rgb-gold) / 0.5);
     pointer-events: none;
   }
   .mdx-tabs:not([data-measured]) .mdx-tabs__thumb {
@@ -2278,6 +2278,17 @@ a:focus-visible .mdx-lift {
 @media (max-width: 1023.98px) {
   html[data-keyboard] [data-tabbar] {
     display: none;
+  }
+}
+/* Focus not obscured (WCAG 2.4.11): a control that Tab scrolls into view stops clear of the sticky header (0 when it
+ * scrolls away sideways) and of the tab bar; with the tab bar stepped aside for the keyboard, nothing is reserved. */
+@media (max-width: 1023.98px) {
+  html {
+    scroll-padding-top: calc(var(--mhead-h) + 8px);
+    scroll-padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 8px);
+  }
+  html[data-keyboard] {
+    scroll-padding-bottom: 0;
   }
 }
 
