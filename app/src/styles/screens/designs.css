@@ -22,6 +22,14 @@
 .cdx-designs .mdx-design-collections {
   scroll-padding-inline: 16px;
 }
+/* Below 1024px all five filters fit the width with no sideways swipe, as Launch's pair HUD filters do: the track
+ * spans the column, the options share it by their length (each at least 44px wide, on the 44px track), and the
+ * counts drop (the heading already says 37 designs). From 1024px the counts and the look are unchanged. */
+@media (max-width: 1023.98px) {
+  .cdx-designs .mdx-design-collections { display: flex; width: 100%; }
+  .cdx-designs .mdx-design-collections .mdx-tabs__count { display: none; }
+  .cdx-designs .mdx-design-collections .mdx-tabs__tab { flex: 1 1 auto; min-width: 44px; justify-content: center; padding: 0 6px; }
+}
 
 /* ------------------------------------------------ the coverflow: the centre turntable stands on the ledge, its controls
  * row hangs under it, and the fanned neighbours stand on the same ledge (the track ends where the controls begin). */

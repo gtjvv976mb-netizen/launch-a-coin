@@ -12,8 +12,9 @@ import { pageHead } from "../lib/mintdex/seo";
  * How it works (/how): the one page that holds every explanation the screens leave out (the words rule: screens
  * carry the fewest words that let someone act, and each links here with one "How it works" or "Details" link).
  * MintDex's reading format, like /legal: the title row, a section list (a column from 1024px, a row on phones)
- * beside one plinth panel. The panel opens with the old guide's three steps, then one anchored section per topic
- * (#launch, #cards, #pairs, #trading, #wallet, #fees, #demo, #recovery, #motion). From 1024px the panel scrolls on
+ * beside one plinth panel. The panel opens with the old guide's three steps, then one anchored section per topic, in
+ * the order a newcomer needs them (#launch, #pairs, #cards, #fees, #demo, #trading, then the mainnet-only #wallet and
+ * #recovery, and #motion). From 1024px the panel scrolls on
  * its own; phones scroll the page. A #hash link lands its section at the top and moves focus to its heading.
  * Terms, privacy and risks stay at /legal. Styles: styles/screens/how.css.
  */
@@ -82,10 +83,8 @@ const SECTIONS: Section[] = [
     body: (
       <ul>
         <li>Name, ticker and artwork are all you need. Everything else has a default: the pair starts on SOL.</li>
-        <li>Pick a pair and its card comes with it. The card beside the form shows that pair's design at once.</li>
         <li>The ticker takes 2 to 8 letters or numbers (A to Z, 0 to 9).</li>
         <li>Card art: PNG, JPG, WEBP or GIF up to 12 MB. Square works best. You can also drop the image on the box.</li>
-        <li>The card beside the form is a live preview. It changes as you edit.</li>
         <li>The pair panel filters by Memes, Stocks, Collector and Base (SOL and USDC), and searches by symbol or name.</li>
         <li>More options holds your website, X link, an optional initial buy and its slippage.</li>
         <li>The exact initial buy and slippage show before your wallet opens.</li>
@@ -98,12 +97,28 @@ const SECTIONS: Section[] = [
     ),
   },
   {
+    id: "pairs",
+    nav: "Pairs",
+    title: "Pairs",
+    body: (
+      <ul>
+        <li>The pair is what your coin is priced and bought in: SOL, USDC, a meme or collector token, or a tokenized stock.</li>
+        <li>The pair picks the card. Each pair has exactly one design, so choosing the pair and the design is one choice. DOGE gets Imperial Gold.</li>
+        <li>SOL is pump.fun's default pair and gets the One Piece design. USDC gets Duel Masters.</li>
+        <li>Under the pair panel: the exact mint, its issuer and when it was reviewed. The mint is checked again before wallet review.</li>
+        <li>The pair funds the optional initial buy, so changing the pair clears it. SOL also pays network and account costs.</li>
+        <li>Stock pairs use tokenized quote assets. They grant no equity: your coin is not company shares.</li>
+        <li>Each quote asset has its own issuer terms, availability and risks.</li>
+        {IS_SIM ? <li>Demo pairs use no real assets.</li> : null}
+      </ul>
+    ),
+  },
+  {
     id: "cards",
     nav: "Cards",
     title: "Your card",
     body: (
       <ul>
-        <li>Every coin has one card, and its pair picks the design. DOGE gets Imperial Gold.</li>
         <li>The design is printed on the card and kept for good. Market cap never changes it.</li>
         <li>The token trades. Its creator holds the separate one-of-one card made at launch.</li>
         <li>Picking another pair keeps your coin details and artwork; only the pair and its card change.</li>
@@ -115,19 +130,46 @@ const SECTIONS: Section[] = [
     ),
   },
   {
-    id: "pairs",
-    nav: "Pairs",
-    title: "Pairs",
+    id: "fees",
+    nav: "Fees",
+    title: "Fees",
     body: (
       <ul>
-        <li>Every coin trades against one pair (its quote asset): SOL, USDC, a meme or collector token, or a tokenized stock.</li>
-        <li>The pair picks the card. Each pair has exactly one design, so choosing the pair and the design is one choice.</li>
-        <li>SOL is pump.fun's default pair and gets the One Piece design. USDC gets Duel Masters.</li>
-        <li>Under the pair panel: the exact mint, its issuer and when it was reviewed. The mint is checked again before wallet review.</li>
-        <li>The pair funds the optional initial buy, so changing the pair clears it. SOL also pays network and account costs.</li>
-        <li>Stock pairs use tokenized quote assets. They grant no equity: your coin is not company shares.</li>
-        <li>Each quote asset has its own issuer terms, availability and risks.</li>
-        {IS_SIM ? <li>Demo pairs use no real assets.</li> : null}
+        <li>Launch a Card charges no platform fee.</li>
+        <li>
+          A mainnet launch pays Solana network and priority fees, account rent for the new accounts, the Metaplex NFT
+          fee for the card, and pump.fun's protocol and creator fees inside any initial buy.
+        </li>
+        <li>Coin creation and card issuance are paid mainnet transactions. Exact costs show before your wallet asks.</li>
+        {IS_SIM ? (
+          <li>
+            In the demo, the {sol(LAUNCH_FEE)} test SOL launch cost stands in for those network fees and account rent.
+            Demo trades pay {pct(TRADE_FEE_BPS)}.
+          </li>
+        ) : null}
+        <li>
+          Every fee in one table: <TextLink to="/legal" search={{ tab: "fees" }}>Fees</TextLink>.
+        </li>
+      </ul>
+    ),
+  },
+  {
+    id: "demo",
+    nav: "Demo",
+    title: "The demo",
+    body: (
+      <ul>
+        <DemoLine />
+        <li>Pick a handle to get {START_SOL} test SOL. No wallet needed.</li>
+        <li>Your test account lives in this browser. Clearing site data ends access to it.</li>
+        <li>Balances, the bonding curve and trades are simulated. Each quote asset has its own demo balance.</li>
+        <li>Activity includes demo bots: simulated traders, marked bot.</li>
+        <li>Portfolio holds your coins and your one-of-one cards. Value is test SOL plus your coins; 24h is their price move.</li>
+        <li>
+          Under {sol(FAUCET_BELOW)} test SOL, the faucet in your wallet menu gives {sol(FAUCET_AMOUNT)} more.
+        </li>
+        <li>Start over leaves your handle for good. Its coins and cards stay with it, and nobody can enter it again.</li>
+        <li>Only demo coins have cards here. Coins on Solana devnet or mainnet don't, yet.</li>
       </ul>
     ),
   },
@@ -181,50 +223,6 @@ const SECTIONS: Section[] = [
         <p className="cdx-how__safety">{WALLET_NOTICE_COPY.safety}</p>
         <p>Connecting a wallet authorizes no payment or transaction.</p>
       </>
-    ),
-  },
-  {
-    id: "fees",
-    nav: "Fees",
-    title: "Fees",
-    body: (
-      <ul>
-        <li>Launch a Card charges no platform fee.</li>
-        <li>
-          A mainnet launch pays Solana network and priority fees, account rent for the new accounts, the Metaplex NFT
-          fee for the card, and pump.fun's protocol and creator fees inside any initial buy.
-        </li>
-        <li>Coin creation and card issuance are paid mainnet transactions. Exact costs show before your wallet asks.</li>
-        {IS_SIM ? (
-          <li>
-            In the demo, the {sol(LAUNCH_FEE)} test SOL launch cost stands in for those network fees and account rent.
-            Demo trades pay {pct(TRADE_FEE_BPS)}.
-          </li>
-        ) : null}
-        <li>
-          Every fee in one table: <TextLink to="/legal" search={{ tab: "fees" }}>Fees</TextLink>.
-        </li>
-      </ul>
-    ),
-  },
-  {
-    id: "demo",
-    nav: "Demo",
-    title: "The demo",
-    body: (
-      <ul>
-        <DemoLine />
-        <li>Pick a handle to get {START_SOL} test SOL. No wallet needed.</li>
-        <li>Your test account lives in this browser. Clearing site data ends access to it.</li>
-        <li>Balances, the bonding curve and trades are simulated. Each quote asset has its own demo balance.</li>
-        <li>Activity includes demo bots: simulated traders, marked bot.</li>
-        <li>Portfolio holds your coins and your one-of-one cards. Value is test SOL plus your coins; 24h is their price move.</li>
-        <li>
-          Under {sol(FAUCET_BELOW)} test SOL, the faucet in your wallet menu gives {sol(FAUCET_AMOUNT)} more.
-        </li>
-        <li>Start over leaves your handle for good. Its coins and cards stay with it, and nobody can enter it again.</li>
-        <li>Only demo coins have cards here. Coins on Solana devnet or mainnet don't, yet.</li>
-      </ul>
     ),
   },
   {
