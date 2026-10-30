@@ -30,6 +30,7 @@
 - ZCAT's Token-2022 mint charges a 3% transfer fee. The live adapter's pre-send check refuses it ("Pair mint charges a transfer fee this launch cannot price"), so a real ZCAT launch would be refused at prepare; the demo works. Decide whether ZCAT stays offered.
 - Art rights: identity designs depict third-party projects and companies; five meme backs and TAO's back reuse source logo or photo pixels (Codex's reports). Trademark review is the owner's call.
 - Asset weight: about 690 MB in about 2,250 files under `app/public` (Codex's 355 MB plus 24 MB of copies). Deploy at 100% only (the GIF rollback caveat below).
+- Rollback hazard: once a coin exists on a new pair, the previous release cannot read it. Locally, f441569e's build (f603773) returned 500 on Home after this build had stored demo coins on PEPE and ETH (its pair registry fails closed on unknown quote keys). Rolling back after launches on new pairs needs a fix-forward, not a version switch.
 
 **Not verified.** Real phones; live mainnet (live mode stayed off; nothing was signed, sent or deployed); `/review-animations`, `impeccable audit` and a Lighthouse run; GIF exports in a Workers isolate (memory figure above is process RSS); keyboard-only operation of the scrolling desktop grid beyond the existing arrow-key tests.
 
