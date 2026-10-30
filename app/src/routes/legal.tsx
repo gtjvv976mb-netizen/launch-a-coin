@@ -19,7 +19,7 @@ export const Route = createFileRoute("/legal")({
   component: Legal,
 });
 
-const UPDATED = "28 October 2026";
+const UPDATED = "30 October 2026";
 
 /** A fact the operator still has to supply. Shown as an obvious marked slot, never as a guess. */
 function Fill({ children }: { children: string }) {
@@ -55,9 +55,14 @@ const SECTIONS: Section[] = [
         id: "eligibility",
         title: "Who can use it",
         body: (
-          <p>
-            Minimum age: <Fill>minimum age</Fill>. Not available in: <Fill>restricted countries and regions</Fill>.
-          </p>
+          <>
+            <p>You must be at least 18, or the age of majority where you live if that is higher.</p>
+            <p>
+              Not available to anyone in, or ordinarily resident in, a country or region under comprehensive sanctions
+              (including Cuba, Iran, North Korea, Syria, and the Crimea, Donetsk and Luhansk regions of Ukraine), or to
+              anyone named on a government sanctions list. You are responsible for following the laws that apply to you.
+            </p>
+          </>
         ),
       },
       {
@@ -103,9 +108,20 @@ const SECTIONS: Section[] = [
         id: "liability",
         title: "Liability",
         body: (
-          <p>
-            <Fill>warranty disclaimer and limitation of liability, written by counsel</Fill>
-          </p>
+          <>
+            <p>
+              Launch a Card is provided “as is” and “as available”, without warranties of any kind, express or implied,
+              including merchantability, fitness for a particular purpose and non-infringement. Launch a Card does not
+              control Solana, pump.fun, wallets or quote-asset issuers and is not responsible for their availability,
+              fees, errors or losses.
+            </p>
+            <p>
+              To the fullest extent the law allows, Launch a Card and its operator are not liable for indirect,
+              incidental, special, consequential or punitive damages, or for lost profits, tokens, funds or data. Total
+              liability for any claim is limited to the fees you paid to Launch a Card in the 12 months before the claim.
+              Nothing here limits liability that the law does not allow to be limited.
+            </p>
+          </>
         ),
       },
       {
@@ -122,8 +138,8 @@ const SECTIONS: Section[] = [
         title: "Changes to these terms",
         body: (
           <p>
-            The Updated date at the top of this page shows the current version. How changes are announced:{" "}
-            <Fill>how changes are announced</Fill>.
+            The Updated date at the top of this page shows the current version. Changes are posted on this page with a
+            new Updated date. Using Launch a Card after a change means you accept the updated terms.
           </p>
         ),
       },
