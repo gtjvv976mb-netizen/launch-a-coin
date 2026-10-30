@@ -97,9 +97,9 @@ const SIM_COPY: ModeCopy = {
   addressNotFound: "Only demo coins have cards here.",
   hero: "Try it with test SOL on a simulated pump.fun curve.",
   launchContext:
-    "Choose a permanent card design, add your coin, and try the pump.fun launch flow with test SOL.",
+    "Pick a pair and its card comes with it. Add your coin and try the pump.fun launch flow with test SOL.",
   guideLaunch:
-    "Choose a design, add your coin art and launch. The demo creates a simulated coin and one-of-one card in your collection.",
+    "Pick a pair (its card comes with it), add your coin art and launch. The demo creates a simulated coin and one-of-one card in your collection.",
   guideNote: "Demo: separate test balances and a simulated bonding curve. No real coin or NFT is minted.",
   curveComplete: "Curve complete (simulated)",
   botsNote: "Includes demo bots.",
@@ -306,7 +306,7 @@ export const WORDS = {
   /** Launch, under Mint and launch. */
   launcherLine: "Your selected design belongs to your coin from the first card.",
   /** Home, the second line under the headline (P1-27). */
-  heroBid: "Launch on pump.fun. Pick its one-of-one card.",
+  heroBid: "Launch on pump.fun. Your pair picks the card.",
   /** Trade ticket fee row. */
   tradeFeeLabel: `Demo trading fee ${FEES.trade}`,
   cardIncome: IS_MAINNET

@@ -221,7 +221,7 @@
 /* The group filter: MintDex's segmented track in its small type, each option a 40px target (44px on touch). */
 .cdx-pair-hud .mdx-tabs--sm { height: 40px; }
 .cdx-pair-hud .mdx-tabs--sm :is(.mdx-tabs__tab, .mdx-tabs__thumb) { height: 32px; }
-.cdx-pair-hud .mdx-tabs--sm .mdx-tabs__tab { min-width: 0; justify-content: center; padding: 0 12px; }
+.cdx-pair-hud .mdx-tabs--sm .mdx-tabs__tab { min-width: 40px; justify-content: center; padding: 0 12px; }
 .cdx-pair-hud .mdx-tabs--sm .mdx-tabs__tab::before { content: ""; position: absolute; inset: -4px 0; }
 .cdx-pair-hud .mdx-tabs--fill .mdx-tabs__tab { flex: 1 1 auto; }
 @container (min-width: 540px) {
@@ -230,6 +230,7 @@
 @media (pointer: coarse), (max-width: 1023.98px) {
   .cdx-pair-hud .mdx-tabs--sm { height: 44px; }
   .cdx-pair-hud .mdx-tabs--sm :is(.mdx-tabs__tab, .mdx-tabs__thumb) { height: 36px; }
+  .cdx-pair-hud .mdx-tabs--sm .mdx-tabs__tab { min-width: 44px; }
 }
 @container (max-width: 300px) {
   .cdx-pair-hud .mdx-tabs--sm .mdx-tabs__tab { padding: 0 6px; }
@@ -243,8 +244,27 @@
 }
 .cdx-pair-hud__glyph { position: absolute; top: 50%; left: 12px; color: var(--color-slate); pointer-events: none; transform: translateY(-50%); }
 .cdx-pair-hud__clear { position: absolute; top: 50%; right: 2px; transform: translateY(-50%); }
-/* The tiles: as many 116px tracks as fit (two on a 360px phone, five in the desktop form panel). */
+/* The tiles: from 1024px as many 116px tracks as fit (four in the desktop form panel). */
 .cdx-pair-hud__grid { display: grid; min-width: 0; grid-template-columns: repeat(auto-fill, minmax(116px, 1fr)); gap: 6px; }
+/* Below 1024px: one sideways strip (MintDex's .mdx-strip, as Designs uses on phones), so the HUD stays one row tall
+ * and Card art stays close under it. It runs to the well's edges, so the cut tile at the edge says it scrolls; the
+ * padding above and below keeps the chosen tile's check and the focus ring inside the scroller. PairHud centres the
+ * chosen tile, at once. */
+@media (max-width: 1023.98px) {
+  .cdx-pair-hud__grid {
+    display: flex;
+    margin-inline: -12px;
+    padding: 6px 12px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 12px;
+    scrollbar-width: none;
+  }
+  .cdx-pair-hud__grid::-webkit-scrollbar { display: none; }
+  .cdx-pair-hud__grid > .cdx-pair-tile { flex: none; width: 128px; scroll-snap-align: center; }
+  .cdx-pair-hud__grid > .cdx-pair-hud__empty { flex: 1 0 100%; }
+}
 .cdx-pair-tile {
   position: relative;
   display: grid;
@@ -329,8 +349,10 @@
 .cdx-live-stage__links .mdx-link,
 .cdx-live-block .mdx-link { display: inline-flex; align-items: center; gap: 4px; }
 .cdx-live-stage__links .mdx-link > svg { margin-top: 0; }
+/* The HUD's status line stays rendered while empty (an empty line has no height), so a live region is in place
+ * before its words arrive and they are announced. */
 .cdx-pair-notice { font-size: var(--text-body); line-height: 20px; color: var(--color-ink); }
-.cdx-pair-notice:empty { display: none; }
+.cdx-pair-hud__picked .cdx-pair-notice:empty { margin-top: 0; }
 
 /* Field selects: 16px on touch, as the inputs are (no iOS zoom). */
 @media (pointer: coarse), (max-width: 1023.98px) {

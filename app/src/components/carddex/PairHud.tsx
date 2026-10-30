@@ -1,12 +1,16 @@
-import { useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { getPairAsset, getTradingPair, type PairAssetKey } from "../../lib/carddex/pairs";
 import { Icon, IconButton, Tabs, TextLink } from "../mintdex/ui";
 import { QuoteAssetMeta } from "./QuoteAssetMeta";
 import { PAIR_GROUPS, filterPairs, gridStep, pairMonogram, shortPairName, type PairGroup } from "./pair-groups";
 
+/** A layout effect in the browser (measured before paint), a plain one on the server (where neither runs). */
+const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+
 /**
  * Launch's pair HUD: the pair picks the card. A filter (All, Memes, Stocks, Collector, Base), a search for a symbol or
- * name, and every pair as a tile in one radio group (arrow keys move and select, as radio groups do). Choosing a pair
+ * name, and every pair as a tile in one radio group (arrow keys move and select, as radio groups do): a grid from
+ * 1024px, one sideways strip below it so the HUD stays short on phones. Choosing a pair
  * is choosing its card: the live card preview shows that pair's design at once, so the HUD never shows a design name,
  * thumbnail or swatch. Under it, the chosen pair's safety facts: its name and issuer, the full mint, when it was
  * reviewed and the terms links. Explanations live at /how#pairs. Styles: styles/screens/launch.css.
@@ -33,7 +37,17 @@ export function PairHud({ value, onChange, ticker, live = false, disabled = fals
   const checked = shown.findIndex((pair) => pair.key === asset.key);
   const tabStop = checked >= 0 ? checked : 0;
 
-  /** How many tiles share the first row (the grid's track count at this width). */
+  // Below 1024px the tiles are one sideways strip (launch.css): the chosen tile is brought to its middle, as the
+  // Designs strip does, at once (no travel). From 1024px the grid does not scroll and this does nothing.
+  useIsoLayoutEffect(() => {
+    const strip = gridRef.current;
+    const tile = strip?.querySelector<HTMLElement>(`[data-pair="${asset.key}"]`);
+    if (!strip || !tile || strip.scrollWidth <= strip.clientWidth) return;
+    const left = tile.getBoundingClientRect().left - strip.getBoundingClientRect().left + strip.scrollLeft;
+    strip.scrollLeft = left - (strip.clientWidth - tile.offsetWidth) / 2;
+  }, [asset.key, group, query]);
+
+  /** How many tiles share the first row (the grid's track count at this width; a strip is one row). */
   const columns = () => {
     const tiles = gridRef.current?.querySelectorAll<HTMLElement>("[role='radio']");
     if (!tiles?.length) return 1;
@@ -42,9 +56,11 @@ export function PairHud({ value, onChange, ticker, live = false, disabled = fals
     for (const tile of tiles) { if (tile.offsetTop !== top) break; n++; }
     return Math.max(1, n);
   };
+  // Every pick reaches the form, the checked pair's too: there it brings back the pair's own card when a saved launch
+  // showed another (launch-form.ts pickPair); otherwise the form ignores it.
   const choose = (key: PairAssetKey, focus = false) => {
     if (disabled) return;
-    if (key !== asset.key) onChange(key);
+    onChange(key);
     if (focus) gridRef.current?.querySelector<HTMLElement>(`[data-pair="${key}"]`)?.focus();
   };
   function onGridKeyDown(e: KeyboardEvent<HTMLDivElement>) {

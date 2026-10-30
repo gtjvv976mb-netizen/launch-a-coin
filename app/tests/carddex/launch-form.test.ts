@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { draftPair, enterTarget, firstProblem, launchDesign, pairFromSearch, quickBuyAmounts, sameAmount } from "../../src/components/carddex/launch-form";
+import { draftPair, enterTarget, firstProblem, formDesign, launchDesign, pairFromSearch, pickPair, quickBuyAmounts, sameAmount } from "../../src/components/carddex/launch-form";
 import { ORDERED_PAIRS, PAIR_GROUPS, filterPairs, gridStep, pairGroupOf, pairMonogram, pairsInGroup, shortPairName } from "../../src/components/carddex/pair-groups";
 import { walletNoticeItems, walletNoticePreview, WALLET_NOTICE_COPY } from "../../src/components/carddex/live/wallet-notice";
 import { CARD_DESIGNS } from "../../src/lib/carddex/designs";
@@ -29,6 +29,24 @@ describe("the Launch form derives its card from the pair", () => {
     expect(launchDesign("sol", "pokemon-classic")).toBe("pokemon-classic");
     expect(launchDesign("gmex", "gamestop")).toBe("gamestop");
     expect(launchDesign("sol", "not-a-design")).toBe("one-piece");
+  });
+  test("a saved launch's own design stays in mainnet mode: Demo shows and sends the pair's own card", () => {
+    // Review finding 2: a pre-change SOL launch (Pokemon Classic) loaded in mainnet mode, then Demo with ?quote=sol.
+    expect(formDesign("sol", "pokemon-classic", true)).toBe("pokemon-classic");
+    expect(formDesign("sol", "pokemon-classic", false)).toBe("one-piece");
+    expect(formDesign("gmex", "gamestop", false)).toBe("stock-gme");
+    for (const asset of PAIR_ASSETS) {
+      expect(formDesign(asset.key, null, true)).toBe(designForPair(asset.key)!);
+      expect(formDesign(asset.key, "pokemon-full-art", false)).toBe(designForPair(asset.key)!);
+    }
+  });
+  test("tapping the checked pair brings back its own card after a saved launch showed another", () => {
+    expect(pickPair({ pair: "sol", savedDesign: "pokemon-classic" }, "sol")).toEqual({ pair: "sol", savedDesign: null, changed: false });
+    expect(pickPair({ pair: "sol", savedDesign: null }, "sol")).toBeNull();
+    expect(pickPair({ pair: "sol", savedDesign: null }, "doge")).toEqual({ pair: "doge", savedDesign: null, changed: true });
+    expect(pickPair({ pair: "gmex", savedDesign: "gamestop" }, "doge")).toEqual({ pair: "doge", savedDesign: null, changed: true });
+    const back = pickPair({ pair: "sol", savedDesign: "pokemon-classic" }, "sol")!;
+    expect(formDesign(back.pair, back.savedDesign, true)).toBe("one-piece");
   });
   test("?quote= preselects its pair; an old ?design= link opens on that design's pair, or on SOL without an error", () => {
     expect(pairFromSearch({ quote: "doge" })).toEqual({ pair: "doge", notice: "" });

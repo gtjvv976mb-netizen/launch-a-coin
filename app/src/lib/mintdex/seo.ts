@@ -17,7 +17,7 @@ export const SITE_NAME = "Launch a Card";
  * meta API writes with claims the test site cannot make; the mode suffix says what is real (P0-5).
  */
 export const SITE_DESCRIPTION = sentences(
-  "Choose a premium design. Launch a pump.fun token paired with its own one-of-one NFT trading card",
+  "Pick a pair and its card comes with it. Launch a pump.fun token with its own one-of-one NFT trading card",
 );
 
 /**

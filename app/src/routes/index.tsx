@@ -891,7 +891,7 @@ function Home() {
               the page already says what is real, so the hero keeps one line. */}
           <p className="cdx-home__copy mdx-home-arrival mdx-home-arrival--copy">
             {!IS_SIM && CARD_BIDDING_SUSPENDED
-              ? "Pick one premium design. Keep it from day one."
+              ? "Pick a pair. Its card comes with it."
               : WORDS.heroBid}
           </p>
           {/* MintDex: Launch a coin, Explore coins and How it works on the first screen from 1024px up; phones put the

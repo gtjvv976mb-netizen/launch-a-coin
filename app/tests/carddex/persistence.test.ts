@@ -434,7 +434,16 @@ describe("CardDex fixed creator cards and token trading", () => {
       const sql = readFileSync(resolve(migrations, name), "utf8");
       if (sql.replace(/--[^\n]*/g, "").trim()) sqlite.exec(sql);
     }
-    await localD1.batch(seed.buildSeed() as Prepared[]);
+    // SOL curves as the seed wrote them before 0009 (no quote columns yet), in skins that now belong to other pairs.
+    // The seed itself now writes each coin's own pair, so it no longer fits this schema.
+    const legacy = ["pokemon-classic", "yugioh-monster", "magic-etched", "pokemon-full-art", "one-piece", "duel-masters", "doge", "ronin", "obsidian-archive", "yugioh-spell"];
+    sqlite.query("INSERT INTO users (id, handle, balance, is_npc, faucet_at, created_at) VALUES ('legacy_npc', 'legacy_npc', 0, 1, 0, 0)").run();
+    for (const [index, key] of legacy.entries()) {
+      const level = getCardDesign(key).materialLevel;
+      sqlite.query(`INSERT INTO coins (id, dex_no, name, ticker, lore, image, website, x_url, creator_id, owner_id, v_sol, v_tok, volume, owner_fees, level, peak_level, list_price, trades, is_seed, created_at, last_trade_at, fee_vault, mint_address, card_template, peak_mcap_usd)
+        VALUES (?, ?, 'Legacy', ?, '', '/assets/creatures/honk.webp', NULL, NULL, 'legacy_npc', 'legacy_npc', ?, ?, 0, 0, ?, ?, NULL, 0, 1, 0, 0, 0, NULL, ?, 0)`)
+        .run(`legacy${index}`, index + 1, `LEG${index}`, INITIAL_RESERVES.vSol, INITIAL_RESERVES.vTok, level, level, key);
+    }
     sqlite.exec(readFileSync(resolve(migrations, "0009_carddex_quote_assets.sql"), "utf8"));
     const coins = await service.allCoins();
     expect(coins).toHaveLength(10);
@@ -521,6 +530,9 @@ describe("CardDex fixed creator cards and token trading", () => {
     expect(coins).toHaveLength(10);
     for (const coin of coins) {
       expect(coin.cardTemplate).toBeTruthy();
+      // The pair picks the card: every seed coin trades against its design's own pair.
+      expect(pairForDesign(coin.cardTemplate)?.key).toBe(coin.quoteAssetKey);
+      expect(coin.quoteMint).toBe(getPairAsset(coin.quoteAssetKey).mint);
       expect(coin.level).toBe(getCardDesign(coin.cardTemplate).materialLevel);
       expect(coin.ownerId).toBe(coin.creatorId);
       expect(coin.mintAddress).toBeNull();
@@ -531,5 +543,35 @@ describe("CardDex fixed creator cards and token trading", () => {
     expect(sqlite.query("SELECT COUNT(*) AS n FROM trades").get()).toEqual({ n: 420 });
     for (const table of ["bids", "deed_sales", "owner_earnings", "vanity_pool"]) expect(sqlite.query(`SELECT COUNT(*) AS n FROM ${table}`).get()).toEqual({ n: 0 });
     expect(sqlite.query("SELECT COUNT(*) AS n FROM events WHERE kind NOT IN ('launch', 'buy', 'sell')").get()).toEqual({ n: 0 });
+  });
+
+  test("seed coins trade in their own pair's units, and the demo bots can keep trading them", async () => {
+    await localD1.batch(seed.buildSeed() as unknown as Prepared[]);
+    const coins = await service.allCoins();
+    // Several pairs, SOL among them; each pair's ledger and fee total stays whole and never negative.
+    expect(new Set(coins.map(coin => coin.quoteAssetKey)).size).toBe(10);
+    expect(coins.some(coin => coin.quoteAssetKey === "sol")).toBe(true);
+    const ledgers = sqlite.query("SELECT quote_asset_key, balance FROM quote_balances").all() as { quote_asset_key: string; balance: number }[];
+    expect(ledgers.length).toBeGreaterThan(0);
+    for (const ledger of ledgers) {
+      expect(ledger.quote_asset_key).not.toBe("sol");
+      expect(Number.isSafeInteger(ledger.balance) && ledger.balance >= 0).toBe(true);
+    }
+    const fees = sqlite.query("SELECT quote_asset_key FROM protocol_quote_fees ORDER BY quote_asset_key").all() as { quote_asset_key: string }[];
+    expect(fees.map(fee => fee.quote_asset_key)).toEqual([...new Set(coins.map(coin => coin.quoteAssetKey))].sort());
+    // The ambient bot's call (seed.server.ts maybeAmbient): its own pair named, a buy sized in that pair's atoms.
+    const npc = { id: "carddex_demo_0" };
+    for (const coin of coins) {
+      const before = row(coin.id);
+      const fill = await service.trade(npc, coin.id, "buy", seed.seedQuoteAtoms(coin.quoteAssetKey, LAMPORTS / 2), 0, { quoteAssetKey: coin.quoteAssetKey, quoteMint: coin.quoteMint });
+      expect(fill.quoteAssetKey).toBe(coin.quoteAssetKey);
+      expect(fill.tokens).toBeGreaterThan(0);
+      const after = row(coin.id);
+      expect(after.card_template).toBe(before.card_template);
+      expect(after.quote_asset_key).toBe(coin.quoteAssetKey);
+    }
+    // SOL is unchanged by the scaling; another pair moves the same share of its own starting reserve.
+    expect(seed.seedQuoteAtoms("sol", LAMPORTS)).toBe(LAMPORTS);
+    expect(seed.seedQuoteAtoms("doge", INITIAL_RESERVES.vSol)).toBe(initialQuoteReserves("doge").vSol);
   });
 });

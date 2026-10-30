@@ -34,7 +34,7 @@ import { formatQuoteAmount, initialQuoteReserves, maxInitialBuyQuoteAtoms, parse
 import { quoteFixed } from "../lib/carddex/quote-display";
 import { CREATION_MCAP_LABEL } from "../lib/carddex/card-template";
 import type { LiveLaunchHandle, LivePrimary } from "../components/carddex/live/LiveLaunchPanel";
-import { draftPair, firstProblem, enterTarget, launchDesign, pairFromSearch, type FormCheck } from "../components/carddex/launch-form";
+import { draftPair, firstProblem, enterTarget, formDesign, pairFromSearch, pickPair as nextPick, type FormCheck } from "../components/carddex/launch-form";
 import { liveReadinessQuery, useLiveLaunchOpen, useLiveRecoveryOpen } from "../components/carddex/live/readiness";
 import { formatLiveAmount, parseLiveAmount } from "../components/carddex/live/amounts";
 import { BUY_FIT_AFTER_SIGN_IN, liveBuyOff, useLiveBuyFit, useLiveBuyRefusal } from "../components/carddex/live/buy-fit";
@@ -269,13 +269,16 @@ function Launch() {
     if (previousMode.current === live) return;
     previousMode.current = live;
     setPreview(null); setImageUrl(null); setPreparedArt(null); setShowErrors(false);
+    // A saved launch's own design stays in mainnet mode (the panel reports it again when the page comes back).
+    if (!live) setSavedDesign(null);
   }, [live]);
   // The pair picks the card (launch-form.ts): ?quote= opens on that pair, an older ?design= link on that design's pair,
   // anything else on SOL. The card's design always follows the pair, except that a saved mainnet launch keeps the
-  // design it was saved with (one prepared before this rule may carry another); any pair pick ends that.
+  // design it was saved with (one prepared before this rule may carry another) while the page is in mainnet mode; any
+  // pair tap ends that, the checked pair's included.
   const [quoteKey, setQuoteKey] = useState<PairAssetKey>(() => pairFromSearch(search).pair);
   const [savedDesign, setSavedDesign] = useState<string | null>(null);
-  const designKey = launchDesign(quoteKey, savedDesign);
+  const designKey = formDesign(quoteKey, savedDesign, live);
   const [pairNotice, setPairNotice] = useState("");
   const design = getCardDesign(designKey);
   const quoteAsset = getPairAsset(quoteKey);
@@ -665,10 +668,11 @@ function Launch() {
    * unit, so it is cleared (and the line under the HUD says so). */
   const pickPair = (next: PairAssetKey) => {
     if (live && liveLocked) return;
-    if (next === quoteKey && !savedDesign) return;
-    setSavedDesign(null);
-    setQuoteKey(next);
-    if (next !== quoteKey && devBuy) { setDevBuy(""); setPairNotice("Initial buy cleared."); }
+    const pick = nextPick({ pair: quoteKey, savedDesign }, next);
+    if (!pick) return;
+    setSavedDesign(pick.savedDesign);
+    setQuoteKey(pick.pair);
+    if (pick.changed && devBuy) { setDevBuy(""); setPairNotice("Initial buy cleared."); }
     else setPairNotice("");
   };
 

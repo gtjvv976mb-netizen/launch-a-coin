@@ -28,6 +28,27 @@ export function launchDesign(pair: string, savedDesign?: string | null): CardDes
   return designForPair(pair) ?? designForPair(DEFAULT_PAIR)!;
 }
 
+/**
+ * The card the Launch page shows and sends in its current mode. A saved launch's own design belongs to mainnet mode
+ * only: Demo always shows (and sends) the pair's own card, since the demo launch refuses any other.
+ */
+export function formDesign(pair: string, savedDesign: string | null, live: boolean): CardDesignKey {
+  return launchDesign(pair, live ? savedDesign : null);
+}
+
+/**
+ * A tap on a pair: the form's next pair, or null when nothing changes. Any tap ends a saved launch's own design, the
+ * checked pair's included (its card comes back), so `savedDesign` is always cleared; `changed` says the pair moved
+ * (an initial buy in the old pair's unit is then cleared).
+ */
+export function pickPair(
+  current: { pair: PairAssetKey; savedDesign: string | null },
+  next: PairAssetKey,
+): { pair: PairAssetKey; savedDesign: null; changed: boolean } | null {
+  if (next === current.pair && !current.savedDesign) return null;
+  return { pair: next, savedDesign: null, changed: next !== current.pair };
+}
+
 /** A draft this browser kept: its pair, if it is still offered (an older draft's separate design is not used). */
 export function draftPair(draft: { quoteKey?: unknown } | null | undefined): PairAssetKey | null {
   return isPairAssetKey(draft?.quoteKey) ? draft.quoteKey : null;

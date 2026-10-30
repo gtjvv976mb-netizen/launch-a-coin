@@ -103,8 +103,7 @@ const SECTIONS: Section[] = [
     title: "Your card",
     body: (
       <ul>
-        <li>Every coin has one card, and its pair picks the design: one pair, one design. DOGE gets the Doge card.</li>
-        <li>SOL and USDC have no design of their own: SOL gets One Piece and USDC gets Duel Masters.</li>
+        <li>Every coin has one card, and its pair picks the design. DOGE gets Imperial Gold.</li>
         <li>The design is printed on the card and kept for good. Market cap never changes it.</li>
         <li>The token trades. Its creator holds the separate one-of-one card made at launch.</li>
         <li>Picking another pair keeps your coin details and artwork; only the pair and its card change.</li>
