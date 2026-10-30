@@ -44,7 +44,12 @@ export function CoinRow({ coin, rank, flipId }: { coin: CoinSummary; rank?: numb
         <span className="block truncate text-[12px] leading-[1.3] text-slate">${coin.ticker}</span>
       </span>
       <span className="flex flex-col items-end">
-        <span className="num text-[16px] leading-[1.2] text-ink">{marketCapText(coin)}</span>
+        {/* The figure is the market cap whatever the list is ranked by (GalleryTile's MC unit, INTEGRITY-2). */}
+        <span className="text-[16px] leading-[1.2] text-ink">
+          <span className="mr-1 text-[12px] font-medium text-slate" aria-hidden>MC</span>
+          <span className="sr-only">, market cap </span>
+          <span className="num">{marketCapText(coin)}</span>
+        </span>
         <Change v={coin.change24h} hideZero className="text-[13px] leading-[1.3]" />
       </span>
     </Link>

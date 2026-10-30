@@ -5,7 +5,7 @@ import { HeroTurntable } from "../components/carddex/HeroTurntable";
 import { useViewIn3D } from "../components/carddex/CardControls";
 import { MintCard, type CardData } from "../components/mintdex/MintCard";
 import { ButtonLink, Tabs, TextLink } from "../components/mintdex/ui";
-import { COLLECTION, DesignMini } from "../components/carddex/GalleryTile";
+import { DesignMini } from "../components/carddex/GalleryTile";
 import { getCardDesign, isCardDesignKey, type CardDesign } from "../lib/carddex/designs";
 import { pageHead } from "../lib/mintdex/seo";
 import { defaultQuoteForDesign, designForPair, isPairAssetKey, pairForDesign, type PairAsset } from "../lib/carddex/pairs";
@@ -104,7 +104,7 @@ function Designs() {
     quoteMint: quote.mint,
     mcapUsd: sampleMetrics.mcapUsd,
     mcapQuote: sampleMetrics.mcapQuote,
-    holders: 842,
+    holders: 0, // not launched: CardPrint prints "—" for the sample, as the Launch preview does
     dexNo: 0,
     dexLabel: "Sample",
     lore: "A small creature with a very big world to discover.",
@@ -169,7 +169,6 @@ function Designs() {
       Use this pair
     </ButtonLink>
   ) : null;
-  const collectionName = COLLECTION[design.category];
   const fan = index === -1 ? [] : shown.map((d, i) => ({ d, n: i - index })).filter(({ n }) => n !== 0 && Math.abs(n) <= FAN_REACH);
 
   return (
@@ -226,16 +225,13 @@ function Designs() {
                   </div>
                 </div>
               </div>
-              {/* The caption under the ledge: the plate, the name, its collection and pair, the one primary. */}
+              {/* The caption under the ledge: the plate, the name, its pair, the one primary. */}
               <div className="cdx-cf-cap">
                 {pair ? <span className="mdx-plate cdx-cf-cap__no">No. {catalogueNo(design)}</span> : null}
                 <span className="cdx-cf-cap__name">{design.name}</span>
                 <span data-chip="" className="cdx-cf-cap__chip">
                   <DesignMini design={design} />
-                  <span>
-                    {collectionName}
-                    <span className="text-slate"> · {pair ? `${pair.symbol} pair` : "Existing coins only"}</span>
-                  </span>
+                  <span>{pair ? `${pair.symbol} pair` : "Existing coins only"}</span>
                 </span>
                 {primary ? <span className="cdx-cf-cap__go">{primary}</span> : null}
               </div>
@@ -305,7 +301,6 @@ function Designs() {
             <div className="cdx-designs__info">
               <h2 className="mdx-h2 cdx-designs__title">
                 <span>{design.name}</span>
-                <span className="cdx-designs__tagline">{collectionName}</span>
               </h2>
               <p className="cdx-designs__desc">{design.description}</p>
               <p className="cdx-designs__pair">

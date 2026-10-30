@@ -267,6 +267,10 @@ function Discover() {
 function CoinCell({ coin, width, list, index }: { coin: CoinSummary; width: number; list: Array<{ id: string; card: CoinSummary }>; index: number }) {
   const mc = marketCapText(coin);
   const native = coin.mcapUsd == null;
+  // The 24h change as Change prints it, for the link's name (Home's rows read it too).
+  const pct = Number.isFinite(coin.change24h) ? Math.abs(coin.change24h * 100) : 0;
+  const pctText = pct >= 100 ? pct.toFixed(0) : pct.toFixed(1);
+  const changeText = pctText === "0.0" ? "no change in 24 hours" : `${coin.change24h > 0 ? "+" : "\u2212"}${pctText}% in 24 hours`;
   const figure = (
     <Num size="sm" tone="inherit" watch={marketCapWatch(coin)}>
       {mc}
@@ -278,7 +282,7 @@ function CoinCell({ coin, width, list, index }: { coin: CoinSummary; width: numb
         to="/coin/$id"
         params={{ id: coin.id }}
         className="block"
-        aria-label={`${coin.name}, $${coin.ticker}, market cap ${mc}, ${getCardDesign(coin.cardTemplate).name} design`}
+        aria-label={`${coin.name}, $${coin.ticker}, market cap ${mc}, ${changeText}, ${getCardDesign(coin.cardTemplate).name} design`}
       >
         <ShelfItem
           width={width}
@@ -291,7 +295,9 @@ function CoinCell({ coin, width, list, index }: { coin: CoinSummary; width: numb
           caption={
             <GridCaption
               name={coin.name}
-              value={native ? undefined : figure}
+              // A market cap in its own quote is long, so it takes the ticker's line and the change moves up beside
+              // the name: every cell shows its 24h change, as Home does.
+              value={native ? <Change v={coin.change24h} /> : figure}
               sub={<span className="text-slate">${coin.ticker}</span>}
               subRight={native ? figure : <Change v={coin.change24h} />}
             />

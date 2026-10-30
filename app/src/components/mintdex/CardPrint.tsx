@@ -49,7 +49,7 @@ export function CardPrint({ card, layout, preview = false }: { card: CardData; l
           <span>Market cap</span><i /><b>{card.mcapLabel ?? marketCapText(card)}</b>
         </div>
         <div className="mdx-card__row mdx-card__row--holders" data-card-slot="holders">
-          <span>Holders</span><i /><b>{unquoted ? "—" : card.holders}</b>
+          <span>Holders</span><i /><b>{unquoted || card.dexLabel === "Sample" ? "—" : card.holders}</b>
         </div>
       </div>
     </div>

@@ -149,25 +149,22 @@ const SECTIONS: Section[] = [
               <tbody>
                 <tr>
                   <th scope="row">Launch a Card fee per launch</th>
-                  <td>Launch a Card currently adds no fee to launch or card transactions.</td>
+                  <td>None. Launch a Card adds no fee to launch or card transactions.</td>
                 </tr>
                 <tr>
                   <th scope="row">Launch a Card share of trading fees</th>
-                  <td>
-                    <Fill>platform share of trading fees, or none</Fill>
-                  </td>
+                  <td>None.</td>
                 </tr>
                 <tr>
                   <th scope="row">Card NFT issuance</th>
                   <td>
-                    Account rent, the Solana network fee and the Metaplex NFT fee, paid from your wallet.{" "}
-                    <Fill>typical total in SOL</Fill>
+                    Account rent, the Solana network fee and the Metaplex NFT fee, paid from your wallet.
                   </td>
                 </tr>
                 <tr>
                   <th scope="row">pump.fun creation and trading fees</th>
                   <td>
-                    Set and charged by pump.fun. <Fill>link to pump.fun fee schedule</Fill>
+                    Set and charged by pump.fun.
                   </td>
                 </tr>
                 <tr>
