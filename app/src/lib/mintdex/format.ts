@@ -74,17 +74,30 @@ export function dexNo(n: number) {
 }
 
 /**
- * What an amount field keeps of what was typed or pasted: digits and ONE decimal point, with at most `decimals`
- * digits after it (SOL has 9, tokens 6). "1.571.6" becomes "1.5716", "2..5" becomes "2.5".
+ * The amount an amount field's text means: digits and ONE decimal point, with at most `decimals` digits after it (SOL
+ * has 9, tokens 6). "1.571.6" becomes "1.5716", "2..5" becomes "2.5". Read it when the amount is used (the quote, the
+ * trade), never to rewrite the field while it is typed: typedAmount keeps the field.
  */
 export function cleanAmount(raw: string, decimals = 9) {
-  // A comma decimal ("1,5", "1,50", or "1," mid-typing) is a decimal point when the text has no point and that one
-  // comma has at most two digits after it; any other comma ("1,500") is a thousands separator and is dropped.
-  const text = !raw.includes(".") && /^[^,]*,\d{0,2}$/.test(raw.trim()) ? raw.replace(",", ".") : raw;
+  // One comma with one or two digits after it, and no point, is a decimal comma ("1,5", "1,50"); every other comma
+  // ("1,500", "12,345,678", a trailing "1,") is a thousands separator and is dropped.
+  const text = !raw.includes(".") && /^[^,]*,\d{1,2}$/.test(raw.trim()) ? raw.replace(",", ".") : raw;
   const t = text.replace(/[^0-9.]/g, "");
   const dot = t.indexOf(".");
   if (dot < 0) return t;
   return `${t.slice(0, dot)}.${t.slice(dot + 1).replace(/\./g, "").slice(0, decimals)}`;
+}
+
+/**
+ * What an amount field holds as it is typed or pasted: digits, commas and ONE decimal point, with at most `decimals`
+ * digits after the point. Commas stay as typed, so "1,500" typed key by key passes through "1," and "1,5" and ends as
+ * "1,500" (1500 to cleanAmount), never as "1.500".
+ */
+export function typedAmount(raw: string, decimals = 9) {
+  const t = raw.replace(/[^0-9.,]/g, "");
+  const dot = t.indexOf(".");
+  if (dot < 0) return t;
+  return `${t.slice(0, dot)}.${t.slice(dot + 1).replace(/[.,]/g, "").slice(0, decimals)}`;
 }
 
 /**

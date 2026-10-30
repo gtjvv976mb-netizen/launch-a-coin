@@ -126,8 +126,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/** The handle field's rule (screen readers hear it with the field; the error repeats it). */
+/** The handle field's rule (the error repeats it). The field shows its length; it removes anything else as it is typed. */
 const HANDLE_HELP = "3 to 16 letters, numbers or underscores.";
+const HANDLE_HINT = "3–16 characters.";
 
 function EnterDialog({
   open,
@@ -210,11 +211,12 @@ function EnterDialog({
           {reason ? `${reason} ` : null}
           {MODE_COPY.enterGift}
         </p>
-        {/* The rule is read out with the field (the error repeats it when it fails); what typing removed is said. */}
+        {/* The length is shown (the field removes any other character as it is typed, and says so); the error repeats
+            the whole rule when it fails. */}
         <Field
           label="Handle"
           htmlFor="handle"
-          help={<><span aria-live="polite">{note}</span>{note ? null : <span className="sr-only">{HANDLE_HELP}</span>}</>}
+          help={<><span aria-live="polite">{note}</span>{note ? null : HANDLE_HINT}</>}
           error={error ?? undefined}
         >
           <Input

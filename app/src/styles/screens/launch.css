@@ -244,9 +244,10 @@
 }
 .cdx-pair-hud__glyph { position: absolute; top: 50%; left: 12px; color: var(--color-slate); pointer-events: none; transform: translateY(-50%); }
 .cdx-pair-hud__clear { position: absolute; top: 50%; right: 2px; transform: translateY(-50%); }
-/* The tiles: from 1024px as many 100px tracks as fit (five in the 1440px form panel, four at 1280), with a little less
- * inner padding there so the longest symbol (CHILLHOUSE) still fits whole. */
-.cdx-pair-hud__grid { display: grid; min-width: 0; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 6px; }
+/* The tiles: from 1024px as many 112px tracks as fit (five in the 1440px form panel, four at 1280), with a little less
+ * inner padding there. 112px is the narrowest track whose text column (112 - 6 - 6 padding, 24 monogram, 6 gap = 70px)
+ * still holds the longest symbol, CHILLHOUSE (68.3px), whole at every width. */
+.cdx-pair-hud__grid { display: grid; min-width: 0; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 6px; }
 @media (min-width: 1024px) {
   .cdx-pair-hud__grid > .cdx-pair-tile { column-gap: 6px; padding-inline: 6px; }
 }
@@ -261,7 +262,7 @@
     grid-template-columns: none;
     grid-template-rows: repeat(2, auto);
     grid-auto-flow: column;
-    grid-auto-columns: 128px;
+    grid-auto-columns: 126px;
     margin-inline: -12px;
     padding: 6px 12px;
     overflow-x: auto;
@@ -382,10 +383,12 @@
 .cdx-pair-meta .cdx-pair-mint { display: inline; word-break: break-all; }
 .cdx-pair-meta .cdx-pair-mint > svg { display: inline-block; margin: 0 0 0 2px; vertical-align: -1px; }
 /* Touch: the mint (two lines on phones) is a 44px-tall target. Vertical padding on an inline link grows only its hit
- * area, never the lines, so the mint wraps and reads exactly as before. It reaches up over the plain-text asset line
- * (nothing to tap there); below, the "Mint reviewed" line starts 2px under it and keeps its own taps. */
+ * area, never the lines, so the mint wraps and reads exactly as before. Its line sits 9px lower, so the 11px it
+ * reaches up lands in that space, never on the asset and issuer line; below, the "Mint reviewed" line starts 2px
+ * under it and keeps its own taps. */
 @media (pointer: coarse), (max-width: 1023.98px) {
   .cdx-pair-meta .cdx-pair-mint { padding-block: 11px 2px; }
+  .cdx-pair-meta__mint { margin-top: 9px; }
 }
 
 /* ------------------------------------------------ the mainnet panel (live mode: the ticket's body) */

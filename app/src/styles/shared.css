@@ -210,7 +210,7 @@
     }
     /* The coin page: a quick amount brings the Buy/Sell button and its note to just above the tab bar (coin.css),
      * so toasts rise above them (the button, its note and their 8px gap: 88px) and a "Bought" toast never covers
-     * the next press. */
+     * the next press. That is where the quote rows are: a new amount sends the toast out (coin.tsx edit). */
     html:has(.cdx-trade-ticket__submit) .mdx-toasts {
       bottom: calc(var(--tabbar-h) + 88px + 16px + env(safe-area-inset-bottom));
     }

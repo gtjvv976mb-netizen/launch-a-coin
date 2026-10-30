@@ -96,6 +96,38 @@ function writeDraft(draft: LaunchDraft | null) {
 }
 const str = (v: unknown) => (typeof v === "string" ? v : "");
 
+/**
+ * Card art picked while signed out in Demo (held in the page until Create starts the demo and uploads it) is kept here
+ * too, as a data URL beside the draft, so a refresh does not drop it while the page says "Draft saved". Cleared when
+ * it is removed, uploaded for the launch, or the form starts over.
+ */
+const HELD_ART_KEY = "carddex.launch.art.v1";
+/** The latest keepHeldArt call: a slower read of earlier art never writes over a later change or a clear. */
+let heldArtSeq = 0;
+function keepHeldArt(blob: Blob | null) {
+  const seq = ++heldArtSeq;
+  try {
+    if (!blob) { localStorage.removeItem(HELD_ART_KEY); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (seq !== heldArtSeq) return;
+      try { if (typeof reader.result === "string") localStorage.setItem(HELD_ART_KEY, reader.result); } catch { /* full or blocked: not kept */ }
+    };
+    reader.readAsDataURL(blob);
+  } catch { /* Storage can be blocked; the art stays in the page, it just is not kept. */ }
+}
+function readHeldArt(): Blob | null {
+  try {
+    const url = localStorage.getItem(HELD_ART_KEY);
+    const m = url ? /^data:(image\/(?:png|webp|jpeg));base64,([A-Za-z0-9+/=]+)$/.exec(url) : null;
+    if (!m) return null;
+    const bin = atob(m[2]);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type: m[1] });
+  } catch { return null; }
+}
+
 // ---------------------------------------------------------------- helpers
 
 /** Center-crop to a square and re-encode, so every card window gets clean art. */
@@ -253,7 +285,7 @@ function Launch() {
   const heldArtRef = useRef<Blob | null>(null);
   // The held art's upload, kept so a launch that fails after it does not upload the same image again.
   const heldUploadRef = useRef<{ blob: Blob; url: string } | null>(null);
-  const holdArt = (blob: Blob | null) => { heldArtRef.current = blob; setHeldArt(blob); };
+  const holdArt = (blob: Blob | null) => { heldArtRef.current = blob; setHeldArt(blob); keepHeldArt(blob); };
   const [liveLocked, setLiveLocked] = useState(false);
   // A mainnet step is running (sign-in, the artwork upload, preparing): the press already captured the fields.
   const [liveBusy, setLiveBusy] = useState(false);
@@ -353,6 +385,11 @@ function Launch() {
       // Only an uploaded demo image can come back; prepared mainnet art lives in memory.
       if (!live && typeof d.imageUrl === "string" && d.imageUrl.startsWith("/")) { setImageUrl(d.imageUrl); setPreview(d.imageUrl); }
     }
+    // Demo art picked while signed out and not yet uploaded comes back from beside the draft (keepHeldArt).
+    if (!live && !(typeof d?.imageUrl === "string" && d.imageUrl.startsWith("/"))) {
+      const kept = readHeldArt();
+      if (kept) { heldArtRef.current = kept; setHeldArt(kept); setPreview(URL.createObjectURL(kept)); }
+    }
     setDraftReady(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recoveryOnly]);
@@ -446,7 +483,7 @@ function Launch() {
   const xMsg = xError && shown("x", xUrl) ? xError : null;
   const touch = (key: FieldKey) => () => setTouched((t) => (t[key] ? t : { ...t, [key]: true }));
 
-  const dirty = !!(name || ticker || lore || website || xUrl || devBuy || imageUrl);
+  const dirty = !!(name || ticker || lore || website || xUrl || devBuy || imageUrl || heldArt);
   useEffect(() => {
     if (justRestored.current) { justRestored.current = false; return; }
     if (!draftReady || (live && liveLocked) || recoveryOnly) return;
@@ -645,7 +682,7 @@ function Launch() {
       { keys: [["home"], ["coins"], ["market"], ["portfolio"]] },
     );
     // The coin page opens "Your card is live" (P1-12) for ?minted=1, then drops the flag from the URL.
-    if (res) writeDraft(null);
+    if (res) { writeDraft(null); keepHeldArt(null); }
     if (res) navigate({ to: "/coin/$id", params: { id: res.id }, search: { minted: 1 } });
   }
 

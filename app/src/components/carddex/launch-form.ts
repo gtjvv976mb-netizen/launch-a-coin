@@ -1,6 +1,5 @@
 import { isCardDesignKey, type CardDesignKey } from "../../lib/carddex/designs";
 import { DEFAULT_PAIR, designForPair, getPairAsset, isPairAssetKey, pairForDesign, type PairAssetKey } from "../../lib/carddex/pairs";
-import { quickBuyPresets } from "../../lib/carddex/quote-simulation";
 
 /**
  * Pure helpers for the one-page Launch form (routes/launch.tsx): which pair the page opens on and which card it shows
@@ -53,27 +52,6 @@ export function pickPair(
 /** A draft this browser kept: its pair, if it is still offered (an older draft's separate design is not used). */
 export function draftPair(draft: { quoteKey?: unknown } | null | undefined): PairAssetKey | null {
   return isPairAssetKey(draft?.quoteKey) ? draft.quoteKey : null;
-}
-
-
-/** Whole quote atoms for a short decimal amount (exact; null when the quote has too few decimals for it). */
-function atomsOf(amount: string, decimals: number): bigint | null {
-  const [whole = "0", fraction = ""] = amount.split(".");
-  if (fraction.length > decimals) return null;
-  return BigInt(whole) * 10n ** BigInt(decimals) + BigInt(fraction.padEnd(decimals, "0") || "0");
-}
-
-/**
- * The quick initial-buy amounts offered for this quote: the coin page's buy amounts for its pair (quickBuyPresets, the
- * same share of its curve as SOL's 0.1 / 0.5 / 1 / 5) that it can hold at its decimals and, when a cap is given (the
- * demo's largest initial buy, in atoms), no larger than the cap.
- */
-export function quickBuyAmounts(quoteKey: string, maxAtoms?: number): string[] {
-  const { decimals } = getPairAsset(quoteKey);
-  return quickBuyPresets(quoteKey).filter((amount) => {
-    const atoms = atomsOf(amount, decimals);
-    return atoms !== null && (maxAtoms === undefined || atoms <= BigInt(Math.floor(maxAtoms)));
-  });
 }
 
 /** True when the typed amount is the same number as the quick amount (0.50 is 0.5). Empty and 0 are "None". */

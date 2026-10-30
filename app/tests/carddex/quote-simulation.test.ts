@@ -3,7 +3,7 @@ import { PAIR_ASSETS, PAIR_ASSET_KEYS } from "../../src/lib/carddex/pairs";
 import { quoteCap } from "../../src/lib/carddex/quote-display";
 import { demoQuoteStartBalance, formatQuoteAmount, initialQuoteReserves, isQuoteDecimal, maxInitialBuyQuoteAtoms, parseQuoteAmount, quickBuyPresets, quoteAtomsToSol, quoteMetrics, quoteUnit } from "../../src/lib/carddex/quote-simulation";
 import { quoteBuy, type BuyQuote } from "../../src/lib/mintdex/curve";
-import { cleanAmount, sellShare } from "../../src/lib/mintdex/format";
+import { cleanAmount, sellShare, typedAmount } from "../../src/lib/mintdex/format";
 import { TOKEN_UNIT } from "../../src/lib/mintdex/constants";
 
 function decimal(atoms: bigint, unit: bigint, decimals: number) {
@@ -137,11 +137,29 @@ describe("amount fields read a comma decimal", () => {
   test("one comma with one or two digits after it is the decimal point; other commas are dropped", () => {
     expect(cleanAmount("1,5")).toBe("1.5");
     expect(cleanAmount("1,50")).toBe("1.50");
-    expect(cleanAmount("1,")).toBe("1.");
+    expect(cleanAmount("1,")).toBe("1");
     expect(cleanAmount("1,500")).toBe("1500");
     expect(cleanAmount("12,345,678")).toBe("12345678");
     expect(cleanAmount("1.5")).toBe("1.5");
     expect(cleanAmount("1.571.6")).toBe("1.5716");
     expect(cleanAmount("1,5", 6)).toBe("1.5");
+  });
+  test("typed key by key, a thousands comma stays a thousands comma (the field keeps the text; the amount reads it)", () => {
+    // The ticket's onChange path: each key goes through typedAmount on what the field already holds.
+    const typeKeys = (text: string, decimals = 9) => [...text].reduce((field, key) => typedAmount(field + key, decimals), "");
+    expect(typeKeys("1,500")).toBe("1,500");
+    expect(cleanAmount(typeKeys("1,500"))).toBe("1500");
+    expect(cleanAmount(typeKeys("12,345"))).toBe("12345");
+    expect(cleanAmount(typeKeys("10,000"))).toBe("10000");
+    expect(cleanAmount(typeKeys("12,345,678"))).toBe("12345678");
+    expect(cleanAmount(typeKeys("1,5"))).toBe("1.5");
+    expect(cleanAmount(typeKeys("1,50"))).toBe("1.50");
+    expect(cleanAmount(typeKeys("1,234.56", 6))).toBe("1234.56");
+    // Every prefix of "10,000" reads as a number on the way ("1," is 1, "10,0" is 10.0), never a dead field.
+    for (const prefix of ["1", "10", "10,", "10,0", "10,00", "10,000"]) expect(Number(cleanAmount(typeKeys(prefix)))).not.toBeNaN();
+    // The point still caps decimals and drops a second point or a comma after it.
+    expect(typeKeys("1.2345678", 6)).toBe("1.234567");
+    expect(typeKeys("1.2.3,4")).toBe("1.234");
+    expect(typeKeys("1a,5b")).toBe("1,5");
   });
 });

@@ -52,7 +52,7 @@ export const Route = createFileRoute("/discover")({
       path: "/discover",
       title: "Discover | Launch a Card",
       description:
-        "Discover coins and their creator-selected NFT trading cards. A demo with simulated pump.fun trading.",
+        "Discover coins and the cards their pairs pick. A demo with simulated pump.fun trading.",
     }),
   component: Discover,
 });

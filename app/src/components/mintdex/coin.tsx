@@ -55,6 +55,7 @@ import {
   dexNo,
   cleanAmount,
   sellShare,
+  typedAmount,
   sol,
   timeAgo,
   tokens,
@@ -94,6 +95,7 @@ import {
   SideToggle,
   Tabs,
   TextLink,
+  dismissToasts,
   useLiveList,
   useSize,
 } from "./ui";
@@ -1228,8 +1230,10 @@ export function useTradeTicket(page: CoinPage) {
   const walletQuote = me?.quoteBalances?.[asset.key] ?? (asset.key === "sol" ? me?.balance ?? 0 : 0);
   const reserves = { vSol: coin.vQuote ?? coin.vSol, vTok: coin.vTok };
   const holding = viewer?.holding ?? 0;
+  // The field keeps what was typed ("1,500"); the amount is what that means (1500; "1,5" is 1.5), read here.
+  const amountText = cleanAmount(input, side === "buy" ? asset.decimals : 6);
   const amount =
-    side === "buy" ? parseQuoteAmount(input || "0", asset.key) ?? NaN : Math.round(parseFloat(input || "0") * TOKEN_UNIT);
+    side === "buy" ? parseQuoteAmount(amountText || "0", asset.key) ?? NaN : Math.round(parseFloat(amountText || "0") * TOKEN_UNIT);
   const quote = useMemo<Quote | null>(() => {
     if (!Number.isFinite(amount) || amount <= 0) return null;
     return side === "buy" ? quoteBuy(reserves, amount) : quoteSell(reserves, amount);
@@ -1311,6 +1315,9 @@ export function useTradeTicket(page: CoinPage) {
     setInput(next);
     setAttempted(false);
     reset("trade");
+    // Phones: the last trade's toast sits where this one's fee, slippage and market cap rows are (toasts rise above
+    // the button there, shared.css), so a new amount sends it out and every quote row is in view before the press.
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 1023.98px)").matches) dismissToasts();
   }
 
   function changeSide(s: "buy" | "sell") {
@@ -1376,7 +1383,7 @@ export function useTradeTicket(page: CoinPage) {
     if (!me) {
       const intent = quote?.ok
         ? side === "buy"
-          ? `Start the demo and buy ${input} ${asset.symbol} of $${coin.ticker}`
+          ? `Start the demo and buy ${amountText} ${asset.symbol} of $${coin.ticker}`
           : `Start the demo and sell $${coin.ticker}`
         : "Start the demo";
       require(quote?.ok ? doTrade : () => inputRef.current?.focus(), "Pick a handle to trade.", intent);
@@ -1539,7 +1546,7 @@ export function TradePanel({
             enterKeyHint="go"
             autoComplete="off"
             value={t.input}
-            onChange={(e) => t.edit(cleanAmount(e.target.value, side === "buy" ? asset.decimals : 6))}
+            onChange={(e) => t.edit(typedAmount(e.target.value, side === "buy" ? asset.decimals : 6))}
             onKeyDown={t.onAmountKey}
             placeholder="0.00"
             className="mdx-input num cdx-trade-ticket__input"

@@ -1,10 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { draftPair, enterTarget, firstProblem, formDesign, launchDesign, pairFromSearch, pickPair, quickBuyAmounts, sameAmount, signedOutPress } from "../../src/components/carddex/launch-form";
+import { draftPair, enterTarget, firstProblem, formDesign, launchDesign, pairFromSearch, pickPair, sameAmount, signedOutPress } from "../../src/components/carddex/launch-form";
 import { ORDERED_PAIRS, PAIR_GROUPS, filterPairs, gridStep, pairGroupOf, pairMonogram, pairsInGroup, shortPairName, tileName } from "../../src/components/carddex/pair-groups";
 import { walletNoticeItems, walletNoticePreview, WALLET_NOTICE_COPY } from "../../src/components/carddex/live/wallet-notice";
 import { CARD_DESIGNS } from "../../src/lib/carddex/designs";
 import { PAIR_ASSETS, designForPair, getPairAsset, pairForDesign } from "../../src/lib/carddex/pairs";
-import { maxInitialBuyQuoteAtoms } from "../../src/lib/carddex/quote-simulation";
 
 // The one-page Launch form (routes/launch.tsx): the pair it opens on and the card it shows (the pair picks the card),
 // the pair HUD's groups, search and arrow keys, the quick initial-buy amounts, and where focus goes when something is
@@ -133,20 +132,6 @@ describe("the pair HUD", () => {
 });
 
 describe("quick initial-buy amounts", () => {
-  test("the coin page's amounts, in the quote's units, within the demo cap", () => {
-    expect(quickBuyAmounts("sol")).toEqual(["0.1", "0.5", "1", "5"]);
-    const cap = maxInitialBuyQuoteAtoms("sol");
-    expect(quickBuyAmounts("sol", cap)).toEqual(["0.1", "0.5", "1", "5"]);
-    expect(quickBuyAmounts("sol", 1_000_000_000)).toEqual(["0.1", "0.5", "1"]);
-    expect(quickBuyAmounts("sol", 0)).toEqual([]);
-    // Other pairs offer the coin page's amounts for their own curve, still within the cap.
-    expect(quickBuyAmounts("doge")).toEqual(["100", "500", "1000", "5000"]);
-    for (const asset of PAIR_ASSETS) {
-      const cap = maxInitialBuyQuoteAtoms(asset.key);
-      expect(quickBuyAmounts(asset.key, cap).length).toBeGreaterThan(0);
-      for (const amount of quickBuyAmounts(asset.key, cap)) expect(Number(amount) * 10 ** asset.decimals).toBeLessThanOrEqual(cap);
-    }
-  });
   test("an amount matches whatever way it was typed; empty and 0 are None", () => {
     expect(sameAmount("0.50", "0.5")).toBe(true);
     expect(sameAmount("1", "1")).toBe(true);

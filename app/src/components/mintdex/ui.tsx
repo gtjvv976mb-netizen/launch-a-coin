@@ -2480,6 +2480,16 @@ const TOAST_OUT_MS = 160;
 /** On screen: ok 5s, level 7s, errors 10s (WCAG 2.2.1 wants time to read). A toast with an action stays. */
 const TOAST_MS: Record<ToastKind, number> = { ok: 5_000, level: 7_000, err: 10_000 };
 const TOAST_MAX = 3;
+/** The event dismissToasts sends to the provider. */
+const DISMISS_TOASTS = "mdx:dismiss-toasts";
+
+/**
+ * Sends every toast on screen out (with its exit), except one with an action, which stays until dismissed. The coin
+ * ticket calls it on phones when the amount changes, so the last trade's toast never covers the next one's quote rows.
+ */
+export function dismissToasts() {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(DISMISS_TOASTS));
+}
 
 type Timer = { timer?: ReturnType<typeof setTimeout>; remaining: number; started: number };
 
@@ -2597,6 +2607,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     },
     [dismiss, start],
   );
+
+  // dismissToasts(): every toast without an action leaves.
+  const listRef = useRef(toasts);
+  listRef.current = toasts;
+  useEffect(() => {
+    const onDismiss = () => {
+      for (const x of listRef.current) if (!x.leaving && !x.action) dismiss(x.id);
+    };
+    window.addEventListener(DISMISS_TOASTS, onDismiss);
+    return () => window.removeEventListener(DISMISS_TOASTS, onDismiss);
+  }, [dismiss]);
 
   // Escape dismisses the newest toast (not while typing, and never under an open dialog or menu).
   useEffect(() => {

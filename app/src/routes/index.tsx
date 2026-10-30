@@ -440,7 +440,12 @@ function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
         </div>
       </dl>
       <div className="mt-4 max-lg:col-start-2 max-lg:row-span-2 max-lg:row-start-1 max-lg:mt-0">
-        <ButtonLink to="/coin/$id" params={{ id: c.id }} size="sm">
+        {/* Phones: the secondary (suede) button, so Launch a coin, right under this caption there, is the page's one
+            red action; from 1024px the caption keeps MintDex's primary. */}
+        <ButtonLink to="/coin/$id" params={{ id: c.id }} size="sm" variant="outline" className="lg:hidden">
+          {HOME_COPY.viewCoin}
+        </ButtonLink>
+        <ButtonLink to="/coin/$id" params={{ id: c.id }} size="sm" className="max-lg:hidden">
           {HOME_COPY.viewCoin}
         </ButtonLink>
       </div>
@@ -455,7 +460,7 @@ function PairLinked({ text }: { text: string }) {
   return (
     <>
       {text.slice(0, at)}
-      <TextLink to="/how" hash="pairs">pair</TextLink>
+      <TextLink to="/how" hash="pairs" className="cdx-home__pair">pair</TextLink>
       {text.slice(at + 4)}
     </>
   );
@@ -1048,8 +1053,8 @@ function Home() {
                 </div>
                 {stepper("cdx-home__stepper max-lg:hidden", "start")}
               </div>
-              {/* Phones: Launch a coin and Explore right under the caption, so they are on the first screen above the
-                  tab bar; the drag line, tilt chip, chevrons, Pause and dots follow. */}
+              {/* Phones: Launch a coin and Discover coins right under the caption, so they are on the first screen
+                  above the tab bar; the drag line, tilt chip, chevrons, Pause and dots follow. */}
               <HeroActions className="cdx-home__actions--phone lg:hidden" />
               {shown && target ? (
                 <div className="cdx-home__touchtools lg:hidden">
