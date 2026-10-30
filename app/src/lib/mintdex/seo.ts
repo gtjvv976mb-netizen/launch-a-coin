@@ -24,8 +24,8 @@ export const SITE_DESCRIPTION = sentences(
  * The default share image (SEO-1): a 1200x630 capture of Home's hero, used wherever a route has no image of its
  * own. Absolute on launchacard.fun, since link previews need a full URL.
  */
-export const SITE_OG_IMAGE = "/og/launch-a-card-1200x630.jpg";
-export const SITE_OG_IMAGE_ALT = "Launch a Card: a token's one-of-one trading card under the headline Every coin is a card";
+export const SITE_OG_IMAGE = "/og/launch-a-card-mainnet-1200x630.jpg";
+export const SITE_OG_IMAGE_ALT = "Launch a Card on Solana mainnet: a card back under the headline Every coin is a card, and no coins launched yet";
 
 /** Static pages listed in the sitemap. */
 export const STATIC_PATHS = ["/", "/discover", "/launch", "/levels", "/how", "/legal"] as const;

@@ -19,6 +19,8 @@ export const Route = createFileRoute('/robots.txt')({
         const body = [
           'User-agent: *',
           'Allow: /',
+          // Coin card art, so link previews of coin pages show it (longest match wins over Disallow: /api/).
+          'Allow: /api/live/assets/',
           'Disallow: /api/',
           'Disallow: /_serverFn/',
           '',

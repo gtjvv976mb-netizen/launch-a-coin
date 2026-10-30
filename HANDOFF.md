@@ -8,7 +8,16 @@
 - **Designs.** Sample cards print "At creation" for market cap, as a minted card does (no simulated figure).
 - **Terms.** No fill-in slot is left. Written out (the policy wording first drafted in cd838ee): minimum age 18 or the local age of majority, the sanctioned regions, the "as is" disclaimer and liability limit, and how changes are posted. Removed, since they need the owner's own details: operator name and address, contact and takedown emails, governing law and courts, the privacy contact. Removed as demo: Test data, the Demo fee row, Demo values and the demo session line. A lawyer should still review the liability wording (its cap is "the fees you paid", and the site charges none).
 
-**Gates.** TypeScript clean; app tests 711 pass, 0 fail; pump adapter 127 pass; `vite build` ok.
+**Review fixes (independent review of 930c9fc: four lenses, each finding verified by a skeptic; five confirmed, one refuted).**
+- The default share image (`og:image` on every page) was a screenshot of the old demo. It is now `public/og/launch-a-card-mainnet-1200x630.jpg`, captured from this build's Home (mainnet strip, "No coins yet", the card back); the old file is deleted and the new name refreshes link-preview caches.
+- Discover showed "0 coins · No coins yet" while its list was loading or after a failed read. It now shows a skeleton while loading and "Couldn't load coins" with Try again on failure; "No coins yet" only for a real empty list.
+- robots.txt blocked `/api/live/assets/`, the only place coin card art lives, so link previews of coin pages had no image: it is allowed now.
+- Both search fields cut input at 40 characters, so a pasted 43-44 character mint never matched: 64 now (the coin route's limit).
+- Every list stopped at the newest 100 launches: the list now carries 500 (past that, add cursor pages to the API), and sitemap.xml reads every finished launch itself (up to 45,000).
+- Refuted: the page source still says `carddex-mode` "sim" and the manifest is `site.sim.webmanifest`. That names the inherited chain mode, which must stay off; nothing visible.
+- `app/tests/carddex/mainnet-only.test.ts` locks these and the no-demo rule (no demo words in pages, the shell or live components; the demo routes stay deleted).
+
+**Gates.** TypeScript clean; app tests 716 pass, 0 fail; pump adapter 127 pass; `vite build` ok.
 
 **Browser.** Production build, fresh local D1 (port 6101), the in-app browser at 1440x900 and 375x812. With no launches: Home shows the card back and "No coins yet", the rail "No coins yet. Launch the first one", Discover "No coins yet", Portfolio asks for the wallet, Launch says launches are paused (live config is off locally); the fresh database has 0 coins and 0 users after visiting every page; no page's HTML holds demo words; `/api/upload` and `/api/img/...` answer 404. With two test launches inserted into that local database only: Home stages both cards, Discover shows both, `/coin/<mint>` renders the card and its facts, `?creator=` returns both, the sitemap lists both. 0 console errors.
 

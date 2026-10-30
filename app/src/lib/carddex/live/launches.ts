@@ -8,8 +8,11 @@ import { CREATION_MCAP_LABEL } from "../card-template";
 import { getCardDesign } from "../designs";
 import { getTradingPair } from "../pairs";
 
-/** The most launches one list answer carries, newest first. */
-export const LIVE_LAUNCHES_LIMIT = 100;
+/**
+ * The most launches one list answer carries, newest first: every page and the header search filter this one list in
+ * the browser. Past this many launches, add cursor pages (created_at) to the API before raising it further.
+ */
+export const LIVE_LAUNCHES_LIMIT = 500;
 
 /** A Solana address (a coin's mint or a wallet). */
 export const SOLANA_ADDRESS = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;

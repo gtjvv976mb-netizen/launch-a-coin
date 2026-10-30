@@ -14,12 +14,17 @@ const xmlEscape = (s: string) =>
  */
 async function coinEntries(): Promise<Entry[]> {
   if (IS_SIM) {
-    const { listCompletedLaunches } = await import('../lib/carddex/live/launches.server')
-    const launches = await listCompletedLaunches().catch(() => [])
-    return launches.map((l) => ({
-      loc: absoluteUrl(`/coin/${l.tokenMint}`),
-      lastmod: new Date(l.createdAt).toISOString().split('T')[0],
-    }))
+    // Its own read, past the page lists' limit: every finished launch's mint and day, nothing else.
+    const { all } = await import('../lib/mintdex/server/db.server')
+    const rows = await all<{ token_mint: string; created_at: number }>(
+      "SELECT token_mint, created_at FROM live_launch_intents WHERE status = 'complete' ORDER BY created_at DESC LIMIT 45000",
+    ).catch(() => [])
+    return rows
+      .filter((r) => /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(r.token_mint))
+      .map((r) => ({
+        loc: absoluteUrl(`/coin/${r.token_mint}`),
+        lastmod: new Date(r.created_at).toISOString().split('T')[0],
+      }))
   }
   // Devnet: every coin with a MintDex card, from the chain API (never throws; whatever it read in time).
   if (IS_CHAIN) {

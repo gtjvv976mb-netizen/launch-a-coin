@@ -12,6 +12,7 @@ import {
   PageFrame,
   PageHeader,
   Pager,
+  Skeleton,
   Shelf,
   ShelfItem,
   TextLink,
@@ -37,7 +38,7 @@ import { pageHead } from "../lib/mintdex/seo";
  */
 export const Route = createFileRoute("/discover")({
   validateSearch: searchSchema({
-    q: text(40),
+    q: text(64),
     design: text(40),
     focus: num(),
     page: num(),
@@ -168,7 +169,7 @@ function Discover() {
           className="mdx-input"
           type="search"
           value={query}
-          maxLength={40}
+          maxLength={64}
           placeholder="Search coins"
           enterKeyHint="search"
           autoComplete="off"
@@ -185,7 +186,7 @@ function Discover() {
         className="cdx-dex__head"
         context={
           <>
-            <span className="num">{coins.length}</span> {coins.length === 1 ? "coin" : "coins"}
+            {launches.data ? <><span className="num">{coins.length}</span> {coins.length === 1 ? "coin" : "coins"}</> : "Coins"}
             {trimmed ? <> for “{trimmed}” · <TextLink onClick={() => setQuery("")}>Clear</TextLink></> : null}
             {" · "}
             <TextLink to="/how" hash="cards">How it works</TextLink>
@@ -215,6 +216,22 @@ function Discover() {
             seedOf={(c: Cell) => order.get(c.id) ?? 0}
             render={(c: Cell, w) => <CoinCell coin={c} width={w} list={items} index={order.get(c.id) ?? 99} />}
           />
+        ) : !launches.data && launches.isError ? (
+          // A failed read never reads as "no coins": say so, with a retry (Home's rail does the same).
+          <EmptyState
+            inline
+            title="Couldn't load coins"
+            action={
+              <Button variant="outline" size="sm" onClick={() => void launches.refetch()} disabled={launches.isFetching}>
+                {launches.isFetching ? "Trying again…" : "Try again"}
+              </Button>
+            }
+          />
+        ) : !launches.data ? (
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-busy="true" aria-label="Loading coins">
+            <Skeleton className="aspect-[5/7] rounded-panel" />
+            <Skeleton className="aspect-[5/7] rounded-panel" />
+          </div>
         ) : trimmed || design ? (
           <EmptyState
             inline

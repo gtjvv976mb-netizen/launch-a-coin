@@ -318,7 +318,7 @@ function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> 
         enterKeyHint="search"
         autoComplete="off"
         spellCheck={false}
-        maxLength={40}
+        maxLength={64}
         className="mdx-input h-10 rounded-pill pl-9 pr-9 text-[14px]"
       />
       {!focused && !q && (
