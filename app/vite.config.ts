@@ -10,6 +10,7 @@ import { defineConfig, loadEnv, type Plugin } from "vite";
 import { mainnetBuildProblems } from "./src/lib/chain/build-guard";
 import { MAINNET_ANCHORS } from "./src/lib/chain/anchors.mainnet";
 import { manifestFileName, manifestModeOf, webManifestText, type ManifestMode } from "./src/lib/mintdex/manifest";
+import { clientRegistryCopy } from "./src/lib/carddex/client-registry-fields";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { fileURLToPath } from "node:url";
 import { readFileSync } from "node:fs";
@@ -35,17 +36,10 @@ function creatorRendererWasm(): Plugin {
 }
 
 /**
- * The browser reads a few fields of two registries the server needs whole (readiness audit PERF-1): the client copy of
- * render-assets.json drops its hashes (CanonicalCardSkin reads the path, preview path and renderer version) and the
- * client copy of pair-assets.json drops its provenance (source URLs, evidence, slot, admission). The client copy of
- * pair-logos.json keeps only `logo` (and a monogram's `reason`): pair-logos.ts pairLogo reads nothing else. The server
- * bundle and the tests keep all three files whole.
+ * The client copies of render-assets.json, pair-assets.json and pair-logos.json keep only the fields the browser reads
+ * (readiness audit PERF-1; src/lib/carddex/client-registry-fields.ts names them). The server bundle and the tests keep
+ * all three files whole.
  */
-const CLIENT_DROPPED_FIELDS: Readonly<Record<string, readonly string[]>> = {
-  "render-assets.json": ["sha256", "previewSha256", "sourceSha256"],
-  "pair-assets.json": ["sourceUrls", "sourceEvidenceArtifact", "verificationSlot", "verifiedDate", "admission"],
-  "pair-logos.json": ["w128", "w64", "source", "derivation"],
-};
 function clientRegistryFields(): Plugin {
   const dir = path.join(fileURLToPath(new URL("./src/lib/carddex/", import.meta.url)));
   return {
@@ -54,12 +48,9 @@ function clientRegistryFields(): Plugin {
     transform(code, id) {
       if (this.environment?.name !== "client") return;
       const file = id.split("?")[0]!;
-      const fields = path.dirname(file) + path.sep === dir ? CLIENT_DROPPED_FIELDS[path.basename(file)] : undefined;
-      if (!fields) return;
-      const keep = (row: Record<string, unknown>) => Object.fromEntries(Object.entries(row).filter(([key]) => !fields.includes(key)));
-      const data = JSON.parse(code) as Record<string, unknown>[] | Record<string, Record<string, unknown>>;
-      const out = Array.isArray(data) ? data.map(keep) : Object.fromEntries(Object.entries(data).map(([key, row]) => [key, keep(row)]));
-      return { code: JSON.stringify(out), map: null };
+      const copy = path.dirname(file) + path.sep === dir ? clientRegistryCopy(path.basename(file), code) : undefined;
+      if (copy === undefined) return;
+      return { code: copy, map: null };
     },
   };
 }

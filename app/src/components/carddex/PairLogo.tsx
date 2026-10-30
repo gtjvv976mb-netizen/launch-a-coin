@@ -4,7 +4,7 @@ import { pairMonogram } from "./pair-groups";
 
 /**
  * A pair's logo in a gold-ringed circle: the token's own image (public/assets/pairs, 64 px and 128 px WebP), or its
- * letter when it has none (GORK, MANIFEST). Decorative: the symbol is always written beside it. No state, so it renders
+ * letter when it has none (GORK, MANIFEST, FARTCOIN). Decorative: the symbol is always written beside it. No state, so it renders
  * the same on the server and in the browser.
  */
 export function PairLogo({ asset, size = 24, className }: { asset: Readonly<PairAsset>; size?: number; className?: string }) {

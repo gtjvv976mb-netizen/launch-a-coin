@@ -10,6 +10,7 @@ import {OFFERED_PAIRS,PAIR_ASSET_KEYS,getPairAsset} from "../../src/lib/carddex/
 import {createElement} from "react";
 import {renderToStaticMarkup} from "react-dom/server";
 import {PairLogo} from "../../src/components/carddex/PairLogo";
+import {CLIENT_DROPPED_FIELDS,clientRegistryCopy} from "../../src/lib/carddex/client-registry-fields";
 import {pairMonogram} from "../../src/components/carddex/pair-groups";
 
 /**
@@ -24,7 +25,8 @@ type Row = {logo: string | null; reason?: string; w128?: File; w64?: File;
 const ROWS = logos as unknown as Record<string, Row>;
 const PUBLIC = path.join(import.meta.dir, "../../public");
 const DIR = path.join(PUBLIC, "assets/pairs");
-const MONOGRAMS = ["gork", "manifest"];
+/** Token images that hold no logo; FARTCOIN since the fix pass (visual check LOGO-1). */
+const MONOGRAMS = ["fartcoin", "gork", "manifest"];
 
 /** The full release's pairs: every identity pair whose design is not held as "not offered" (the same on the release step). */
 const RELEASE = Object.entries(PAIR_IDENTITY_DESIGNS)
@@ -58,14 +60,14 @@ describe("pair logos", () => {
     for (const asset of OFFERED_PAIRS) expect(Object.hasOwn(ROWS, asset.key)).toBe(true);
   });
 
-  test("exactly GORK and MANIFEST keep the monogram, each with its reason", () => {
+  test("exactly GORK, MANIFEST and FARTCOIN keep the monogram, each with its reason", () => {
     const mono = Object.entries(ROWS).filter(([, row]) => row.logo === null);
     expect(mono.map(([key]) => key).sort()).toEqual(MONOGRAMS);
     for (const [, row] of mono) {
       expect(row.reason!.length).toBeGreaterThan(20);
       expect(row.w128 ?? row.w64 ?? row.source ?? row.derivation).toBeUndefined();
     }
-    expect(withLogo.length).toBe(84);
+    expect(withLogo.length).toBe(83);
   });
 
   test("each logo is a 128 px and a 64 px WebP matching its recorded sha256", () => {
@@ -81,11 +83,11 @@ describe("pair logos", () => {
     }
   });
 
-  test("public/assets/pairs holds exactly those files: none for a pair that is not offered, 600 KB at most", () => {
+  test("public/assets/pairs holds exactly those files: none for a pair outside the full release, 600 KB at most", () => {
     const expected = withLogo.flatMap(([key]) => [`${key}.webp`, `${key}-64.webp`]).sort();
     const files = readdirSync(DIR).sort();
     expect(files).toEqual(expected);
-    expect(files.length).toBe(168);
+    expect(files.length).toBe(166);
     const offered = new Set(OFFERED_PAIRS.map(asset => asset.key as string));
     const notOffered = PAIR_ASSET_KEYS.filter(key => !Object.hasOwn(ROWS, key));
     expect(notOffered.sort()).toEqual(["67", "aave", "agency", "alon", "biketyson", "claudia", "hodl", "jeanphil", "neet", "solangeles", "uni"]);
@@ -114,7 +116,11 @@ describe("pair logos", () => {
       .filter(line => line && !line.startsWith("#"));
     for (const file of readdirSync(DIR)) {
       expect(file.startsWith("pair-")).toBe(false);
-      for (const line of lines) expect(file.startsWith(line.slice(0, -"[-.]*".length))).toBe(false);
+      for (const line of lines) {
+        const stem = line.endsWith("[-.]*") ? line.slice(0, -"[-.]*".length) : line;
+        expect(stem.length).toBeGreaterThan(0);
+        expect(file.startsWith(stem)).toBe(false);
+      }
     }
   });
 
@@ -124,7 +130,7 @@ describe("pair logos", () => {
     for (const key of [...MONOGRAMS, "67", "aave", "solangeles", "nope", "", null, undefined]) expect(pairLogo(key)).toBeNull();
   });
 
-  test("Launch's tiles draw every offered pair's logo, and the letter only for GORK and MANIFEST", () => {
+  test("Launch's tiles draw every offered pair's logo, and the letter only for GORK, MANIFEST and FARTCOIN", () => {
     const html = (key: string, size?: number) => renderToStaticMarkup(createElement(PairLogo, {asset: getPairAsset(key), size}));
     for (const asset of OFFERED_PAIRS) {
       const out = html(asset.key);
@@ -139,6 +145,37 @@ describe("pair logos", () => {
     }
     expect(html("gork")).toContain(">G</span>");
     expect(html("manifest")).toContain(">M</span>");
+    expect(html("fartcoin")).toContain(">F</span>");
     expect(html("sol", 20)).toContain('sizes="20px" width="20" height="20"');
+  });
+
+  test("the client copy of pair-logos.json keeps only `logo`; the other registries drop only their listed fields", () => {
+    const dir = path.join(import.meta.dir, "../../src/lib/carddex");
+    const raw = (name: string) => readFileSync(path.join(dir, name), "utf8");
+    const client = JSON.parse(clientRegistryCopy("pair-logos.json", raw("pair-logos.json"))!) as Record<string, Record<string, unknown>>;
+    expect(Object.keys(client).sort()).toEqual(Object.keys(ROWS).sort());
+    for (const [key, row] of Object.entries(client)) expect(row).toEqual({logo: ROWS[key]!.logo});
+    expect(client.sol).toEqual({logo: "/assets/pairs/sol.webp"});
+    expect(client.fartcoin).toEqual({logo: null});
+    for (const name of ["render-assets.json", "pair-assets.json"]) {
+      const whole = JSON.parse(raw(name)) as Record<string, Record<string, unknown>> | Record<string, unknown>[];
+      const copy = JSON.parse(clientRegistryCopy(name, raw(name))!) as typeof whole;
+      const rows = (data: typeof whole) => Array.isArray(data) ? data : Object.values(data);
+      expect(rows(copy).length).toBe(rows(whole).length);
+      rows(whole).forEach((row, index) => {
+        const kept = Object.fromEntries(Object.entries(row).filter(([field]) => !CLIENT_DROPPED_FIELDS[name]!.includes(field)));
+        expect(rows(copy)[index]).toEqual(kept);
+      });
+    }
+    expect(clientRegistryCopy("pairs.json", "[]")).toBeUndefined();
+    expect(clientRegistryCopy("toString", "{}")).toBeUndefined();
+    expect(readFileSync(path.join(import.meta.dir, "../../vite.config.ts"), "utf8")).toContain("clientRegistryCopy(path.basename(file), code)");
+  });
+
+  test("_headers gives /assets/pairs/* the one-day public cache rule", () => {
+    const lines = readFileSync(path.join(PUBLIC, "_headers"), "utf8").split("\n");
+    const at = lines.findIndex(line => line.trim() === "/assets/pairs/*");
+    expect(at).toBeGreaterThanOrEqual(0);
+    expect(lines[at + 1]!.trim()).toBe("Cache-Control: public, max-age=86400, stale-while-revalidate=604800");
   });
 });

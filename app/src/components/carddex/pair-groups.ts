@@ -83,7 +83,8 @@ export function filterPairs(group: PairGroup, query: string): readonly Readonly<
 
 /**
  * A pair's typographic monogram: the first letter or digit of its symbol. It is the fallback for a pair without a logo
- * (pair-logos.json: GORK and MANIFEST, whose token images hold no logo; lib/carddex/pair-logos.ts pairLogo is null).
+ * (pair-logos.json: GORK, MANIFEST and FARTCOIN, whose token images hold no logo; lib/carddex/pair-logos.ts pairLogo is
+ * null).
  */
 export function pairMonogram(asset: Readonly<PairAsset>): string {
   return (asset.symbol.match(/[A-Za-z0-9]/)?.[0] ?? "?").toUpperCase();

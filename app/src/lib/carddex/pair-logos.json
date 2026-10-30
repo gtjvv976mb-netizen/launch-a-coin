@@ -384,42 +384,8 @@
   }
  },
  "fartcoin": {
-  "logo": "/assets/pairs/fartcoin.webp",
-  "w128": {
-   "path": "/assets/pairs/fartcoin.webp",
-   "sha256": "1519ad2d684dd3542b99241f928312a75310ee64960b272d5627ff2a13934306",
-   "bytes": 1872
-  },
-  "w64": {
-   "path": "/assets/pairs/fartcoin-64.webp",
-   "sha256": "9edd81533d386050edfa7f1f8c5fa19a7dde1bdc8db968ea6b5eee89d44bc51b",
-   "bytes": 1234
-  },
-  "source": {
-   "folder": "creative/higgsfield/pair-identities-2026-10-30",
-   "file": "references/fartcoin-official-pump-current-a6696d4f22be.png",
-   "sha256": "a6696d4f22bee30448384d9bbce7d896602f564af97f21ff77717c54149d5f86",
-   "record": "research/fartcoin-current-official-image-check.json#proxySha256",
-   "url": "https://ipfs.io/ipfs/QmQr3Fz4h1etNsF7oLGMRHiCzhB5y9a7GjyodnF7zLHK1g"
-  },
-  "derivation": {
-   "mode": "whole",
-   "crop": [
-    0,
-    0,
-    80
-   ],
-   "plate": null,
-   "sourcePx": [
-    80,
-    80
-   ],
-   "upscaled": true,
-   "resample": "high",
-   "transparentFraction": 0,
-   "luminance": 0.015,
-   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
-  }
+  "logo": null,
+  "reason": "token image is a screenshot of a terminal chat (text and an ASCII wordmark), not a logo; its 80 px square crop reads as an empty dark disc at tile size"
  },
  "pnut": {
   "logo": "/assets/pairs/pnut.webp",

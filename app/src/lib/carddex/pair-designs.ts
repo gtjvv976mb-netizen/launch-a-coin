@@ -80,13 +80,13 @@ export const HELD_PAIR_DESIGNS: Readonly<Record<string, string | null>> = Object
   "pair-biketyson": null, // a real person's likeness
   "pair-neet": null, // a real person's likeness
   "pair-solangeles": null, // caricatures of real-looking people under "YOU'RE NOT WELCOME" (readiness audit)
-  // Offered with the design production offers today: the new art has a real person, other companies' logos, an
-  // invented logo, a misspelling or a stray bar.
+  // Offered with the design production offers today: the new art has a real person, other companies' logos, a
+  // misspelling or a stray bar.
   "pair-ansem": "sovereign", // a photoreal man's head on a bull's body
   "pair-spx": "celestial", // the back misspells the coin ("SBP 6900")
   "pair-trump": "regal", // a real person ("FIGHT FIGHT FIGHT")
   "pair-giga": "mythic", // a real person's likeness
-  "pair-gmex": "stock-gme", // an invented "GS" logo
+  "pair-gmex": "stock-gme", // the "GS" mark of the token's own xStocks logo (GMEx.png), not an invented one
   "pair-tslax": "stock-tsla", // Tesla's logo; a grey-white bar baked under the title
   "pair-nvdax": "stock-nvda", // NVIDIA's logo
   "pair-aaplx": "stock-aapl", // Apple's logo; a grey-white bar baked under the title

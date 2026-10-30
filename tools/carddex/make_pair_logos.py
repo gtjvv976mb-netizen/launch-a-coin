@@ -14,7 +14,8 @@ of its opaque pixels (alpha > 32) and padded so its farthest pixel sits inside 9
 it is dark (alpha-weighted luminance < 0.35) or a chocolate plate otherwise. An opaque square source is used whole; an
 opaque non-square one gets a centred square crop of its short side. SVGs render at 1024 px on the long side. Output:
 <key>.webp (128 px) and <key>-64.webp (64 px), canvas image/webp quality 0.9. PEPE (64 px pixel art) doubles with
-nearest-neighbour; other sources under 128 px are smoothed up and marked upscaled. GORK and MANIFEST keep the monogram.
+nearest-neighbour; other sources under 128 px are smoothed up and marked upscaled. GORK, MANIFEST and FARTCOIN keep the
+monogram.
 """
 import argparse, base64, hashlib, json, os, sys
 from pathlib import Path
@@ -34,7 +35,7 @@ SOURCES = {
     "nvdax": "references/nvdax-6b639eff0158.png", "aaplx": "references/aaplx-930db1995149.png",
     "mstrx": "references/mstrx-1456e378930a.png", "coinx": "references/coinx-7b028dd20902.png",
     "amc": "references/amc-d865497a68ea.png", "doge": "references/doge-06183873aff4.svg",
-    "fartcoin": "references/fartcoin-official-pump-current-a6696d4f22be.png", "pnut": "references/pnut-7b8c1825d78c.jpg",
+    "fartcoin": None, "pnut": "references/pnut-7b8c1825d78c.jpg",
     "moodeng": "references/moodeng-7f4f147ab9ea.png", "troll": "references/troll-5e3348ca8d09.png",
     "bonk": "references/bonk-498ca3589dbe.jpg", "wif": "references/wif-2ad89d597573.jpg",
     "cards": "references/cards-241bcf8ee4f8.svg", "sv151": "references/sv151-3ffeea5b7f58.png",
@@ -78,8 +79,6 @@ OVERRIDES = {
     # The same exact-mint image at 600 px (the intake file is 80 px).
     "ansem": ("research/ansem-higher-source-followup.json", "image.path", "image.sha256", "image.uri"),
     "michi": ("research/michi-higher-source-followup.json", "image.path", "image.sha256", "image.uri"),
-    # The square image pump.fun shows; the intake file is an 868x245 wordmark.
-    "fartcoin": ("research/fartcoin-current-official-image-check.json", "proxyPath", "proxySha256", "originalSource"),
     # The token portrait cropped from the 1200x630 page card (the intake file).
     "zcat": ("research/expansion-reference-image-uris.json", "referenceIntake.deterministicIdentityCrop.path",
              "referenceIntake.deterministicIdentityCrop.sha256", "referenceIntake.referenceSourceUri"),
@@ -90,6 +89,9 @@ OVERRIDES = {
 MONOGRAMS = {
     "gork": "token image is a screenshot of a social profile with a default avatar and a person's name, not a logo",
     "manifest": "token image is a 2522x834 banner with a small figure; no logo to crop",
+    # Fix pass (visual check LOGO-1): pump.fun's 80 px square of it read as an empty near-black disc at 24 px.
+    "fartcoin": "token image is a screenshot of a terminal chat (text and an ASCII wordmark), not a logo; its 80 px "
+                "square crop reads as an empty dark disc at tile size",
 }
 NEAREST = {"pepe"}  # 64 px pixel art: the 128 px file is an exact 2x
 MIME = {".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp", ".svg": "image/svg+xml"}
