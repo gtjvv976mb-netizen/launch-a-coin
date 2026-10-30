@@ -1,0 +1,3250 @@
+{
+ "sol": {
+  "logo": "/assets/pairs/sol.webp",
+  "w128": {
+   "path": "/assets/pairs/sol.webp",
+   "sha256": "b9f391ed9a32170dd11c3590d345dcbca55a35917ba797d26897e054c1022316",
+   "bytes": 1466
+  },
+  "w64": {
+   "path": "/assets/pairs/sol-64.webp",
+   "sha256": "06cd69b2dd48f7d6001def7ae3c1b1a86d689862ad091bdf4e1734c4a976bf19",
+   "bytes": 1018
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/sol-943c48e760ec.png",
+   "sha256": "943c48e760ec717f55363835067d501ff4bd6825a29732a18955e141ba536602",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    512
+   ],
+   "plate": null,
+   "sourcePx": [
+    512,
+    512
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.049,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "usdc": {
+  "logo": "/assets/pairs/usdc.webp",
+  "w128": {
+   "path": "/assets/pairs/usdc.webp",
+   "sha256": "1d02f29e2ece43c2d0aa1c1ea67f3dbdb5c8addbe59f80e981ea93f1ada4c297",
+   "bytes": 4294
+  },
+  "w64": {
+   "path": "/assets/pairs/usdc-64.webp",
+   "sha256": "4547f9040a57a6b95a142d1d3766a200bcd41e6572d8587fa2a32c1b5ce1f4db",
+   "bytes": 2250
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/usdc-token-list-6d14601d0b11.png",
+   "sha256": "6d14601d0b1109046e366592b8c0f256ffb075f69180b65dddd97ae665d49f9e",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -8.77,
+    -8.27,
+    197.53
+   ],
+   "plate": "#26120b",
+   "sourcePx": [
+    181,
+    181
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.228,
+   "luminance": 0.352,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "gmex": {
+  "logo": "/assets/pairs/gmex.webp",
+  "w128": {
+   "path": "/assets/pairs/gmex.webp",
+   "sha256": "f830feaffc0f030b93bc47ff9582411720c47843eba9e436b1c717e2e11a8592",
+   "bytes": 2610
+  },
+  "w64": {
+   "path": "/assets/pairs/gmex-64.webp",
+   "sha256": "6b6e96692cfc2ee83bfeb379f46c4b58a003fc62b4c8be1aacc1c1857ef1f4c0",
+   "bytes": 1590
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/gmex-709f953a1655.png",
+   "sha256": "709f953a165589700393b799bc93fe5ff7faae9b2247194a609db8631830ed45",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/GMEx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.249,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "tslax": {
+  "logo": "/assets/pairs/tslax.webp",
+  "w128": {
+   "path": "/assets/pairs/tslax.webp",
+   "sha256": "f96f529ba94fcee77f3533498caaa59ec23032ed2eb8b4ccb49fadbb3355eefa",
+   "bytes": 2386
+  },
+  "w64": {
+   "path": "/assets/pairs/tslax-64.webp",
+   "sha256": "297a1a285a9c2c15d8e56cf4a192a1f4b2159d6e843e5021ab89af654fb96ea5",
+   "bytes": 1418
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/tslax-42cb949ac9a7.png",
+   "sha256": "42cb949ac9a7e6385df10a59bcd47576260c6a78bf54df0eea962343644d7fd8",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/TSLAx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.219,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "nvdax": {
+  "logo": "/assets/pairs/nvdax.webp",
+  "w128": {
+   "path": "/assets/pairs/nvdax.webp",
+   "sha256": "88aedd57ccf8e0fd67b3fc4106bc3b60b2bafa0dc5c3210b43fdd349a7935ca6",
+   "bytes": 2718
+  },
+  "w64": {
+   "path": "/assets/pairs/nvdax-64.webp",
+   "sha256": "6c5a8f7335777a2821c2e7e668fd621835dfd528494206f2ef352aff7b1c4f4b",
+   "bytes": 1566
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/nvdax-6b639eff0158.png",
+   "sha256": "6b639eff0158850c474d378ed8580375c396dda494cfff9040e6b1735b8ef623",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/NVDAx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.431,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "aaplx": {
+  "logo": "/assets/pairs/aaplx.webp",
+  "w128": {
+   "path": "/assets/pairs/aaplx.webp",
+   "sha256": "eddc0c881566fb922bb1f95aac517f8465234224f01f40d728e4f70894ad6b62",
+   "bytes": 1408
+  },
+  "w64": {
+   "path": "/assets/pairs/aaplx-64.webp",
+   "sha256": "c8509fd213fd6886a56923e8bac45de1a6961fcc1d69351cb81dee8c482041e9",
+   "bytes": 962
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/aaplx-930db1995149.png",
+   "sha256": "930db19951493787ee286650222311b5158317bdb811205b450cfb412ab89295",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/AAPLx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.185,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "mstrx": {
+  "logo": "/assets/pairs/mstrx.webp",
+  "w128": {
+   "path": "/assets/pairs/mstrx.webp",
+   "sha256": "978003784ba493baec670903c3edcbd873fded09c4d9ca2f1eb7ebf4ca8c33be",
+   "bytes": 2640
+  },
+  "w64": {
+   "path": "/assets/pairs/mstrx-64.webp",
+   "sha256": "9e6b1eba305302b4d64683f94cef23bfb3acef75061f59625652d6be6b81c323",
+   "bytes": 1456
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/mstrx-1456e378930a.png",
+   "sha256": "1456e378930a91691694252aef4c77d0b56eb296802a9b1396a4a92629a449a8",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/MSTRx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.26,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "coinx": {
+  "logo": "/assets/pairs/coinx.webp",
+  "w128": {
+   "path": "/assets/pairs/coinx.webp",
+   "sha256": "4ff540aae5a5d24f2bdedef3ce9fa97d61685f15874ee19f76c85a32303d4722",
+   "bytes": 2844
+  },
+  "w64": {
+   "path": "/assets/pairs/coinx-64.webp",
+   "sha256": "825e018981dbf13580a8fcf036650c131d161a5f63e064ba9fb84177909e753d",
+   "bytes": 1706
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/coinx-7b028dd20902.png",
+   "sha256": "7b028dd209022659803a269eb4a35f61995249e9e2c17635ffe2db41eefce6d6",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/COINx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.282,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "amc": {
+  "logo": "/assets/pairs/amc.webp",
+  "w128": {
+   "path": "/assets/pairs/amc.webp",
+   "sha256": "a9bdb9074e82aff463d712f097b5757e213578ffdb71c32c20108bf11f765cb3",
+   "bytes": 2226
+  },
+  "w64": {
+   "path": "/assets/pairs/amc-64.webp",
+   "sha256": "f2b0686d3aba209dfd0eb40bddd3b9f3ed65821a0f50982f5fae41f22053a033",
+   "bytes": 1246
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/amc-d865497a68ea.png",
+   "sha256": "d865497a68eae9d46d07498e5e4880550b77b63dd0dad2ba407b2b35e07a1352",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://d1io3yog0oux5.cloudfront.net/_60e2e3fc636ec8d3e29e66a1fec50310/amctheatres/files/theme/images/favicons/apple-touch-icon.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    180
+   ],
+   "plate": null,
+   "sourcePx": [
+    180,
+    180
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.941,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "doge": {
+  "logo": "/assets/pairs/doge.webp",
+  "w128": {
+   "path": "/assets/pairs/doge.webp",
+   "sha256": "a8efc1f1c3384c02df9d7a0955a5a2c7417975869ae15ddf3c9fd74352b3c5c5",
+   "bytes": 2562
+  },
+  "w64": {
+   "path": "/assets/pairs/doge-64.webp",
+   "sha256": "f0aa114763c819e821312eb348a6654d51777245aa00ae4cba53413237be0dc1",
+   "bytes": 1442
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/doge-06183873aff4.svg",
+   "sha256": "06183873aff470d47f6af2f05d5058d6458796cf106d391c7492c370ae907375",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://dogecoin.com/assets/images/doge.svg"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -99.99,
+    -123.99,
+    1258.98
+   ],
+   "plate": "#26120b",
+   "sourcePx": [
+    150,
+    150
+   ],
+   "renderedPx": [
+    1024,
+    1024
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.506,
+   "luminance": 0.488,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "fartcoin": {
+  "logo": "/assets/pairs/fartcoin.webp",
+  "w128": {
+   "path": "/assets/pairs/fartcoin.webp",
+   "sha256": "1519ad2d684dd3542b99241f928312a75310ee64960b272d5627ff2a13934306",
+   "bytes": 1872
+  },
+  "w64": {
+   "path": "/assets/pairs/fartcoin-64.webp",
+   "sha256": "9edd81533d386050edfa7f1f8c5fa19a7dde1bdc8db968ea6b5eee89d44bc51b",
+   "bytes": 1234
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/fartcoin-official-pump-current-a6696d4f22be.png",
+   "sha256": "a6696d4f22bee30448384d9bbce7d896602f564af97f21ff77717c54149d5f86",
+   "record": "research/fartcoin-current-official-image-check.json#proxySha256",
+   "url": "https://ipfs.io/ipfs/QmQr3Fz4h1etNsF7oLGMRHiCzhB5y9a7GjyodnF7zLHK1g"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    80
+   ],
+   "plate": null,
+   "sourcePx": [
+    80,
+    80
+   ],
+   "upscaled": true,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.015,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "pnut": {
+  "logo": "/assets/pairs/pnut.webp",
+  "w128": {
+   "path": "/assets/pairs/pnut.webp",
+   "sha256": "6055d8578de149fd00c06def2abf22a5955be7a0860b90c3540050b19aee6e58",
+   "bytes": 4442
+  },
+  "w64": {
+   "path": "/assets/pairs/pnut-64.webp",
+   "sha256": "6a52cc725578d98ae53ad785491684ae8c7450fc4ce16387f9464b6a1c84bd9a",
+   "bytes": 2050
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/pnut-7b8c1825d78c.jpg",
+   "sha256": "7b8c1825d78c5e17a13b780cfe4f14e504e398bc0b294c44a19c11f59eaff95d",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/QmNdTtJauw39u4DzGyTaZ35rRx4VgAxqb91wE89zjyHWd2"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    6.5,
+    1011
+   ],
+   "plate": null,
+   "sourcePx": [
+    1011,
+    1024
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.466,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "moodeng": {
+  "logo": "/assets/pairs/moodeng.webp",
+  "w128": {
+   "path": "/assets/pairs/moodeng.webp",
+   "sha256": "7c5412eb1f4791581999cbea56223730b6045d93849c39bc3811b9534c4e7398",
+   "bytes": 5906
+  },
+  "w64": {
+   "path": "/assets/pairs/moodeng-64.webp",
+   "sha256": "c6449484012f1355793e1ad877b2d85a3c3cdff395118fce7407992c258f323a",
+   "bytes": 2222
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/moodeng-7f4f147ab9ea.png",
+   "sha256": "7f4f147ab9ea04dde92da1189d18a822b0d728dffe3367604bf6d1cdf487c680",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/Qmf1g7dJZNDJHRQru7E7ENwDjcvu7swMUB6x9ZqPXr4RV2"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    500
+   ],
+   "plate": null,
+   "sourcePx": [
+    500,
+    500
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.211,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "troll": {
+  "logo": "/assets/pairs/troll.webp",
+  "w128": {
+   "path": "/assets/pairs/troll.webp",
+   "sha256": "bb4b69b55bc7ffbd8d64175a3586723b27587d122e72498dc7c1e105a57077c2",
+   "bytes": 4284
+  },
+  "w64": {
+   "path": "/assets/pairs/troll-64.webp",
+   "sha256": "2eed08420c19c01874369fc67c2d1921018b94e6349fa513399b0c23012c9b80",
+   "bytes": 1968
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/troll-5e3348ca8d09.png",
+   "sha256": "5e3348ca8d09765d9e5ec24b0135bcf204239b4674a518b35d4bf38e087c3a51",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://cf-ipfs.com/ipfs/QmWV8QgmH1gSw41yapzsFwkC8yPbzoSreAcJbzqfvo2sVq"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -39.2,
+    -68.2,
+    425.4
+   ],
+   "plate": "#26120b",
+   "sourcePx": [
+    347,
+    288
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.362,
+   "luminance": 0.604,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "bonk": {
+  "logo": "/assets/pairs/bonk.webp",
+  "w128": {
+   "path": "/assets/pairs/bonk.webp",
+   "sha256": "b7af6ca6fd952e7e971a93ea3a821c10d4cabd3d590aa39c461437b2b1772f6d",
+   "bytes": 3640
+  },
+  "w64": {
+   "path": "/assets/pairs/bonk-64.webp",
+   "sha256": "b82e26bfa5237812dec3671bd897be930283fab464914473ea42fb9b8d9c94d0",
+   "bytes": 1870
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/bonk-498ca3589dbe.jpg",
+   "sha256": "498ca3589dbe075f0cfed24f7e7a31ba868079ad98e3e25813893eaa99092c31",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://arweave.net/hQiPZOsRZXGXBJd_82PhVdlM_hACsT_q6wqwf5cSY7I"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    640
+   ],
+   "plate": null,
+   "sourcePx": [
+    640,
+    640
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.45,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "wif": {
+  "logo": "/assets/pairs/wif.webp",
+  "w128": {
+   "path": "/assets/pairs/wif.webp",
+   "sha256": "7503329f2a73c244563168f5e1f9749400882bce249e91e951c78f5aca2335c8",
+   "bytes": 3600
+  },
+  "w64": {
+   "path": "/assets/pairs/wif-64.webp",
+   "sha256": "2bc6a61ec708b722d28ee838ee6b36900964ab31cdcf08dd8e428151e8cd7077",
+   "bytes": 1516
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/wif-2ad89d597573.jpg",
+   "sha256": "2ad89d597573c42e0d7f5470ce2a2c31f2880f049340cb6c6c09902baaa738a3",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://bafkreibk3covs5ltyqxa272uodhculbr6kea6betidfwy3ajsav2vjzyum.ipfs.nftstorage.link"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    4,
+    0,
+    1117
+   ],
+   "plate": null,
+   "sourcePx": [
+    1125,
+    1117
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.278,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "cards": {
+  "logo": "/assets/pairs/cards.webp",
+  "w128": {
+   "path": "/assets/pairs/cards.webp",
+   "sha256": "0726cc3c509ec764ee572ed5f2cb3fc6df2b7187c4b7c090501282e050a3de43",
+   "bytes": 2376
+  },
+  "w64": {
+   "path": "/assets/pairs/cards-64.webp",
+   "sha256": "2800f0299b1505d1fc02238fcab2facd008b5bb638321a126b4e5bcc383301d9",
+   "bytes": 1536
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/cards-241bcf8ee4f8.svg",
+   "sha256": "241bcf8ee4f8d978d58ddf53666fb34ce229bcd002a58c64052ff81ea2cbadff",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://collectorcrypt.com/logo.svg"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -218.23,
+    -44.23,
+    1112.47
+   ],
+   "plate": "#26120b",
+   "sourcePx": [
+    18,
+    25
+   ],
+   "renderedPx": [
+    737,
+    1024
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.325,
+   "luminance": 0.411,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "sv151": {
+  "logo": "/assets/pairs/sv151.webp",
+  "w128": {
+   "path": "/assets/pairs/sv151.webp",
+   "sha256": "e52db49628055edad19524bf3edf97232c3489303fcff4aee6a9c81e64a6f7fc",
+   "bytes": 6432
+  },
+  "w64": {
+   "path": "/assets/pairs/sv151-64.webp",
+   "sha256": "1d7019e11feff5e4eb8f35c2dd398dbc68628b7392d42bd9d7c8d291cfc0242c",
+   "bytes": 2600
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/sv151-3ffeea5b7f58.png",
+   "sha256": "3ffeea5b7f5811556c21135b742efc665f38a83a6a54b58f7cb3a3f14ffdd3e3",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://token-media.defined.fi/1399811149_SV151D5pjygAKA8aJJcKzm4wFnRX5G92Fye94jQJk7g_large_5eb9ee365df0.png"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -11.74,
+    -11.74,
+    279.49
+   ],
+   "plate": "#f3e7cf",
+   "sourcePx": [
+    256,
+    256
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.221,
+   "luminance": 0.169,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "toad": {
+  "logo": "/assets/pairs/toad.webp",
+  "w128": {
+   "path": "/assets/pairs/toad.webp",
+   "sha256": "d6264b215ad1e8352d2d38330c956c5b9f25064823794a7c137d721888adcc83",
+   "bytes": 4110
+  },
+  "w64": {
+   "path": "/assets/pairs/toad-64.webp",
+   "sha256": "89dd05569c906b9ff740cacfe6b9b7e966bc7f0db8306a9835a962082d02ac1b",
+   "bytes": 2144
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/toad-80464cc13949.png",
+   "sha256": "80464cc13949e033e0a305371f57908d1ffcd5dbcc410157285605ff890368b8",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/bafybeieqj4yflnjsrld7flroapyq6pixzi4qyifiotnqddq7edoa2hn4sq"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    1,
+    988
+   ],
+   "plate": null,
+   "sourcePx": [
+    988,
+    990
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.359,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "pengu": {
+  "logo": "/assets/pairs/pengu.webp",
+  "w128": {
+   "path": "/assets/pairs/pengu.webp",
+   "sha256": "df661aae20ead54552c49525c62d50a802eab9805c99cf7e9241d5da6aad1787",
+   "bytes": 2904
+  },
+  "w64": {
+   "path": "/assets/pairs/pengu-64.webp",
+   "sha256": "bf6fe820e1a351191d8a5c7d9fdeced29ab8bd218b49a8032dd1db9190a85463",
+   "bytes": 1616
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/pengu-0b6260425d58.png",
+   "sha256": "0b6260425d584ee3d198f8e84a452b202fbe8ca3500fee1ffc03f46f880ce73c",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://arweave.net/BW67hICaKGd2_wamSB0IQq-x7Xwtmr2oJj1WnWGJRHU"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    2700
+   ],
+   "plate": null,
+   "sourcePx": [
+    2700,
+    2700
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.823,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "giga": {
+  "logo": "/assets/pairs/giga.webp",
+  "w128": {
+   "path": "/assets/pairs/giga.webp",
+   "sha256": "8808df3afa12f67b924eba19ee523653196fa8630a0e6805ef66c8ed4bfece0d",
+   "bytes": 2170
+  },
+  "w64": {
+   "path": "/assets/pairs/giga-64.webp",
+   "sha256": "0ad5365bc3a14cb0cc6929d03be81abf8b3cdb410dad91d8fa4467cbf2cce9e0",
+   "bytes": 1142
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/giga-61b9c55c37cd.png",
+   "sha256": "61b9c55c37cdac38a6961000e43274f2dade4e257ed5eee22d74f5578fea47ae",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://bafybeifiyvpbr3kd6wepax4qxdlxbjrpz2de4lqsuwwuihirvaal6kqwba.ipfs.nftstorage.link"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    7,
+    1008
+   ],
+   "plate": null,
+   "sourcePx": [
+    1008,
+    1022
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.07,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "spx": {
+  "logo": "/assets/pairs/spx.webp",
+  "w128": {
+   "path": "/assets/pairs/spx.webp",
+   "sha256": "55a754c42a9268c49f37db26fe0ea53de01d5e30625aef9e9c6667c63cd0e13a",
+   "bytes": 2922
+  },
+  "w64": {
+   "path": "/assets/pairs/spx-64.webp",
+   "sha256": "0260d884607fb45c2383d2e3432d07ddfedc834d49e3b15b9adead0696eb915e",
+   "bytes": 1640
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/spx-0e35c0c102cc.png",
+   "sha256": "0e35c0c102cc6017569373e077a8c9646711f51c693a6a2d0d49ffb9ab31b126",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://www.spx6900.com/spxlogo-sm.png"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -15.8,
+    -15.8,
+    311.61
+   ],
+   "plate": "#f3e7cf",
+   "sourcePx": [
+    280,
+    280
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.722,
+   "luminance": 0.345,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "trump": {
+  "logo": "/assets/pairs/trump.webp",
+  "w128": {
+   "path": "/assets/pairs/trump.webp",
+   "sha256": "24d4080b472146b1684684563dce99123f62fc6adec37686e17835660e3f77f3",
+   "bytes": 4794
+  },
+  "w64": {
+   "path": "/assets/pairs/trump-64.webp",
+   "sha256": "e4887a6a83984442d72b56e03da615b7fe8a39da4e3684e2e118d5488d3dedff",
+   "bytes": 2180
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/trump-9b6c706e030b.jpg",
+   "sha256": "9b6c706e030b969e89ed1bcbcf0ee655200069ffa7bdf842936a0b36e34a254f",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://arweave.net/VQrPjACwnQRmxdKBTqNwPiyo65x7LAT773t8Kd7YBzw"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    3,
+    2811
+   ],
+   "plate": null,
+   "sourcePx": [
+    2811,
+    2817
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.566,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "useless": {
+  "logo": "/assets/pairs/useless.webp",
+  "w128": {
+   "path": "/assets/pairs/useless.webp",
+   "sha256": "8fbb38abec745846307bfca4091d90d04696be7730df48e7412667048499b637",
+   "bytes": 3100
+  },
+  "w64": {
+   "path": "/assets/pairs/useless-64.webp",
+   "sha256": "28ee1ffea4d2e7efef84463781ba79779d88f7e339a83d55239e2d9ebad2e5ae",
+   "bytes": 1906
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/useless-f21ba0a63e3d.png",
+   "sha256": "f21ba0a63e3d8e08100e8ea4f074edb713bd61bf92e7f9b5ea1101392cf0f08b",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/bafkreihsdoqkmpr5ryebaduoutyhj3nxco6wdp4s4743l2qrae4sz4hqrm"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    224
+   ],
+   "plate": null,
+   "sourcePx": [
+    224,
+    224
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.698,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "chillguy": {
+  "logo": "/assets/pairs/chillguy.webp",
+  "w128": {
+   "path": "/assets/pairs/chillguy.webp",
+   "sha256": "ce4a3f9be8c468ada2bbc99471ece2839bba90212f22890f7c0d1b510dc37ffe",
+   "bytes": 2714
+  },
+  "w64": {
+   "path": "/assets/pairs/chillguy-64.webp",
+   "sha256": "4f838007b7e410a010e6823890dcf336db46105a8ade777d092f5ef6f6222505",
+   "bytes": 1292
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/chillguy-441a9eb33c81.jpg",
+   "sha256": "441a9eb33c819daf6a56bcdb79a38718f9365c6d3e4c523d6ddcd0153f6c8590",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/QmaFy59TMnLb4jGgL6LpquyXSxTRXKR4mEfSobUSsPoR46"
+  },
+  "derivation": {
+   "mode": "cover",
+   "crop": [
+    0,
+    48.5,
+    989
+   ],
+   "plate": null,
+   "sourcePx": [
+    989,
+    1086
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.256,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "goat": {
+  "logo": "/assets/pairs/goat.webp",
+  "w128": {
+   "path": "/assets/pairs/goat.webp",
+   "sha256": "d82b1b862f2c2467a80af65320575d014c879e02203a78a28fe051fc23575e1e",
+   "bytes": 2334
+  },
+  "w64": {
+   "path": "/assets/pairs/goat-64.webp",
+   "sha256": "cecdc6630336994d7ffb47391153116bacc8234ec29c28c9122fe208a90e5a0c",
+   "bytes": 1298
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/goat-4015c971963a.jpg",
+   "sha256": "4015c971963a7fab912269e3bac1710e0e805f847b0fc9d05937bc231f7d66fc",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/QmapAq9WtNrtyaDtjZPAHHNYmpSZAQU6HywwvfSWq4dQVV"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    222
+   ],
+   "plate": null,
+   "sourcePx": [
+    222,
+    222
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.016,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "zerebro": {
+  "logo": "/assets/pairs/zerebro.webp",
+  "w128": {
+   "path": "/assets/pairs/zerebro.webp",
+   "sha256": "a3b1bfaa060da1ea13f7226443c6c51dfc099e55b3ff7fa33e9d307767bde8a9",
+   "bytes": 5528
+  },
+  "w64": {
+   "path": "/assets/pairs/zerebro-64.webp",
+   "sha256": "d079baa0a8cc3fdcb259a7f2cf324691b88fe6eda2931022248a1e2fa44e22cf",
+   "bytes": 2032
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/zerebro-a8216adfc8b0.png",
+   "sha256": "a8216adfc8b0828f2493bb280192f02ca677e91cd738122bbc7465c4d96bad44",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/QmZ1HDSibY2LdEmC1tPHK36ApGCQACJENqsbPsT2nc29AD"
+  },
+  "derivation": {
+   "mode": "cover",
+   "crop": [
+    39,
+    0,
+    1978
+   ],
+   "plate": null,
+   "sourcePx": [
+    2056,
+    1978
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.067,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "act": {
+  "logo": "/assets/pairs/act.webp",
+  "w128": {
+   "path": "/assets/pairs/act.webp",
+   "sha256": "9fe95d482fed42ca99914fee726dccba2d22c84b92d6656d0c614e21b0d81259",
+   "bytes": 6284
+  },
+  "w64": {
+   "path": "/assets/pairs/act-64.webp",
+   "sha256": "c7fc9278dcabf5d8d2d53fe140a5af342b40fb2d88e88900bb1a92bf0d8cffb6",
+   "bytes": 2548
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/act-90309845b93a.jpg",
+   "sha256": "90309845b93ad860b2c755810b13d3fd376d9b9fe026d6de50103677af95b521",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/QmUfrHNLqia7NmqgbzHYGF4rtX75nEwukPFFU1YscKKquL"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.364,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "pippin": {
+  "logo": "/assets/pairs/pippin.webp",
+  "w128": {
+   "path": "/assets/pairs/pippin.webp",
+   "sha256": "21938030bca8f5053f354eab55417d8d7fd67a24382893d25f035ff330439ec4",
+   "bytes": 1864
+  },
+  "w64": {
+   "path": "/assets/pairs/pippin-64.webp",
+   "sha256": "7606ed3f2543ebad9a63b818087e732b4cd5678d2a17bc49592bf48b63a7bbb5",
+   "bytes": 1062
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/pippin-03111311888d.png",
+   "sha256": "03111311888d880dbe6aeb77d507487cbd6c0c0a29c4587932c0c41bc77f663e",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/QmdcvSSBg7gWD4tvfXv3PuLtAiPyDZ5Z9w4LQVeRJKL3Lz"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    250
+   ],
+   "plate": null,
+   "sourcePx": [
+    250,
+    250
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.913,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "vine": {
+  "logo": "/assets/pairs/vine.webp",
+  "w128": {
+   "path": "/assets/pairs/vine.webp",
+   "sha256": "46ac23c04a132f49f5300c16942fe5ecfd0ad7e2281425317cc14ab8e52455c0",
+   "bytes": 2022
+  },
+  "w64": {
+   "path": "/assets/pairs/vine-64.webp",
+   "sha256": "1a3b66a608828730c3fff90b426f4a817a239e89218cb0244063c188647ea134",
+   "bytes": 1330
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/vine-f8bc16ff3c5f.png",
+   "sha256": "f8bc16ff3c5f681c05af4d77e8450678b2d6a9376e8a48c5f213cf665835f2fd",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/QmRtFJu3ZospaS4EAk17iNXZGAJp7gMxzvsZckZxbqZa5r"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    3398
+   ],
+   "plate": null,
+   "sourcePx": [
+    3398,
+    3398
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.446,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "aura": {
+  "logo": "/assets/pairs/aura.webp",
+  "w128": {
+   "path": "/assets/pairs/aura.webp",
+   "sha256": "25034beb70d3965b020708bf3d438803cb5e0205bbf7eeb9ac3b3ed46544d9de",
+   "bytes": 3438
+  },
+  "w64": {
+   "path": "/assets/pairs/aura-64.webp",
+   "sha256": "52b0734218344d3858193531ccd89a1118a1a1ae0a8969e295659f63e578ee3e",
+   "bytes": 1708
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/aura-e4e149c6b5fb.png",
+   "sha256": "e4e149c6b5fb8846395c0cdb14869b58db256439d3d533e11d83aecd80b99921",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://cf-ipfs.com/ipfs/QmSBgFtpXnxLMeyU1Czs1PW5Zv7nFjy8ZXe5ZDhA8fyyPD"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    700
+   ],
+   "plate": null,
+   "sourcePx": [
+    700,
+    700
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.305,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "michi": {
+  "logo": "/assets/pairs/michi.webp",
+  "w128": {
+   "path": "/assets/pairs/michi.webp",
+   "sha256": "6d5b468da06cfa398635c1ed1c2408612c5cb37788d708e33eb4e7c45868ea1a",
+   "bytes": 3886
+  },
+  "w64": {
+   "path": "/assets/pairs/michi-64.webp",
+   "sha256": "8fca4b83918ca91bb34bbb0204610a349b1fa269a8b7ae8fca6697461a976476",
+   "bytes": 1676
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/michi-aa8e56a3812970fb-higher-pump-reference.png",
+   "sha256": "aa8e56a3812970fb9bb02150e09d40588db7363da3889159781c19057eecdc99",
+   "record": "research/michi-higher-source-followup.json#image.sha256",
+   "url": "https://images.pump.fun/coin-image/AywAYdNJnSLSXwKWYxDciPjqGRnwp4iZdQptuuQTpump?placeholder=none&src=https%3A%2F%2Fipfs.io%2Fipfs%2FQmNzwuJnJrtyp77CdwGJH9dS3SauuiA6yFn7ZDTBon2RtN&variant=600x600"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    600
+   ],
+   "plate": null,
+   "sourcePx": [
+    600,
+    600
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.289,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "cate": {
+  "logo": "/assets/pairs/cate.webp",
+  "w128": {
+   "path": "/assets/pairs/cate.webp",
+   "sha256": "ca31d67795e9fee53d4d4b8b6aa3f9e66850de51b8009f21e51dde1ab364c677",
+   "bytes": 5428
+  },
+  "w64": {
+   "path": "/assets/pairs/cate-64.webp",
+   "sha256": "8c5845ff8552f7b2e0b30bb6345324f490e736f31c216864d3e48e211cb98796",
+   "bytes": 2480
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/cate-a4c0d4c03864.jpg",
+   "sha256": "a4c0d4c0386424603b8e84a8037b5054e07bb1e2f14df867385f9e3ac26f32e1",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://m.rapidlaunch.io/images/Tsg4I9WHC.jpg"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    256
+   ],
+   "plate": null,
+   "sourcePx": [
+    256,
+    256
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.452,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "ansem": {
+  "logo": "/assets/pairs/ansem.webp",
+  "w128": {
+   "path": "/assets/pairs/ansem.webp",
+   "sha256": "6a78ea491162a770f5c3ecbc5eb3e80b3693b73800c56c5857250cd0cbe25e2b",
+   "bytes": 2114
+  },
+  "w64": {
+   "path": "/assets/pairs/ansem-64.webp",
+   "sha256": "1ae9c871eeafcc59a4009053add8501cc532837443f248bf6f273cc6587f1621",
+   "bytes": 1104
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/ansem-d330339eb3aef602-higher-pump-reference.jpg",
+   "sha256": "d330339eb3aef602ad7d0e9d92dbb4610745c24fb5291579d5d9e070f5f2c2ed",
+   "record": "research/ansem-higher-source-followup.json#image.sha256",
+   "url": "https://images.pump.fun/coin-image/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump?placeholder=none&src=https%3A%2F%2Fedge.uxento.io%2Fimage%2FCx83EqERns2VuiKrkwHegTuECVqZebsNhJ3dCU8CucWG&variant=600x600"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    600
+   ],
+   "plate": null,
+   "sourcePx": [
+    600,
+    600
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.007,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "bert": {
+  "logo": "/assets/pairs/bert.webp",
+  "w128": {
+   "path": "/assets/pairs/bert.webp",
+   "sha256": "3e41208ca189da7d2b18eb61ebff441afbc62ad14048fb46a6f4afe8e2c5f3b8",
+   "bytes": 7444
+  },
+  "w64": {
+   "path": "/assets/pairs/bert-64.webp",
+   "sha256": "0ea92374650d93fc7a71f9e4c1dda264f113cf7315752dc12acdb1a3d37df0da",
+   "bytes": 2530
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/bert-f670e4bb1e68.png",
+   "sha256": "f670e4bb1e6878f8b17c4cb0c706dea41b7f55b0a30d26ca94ec917c1df59e11",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/Qma4nWagupvZyYG5gRz6WcbCAM8fpzQcSoJWT7ryY82YSg"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    1080
+   ],
+   "plate": null,
+   "sourcePx": [
+    1080,
+    1080
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.223,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "chillhouse": {
+  "logo": "/assets/pairs/chillhouse.webp",
+  "w128": {
+   "path": "/assets/pairs/chillhouse.webp",
+   "sha256": "509421bbf049407bab9b153b07fcaf501b618ff7d8db11e9927a4641b5459b1d",
+   "bytes": 3304
+  },
+  "w64": {
+   "path": "/assets/pairs/chillhouse-64.webp",
+   "sha256": "4c86d5a14cfc15df7149669d2e1f8960f2e441a8f260d4a904e1d218806d81f0",
+   "bytes": 1544
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/chillhouse-d61002d28888.jpg",
+   "sha256": "d61002d28888129b2440553c3211e6625c6e5e4483c20d70e4594362d58d8c65",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/QmU5D2LBjkriYD4wqL5cEVwv1x1xqj2LCQAPKC79cVGd34"
+  },
+  "derivation": {
+   "mode": "cover",
+   "crop": [
+    0,
+    31.5,
+    354
+   ],
+   "plate": null,
+   "sourcePx": [
+    354,
+    417
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.257,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "usduc": {
+  "logo": "/assets/pairs/usduc.webp",
+  "w128": {
+   "path": "/assets/pairs/usduc.webp",
+   "sha256": "998d30f2a9c8ef627ba785d280ccf72755eff35d019fa73556317855342816c5",
+   "bytes": 3202
+  },
+  "w64": {
+   "path": "/assets/pairs/usduc-64.webp",
+   "sha256": "6949d7145ca5db6016a5c6c8818c5e3b27ad8f602efa0eadd286db70a85384df",
+   "bytes": 1770
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/usduc-bd7806798bd1.png",
+   "sha256": "bd7806798bd10ddd4fe954dbdc8ccda24b0d8d2554a0457f9193fa54636ebc61",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/QmQw4DQjdWp3G8TuMCykG8SVSwtFwkxvTyxEWNMuAVYU4q"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    1000
+   ],
+   "plate": null,
+   "sourcePx": [
+    1000,
+    1000
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.472,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "wbtc": {
+  "logo": "/assets/pairs/wbtc.webp",
+  "w128": {
+   "path": "/assets/pairs/wbtc.webp",
+   "sha256": "5c2f87a0c845983208b81f4df97963b63c6d75d33e9d4b1814f86e88ca272d26",
+   "bytes": 2944
+  },
+  "w64": {
+   "path": "/assets/pairs/wbtc-64.webp",
+   "sha256": "cd449f708761926eb63bd935bfd2cedc8a5173ddf50f3df88d32e415c5136c9b",
+   "bytes": 1722
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/wbtc-token-list-4b2b394a8a1a.png",
+   "sha256": "4b2b394a8a1a3e370969a74e9d2cc0cd04f336f40ce726f682609eb0577bf3ad",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh/logo.png"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -21.77,
+    -21.77,
+    164.54
+   ],
+   "plate": "#26120b",
+   "sourcePx": [
+    120,
+    120
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.225,
+   "luminance": 0.472,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "eth": {
+  "logo": "/assets/pairs/eth.webp",
+  "w128": {
+   "path": "/assets/pairs/eth.webp",
+   "sha256": "6d41feb2fd238cc17e2885e13cf181eec34fce5301fcf425a2efbcd9aca33de2",
+   "bytes": 1902
+  },
+  "w64": {
+   "path": "/assets/pairs/eth-64.webp",
+   "sha256": "61bff0b288890b5a476fd81c2fd7f30c955b846e206d13185b2ff45655164d74",
+   "bytes": 1232
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/eth-836339466e52.png",
+   "sha256": "836339466e52821ec7c7b2088e30a87af27b23f5557d00178e7052a711857352",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ethereum.org/_next/static/media/eth-diamond-black.31u_5ih2w7osr.png"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -307.61,
+    -56.11,
+    1415.22
+   ],
+   "plate": "#f3e7cf",
+   "sourcePx": [
+    800,
+    1303
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 1,
+   "luminance": 0,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "hype": {
+  "logo": "/assets/pairs/hype.webp",
+  "w128": {
+   "path": "/assets/pairs/hype.webp",
+   "sha256": "e87be821dc57bc7f8a1756db17db5a8383b2a28ce884bf994d79fcc86a666cf2",
+   "bytes": 2074
+  },
+  "w64": {
+   "path": "/assets/pairs/hype-64.webp",
+   "sha256": "456c0de3edf18b80b556aa4e99418be72a8ca8a04460ff724bc191329f51472b",
+   "bytes": 1364
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/hype-4d210e44f273.png",
+   "sha256": "4d210e44f273db8d4089cd44c86e24c057969495c8ba32d1331c30badd91102e",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://arweave.net/QBRdRop8wI4PpScSRTKyibv-fQuYBua-WOvC7tuJyJo"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -32.4,
+    -30.9,
+    640.8
+   ],
+   "plate": "#26120b",
+   "sourcePx": [
+    576,
+    576
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.575,
+   "luminance": 0.818,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "zec": {
+  "logo": "/assets/pairs/zec.webp",
+  "w128": {
+   "path": "/assets/pairs/zec.webp",
+   "sha256": "8d0425550c59af36accbeb0c09e2e71f85d72dba26ed528a19a75219b0aefcbd",
+   "bytes": 3858
+  },
+  "w64": {
+   "path": "/assets/pairs/zec-64.webp",
+   "sha256": "ad0dba577d40e06b4742dff053b9f70e954de1692d1bd1fcf818c1033bd683ec",
+   "bytes": 2208
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/zec-c202292c3633.svg",
+   "sha256": "c202292c36336b109523fff68c5e8de3a659ca2dbea6a7d1e9fdead80c0e1a90",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://arweave.net/QSYqnmB7NYlB7n1R6rz935Y07dlRK0tIuKe2mof5Sho"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -45.42,
+    -45.42,
+    1114.85
+   ],
+   "plate": "#f3e7cf",
+   "sourcePx": [
+    150,
+    150
+   ],
+   "renderedPx": [
+    1024,
+    1024
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.217,
+   "luminance": 0.197,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "near": {
+  "logo": "/assets/pairs/near.webp",
+  "w128": {
+   "path": "/assets/pairs/near.webp",
+   "sha256": "3c609e80d53383df687c37edbcbf33f4d9e3734dfa4db53752cab7d777c27d01",
+   "bytes": 2114
+  },
+  "w64": {
+   "path": "/assets/pairs/near-64.webp",
+   "sha256": "afb41364b8bb35e8cbc9aa18e02053da22b48a03298dcb96b1e1d8cdbd4ce9f9",
+   "bytes": 1440
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/near-8ab8ebca5d9f.svg",
+   "sha256": "8ab8ebca5d9f14d09aa7f682fc19bb6272ad2f5ea5184dfc2e359eab3431b08a",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://bafkreiekxdv4uxm7ctijvj7wql6bto3cokws6xvfdbg7ylrvt2vtimnqri.ipfs.w3s.link"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    142.67,
+    144.17,
+    738.65
+   ],
+   "plate": "#f3e7cf",
+   "sourcePx": [
+    150,
+    150
+   ],
+   "renderedPx": [
+    1024,
+    1024
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.871,
+   "luminance": 0,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "xrp": {
+  "logo": "/assets/pairs/xrp.webp",
+  "w128": {
+   "path": "/assets/pairs/xrp.webp",
+   "sha256": "099b999c5ea8f0071aaad2e6eae77ec7f4806ad25fea25414a7cd2e08fc80f26",
+   "bytes": 5560
+  },
+  "w64": {
+   "path": "/assets/pairs/xrp-64.webp",
+   "sha256": "9d3906d51e58fa428d361afe3405f4c479d6e2843bffccc520bce4efe3e39a47",
+   "bytes": 2502
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/xrp-40c7dd792c5f.svg",
+   "sha256": "40c7dd792c5f5d6e61c224cb2a343e1954b79b172509522a967ddd83ee86b1b2",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://cdn.prod.website-files.com/61a0a50381fdccb6c37927e5/692521b55b7c02a5da964dc3_wXRP-token-logo.svg"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -45.51,
+    -45.51,
+    1115.02
+   ],
+   "plate": "#f3e7cf",
+   "sourcePx": [
+    150,
+    150
+   ],
+   "renderedPx": [
+    1024,
+    1024
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.216,
+   "luminance": 0.23,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "xmr": {
+  "logo": "/assets/pairs/xmr.webp",
+  "w128": {
+   "path": "/assets/pairs/xmr.webp",
+   "sha256": "7f7b31f83c9bf2a45a1c7a203389eb9c55a25f1d3e46183b411bed3179a26266",
+   "bytes": 2588
+  },
+  "w64": {
+   "path": "/assets/pairs/xmr-64.webp",
+   "sha256": "bb9e07ceb9be194f2ede2b3aec3b0bd0062389dc116637eb97fe7b95874fb2b7",
+   "bytes": 1576
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/xmr-26f020ea2c78.png",
+   "sha256": "26f020ea2c781d70407768ab3e4439b6f57f56c6596a3771ef7355a7bc555438",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://wxmr.io/xmr.png"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -87.92,
+    -87.92,
+    2175.84
+   ],
+   "plate": "#26120b",
+   "sourcePx": [
+    2000,
+    2000
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.215,
+   "luminance": 0.405,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "sui": {
+  "logo": "/assets/pairs/sui.webp",
+  "w128": {
+   "path": "/assets/pairs/sui.webp",
+   "sha256": "34ef64b8ce45eedbc907996a1971f3feffc692010d9c666df92ac59cbf9737e1",
+   "bytes": 2442
+  },
+  "w64": {
+   "path": "/assets/pairs/sui-64.webp",
+   "sha256": "726774238aa2ec3f2827874f437017cded310b7f6e725a403492d7dc3b42642f",
+   "bytes": 1424
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/sui-5351dc0dbefb.svg",
+   "sha256": "5351dc0dbefbdb2d21f2d18b6e21ba7b393f8db6fd7fe072ecfa35917e79db5d",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://docs.sui.io/img/logo.svg"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    1024
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "renderedPx": [
+    1024,
+    1024
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.356,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "arb": {
+  "logo": "/assets/pairs/arb.webp",
+  "w128": {
+   "path": "/assets/pairs/arb.webp",
+   "sha256": "477859272de1016646ee7e0b54d9402c6feb554dc1e2899b0ee3653c70fe418b",
+   "bytes": 3984
+  },
+  "w64": {
+   "path": "/assets/pairs/arb-64.webp",
+   "sha256": "e0b43fa04b687f45472c18abc27d449d6c2a1dc5f5b111e892b72733d9dd0d08",
+   "bytes": 2176
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/arb-e5d53dd5c7f9.svg",
+   "sha256": "e5d53dd5c7f98a985a48e4b0eea98cd78d7a0f147b4c7a18f3ba7e24b303680c",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://arweave.net/j-fCD9twgXHSwwFZrvlqe1mSu5pDdjL9Vs07npmwZMw"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    184.97,
+    215.97,
+    591.05
+   ],
+   "plate": "#26120b",
+   "sourcePx": [
+    141,
+    150
+   ],
+   "renderedPx": [
+    963,
+    1024
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.798,
+   "luminance": 0.386,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "tao": {
+  "logo": "/assets/pairs/tao.webp",
+  "w128": {
+   "path": "/assets/pairs/tao.webp",
+   "sha256": "9be4f207eae55863fc4013fd193c7f5c0fb009c88d9e398a1a4810d8898b72e8",
+   "bytes": 1120
+  },
+  "w64": {
+   "path": "/assets/pairs/tao-64.webp",
+   "sha256": "5241c62b691564858e24923d4463f1c1e65458ed8f27404f6528ccf26bf5e6f1",
+   "bytes": 916
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/tao-primary-inline-432636a22810.svg",
+   "sha256": "432636a22810a0814d22434a764f7194d2df2289bdabb1232cb7d3fde0f37631",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://www.bittensor.com"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -228.41,
+    -204.41,
+    1465.82
+   ],
+   "plate": "#f3e7cf",
+   "sourcePx": [
+    24,
+    24
+   ],
+   "renderedPx": [
+    1024,
+    1024
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.728,
+   "luminance": 0,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "peaq": {
+  "logo": "/assets/pairs/peaq.webp",
+  "w128": {
+   "path": "/assets/pairs/peaq.webp",
+   "sha256": "1243bdb98907d5d4eca82eb83a47a3c5c9db9c62fb6672a42dbde242d4a86c57",
+   "bytes": 3284
+  },
+  "w64": {
+   "path": "/assets/pairs/peaq-64.webp",
+   "sha256": "55d1ee35bdeba770acaf344db3276de1cf578f24e657c8b2c484e7c186dcba34",
+   "bytes": 1880
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/peaq-c1f813eb9e81.png",
+   "sha256": "c1f813eb9e810b97f9c30267942e12cb49f01bf023c00f160547e4e7a0487282",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://arweave.net/GRDbV2NikfCG0oCaG9nZ-uSs_MbCCCVTQQGF6L6wdLA"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -22.7,
+    -22.7,
+    557.41
+   ],
+   "plate": "#26120b",
+   "sourcePx": [
+    512,
+    512
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.218,
+   "luminance": 0.894,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "mon": {
+  "logo": "/assets/pairs/mon.webp",
+  "w128": {
+   "path": "/assets/pairs/mon.webp",
+   "sha256": "7b5b75e8b517c49b01dcde455edd00519ce353e30bb0594fcfff6c9d0f0526a9",
+   "bytes": 2682
+  },
+  "w64": {
+   "path": "/assets/pairs/mon-64.webp",
+   "sha256": "6c8b4fd7e25716e4f38a2aac5c995bd78dcd46a0b5cedff81bc37bd808133b26",
+   "bytes": 1542
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "references/mon-3625ee5cdc35.png",
+   "sha256": "3625ee5cdc357de28f1a28decbaa84a1985ba2b8039bed798d7ff695cd72162c",
+   "record": "research/reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://www.monad.xyz/favicon.ico"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -33.55,
+    -33.55,
+    323.11
+   ],
+   "plate": "#f3e7cf",
+   "sourcePx": [
+    256,
+    256
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.113,
+   "luminance": 0.327,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "cashcat": {
+  "logo": "/assets/pairs/cashcat.webp",
+  "w128": {
+   "path": "/assets/pairs/cashcat.webp",
+   "sha256": "184ddd270aef4dd3db0a353e429edad6616eac4d4c5f57dc7be45de5c67f5402",
+   "bytes": 1778
+  },
+  "w64": {
+   "path": "/assets/pairs/cashcat-64.webp",
+   "sha256": "ed9aa2cf5df7b5221abef9e831b89b4d4e4e24075303ed2a8ddc308f4f3c7865",
+   "bytes": 1156
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/cashcat-9ea26bf56766.jpg",
+   "sha256": "9ea26bf5676658af38db7cec329e29059ff50e0a128979f3bb6ca8588efa30d1",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://arweave.net/EYeMKzGcxt4Wnm7E6T7D86_x1ktu56a4d9o-FKUJf-c"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    50
+   ],
+   "plate": null,
+   "sourcePx": [
+    50,
+    50
+   ],
+   "upscaled": true,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.775,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "otc": {
+  "logo": "/assets/pairs/otc.webp",
+  "w128": {
+   "path": "/assets/pairs/otc.webp",
+   "sha256": "f48d9035b68551b2f8e994a859902968cede5a1185829d93a8cb33c811bb56d4",
+   "bytes": 1672
+  },
+  "w64": {
+   "path": "/assets/pairs/otc-64.webp",
+   "sha256": "a4c224e6db31c54de9afd3a88f62801f3a044a706dac6a11959e27c65a2e65cc",
+   "bytes": 1080
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/otc-d6bd73eeed43.jpg",
+   "sha256": "d6bd73eeed43ac1ae0fa6ebe2008e18614366c06bf0eca6f7f7ac4a88ec31518",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/QmP1qukvUAheQpqCccr4qsrWrytkJiGCxzgYMcaAWGGGCw"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.115,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "fone": {
+  "logo": "/assets/pairs/fone.webp",
+  "w128": {
+   "path": "/assets/pairs/fone.webp",
+   "sha256": "fed53a400694ce30bdaef3827ece91d87d63e76cc0b22e0c80bffc2d38bda3d3",
+   "bytes": 3450
+  },
+  "w64": {
+   "path": "/assets/pairs/fone-64.webp",
+   "sha256": "071d5bbacc1ef5f189227a93c5532556cb87d8c3c6e098bf79a5f1b7dbc8e220",
+   "bytes": 1578
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/fone-08061211879a.jpg",
+   "sha256": "08061211879aad673eb5dfc27f6378d555623d84de22e40941484c1a94c4f145",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://www.apeonfone.com/images/apeonfone.jpg"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    800
+   ],
+   "plate": null,
+   "sourcePx": [
+    800,
+    800
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.453,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "buttcoin": {
+  "logo": "/assets/pairs/buttcoin.webp",
+  "w128": {
+   "path": "/assets/pairs/buttcoin.webp",
+   "sha256": "9ea4d6eece8f7ae23648d00f61e9a18e5bf3a5d220c4b72407141c95647e0708",
+   "bytes": 3098
+  },
+  "w64": {
+   "path": "/assets/pairs/buttcoin-64.webp",
+   "sha256": "7a0fdb152afd13d6c6c433a4ba5a627fde97a73420f413a5c1605b9e7c7206b6",
+   "bytes": 1726
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/buttcoin-b337d4bf1f40.jpg",
+   "sha256": "b337d4bf1f402ae9b47924d54721b6330dd18a5e3e6f9eaf4eef520c1cfc4cac",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/bafkreiftg7kl6h2aflu3i6je2vdsdnrtbxiyuxr6n6pk6txpkigbz7cmvq"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.616,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "triplet": {
+  "logo": "/assets/pairs/triplet.webp",
+  "w128": {
+   "path": "/assets/pairs/triplet.webp",
+   "sha256": "5ab4d2a608778d3899a5b856b18411f230a4d072c099f0272aaca1a96891de64",
+   "bytes": 7846
+  },
+  "w64": {
+   "path": "/assets/pairs/triplet-64.webp",
+   "sha256": "9e30e47962e27ebd642805a9e5a3d10fc9cc95e4c9f0ce8eb0ebd045e12efa7d",
+   "bytes": 2930
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/triplet-40b03cc789ee.jpg",
+   "sha256": "40b03cc789ee9809aa8341ec69cdaa52182ee0210b1add52c4e0b9fe31fbf3e1",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/bafkreicawa6mpcpotae2va2b5ru43kssdaxoaiildlovfrhaxh7dd67t4e"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    720
+   ],
+   "plate": null,
+   "sourcePx": [
+    720,
+    720
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.146,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "cupsey": {
+  "logo": "/assets/pairs/cupsey.webp",
+  "w128": {
+   "path": "/assets/pairs/cupsey.webp",
+   "sha256": "b09a99fd8a37a7694be29717ad1a7d76f8a5ca22a77acef84755767092962852",
+   "bytes": 3508
+  },
+  "w64": {
+   "path": "/assets/pairs/cupsey-64.webp",
+   "sha256": "327bb580f7357393a5aad75244aa9079b58df5ae87fad1921adb5699849c6523",
+   "bytes": 1818
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/cupsey-63b8c11aa5ab.png",
+   "sha256": "63b8c11aa5ab3ce3ce2e4e16836ea1d320db9485c9ef634fd949bdef251fcd9d",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/QmPXxffmpwSqdVFckNvmdxQSPBige24vjgMD32v5GF3Luo"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    1840
+   ],
+   "plate": null,
+   "sourcePx": [
+    1840,
+    1840
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.356,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "jimothy": {
+  "logo": "/assets/pairs/jimothy.webp",
+  "w128": {
+   "path": "/assets/pairs/jimothy.webp",
+   "sha256": "59dd22e8111e9dd50a461d3a7f5db946f985e10dede98de53618e410f42f18ff",
+   "bytes": 4166
+  },
+  "w64": {
+   "path": "/assets/pairs/jimothy-64.webp",
+   "sha256": "685cb415b12f5cea44bf4447330fac6dc5f326406b99eaa89f63cfb657f69224",
+   "bytes": 2120
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/jimothy-d8e5e31f43da.jpg",
+   "sha256": "d8e5e31f43da271d7e06fdb56276073b81874f33e1c6408ce94567ce04efd588",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://axiomtrading-v2.axiom-cdn.io/A3NqdmPtu9Qa6nRqcZWJ969ePUWNA1Fb4SgmQ7Ldpump.webp"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    80
+   ],
+   "plate": null,
+   "sourcePx": [
+    80,
+    80
+   ],
+   "upscaled": true,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.332,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "lmao": {
+  "logo": "/assets/pairs/lmao.webp",
+  "w128": {
+   "path": "/assets/pairs/lmao.webp",
+   "sha256": "cc2a48c934817ce3e33743c5f5317db715cf26ac26d7f95f48a03f1483f44815",
+   "bytes": 3872
+  },
+  "w64": {
+   "path": "/assets/pairs/lmao-64.webp",
+   "sha256": "17b72b8651e4a2fb9cfa1534f047c2be159677830aaa60e5b7992cf42b871c19",
+   "bytes": 1916
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/lmao-5a57ab0ec5d1.jpg",
+   "sha256": "5a57ab0ec5d19bb8a5af669be97f60ab5b10e43c319ee840d80ea98ec48131eb",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/bafkreic2k6vq5rorto4kll3gtpux6yfllmioipbrt3uebwaovghmjajr5m"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    1152
+   ],
+   "plate": null,
+   "sourcePx": [
+    1152,
+    1152
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.585,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "bobo": {
+  "logo": "/assets/pairs/bobo.webp",
+  "w128": {
+   "path": "/assets/pairs/bobo.webp",
+   "sha256": "56bdc6932e28fe153176a82d2a9dca7c6de67831fcffd593a2f514a62f599cad",
+   "bytes": 2846
+  },
+  "w64": {
+   "path": "/assets/pairs/bobo-64.webp",
+   "sha256": "56a97972f71c64ad20834fd22786bea23bdb7e61f04d4b0bc762567f75b03ea2",
+   "bytes": 1418
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/bobo-064db424e413.png",
+   "sha256": "064db424e413117370c2a4f4149773644859360cbc0b3dbe4ed0cc807de573ed",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/QmcDbbGg13L1ERkM6Xb77qw6XRhxE3NraQqorQEibih4qn"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    1000
+   ],
+   "plate": null,
+   "sourcePx": [
+    1000,
+    1000
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.098,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "tokabu": {
+  "logo": "/assets/pairs/tokabu.webp",
+  "w128": {
+   "path": "/assets/pairs/tokabu.webp",
+   "sha256": "69f7b4da74db41903a90d533ea05005eb4b4619cf0ec1f2d6548ee978c15d206",
+   "bytes": 2776
+  },
+  "w64": {
+   "path": "/assets/pairs/tokabu-64.webp",
+   "sha256": "71168ab4bdfe0756013a9e86cc7648b4d2364bdd5f0d34b3e0c7c9d62091b9ca",
+   "bytes": 1472
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/tokabu-511a368112d4.jpg",
+   "sha256": "511a368112d49553d297bba59abcb4ddd8d8a56d6b8b0616efa40e9d9031a77c",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/bafkreicrdi3icewusvj5ff53uwnlzng53dmkk3llrmdbn35eb2ozamnhpq"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    800
+   ],
+   "plate": null,
+   "sourcePx": [
+    800,
+    800
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.721,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "manifest": {
+  "logo": null,
+  "reason": "token image is a 2522x834 banner with a small figure; no logo to crop"
+ },
+ "baton": {
+  "logo": "/assets/pairs/baton.webp",
+  "w128": {
+   "path": "/assets/pairs/baton.webp",
+   "sha256": "2a4a7f475e14c06e168bfb7d807d03405a8d82f3ebe65a265e688f7d545c0c2a",
+   "bytes": 3188
+  },
+  "w64": {
+   "path": "/assets/pairs/baton-64.webp",
+   "sha256": "058670a15fd29084594f53c45ce4bcc06b030fe812dce87b34c576332c4708ca",
+   "bytes": 1532
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/baton-45d46d18d4a6.webp",
+   "sha256": "45d46d18d4a65c0765cde6732043d7a9457c8550fc347de90a07088c2ace674d",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://axiomtrading.sfo3.cdn.digitaloceanspaces.com/41UrTGwAokUi5y9qXvHtG82fYsHgCnQE7oFtLhYRwYMP.webp"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    200
+   ],
+   "plate": null,
+   "sourcePx": [
+    200,
+    200
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.624,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "claw": {
+  "logo": "/assets/pairs/claw.webp",
+  "w128": {
+   "path": "/assets/pairs/claw.webp",
+   "sha256": "85a49010fca13748a3118f18a308da04b332d71051f8741b93b0eb5299c15953",
+   "bytes": 2636
+  },
+  "w64": {
+   "path": "/assets/pairs/claw-64.webp",
+   "sha256": "7f906285f468de24ae95a47b0346e308a6d9364d4f41b69687790663b7ed5bf3",
+   "bytes": 1482
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/claw-f5546a3e2e71.png",
+   "sha256": "f5546a3e2e7108433c33b78ee0186af963991f8cb5d4049b8674fd957103ea2c",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/QmfN6XKWnb2bJizSoaZwNqwpDLT5iZRgkitCvDjNkkDo8g"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    200.52,
+    -46.48,
+    1040.97
+   ],
+   "plate": "#26120b",
+   "sourcePx": [
+    1536,
+    1024
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.858,
+   "luminance": 0.437,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "zauth": {
+  "logo": "/assets/pairs/zauth.webp",
+  "w128": {
+   "path": "/assets/pairs/zauth.webp",
+   "sha256": "1b5b20a11ef5360f7ccdd945bf86496f769e6baffac6839e03dc3e2bfc65b46d",
+   "bytes": 3174
+  },
+  "w64": {
+   "path": "/assets/pairs/zauth-64.webp",
+   "sha256": "d6d0e4cfc03255c9fb8e56b6093d062b840f8684fd31f03b03a2276e5349062d",
+   "bytes": 2102
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/zauth-3add66529015.png",
+   "sha256": "3add66529015abcdca116d56707014c0f7943fa36b8a6da7455e006f87cdaa37",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/bafkreib23vtffeavvpg4uelnkzyhafga66kd7i3lrjw2ork6abxyptnkg4"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    1024
+   ],
+   "plate": null,
+   "sourcePx": [
+    1024,
+    1024
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.008,
+   "luminance": 0.117,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "kins": {
+  "logo": "/assets/pairs/kins.webp",
+  "w128": {
+   "path": "/assets/pairs/kins.webp",
+   "sha256": "3cf19cd98f5a840e4f2efcd3c4ff3459a1f68f4487dac5afcb872bb4c3d54d6f",
+   "bytes": 1312
+  },
+  "w64": {
+   "path": "/assets/pairs/kins-64.webp",
+   "sha256": "b2c2da77866775a090ea4da2eaf0ece715c8d8864b5d71ede9b7f6f384d248a0",
+   "bytes": 1008
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/kins-fd8bdc66f477.png",
+   "sha256": "fd8bdc66f477c09106bfb61e4f3745607d668e961413c863c9bf2118f6358643",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/bafybeicincod6gebb2wkef7mtlibmz6scduj25lxjlk75qv3o4mpxwdfau"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    600
+   ],
+   "plate": null,
+   "sourcePx": [
+    600,
+    600
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.546,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "percolator": {
+  "logo": "/assets/pairs/percolator.webp",
+  "w128": {
+   "path": "/assets/pairs/percolator.webp",
+   "sha256": "86dab5adf19e70d31d38300b9f7afa2b5527a3a042ae5292edf4d3bbdc1c1abd",
+   "bytes": 1962
+  },
+  "w64": {
+   "path": "/assets/pairs/percolator-64.webp",
+   "sha256": "38bd99929e1bcd82a8a3e03727d56445c439f52e86ccb34edf0702e2caa50c3d",
+   "bytes": 1098
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/percolator-fd19ec09ef1b.jpg",
+   "sha256": "fd19ec09ef1b0644e2747c16853d2fd17aa84bc6676f920a162e4d242fb4fc7b",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/bafkreih5dhwat3y3azcoe5d4c2ct2l6rpkuexrthn6jaufrojusc7nh4pm"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    512
+   ],
+   "plate": null,
+   "sourcePx": [
+    512,
+    512
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.013,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "jotchua": {
+  "logo": "/assets/pairs/jotchua.webp",
+  "w128": {
+   "path": "/assets/pairs/jotchua.webp",
+   "sha256": "2946dcf713be5decc54a8105e460c317e12214253c5ae9d4a1974722414ca766",
+   "bytes": 2642
+  },
+  "w64": {
+   "path": "/assets/pairs/jotchua-64.webp",
+   "sha256": "2ff16fe7fbc974d4315a44d73b9771cf62af283f8c5172df9c435b48af994ea5",
+   "bytes": 1730
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/jotchua-c3c31b4fd97d.jpg",
+   "sha256": "c3c31b4fd97dbe0de6125bf367fbcc7d0f5fe9886c3228411fedb7fb5a2c08e1",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://images.pump.fun/coin-image/BcHEaaTCvycPwwsJ9yQTXdHP9X2gCLkznDbZ8VySpump?placeholder=none&variant=64x64"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    64
+   ],
+   "plate": null,
+   "sourcePx": [
+    64,
+    64
+   ],
+   "upscaled": true,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.298,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "zcat": {
+  "logo": "/assets/pairs/zcat.webp",
+  "w128": {
+   "path": "/assets/pairs/zcat.webp",
+   "sha256": "2750c42272c3fa1c5d008cd843de7dcb246c9d3ee81a1992b879d2729c6b75a2",
+   "bytes": 3582
+  },
+  "w64": {
+   "path": "/assets/pairs/zcat-64.webp",
+   "sha256": "fa1d974de29ab24dfbd747c4a6230a3f051068195a9b3475dc60826bc47f4111",
+   "bytes": 1860
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-references/zcat-og-identity-crop.png",
+   "sha256": "4a42113222fe75b160e2f14b9bd495d8b6c3b97943740cc2e3f777d9c351629d",
+   "record": "research/expansion-reference-image-uris.json#referenceIntake.deterministicIdentityCrop.sha256",
+   "url": "https://www.stonkfun.xyz/api/og/token/HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    113
+   ],
+   "plate": null,
+   "sourcePx": [
+    113,
+    113
+   ],
+   "upscaled": true,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.253,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "gork": {
+  "logo": null,
+  "reason": "token image is a screenshot of a social profile with a default avatar and a person's name, not a logo"
+ },
+ "stonk": {
+  "logo": "/assets/pairs/stonk.webp",
+  "w128": {
+   "path": "/assets/pairs/stonk.webp",
+   "sha256": "4581dc9aee048d577fb4ac73fba8ae7919848f0b5b37172fd98055c956066a40",
+   "bytes": 1890
+  },
+  "w64": {
+   "path": "/assets/pairs/stonk-64.webp",
+   "sha256": "dfcc2255f03dcefb53a3fad390dc138e38abf42eda9c0ecfe92a8bf0bc21e6b3",
+   "bytes": 1234
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-direct-references/stonk-primary-7417b870b953.svg",
+   "sha256": "7417b870b953aaf29f1c51c9029374e9e6b0beb6ff0612eb0ce8724ea07228bb",
+   "record": "research/expansion-direct-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://www.stonkfun.xyz/stonk-mark.svg"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -177.48,
+    -187.48,
+    1378.95
+   ],
+   "plate": "#26120b",
+   "sourcePx": [
+    153,
+    150
+   ],
+   "renderedPx": [
+    1024,
+    1004
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.629,
+   "luminance": 0.44,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "paid": {
+  "logo": "/assets/pairs/paid.webp",
+  "w128": {
+   "path": "/assets/pairs/paid.webp",
+   "sha256": "a8340845017c8b9974cea072b44ad3059783071b663fd6518d13b4c0bb550e26",
+   "bytes": 2012
+  },
+  "w64": {
+   "path": "/assets/pairs/paid-64.webp",
+   "sha256": "42414e0cb9a37622364a91de9dfd58d3f5105f398ed4b2226c48f4e2b944ab47",
+   "bytes": 1370
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-direct-references/paid-primary-7fe42e316e42.svg",
+   "sha256": "7fe42e316e420721f072658b55e45cc97dce29315fcfe41f4217b2dd236a215b",
+   "record": "research/expansion-direct-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://usepaid.app/icon.svg?icon.2creho8k8jcx4.svg"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -174.44,
+    -174.44,
+    1372.88
+   ],
+   "plate": "#f3e7cf",
+   "sourcePx": [
+    150,
+    150
+   ],
+   "renderedPx": [
+    1024,
+    1024
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.042,
+   "luminance": 0.123,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "pepe": {
+  "logo": "/assets/pairs/pepe.webp",
+  "w128": {
+   "path": "/assets/pairs/pepe.webp",
+   "sha256": "4e12f079b6d71edc9a13517b86bfee7787d7360ce6d4570efbfd749598e0a416",
+   "bytes": 4208
+  },
+  "w64": {
+   "path": "/assets/pairs/pepe-64.webp",
+   "sha256": "1ea2316cafbfd1a9d8c1ff4795a10d3c031a1bb412a5e180f410245e583f52b1",
+   "bytes": 2200
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-direct-references/pepe-ec537de040a7.png",
+   "sha256": "ec537de040a73db93b37350b1e6ec11f9d51f663c121ddc9fed6ad9b9f803eac",
+   "record": "research/expansion-direct-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://arweave.net/FyNde0I6M7gOYB6Ui_wnCFPraX4AQIaEcr6rB9gWPAQ"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    64
+   ],
+   "plate": null,
+   "sourcePx": [
+    64,
+    64
+   ],
+   "upscaled": true,
+   "resample": "nearest",
+   "transparentFraction": 0,
+   "luminance": 0.213,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "pill": {
+  "logo": "/assets/pairs/pill.webp",
+  "w128": {
+   "path": "/assets/pairs/pill.webp",
+   "sha256": "30f23668465dc2cdaf8ff3a63c028a958e0df02171de29eb37043fe0e1114c42",
+   "bytes": 1666
+  },
+  "w64": {
+   "path": "/assets/pairs/pill-64.webp",
+   "sha256": "51457dd1bd7b451bfdf28b0b7c77c3430305b692eff132a5046ef1349b75ccc4",
+   "bytes": 1090
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-direct-references/pill-primary-b90d439fa4d9.jpg",
+   "sha256": "b90d439fa4d997aa93494da615c0fa19a1b4a3e178ca41237ae626e40ab4b470",
+   "record": "research/expansion-direct-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://metadata.j7tracker.io/m/kWdud9h3TW-img"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    80
+   ],
+   "plate": null,
+   "sourcePx": [
+    80,
+    80
+   ],
+   "upscaled": true,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.877,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "npc": {
+  "logo": "/assets/pairs/npc.webp",
+  "w128": {
+   "path": "/assets/pairs/npc.webp",
+   "sha256": "ca5ebbc72b2bca514d0c5a82756d161fb6ddb096887e9f9076c3ce877ccef265",
+   "bytes": 1030
+  },
+  "w64": {
+   "path": "/assets/pairs/npc-64.webp",
+   "sha256": "d11858d476b2be5b4943a83e4b8821324d138f4d59c3eb0438076479502f4c0a",
+   "bytes": 808
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-direct-references/npc-fcdab23761ce.png",
+   "sha256": "fcdab23761ce3ff03c264e62d122cf8152dfbe69c3297c56502a787df6d447d5",
+   "record": "research/expansion-direct-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/bafybeietojbtijlqhvsyubipmvyb3jhanahqgxn6dfz76uaumrygojnqcy"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    512
+   ],
+   "plate": null,
+   "sourcePx": [
+    512,
+    512
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.296,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "wojak": {
+  "logo": "/assets/pairs/wojak.webp",
+  "w128": {
+   "path": "/assets/pairs/wojak.webp",
+   "sha256": "477d4cfe413bdbf138f91fed2ccac9e391f2bf8f8a1843ac90b4a5f0a0412636",
+   "bytes": 2936
+  },
+  "w64": {
+   "path": "/assets/pairs/wojak-64.webp",
+   "sha256": "c633070db16222d2466cab51d8824f02b63122dabf2d4b73b678dc094ff5afff",
+   "bytes": 1628
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-direct-references/wojak-c7064f9b7d48.jpg",
+   "sha256": "c7064f9b7d484cb07297ffad526b048e69e1f2d01f5bd02e0cbf824404a30a13",
+   "record": "research/expansion-direct-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/bafkreighazhzw7kijsyhff77vvjgwbeonhq7fua7lpic4df7qjcajiykcm"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.947,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "eacc": {
+  "logo": "/assets/pairs/eacc.webp",
+  "w128": {
+   "path": "/assets/pairs/eacc.webp",
+   "sha256": "3046c81ecf07eb99376c602954b8a13d2cf41fabb1e51a75b690fbb4409af36c",
+   "bytes": 4292
+  },
+  "w64": {
+   "path": "/assets/pairs/eacc-64.webp",
+   "sha256": "576c1cd4e246ce06b8568f37c680ed026c7d5d1d80cf23c0431b0a4d134f9231",
+   "bytes": 1950
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-direct-references/eacc-4f83e5b63bcd.webp",
+   "sha256": "4f83e5b63bcd4a89dd943d0c95e099240c2570a9aa7fb9b47c088bdeee68c961",
+   "record": "research/expansion-direct-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://axiomtrading-v2.axiom-cdn.io/F9e81iQnWSgZPvJFhygTLSwDPyFpmSQu8dxvPJNjXbiQ.webp"
+  },
+  "derivation": {
+   "mode": "cover",
+   "crop": [
+    0,
+    10,
+    236
+   ],
+   "plate": null,
+   "sourcePx": [
+    236,
+    256
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.139,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "shib": {
+  "logo": "/assets/pairs/shib.webp",
+  "w128": {
+   "path": "/assets/pairs/shib.webp",
+   "sha256": "99cc987116b670a366de2ab0d2f36ead34e28f300e2a4b0229ff704f2b0aceff",
+   "bytes": 3384
+  },
+  "w64": {
+   "path": "/assets/pairs/shib-64.webp",
+   "sha256": "53e502108f1682079ee5acceb0c23f24f2e464eb57a182b41e213c51981a8e94",
+   "bytes": 1892
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-direct-references/shib-primary-emblem-crop.svg",
+   "sha256": "8abd21adc0af6d5ee6ec5913c4104bca84d45b9de61e80d5cebf5b783e97062b",
+   "record": "research/expansion-direct-reference-image-uris.json#referenceIntake.deterministicIdentityCrop.cropSourceSvgSha256",
+   "url": "https://shib.mypinata.cloud/ipfs/bafybeidvkdvjgb7efb2b4n5pthoyw4cwmc3h2wanbcm7zoyu4ksjbtwwu4/images/redesign/shibio_logo.svg"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -155.29,
+    -155.29,
+    1328.57
+   ],
+   "plate": "#26120b",
+   "sourcePx": [
+    122,
+    122
+   ],
+   "renderedPx": [
+    1024,
+    1024
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.206,
+   "luminance": 0.41,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "swordcat": {
+  "logo": "/assets/pairs/swordcat.webp",
+  "w128": {
+   "path": "/assets/pairs/swordcat.webp",
+   "sha256": "238838eaf64bc32b016308c90a768fd23b545394aebd3ac098d8e902fff70a45",
+   "bytes": 3528
+  },
+  "w64": {
+   "path": "/assets/pairs/swordcat-64.webp",
+   "sha256": "e02333a9f8fa9cbc3c9d31caeb20dbfc65367357806b327c869bd5531dfa21cb",
+   "bytes": 1648
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-direct-references/swordcat-9b3a8b914ce0.webp",
+   "sha256": "9b3a8b914ce061645a9eaeb9228ce1bcedb5342bcd38f3ad74f7645c646cfda2",
+   "record": "research/expansion-direct-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://pump.mypinata.cloud/ipfs/bafkreie3hkfzcthamfsfvhvoxerizyn45w2tik6nhdz225hxmrogi3h5ui"
+  },
+  "derivation": {
+   "mode": "cover",
+   "crop": [
+    47,
+    0,
+    417
+   ],
+   "plate": null,
+   "sourcePx": [
+    511,
+    417
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.338,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "plague": {
+  "logo": "/assets/pairs/plague.webp",
+  "w128": {
+   "path": "/assets/pairs/plague.webp",
+   "sha256": "10e4f8ad1e1cd549efc5a1fc5342411e0bf53922cd9ed7db132dfc2261b36b37",
+   "bytes": 4746
+  },
+  "w64": {
+   "path": "/assets/pairs/plague-64.webp",
+   "sha256": "a7cbf3450af0c1dafb3ab0a56e1af3929b52e1b1254431e0d3b5e9735dd2eb78",
+   "bytes": 1854
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-direct-references/plague-68bb5af167cd.jpg",
+   "sha256": "68bb5af167cd23f12dab24c013648cf5e00dbcb4de1a2c3d25bb4da9b8441304",
+   "record": "research/expansion-direct-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://cf-ipfs.com/ipfs/QmUgtU2n9ZbyTgCdyCK5sZco5qHrft5EYQUVfyF6QA3Q2o"
+  },
+  "derivation": {
+   "mode": "cover",
+   "crop": [
+    90,
+    0,
+    360
+   ],
+   "plate": null,
+   "sourcePx": [
+    540,
+    360
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.044,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "pump": {
+  "logo": "/assets/pairs/pump.webp",
+  "w128": {
+   "path": "/assets/pairs/pump.webp",
+   "sha256": "faaeaf05e91abb97a9253e4a55f3e579f74d5054ed7123e2e32928cf4bd07dbd",
+   "bytes": 2774
+  },
+  "w64": {
+   "path": "/assets/pairs/pump-64.webp",
+   "sha256": "4ecadeebcef1b94eb8180e9394a27ccc67a5aeeaf0345d34c189671071e20ca9",
+   "bytes": 1576
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-final-references/pump-380ece26fcc6.png",
+   "sha256": "380ece26fcc65d4707b14b292bb2d27b242bb5249de2f7376ef9bdc267cfb64b",
+   "record": "research/expansion-final-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/bafkreibyb3hcn7gglvdqpmklfev3fut3eqv3kje54l3to3xzxxbgpt5wjm"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -31.07,
+    -30.57,
+    762.14
+   ],
+   "plate": "#f3e7cf",
+   "sourcePx": [
+    700,
+    701
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.219,
+   "luminance": 0.139,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "alch": {
+  "logo": "/assets/pairs/alch.webp",
+  "w128": {
+   "path": "/assets/pairs/alch.webp",
+   "sha256": "1a0bfcceb4f3e94f524755bede903927b0559642bea939f656ac0790accd62f4",
+   "bytes": 2588
+  },
+  "w64": {
+   "path": "/assets/pairs/alch-64.webp",
+   "sha256": "56ec2505bafea15099946403f4aba548f26be939654cbb77952e538c91cffdf5",
+   "bytes": 1356
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-final-references/alch-d8434afffbae.jpg",
+   "sha256": "d8434afffbaeb979cd6bf5d41a868f6510b8636c46e246eff4afe6c938fe3f53",
+   "record": "research/expansion-final-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/QmYqwkPV1p4DraqN5TfLZVhyrAusSkHfvFDZMJAWALZJxj"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    320
+   ],
+   "plate": null,
+   "sourcePx": [
+    320,
+    320
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.043,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "pumpcade": {
+  "logo": "/assets/pairs/pumpcade.webp",
+  "w128": {
+   "path": "/assets/pairs/pumpcade.webp",
+   "sha256": "c6b5807553f1daa842e586fbf347dd2de2bf70cd9568ab3084c5ee5b81a919a4",
+   "bytes": 6880
+  },
+  "w64": {
+   "path": "/assets/pairs/pumpcade-64.webp",
+   "sha256": "b39f092499e2795a32a5af5700a237f6cb34653e5f254efedaccb5ca8e95621f",
+   "bytes": 2780
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-final-references/pumpcade-7986d3ba9bc6.jpg",
+   "sha256": "7986d3ba9bc689dd0be8892d95e9a9d11910251c24ed20b118aedca89e8fa86e",
+   "record": "research/expansion-final-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/bafkreidzq3j3vg6grhoqx2ejfwk6tkordeickhbe5uqlcgfo3suj5d5iny"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    1024
+   ],
+   "plate": null,
+   "sourcePx": [
+    1024,
+    1024
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0,
+   "luminance": 0.222,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "codec": {
+  "logo": "/assets/pairs/codec.webp",
+  "w128": {
+   "path": "/assets/pairs/codec.webp",
+   "sha256": "36c80c5ba721c01d2e6d5b41cc64fea57731267e36f9b7db2994ae8b820db146",
+   "bytes": 1434
+  },
+  "w64": {
+   "path": "/assets/pairs/codec-64.webp",
+   "sha256": "d28c61aa9f46f1dd1d456b6743acd6c988388b9d8bd131b5b3865165ed1ee510",
+   "bytes": 1158
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-final-references/codec-84b41e87625c.png",
+   "sha256": "84b41e87625c6e9bf2a21c3ae38471cf46da233114b8a2a9524115cfa7648ae1",
+   "record": "research/expansion-final-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/QmXibCaGQdyqPrec5TUhv47awcY7pk5v5bBqe4Ez7QNeES"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    611
+   ],
+   "plate": null,
+   "sourcePx": [
+    611,
+    611
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.003,
+   "luminance": 0.057,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "ape": {
+  "logo": "/assets/pairs/ape.webp",
+  "w128": {
+   "path": "/assets/pairs/ape.webp",
+   "sha256": "279bf0b4955687e14faa785f5e0cb91bb7237a880bf051522179b0eddbc98e97",
+   "bytes": 3988
+  },
+  "w64": {
+   "path": "/assets/pairs/ape-64.webp",
+   "sha256": "c7c3d531a29712872e6800baee59d69e6ca6d618176f6b46b2060ef05c731119",
+   "bytes": 2232
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-final-references/ape-40c62c5756b7.png",
+   "sha256": "40c62c5756b75424b3264d0f7484075219806ce6e0072c84b730f07d7d305044",
+   "record": "research/expansion-final-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ipfs.io/ipfs/bafkreicayywfovvxkqslgjsnb52iib2sdgagzzxaa4wijnzq6b6x2mcqiq"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -69.53,
+    -69.53,
+    1725.06
+   ],
+   "plate": "#f3e7cf",
+   "sourcePx": [
+    1586,
+    1586
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.215,
+   "luminance": 0.341,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "link": {
+  "logo": "/assets/pairs/link.webp",
+  "w128": {
+   "path": "/assets/pairs/link.webp",
+   "sha256": "a723d129480817ec44b4d2878b324406aa213acc3187c73103e01b2d596da152",
+   "bytes": 3196
+  },
+  "w64": {
+   "path": "/assets/pairs/link-64.webp",
+   "sha256": "7336d281eb303cce896b009e3b5c953b908a09d27731ce5a645d191ea5e29a43",
+   "bytes": 1942
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-final-references/link-878946df941b.svg",
+   "sha256": "878946df941ba3a753036ecc39e7596f863a5a3876db5a2c4a6acc255d646f5d",
+   "record": "research/expansion-final-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://d2f70xi62kby8n.cloudfront.net/LINK.svg"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    192.35,
+    63.85,
+    639.3
+   ],
+   "plate": "#f3e7cf",
+   "sourcePx": [
+    200,
+    150
+   ],
+   "renderedPx": [
+    1024,
+    768
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.657,
+   "luminance": 0.341,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "ore": {
+  "logo": "/assets/pairs/ore.webp",
+  "w128": {
+   "path": "/assets/pairs/ore.webp",
+   "sha256": "b33e7cb001755239f25b2731517971c95e80344022ef16bfe83d968f7deab648",
+   "bytes": 2790
+  },
+  "w64": {
+   "path": "/assets/pairs/ore-64.webp",
+   "sha256": "58202f1f193044adb68ffaad10650de9593797dcdbe1dfb50189daf3cf8dfac6",
+   "bytes": 1702
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-final-references/ore-ca2410840b70.png",
+   "sha256": "ca2410840b700b528578744e4cac65741b93e6361445927a0633323e9efc8e45",
+   "record": "research/expansion-final-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://ore.supply/assets/icon.png"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -15.61,
+    -15.61,
+    381.23
+   ],
+   "plate": "#f3e7cf",
+   "sourcePx": [
+    350,
+    350
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.219,
+   "luminance": 0.126,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ },
+ "skr": {
+  "logo": "/assets/pairs/skr.webp",
+  "w128": {
+   "path": "/assets/pairs/skr.webp",
+   "sha256": "5d48e6aaa98187f2b93c1b4683f1318249f1844d770669a7de0af7255da6ae0c",
+   "bytes": 3020
+  },
+  "w64": {
+   "path": "/assets/pairs/skr-64.webp",
+   "sha256": "5f7f67fe076ded2760c466c1852fc4d86347b2eafba8478e32836f7edcf150f2",
+   "bytes": 1880
+  },
+  "source": {
+   "folder": "creative/higgsfield/pair-identities-2026-10-30",
+   "file": "expansion-final-references/skr-14d4f9e9944c.png",
+   "sha256": "14d4f9e9944ccd89005d6fbf15974c72c06327ab8204433d74f18675110467c6",
+   "record": "research/expansion-final-reference-image-uris.json#referenceIntake.sha256",
+   "url": "https://r2.solanamobiledappstore.com/skr/seeker.png"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -22.14,
+    -22.14,
+    544.27
+   ],
+   "plate": "#f3e7cf",
+   "sourcePx": [
+    500,
+    500
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "transparentFraction": 0.218,
+   "luminance": 0.263,
+   "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
+  }
+ }
+}
