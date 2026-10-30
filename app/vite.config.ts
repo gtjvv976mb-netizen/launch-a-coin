@@ -37,12 +37,14 @@ function creatorRendererWasm(): Plugin {
 /**
  * The browser reads a few fields of two registries the server needs whole (readiness audit PERF-1): the client copy of
  * render-assets.json drops its hashes (CanonicalCardSkin reads the path, preview path and renderer version) and the
- * client copy of pair-assets.json drops its provenance (source URLs, evidence, slot, admission). The server bundle and
- * the tests keep both files whole.
+ * client copy of pair-assets.json drops its provenance (source URLs, evidence, slot, admission). The client copy of
+ * pair-logos.json keeps only `logo` (and a monogram's `reason`): pair-logos.ts pairLogo reads nothing else. The server
+ * bundle and the tests keep all three files whole.
  */
 const CLIENT_DROPPED_FIELDS: Readonly<Record<string, readonly string[]>> = {
   "render-assets.json": ["sha256", "previewSha256", "sourceSha256"],
   "pair-assets.json": ["sourceUrls", "sourceEvidenceArtifact", "verificationSlot", "verifiedDate", "admission"],
+  "pair-logos.json": ["w128", "w64", "source", "derivation"],
 };
 function clientRegistryFields(): Plugin {
   const dir = path.join(fileURLToPath(new URL("./src/lib/carddex/", import.meta.url)));

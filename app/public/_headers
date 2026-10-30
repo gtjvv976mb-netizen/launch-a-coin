@@ -42,6 +42,8 @@
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 /assets/icons/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/assets/pairs/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 /assets/plates/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 /og/*
