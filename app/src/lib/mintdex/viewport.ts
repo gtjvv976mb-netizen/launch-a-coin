@@ -40,12 +40,14 @@ export const DESK_GUESS: Viewport = { w: 1360, h: 850 };
 /**
  * A first visit, no cookie yet: is this a phone? Chromium says so itself (Sec-CH-UA-Mobile, sent on every
  * request without opting in), and its "not mobile" gets the desktop guess, so Discover's server HTML is the
- * fitted desktop shelf rather than the phone grid it would re-lay out after hydration. Safari and Firefox say
- * "phone" in the user agent; anything else from them (tablets and desktops): null.
+ * fitted desktop shelf rather than the phone grid it would re-lay out after hydration. Android also says "not
+ * mobile" from tablets and from phones in desktop-site mode, mostly under 1024px wide, so Android (the
+ * Sec-CH-UA-Platform hint, else the user agent) gets no guess. Safari and Firefox say "phone" in the user agent;
+ * anything else from them (tablets and desktops): null.
  */
-export function guessViewport(mobileHint: string | undefined, userAgent: string | undefined): Viewport | null {
+export function guessViewport(mobileHint: string | undefined, userAgent: string | undefined, platform?: string): Viewport | null {
   if (mobileHint === "?1") return PHONE_GUESS;
-  if (mobileHint === "?0") return DESK_GUESS;
+  if (mobileHint === "?0") return /android/i.test(platform ?? "") || /Android/i.test(userAgent ?? "") ? null : DESK_GUESS;
   return userAgent && PHONE_UA.test(userAgent) ? PHONE_GUESS : null;
 }
 
@@ -58,7 +60,7 @@ export const readViewport = createIsomorphicFn()
     try {
       return (
         parseViewport(getCookie(VIEWPORT_COOKIE)) ??
-        guessViewport(getRequestHeader("sec-ch-ua-mobile"), getRequestHeader("user-agent"))
+        guessViewport(getRequestHeader("sec-ch-ua-mobile"), getRequestHeader("user-agent"), getRequestHeader("sec-ch-ua-platform"))
       );
     } catch {
       return null;

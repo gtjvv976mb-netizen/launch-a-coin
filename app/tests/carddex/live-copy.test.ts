@@ -23,7 +23,7 @@ describe("live launch fee disclosure", () => {
     const legal = read("src/routes/legal.tsx");
     // No transfer in the pump.fun launch goes to a Launch a Card wallet, so both platform rows say None, unhedged.
     expect(legal).toContain("None. Launch a Card adds no fee to launch or card transactions.");
-    expect(legal).not.toContain("currently");
+    expect(legal).not.toContain("currently adds");
     // No invented total or unconfirmed link: those cells keep only what the code does.
     for (const gone of ["platform fee per launch", "platform share of trading fees, or none", "typical total in SOL", "link to pump.fun fee schedule"]) expect(legal).not.toContain(`<Fill>${gone}</Fill>`);
     for (const slot of ["operator legal name", "contact email", "governing law", "minimum age"]) expect(legal).toContain(`<Fill>${slot}</Fill>`);

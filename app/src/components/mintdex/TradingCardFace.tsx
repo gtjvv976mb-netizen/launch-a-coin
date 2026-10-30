@@ -92,7 +92,7 @@ export function TradingCardFace({ card, design, priority = false, sizes, compact
     <div className="cdx-trading-card__type"><b>${card.ticker}</b><span>{card.tradingPair ?? getTradingPair(card.ticker, card.quoteAssetKey)}</span></div>
     <div className="cdx-trading-card__effect">
       <p>{card.lore || "Every token has a story. This is where yours begins."}</p>
-      <div className="cdx-trading-card__stats"><span>Market cap <b>{quote}</b></span><span>Holders <b>{sample || card.dexNo > 0 || card.mintAddress ? card.holders : "—"}</b></span></div>
+      <div className="cdx-trading-card__stats"><span>Market cap <b>{quote}</b></span><span>Holders <b>{!sample && (card.dexNo > 0 || card.mintAddress) ? card.holders : "—"}</b></span></div>
       <div className="cdx-trading-card__address"><span>Token</span><b>{address}</b></div>
     </div>
     <div className="cdx-trading-card__footer"><span>{card.ownerHandle ? `@${card.ownerHandle}` : "Launch a Card"}</span><span>{card.dexLabel ?? (card.dexNo > 0 || card.mintAddress ? dexNo(card.dexNo) : "Preview")}</span></div>

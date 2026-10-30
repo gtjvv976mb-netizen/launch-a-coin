@@ -7,6 +7,7 @@ import { View3DHost } from "../components/mintdex/card3d";
 import {
   Button,
   Change,
+  changeWords,
   GridCaption,
   Icon,
   IconButton,
@@ -268,9 +269,7 @@ function CoinCell({ coin, width, list, index }: { coin: CoinSummary; width: numb
   const mc = marketCapText(coin);
   const native = coin.mcapUsd == null;
   // The 24h change as Change prints it, for the link's name (Home's rows read it too).
-  const pct = Number.isFinite(coin.change24h) ? Math.abs(coin.change24h * 100) : 0;
-  const pctText = pct >= 100 ? pct.toFixed(0) : pct.toFixed(1);
-  const changeText = pctText === "0.0" ? "no change in 24 hours" : `${coin.change24h > 0 ? "+" : "\u2212"}${pctText}% in 24 hours`;
+  const changeText = changeWords(coin.change24h);
   const figure = (
     <Num size="sm" tone="inherit" watch={marketCapWatch(coin)}>
       {mc}
