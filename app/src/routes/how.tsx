@@ -85,7 +85,7 @@ const SECTIONS: Section[] = [
         <li>Name, ticker and artwork are all you need. Everything else has a default: the pair starts on SOL.</li>
         <li>The ticker takes 2 to 8 letters or numbers (A to Z, 0 to 9).</li>
         <li>Card art: PNG, JPG, WEBP or GIF up to 12 MB. Square works best. You can also drop the image on the box.</li>
-        <li>The pair panel filters by Memes, Stocks, Collector and Base (SOL and USDC), and searches by symbol or name.</li>
+        <li>The pair panel filters by Memes, Stocks, Crypto and Collector, and searches by symbol or name.</li>
         <li>More options holds your website, X link, an optional initial buy and its slippage.</li>
         <li>The exact initial buy and slippage show before your wallet opens.</li>
         <li>
@@ -102,9 +102,11 @@ const SECTIONS: Section[] = [
     title: "Pairs",
     body: (
       <ul>
-        <li>The pair is what your coin is priced and bought in: SOL, USDC, a meme or collector token, or a tokenized stock.</li>
-        <li>The pair picks the card. Each pair has exactly one design, so choosing the pair and the design is one choice. DOGE gets Imperial Gold.</li>
+        <li>The pair is what your coin is priced and bought in: SOL, USDC, a crypto, meme or collector token, or a tokenized stock.</li>
+        <li>The pair picks the card. Each pair has exactly one design, so choosing the pair and the design is one choice. DOGE gets Dogecoin Signature.</li>
         <li>SOL is pump.fun's default pair and gets the One Piece design. USDC gets Duel Masters.</li>
+        <li>Crypto pairs are Solana versions of other coins; the panel names the bridge or issuer.</li>
+        <li>Some pairs are admitted on-chain but missing from pump.fun's dated public list; their panel says so.</li>
         <li>Under the pair panel: the exact mint, its issuer and when it was reviewed. The mint is checked again before wallet review.</li>
         <li>The pair funds the optional initial buy, so changing the pair clears it. SOL also pays network and account costs.</li>
         <li>Stock pairs use tokenized quote assets. They grant no equity: your coin is not company shares.</li>
@@ -122,7 +124,7 @@ const SECTIONS: Section[] = [
         <li>The design is printed on the card and kept for good. Market cap never changes it.</li>
         <li>The token trades. Its creator holds the separate one-of-one card made at launch.</li>
         <li>Picking another pair keeps your coin details and artwork; only the pair and its card change.</li>
-        <li>Designs shows one sample coin in each pair's design, grouped as Memes, Stocks, Collector and Base.</li>
+        <li>Designs shows one sample coin in each pair's design, grouped as Memes, Stocks, Crypto and Collector.</li>
         <li>Designs with no pair are kept by the coins already made with them. They are not offered for new coins.</li>
         <li>In the demo the card goes into your demo collection. On mainnet it is permanent once your coin is created.</li>
         <li>There are no card sales, bids, auctions or royalties. The card NFT gives no token ownership or stock rights.</li>
