@@ -6,7 +6,6 @@ import { CARD_GENERATED_ASSETS } from "../../src/lib/carddex/generated-assets";
 import { CANONICAL_CARD_LAYOUT } from "../../src/lib/carddex/card-template";
 import renderAssets from "../../src/lib/carddex/render-assets.json";
 import { CARD_DESIGNS } from "../../src/lib/carddex/designs";
-import { HELD_PAIR_DESIGNS } from "../../src/lib/carddex/pair-designs";
 import { OFFERED_PAIRS, designForPair } from "../../src/lib/carddex/pairs";
 
 /** A WebP's pixel size from its header (VP8X, VP8 or VP8L). */
@@ -40,8 +39,8 @@ describe("phone and tablet copies of every card face (the srcsets ask for them)"
         }
       }
     }
-    expect(designs).toBe(CARD_DESIGNS.length + HELD_PAIR_DESIGNS.length);
-    // 95 installed identity designs (92 active, 3 held) with both faces, plus the earlier designs' faces (a few of them have no back).
+    expect(designs).toBe(CARD_DESIGNS.length);
+    // 95 installed identity designs (74 offered or SOL's and USDC's, 21 held) with both faces, plus the earlier designs' faces (a few of them have no back).
     expect(copies).toBeGreaterThanOrEqual(95 * 4);
   });
   test("every card skin has its 480 and 640 px copies", () => {
@@ -62,7 +61,7 @@ describe("the creator's print reads on every offered identity design", () => {
     const inkL = lum(...ink);
     let lowest = Infinity;
     const offered = OFFERED_PAIRS.map(pair => designForPair(pair.key)!).filter(key => key.startsWith("pair-"));
-    expect(offered).toHaveLength(90);
+    expect(offered).toHaveLength(72);
     for (const key of offered) {
       const atlas = (renderAssets as Record<string, { previewPath: string }>)[key + (CARD_DESIGNS.find(d => d.key === key)!.category === "stocks" ? "--stock" : "")]!;
       const png = readFileSync(file(atlas.previewPath));

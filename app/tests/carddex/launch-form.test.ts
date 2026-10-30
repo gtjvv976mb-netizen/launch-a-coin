@@ -21,7 +21,9 @@ describe("the Launch form derives its card from the pair", () => {
       expect(launchDesign(asset.key, null)).toBe(designForPair(asset.key)!);
     }
     expect(launchDesign("doge")).toBe("pair-doge");
-    expect(launchDesign("tslax")).toBe("pair-tslax");
+    // TSLAX's identity is held (content holds): the pair keeps the design production gives it.
+    expect(launchDesign("tslax")).toBe("stock-tsla");
+    expect(launchDesign("agency")).toBe("one-piece");
     expect(launchDesign("cards")).toBe("pair-cards");
     expect(launchDesign("unknown")).toBe("one-piece");
     expect(launchDesign("aave")).toBe("one-piece");
@@ -36,7 +38,7 @@ describe("the Launch form derives its card from the pair", () => {
     // Review finding 2: a pre-change SOL launch (Pokemon Classic) loaded in mainnet mode, then Demo with ?quote=sol.
     expect(formDesign("sol", "pokemon-classic", true)).toBe("pokemon-classic");
     expect(formDesign("sol", "pokemon-classic", false)).toBe("one-piece");
-    expect(formDesign("gmex", "gamestop", false)).toBe("pair-gmex");
+    expect(formDesign("gmex", "gamestop", false)).toBe("stock-gme");
     expect(formDesign("tslax", "stock-tsla", true)).toBe("stock-tsla");
     for (const asset of OFFERED_PAIRS) {
       expect(formDesign(asset.key, null, true)).toBe(designForPair(asset.key)!);
@@ -60,11 +62,11 @@ describe("the Launch form derives its card from the pair", () => {
       if (pair) expect(pairFromSearch({ design: design.key })).toEqual({ pair: pair.key, notice: "" });
     }
     // Links from before the identity designs keep their pair: design "pepe" was TOAD's card, "doge" DOGE's.
-    // A pair not offered now (ANSEM and SPX wait for the owner) opens on SOL and says so.
+    // A pair not offered now opens on SOL and says so.
     const cardGone = "That card is unavailable. SOL selected.";
     for (const [pair, design] of Object.entries(PAIR_DESIGNS_2026_10_30)) expect(pairFromSearch({ design })).toEqual(isOfferedPair(pair) ? { pair, notice: "" } : { pair: "sol", notice: cardGone });
-    expect(pairFromSearch({ design: "sovereign" })).toEqual({ pair: "sol", notice: cardGone });
-    expect(pairFromSearch({ design: "celestial" })).toEqual({ pair: "sol", notice: cardGone });
+    expect(pairFromSearch({ design: "sovereign" })).toEqual({ pair: "ansem", notice: "" });
+    expect(pairFromSearch({ design: "celestial" })).toEqual({ pair: "spx", notice: "" });
     expect(pairFromSearch({ design: "pepe" })).toEqual({ pair: "toad", notice: "" });
     expect(pairFromSearch({ design: "doge" })).toEqual({ pair: "doge", notice: "" });
     expect(pairFromSearch({ design: "stock-tsla" })).toEqual({ pair: "tslax", notice: "" });
@@ -73,14 +75,18 @@ describe("the Launch form derives its card from the pair", () => {
     expect(pairFromSearch({ design: "pair-usdc" })).toEqual({ pair: "usdc", notice: "" });
     expect(pairFromSearch({ design: "gamestop" })).toEqual({ pair: "gmex", notice: "" });
     expect(pairFromSearch({ design: "pokemon-full-art" })).toEqual({ pair: "sol", notice: "" });
-    // An unknown, withheld or held design says so; a known design no pair ever had (pokemon-full-art) stays quiet.
-    for (const design of ["nope", "pair-aave", "pair-uni", "pair-67", "pair-ansem", "pair-spx"]) expect(pairFromSearch({ design })).toEqual({ pair: "sol", notice: cardGone });
-    for (const quote of ["aave", "uni", "popcat"]) expect(pairFromSearch({ quote })).toEqual({ pair: "sol", notice: "That pair is unavailable. SOL selected." });
+    // A held identity whose pair is still offered opens on that pair (and its live card), quietly.
+    expect(pairFromSearch({ design: "pair-ansem" })).toEqual({ pair: "ansem", notice: "" });
+    expect(pairFromSearch({ design: "pair-tslax" })).toEqual({ pair: "tslax", notice: "" });
+    // An unknown, withheld or held-out design says so; a known design no pair ever had (pokemon-full-art) stays quiet.
+    for (const design of ["nope", "pair-aave", "pair-uni", "pair-67", "pair-agency", "pair-alon", "pair-hodl", "pair-jeanphil", "pair-claudia", "pair-biketyson", "pair-neet"]) expect(pairFromSearch({ design })).toEqual({ pair: "sol", notice: cardGone });
+    for (const quote of ["aave", "uni", "popcat", "67", "agency", "alon", "hodl", "jeanphil", "claudia", "biketyson", "neet"]) expect(pairFromSearch({ quote })).toEqual({ pair: "sol", notice: "That pair is unavailable. SOL selected." });
   });
   test("a kept draft brings back its pair only, if it is still offered (an older draft's separate design is not used)", () => {
     expect(draftPair({ quoteKey: "bonk" })).toBe("bonk");
     expect(draftPair({ quoteKey: "pepe" })).toBe("pepe");
     expect(draftPair({ quoteKey: "aave" })).toBeNull();
+    expect(draftPair({ quoteKey: "agency" })).toBeNull();
     expect(draftPair({ quoteKey: "popcat" })).toBeNull();
     expect(draftPair({})).toBeNull();
     expect(draftPair(null)).toBeNull();
@@ -89,21 +95,21 @@ describe("the Launch form derives its card from the pair", () => {
 
 describe("the pair HUD", () => {
   test("All holds every offered pair once: SOL and USDC, the stocks, memes, other crypto, then collector tokens", () => {
-    expect(ORDERED_PAIRS).toHaveLength(92);
-    expect(new Set(ORDERED_PAIRS.map(pair => pair.key)).size).toBe(92);
+    expect(ORDERED_PAIRS).toHaveLength(87);
+    expect(new Set(ORDERED_PAIRS.map(pair => pair.key)).size).toBe(87);
     expect(ORDERED_PAIRS.map(pair => pair.key).sort()).toEqual(OFFERED_PAIRS.map(pair => pair.key).sort());
     expect(ORDERED_PAIRS.slice(0, 4).map(pair => pair.key)).toEqual(["sol", "usdc", "gmex", "tslax"]);
     expect(ORDERED_PAIRS.findIndex(pair => pair.key === "tslax")).toBe(3);
-    expect(ORDERED_PAIRS.some(pair => ["aave", "uni", "67", "ansem", "spx"].includes(pair.key))).toBe(false);
+    expect(ORDERED_PAIRS.some(pair => ["aave", "uni", "67", "agency", "alon", "hodl", "jeanphil", "claudia", "biketyson", "neet"].includes(pair.key))).toBe(false);
     expect(PAIR_GROUPS.map(group => group.name)).toEqual(["All", "Memes", "Stocks", "Crypto", "Collector"]);
     expect(pairsInGroup("crypto").slice(0, 2).map(pair => pair.key)).toEqual(["sol", "usdc"]);
     expect(pairsInGroup("crypto")).toHaveLength(22);
     expect(pairsInGroup("collector").map(pair => pair.key)).toEqual(["cards", "sv151"]);
     expect(pairsInGroup("stocks").map(pair => pair.key)).toEqual(["gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc"]);
-    expect(pairsInGroup("memes")).toHaveLength(61);
+    expect(pairsInGroup("memes")).toHaveLength(56);
     expect(pairsInGroup("memes").every(pair => pairGroupOf(pair) === "memes" && pair.kind === "meme")).toBe(true);
     const sizes = PAIR_GROUPS.filter(group => group.key !== "all").map(group => pairsInGroup(group.key).length);
-    expect(sizes.reduce((a, b) => a + b, 0)).toBe(92);
+    expect(sizes.reduce((a, b) => a + b, 0)).toBe(87);
     // Old links named the base group (SOL and USDC): it is part of Crypto now.
     expect(groupAlias("base")).toBe("crypto");
     expect(groupAlias("memes")).toBe("memes");
@@ -122,10 +128,10 @@ describe("the pair HUD", () => {
     expect(filterPairs("all", "pepe").map(pair => pair.key)).toEqual(["pepe", "toad"]);
     expect(filterPairs("all", "ape")[0]!.key).toBe("ape");
     expect(filterPairs("all", "aave")).toEqual([]);
-    expect(filterPairs("all", "spx")).toEqual([]);
-    expect(filterPairs("all", "ansem")).toEqual([]);
+    expect(filterPairs("all", "spx")[0]!.key).toBe("spx");
+    for (const query of ["67", "agency", "hodl", "claudia"]) expect(filterPairs("all", query).map(pair => pair.key)).not.toContain(query);
   });
-  test("ranked search: typing any offered pair's symbol puts it first, 90 or more within 4 characters", () => {
+  test("ranked search: typing any offered pair's symbol puts it first, 85 or more within 4 characters", () => {
     let quick = 0;
     for (const pair of ORDERED_PAIRS) {
       expect(filterPairs("all", pair.symbol)[0]!.key).toBe(pair.key);
@@ -134,7 +140,7 @@ describe("the pair HUD", () => {
         if (filterPairs("all", symbol.slice(0, n))[0]?.key === pair.key) { if (n <= 4) quick++; break; }
       }
     }
-    expect(quick).toBeGreaterThanOrEqual(90);
+    expect(quick).toBeGreaterThanOrEqual(85);
     for (const [query, key] of [["pepe", "pepe"], ["ape", "ape"], ["mon", "mon"], ["near", "near"], ["pump", "pump"], ["sola", "solangeles"], ["e/a", "eacc"], ["link", "link"], ["wbtc", "wbtc"]]) {
       expect(filterPairs("all", query!)[0]!.key).toBe(key!);
     }

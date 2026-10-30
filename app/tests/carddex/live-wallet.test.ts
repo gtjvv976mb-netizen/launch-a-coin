@@ -16,6 +16,7 @@ import { LiveWalletNotice } from "../../src/components/carddex/live/LiveWalletNo
 import { LiveTokenImage } from "../../src/components/carddex/live/LiveTokenImage";
 import { WALLET_NOTICE_COPY, WALLET_NOTICE_TITLE, WALLET_OPEN_COPY, walletNoticeItems } from "../../src/components/carddex/live/wallet-notice";
 import { assetSeed, creator, creatorSeed, fixture, mint, nftFixture } from "./live-plan-fixtures";
+import { HELD_PAIR_DESIGNS } from "../../src/lib/carddex/pair-designs";
 
 describe("real quote amount precision", () => {
   test("parses every base unit without floating-point rounding", () => {
@@ -49,10 +50,12 @@ describe("real quote amount precision", () => {
 describe("creator-wallet transaction commitments", () => {
   test("all reviewed quotes and creator-design presets verify exact token accounts and NFT binding attributes", () => {
     const stockPairs = {"stock-gme": "gmex", "stock-tsla": "tslax", "stock-nvda": "nvdax", "stock-aapl": "aaplx", "stock-mstr": "mstrx", "stock-coin": "coinx", gamestop: "gmex", amc: "amc", coinbase: "coinx", strategy: "mstrx"};
-    // Every offered pair with its own card, the earlier stock and chooser combinations saved launches may carry, and a
-    // neutral design on every reviewed quote (AAVE and UNI included: saved launches never re-check the offer).
-    const pairs = [...Object.entries(stockPairs), ...MEME_PAIR_PRESETS.map(({design, quote}) => [design, quote] as const), ...OFFERED_PAIRS.map(asset => [designForPair(asset.key)!, asset.key] as const), ...PAIR_ASSETS.map(asset=>["pokemon-classic",asset.key] as const)];
-    expect(pairs).toHaveLength(10 + 31 + 92 + 97);
+    // Every offered pair with its own card, every held identity on its own pair (content holds), the earlier stock and
+    // chooser combinations saved launches may carry, and a neutral design on every reviewed quote (AAVE and UNI
+    // included: saved launches never re-check the offer).
+    const held = Object.keys(HELD_PAIR_DESIGNS).map(key => [key, key.slice(5)] as const);
+    const pairs = [...Object.entries(stockPairs), ...MEME_PAIR_PRESETS.map(({design, quote}) => [design, quote] as const), ...OFFERED_PAIRS.map(asset => [designForPair(asset.key)!, asset.key] as const), ...held, ...PAIR_ASSETS.map(asset=>["pokemon-classic",asset.key] as const)];
+    expect(pairs).toHaveLength(10 + 31 + 87 + 21 + 97);
     for (const [design, quoteKey] of pairs) {
       const token = fixture(design, quoteKey), nft = nftFixture(design, quoteKey);
       const wire=validateLivePlan(token.plan, token.expected);

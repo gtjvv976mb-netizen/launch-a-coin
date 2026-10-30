@@ -62,12 +62,39 @@ export const STAGED_PAIR_DESIGNS = Object.freeze(staged.map(design=>{
  */
 export const WITHHELD_PAIR_DESIGNS: readonly PairDesignKey[] = Object.freeze(["pair-aave", "pair-uni"] as PairDesignKey[]);
 /**
- * Installed pair designs held back for the owner's review (fix pass, 30 October 2026), treated like the withheld ones:
- * no design key, not on Designs, their pairs not offered. A coin's back becomes its public coin image for good, so
- * these wait for a yes: pair-67 shows a photoreal child (a real minor's likeness), pair-ansem a photoreal man's head on
- * a bull's body, and pair-spx's back misspells the coin ("SBP 6900"). Delivered art is untouched; deleting a key here
- * offers its pair again with that design. No coin can carry one yet, so holding them changes no stored coin.
+ * Content holds (owner's review, 30 October 2026): installed identity designs a new launch never gets. A held design
+ * stays installed and is still a design key, so a coin or saved launch that carries one keeps rendering and trading,
+ * and its art and manifests are untouched; it is never offered, and Designs neither lists nor opens it. The value is
+ * the design its pair keeps launching with (the one production offers today); null means the pair is not offered at
+ * all. Deleting a line offers its pair with its identity design again (design-pairings.ts PAIR_DESIGNS applies this).
+ * Reasons are a visual check of the delivered art, not legal advice.
  */
-export const HELD_PAIR_DESIGNS: readonly PairDesignKey[] = Object.freeze(["pair-67", "pair-ansem", "pair-spx"] as PairDesignKey[]);
-export const ACTIVE_PAIR_DESIGNS: readonly PairDesign[] = Object.freeze(STAGED_PAIR_DESIGNS.filter(design => !WITHHELD_PAIR_DESIGNS.includes(design.key) && !HELD_PAIR_DESIGNS.includes(design.key)));
-export const activePairDesignForQuote = (key: string) => ACTIVE_PAIR_DESIGNS.find(design => design.quoteKey === key) ?? null;
+export const HELD_PAIR_DESIGNS: Readonly<Record<string, string | null>> = Object.freeze({
+  // Not offered: the pair's only art shows a real child, real identifiable people or other companies' marks.
+  "pair-67": null, // a photoreal child on the back and coin image (a real minor's likeness)
+  "pair-agency": null, // OpenAI, Anthropic, Claude, Meta, xAI and DeepSeek marks
+  "pair-alon": null, // a cartoon of a real person with the Gadsden snake
+  "pair-hodl": null, // a real person's likeness (and photo fragments in the frame)
+  "pair-jeanphil": null, // a real person's likeness
+  "pair-claudia": null, // a real person's likeness
+  "pair-biketyson": null, // a real person's likeness
+  "pair-neet": null, // a real person's likeness
+  // Offered with the design production offers today: the new art has a real person, other companies' logos, an
+  // invented logo, a misspelling or a stray bar.
+  "pair-ansem": "sovereign", // a photoreal man's head on a bull's body
+  "pair-spx": "celestial", // the back misspells the coin ("SBP 6900")
+  "pair-trump": "regal", // a real person ("FIGHT FIGHT FIGHT")
+  "pair-giga": "mythic", // a real person's likeness
+  "pair-gmex": "stock-gme", // an invented "GS" logo
+  "pair-tslax": "stock-tsla", // Tesla's logo; a grey-white bar baked under the title
+  "pair-nvdax": "stock-nvda", // NVIDIA's logo
+  "pair-aaplx": "stock-aapl", // Apple's logo; a grey-white bar baked under the title
+  "pair-mstrx": "stock-mstr", // Strategy's logo
+  "pair-coinx": "stock-coin", // Coinbase's logo
+  "pair-amc": "amc", // AMC's logo
+  "pair-sv151": "pokemon-classic", // the Pokemon 151 logo
+  "pair-vine": "magic-etched", // Vine's logo
+});
+export const isHeldPairDesign = (key?: string | null): boolean => !!key && Object.hasOwn(HELD_PAIR_DESIGNS, key);
+/** Every installed pair design (the staged ones but the two without finished art): each renders for any coin that has it. */
+export const ACTIVE_PAIR_DESIGNS: readonly PairDesign[] = Object.freeze(STAGED_PAIR_DESIGNS.filter(design => !WITHHELD_PAIR_DESIGNS.includes(design.key)));

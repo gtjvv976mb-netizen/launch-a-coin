@@ -1,21 +1,32 @@
 import {describe,expect,test} from "bun:test";
-import {ACTIVE_PAIR_DESIGNS,HELD_PAIR_DESIGNS,STAGED_PAIR_DESIGNS,WITHHELD_PAIR_DESIGNS,isPairDesignInstalled,type PairDesignInstallation} from "../../src/lib/carddex/pair-designs";
+import {ACTIVE_PAIR_DESIGNS,HELD_PAIR_DESIGNS,STAGED_PAIR_DESIGNS,WITHHELD_PAIR_DESIGNS,isHeldPairDesign,isPairDesignInstalled,type PairDesignInstallation} from "../../src/lib/carddex/pair-designs";
 import {installedPairDesignKeys} from "../../src/lib/carddex/pair-designs-installed";
 import {CARD_DESIGNS,LEGACY_CARD_DESIGNS,isCardDesignKey} from "../../src/lib/carddex/designs";
 import {MEME_PAIR_PRESETS} from "../../src/lib/carddex/design-pairings";
-import {getPairAsset,allowedQuotesForDesign,defaultQuoteForDesign,designForPair,pairForDesign,resolveLaunchQuote} from "../../src/lib/carddex/pairs";
+import {UNPAIRED_DESIGN,getPairAsset,allowedQuotesForDesign,defaultQuoteForDesign,designForPair,pairForDesign,resolveLaunchQuote,resolveNewLaunchPair} from "../../src/lib/carddex/pairs";
 import {CARD_RENDERER_VERSION} from "../../src/lib/carddex/card-template";
 
 describe("reviewed exact pair-identity designs",()=>{
-  test("the active designs are exactly the installed ones: every staged design but the two without finished art and the three held for review",()=>{
+  test("the active designs are exactly the installed ones: every staged design but the two without finished art",()=>{
     expect(WITHHELD_PAIR_DESIGNS).toEqual(["pair-aave","pair-uni"]);
-    expect(HELD_PAIR_DESIGNS).toEqual(["pair-67","pair-ansem","pair-spx"]);
-    expect(ACTIVE_PAIR_DESIGNS).toHaveLength(92);
+    expect(ACTIVE_PAIR_DESIGNS).toHaveLength(95);
     // A missing or mismatched asset or hash fails here (the gates), not on the page: the manifests stay off the client.
-    // Held designs stay installed (so one deleted key offers them again) but are not active.
-    expect(ACTIVE_PAIR_DESIGNS.map(d=>d.key)).toEqual(installedPairDesignKeys().filter(key=>!HELD_PAIR_DESIGNS.includes(key as `pair-${string}`)));
-    for(const key of HELD_PAIR_DESIGNS){expect(installedPairDesignKeys()).toContain(key);expect(isCardDesignKey(key)).toBe(false);expect(designForPair(key.slice(5))).toBeNull();}
+    expect(ACTIVE_PAIR_DESIGNS.map(d=>d.key)).toEqual(installedPairDesignKeys());
     expect(STAGED_PAIR_DESIGNS.filter(d=>!installedPairDesignKeys().includes(d.key)).map(d=>d.key)).toEqual([...WITHHELD_PAIR_DESIGNS]);
+  });
+  test("content holds: 21 installed identities stay design keys (existing coins keep them) and no new launch gets one",()=>{
+    const held=Object.keys(HELD_PAIR_DESIGNS);
+    expect(held).toHaveLength(21);
+    expect(held.filter(key=>HELD_PAIR_DESIGNS[key]===null).sort()).toEqual(["pair-67","pair-agency","pair-alon","pair-biketyson","pair-claudia","pair-hodl","pair-jeanphil","pair-neet"]);
+    for(const key of held){
+      expect(installedPairDesignKeys()).toContain(key);
+      expect(isHeldPairDesign(key)).toBe(true);
+      expect(isCardDesignKey(key)).toBe(true);
+      expect(pairForDesign(key)).toBeNull();
+      expect(defaultQuoteForDesign(key).key).toBe(key.slice(5));
+      expect(()=>resolveNewLaunchPair({cardTemplate:key})).toThrow(UNPAIRED_DESIGN);
+    }
+    for(const key of ["pair-doge","pair-sol","one-piece","stock-tsla","pair-aave",null,undefined,""])expect(isHeldPairDesign(key)).toBe(false);
   });
   test("the original48 identities remain valid and staged artwork never creates a placeholder option",()=>{
     expect(LEGACY_CARD_DESIGNS).toHaveLength(48);
@@ -57,8 +68,12 @@ describe("reviewed exact pair-identity designs",()=>{
       expect(defaultQuoteForDesign(design.key)).toBe(asset);
       expect(allowedQuotesForDesign(design.key)).toEqual([asset]);
       // The owner keeps One Piece on SOL and Duel Masters on USDC: pair-sol and pair-usdc render but are never offered.
+      // A held identity renders too; its pair launches with the design the hold names, or is not offered.
       if(asset.key==="sol"||asset.key==="usdc"){
         expect(designForPair(asset.key)).toBe(asset.key==="sol"?"one-piece":"duel-masters");
+        expect(pairForDesign(design.key)).toBeNull();
+      }else if(isHeldPairDesign(design.key)){
+        expect(designForPair(asset.key)).toBe((HELD_PAIR_DESIGNS[design.key] ?? null) as never);
         expect(pairForDesign(design.key)).toBeNull();
       }else{
         expect(designForPair(asset.key)).toBe(design.key);

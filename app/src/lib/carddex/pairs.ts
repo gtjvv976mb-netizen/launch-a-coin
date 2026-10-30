@@ -60,15 +60,15 @@ if (Object.entries(PAIR_DESIGNS).some(([pair, design]) => !BY_KEY.has(pair) || !
   throw new Error("Every offered pair needs exactly one card design of its own.");
 }
 
-/** The pairs offered for new launches: those with a finished design (AAVE and UNI wait for theirs). */
+/** The pairs offered for new launches: those PAIR_DESIGNS gives a design (not AAVE and UNI, nor the held 67, AGENCY...). */
 export const OFFERED_PAIRS: readonly Readonly<PairAsset>[] = Object.freeze(PAIR_ASSETS.filter(asset => PAIR_DESIGN[asset.key]));
 export function isOfferedPair(key?: string | null): boolean {
   return !!key && isPairAssetKey(key) && !!PAIR_DESIGN[key];
 }
 /**
  * The pairs coins can trade in, so the demo funds them: every offered pair, and every pair offered before (a coin keeps
- * its pair, so ANSEM and SPX coins still trade while their new designs wait for the owner). Never-offered pairs (AAVE,
- * UNI, 67) are left out.
+ * its pair). Pairs never offered in a release (AAVE, UNI and the held 67, AGENCY, ALON, HODL, JEANPHIL, CLAUDIA,
+ * BIKETYSON, NEET) are left out.
  */
 export const TRADED_PAIRS: readonly Readonly<PairAsset>[] = Object.freeze(PAIR_ASSETS.filter(asset => PAIR_DESIGN[asset.key] || asset.key in PAIR_DESIGNS_2026_10_30));
 export const NOT_OFFERED_PAIR = "That pair is not offered yet. Pick another pair.";

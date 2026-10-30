@@ -8,7 +8,8 @@ import { ButtonLink, Tabs, TextLink } from "../components/mintdex/ui";
 import { DesignMini } from "../components/carddex/GalleryTile";
 import { getCardDesign, isCardDesignKey, type CardDesign } from "../lib/carddex/designs";
 import { pageHead } from "../lib/mintdex/seo";
-import { defaultQuoteForDesign, designForPair, isOfferedPair, pairForDesign, type PairAsset } from "../lib/carddex/pairs";
+import { boundQuoteForDesign, defaultQuoteForDesign, designForPair, isOfferedPair, pairForDesign, type PairAsset } from "../lib/carddex/pairs";
+import { isHeldPairDesign } from "../lib/carddex/pair-designs";
 import { ORDERED_PAIRS, PAIR_GROUPS, groupAlias, isPairGroup, pairGroupOf, shortPairName, type PairGroup } from "../components/carddex/pair-groups";
 import { initialQuoteReserves, quoteMetrics } from "../lib/carddex/quote-simulation";
 
@@ -87,13 +88,14 @@ function Designs() {
   const collection = groupAlias(search.collection);
   const group: PairGroup = isPairGroup(collection) ? collection : "all";
   const shown = useMemo(() => pairedIn(group), [group]);
-  // A design from the link (one no pair has still opens, with no launch action), else the linked pair's design,
-  // else the group's first.
-  const linked = isCardDesignKey(key) ? getCardDesign(key) : isOfferedPair(search.quote) ? getCardDesign(designForPair(search.quote)!) : null;
+  // A design from the link (one no pair has still opens, with no launch action; a held one does not), else the linked
+  // pair's design, else the group's first.
+  const linked = isCardDesignKey(key) && !isHeldPairDesign(key) ? getCardDesign(key) : isOfferedPair(search.quote) ? getCardDesign(designForPair(search.quote)!) : null;
   const design = linked ?? shown[0]?.design ?? PAIRED[0]!.design;
   const pair = pairForDesign(design.key);
-  // pair-sol and pair-usdc: identity designs no coin can carry (SOL keeps One Piece, USDC Duel Masters).
-  const unofferedIdentity = !pair && design.key.startsWith("pair-");
+  // pair-sol and pair-usdc: identity designs whose pair launches with another card (SOL keeps One Piece, USDC Duel
+  // Masters). An identity whose pair is not offered at all reads as any design no pair has.
+  const unofferedIdentity = !pair && design.key.startsWith("pair-") && isOfferedPair(boundQuoteForDesign(design.key)?.key);
   // The sample card's quote: the design's pair; a design no pair has shows the quote coins made with it read as.
   const quote = pair ?? defaultQuoteForDesign(design.key);
   const index = shown.findIndex((d) => d.design.key === design.key);
@@ -252,7 +254,7 @@ function Designs() {
                 {primary ? <span className="cdx-cf-cap__go">{primary}</span> : null}
               </div>
               {/* Phones: the designs as one strip of chips (MintDex's .mdx-strip): each chip is the design's swatch and its
-                  pair's symbol (the full name is in its label, the caption and the plinth), so 92 chips stay short. */}
+                  pair's symbol (the full name is in its label, the caption and the plinth), so every chip stays short. */}
               <div
                 ref={stripRef}
                 role="group"
