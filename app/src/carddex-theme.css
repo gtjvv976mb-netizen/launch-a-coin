@@ -251,7 +251,7 @@
 
   /* ---- shell geometry (MintDex) */
   --rail-w: 224px;
-  --mhead-h: 56px; /* the phone header; 0 when it scrolls away (phones held sideways) */
+  --mhead-h: 3.5rem; /* the phone header (h-14: 56px at the default font size, more at a larger one); 0 when it scrolls away (phones held sideways) */
   --tabbar-h: 64px;
   --scroll-thumb: var(--color-control-border); /* scrollbar thumbs: 4.2:1 on plinth, above 3:1 on wall (THEME-2) */
   --status-h: 28px; /* the status strip under 1024px: one 13/20 line plus 4px above and below */
@@ -345,7 +345,7 @@
 }
 @media (max-width: 1023.98px) and (display-mode: standalone) {
   :root {
-    --mhead-h: calc(56px + env(safe-area-inset-top)); /* installed: the header clears the status bar */
+    --mhead-h: calc(3.5rem + env(safe-area-inset-top)); /* installed: the header clears the status bar */
   }
 }
 @media (max-width: 1023.98px) and (max-height: 500px) {

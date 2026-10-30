@@ -932,7 +932,7 @@ export function Stepper({
             aria-label={`Show card ${k + 1} of ${count}`}
             aria-current={k === i || undefined}
             className={cx(
-              "grid h-10 w-10 flex-none place-items-center rounded-pill",
+              "grid h-10 w-10 flex-none place-items-center rounded-pill pointer-coarse:h-11 pointer-coarse:w-11",
             )}
           >
             <span className="mdx-step-dot" data-active={k === i || undefined} />

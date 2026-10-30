@@ -17,6 +17,11 @@
 }
 .cdx-launch-draft { display: inline; }
 .cdx-launch-draft .mdx-link { font-weight: 500; color: var(--color-ink); }
+/* From 1024px the header's context line (one line, ellipsis) clips sideways only, as PageHeader's does (shared.css),
+ * so How it works and Start over keep their whole hit area (.mdx-hit) above and below the 13px line. */
+@media (min-width: 1024px) {
+  .cdx-launch-head > div > p { overflow-x: clip; overflow-y: visible; }
+}
 
 /* Mainnet | Demo: the segmented look (a track pill, the current mode on the sheet thumb). Links, not tabs: each mode
  * is its own address. */

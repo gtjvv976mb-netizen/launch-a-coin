@@ -162,6 +162,18 @@ function Designs() {
     const chip = strip?.querySelector<HTMLElement>(`[data-design="${design.key}"]`);
     if (strip && chip && strip.clientWidth) strip.scrollLeft = chip.offsetLeft - (strip.clientWidth - chip.offsetWidth) / 2;
   }, [design.key, group]);
+  // A chip reached by keyboard comes fully into view, centred as the strip snaps: the browser leaves a chip that is
+  // partly in view where it is, half past the edge.
+  const showFocusedChip = (e: { currentTarget: HTMLDivElement; target: EventTarget }) => {
+    const strip = e.currentTarget;
+    const chip = e.target as HTMLElement;
+    if (chip === strip || !chip.matches(":focus-visible")) return;
+    const r = chip.getBoundingClientRect();
+    const s = strip.getBoundingClientRect();
+    const left = Math.max(s.left, 0);
+    const right = Math.min(s.right, window.innerWidth);
+    if (r.left < left || r.right > right) strip.scrollLeft += r.left + r.width / 2 - (left + right) / 2;
+  };
 
   // The one primary: Launch on this design's pair (its card comes with it). A design no pair has offers none.
   const primary = pair ? (
@@ -241,6 +253,7 @@ function Designs() {
                 role="group"
                 aria-label="Designs"
                 className="mdx-strip cdx-designs__strip -mx-4 mt-3 flex flex-none px-4 py-0.5 lg:hidden"
+                onFocus={showFocusedChip}
               >
                 {shown.map((d) => (
                   <button
