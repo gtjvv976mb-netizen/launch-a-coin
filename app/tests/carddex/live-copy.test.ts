@@ -26,11 +26,10 @@ describe("live launch fee disclosure", () => {
     expect(legal).not.toContain("currently adds");
     // No invented total or unconfirmed link: those cells keep only what the code does.
     for (const gone of ["platform fee per launch", "platform share of trading fees, or none", "typical total in SOL", "link to pump.fun fee schedule"]) expect(legal).not.toContain(`<Fill>${gone}</Fill>`);
-    // Policy chosen for the owner (age, sanctioned regions, liability, how changes are posted) is written out; only
-    // facts about the operator stay marked until the owner supplies them.
-    for (const done of ["minimum age", "restricted countries and regions", "warranty disclaimer and limitation of liability, written by counsel", "how changes are announced"]) expect(legal).not.toContain(`<Fill>${done}</Fill>`);
-    expect(legal).toContain("You must be at least 18");
-    for (const slot of ["operator legal name", "contact email", "governing law"]) expect(legal).toContain(`<Fill>${slot}</Fill>`);
+    // Legal terms are the owner's and counsel's to write (readiness audit): age, regions, liability and how changes are
+    // announced stay marked slots, with the operator facts, until they are supplied. Nothing is drafted in their place.
+    for (const slot of ["operator legal name", "contact email", "governing law", "minimum age", "restricted countries and regions", "warranty disclaimer and limitation of liability, written by counsel", "how changes are announced"]) expect(legal).toContain(`<Fill>${slot}</Fill>`);
+    for (const drafted of ["at least 18", "Syria", "“as is”", "12 months before the claim", "means you accept"]) expect(legal).not.toContain(drafted);
   });
   test("the initial-buy notes are plain and name when the size is checked", async () => {
     const copy = await import("../../src/lib/carddex/live/copy");

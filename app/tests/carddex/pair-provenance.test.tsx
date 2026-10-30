@@ -1,7 +1,7 @@
 import {describe,expect,test} from "bun:test";
 import {renderToStaticMarkup} from "react-dom/server";
 import {QuoteAssetMeta} from "../../src/components/carddex/QuoteAssetMeta";
-import {PAIR_ASSETS,chargesTransferFee,isDirectPair} from "../../src/lib/carddex/pairs";
+import {CONFIRMED_DIRECT_PAIRS,PAIR_ASSETS,chargesTransferFee,isDirectPair} from "../../src/lib/carddex/pairs";
 import {STAGED_PAIR_DESIGNS} from "../../src/lib/carddex/pair-designs";
 
 const DIRECT_LINE = "Not on pump.fun's public pairs list; admitted on-chain";
@@ -16,10 +16,19 @@ describe("pair catalogue provenance",()=>{
         const meta=renderToStaticMarkup(<QuoteAssetMeta quoteAssetKey={asset.key} live={live} />).replaceAll("&#x27;","'");
         expect(meta).toContain(asset.mint);
         expect(meta).toContain("pump.fun pairs");
-        if(isDirectPair(asset)){
+        if(isDirectPair(asset)&&live){
+          // Mainnet mode: an unconfirmed direct pair says only that mainnet can't use it yet, and why.
+          expect(CONFIRMED_DIRECT_PAIRS).toHaveLength(0);
+          expect(meta).toContain("Mainnet launches can't use this pair yet: it isn't on pump.fun's public pairs list.");
+          expect(meta).not.toContain(DIRECT_LINE);
+        }else if(isDirectPair(asset)){
           expect(meta).toContain(`${DIRECT_LINE} (checked ${asset.verifiedAt}).`);
           expect(meta.match(/admitted on-chain/g)).toHaveLength(1);
-        }else expect(meta).not.toContain(DIRECT_LINE);
+          expect(meta).not.toContain("Mainnet launches");
+        }else{
+          expect(meta).not.toContain(DIRECT_LINE);
+          expect(meta).not.toContain("public pairs list");
+        }
         // A transfer-fee pair (ZCAT) says why mainnet can't use it, in mainnet mode only.
         expect(meta.includes("its mint charges a transfer fee")).toBe(live && chargesTransferFee(asset.key));
       }

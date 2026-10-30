@@ -1,3 +1,4 @@
+// Needs claude/codex-identities-snapshot (Codex's evidence folder and output/, left off this branch); it does not run here.
 /** Incrementally install accepted complete Higgsfield pair identities. No generation, deployment or wallet access.
  * Run from app/: bun scripts/prepare-pair-designs.ts [--only=pair-sol,pair-doge] [--force] [--plan] [--revoke-only]
  * Preserves every legacy manifest entry and source byte. Pending/incomplete faces are never activated.

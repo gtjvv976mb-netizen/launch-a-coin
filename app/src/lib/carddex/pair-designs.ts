@@ -79,6 +79,7 @@ export const HELD_PAIR_DESIGNS: Readonly<Record<string, string | null>> = Object
   "pair-claudia": null, // a real person's likeness
   "pair-biketyson": null, // a real person's likeness
   "pair-neet": null, // a real person's likeness
+  "pair-solangeles": null, // caricatures of real-looking people under "YOU'RE NOT WELCOME" (readiness audit)
   // Offered with the design production offers today: the new art has a real person, other companies' logos, an
   // invented logo, a misspelling or a stray bar.
   "pair-ansem": "sovereign", // a photoreal man's head on a bull's body
@@ -94,6 +95,7 @@ export const HELD_PAIR_DESIGNS: Readonly<Record<string, string | null>> = Object
   "pair-amc": "amc", // AMC's logo
   "pair-sv151": "pokemon-classic", // the Pokemon 151 logo
   "pair-vine": "magic-etched", // Vine's logo
+  "pair-fartcoin": "ember", // the back's wordmark is garbled, not FARTCOIN (readiness audit)
 });
 export const isHeldPairDesign = (key?: string | null): boolean => !!key && Object.hasOwn(HELD_PAIR_DESIGNS, key);
 /** Every installed pair design (the staged ones but the two without finished art): each renders for any coin that has it. */

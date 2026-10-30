@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { ed25519 } from "@noble/curves/ed25519";
 import { base58Encode } from "../../../chain/sdk/src/bytes";
-import { NOT_OFFERED_PAIR, OFFERED_PAIRS, TRANSFER_FEE_PAIR, UNPAIRED_DESIGN, boundQuoteForDesign, chargesTransferFee, designForPair, getPairAsset } from "../../src/lib/carddex/pairs";
+import { DIRECT_PAIR_HELD, NOT_OFFERED_PAIR, OFFERED_PAIRS, TRANSFER_FEE_PAIR, UNPAIRED_DESIGN, boundQuoteForDesign, designForPair, getPairAsset, mainnetPairHold } from "../../src/lib/carddex/pairs";
 import { MEME_PAIR_PRESETS } from "../../src/lib/carddex/design-pairings";
 import renderAssets from "../../src/lib/carddex/render-assets.json";
 import tokenBackAssets from "../../src/lib/carddex/token-back-assets.json";
@@ -35,7 +35,7 @@ const localD1 = {prepare: (sql: string) => new Prepared(sql), async batch(statem
 const objects = new Map<string, {bytes: Uint8Array; mime: string}>();
 const storage = {
   async put(key: string, bytes: Uint8Array, options: {httpMetadata: {contentType: string}}) { objects.set(key, {bytes: new Uint8Array(bytes), mime: options.httpMetadata.contentType}); },
-  async get(key: string) { const value = objects.get(key); return value ? {arrayBuffer: async () => value.bytes.slice().buffer, body: value.bytes, httpMetadata: {contentType: value.mime}, httpEtag: '"fixture"'} : null; },
+  async get(key: string) { const value = objects.get(key); return value ? {arrayBuffer: async () => value.bytes.slice().buffer, body: value.bytes, size: value.bytes.byteLength, httpMetadata: {contentType: value.mime}, httpEtag: '"fixture"'} : null; },
   async head(key: string) { return objects.has(key) ? {key} : null; },
 };
 let storagePuts = 0;
@@ -201,8 +201,9 @@ async function savedBeforePairRule(cardTemplate: string, quoteKey: string) {
 describe("isolated real-launch server lifecycle", () => {
   // The pair picks the card: every offered pair launches with its own design, sent as the pair alone (the Launch form's
   // shape is the full three; older clients too), and keeps it through metadata, the NFT and saved reads. A transfer-fee
-  // pair (ZCAT) is refused for mainnet before anything is made (its own test below).
-  const designPairs = OFFERED_PAIRS.filter(asset => !chargesTransferFee(asset.key)).map(asset => [designForPair(asset.key)!, asset.key] as const);
+  // pair (ZCAT) and the direct pairs the owner has not confirmed are refused for mainnet before anything is made (their
+  // own tests below).
+  const designPairs = OFFERED_PAIRS.filter(asset => !mainnetPairHold(asset.key)).map(asset => [designForPair(asset.key)!, asset.key] as const);
   for (const [cardTemplate, quoteKey] of designPairs) test(`${quoteKey} launches its own ${cardTemplate} card through metadata, NFT preparation and saved reads`, async () => {
     const quote = getPairAsset(quoteKey);
     const original = await input({cardTemplate, quoteAssetKey: quote.key, quoteMint: quote.mint});
@@ -293,6 +294,21 @@ describe("isolated real-launch server lifecycle", () => {
     for (const key of ["aave", "67", "agency"]) await expect(service.checkLiveLaunchSize(creator, {name: "Launch Fixture", symbol: "FIX", quoteAssetKey: key, initialBuyQuoteBaseUnits: "1"})).rejects.toThrow(NOT_OFFERED_PAIR);
     expect(storagePuts).toBe(puts);
   });
+  test("a direct pair the owner has not confirmed is refused for mainnet before any upload, coin image, size check, plan or row", async () => {
+    const {composeLiveAssets} = await import("../../src/lib/carddex/live/composition.server");
+    const direct = OFFERED_PAIRS.filter(asset => mainnetPairHold(asset.key) && asset.key !== "zcat");
+    expect(direct.map(asset => asset.key)).toEqual(["gork", "stonk", "paid", "pepe", "pill", "npc", "wojak", "eacc", "shib", "swordcat", "plague", "ape", "link"]);
+    for (const quote of direct) {
+      const original = {...await input(), cardTemplate: designForPair(quote.key)!, quoteAssetKey: quote.key, quoteMint: quote.mint}, puts = storagePuts;
+      const {cardTemplate: _design, ...pairOnly} = original;
+      for (const request of [original, pairOnly]) await expect(service.prepareLiveLaunch(creator, request)).rejects.toThrow(DIRECT_PAIR_HELD);
+      const fields = {tokenMint: mint, name: "Launch Fixture", symbol: "FIX", description: "", quoteAssetKey: quote.key, quoteMint: quote.mint};
+      await expect(composeLiveAssets(creator, fields, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(DIRECT_PAIR_HELD);
+      await expect(service.checkLiveLaunchSize(creator, {name: "Launch Fixture", symbol: "FIX", quoteAssetKey: quote.key, initialBuyQuoteBaseUnits: "0"})).rejects.toThrow(DIRECT_PAIR_HELD);
+      expect(prepareCalls).toBe(0); expect(tokenMediaCalls).toBe(0); expect(storagePuts).toBe(puts);
+      expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 0});
+    }
+  });
   test("a card composition is refused for a design that is not its pair's own, before anything is uploaded", async () => {
     const {composeLiveAssets} = await import("../../src/lib/carddex/live/composition.server");
     const fields = {tokenMint: mint, name: "Launch Fixture", symbol: "FIX", description: "", cardTemplate: "pair-doge", quoteAssetKey: "sol", quoteMint: getPairAsset("sol").mint};
@@ -306,7 +322,10 @@ describe("isolated real-launch server lifecycle", () => {
   // content holds), neutral designs on SOL or a stock, and designs no pair has. Each recovers byte for byte and
   // finishes its card.
   const neutralPresetDesigns = [...new Set(MEME_PAIR_PRESETS.map(preset => preset.design))].filter(design => !boundQuoteForDesign(design));
+  // Also launches saved on this release's pairs that a hold or the release step leaves behind: a direct pair held from
+  // mainnet (pair-pepe), a pair new in this release (pair-eth; the release step does not offer it) and two held identities.
   const legacyPairs = [["pokemon-full-art", "tslax"], ["pepe", "gmex"], ["spark", "tslax"], ["gamestop", "gmex"], ["kraken", "sol"],
+    ["pair-pepe", "pepe"], ["pair-eth", "eth"], ["pair-solangeles", "solangeles"], ["pair-fartcoin", "fartcoin"],
     ...MEME_PAIR_PRESETS.map(preset => [preset.design, preset.quote] as const),
     ...neutralPresetDesigns.map(design => [design, "sol"] as const)];
   for (const [cardTemplate, quoteKey] of legacyPairs) test(`a launch saved as ${cardTemplate}/${quoteKey} before the pair picked the card recovers unchanged`, async () => {
@@ -450,6 +469,8 @@ describe("isolated real-launch server lifecycle", () => {
     expect(response.headers.get("content-type")).toBe("image/gif");
     // Prepared, not signed: public for the wallet approval with a short cache (immutable once the coin is signed).
     expect(response.headers.get("cache-control")).toBe("public, max-age=300");
+    // Its size too, so a HEAD (served by GET without the body) says it.
+    expect(response.headers.get("content-length")).toBe(String(tokenGif().byteLength));
     expect(response.headers.get("x-content-type-options")).toBe("nosniff");
     expect(new Uint8Array(await response.arrayBuffer())).toEqual(tokenGif());
     expect(sqlite.query("SELECT width, height FROM live_assets WHERE sha256 = ?").get(tokenImage.sha256)).toEqual({width: 1024, height: 1024});

@@ -39,7 +39,7 @@ const { CARD_DESIGNS, DEFAULT_CARD_DESIGN, getCardDesign } = await import("../..
 const { MEME_PAIR_PRESETS } = await import("../../src/lib/carddex/design-pairings");
 const { INITIAL_RESERVES, quoteBuy, quoteSell } = await import("../../src/lib/mintdex/curve");
 const { LAUNCH_FEE, LAMPORTS } = await import("../../src/lib/mintdex/constants");
-const { OFFERED_PAIRS, PAIR_ASSETS, defaultQuoteForDesign, designForPair, getPairAsset, getTradingPair, pairForDesign, NOT_OFFERED_PAIR, UNPAIRED_DESIGN } = await import("../../src/lib/carddex/pairs");
+const { OFFERED_PAIRS, PAIR_ASSETS, TRADED_PAIRS, defaultQuoteForDesign, designForPair, getPairAsset, getTradingPair, pairForDesign, NOT_OFFERED_PAIR, UNPAIRED_DESIGN } = await import("../../src/lib/carddex/pairs");
 const { demoQuoteStartBalance, initialQuoteReserves, maxInitialBuyQuoteAtoms, quoteUnit } = await import("../../src/lib/carddex/quote-simulation");
 const migrations = resolve(import.meta.dir, "../../migrations");
 
@@ -90,7 +90,12 @@ describe("CardDex fixed creator cards and token trading", () => {
       expect(page?.sales).toEqual([]);
     }
     expect(sqlite.query("SELECT COUNT(*) AS n FROM coins").get()).toEqual({ n: CARD_DESIGNS.length });
-    expect((await service.getHome()).featured).toHaveLength(CARD_DESIGNS.length);
+    // Home features one coin per design, at most 48 (the designs whose best coins lead by market cap), in design order.
+    const featured = (await service.getHome()).featured;
+    expect(featured).toHaveLength(48);
+    expect(new Set(featured.map(coin => coin.cardTemplate)).size).toBe(48);
+    const order = CARD_DESIGNS.map(design => design.key);
+    expect(featured.map(coin => order.indexOf(coin.cardTemplate))).toEqual(featured.map(coin => order.indexOf(coin.cardTemplate)).sort((a, b) => a - b));
     expect((await service.getLevels()).counts).toEqual(CARD_DESIGNS.map(() => 1));
   });
 
@@ -286,10 +291,13 @@ describe("CardDex fixed creator cards and token trading", () => {
   });
 
   // Content holds: a coin stored on a held identity keeps its design, renders and trades. TSLAX (offered with its live
-  // design) is funded for everyone; AGENCY and 67 are not offered, so only an account that already holds the quote (one
-  // funded while a preview offered the pair) can buy; anyone holding the coin can sell.
-  for (const [cardTemplate, quoteKey, fund] of [["pair-tslax", "tslax", false], ["pair-ansem", "ansem", false], ["pair-agency", "agency", true], ["pair-67", "67", true]] as const) test(`a coin stored on held ${cardTemplate} keeps its design and trades in ${quoteKey}`, async () => {
+  // design) is funded for everyone; AGENCY, 67 and SOLANGELES are not offered, so only an account that already holds the
+  // quote (one funded while a preview offered the pair) can buy; anyone holding the coin can sell. WBTC and ETH coins
+  // are the ones this release makes on new pairs: where a build does not fund them (the release step), an account the
+  // full release funded keeps buying and selling.
+  for (const [cardTemplate, quoteKey] of [["pair-tslax", "tslax"], ["pair-ansem", "ansem"], ["pair-agency", "agency"], ["pair-67", "67"], ["pair-solangeles", "solangeles"], ["pair-fartcoin", "fartcoin"], ["pair-wbtc", "wbtc"], ["pair-eth", "eth"]] as const) test(`a coin stored on ${cardTemplate} keeps its design and trades in ${quoteKey}`, async () => {
     await service.getMe(user);
+    const fund = !TRADED_PAIRS.some(asset => asset.key === quoteKey);
     const asset = getPairAsset(quoteKey), design = getCardDesign(cardTemplate), initial = initialQuoteReserves(quoteKey), now = Date.now();
     expect(design.key).toBe(cardTemplate);
     if (fund) sqlite.query("INSERT OR REPLACE INTO quote_balances (user_id, quote_asset_key, balance) VALUES (?, ?, ?)").run(user.id, asset.key, initial.vSol);
@@ -564,7 +572,7 @@ describe("CardDex fixed creator cards and token trading", () => {
     const coins = await service.allCoins();
     expect(coins).toHaveLength(10);
     // A fresh database seeds each coin on its pair with that pair's design (identity designs; SOL and USDC keep theirs).
-    expect(coins.map(coin => `${coin.quoteAssetKey}:${coin.cardTemplate}`).sort()).toEqual(["act:pair-act", "cards:pair-cards", "cate:pair-cate", "doge:pair-doge", "fartcoin:pair-fartcoin", "sol:one-piece", "sv151:pokemon-classic", "toad:pair-toad", "usdc:duel-masters", "vine:magic-etched"]);
+    expect(coins.map(coin => `${coin.quoteAssetKey}:${coin.cardTemplate}`).sort()).toEqual(["act:pair-act", "cards:pair-cards", "cate:pair-cate", "doge:pair-doge", "fartcoin:ember", "sol:one-piece", "sv151:pokemon-classic", "toad:pair-toad", "usdc:duel-masters", "vine:magic-etched"]);
     for (const coin of coins) {
       expect(coin.cardTemplate).toBeTruthy();
       // The pair picks the card: every seed coin trades against its design's own pair.

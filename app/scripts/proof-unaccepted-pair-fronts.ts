@@ -1,3 +1,4 @@
+// Needs claude/codex-identities-snapshot (Codex's evidence folder and output/, left off this branch); it does not run here.
 /** Isolated canonical proof; never writes acceptance or active indexes. */
 import {readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';

@@ -95,8 +95,8 @@ describe("the Launch form derives its card from the pair", () => {
 
 describe("the pair HUD", () => {
   test("All holds every offered pair once: SOL and USDC, the stocks, memes, other crypto, then collector tokens", () => {
-    expect(ORDERED_PAIRS).toHaveLength(87);
-    expect(new Set(ORDERED_PAIRS.map(pair => pair.key)).size).toBe(87);
+    expect(ORDERED_PAIRS).toHaveLength(86);
+    expect(new Set(ORDERED_PAIRS.map(pair => pair.key)).size).toBe(86);
     expect(ORDERED_PAIRS.map(pair => pair.key).sort()).toEqual(OFFERED_PAIRS.map(pair => pair.key).sort());
     expect(ORDERED_PAIRS.slice(0, 4).map(pair => pair.key)).toEqual(["sol", "usdc", "gmex", "tslax"]);
     expect(ORDERED_PAIRS.findIndex(pair => pair.key === "tslax")).toBe(3);
@@ -106,10 +106,10 @@ describe("the pair HUD", () => {
     expect(pairsInGroup("crypto")).toHaveLength(22);
     expect(pairsInGroup("collector").map(pair => pair.key)).toEqual(["cards", "sv151"]);
     expect(pairsInGroup("stocks").map(pair => pair.key)).toEqual(["gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc"]);
-    expect(pairsInGroup("memes")).toHaveLength(56);
+    expect(pairsInGroup("memes")).toHaveLength(55);
     expect(pairsInGroup("memes").every(pair => pairGroupOf(pair) === "memes" && pair.kind === "meme")).toBe(true);
     const sizes = PAIR_GROUPS.filter(group => group.key !== "all").map(group => pairsInGroup(group.key).length);
-    expect(sizes.reduce((a, b) => a + b, 0)).toBe(87);
+    expect(sizes.reduce((a, b) => a + b, 0)).toBe(86);
     // Old links named the base group (SOL and USDC): it is part of Crypto now.
     expect(groupAlias("base")).toBe("crypto");
     expect(groupAlias("memes")).toBe("memes");
@@ -131,7 +131,7 @@ describe("the pair HUD", () => {
     expect(filterPairs("all", "spx")[0]!.key).toBe("spx");
     for (const query of ["67", "agency", "hodl", "claudia"]) expect(filterPairs("all", query).map(pair => pair.key)).not.toContain(query);
   });
-  test("ranked search: typing any offered pair's symbol puts it first, 85 or more within 4 characters", () => {
+  test("ranked search: typing any offered pair's symbol puts it first, 84 or more within 4 characters", () => {
     let quick = 0;
     for (const pair of ORDERED_PAIRS) {
       expect(filterPairs("all", pair.symbol)[0]!.key).toBe(pair.key);
@@ -140,8 +140,8 @@ describe("the pair HUD", () => {
         if (filterPairs("all", symbol.slice(0, n))[0]?.key === pair.key) { if (n <= 4) quick++; break; }
       }
     }
-    expect(quick).toBeGreaterThanOrEqual(85);
-    for (const [query, key] of [["pepe", "pepe"], ["ape", "ape"], ["mon", "mon"], ["near", "near"], ["pump", "pump"], ["sola", "solangeles"], ["e/a", "eacc"], ["link", "link"], ["wbtc", "wbtc"]]) {
+    expect(quick).toBeGreaterThanOrEqual(84);
+    for (const [query, key] of [["pepe", "pepe"], ["ape", "ape"], ["mon", "mon"], ["near", "near"], ["pump", "pump"], ["perc", "percolator"], ["e/a", "eacc"], ["link", "link"], ["wbtc", "wbtc"]]) {
       expect(filterPairs("all", query!)[0]!.key).toBe(key!);
     }
   });

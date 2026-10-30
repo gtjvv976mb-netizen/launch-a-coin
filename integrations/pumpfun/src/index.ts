@@ -145,6 +145,9 @@ export function quoteIssuerControls(mint: Mint) {
  * initial buy: the coin is created with the stock quote, and buying happens afterwards on pump.fun. Set true to
  * allow the buy again; the review already tells the creator about the notice before the wallet opens.
  */
+// Before turning this on: GMEX, NVDAX and AAPLX carry a Token-2022 scaled-UI multiplier (about 1.0017 to 1.0053 at slot
+// 463274173) that amounts here ignore (they convert by decimals only); convert entered amounts with the mint's current
+// multiplier and show the wallet's figure in the review first.
 export const ALLOW_PERMANENT_DELEGATE_QUOTE_BUY = false;
 export const PERMANENT_DELEGATE_BUY_REFUSAL = "Wallets warn about tokenized-stock quotes in a first buy (the stock token has issuer controls); launch without an initial buy, then buy on pump.fun after launch";
 

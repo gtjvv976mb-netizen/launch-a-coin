@@ -40,7 +40,7 @@ describe("phone and tablet copies of every card face (the srcsets ask for them)"
       }
     }
     expect(designs).toBe(CARD_DESIGNS.length);
-    // 95 installed identity designs (74 offered or SOL's and USDC's, 21 held) with both faces, plus the earlier designs' faces (a few of them have no back).
+    // 95 installed identity designs (72 offered or SOL's and USDC's, 23 held) with both faces, plus the earlier designs' faces (a few of them have no back).
     expect(copies).toBeGreaterThanOrEqual(95 * 4);
   });
   test("every card skin has its 480 and 640 px copies", () => {
@@ -61,7 +61,7 @@ describe("the creator's print reads on every offered identity design", () => {
     const inkL = lum(...ink);
     let lowest = Infinity;
     const offered = OFFERED_PAIRS.map(pair => designForPair(pair.key)!).filter(key => key.startsWith("pair-"));
-    expect(offered).toHaveLength(72);
+    expect(offered).toHaveLength(70);
     for (const key of offered) {
       const atlas = (renderAssets as Record<string, { previewPath: string }>)[key + (CARD_DESIGNS.find(d => d.key === key)!.category === "stocks" ? "--stock" : "")]!;
       const png = readFileSync(file(atlas.previewPath));

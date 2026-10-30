@@ -34,6 +34,34 @@ function creatorRendererWasm(): Plugin {
   };
 }
 
+/**
+ * The browser reads a few fields of two registries the server needs whole (readiness audit PERF-1): the client copy of
+ * render-assets.json drops its hashes (CanonicalCardSkin reads the path, preview path and renderer version) and the
+ * client copy of pair-assets.json drops its provenance (source URLs, evidence, slot, admission). The server bundle and
+ * the tests keep both files whole.
+ */
+const CLIENT_DROPPED_FIELDS: Readonly<Record<string, readonly string[]>> = {
+  "render-assets.json": ["sha256", "previewSha256", "sourceSha256"],
+  "pair-assets.json": ["sourceUrls", "sourceEvidenceArtifact", "verificationSlot", "verifiedDate", "admission"],
+};
+function clientRegistryFields(): Plugin {
+  const dir = path.join(fileURLToPath(new URL("./src/lib/carddex/", import.meta.url)));
+  return {
+    name: "launchacard-client-registry-fields",
+    enforce: "pre",
+    transform(code, id) {
+      if (this.environment?.name !== "client") return;
+      const file = id.split("?")[0]!;
+      const fields = path.dirname(file) + path.sep === dir ? CLIENT_DROPPED_FIELDS[path.basename(file)] : undefined;
+      if (!fields) return;
+      const keep = (row: Record<string, unknown>) => Object.fromEntries(Object.entries(row).filter(([key]) => !fields.includes(key)));
+      const data = JSON.parse(code) as Record<string, unknown>[] | Record<string, Record<string, unknown>>;
+      const out = Array.isArray(data) ? data.map(keep) : Object.fromEntries(Object.entries(data).map(([key, row]) => [key, keep(row)]));
+      return { code: JSON.stringify(out), map: null };
+    },
+  };
+}
+
 // The vendored @higgsfield/quanta components import their glyphs from the private
 // Nexus-only `@higgsfield-ai/icons`. Generated sites build on the PUBLIC npm
 // registry, so we redirect every `@higgsfield-ai/icons/*` import to a Material
@@ -122,6 +150,7 @@ export default defineConfig(({ mode }) => {
       ssr: { build: { rollupOptions: { preserveEntrySignatures: "strict" } } },
     },
     plugins: [
+      clientRegistryFields(),
       creatorRendererWasm(),
       // Material Symbols SVGs (the app icon set) import as React components via
       // `?react`. `icon: true` sizes them 1em; fill is forced to currentColor so

@@ -1,3 +1,4 @@
+// Needs claude/codex-identities-snapshot (Codex's evidence folder and output/, left off this branch); it does not run here.
 /** Visual proof of actual shared creator print, without wallet or launch side effects. */
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';

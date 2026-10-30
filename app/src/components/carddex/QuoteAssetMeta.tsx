@@ -1,4 +1,4 @@
-import { PAIR_ASSETS_SOURCE, chargesTransferFee, getPairAsset, isDirectPair } from "../../lib/carddex/pairs";
+import { PAIR_ASSETS_SOURCE, getPairAsset, isDirectPair, mainnetPairHold } from "../../lib/carddex/pairs";
 import { Icon } from "../mintdex/ui";
 
 /**
@@ -15,6 +15,8 @@ export function QuoteAssetMeta({ quoteAssetKey, live = false, named = false }: {
   const asset = getPairAsset(quoteAssetKey);
   const external = (href: string, label: string) => <a className="mdx-link mdx-hit" href={href} target="_blank" rel="noreferrer">{label}<Icon name="external" size={12} /></a>;
   const mintKind = asset.kind === "native" ? "Wrapped SOL" : "quote asset";
+  // In mainnet mode a pair that can't launch there yet says why (ZCAT's fee; a direct pair the owner has not confirmed).
+  const hold = mainnetPairHold(asset.key);
   return <div className="cdx-pair-meta">
     {!named || asset.issuer ? <p className="cdx-pair-meta__asset">
       {named ? null : <strong>{asset.name}</strong>}
@@ -26,7 +28,7 @@ export function QuoteAssetMeta({ quoteAssetKey, live = false, named = false }: {
     </p>
     {/* A line of text between the mint and the terms row, so the terms links' 44px hit areas stay off the mint. */}
     <p>Mint reviewed {asset.verifiedAt}.{asset.kind !== "native" ? " SOL also pays network and account costs." : ""}</p>
-    {isDirectPair(asset) ? <p className="cdx-pair-meta__direct">Not on pump.fun's public pairs list; admitted on-chain (checked {asset.verifiedAt}).</p> : null}
+    {isDirectPair(asset) && !(live && hold) ? <p className="cdx-pair-meta__direct">Not on pump.fun's public pairs list; admitted on-chain (checked {asset.verifiedAt}).</p> : null}
     <p className="cdx-pair-meta__links">
       {asset.issuerTerms ? external(asset.issuerTerms, "Issuer terms") : null}
       {asset.listingProviderTerms ? external(asset.listingProviderTerms, `${asset.listingProvider ?? "Listing"} terms`) : null}
@@ -34,6 +36,6 @@ export function QuoteAssetMeta({ quoteAssetKey, live = false, named = false }: {
     </p>
     {asset.kind === "stock" ? <p>A tokenized-stock quote does not make your coin company shares.</p> : null}
     {live ? <p>The exact mint is checked again before wallet review.</p> : null}
-    {live && chargesTransferFee(asset.key) ? <p className="cdx-pair-meta__direct">Mainnet launches can't use this pair yet: its mint charges a transfer fee.</p> : null}
+    {live && hold ? <p className="cdx-pair-meta__direct">{hold}</p> : null}
   </div>;
 }

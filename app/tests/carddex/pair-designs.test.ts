@@ -14,10 +14,10 @@ describe("reviewed exact pair-identity designs",()=>{
     expect(ACTIVE_PAIR_DESIGNS.map(d=>d.key)).toEqual(installedPairDesignKeys());
     expect(STAGED_PAIR_DESIGNS.filter(d=>!installedPairDesignKeys().includes(d.key)).map(d=>d.key)).toEqual([...WITHHELD_PAIR_DESIGNS]);
   });
-  test("content holds: 21 installed identities stay design keys (existing coins keep them) and no new launch gets one",()=>{
+  test("content holds: 23 installed identities stay design keys (existing coins keep them) and no new launch gets one",()=>{
     const held=Object.keys(HELD_PAIR_DESIGNS);
-    expect(held).toHaveLength(21);
-    expect(held.filter(key=>HELD_PAIR_DESIGNS[key]===null).sort()).toEqual(["pair-67","pair-agency","pair-alon","pair-biketyson","pair-claudia","pair-hodl","pair-jeanphil","pair-neet"]);
+    expect(held).toHaveLength(23);
+    expect(held.filter(key=>HELD_PAIR_DESIGNS[key]===null).sort()).toEqual(["pair-67","pair-agency","pair-alon","pair-biketyson","pair-claudia","pair-hodl","pair-jeanphil","pair-neet","pair-solangeles"]);
     for(const key of held){
       expect(installedPairDesignKeys()).toContain(key);
       expect(isHeldPairDesign(key)).toBe(true);

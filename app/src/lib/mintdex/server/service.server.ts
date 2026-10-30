@@ -340,6 +340,8 @@ export async function recentEvents(limit = 10): Promise<EventRow[]> {
   return rows.map(mapEvent);
 }
 
+const FEATURED_MAX = 48;
+const DESIGN_KEYS = new Set<string>(CARD_DESIGNS.map((design) => design.key));
 export async function getHome(): Promise<HomeData & Rev> {
   const [raw, h, b, p, v, events, players, rev] = await readBatch(
     allCoinsQuery(),
@@ -350,12 +352,16 @@ export async function getHome(): Promise<HomeData & Rev> {
     revQuery(),
   );
   const coins = await summarize(raw, [h, b, p, v]);
-  // One token per selected design. Equal material finishes must not hide distinct card templates.
-  const featured: CoinSummary[] = [];
-  for (const design of CARD_DESIGNS) {
-    const best = sortCoins(coins.filter((c) => c.cardTemplate === design.key), "mcap")[0];
-    if (best) featured.push(best);
+  // One token per selected design (its highest market cap). Equal material finishes must not hide distinct card
+  // templates. One pass whatever the number of designs; at most FEATURED_MAX (the 48 designs production had), the
+  // designs whose best coins lead by market cap, shown in design order.
+  const best = new Map<string, CoinSummary>();
+  for (const coin of sortCoins(coins, "mcap")) {
+    const design = coin.cardTemplate;
+    if (design && DESIGN_KEYS.has(design) && !best.has(design)) best.set(design, coin);
   }
+  const kept = new Set([...best.values()].slice(0, FEATURED_MAX));
+  const featured = CARD_DESIGNS.flatMap((design) => { const coin = best.get(design.key); return coin && kept.has(coin) ? [coin] : []; });
   const trending = sortCoins(coins).slice(0, 10);
   return {
     featured,

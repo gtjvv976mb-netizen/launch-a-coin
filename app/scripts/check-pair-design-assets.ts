@@ -1,3 +1,4 @@
+// Needs claude/codex-identities-snapshot (Codex's evidence folder and output/, left off this branch); it does not run here.
 /** Read actual pinned files and preserve original48 SVG golden output. No transactions/network. */
 import {readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';

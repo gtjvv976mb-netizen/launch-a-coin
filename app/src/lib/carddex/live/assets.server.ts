@@ -180,6 +180,8 @@ export async function serveLiveAsset(filename: string, request?: Request, now = 
     "content-type": object.httpMetadata?.contentType ?? "application/octet-stream", "cache-control": access === "public" ? IMMUTABLE : access === "preview" ? PREVIEW_CACHE : "no-store",
     "x-content-type-options": "nosniff", ...(access !== "check" ? {"access-control-allow-origin": "*"} : {}),
     "content-security-policy": "default-src 'none'; sandbox", etag: object.httpEtag,
+    // The size, so a HEAD (served by this GET without the body) says it too.
+    ...(typeof object.size === "number" ? {"content-length": String(object.size)} : {}),
   }});
 }
 export async function serveLiveMetadata(digest: string, request?: Request): Promise<Response> {

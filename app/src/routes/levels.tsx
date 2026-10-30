@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { searchSchema, text } from "../lib/mintdex/search";
 import { HeroTurntable } from "../components/carddex/HeroTurntable";
 import { useViewIn3D } from "../components/carddex/CardControls";
@@ -88,9 +88,13 @@ function Designs() {
   const collection = groupAlias(search.collection);
   const group: PairGroup = isPairGroup(collection) ? collection : "all";
   const shown = useMemo(() => pairedIn(group), [group]);
-  // A design from the link (one no pair has still opens, with no launch action; a held one does not), else the linked
-  // pair's design, else the group's first.
-  const linked = isCardDesignKey(key) && !isHeldPairDesign(key) ? getCardDesign(key) : isOfferedPair(search.quote) ? getCardDesign(designForPair(search.quote)!) : null;
+  // A design from the link (one no pair has still opens, with no launch action; a held one does not), else a held
+  // identity's pair's card when that pair is offered (as Launch opens it: pair-tslax opens Tesla Current), else the
+  // linked pair's design, else the group's first.
+  const heldPair = isHeldPairDesign(key) ? boundQuoteForDesign(key)?.key : undefined;
+  const linked = isCardDesignKey(key) && !isHeldPairDesign(key) ? getCardDesign(key)
+    : isOfferedPair(heldPair) ? getCardDesign(designForPair(heldPair)!)
+    : isOfferedPair(search.quote) ? getCardDesign(designForPair(search.quote)!) : null;
   const design = linked ?? shown[0]?.design ?? PAIRED[0]!.design;
   const pair = pairForDesign(design.key);
   // pair-sol and pair-usdc: identity designs whose pair launches with another card (SOL keeps One Piece, USDC Duel
@@ -181,6 +185,20 @@ function Designs() {
     if (r.left < left || r.right > right) strip.scrollLeft += r.left + r.width / 2 - (left + right) / 2;
   };
 
+  // One Tab stop per list (the selected design, else the first) and arrow keys, Home and End that move and select, as
+  // Launch's pair radio group does: 87 designs are not 87 Tab stops (readiness audit KBD-1).
+  const tabStop = (i: number, key: string) => (key === design.key || (index === -1 && i === 0) ? 0 : -1);
+  const rove = (e: KeyboardEvent<HTMLDivElement>) => {
+    const step = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
+    const last = shown.length - 1;
+    const to = e.key === "Home" ? 0 : e.key === "End" ? last : step ? Math.min(last, Math.max(0, (index === -1 ? 0 : index) + step)) : -1;
+    const next = shown[to];
+    if (!next || e.altKey || e.ctrlKey || e.metaKey) return;
+    e.preventDefault();
+    if (to !== index) go(next);
+    e.currentTarget.querySelector<HTMLElement>(`[data-design="${next.design.key}"]`)?.focus();
+  };
+
   // The one primary: Launch on this design's pair (its card comes with it). A design no pair has offers none.
   const primary = pair ? (
     <ButtonLink to="/launch" search={{ quote: pair.key }}>
@@ -261,12 +279,14 @@ function Designs() {
                 aria-label="Designs"
                 className="mdx-strip cdx-designs__strip -mx-4 mt-3 flex flex-none px-4 py-0.5 lg:hidden"
                 onFocus={showFocusedChip}
+                onKeyDown={rove}
               >
-                {shown.map((d) => (
+                {shown.map((d, i) => (
                   <button
                     key={d.design.key}
                     type="button"
                     data-design={d.design.key}
+                    tabIndex={tabStop(i, d.design.key)}
                     aria-pressed={d.design.key === design.key}
                     aria-label={`${d.design.name}, ${d.pair.symbol} pair`}
                     className="cdx-design-chip"
@@ -292,14 +312,16 @@ function Designs() {
               role="group"
               aria-label={`Designs, ${shown.length}`}
               className="cdx-ladder mdx-scroll max-lg:hidden"
+              onKeyDown={rove}
             >
-              {shown.map((d) => {
+              {shown.map((d, i) => {
                 const pressed = d.design.key === design.key;
                 return (
                   <button
                     key={d.design.key}
                     type="button"
                     data-design={d.design.key}
+                    tabIndex={tabStop(i, d.design.key)}
                     aria-pressed={pressed}
                     aria-label={`${d.design.name}, ${d.pair.symbol} pair`}
                     className="mdx-ladrow cdx-ladrow"

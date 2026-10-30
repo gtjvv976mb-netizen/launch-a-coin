@@ -1,5 +1,5 @@
 import { isCardDesignKey } from "../designs";
-import { TRANSFER_FEE_PAIR, chargesTransferFee, completeLaunchPair, resolveLaunchQuote, resolveNewLaunchPair } from "../pairs";
+import { completeLaunchPair, mainnetPairRefusal, resolveLaunchQuote, resolveNewLaunchPair } from "../pairs";
 import { UserError } from "../../mintdex/server/db.server";
 import { sha256, walletBytes } from "./auth.server";
 import type { LiveComposeInput } from "./types";
@@ -53,7 +53,9 @@ export function normalizeLiveFields(input: LiveFieldsInput): LiveComposeInput {
 export function requireNewLaunchPair(fields: LiveComposeInput) {
   try { resolveNewLaunchPair(fields); }
   catch (error) { throw new UserError(error instanceof Error ? error.message : "Pick a supported pair."); }
-  // A transfer-fee quote (ZCAT) would only be refused at prepare, after the uploads and the coin image: refuse it here.
-  if (chargesTransferFee(fields.quoteAssetKey)) throw new UserError(TRANSFER_FEE_PAIR);
+  // A transfer-fee quote (ZCAT) would only be refused at prepare, after the uploads and the coin image, and a direct pair
+  // waits for the owner's confirmation (pairs.ts mainnetPairHold): refuse them here.
+  const held = mainnetPairRefusal(fields.quoteAssetKey);
+  if (held) throw new UserError(held);
 }
 export function compositionBinding(wallet: string, fields: LiveFieldsInput) { return sha256(JSON.stringify({version: 1, creator: wallet, ...normalizeLiveFields(fields)})); }

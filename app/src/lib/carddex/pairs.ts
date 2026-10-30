@@ -23,7 +23,11 @@ export type PairAsset = {
   /** Admitted by pump.fun's program on-chain but missing from its dated public pairs table (Codex, 30 October 2026). */
   listingStatus?: "direct-onchain";
   listingNotice?: string;
-  /** Reviewed on-chain snapshot for the local demo. Production resolves fresh account state. */
+  /**
+   * A dated snapshot (Codex's 28 and 30 October reviews) for the local demo's math and Discover's trending order. The
+   * live path never reads it: preparePumpLaunchPlan uses the chain's QuoteControl values, which have moved since (from
+   * -18.5% to +28.3% at slot 463274173), so nothing live may compare against it.
+   */
   initialVirtualQuoteReserves: string;
 };
 
@@ -82,6 +86,30 @@ export const NOT_OFFERED_PAIR = "That pair is not offered yet. Pick another pair
 export const TRANSFER_FEE_PAIRS: readonly PairAssetKey[] = Object.freeze(["zcat"] as PairAssetKey[]);
 export const TRANSFER_FEE_PAIR = "Mainnet launches can't use this pair yet: its mint charges a transfer fee. Pick another pair.";
 export const chargesTransferFee = (key?: string | null) => !!key && (TRANSFER_FEE_PAIRS as readonly string[]).includes(key);
+/**
+ * Direct pairs (isDirectPair) whose mainnet launches the owner has confirmed. Until a key is added here a mainnet launch
+ * on a direct pair is refused before anything is uploaded (readiness audit, 30 October 2026: pump.fun's dated public
+ * table leaves them out, so its site support can't be checked from the chain, and none has had a real mainnet create).
+ * One key opens one pair. The demo is unaffected.
+ */
+export const CONFIRMED_DIRECT_PAIRS: readonly PairAssetKey[] = Object.freeze([] as PairAssetKey[]);
+const FEE_HOLD = "Mainnet launches can't use this pair yet: its mint charges a transfer fee.";
+const DIRECT_HOLD = "Mainnet launches can't use this pair yet: it isn't on pump.fun's public pairs list.";
+export const DIRECT_PAIR_HELD = `${DIRECT_HOLD} Pick another pair.`;
+/**
+ * Why a new mainnet launch can't use this pair yet (the live pair panel's line), or null. New launches only: the live
+ * composition, a first prepare, the size check and the panel refuse with mainnetPairRefusal before any upload. Saved
+ * launches, reads and trades keep their pair.
+ */
+export function mainnetPairHold(key?: string | null): string | null {
+  if (chargesTransferFee(key)) return FEE_HOLD;
+  const asset = key ? BY_KEY.get(key) : undefined;
+  return asset && isDirectPair(asset) && !(CONFIRMED_DIRECT_PAIRS as readonly string[]).includes(asset.key) ? DIRECT_HOLD : null;
+}
+export function mainnetPairRefusal(key?: string | null): string | null {
+  const hold = mainnetPairHold(key);
+  return hold ? `${hold} Pick another pair.` : null;
+}
 
 /** The one card design a pair launches with (null for an unknown pair or one not offered yet). */
 export function designForPair(key?: string | null): CardDesignKey | null {

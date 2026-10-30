@@ -6,6 +6,9 @@ export const TOKEN_ANIMATION_SIZE = 1024;
 export const TOKEN_ANIMATION_FRAMES = 64;
 export const TOKEN_ANIMATION_FRAME_MS = 40;
 export const TOKEN_ANIMATION_HOLD_MS = 600;
+// The cap a coin GIF must fit. Worst case measured (readiness audit, 30 October 2026; 2048 px random-noise art): frost
+// 11.92 MiB, pair-eth 11.83 MiB; with realistic art at most 9.66 MiB. Art over the cap gets the plain "too much fine
+// detail" refusal at first prepare, before anything is sent.
 export const TOKEN_ANIMATION_MAX_BYTES = 12 * 1024 * 1024;
 export const TOKEN_ANIMATION_CARD_HEIGHT = TOKEN_ANIMATION_SIZE * .76;
 export const TOKEN_ANIMATION_BACKGROUND = Object.freeze([245, 239, 226] as const);

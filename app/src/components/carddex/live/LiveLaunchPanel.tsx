@@ -8,7 +8,7 @@ import {
 } from "../../../lib/carddex/live/api";
 import { composeCreatorCard } from "../../../lib/carddex/live/compose-client";
 import { getCardDesign } from "../../../lib/carddex/designs";
-import { TRANSFER_FEE_PAIR, chargesTransferFee, getPairAsset, getTradingPair } from "../../../lib/carddex/pairs";
+import { getPairAsset, getTradingPair, mainnetPairRefusal } from "../../../lib/carddex/pairs";
 import type { CardData } from "../../mintdex/MintCard";
 import { Button, Icon, Modal, TextLink } from "../../mintdex/ui";
 import { EmptyState } from "../../mintdex/empty-state";
@@ -303,8 +303,10 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
       }
       if (creator.current && creator.current !== address) throw new Error("Reconnect the wallet that owns this prepared launch.");
       if (!draft) { onInvalid(); return; }
-      // A transfer-fee pair (ZCAT) cannot launch on mainnet yet: say so before signing in, measuring or uploading.
-      if (chargesTransferFee(draft.quoteAssetKey)) throw new Error(TRANSFER_FEE_PAIR);
+      // A transfer-fee pair (ZCAT) or an unconfirmed direct pair cannot launch on mainnet yet: say so before signing in,
+      // measuring or uploading.
+      const held = mainnetPairRefusal(draft.quoteAssetKey);
+      if (held) throw new Error(held);
       await authenticate(address, version);
       if (draft.initialBuyQuoteBaseUnits !== "0") {
         // Nothing is uploaded for a buy that cannot fit the one coin transaction.

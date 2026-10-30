@@ -185,6 +185,7 @@ function SignedOut() {
 }
 
 type View = "coins" | "cards" | "balances";
+const PHONE_BALANCES = 12;
 
 function Collection({ me }: { me: NonNullable<Me> }) {
   const initial = Route.useLoaderData();
@@ -206,7 +207,8 @@ function Collection({ me }: { me: NonNullable<Me> }) {
   const count = view === "cards" ? data?.deeds.length ?? 0 : view === "balances" ? balances.length : coins.length;
   const tabsId = useId();
   // One fitted page per view on desktop (MintDex): rows of 64px, cards of about 300px, balance tiles of 84px; the
-  // pager turns. Phones show the whole list (the columns still follow the width).
+  // pager turns. Phones show the whole list (the columns still follow the width), but balances, one per pair, come 12
+  // to a page: SOL and the quotes your coins use first (readiness audit UX-1; 87 rows were a 5,276 px page).
   const grid = usePageCapacity({
     rowHeight: view === "cards" ? 300 : view === "balances" ? 84 : 64,
     minWidth: view === "coins" ? 10000 : view === "cards" ? 168 : 200,
@@ -214,7 +216,7 @@ function Collection({ me }: { me: NonNullable<Me> }) {
     maxRows: view === "cards" ? 2 : 10,
   });
   const desk = useDesk();
-  const perPage = desk ? grid.count : Math.max(1, count);
+  const perPage = desk ? grid.count : view === "balances" ? PHONE_BALANCES : Math.max(1, count);
   const pages = Math.max(1, Math.ceil(count / perPage));
   const page = Math.min((search.page ?? 1) - 1, pages - 1);
   const from = page * perPage;

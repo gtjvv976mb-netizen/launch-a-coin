@@ -8,12 +8,14 @@ import { FAUCET_AMOUNT, FAUCET_BELOW, LAMPORTS, LAUNCH_FEE, SOL_USD, START_BALAN
 import { IS_SIM, WORDS, pct } from "../lib/mintdex/copy";
 import { pageHead } from "../lib/mintdex/seo";
 import { getCardDesign } from "../lib/carddex/designs";
-import { OFFERED_PAIRS, designForPair, isDirectPair } from "../lib/carddex/pairs";
+import { OFFERED_PAIRS, designForPair, isDirectPair, mainnetPairHold } from "../lib/carddex/pairs";
 
 /** The Pairs lines that follow the offered set (pairs.ts): DOGE's card, and whether any crypto or direct pair is offered. */
 const DOGE_DESIGN = getCardDesign(designForPair("doge") ?? undefined).name;
 const OFFERS_CRYPTO = OFFERED_PAIRS.some((asset) => asset.kind === "crypto");
 const OFFERS_DIRECT = OFFERED_PAIRS.some(isDirectPair);
+// Direct pairs wait for the owner's confirmation before mainnet launches (pairs.ts CONFIRMED_DIRECT_PAIRS).
+const DIRECT_HELD = OFFERED_PAIRS.filter(isDirectPair).every((asset) => mainnetPairHold(asset.key));
 
 /*
  * How it works (/how): the one page that holds every explanation the screens leave out (the words rule: screens
@@ -112,8 +114,8 @@ const SECTIONS: Section[] = [
         <li>The pair is what your coin is priced and bought in: SOL, USDC, a crypto, meme or collector token, or a tokenized stock.</li>
         <li>The pair picks the card. Each pair has exactly one design, so choosing the pair and the design is one choice. DOGE gets {DOGE_DESIGN}.</li>
         <li>SOL is pump.fun's default pair and gets the One Piece design. USDC gets Duel Masters.</li>
-        {OFFERS_CRYPTO ? <li>Crypto pairs are Solana tokens or Solana versions of other coins; a version's panel names its bridge.</li> : null}
-        {OFFERS_DIRECT ? <li>Some pairs are admitted on-chain but missing from pump.fun's dated public list; their panel says so.</li> : null}
+        {OFFERS_CRYPTO ? <li>Crypto pairs are Solana tokens or Solana versions of other coins; the panel names the bridge where one is listed.</li> : null}
+        {OFFERS_DIRECT ? <li>Some pairs are admitted on-chain but missing from pump.fun's dated public list; their panel says so.{DIRECT_HELD ? " Mainnet launches can't use them yet." : ""}</li> : null}
         <li>Under the pair panel: the exact mint, its issuer and when it was reviewed. The mint is checked again before wallet review.</li>
         <li>The pair funds the optional initial buy, so changing the pair clears it. SOL also pays network and account costs.</li>
         <li>Stock pairs use tokenized quote assets. They grant no equity: your coin is not company shares.</li>
