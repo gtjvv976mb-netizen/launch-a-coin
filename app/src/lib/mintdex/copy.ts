@@ -90,28 +90,27 @@ const SIM_COPY: ModeCopy = {
   explainer: "Demo: simulated pump.fun trading and NFT cards with test SOL. No real coins or funds.",
   metaSuffix: "A demo with test SOL.",
   coinQualifier: "Demo: simulated market.",
-  usdNote: `USD at a fixed $${SOL_USD} per SOL (test rate)`,
+  usdNote: `USD at $${SOL_USD} per SOL (test rate)`,
   addressLabel: "Test address, not on chain",
   copyAddress: "Copy test address",
   addressCopied: "Test address copied.",
-  addressNotFound:
-    "Launch a Card runs as a demo for now, so coins on Solana devnet or mainnet do not have cards here yet. Only demo coins live in this collection.",
+  addressNotFound: "Only demo coins have cards here.",
   hero: "Try it with test SOL on a simulated pump.fun curve.",
   launchContext:
-    "Choose a permanent card design, add your coin, and try the pump.fun launch flow with test SOL.",
+    "Pick a pair and its card comes with it. Add your coin and try the pump.fun launch flow with test SOL.",
   guideLaunch:
-    "Choose a design, add your coin art and launch. The demo creates a simulated coin and one-of-one card in your collection.",
+    "Pick a pair (its card comes with it), add your coin art and launch. The demo creates a simulated coin and one-of-one card in your collection.",
   guideNote: "Demo: separate test balances and a simulated bonding curve. No real coin or NFT is minted.",
   curveComplete: "Curve complete (simulated)",
   botsNote: "Includes demo bots.",
   walletUnit: "test SOL",
   enterForSol: `Try the demo for ${START_SOL} test SOL`,
-  accountNote: "Your test account lives in this browser. Clearing site data ends access to it.",
-  enterGift: `You get ${START_SOL} test SOL. The demo uses no real funds.`,
+  accountNote: "Saved in this browser only.",
+  enterGift: `You get ${START_SOL} test SOL.`,
   enterWelcome: `${START_SOL} test SOL is in your wallet.`,
   walletContext: "Test wallet",
   portfolioSignedOut: `Try the demo to get a test wallet with ${START_SOL} test SOL. Your coins and cards will live here.`,
-  walletNote: "Test SOL only",
+  walletNote: "Test SOL",
   railStart: `Get ${START_SOL} test SOL to start. No real funds.`,
   shareSuffix: " (demo)",
 };
@@ -186,8 +185,9 @@ export const SIM_TAG = IS_SIM ? "Simulated" : "";
 export const SIM_TAG_HINT = "Simulated market data in the demo, not live quotes";
 export const BOT_HINT = "Simulated trader in the demo";
 
-/** The one label for "go and look at the coins" (Home hero, not-found pages, empty states): links to /discover. */
-export const EXPLORE_COINS = "Explore coins";
+/** The one label for "go and look at the coins" (Home hero, not-found pages, empty states): links to /discover, so it
+ * uses the tab's own name. */
+export const EXPLORE_COINS = "Discover coins";
 
 /** Home and the app shell: short labels (UX pass 2026-10-11). */
 export const HOME_COPY = {
@@ -203,11 +203,11 @@ export const HOME_COPY = {
 
 /** Coin not-found page (P0-10): one title, a body per reason. */
 export const COIN_NOT_FOUND = {
-  title: "This coin does not exist",
-  unknown: "No coin goes by that name or ticker. Check the spelling.",
+  title: "Coin not found",
+  unknown: "Check the spelling.",
   address: MODE_COPY.addressNotFound,
   action: EXPLORE_COINS,
-  several: "More than one coin goes by that name",
+  several: "Several coins match",
   severalBody: "Pick the one you mean.",
 } as const;
 
@@ -229,16 +229,16 @@ export const COIN_COPY = {
 
 /** Any other unknown page. */
 export const PAGE_NOT_FOUND = {
-  title: "This page does not exist",
-  body: "The link may be wrong, or the page moved.",
+  title: "Page not found",
+  body: "",
   action: EXPLORE_COINS,
   home: HOME_COPY.goHome,
 } as const;
 
 /** A route that failed to load, shown inside the app shell so the nav stays. */
 export const ROUTE_ERROR = {
-  title: "This page did not load",
-  body: "Something went wrong on our side. Try again, or head back home.",
+  title: "Page didn't load",
+  body: "",
   retry: "Try again",
   home: HOME_COPY.goHome,
 } as const;
@@ -307,7 +307,7 @@ export const WORDS = {
   /** Launch, under Mint and launch. */
   launcherLine: "Your selected design belongs to your coin from the first card.",
   /** Home, the second line under the headline (P1-27). */
-  heroBid: "Launch a coin on pump.fun. Give it a card worth collecting.",
+  heroBid: "Launch on pump.fun. Your pair picks the card.",
   /** Trade ticket fee row. */
   tradeFeeLabel: `Demo trading fee ${FEES.trade}`,
   cardIncome: IS_MAINNET
@@ -342,7 +342,7 @@ export const MARKET_COPY = {
   },
   feesTitle: "Fees and escrow",
   gone: "This card is gone",
-  explore: "Explore coins",
+  explore: EXPLORE_COINS,
 } as const;
 
 /** Discover (UX pass 2026-10-11): the design filter and one empty state per cause. */
@@ -354,7 +354,7 @@ export const DISCOVER_COPY = {
   noMatchBody: "Try a name or a ticker.",
   clearSearch: "Clear search",
   noDesign: (name: string) => `No coin has the ${name} design yet`,
-  noDesignBody: "A design unlocks as the market cap grows.",
+  noDesignBody: "Try another design.",
   noBoth: "No cards match",
   noBothBody: "Try another design or clear the search.",
   clearFilters: "Clear filters",
@@ -418,9 +418,12 @@ export const FLOW = {
   /** Above the impact threshold (P1-9 step 5). */
   highImpact: (side: "buy" | "sell", pctText: string) =>
     `High price impact: this ${side} moves the price ${pctText}.`,
-  /** Signed-out CTAs (P1-11 step 3). On devnet the wallet is the identity. */
-  enterToTrade: IS_SIM ? "Try the demo to trade" : "Connect a wallet to trade",
-  enterToLaunch: IS_SIM ? "Try the demo to launch" : "Connect a wallet to launch",
+  /**
+   * Signed-out CTAs off sim (P1-11 step 3): on devnet and mainnet the wallet is the identity. The demo's signed-out
+   * buttons name their action instead ("Buy $GLORB", "Create demo coin") and the dialog they open starts the demo.
+   */
+  enterToTrade: "Connect a wallet to trade",
+  enterToLaunch: "Connect a wallet to launch",
 } as const;
 
 /**
@@ -503,7 +506,7 @@ export const PORTFOLIO_COPY = {
   signedOutTitle: "See your cards here",
   /** Chain builds; the sim build keeps MODE_COPY.portfolioSignedOut (Enter Launch a Card). */
   signedOutBody: "Connect a wallet to see your coins and cards.",
-  explore: "Explore coins",
+  explore: EXPLORE_COINS,
   tabCoins: "Coins",
   tabCards: "Cards",
   tabBids: "My bids",

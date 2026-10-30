@@ -1,6 +1,7 @@
 export type LiveStage = "prepared" | "token_pending" | "nft_pending" | "complete" | "abandoned";
 export type LiveAsset = { sha256: string; url: string; mimeType: string; bytes: number };
-export type LiveAssets = { artwork: LiveAsset; cardImage: LiveAsset; caseImage: LiveAsset };
+// Token media is server-derived on new preparation. Historical immutable intents have only the original three assets.
+export type LiveAssets = { artwork: LiveAsset; cardImage: LiveAsset; caseImage: LiveAsset; tokenImage?: LiveAsset; tokenPoster?: LiveAsset };
 export type LivePrepareInput = {
   idempotencyKey: string; tokenMint: string; nftMint: string;
   name: string; symbol: string; description: string; website?: string; xUrl?: string; cardTemplate: string;
@@ -13,6 +14,8 @@ export type LivePrepareInput = {
   withCard?: boolean;
 };
 export type LiveComposeInput = Pick<LivePrepareInput, "tokenMint" | "name" | "symbol" | "description" | "website" | "xUrl" | "cardTemplate" | "quoteAssetKey" | "quoteMint">;
+/** A prepare request as the server accepts it: the pair alone names the card (an older client also sends the design). */
+export type LivePrepareRequest = Omit<LivePrepareInput, "cardTemplate" | "quoteAssetKey" | "quoteMint"> & Partial<Pick<LivePrepareInput, "cardTemplate" | "quoteAssetKey" | "quoteMint">>;
 export type { WalletTransactionPlan } from "../../../../../integrations/pumpfun/src/live";
 export type LiveReadiness = {
   implemented: true; configured: boolean;

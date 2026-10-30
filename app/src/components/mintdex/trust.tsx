@@ -3,7 +3,7 @@
  *
  *   ModeBadge      The "Test mode" pill beside the wordmark (rail lockup and MobileHeader). Opens a small popover
  *                  (a bottom sheet on phones): what is simulated, the USD rate, and links to a devnet faucet (the
- *                  guide in test mode) and to Terms and risks. Renders nothing when the mode has no badge (mainnet).
+ *                  /how#demo in test mode) and to Terms & risks. Renders nothing when the mode has no badge (mainnet).
  *   BotTag         The small "bot" chip after a demo bot's handle.
  *   SimTag         The small "Simulated" chip beside demo market figures (test mode only).
  *   ConfirmDialog  open (req), onOpenChange (req), title (req), children (req), confirmLabel (req), cancelLabel,
@@ -37,7 +37,6 @@ import { dexNo } from "../../lib/mintdex/format";
 import { absoluteUrl, canonicalCoinPath } from "../../lib/mintdex/seo";
 import type { CoinDetail } from "../../lib/mintdex/types";
 import { MintCard } from "./MintCard";
-import { useSessionUi } from "./session";
 import { Button, Icon, Modal, Pocket, menuCollisionPadding, useToast } from "./ui";
 import { Sheet, isPhoneNow } from "./sheet";
 
@@ -55,12 +54,11 @@ const FAUCET = HOME_COPY.getDevnetSol ? DEVNET_FAUCETS[0] : undefined;
  * it adds no rail row. On phones the hit area grows to 44px without moving the pill.
  */
 export function ModeBadge({ className = "" }: { className?: string }) {
-  const { openGuide } = useSessionUi();
   const [open, setOpen] = useState(false);
   // Phones read the same words in a bottom sheet (P1-1); the trigger and its markup stay the same.
   const [sheet, setSheet] = useState(false);
   if (!MODE_COPY.badge) return null;
-  const body = (close: () => void, fromSheet = false) => (
+  const body = (close: () => void) => (
     <>
       <p className="text-body text-slate max-lg:text-lead">
         {MODE_COPY.explainer}
@@ -77,21 +75,12 @@ export function ModeBadge({ className = "" }: { className?: string }) {
             {HOME_COPY.getDevnetSol}
           </a>
         ) : (
-          <button
-            type="button"
-            className="mdx-link mdx-hit"
-            onClick={() => {
-              close();
-              // From the sheet, the guide rises once this one has slid away and handed focus back.
-              if (fromSheet) setTimeout(openGuide, 260);
-              else openGuide();
-            }}
-          >
-            How Launch a Card works
-          </button>
+          <Link to="/how" hash="demo" className="mdx-link mdx-hit" onClick={close}>
+            How it works
+          </Link>
         )}
         <Link to="/legal" hash="risks" className="mdx-link mdx-hit" onClick={close}>
-          Terms and risks
+          Terms &amp; risks
         </Link>
       </div>
     </>
@@ -128,7 +117,7 @@ export function ModeBadge({ className = "" }: { className?: string }) {
         </Popover.Content>
       </Popover.Portal>
       <Sheet open={sheet} onOpenChange={setSheet} title={MODE_COPY.badge}>
-        {body(() => setSheet(false), true)}
+        {body(() => setSheet(false))}
       </Sheet>
     </Popover.Root>
   );
@@ -333,7 +322,10 @@ export function LaunchedDialog({
     if (!open) return;
     const t = window.setTimeout(() => {
       if (!cardRef.current) return;
-      void import("./arcade").then((m) => m.launchBurst(m.centerOf(cardRef.current)));
+      void import("./arcade").then((m) => {
+        m.launchBurst(m.centerOf(cardRef.current));
+        m.sparkBurst(cardRef.current);
+      });
     }, 1500);
     return () => window.clearTimeout(t);
   }, [open]);
@@ -351,8 +343,8 @@ export function LaunchedDialog({
           </div>
         </div>
         <p className="cdx-launched-copy">
-          {dexNo(coin.dexNo)} in the collection. You hold the one-of-one ${coin.ticker} card in your chosen design.
-          {IS_SIM ? " This is a demo; no real coin or NFT has been minted." : ""}
+          {dexNo(coin.dexNo)}. Your one-of-one ${coin.ticker} card.
+          {IS_SIM ? " Demo: nothing was minted." : ""}
         </p>
         <div className="cdx-overlay-actions mdx-sheet-foot">
           <Button variant="outline" onClick={() => void copyLink(url)}>

@@ -1,28 +1,46 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { num, oneOf, searchSchema, text } from "../lib/mintdex/search";
-import { CoinTile } from "../components/carddex/GalleryTile";
+import { MintCard } from "../components/mintdex/MintCard";
+import { View3DHost } from "../components/mintdex/card3d";
 import {
-  AutoGrid,
   Button,
-  ButtonLink,
-  IconButton,
+  Change,
+  GridCaption,
   Icon,
+  IconButton,
+  Num,
   PageFrame,
   PageHeader,
-  SortMenu,
+  Pager,
+  Shelf,
+  ShelfItem,
   TextLink,
+  fitCardGrid,
+  useSize,
 } from "../components/mintdex/ui";
 import { EmptyState } from "../components/mintdex/empty-state";
-import { SimTag } from "../components/mintdex/trust";
+import { useLoaderViewport } from "../components/mintdex/hooks";
 import { listCoins } from "../lib/mintdex/api";
+import { getCardDesign } from "../lib/carddex/designs";
+import { marketCapText, marketCapWatch } from "../lib/carddex/quote-display";
 import { pageHead } from "../lib/mintdex/seo";
+import { sortCoins } from "../lib/mintdex/sort";
+import type { CoinSummary } from "../lib/mintdex/types";
 
+/*
+ * Discover (MintDex's format): the header row (Discover, the count, then the Design and Sort pills), then the shelf:
+ * every coin's card in its tray on a ledge, with its caption (name and market cap, ticker and 24h). Desktop fits one
+ * page of cards to the screen (the pager in the header row turns pages, kept in ?page=); phones show every card two
+ * up and the page scrolls, with the search field on top. The shelf deals in, leans toward the pointer and shuffles on a Design or
+ * Sort change (Shelf, ui.tsx). Styles: styles/screens/discover.css.
+ */
 export const Route = createFileRoute("/discover")({
   validateSearch: searchSchema({
     q: text(40),
     sort: oneOf(["trending", "mcap", "new", "next"]),
+    design: text(40),
     focus: num(),
     tier: num(),
     page: num(),
@@ -34,9 +52,8 @@ export const Route = createFileRoute("/discover")({
       path: "/discover",
       title: "Discover | Launch a Card",
       description:
-        "Explore coins and their creator-selected NFT trading cards. A demo with simulated pump.fun trading.",
+        "Discover coins and the cards their pairs pick. A demo with simulated pump.fun trading.",
     }),
-  pendingComponent: DiscoverPending,
   component: Discover,
 });
 
@@ -47,12 +64,19 @@ const SORTS = [
 ] as const;
 type Sort = (typeof SORTS)[number]["value"];
 
-/** Every coin up to 48 is laid out on the page (density R4); a longer list shows its first 48 and one "Show all N
- * coins" that expands in place (the page param stays in the URL: any value above 1 means expanded). */
-const INLINE = 48;
+/** The fitted desktop shelf: a 56px caption strip under each card, cards 132 to 240px wide (compact under 190). */
+const FIT = { strip: 56, gap: 20, minW: 132, maxW: 240 };
 
-const clock = (t: number) =>
-  new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+/** Desktop (the fitted shelf) from 1024px; the server guesses from the root loader's viewport. */
+const DESK_QUERY = "(min-width: 1024px)";
+function subscribeDesk(cb: () => void) {
+  const list = window.matchMedia(DESK_QUERY);
+  list.addEventListener("change", cb);
+  return () => list.removeEventListener("change", cb);
+}
+function useDesk(serverGuess: boolean) {
+  return useSyncExternalStore(subscribeDesk, () => window.matchMedia(DESK_QUERY).matches, () => serverGuess);
+}
 
 function Discover() {
   const initial = Route.useLoaderData(),
@@ -60,267 +84,219 @@ function Discover() {
   const navigate = useNavigate({ from: "/discover" });
   const query = search.q ?? "";
   const sort: Sort = search.sort === "mcap" || search.sort === "new" ? search.sort : "trending";
-  const setQuery = (value: string) =>
+  const design = search.design ?? "";
+  const go = (next: { q?: string; sort?: Sort; design?: string; page?: number }) =>
     void navigate({
-      search: (previous) => ({ ...previous, q: value || undefined, page: undefined }),
+      search: (previous) => ({ ...previous, ...next, page: next.page }),
       replace: true,
       resetScroll: false,
     });
-  const { data, isError, isFetching, dataUpdatedAt, refetch } = useQuery({
+  const setQuery = (value: string) => go({ q: value || undefined });
+  const { data } = useQuery({
     queryKey: ["coins", {}],
     queryFn: () => listCoins({ data: {} }),
     initialData: initial,
     staleTime: 10000,
     refetchInterval: 20000,
   });
+  // The Design pill lists the designs the coins on the shelf wear, by name.
+  const designs = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const c of data) {
+      const d = getCardDesign(c.cardTemplate);
+      seen.set(d.key, d.name);
+    }
+    return [...seen].sort((a, b) => a[1].localeCompare(b[1]));
+  }, [data]);
+  // One order for every sort, shared with the server and Home (lib/mintdex/sort.ts): fair across pairs.
   const coins = useMemo(
     () =>
-      data
-        .filter((c) => `${c.name} ${c.ticker}`.toLowerCase().includes(query.trim().toLowerCase()))
-        .sort((a, b) =>
-          sort === "new"
-            ? b.createdAt - a.createdAt
-            : sort === "mcap"
-              ? (b.mcapUsd ?? -1) - (a.mcapUsd ?? -1)
-              : (b.volume24h ?? -1) - (a.volume24h ?? -1),
-        ),
-    [data, query, sort],
+      sortCoins(
+        data
+          .filter((c) => `${c.name} ${c.ticker}`.toLowerCase().includes(query.trim().toLowerCase().replace(/^\$/, "")))
+          .filter((c) => !design || getCardDesign(c.cardTemplate).key === design),
+        sort,
+      ),
+    [data, query, sort, design],
   );
-  const gridRef = useRef<HTMLUListElement>(null);
-  const searchRef = useRef<HTMLInputElement>(null);
-  const expanded = (search.page ?? 1) > 1;
-  const visible = expanded ? coins : coins.slice(0, INLINE);
-  // "Show all" moves focus to the first coin it added, so keyboard users carry on from there.
-  const focusFrom = useRef<number | null>(null);
-  useEffect(() => {
-    const from = focusFrom.current;
-    if (from == null || visible.length <= from) return;
-    focusFrom.current = null;
-    gridRef.current?.children[from]?.querySelector<HTMLElement>(".cdx-token-cell__link")?.focus();
-  }, [visible.length]);
   const items = useMemo(() => coins.map((c) => ({ id: c.id, card: c })), [coins]);
-  const sortLabel = SORTS.find((s) => s.value === sort)!.label.toLowerCase();
-  const count = (
-    <>
-      <span className="tabular-nums">{coins.length}</span> {coins.length === 1 ? "coin" : "coins"}
-    </>
-  );
-  // The count is announced once typing pauses (500ms), not on every keystroke: a quiet status of its own, with the
-  // visible words. Nothing is said on arrival.
-  const matchText = query.trim() ? `${coins.length} ${coins.length === 1 ? "coin matches" : "coins match"} “${query.trim()}”` : `${coins.length} ${coins.length === 1 ? "coin" : "coins"}`;
+  const order = useMemo(() => new Map(coins.map((c, i) => [c.id, i])), [coins]);
+
+  // The shelf's room: measured once mounted; the first frame (server and hydration) estimates it from the viewport.
+  const vp = useLoaderViewport();
+  const desk = useDesk((vp?.w ?? 390) >= 1024);
+  const guess = vp && vp.w >= 1024 ? { width: vp.w - 224 - 48, height: (vp.h ?? 900) - 53 - 40 - 48 - 72 - 48 } : { width: 358, height: 600 };
+  const [bodyRef, size] = useSize<HTMLDivElement>(guess);
+  const fit = desk ? fitCardGrid(size.width, size.height, FIT, coins.length) : null;
+  const perPage = fit ? fit.count : coins.length || 1;
+  const pages = Math.max(1, Math.ceil(coins.length / perPage));
+  const page = Math.min(Math.max(1, search.page ?? 1), pages) - 1;
+  const visible = fit ? coins.slice(page * perPage, page * perPage + perPage) : coins;
+
+  // Screen readers hear the match count once typing settles (not on load).
+  const trimmed = query.trim();
+  const matchText = trimmed ? `${coins.length} ${coins.length === 1 ? "coin matches" : "coins match"} “${trimmed}”` : `${coins.length} ${coins.length === 1 ? "coin" : "coins"}`;
   const [said, setSaid] = useState("");
   const typed = useRef(false);
   useEffect(() => {
     if (!typed.current) { typed.current = true; return; }
     const timer = setTimeout(() => setSaid(matchText), 500);
     return () => clearTimeout(timer);
+    // The count follows the query; the text is read when the timer fires.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
+
+  const searchRef = useRef<HTMLInputElement>(null);
   const clearSearch = () => {
-    // The field stays mounted; carry focus back to it so typing can start again.
     setQuery("");
     searchRef.current?.focus();
   };
+
+  const pills = (
+    <>
+      <label className="cdx-dex__pill">
+        <span className="cdx-dex__pill-label">Design</span>
+        <select
+          className="mdx-select"
+          value={design}
+          onChange={(e) => go({ design: e.target.value || undefined })}
+        >
+          <option value="">{desk ? "All" : "All designs"}</option>
+          {designs.map(([key, name]) => (
+            <option key={key} value={key}>{name}</option>
+          ))}
+        </select>
+      </label>
+      <label className="cdx-dex__pill">
+        <span className="cdx-dex__pill-label">Sort</span>
+        <select
+          className="mdx-select"
+          value={sort}
+          onChange={(e) => go({ sort: e.target.value === "trending" ? undefined : (e.target.value as Sort) })}
+        >
+          {SORTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+        </select>
+      </label>
+    </>
+  );
+
   return (
-    <PageFrame className="cdx-discover">
-      {/* One header row from 1024px: the title and its one line (count, sort, the page's Simulated label), then
-          search, sort and the primary. Only the count phrase ellipsizes, so a long query never hides Simulated. */}
+    <PageFrame className="mdx-page cdx-dex">
+      {/* Phones: the search field over the title (desktop searches from the rail). */}
+      <div className="cdx-dex__search lg:hidden">
+        <label className="sr-only" htmlFor="discover-search">Search coins</label>
+        <Icon name="search" className="cdx-dex__search-glyph" />
+        <input
+          ref={searchRef}
+          id="discover-search"
+          className="mdx-input"
+          type="search"
+          value={query}
+          maxLength={40}
+          placeholder="Search coins"
+          enterKeyHint="search"
+          autoComplete="off"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          onChange={(e) => setQuery(e.target.value)}
+          autoFocus={search.focus === 1 && !desk}
+        />
+        {query ? <IconButton icon="close" label="Clear search" size="sm" className="cdx-dex__clear" onClick={clearSearch} /> : null}
+      </div>
       <PageHeader
         title="Discover"
+        className="cdx-dex__head"
         context={
           <>
-            <span className="cdx-discover__ctx">
-              <span>
-                {count}
-                {query.trim()
-                  ? ` ${coins.length === 1 ? "matches" : "match"} “${query.trim()}”`
-                  : null}
-              </span>{" "}
-              · sorted by {sortLabel}
-            </span>{" "}
-            <SimTag className="cdx-discover__sim" />
+            <span className="num">{coins.length}</span> {coins.length === 1 ? "coin" : "coins"}
+            {trimmed ? <> for “{trimmed}” · <TextLink onClick={() => setQuery("")}>Clear</TextLink></> : null}
+            {" · "}
+            <TextLink to="/how" hash="cards">How it works</TextLink>
             <span className="sr-only" role="status">{said}</span>
           </>
         }
         toolbar={
           <>
-            <div className="cdx-discover__search">
-              <label className="sr-only" htmlFor="token-search">
-                Search coins
-              </label>
-              <Icon name="search" className="cdx-discover__search-glyph" />
-              <input
-                ref={searchRef}
-                id="token-search"
-                className="mdx-input"
-                type="search"
-                value={query}
-                maxLength={40}
-                placeholder="Search coins"
-                enterKeyHint="search"
-                autoComplete="off"
-                autoCapitalize="none"
-                autoCorrect="off"
-                spellCheck={false}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Escape" && query) {
-                    e.preventDefault();
-                    setQuery("");
-                  }
-                }}
-                autoFocus={search.focus === 1}
-              />
-              {query ? (
-                <IconButton
-                  icon="close"
-                  label="Clear search"
-                  size="sm"
-                  className="cdx-discover__clear"
-                  onClick={clearSearch}
-                />
-              ) : null}
-            </div>
-            <SortMenu
-              value={sort}
-              options={[...SORTS]}
-              label="Sort"
-              labelClassName="max-md:sr-only"
-              onChange={(value) =>
-                void navigate({
-                  search: (previous) => ({
-                    ...previous,
-                    sort: value === "trending" ? undefined : value,
-                    page: undefined,
-                  }),
-                  replace: true,
-                  resetScroll: false,
-                })
-              }
-            />
+            {pills}
+            {/* The pager sits in the header row, so turning pages never changes the shelf's room. */}
+            {fit && pages > 1 ? <Pager page={page} pages={pages} onPage={(next) => go({ page: next > 0 ? next + 1 : undefined })} /> : null}
           </>
         }
-        right={
-          <ButtonLink to="/launch" className="cdx-discover__launch">
-            Launch a coin
-          </ButtonLink>
-        }
       />
-      <div className="cdx-discover__body">
-        {isError && !isFetching ? (
-          <p className="cdx-discover__stale" role="status">
-            <Icon name="warning" className="cdx-discover__stale-glyph" />
-            <span>
-              Couldn't refresh the coin list. Showing figures from{" "}
-              <span className="tabular-nums">{clock(dataUpdatedAt)}</span>.
-            </span>{" "}
-            <TextLink onClick={() => void refetch()}>Try again</TextLink>
-          </p>
-        ) : null}
+      <div ref={bodyRef} className="cdx-dex__body">
         {coins.length > 0 ? (
-          <AutoGrid ref={gridRef} min="var(--coin-min)" className="cdx-token-grid">
-            {visible.map((c, i) => (
-              <li key={c.id} className="cdx-token-item">
-                {/* The first four (two rows on a phone, the start of the first row above) load at once and at high
-                    priority; the rest when they near the screen, so a phone's first screen gets the bandwidth. The sizes
-                    match the laid-out card (under half the screen on phones, a quarter on tablets, 150-200px above). */}
-                <CoinTile
-                  coin={c}
-                  list={items}
-                  priority={i < 4}
-                  sizes="(max-width: 767px) 46vw, (max-width: 1023px) 25vw, 200px"
-                />
-              </li>
-            ))}
-          </AutoGrid>
-        ) : query.trim() ? (
+          <Shelf
+            items={visible}
+            cols={fit ? fit.cols : 2}
+            cardW={fit ? fit.cardW : undefined}
+            gap={fit ? FIT.gap : 12}
+            rowGap={fit ? FIT.gap : 16}
+            keyOf={(c: CoinSummary) => c.id}
+            dealKey={`${sort}|${design}|${trimmed}|${page}`}
+            shuffleKey={`${sort}|${design}`}
+            parallax={desk}
+            seedOf={(c: CoinSummary) => c.dexNo}
+            render={(c: CoinSummary, w) => <CoinCell coin={c} width={w} list={items} index={order.get(c.id) ?? 99} />}
+          />
+        ) : trimmed || design ? (
           <EmptyState
-            compact
-            title={`No coins match “${query.trim()}”`}
+            inline
+            title={trimmed ? `No coins match “${trimmed}”` : "No coins wear this design yet"}
             action={
-              <Button variant="outline" size="sm" onClick={clearSearch}>
-                Clear search
+              <Button variant="outline" size="sm" onClick={() => (trimmed ? clearSearch() : go({ design: undefined }))}>
+                {trimmed ? "Clear search" : "All designs"}
               </Button>
             }
           />
         ) : (
           <EmptyState
             title="No coins yet"
-            body="Every coin launched here shows up with its card. Launch the first one."
-            action={<TextLink to="/levels">Browse card designs</TextLink>}
+            action={<TextLink to="/launch">Launch a coin</TextLink>}
           />
         )}
-        {!expanded && coins.length > INLINE ? (
-          <div className="cdx-discover__more">
-            <span className="cdx-discover__shown">
-              Showing <span className="tabular-nums">{INLINE}</span> of{" "}
-              <span className="tabular-nums">{coins.length}</span>
-            </span>
-            <Button
-              variant="outline"
-              onClick={() => {
-                focusFrom.current = INLINE;
-                void navigate({
-                  search: (s) => ({ ...s, page: 2 }),
-                  replace: true,
-                  resetScroll: false,
-                });
-              }}
-            >
-              {/* One text run: the button's flex gap would otherwise space out the count. */}
-              <span className="tabular-nums">{`Show all ${coins.length} coins`}</span>
-            </Button>
-          </div>
-        ) : null}
       </div>
     </PageFrame>
   );
 }
 
 /**
- * While the coin list loads (a client-side visit slower than the router's pending delay): the final layout with each
- * value as a flat bar at its real size, no shimmer, so nothing moves when the coins land.
+ * One shelf cell: the card in its tray (a link to the coin), then its caption. A market cap in the coin's own quote
+ * ("38.84K DOGE") takes the second line beside the ticker, so a long name never pushes it out (VIS-5).
  */
-function DiscoverPending() {
+function CoinCell({ coin, width, list, index }: { coin: CoinSummary; width: number; list: Array<{ id: string; card: CoinSummary }>; index: number }) {
+  const mc = marketCapText(coin);
+  const native = coin.mcapUsd == null;
+  const figure = (
+    <Num size="sm" tone="inherit" watch={marketCapWatch(coin)}>
+      {mc}
+    </Num>
+  );
   return (
-    <PageFrame className="cdx-discover">
-      <PageHeader
-        title="Discover"
-        context={<span className="cdx-skel cdx-skel--context" />}
-        toolbar={
-          <>
-            <span aria-hidden className="cdx-discover__search cdx-skel cdx-skel--field" />
-            <span aria-hidden className="cdx-skel cdx-skel--select" />
-          </>
-        }
-        right={
-          <ButtonLink to="/launch" className="cdx-discover__launch">
-            Launch a coin
-          </ButtonLink>
-        }
-      />
-      <div className="cdx-discover__body">
-        <p className="sr-only" role="status">
-          Loading coins
-        </p>
-        {/* 14 tiles: the two rows above the fold at 1440 (7 columns). */}
-        <div aria-hidden>
-          <AutoGrid min="var(--coin-min)" className="cdx-token-grid">
-            {Array.from({ length: 14 }, (_, i) => (
-              <li key={i} className="cdx-token-item">
-                <div className="cdx-token-cell cdx-token-cell--skel">
-                  <span className="cdx-skel cdx-skel--card" />
-                  <span className="cdx-token-cell__caption">
-                    <span className="cdx-skel cdx-skel--name" />
-                    <span className="cdx-skel cdx-skel--ticker" />
-                    <span className="cdx-skel cdx-skel--track" />
-                  </span>
-                </div>
-              </li>
-            ))}
-          </AutoGrid>
-        </div>
-      </div>
-    </PageFrame>
+    <View3DHost item={{ id: coin.id, card: coin }} list={list} style={{ maxWidth: width }}>
+      <Link
+        to="/coin/$id"
+        params={{ id: coin.id }}
+        className="block"
+        aria-label={`${coin.name}, $${coin.ticker}, market cap ${mc}, ${getCardDesign(coin.cardTemplate).name} design`}
+      >
+        <ShelfItem
+          width={width}
+          card={
+            // The first four load at once and at high priority; the rest when they near the screen. The sizes follow
+            // the laid-out card (under half the screen on phones, 150 to 240px on the fitted desktop shelf).
+            <MintCard card={coin} compact={width < 190} priority={index < 4} sizes="(max-width: 1023px) 46vw, 240px" />
+          }
+          caption={
+            <GridCaption
+              name={coin.name}
+              value={native ? undefined : figure}
+              sub={<span className="text-slate">${coin.ticker}</span>}
+              subRight={native ? figure : <Change v={coin.change24h} />}
+            />
+          }
+        />
+      </Link>
+    </View3DHost>
   );
 }

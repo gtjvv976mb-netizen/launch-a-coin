@@ -74,14 +74,52 @@ export function dexNo(n: number) {
 }
 
 /**
- * What an amount field keeps of what was typed or pasted: digits and ONE decimal point, with at most `decimals`
- * digits after it (SOL has 9, tokens 6). "1.571.6" becomes "1.5716", "2..5" becomes "2.5".
+ * The amount an amount field's text means: digits and ONE decimal point, with at most `decimals` digits after it (SOL
+ * has 9, tokens 6). "1.571.6" becomes "1.5716", "2..5" becomes "2.5". Read it when the amount is used (the quote, the
+ * trade), never to rewrite the field while it is typed: typedAmount keeps the field.
  */
 export function cleanAmount(raw: string, decimals = 9) {
-  const t = raw.replace(/[^0-9.]/g, "");
+  // One comma with one or two digits after it, and no point, is a decimal comma ("1,5", "1,50"); every other comma
+  // ("1,500", "12,345,678", a trailing "1,") is a thousands separator and is dropped.
+  const text = !raw.includes(".") && /^[^,]*,\d{1,2}$/.test(raw.trim()) ? raw.replace(",", ".") : raw;
+  const t = text.replace(/[^0-9.]/g, "");
   const dot = t.indexOf(".");
   if (dot < 0) return t;
   return `${t.slice(0, dot)}.${t.slice(dot + 1).replace(/\./g, "").slice(0, decimals)}`;
+}
+
+/**
+ * What an amount field holds as it is typed or pasted: digits, commas and ONE decimal point, with at most `decimals`
+ * digits after the point. Commas stay as typed, so "1,500" typed key by key passes through "1," and "1,5" and ends as
+ * "1,500" (1500 to cleanAmount), never as "1.500".
+ */
+export function typedAmount(raw: string, decimals = 9) {
+  const t = raw.replace(/[^0-9.,]/g, "");
+  const dot = t.indexOf(".");
+  if (dot < 0) return t;
+  return `${t.slice(0, dot)}.${t.slice(dot + 1).replace(/[.,]/g, "").slice(0, decimals)}`;
+}
+
+/**
+ * What the demo's handle field keeps of what was typed: a dash, dot or space becomes "_" ("walk-phone-1" is
+ * walk_phone_1), anything else outside letters, numbers and "_" is removed (`removed` says so, so the field can say
+ * it), and it is lowercased. HANDLE_RE and the server still decide what is allowed.
+ */
+export function cleanHandle(typed: string): { handle: string; removed: boolean } {
+  const joined = typed.replace(/[-.\s]/g, "_");
+  const handle = joined.replace(/[^a-zA-Z0-9_]/g, "").toLowerCase();
+  return { handle, removed: handle.length < joined.length };
+}
+
+/**
+ * A sell chip's amount: `fraction` of a holding (token atoms) as a token amount, rounded down to two decimals at
+ * every size (50% of 19.88 is 9.94, never more than the share); the whole holding (1) is exact so it sells all of
+ * it. Empty when nothing is held.
+ */
+export function sellShare(holdingAtoms: number, fraction: number): string {
+  if (!(holdingAtoms > 0)) return "";
+  if (fraction >= 1) return String(holdingAtoms / TOKEN_UNIT);
+  return String(Math.floor((holdingAtoms * fraction) / (TOKEN_UNIT / 100)) / 100);
 }
 
 /** Parse a user-typed SOL amount into lamports (NaN when invalid). */

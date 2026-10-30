@@ -10,12 +10,19 @@ function calm() {
   return document.hidden || document.documentElement.dataset.motion === "calm";
 }
 
-/** The design's burst palette: its sheen, its ring, plus neon where the sheen is plain white. */
+/** The site palette's exhibition light (carddex-theme.css --light-1 to --light-5: lit gold, antique gold, ivory,
+ *  card red, bronze), read at run time so the canvas paints the same colours the sheets do. */
+function lights(...n: number[]): string[] {
+  const css = getComputedStyle(document.documentElement);
+  return n.map((i) => css.getPropertyValue(`--light-${i}`).trim()).filter(Boolean);
+}
+
+/** The design's burst palette: its sheen, its ring, plus the site's gold where the sheen is plain white. */
 export function tierColors(level: number): string[] {
   const t = tierForLevel(level);
   const sheen = t.sheen.filter((c) => c.toUpperCase() !== "#FFFFFF");
-  const base = sheen.length ? sheen : ["#3dffb5", "#38d9ff"];
-  return [...base, t.ring, "#ffffff"];
+  const base = sheen.length ? sheen : lights(1, 2);
+  return [...base, t.ring, ...lights(3)];
 }
 
 function node(css: string) {
@@ -41,7 +48,7 @@ let lastAt = 0;
 export function bigBurst(
   colors: string[],
   at?: { x: number; y: number },
-  opts: { confetti?: boolean; label?: string } = {},
+  opts: { confetti?: boolean; label?: string; paletteOnly?: boolean } = {},
 ) {
   if (typeof window === "undefined" || calm()) return;
   // One at a time: two unlocks landing together play one burst.
@@ -105,7 +112,7 @@ export function bigBurst(
   }
 
   void import("./card3d/fx").then((fx) => {
-    const palette = [...colors, "#ffffff"];
+    const palette = [...colors, ...lights(3)];
     fx.burst(x, y, {
       n: 64,
       colors: palette,
@@ -129,7 +136,7 @@ export function bigBurst(
         }),
       160,
     );
-    if (opts.confetti) fx.confetti(palette);
+    if (opts.confetti) fx.confetti(palette, opts.paletteOnly);
   });
 }
 
@@ -139,9 +146,42 @@ export function tierBurst(level: number, at?: { x: number; y: number }) {
   bigBurst(tierColors(level), at, { confetti: level >= 7, label: `${t.name} unlocked` });
 }
 
-/** After a successful launch: confetti and the burst in the card's own foil (gold and the holo stops, carddex-theme.css). */
+/** After a successful launch: confetti in the site's own gold, cream and card red only (carddex-theme.css --light-*),
+ *  no foil pastels. */
 export function launchBurst(at?: { x: number; y: number }) {
-  bigBurst(["#e8bd62", "#f6c6dd", "#f7eac2", "#c8f0de", "#dccdf5"], at, { confetti: true });
+  bigBurst(lights(1, 2, 3, 4, 5), at, { confetti: true, paletteOnly: true });
+}
+
+/**
+ * D1's launch spark (Higgsfield spark-burst.mp4: a 3-second gold burst on black, 16:9, no audio): played once,
+ * screen-blended over the new card on a launch's success state (demo and live), then removed. Never on load (callers
+ * fire it on the success transition only), never under Calm motion or the device's reduced-motion setting (unless the
+ * visitor chose full motion), never in a hidden tab.
+ */
+export function sparkBurst(target: Element | null | undefined) {
+  if (typeof window === "undefined" || !target || calm()) return;
+  const root = document.documentElement;
+  if (root.dataset.motion || (window.matchMedia("(prefers-reduced-motion: reduce)").matches && root.dataset.motionPref !== "full")) return;
+  const card = target.matches(".mdx-card") ? target : (target.querySelector(".mdx-card") ?? target);
+  const r = card.getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  const w = Math.max(r.width, r.height) * 1.9;
+  const h = (w * 9) / 16;
+  const v = document.createElement("video");
+  v.className = "mdx-spark";
+  v.setAttribute("aria-hidden", "true");
+  v.muted = true;
+  v.playsInline = true;
+  v.preload = "auto";
+  v.disablePictureInPicture = true;
+  v.style.cssText = `left:${r.left + r.width / 2 - w / 2}px;top:${r.top + r.height / 2 - h / 2}px;width:${w}px;height:${h}px;`;
+  v.src = "/assets/site/d1/spark-burst.mp4";
+  const remove = () => v.remove();
+  v.addEventListener("ended", remove, { once: true });
+  v.addEventListener("error", remove, { once: true });
+  window.setTimeout(remove, 5000);
+  document.body.appendChild(v);
+  v.play().catch(remove);
 }
 
 /** The center of an element on screen (for a burst from a card). */

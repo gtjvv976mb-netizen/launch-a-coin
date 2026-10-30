@@ -1,45 +1,35 @@
 /**
- * The page-level not-found and error states, one look everywhere (the root and the router's defaults): one compact
- * block (styles/screens/overlays.css .cdx-status) centred in the page: the card back on its ledge (no halo), the
- * title, one sentence that says what to do, then one button and a "Go home" link. The title is the page's one h1,
- * where the route announcer lands focus after a page change. The server's own 500 page (lib/error-page.ts) draws the
- * same words in the same colours without the app.
+ * The page-level not-found and error states, one look everywhere (the root and the router's defaults; MintDex's
+ * format): the empty state's card back in its tray on the ledge, centred in the page, then one short title and two
+ * actions (a button and a "Go home" link), with no sentence under the title. The title is also the page's h1 for
+ * screen readers and the route announcer, which lands focus on a page's h1 after a page change. Styles: styles/screens/legal.css (.cdx-notfound).
+ * The server's own 500 page (lib/error-page.ts) draws the same words in the same colours without the app.
  */
-import { lazy, Suspense, useId, type ReactNode } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 
 import { PAGE_NOT_FOUND, ROUTE_ERROR } from "../../lib/mintdex/copy";
-import { Button, ButtonLink, Ledge, Pocket, TextLink } from "./ui";
+import { Button, ButtonLink, TextLink } from "./ui";
 
-// The root and the router use these pages, so the card back (the card engine) loads only when one shows. The slot
-// holds the card's shape until it lands, so nothing moves when it does.
-const CardBack = lazy(() => import("./card3d/CardBack").then((m) => ({ default: m.CardBack })));
+// The root and the router use these pages, so the card back behind them (the card engine) loads only when one shows.
+// Server HTML hydrates once the chunk is in; a client-side miss shows the h1 until then.
+const EmptyState = lazy(() => import("./empty-state").then((m) => ({ default: m.EmptyState })));
 
-function StatusPage({ title, body, action }: { title: string; body: string; action: ReactNode }) {
-  const id = useId();
+function StatusPage({ title, body, action }: { title: string; body?: string; action: ReactNode }) {
   return (
-    <section className="mdx-page cdx-status" aria-labelledby={id}>
-      <div className="cdx-status__block">
-        <div className="cdx-status__art" aria-hidden>
-          <Pocket className="cdx-status__card [--pocket:6px]">
-            <Suspense fallback={<div className="cdx-status__slot" />}>
-              <CardBack depth="hand" />
-            </Suspense>
-          </Pocket>
-          <Ledge className="cdx-status__ledge" />
-        </div>
-        <div className="cdx-status__text">
-          <h1 id={id} className="cdx-status__title">
-            {title}
-          </h1>
-          <p className="cdx-status__body">{body}</p>
-          <div className="cdx-status__actions">{action}</div>
-        </div>
-      </div>
-    </section>
+    <div className="mdx-page cdx-notfound">
+      <h1 className="sr-only">{title}</h1>
+      <Suspense fallback={null}>
+        <EmptyState
+          title={<span aria-hidden>{title}</span>}
+          body={body || undefined}
+          action={<div className="cdx-notfound__actions">{action}</div>}
+        />
+      </Suspense>
+    </div>
   );
 }
 
-/** An unknown page: Explore coins, or Go home. */
+/** An unknown page: Discover coins, or Go home. */
 export function PageNotFound() {
   return (
     <StatusPage

@@ -19,7 +19,7 @@ export function manifestFileName(mode: ManifestMode): string {
 }
 
 const DESCRIPTION: Record<ManifestMode, string> = {
-  sim: "Choose a premium card design and launch through pump.fun. Explore the separate demo collection with test funds.",
+  sim: "Pick a pair and its card comes with it. Launch through pump.fun. Explore the separate demo collection with test funds.",
   devnet: "The vintage card launchpad. Every coin is a one-of-one card. Live on Solana devnet.",
   mainnet: "The vintage card launchpad. Every coin is a one-of-one card.",
 };
@@ -32,13 +32,14 @@ export function webManifestText(mode: ManifestMode): string {
     description: DESCRIPTION[mode],
     start_url: "/",
     display: "standalone",
-    background_color: "#0d0c0b",
-    theme_color: "#0d0c0b",
+    background_color: "#26120b",
+    theme_color: "#26120b",
     icons: [
       { src: "/assets/brand/carddex-192.png", sizes: "192x192", type: "image/png" },
       { src: "/assets/brand/carddex-512.png", sizes: "512x512", type: "image/png" },
       {
-        src: "/assets/brand/carddex-512.png",
+        // The card inside the 80% safe circle, so a round mask keeps its corners.
+        src: "/assets/brand/carddex-maskable-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",

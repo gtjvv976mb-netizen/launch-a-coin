@@ -59,7 +59,8 @@ describe("the Launch ticket says what the wallet will ask", () => {
     expect(CREATION_MCAP_LABEL).toBe("At creation");
     expect(read("src/lib/carddex/live/creator-print.tsx")).toContain('["Market cap","At creation"]');
     expect(read("src/lib/carddex/live/composition.server.ts")).toContain('mcapLabel: "At creation"');
-    for (const file of ["src/routes/launch.tsx", "src/components/carddex/CardDesignPicker.tsx"]) {
+    // Launch's live card is the only creation preview left (the design library dialog went with the pair HUD).
+    for (const file of ["src/routes/launch.tsx"]) {
       expect(read(file)).toContain("CREATION_MCAP_LABEL");
       expect(read(file)).not.toContain('"At launch"');
     }

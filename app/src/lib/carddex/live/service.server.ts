@@ -7,11 +7,11 @@ import * as runtime from "../../bindings.server";
 import { clearGuard, db, guard, one, q, readBatch, stmt, UserError } from "../../mintdex/server/db.server";
 import { fetchPublicBytes, metadataShaFromUri, metadataUriPlaceholder, previewLaunchAssets, publishLaunchAssets, putPublicAsset, putPublicJson, validateOwnedAsset, verifyPublicJson } from "./assets.server";
 import { sha256, walletBytes } from "./auth.server";
-import { COMPOSITION_VERSION, requireTrustedComposition } from "./composition.server";
+import { COMPOSITION_VERSION, composeTokenAssets, requireTrustedComposition } from "./composition.server";
 import { BUY_DOES_NOT_FIT, STOCK_BUY_WARNS } from "./copy";
 import { requireLiveConfig } from "./config.server";
-import { normalizeLiveFields, normalizeLiveIdentity } from "./validation.server";
-import { LIVE_PACKET_LIMIT, type LiveApprovedCard, type LiveAssets, type LiveChainCheck, type LiveLaunchIntent, type LivePrepareInput, type LiveStage } from "./types";
+import { normalizeLiveFields, normalizeLiveIdentity, requireNewLaunchPair } from "./validation.server";
+import { LIVE_PACKET_LIMIT, type LiveApprovedCard, type LiveAssets, type LiveChainCheck, type LiveLaunchIntent, type LivePrepareRequest, type LiveStage } from "./types";
 
 type Payload = {input: Omit<LiveLaunchInput, "nftMint">; assets: LiveAssets; fields: ReturnType<typeof normalizeLiveFields>};
 type IntentRow = {id: string; creator_wallet: string; token_mint: string; nft_mint: string; quote_key: string; quote_mint: string; design_key: string; payload_sha256: string; payload_json: string; binding_sha256: string; token_metadata_uri: string; nft_metadata_uri: string; status: LiveStage; token_signature: string | null; nft_signature: string | null; token_receipt_json: string | null; nft_receipt_json: string | null; created_at: number; updated_at: number};
@@ -173,11 +173,12 @@ async function sourceAssets(wallet: string, designKey: string) {
   };
   return {front: await load(design.front), back: await load(design.back)};
 }
-async function preparePayload(wallet: string, raw: LivePrepareInput): Promise<Payload> {
+async function preparePayload(wallet: string, raw: LivePrepareRequest): Promise<Payload> {
   const fields = normalizeLiveFields(raw);
   walletBytes(wallet); walletBytes(raw.nftMint);
   if (new Set([wallet, fields.tokenMint, raw.nftMint, fields.quoteMint]).size !== 4) throw new UserError("Creator, new token mint, creator NFT and quote mint must be distinct addresses.");
   if (!raw.termsAcknowledged || !/^(0|[1-9][0-9]{0,19})$/.test(raw.initialBuyQuoteBaseUnits) || BigInt(raw.initialBuyQuoteBaseUnits) > 0xffffffffffffffffn || !Number.isInteger(raw.slippageBps) || raw.slippageBps < 0 || raw.slippageBps > 1000) throw new UserError("Review the quote terms, initial-buy atoms and slippage before preparing a real launch.");
+  if (raw.assets.tokenImage || raw.assets.tokenPoster) throw new UserError("Token image exports are created by this server from your verified card. Compose only the original artwork, card and case.");
   await requireTrustedComposition(wallet, fields, raw.assets);
   for (const role of ["artwork", "cardImage", "caseImage"] as const) await validateOwnedAsset(wallet, raw.assets[role], role);
   // After the composition and asset reads, before the first write (the design copies and metadata). Prepare still
@@ -187,12 +188,14 @@ async function preparePayload(wallet: string, raw: LivePrepareInput): Promise<Pa
     if (!size.fits) throw new UserError(size.buyBlocked ? STOCK_BUY_WARNS : BUY_DOES_NOT_FIT);
   }
   const sources = await sourceAssets(wallet, fields.cardTemplate), quote = getPairAsset(fields.quoteAssetKey), design = getCardDesign(fields.cardTemplate);
+  const media = await composeTokenAssets(wallet,fields,raw.assets);
   const common = {version: 1, rendererVersion: COMPOSITION_VERSION, creatorWallet: wallet, tokenMint: fields.tokenMint, quoteAssetKey: quote.key, quoteMint: quote.mint,
     cardTemplate: fields.cardTemplate, sourceFrontSha256: sources.front.sha256, sourceBackSha256: sources.back.sha256,
     artworkSha256: raw.assets.artwork.sha256, cardImageSha256: raw.assets.cardImage.sha256, caseImageSha256: raw.assets.caseImage.sha256};
-  const tokenJson = {name: fields.name, symbol: fields.symbol, description: fields.description, image: raw.assets.artwork.url,
+  const tokenJson = {name: fields.name, symbol: fields.symbol, description: fields.description, image: media.tokenImage.url, animation_url: media.tokenImage.url,
     ...(fields.website ? {website: fields.website} : {}), ...(fields.xUrl ? {twitter: fields.xUrl} : {}),
-    properties: {files: [{uri: raw.assets.artwork.url, type: raw.assets.artwork.mimeType}], category: "image", launchACard: common}};
+    properties: {files: [{uri: media.tokenImage.url, type: media.tokenImage.mimeType}, {uri: media.tokenPoster.url, type: media.tokenPoster.mimeType}], category: "image",
+      launchACard: {...common,tokenImageSha256:media.tokenImage.sha256,tokenPosterSha256:media.tokenPoster.sha256,tokenImageFormat:media.format,tokenPosterFormat:media.posterFormat,tokenPoster:media.tokenPoster.url}}};
   const nftJson = {name: fields.name, symbol: fields.symbol, description: fields.description,
     image: raw.assets.caseImage.url, seller_fee_basis_points: 0,
     ...(fields.website ? {external_url: fields.website} : {}),
@@ -204,7 +207,7 @@ async function preparePayload(wallet: string, raw: LivePrepareInput): Promise<Pa
   const tokenMetadata = await putPublicJson(wallet, tokenJson), nftMetadata = await putPublicJson(wallet, nftJson);
   await verifyPublicJson(tokenMetadata, tokenJson); await verifyPublicJson(nftMetadata, nftJson);
   if (new TextEncoder().encode(tokenMetadata.url).length > 200) throw new UserError("The public metadata URI exceeds pump.fun's supported length.");
-  return {fields, assets: raw.assets, input: {creator: wallet, mint: fields.tokenMint, name: fields.name, symbol: fields.symbol,
+  return {fields, assets: {...raw.assets,tokenImage:media.tokenImage,tokenPoster:media.tokenPoster}, input: {creator: wallet, mint: fields.tokenMint, name: fields.name, symbol: fields.symbol,
     tokenMetadataUri: tokenMetadata.url, quoteKey: quote.key, nftName: fields.name,
     initialBuyQuoteBaseUnits: raw.initialBuyQuoteBaseUnits, slippageBps: raw.slippageBps,
     renderedCardSha256: raw.assets.cardImage.sha256, nftMetadataSha256: nftMetadata.sha256,
@@ -226,9 +229,13 @@ export async function checkLiveLaunchSize(wallet: string, raw: {name: string; sy
   const buyFits = size.buyBytes <= size.limit && !size.buyBlocked, createFits = size.createBytes <= size.limit;
   return {limit: size.limit, bytes, fits: buy ? buyFits : createFits, buyBytes: size.buyBytes, buyFits, createBytes: size.createBytes, createFits, buyBlocked: size.buyBlocked ?? null};
 }
-/** Every launch asset the coin and card metadata reference: the three images, both design copies and both metadata files. */
+/**
+ * Every launch asset the coin and card metadata reference: the three images, the coin's turning GIF and its still (a
+ * launch prepared before the GIF has neither), both design copies and both metadata files.
+ */
 function launchAssetShas(payload: Payload) {
   return [payload.assets?.artwork?.sha256, payload.assets?.cardImage?.sha256, payload.assets?.caseImage?.sha256,
+    payload.assets?.tokenImage?.sha256, payload.assets?.tokenPoster?.sha256,
     payload.input?.card?.frontSha256, payload.input?.card?.backSha256, payload.input?.nftMetadataSha256,
     metadataShaFromUri(payload.input?.tokenMetadataUri ?? "")].filter((sha): sha is string => typeof sha === "string");
 }
@@ -251,7 +258,7 @@ async function retireUnlandedCoin(wallet: string, row: IntentRow): Promise<Inten
   logLaunchEvent("coin_retired", {intentId: row.id, kind: "token", plans: plans.length});
   return ownedIntent(wallet, row.id);
 }
-export async function prepareLiveLaunch(wallet: string, raw: LivePrepareInput) {
+export async function prepareLiveLaunch(wallet: string, raw: LivePrepareRequest) {
   requireLiveConfig("launch");
   if (!/^[a-zA-Z0-9_-]{8,100}$/.test(raw.idempotencyKey)) throw new UserError("Use a stable launch request identifier.");
   const fields = normalizeLiveFields(raw);
@@ -270,6 +277,9 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareInput) {
     const card = cardFits(transaction, ahead);
     await savePlan(existing, transaction, card); return {intent: publicIntent(existing), transaction, card};
   }
+  // A new launch from here on (a saved one returned above, whatever design and pair it was saved with): the pair picks
+  // the card, and a design that is not the pair's own is refused before any artwork, metadata or plan is made.
+  requireNewLaunchPair(fields);
   // One coin in flight per wallet (REL-5): another device or a cleared browser must recover the submitted coin first.
   const inFlight = await one<{id: string}>("SELECT id FROM live_launch_intents WHERE creator_wallet = ? AND status = 'token_pending' LIMIT 1", wallet);
   if (inFlight) throw new UserError("Finish or discard your saved launch first: its coin transaction was already sent. Find it under Saved launches.");

@@ -15,6 +15,7 @@ import { EmptyState } from "../../mintdex/empty-state";
 import { WalletConnectDialog } from "../../mintdex/wallet-connect";
 import { BUY_DOES_NOT_FIT, checkLiveBuyFit, LIVE_BUY_FIT, liveBuyFitKey, STOCK_BUY_WARNS } from "./buy-fit";
 import { formatLiveAmount } from "./amounts";
+import { LiveTokenImage } from "./LiveTokenImage";
 import { LiveWalletNotice } from "./LiveWalletNotice";
 import { PagedMessage } from "./PagedMessage";
 import { useLiveReadiness } from "./readiness";
@@ -43,10 +44,13 @@ export type LiveLaunchHandle = { submit(): void; startAnother(): void; /** The t
  * `status` is what the launch waits on, or why it stopped, for one line beside the bar's button.
  */
 export type LivePrimary = { kind: "submit" | "startAnother"; label: string; pendingLabel?: string; pending: boolean; disabled: boolean; blockedByPair: boolean; status?: { text: string; alert: boolean } | null };
-type Busy = "ownership" | "artwork" | "preparing" | "refreshing" | "wallet" | "submitting" | "confirming" | "recovering" | null;
+// coinImage: a new launch's first prepare, where the server also makes the coin's turning image. Every other prepare
+// (a saved launch prepared again, the buy-fit check, the card) is "preparing" and makes no image.
+type Busy = "ownership" | "artwork" | "coinImage" | "preparing" | "refreshing" | "wallet" | "submitting" | "confirming" | "recovering" | null;
 const BUSY_COPY: Record<NonNullable<Busy>, string> = {
   ownership: SIGN_IN_COPY,
-  artwork: "Preparing your permanent coin artwork and complete card image…",
+  artwork: "Preparing your artwork and complete card image…",
+  coinImage: "Making your turning coin image and checking the quote asset, balances and exact transaction costs…",
   preparing: "Checking the current quote asset, balances and exact transaction costs…",
   refreshing: "Getting a fresh transaction so your wallet sees current costs…",
   wallet: WALLET_OPEN_COPY,
@@ -73,8 +77,8 @@ function unwrap<T extends object>(result: LiveResult<T>): T {
 }
 const brief = (value: string) => `${value.slice(0, 5)}…${value.slice(-5)}`;
 
-export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOpen, notice, initialBuy = null, slippageBps = 100, ready, onInvalid, onLockedChange, onBusyChange, onTermsNeeded, onIntentLoaded, onStartAnother, onPrimary, ref }: {
-  draft: LiveLaunchDraft | null; card: CardData; pairPending: boolean; launchesOpen: boolean; notice?: string | null; onInvalid(): void;
+export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, initialBuy = null, slippageBps = 100, ready, onInvalid, onLockedChange, onBusyChange, onTermsNeeded, onIntentLoaded, onStartAnother, onPrimary, ref }: {
+  draft: LiveLaunchDraft | null; card: CardData; launchesOpen: boolean; notice?: string | null; onInvalid(): void;
   /** Changes whenever a draft field does (the page's string of them): a connect that was waiting to launch stops. */
   draftKey: string;
   /** The initial buy as typed, with its unit ("0.5 SOL"), or null for none. */
@@ -151,6 +155,16 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
   useEffect(() => { onBusyChange?.(!!busy); }, [busy, onBusyChange]);
   useEffect(() => () => onBusyChange?.(false), [onBusyChange]);
   useEffect(() => { onIntentLoaded(intent); }, [intent, onIntentLoaded]);
+  // D1 spark burst: once, over the visible preview card, when this visit's launch lands (a launch that was already
+  // complete when it loaded never plays it: that is a page load, not a success).
+  const lastStatus = useRef(intent?.status);
+  useEffect(() => {
+    const was = lastStatus.current;
+    lastStatus.current = intent?.status;
+    if (intent?.status !== "complete" || !was || was === "complete") return;
+    const stage = [...document.querySelectorAll(".cdx-launch-stage")].find((el) => el.getBoundingClientRect().width > 0);
+    void import("../../mintdex/arcade").then((m) => m.sparkBurst(stage));
+  }, [intent?.status]);
   useEffect(() => () => onLockedChange(false), [onLockedChange]);
   useEffect(() => {
     mounted.current = true;
@@ -258,7 +272,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
     // Wiring: a saved launch this tab still holds (prepared, or a coin that can be prepared again: launch-flow
     // coinRetryable) continues from its prepared input; its details and terms were accepted when it was saved.
     const continuing = () => !!(preparedInput.current && tokenKey.current && (pendingIntent.current?.status === "prepared" || coinRetryable(pendingIntent.current, true)));
-    if (!continuing() && (pairPending || !draft)) { onInvalid(); return; }
+    if (!continuing() && !draft) { onInvalid(); return; }
     if (!canLaunch) { setError(canRecover ? RECOVERY_ONLY : "Mainnet launch setup must be ready before a transaction can be prepared."); return; }
     if (!continuing() && !terms) { setError(TERMS_NEEDED); termsRef.current?.focus(); return; }
     if (!getLiveWalletSnapshot().address) { launchPending.current = "launch"; setConnectOpen(true); return; }
@@ -305,7 +319,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
       creator.current = address; draftAtPrepare.current = draft;
       setBusy("artwork");
       const assets = await composeCreatorCard({ card, tokenMint: tokenKey.current.address, artwork: draft.artwork, website: draft.website, xUrl: draft.xUrl });
-      assertCurrent(version, address); setBusy("preparing");
+      assertCurrent(version, address); setBusy("coinImage");
       const input: LivePrepareInput = {
         idempotencyKey: idempotencyKey.current, tokenMint: tokenKey.current.address, nftMint: nftKey.current.address,
         name: draft.name, symbol: draft.symbol, description: draft.description, website: draft.website, xUrl: draft.xUrl, cardTemplate: draft.cardTemplate,
@@ -629,7 +643,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
             : unsignable ? { kind: "submit", label: "Discard unused draft", pending: !!busy, disabled: !canRecover, blockedByPair: false }
             : intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current ? { kind: "submit", label: "Check confirmation", pending: !!busy, disabled: !canRecover, blockedByPair: false }
               : !intent && !canLaunch && canRecover ? { kind: "submit", label: "Find saved launch", pending: !!busy, disabled: false, blockedByPair: false }
-                : { kind: "submit", label: !wallet.address ? "Connect wallet to launch" : notSent === "token" ? "Prepare again" : "Review mainnet launch", pendingLabel: "Preparing…", pending: !!busy, disabled: !canLaunch || pairPending, blockedByPair: pairPending };
+                : { kind: "submit", label: !wallet.address ? "Connect wallet to launch" : notSent === "token" ? "Prepare again" : "Review mainnet launch", pendingLabel: "Preparing…", pending: !!busy, disabled: !canLaunch, blockedByPair: false };
   // What the bar says beside its button: the step it waits on, or why the launch stopped (the panel's alert below
   // the primary announces it; the bar's line is for the eye).
   const statusText = busy ? PHASE[busy] : error || "";
@@ -737,7 +751,6 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
       </ol>
       {intent?.status === "nft_pending" && !busy && !error ? <p>The coin is verified. Issue its separate one-of-one card to the same creator wallet.</p> : null}
     </section> : showFresh ? <p className="cdx-live-next">{oneApproval ? ONE_APPROVAL_NEXT : SEPARATE_APPROVALS_NEXT}</p> : null}
-    {pairPending ? <p role="status">Confirm or cancel the quote change under Pair before preparing a transaction.</p> : null}
     {/* The page's initial-buy notice, unless the alert above already says the same words. */}
     {notice && !intent && notice !== error ? <p role="status">{notice}</p> : null}
 
@@ -745,11 +758,12 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
     {showFresh ? <section className="cdx-live-wallet-notice" aria-labelledby="cdx-live-notice">
       <h3 id="cdx-live-notice" className="cdx-live-wallet-notice-title">{oneApproval ? "What your wallet will show for your coin and card" : "What your wallet will show for your coin"}</h3>
       <ul className="cdx-live-wallet-notice-list">{walletNoticePreview({ hasBuy: !!initialBuy, siteHost, oneApproval }).map(item => <li key={item.key} data-notice={item.key}>{item.text}</li>)}</ul>
-      <p className="cdx-live-wallet-notice-safety">{WALLET_NOTICE_COPY.safety}</p>
+      <p className="cdx-live-wallet-notice-safety">{WALLET_NOTICE_COPY.safety} <TextLink to="/how" hash="wallet">Details</TextLink></p>
     </section> : null}
 
     {intent ? <section className="cdx-live-block" aria-labelledby="cdx-live-saved">
       <h3 id="cdx-live-saved" className="cdx-live-subhead">Saved launch</h3>
+      <LiveTokenImage intent={intent} compact />
       <dl className="cdx-launch-cost cdx-live-review">
         <div><dt>Coin mint</dt><dd><TextLink href={`https://solscan.io/token/${intent.tokenMint}`} target="_blank"><span className="cdx-live-address">{brief(intent.tokenMint)}</span><Icon name="external" size={12} /></TextLink></dd></div>
         <div><dt>Quote asset</dt><dd>{selected.symbol}</dd></div>
@@ -787,6 +801,8 @@ export function LiveLaunchPanel({ draft, draftKey, card, pairPending, launchesOp
         <div ref={reviewBody} tabIndex={-1} role="region" aria-label="Transaction review" className="cdx-live-review-page">
           {reviewNotice ? <p className="cdx-live-callout" role="status">{reviewNotice}</p> : null}
           <p className="cdx-live-network"><strong>Solana mainnet · real funds</strong><span>{plan.kind === "token" ? getTradingPair(draftAtPrepare.current?.symbol ?? card.ticker, reviewIntent.quoteAssetKey) : "One-of-one creator card · no NFT royalties"}</span></p>
+          {/* The coin's permanent image, before the wallet opens (the server made it from this card; nothing to choose). */}
+          {plan.kind === "token" ? <LiveTokenImage intent={reviewIntent} /> : null}
           <dl className="cdx-launch-cost cdx-live-review">
             <div><dt>Network fee</dt><dd><span className="num">{formatLiveAmount(plan.review.networkFeeLamports, 9)}</span> <span className="mdx-unit">SOL</span></dd></div>
             <div><dt>Priority fee</dt><dd><span className="num">{formatLiveAmount(plan.review.priorityFeeLamports, 9)}</span> <span className="mdx-unit">SOL</span></dd></div>
@@ -826,6 +842,7 @@ type Stage = { state: "todo" | "active" | "done" | "stopped"; text: string };
 const PHASE: Record<NonNullable<Busy>, string> = {
   ownership: "Waiting for your wallet to sign in",
   artwork: "Preparing your artwork",
+  coinImage: "Making your coin image",
   preparing: "Preparing the transaction",
   refreshing: "Refreshing the transaction",
   wallet: "Waiting for your wallet",

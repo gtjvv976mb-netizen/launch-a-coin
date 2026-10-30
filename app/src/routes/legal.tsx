@@ -1,13 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Fragment, useCallback, useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
+import { Link, createFileRoute } from "@tanstack/react-router";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { oneOf, searchSchema } from "../lib/mintdex/search";
-import { PageFrame, PageHeader, prefersReducedMotion } from "../components/mintdex/ui";
+import { PageFrame, PageHeader, TextLink } from "../components/mintdex/ui";
 import { LAMPORTS, LAUNCH_FEE, TRADE_FEE_BPS } from "../lib/mintdex/constants";
 import { pct } from "../lib/mintdex/copy";
 import { pageHead } from "../lib/mintdex/seo";
 
 export const Route = createFileRoute("/legal")({
-  // Old links (?tab=privacy) still land on their section of the one document.
+  // ?tab= picks the section shown (Terms when absent); an old #hash link (#fees, #token-risk) opens its section.
   validateSearch: searchSchema({
     tab: oneOf(["terms", "fees", "privacy", "risks"]),
   }),
@@ -286,177 +286,106 @@ const SECTIONS: Section[] = [
   },
 ];
 
-/** Every heading the contents list can mark: the four sections and the topics under them, in reading order. */
-const HEADINGS = SECTIONS.flatMap((s) => [s.id as string, ...s.items.map((i) => i.id)]);
+type SectionId = Section["id"];
 
-/**
- * One readable document (a Read screen, one scroller): the title row, then from 1024px three columns across the
- * column (styles/screens/legal.css): the contents (each section one click away, the one you are reading marked, its
- * topics listed; every topic on tall screens), the text in a ~65-character measure, and the short version beside it.
- * From 768px the four section links stay pinned under the top bar over the text and the short version beside it;
- * under 768px the links, then the short version, then the text. Every heading is a linkable anchor; the [TO FILL]
- * slots stay marked until the operator supplies the facts.
+/** The section a #hash names: a section itself, or the section holding that topic. */
+function sectionOf(hash: string): SectionId | null {
+  for (const s of SECTIONS) if (s.id === hash || s.items.some((i) => i.id === hash)) return s.id;
+  return null;
+}
+
+/*
+ * Terms, privacy and risks (MintDex's format): the title row, then a vertical list of the four sections (a row of
+ * them on phones) beside one panel with the chosen section's topics, in two columns on wide screens. From 1024px
+ * the panel scrolls on its own; phones scroll the page. The section lives in ?tab=, so a link opens it; an old
+ * #hash link opens its section and brings the topic into view. The [TO FILL] slots stay marked until the operator
+ * supplies the facts. Styles: styles/screens/legal.css.
  */
 function Legal() {
   const { tab } = Route.useSearch();
+  const navigate = Route.useNavigate();
   const docRef = useRef<HTMLDivElement>(null);
-  const [current, setCurrent] = useState<string>(SECTIONS[0].id);
-  // A heading jumped to (a contents link or a #hash) stays marked while the page scrolls to it, and at the end of
-  // the page where it cannot reach the top; the reader's own scroll (wheel, touch, keys) lets the position decide.
-  const pinned = useRef<string | null>(null);
+  const current: SectionId = tab ?? "terms";
+  const section = SECTIONS.find((s) => s.id === current) ?? SECTIONS[0];
+  // The topic an old #hash link names, brought into view once its section shows.
+  const [topic, setTopic] = useState<string | null>(null);
 
-  // The page itself scrolls (main#content, or the window when there is no app frame), so the contents follow
-  // that scroller: the last heading that has reached the top of its view is current; at the very end, the last.
-  const scroller = useCallback((): HTMLElement | null => docRef.current?.closest<HTMLElement>("#content") ?? null, []);
-  const update = useCallback(() => {
-    const doc = docRef.current;
-    if (!doc) return;
-    if (pinned.current) {
-      setCurrent(pinned.current);
-      return;
-    }
-    const box = scroller();
-    const top = box ? box.getBoundingClientRect().top : 0;
-    let next = HEADINGS[0];
-    for (const id of HEADINGS) {
-      const el = document.getElementById(id);
-      if (el && el.getBoundingClientRect().top - top <= 96) next = id;
-    }
-    const el = box ?? document.documentElement;
-    if (el.scrollTop > 0 && el.scrollTop + el.clientHeight >= el.scrollHeight - 2) next = HEADINGS[HEADINGS.length - 1];
-    setCurrent(next);
-  }, [scroller]);
-
-  // Land on the linked section: #token-risk, or an old ?tab=risks link. A later #hash change does the same.
+  // An old #hash link (#fees, #token-risk): open its section (the URL keeps ?tab=, so the list marks it).
   useEffect(() => {
     const land = () => {
       const hash = decodeURIComponent(window.location.hash.slice(1));
-      const target = hash && document.getElementById(hash) ? hash : tab;
-      if (target && target !== "terms") {
-        pinned.current = target;
-        document.getElementById(target)?.scrollIntoView({ block: "start" });
+      const owner = hash ? sectionOf(hash) : null;
+      if (!owner) return;
+      if (owner !== (tab ?? "terms")) {
+        void navigate({ search: { tab: owner === "terms" ? undefined : owner }, hash, replace: true, resetScroll: false });
       }
-      update();
+      setTopic(hash === owner ? null : hash);
     };
     land();
-    // The router may restore or apply the hash scroll after this effect; read the position again once it has.
-    const raf = requestAnimationFrame(update);
     window.addEventListener("hashchange", land);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("hashchange", land);
-    };
-  }, [tab, update]);
-
+    return () => window.removeEventListener("hashchange", land);
+  }, [tab, navigate]);
   useEffect(() => {
-    const target: HTMLElement | Window = scroller() ?? window;
-    // A rect read per heading per scroll event: cheap enough to run directly, and it keeps working in a background tab.
-    const release = () => {
-      pinned.current = null;
-    };
-    target.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    for (const type of ["wheel", "touchstart", "keydown", "pointerdown"]) {
-      window.addEventListener(type, release, { passive: true, capture: true });
-    }
-    return () => {
-      target.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-      for (const type of ["wheel", "touchstart", "keydown", "pointerdown"]) {
-        window.removeEventListener(type, release, { capture: true });
-      }
-    };
-  }, [scroller, update]);
-
-  function onNav(e: MouseEvent<HTMLAnchorElement>, id: string) {
-    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    e.preventDefault();
-    const el = document.getElementById(id);
-    if (!el) return;
-    history.replaceState(history.state, "", `#${id}`);
-    pinned.current = id;
-    setCurrent(id);
-    el.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" });
-    el.focus({ preventScroll: true });
-  }
-
-  const section = SECTIONS.find((s) => s.id === current || s.items.some((i) => i.id === current))?.id ?? SECTIONS[0].id;
+    if (topic && sectionOf(topic) === current) document.getElementById(topic)?.scrollIntoView({ block: "start" });
+  }, [topic, current]);
 
   return (
-    <PageFrame className="cdx-legal">
-      <PageHeader title="Terms, privacy and risks" context={`Launch a Card · Updated ${UPDATED}`} wrapContext />
+    <PageFrame className="mdx-page cdx-legal">
+      <PageHeader title="Terms, privacy and risks" context={`Updated ${UPDATED}`} />
       <div className="cdx-legal__layout">
-        {/* Phones and tablets: the four sections, pinned under the top bar while the text scrolls. */}
-        <nav className="cdx-legal__jump" aria-label="Sections">
-          {SECTIONS.map((s) => (
-            <a
-              key={s.id}
-              href={`#${s.id}`}
-              onClick={(e) => onNav(e, s.id)}
-              aria-current={section === s.id ? "location" : undefined}
-            >
-              {s.title}
-            </a>
-          ))}
-        </nav>
-        {/* From 1024px: every section and topic; the one in view is marked. */}
-        <nav className="cdx-legal__toc" aria-labelledby="legal-contents">
-          <p id="legal-contents" className="cdx-legal__toc-head">
-            Contents
-          </p>
-          <ol>
+        <nav className="cdx-legal__nav" aria-label="Sections">
+          <ul>
             {SECTIONS.map((s) => (
               <li key={s.id}>
-                <a
-                  href={`#${s.id}`}
-                  onClick={(e) => onNav(e, s.id)}
-                  className="cdx-legal__toc-section"
-                  data-open={section === s.id || undefined}
-                  aria-current={current === s.id ? "location" : undefined}
+                <Link
+                  to="/legal"
+                  search={{ tab: s.id === "terms" ? undefined : s.id }}
+                  replace
+                  resetScroll={false}
+                  // Marked current by the router (aria-current="page") only when ?tab= matches exactly.
+                  activeOptions={{ explicitUndefined: true }}
+                  onClick={() => {
+                    setTopic(null);
+                    docRef.current?.scrollTo({ top: 0 });
+                  }}
+                  className="cdx-legal__tab"
                 >
                   {s.title}
-                </a>
-                <ol>
-                  {s.items.map((item) => (
-                    <li key={item.id}>
-                      <a
-                        href={`#${item.id}`}
-                        onClick={(e) => onNav(e, item.id)}
-                        aria-current={current === item.id ? "location" : undefined}
-                      >
-                        {item.title}
-                      </a>
-                    </li>
-                  ))}
-                </ol>
+                </Link>
               </li>
             ))}
-          </ol>
-        </nav>
-        <aside className="cdx-legal__summary" aria-labelledby="legal-summary">
-          <h2 id="legal-summary">The short version</h2>
-          <ul>
-            <li>Demo prices, balances and trades are simulated. Test funds have no cash value.</li>
-            <li>Wallet launches create a real pump.fun token and cost real SOL. You approve each transaction.</li>
-            <li>Real memecoins can lose all value.</li>
           </ul>
-        </aside>
-        <div ref={docRef} className="cdx-legal__doc">
-          {SECTIONS.map((s) => (
-            <section key={s.id} aria-labelledby={s.id}>
-              <h2 id={s.id} tabIndex={-1}>
-                {s.title}
-              </h2>
-              {s.items.map((item) => (
-                <Fragment key={item.id}>
+          <p className="cdx-legal__more">
+            <TextLink to="/how">How it works</TextLink>
+          </p>
+        </nav>
+        <div ref={docRef} className="cdx-legal__doc mdx-scroll" tabIndex={-1}>
+          <section aria-labelledby={section.id}>
+            <h2 id={section.id} className="sr-only">{section.title}</h2>
+            {section.id === "terms" ? (
+              <>
+                <p className="cdx-legal__lead">By using Launch a Card you agree to these terms.</p>
+                <aside className="cdx-legal__summary" aria-labelledby="legal-summary">
+                  <h3 id="legal-summary">The short version</h3>
+                  <ul>
+                    <li>Demo prices, balances and trades are simulated. Test funds have no cash value.</li>
+                    <li>Wallet launches create a real pump.fun token and cost real SOL. You approve each transaction.</li>
+                    <li>Real memecoins can lose all value.</li>
+                  </ul>
+                </aside>
+              </>
+            ) : null}
+            <div className="cdx-legal__cols">
+              {section.items.map((item) => (
+                <div key={item.id} className="cdx-legal__item">
                   <h3 id={item.id} tabIndex={-1}>
                     {item.title}
                   </h3>
                   {item.body}
-                </Fragment>
+                </div>
               ))}
-            </section>
-          ))}
+            </div>
+          </section>
         </div>
       </div>
     </PageFrame>

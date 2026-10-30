@@ -19,18 +19,7 @@ import { ConfirmDialog } from "../components/mintdex/confirm";
 import { useAction } from "../components/mintdex/hooks";
 import { type CardData } from "../components/mintdex/MintCard";
 import { useMe, useRequireMe } from "../components/mintdex/session";
-import { SimTag } from "../components/mintdex/trust";
-import {
-  ActionBar,
-  Button,
-  Field,
-  Icon,
-  Input,
-  PageFrame,
-  PageHeader,
-  TextLink,
-  useToast,
-} from "../components/mintdex/ui";
+import { Button, Field, Icon, Input, TextLink, useToast } from "../components/mintdex/ui";
 import { launch } from "../lib/mintdex/api";
 import { LAUNCH_FEE, TICKER_RE } from "../lib/mintdex/constants";
 import { quoteBuy } from "../lib/mintdex/curve";
@@ -38,15 +27,14 @@ import { sol, tokens } from "../lib/mintdex/format";
 import { pageHead, sentences } from "../lib/mintdex/seo";
 import { oneOf, searchSchema, text } from "../lib/mintdex/search";
 import { LaunchCardPreview } from "../components/carddex/live/LaunchCardPreview";
-import { CardDesignPicker } from "../components/carddex/CardDesignPicker";
-import { DEFAULT_CARD_DESIGN, getCardDesign, isCardDesignKey } from "../lib/carddex/designs";
-import { allowedQuotesForDesign, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, isPairAssetKey, type PairAssetKey } from "../lib/carddex/pairs";
-import { formatQuoteAmount, initialQuoteReserves, maxInitialBuyQuoteAtoms, parseQuoteAmount, quoteMetrics } from "../lib/carddex/quote-simulation";
-import { quoteFixed } from "../lib/carddex/quote-display";
+import { PairHud } from "../components/carddex/PairHud";
+import { getCardDesign } from "../lib/carddex/designs";
+import { getPairAsset, isPairAssetKey, type PairAssetKey } from "../lib/carddex/pairs";
+import { formatQuoteAmount, initialQuoteReserves, isQuoteDecimal, maxInitialBuyQuoteAtoms, parseQuoteAmount, quoteMetrics } from "../lib/carddex/quote-simulation";
+import { quoteCap, quoteFixed } from "../lib/carddex/quote-display";
 import { CREATION_MCAP_LABEL } from "../lib/carddex/card-template";
-import { QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
 import type { LiveLaunchHandle, LivePrimary } from "../components/carddex/live/LiveLaunchPanel";
-import { firstProblem, enterTarget, quickBuyAmounts, sameAmount, type FormCheck } from "../components/carddex/launch-form";
+import { draftPair, firstProblem, enterTarget, formDesign, pairFromSearch, pickPair as nextPick, signedOutPress, type FormCheck } from "../components/carddex/launch-form";
 import { liveReadinessQuery, useLiveLaunchOpen, useLiveRecoveryOpen } from "../components/carddex/live/readiness";
 import { formatLiveAmount, parseLiveAmount } from "../components/carddex/live/amounts";
 import { BUY_FIT_AFTER_SIGN_IN, liveBuyOff, useLiveBuyFit, useLiveBuyRefusal } from "../components/carddex/live/buy-fit";
@@ -69,7 +57,7 @@ export const Route = createFileRoute("/launch")({
       path: "/launch",
       title: "Launch a coin | Launch a Card",
       description: sentences(
-        "Choose a permanent card design, add your coin details and preview its one-of-one card",
+        "Pick your coin's pair and its card design comes with it. Add your coin details and preview its one-of-one card",
         "Try the full launch as a demo with test SOL",
       ),
     }),
@@ -78,13 +66,11 @@ export const Route = createFileRoute("/launch")({
 
 // ---------------------------------------------------------------- copy
 
-/** The header's one line before anything is typed: what the visitor needs, and that the rest has defaults. */
-const CONTEXT = "Name, ticker and artwork are all you need. Everything else has a default.";
-const ENTER_TO_UPLOAD = "Try the demo to upload card art and launch.";
-/** Under the art field while signed out in the demo: the upload waits, the other fields do not. */
-const ART_GATED = "Start the demo to upload. You can fill in everything else first.";
+// The screen carries the fewest words that let someone act; every explanation lives at /how#launch (and its
+// #fees, #pairs, #wallet, #demo and #recovery sections), one short link away.
 /** Mainnet mode while new launches are off: a creator can still finish a saved launch. */
-const MAINNET_RECOVERY = "New mainnet launches are not open right now. You can still finish a saved launch.";
+const MAINNET_RECOVERY = "Finish a saved launch.";
+/** Screen-reader text only: the field's rule (the error repeats it when it fails). */
 const TICKER_HELP = "2 to 8 letters or numbers (A to Z, 0 to 9).";
 
 // ---------------------------------------------------------------- draft
@@ -109,6 +95,38 @@ function writeDraft(draft: LaunchDraft | null) {
   } catch { /* Storage can be blocked; the form still works, it just is not kept. */ }
 }
 const str = (v: unknown) => (typeof v === "string" ? v : "");
+
+/**
+ * Card art picked while signed out in Demo (held in the page until Create starts the demo and uploads it) is kept here
+ * too, as a data URL beside the draft, so a refresh does not drop it while the page says "Draft saved". Cleared when
+ * it is removed, uploaded for the launch, or the form starts over.
+ */
+const HELD_ART_KEY = "carddex.launch.art.v1";
+/** The latest keepHeldArt call: a slower read of earlier art never writes over a later change or a clear. */
+let heldArtSeq = 0;
+function keepHeldArt(blob: Blob | null) {
+  const seq = ++heldArtSeq;
+  try {
+    if (!blob) { localStorage.removeItem(HELD_ART_KEY); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (seq !== heldArtSeq) return;
+      try { if (typeof reader.result === "string") localStorage.setItem(HELD_ART_KEY, reader.result); } catch { /* full or blocked: not kept */ }
+    };
+    reader.readAsDataURL(blob);
+  } catch { /* Storage can be blocked; the art stays in the page, it just is not kept. */ }
+}
+function readHeldArt(): Blob | null {
+  try {
+    const url = localStorage.getItem(HELD_ART_KEY);
+    const m = url ? /^data:(image\/(?:png|webp|jpeg));base64,([A-Za-z0-9+/=]+)$/.exec(url) : null;
+    if (!m) return null;
+    const bin = atob(m[2]);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type: m[1] });
+  } catch { return null; }
+}
 
 // ---------------------------------------------------------------- helpers
 
@@ -172,6 +190,25 @@ async function artCopies(art: Blob): Promise<Array<{ width: number; blob: Blob }
   }
 }
 
+/** A demo upload's answer: the stored image's address, or the reason it failed. */
+type DemoUpload = { ok: true; url: string } | { ok: false; error: string };
+
+/**
+ * The demo upload (it needs a demo account): the prepared art and its sized copies. A network failure throws; the
+ * caller says it.
+ */
+async function uploadDemoArt(blob: Blob): Promise<DemoUpload> {
+  const form = new FormData();
+  form.append("file", blob, blob.type === "image/webp" ? "art.webp" : "art.png");
+  // The sized copies ride along; if making them fails, the original alone still uploads.
+  for (const c of await artCopies(blob).catch(() => []))
+    form.append(`w${c.width}`, c.blob, `art-w${c.width}.webp`);
+  const res = await fetch("/api/upload", { method: "POST", body: form });
+  const body = (await res.json().catch(() => null)) as { ok: boolean; url?: string; error?: string } | null;
+  if (!res.ok || !body?.ok || !body.url) return { ok: false, error: body?.error ?? "Upload failed. Try again." };
+  return { ok: true, url: body.url };
+}
+
 /** Mirrors the server's link rules so the error shows under the field instead of as a toast. */
 function linkError(value: string, kind: "web" | "x"): string | null {
   const t = value.trim();
@@ -190,15 +227,15 @@ function linkError(value: string, kind: "web" | "x"): string | null {
 
 type FieldKey = "name" | "ticker" | "website" | "x";
 /** The form's checks, in DOM order: the first one that fails takes focus (Launch pressed, or Enter in a field). */
-type ProblemKey = "name" | "ticker" | "art" | "pair" | "buy" | "website" | "x" | "terms";
+type ProblemKey = "name" | "ticker" | "art" | "buy" | "website" | "x" | "terms";
 
 /**
- * Phones and phones held sideways (launch.css uses the same query): the live card sits in the fields panel beside
- * Name and Ticker; elsewhere it has its own track. One turntable is mounted, in whichever place shows. The server HTML
- * draws both places (null here), so a phone paints its card before hydration (it is the screen's LCP); the place that
- * does not show drops out once the page has hydrated.
+ * Below 1024px (MintDex's lg; launch.css uses the same query): the live card sits in the form beside Name and
+ * Ticker, with the pair HUD under them; from 1024px the card has the preview column. One turntable is mounted, in
+ * whichever place shows. The server HTML draws both places (null here), so a phone paints its card before hydration
+ * (it is the screen's LCP); the place that does not show drops out once the page has hydrated.
  */
-const PHONE_CARD_MQ = "(max-width: 767.98px), (max-width: 1023.98px) and (max-height: 500px)";
+const PHONE_CARD_MQ = "(max-width: 1023.98px)";
 function subscribePhoneCard(cb: () => void) {
   const mq = window.matchMedia(PHONE_CARD_MQ);
   mq.addEventListener("change", cb);
@@ -221,9 +258,10 @@ function useSettledValue<T>(value: T, ms: number): T {
 // ---------------------------------------------------------------- view
 
 /**
- * One page, one Launch button (density R5): the form with every field on it, the live card, and the ticket (every
- * cost line, the total and the primary). No steps and no separate review; Enter never submits (it moves on to the
- * next field that needs something, or to the primary). Below 1024px the page's action bar carries the primary.
+ * mintdex.fun's one-page Launch: the form panel (Name | Ticker, the pair HUD, Card art | Description, More options,
+ * then the ticket with the one primary at its foot) beside the live card. The pair picks the card: choosing a pair
+ * shows its design on the live card, and there is no separate design choice. No steps and no separate review; Enter
+ * never submits (it moves on to the next field that needs something, or to the primary).
  */
 function Launch() {
   const me = useMe();
@@ -241,6 +279,13 @@ function Launch() {
   const [preview, setPreview] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [preparedArt, setPreparedArt] = useState<Blob | null>(null);
+  // Signed out in Demo: the prepared art waits here (the upload needs a demo account) and goes up when Create starts
+  // the demo. A ref too, since the launch then runs from a closure made before sign-in.
+  const [heldArt, setHeldArt] = useState<Blob | null>(null);
+  const heldArtRef = useRef<Blob | null>(null);
+  // The held art's upload, kept so a launch that fails after it does not upload the same image again.
+  const heldUploadRef = useRef<{ blob: Blob; url: string } | null>(null);
+  const holdArt = (blob: Blob | null) => { heldArtRef.current = blob; setHeldArt(blob); keepHeldArt(blob); };
   const [liveLocked, setLiveLocked] = useState(false);
   // A mainnet step is running (sign-in, the artwork upload, preparing): the press already captured the fields.
   const [liveBusy, setLiveBusy] = useState(false);
@@ -257,7 +302,10 @@ function Launch() {
   const [resetOpen, setResetOpen] = useState(false);
   // Mainnet only: the initial buy's slippage, chosen beside the buy (the panel sends it with the prepared launch).
   const [slippageBps, setSlippageBps] = useState(100);
-  // The live ticket's primary, mirrored into the phone action bar (LiveLaunchPanel reports it when it changes).
+  // "More options" (Website, X link, the initial buy): MintDex's disclosure. It opens itself when a field inside it
+  // holds something (a restored draft or saved launch) or is where focus has to go.
+  const [moreOpen, setMoreOpen] = useState(false);
+  // The live ticket's primary as LiveLaunchPanel reports it (kept for a future mirror; MintDex has no action bar).
   const [livePrimary, setLivePrimary] = useState<LivePrimary | null>(null);
   const viewId = useId();
   const formId = `${viewId}-form`;
@@ -277,27 +325,28 @@ function Launch() {
   useEffect(() => {
     if (previousMode.current === live) return;
     previousMode.current = live;
-    setPreview(null); setImageUrl(null); setPreparedArt(null); setShowErrors(false);
+    setPreview(null); setImageUrl(null); setPreparedArt(null); holdArt(null); setShowErrors(false);
+    // A saved launch's own design stays in mainnet mode (the panel reports it again when the page comes back).
+    if (!live) setSavedDesign(null);
   }, [live]);
-  const [designKey, setDesignKey] = useState(() =>
-    isCardDesignKey(search.design) ? search.design : DEFAULT_CARD_DESIGN,
-  );
-  const [quoteKey, setQuoteKey] = useState<PairAssetKey>(() => {
-    const bound = boundQuoteForDesign(designKey);
-    return bound?.key ?? (isPairAssetKey(search.quote) ? search.quote : defaultQuoteForDesign(designKey).key);
-  });
+  // The pair picks the card (launch-form.ts): ?quote= opens on that pair, an older ?design= link on that design's pair,
+  // anything else on SOL. The card's design always follows the pair, except that a saved mainnet launch keeps the
+  // design it was saved with (one prepared before this rule may carry another) while the page is in mainnet mode; any
+  // pair tap ends that, the checked pair's included.
+  const [quoteKey, setQuoteKey] = useState<PairAssetKey>(() => pairFromSearch(search).pair);
+  const [savedDesign, setSavedDesign] = useState<string | null>(null);
+  const designKey = formDesign(quoteKey, savedDesign, live);
   const [pairNotice, setPairNotice] = useState("");
-  const [pairPending, setPairPending] = useState(false);
   const design = getCardDesign(designKey);
   const quoteAsset = getPairAsset(quoteKey);
   const restoreLiveIntent = useCallback((intent: LiveLaunchIntent | null) => {
     setLiveMint(intent?.tokenMint ?? null); setLiveCreator(intent?.creatorWallet ?? null);
+    setSavedDesign(intent ? getCardDesign(intent.cardTemplate).key : null);
     if (!intent) return;
     // A finished launch leaves no draft behind: the next visit starts empty, not with this coin's name and ticker.
     if (intent.status === "complete") writeDraft(null);
     setName(intent.name); setTicker(intent.symbol); setLore(intent.description);
     setWebsite(intent.website ?? ""); setXUrl(intent.xUrl ?? "");
-    setDesignKey(getCardDesign(intent.cardTemplate).key);
     if (isPairAssetKey(intent.quoteAssetKey)) setQuoteKey(intent.quoteAssetKey);
     // The saved launch's own initial buy, as a plain decimal in its quote ("" for none).
     const buy = intent.initialBuyQuoteBaseUnits;
@@ -305,17 +354,15 @@ function Launch() {
     setPreview(intent.assets.artwork.url);
   }, []);
   useEffect(() => {
-    const nextDesign = isCardDesignKey(search.design) ? search.design : DEFAULT_CARD_DESIGN;
-    const bound = boundQuoteForDesign(nextDesign);
-    const requested = isPairAssetKey(search.quote) ? search.quote : undefined;
-    const nextQuote = bound?.key ?? requested ?? defaultQuoteForDesign(nextDesign).key;
-    setDesignKey(nextDesign);
-    setQuoteKey(nextQuote);
+    const next = pairFromSearch(search);
+    setQuoteKey(next.pair);
+    setSavedDesign(null);
     setDevBuy("");
-    setPairNotice(search.quote && !isPairAssetKey(search.quote) ? `That quote asset is unavailable. ${getPairAsset(nextQuote).symbol} is selected; review the quote before creating the coin.` : bound && requested && requested !== bound.key ? `${getCardDesign(nextDesign).name} is paired with ${bound.symbol}; the quote has been matched to this design.` : "");
+    setPairNotice(next.notice);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.design, search.quote]);
 
-  // Restore the saved draft once, after the URL's design and quote are applied. A design in the URL wins.
+  // Restore the saved draft once, after the URL's pair is applied. A pair (or design) in the URL wins.
   // The mode is known from the first render (the loader read readiness on the server), so `live` here is the
   // page's real mode, not a test-mode placeholder. A step saved by the old step-by-step form is ignored.
   // Recovery-only mainnet waits: its locked fields fill from a saved launch, and a draft there would read as one.
@@ -332,12 +379,16 @@ function Launch() {
     if (d) {
       setName(str(d.name).slice(0, 24)); setTicker(str(d.ticker).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8));
       setLore(str(d.lore).slice(0, 280)); setWebsite(str(d.website)); setXUrl(str(d.xUrl));
-      const savedDesign = str(d.designKey), savedQuote = str(d.quoteKey);
-      if (!search.design && !search.quote && isCardDesignKey(savedDesign) && isPairAssetKey(savedQuote) && allowedQuotesForDesign(savedDesign).some(a => a.key === savedQuote)) {
-        setDesignKey(savedDesign); setQuoteKey(savedQuote); setDevBuy(str(d.devBuy));
-      }
+      // The draft's pair comes back (its card follows); an older draft's separate design is not used.
+      const savedPair = draftPair(d);
+      if (!search.design && !search.quote && savedPair) { setQuoteKey(savedPair); setDevBuy(str(d.devBuy)); }
       // Only an uploaded demo image can come back; prepared mainnet art lives in memory.
       if (!live && typeof d.imageUrl === "string" && d.imageUrl.startsWith("/")) { setImageUrl(d.imageUrl); setPreview(d.imageUrl); }
+    }
+    // Demo art picked while signed out and not yet uploaded comes back from beside the draft (keepHeldArt).
+    if (!live && !(typeof d?.imageUrl === "string" && d.imageUrl.startsWith("/"))) {
+      const kept = readHeldArt();
+      if (kept) { heldArtRef.current = kept; setHeldArt(kept); setPreview(URL.createObjectURL(kept)); }
     }
     setDraftReady(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -351,7 +402,6 @@ function Launch() {
   const xRef = useRef<HTMLInputElement>(null);
   const devRef = useRef<HTMLInputElement>(null);
   const loreRef = useRef<HTMLTextAreaElement>(null);
-  const pairConfirmationRef = useRef<HTMLDivElement>(null);
 
   useEffect(
     () => () => {
@@ -366,8 +416,10 @@ function Launch() {
   const liveDev = parseLiveAmount(devBuy, quoteAsset.decimals);
   const devAtoms = parsedDev ?? 0;
   const maxDev = maxInitialBuyQuoteAtoms(quoteKey);
-  const devNaN = live ? liveDev === null : !!devBuy && parsedDev === null;
-  const devOver = !live && devAtoms > maxDev;
+  // A plain decimal the parser still refuses is too large to count (past the safe integer range): over the cap.
+  const devHuge = !live && !!devBuy && parsedDev === null && isQuoteDecimal(devBuy, quoteKey);
+  const devNaN = live ? liveDev === null : !!devBuy && parsedDev === null && !devHuge;
+  const devOver = !live && (devHuge || devAtoms > maxDev);
   const devQuote = !live && devAtoms > 0 && !devNaN && !devOver ? quoteBuy(initialReserves, devAtoms) : null;
   const after = devQuote?.ok ? devQuote.after : initialReserves;
   const metrics = quoteMetrics(after, quoteKey);
@@ -376,7 +428,7 @@ function Launch() {
   const devError = devNaN
     ? `Enter a valid ${quoteAsset.symbol} amount with up to ${quoteAsset.decimals} decimals.`
     : devOver
-      ? `Initial buy is capped at ${quoteFixed(maxDev, quoteKey)} ${quoteAsset.symbol} in this demo.`
+      ? `Initial buy is capped at ${quoteCap(maxDev, quoteKey)} ${quoteAsset.symbol} in this demo.`
       : devQuote && !devQuote.ok ? `${devQuote.reason}.` : null;
   const balanceError = !live && me && !devError
     ? me.balance < nativeCost
@@ -405,9 +457,12 @@ function Launch() {
     if (!buyBlocked) setBuyDropped(false);
     else if (devBuy) { if (/[1-9]/.test(devBuy)) setBuyDropped(true); setDevBuy(""); }
   }, [buyBlocked, devBuy]);
+  useEffect(() => {
+    if (devBuy || website || xUrl) setMoreOpen(true);
+  }, [devBuy, website, xUrl]);
   const websiteError = linkError(website, "web");
   const xError = linkError(xUrl, "x");
-  const hasArt = !!(live ? preparedArt : imageUrl);
+  const hasArt = !!(live ? preparedArt : imageUrl || heldArt);
   const ready =
     nameOk &&
     tickerOk &&
@@ -416,7 +471,6 @@ function Launch() {
     !xError &&
     !devError &&
     !balanceError &&
-    !pairPending &&
     !uploading;
 
   // An error shows once the field is left with something in it, or after Launch is pressed.
@@ -429,7 +483,7 @@ function Launch() {
   const xMsg = xError && shown("x", xUrl) ? xError : null;
   const touch = (key: FieldKey) => () => setTouched((t) => (t[key] ? t : { ...t, [key]: true }));
 
-  const dirty = !!(name || ticker || lore || website || xUrl || devBuy || imageUrl);
+  const dirty = !!(name || ticker || lore || website || xUrl || devBuy || imageUrl || heldArt);
   useEffect(() => {
     if (justRestored.current) { justRestored.current = false; return; }
     if (!draftReady || (live && liveLocked) || recoveryOnly) return;
@@ -449,11 +503,6 @@ function Launch() {
     if (!file) return;
     if (live && liveLocked) return;
     const selectedMode = modeRef.current;
-    if (!live && !me) {
-      // After Enter, focus comes back to the dropzone (a file picker cannot reopen without a click).
-      require(() => artRef.current?.focus(), ENTER_TO_UPLOAD, "Start the demo");
-      return;
-    }
     if (!/^image\/(png|jpe?g|webp|gif)$/.test(file.type)) {
       toast("err", "Use a PNG, JPG, WEBP or GIF image.");
       return;
@@ -473,25 +522,22 @@ function Launch() {
         setImageUrl(null);
         return;
       }
-      const form = new FormData();
-      form.append("file", blob, blob.type === "image/webp" ? "art.webp" : "art.png");
-      // The sized copies ride along; if making them fails, the original alone still uploads.
-      for (const c of await artCopies(blob).catch(() => []))
-        form.append(`w${c.width}`, c.blob, `art-w${c.width}.webp`);
-      const res = await fetch("/api/upload", { method: "POST", body: form });
-      const body = (await res.json().catch(() => null)) as {
-        ok: boolean;
-        url?: string;
-        error?: string;
-      } | null;
-      if (!res.ok || !body?.ok || !body.url)
-        throw new Error(body?.error ?? "Upload failed. Try again.");
-      setImageUrl(body.url);
+      // Signed out: the card shows the art at once and it is kept until Create starts the demo, which uploads it.
+      if (!me) {
+        holdArt(blob);
+        setImageUrl(null);
+        return;
+      }
+      holdArt(null);
+      const up = await uploadDemoArt(blob);
+      if (!up.ok) throw new Error(up.error);
+      setImageUrl(up.url);
     } catch (e) {
       // Nothing half-uploaded stays on screen: the dropzone comes back with the reason in a toast.
       setPreview(null);
       setImageUrl(null);
       setPreparedArt(null);
+      holdArt(null);
       toast("err", e instanceof Error ? e.message : "Upload failed. Try again.");
     } finally {
       setUploading(false);
@@ -506,20 +552,15 @@ function Launch() {
 
   /** Remove the art: the dropzone comes back empty and takes focus (the blob preview is released by the effect above). */
   function removeArt() {
-    setPreview(null); setImageUrl(null); setPreparedArt(null);
+    setPreview(null); setImageUrl(null); setPreparedArt(null); holdArt(null);
     requestAnimationFrame(() => artRef.current?.focus({ preventScroll: true }));
   }
-
-  // Signed out in test mode, art cannot be uploaded yet: every other field still works, and the art field and the
-  // Launch button ask them to try the demo.
-  const artGated = !live && !me;
 
   // ------------------------------------------------ where focus goes when something is missing
   const checks = (): FormCheck<ProblemKey>[] => [
     { key: "name", ok: nameOk },
     { key: "ticker", ok: tickerOk },
     { key: "art", ok: hasArt && !uploading },
-    { key: "pair", ok: !pairPending },
     { key: "buy", ok: !devError && !(balanceError && devQuote?.ok) },
     { key: "website", ok: !websiteError },
     { key: "x", ok: !xError },
@@ -527,21 +568,25 @@ function Launch() {
     { key: "terms", ok: !(live && termsNeeded) },
   ];
   const problemRefs: Record<Exclude<ProblemKey, "terms">, RefObject<HTMLElement | null>> = {
-    name: nameRef, ticker: tickerRef, art: artRef, pair: pairConfirmationRef, buy: devRef, website: websiteRef, x: xRef,
+    name: nameRef, ticker: tickerRef, art: artRef, buy: devRef, website: websiteRef, x: xRef,
   };
   const problemEl = (key: ProblemKey) => key === "terms" ? liveRef.current?.terms() : problemRefs[key].current;
-  /** Focus, then bring it into view at once (no smooth scroll); scroll-margin keeps it clear of the action bar. */
+  /** A problem inside More options opens it first (a closed disclosure's fields cannot take focus). */
+  const inMore = (key: ProblemKey) => key === "buy" || key === "website" || key === "x";
+  /** Focus, then bring it into view at once (no smooth scroll); scroll-margin keeps it clear of the screen edges. */
   const land = (el: HTMLElement | null | undefined) => {
     if (!el) return;
     el.focus({ preventScroll: true });
     el.scrollIntoView({ block: "nearest" });
   };
-  /** The primary on screen: the ticket's button from 1024px, the action bar's below. */
+  /** The primary on screen: the ticket's button (or the live panel's). */
   const visiblePrimary = () =>
     [...(document.querySelectorAll<HTMLElement>("[data-launch-primary]"))].find((el) => el.getClientRects().length > 0);
   function focusFirstProblem() {
     const key = firstProblem(checks());
-    if (key) requestAnimationFrame(() => land(problemEl(key)));
+    if (!key) return;
+    if (inMore(key)) setMoreOpen(true);
+    requestAnimationFrame(() => land(problemEl(key)));
   }
   /** Enter in a text field never submits: it moves to the next field that needs something, or to the primary. */
   function onFormKeyDown(e: KeyboardEvent<HTMLFormElement>) {
@@ -552,8 +597,11 @@ function Launch() {
     const target = enterTarget(checks());
     if (target === "primary") land(visiblePrimary());
     else {
-      if (target !== "pair" && target !== "terms") setTouched((t) => ({ ...t, [target]: true }));
-      land(problemEl(target));
+      if (target !== "terms") setTouched((t) => ({ ...t, [target]: true }));
+      if (inMore(target) && !moreOpen) {
+        setMoreOpen(true);
+        requestAnimationFrame(() => land(problemEl(target)));
+      } else land(problemEl(target));
     }
   }
 
@@ -562,7 +610,7 @@ function Launch() {
   function clearFields() {
     writeDraft(null);
     setName(""); setTicker(""); setLore(""); setWebsite(""); setXUrl(""); setDevBuy("");
-    setPreview(null); setImageUrl(null); setPreparedArt(null); setTickerNote("");
+    setPreview(null); setImageUrl(null); setPreparedArt(null); holdArt(null); setTickerNote("");
     setTouched({}); setShowErrors(false);
     reset("launch");
   }
@@ -594,54 +642,70 @@ function Launch() {
   async function attempt() {
     if (modeRef.current) return;
     if (pending === "launch" || uploading) return;
-    if (!ready || !imageUrl) {
+    // Art picked before the demo started is read from the ref: after sign-in this runs from the press's closure.
+    const held = heldArtRef.current;
+    if (!ready || (!imageUrl && !held)) {
       setShowErrors(true);
       focusFirstProblem();
       return;
     }
     const res = await run(
       "launch",
-      () =>
-        launch({
+      async () => {
+        let image = imageUrl;
+        if (!image && held) {
+          const kept = heldUploadRef.current;
+          if (kept?.blob === held) image = kept.url;
+          else {
+            const up = await uploadDemoArt(held);
+            if (!up.ok) return up;
+            heldUploadRef.current = { blob: held, url: up.url };
+            image = up.url;
+          }
+        }
+        return launch({
           data: {
             name,
             cardTemplate: designKey,
             quoteAssetKey: quoteKey,
             quoteMint: quoteAsset.mint,
             ticker,
-            image: imageUrl,
+            image: image!,
             lore,
             website: website.trim() || undefined,
             xUrl: xUrl.trim() || undefined,
             devBuy: devQuote?.ok ? devAtoms : 0,
           },
-        }),
+        });
+      },
       undefined,
       { keys: [["home"], ["coins"], ["market"], ["portfolio"]] },
     );
     // The coin page opens "Your card is live" (P1-12) for ?minted=1, then drops the flag from the URL.
-    if (res) writeDraft(null);
+    if (res) { writeDraft(null); keepHeldArt(null); }
     if (res) navigate({ to: "/coin/$id", params: { id: res.id }, search: { minted: 1 } });
   }
 
   /** Only a press of the primary gets here (Enter in a field is caught above). */
   function submit(e: FormEvent) {
     e.preventDefault();
-    if (pairPending) {
-      focusFirstProblem();
-      return;
-    }
     if (live) {
       if (!ready && !liveLocked && !recoveryOnly) { setShowErrors(true); focusFirstProblem(); return; }
       liveRef.current?.submit();
       return;
     }
-    // Signed out: a missing name or ticker is pointed at first; then the Enter dialog names the launch and finishes
-    // it (P1-11). Without art yet, that means pointing at the art field, the one thing left to do.
-    if (!me && (!nameOk || !tickerOk)) { setShowErrors(true); focusFirstProblem(); return; }
-    require(() => void attempt(), imageUrl ? "Try the demo to launch a coin." : ENTER_TO_UPLOAD, ticker && imageUrl
-      ? `Start the demo and launch $${ticker}`
-      : "Start the demo");
+    // Signed out: anything missing is pointed at first, with no dialog; once the form is complete the one demo
+    // prompt names the launch and finishes it (P1-11), uploading the art it kept.
+    if (!me) {
+      if (signedOutPress({ nameOk, tickerOk, hasArt: hasArt && !uploading }) !== "enter" || firstProblem(checks())) {
+        setShowErrors(true);
+        focusFirstProblem();
+        return;
+      }
+      require(() => void attempt(), undefined, `Start the demo and launch $${ticker}`);
+      return;
+    }
+    void attempt();
   }
 
   const tickerText = ticker ? `$${ticker}` : "coins";
@@ -672,18 +736,16 @@ function Launch() {
     mintAddress: live ? liveMint : undefined,
     lore: lore.trim() || undefined,
   };
-  const changePair = (nextQuote: PairAssetKey, nextDesign: string) => {
+  /** A pair pick is a card pick: the preview shows the pair's design at once. An initial buy is in the old pair's
+   * unit, so it is cleared (and the line under the HUD says so). */
+  const pickPair = (next: PairAssetKey) => {
     if (live && liveLocked) return;
-    if (!isCardDesignKey(nextDesign) || !allowedQuotesForDesign(nextDesign).some(a => a.key === nextQuote)) return;
-    const changed = nextQuote !== quoteKey;
-    setDesignKey(nextDesign);
-    setQuoteKey(nextQuote);
-    if (changed) setDevBuy("");
-    setPairNotice(changed ? `Pair changed to ${getPairAsset(nextQuote).symbol}.${devBuy ? " The initial buy was cleared so its amount is not reused in another asset." : ""}` : "");
-  };
-  const pick = (key: string) => {
-    if (!isCardDesignKey(key)) return;
-    changePair(boundQuoteForDesign(key)?.key ?? quoteKey, key);
+    const pick = nextPick({ pair: quoteKey, savedDesign }, next);
+    if (!pick) return;
+    setSavedDesign(pick.savedDesign);
+    setQuoteKey(pick.pair);
+    if (pick.changed && devBuy) { setDevBuy(""); setPairNotice("Initial buy cleared."); }
+    else setPairNotice("");
   };
 
   // Recovery-only mainnet mode: the fields wait for a saved launch to fill them, and stay locked once it does. They
@@ -694,9 +756,6 @@ function Launch() {
   useEffect(() => {
     if (live && !liveLocked && !preparedArt && preview) setPreview(null);
   }, [live, liveLocked, preparedArt, preview]);
-  const buyOff = locked || buyBlocked;
-  const quickAmounts = quickBuyAmounts(quoteKey, live ? undefined : maxDev);
-
   // The draft the mainnet panel prepares, kept as one object while its fields hold still (the panel's effects
   // read it), and a string of those fields for change checks.
   const liveDraft = useMemo(
@@ -707,15 +766,21 @@ function Launch() {
   const liveBuyText = live && liveDev && liveDev !== "0" ? `${devBuy.trim()} ${quoteAsset.symbol}` : null;
   useEffect(() => { if (!live) setLivePrimary(null); }, [live]);
 
-  // ------------------------------------------------ the header's one line
+  // ------------------------------------------------ the header's one line: the draft, or a saved launch to finish
   const draftLine = dirty && !locked && !recoveryOnly;
-  const context = recoveryOnly ? MAINNET_RECOVERY : draftLine ? (
-    <span className="cdx-launch-draft">
-      <span>Draft saved in this browser</span>
-      <span aria-hidden> · </span>
-      <button type="button" className="mdx-link mdx-hit" aria-haspopup="dialog" onClick={() => setResetOpen(true)}>Start over</button>
-    </span>
-  ) : CONTEXT;
+  const context = (
+    <>
+      {recoveryOnly ? <>{MAINNET_RECOVERY} </> : draftLine ? (
+        <span className="cdx-launch-draft">
+          <span>Draft saved</span>
+          <span aria-hidden> · </span>
+          <button type="button" className="mdx-link mdx-hit" aria-haspopup="dialog" onClick={() => setResetOpen(true)}>Start over</button>
+          <span aria-hidden> · </span>
+        </span>
+      ) : null}
+      <TextLink to="/how" hash={recoveryOnly ? "recovery" : "launch"}>How it works</TextLink>
+    </>
+  );
 
   // ------------------------------------------------ the ticket's pieces
   const required = [
@@ -724,6 +789,7 @@ function Launch() {
     { label: "Artwork", ok: hasArt },
   ];
   const stillNeeded = required.filter((r) => !r.ok).map((r) => r.label.toLowerCase());
+  // The mainnet panel lists what is still needed beside its primary (its `ready` slot).
   const readyList = (
     <div className="cdx-launch-ready">
       <ul aria-label="Required to launch">
@@ -741,129 +807,136 @@ function Launch() {
     </div>
   );
   const demoPending = pending === "launch";
-  // ≤380px the visible words shorten to "Create demo coin"; the name stays whole (it contains the visible words).
-  const demoLabel = !me ? "Try the demo to launch" : uploading ? "Uploading art…" : (
-    <><span className="cdx-launch-go__long">Create demo coin and card</span><span className="cdx-launch-go__short" aria-hidden>Create demo coin</span></>
-  );
-  const demoButton = (inBar: boolean) => (
+  const demoButton = (
     <Button
       type="submit"
-      form={inBar ? formId : undefined}
       size="lg"
-      block={!inBar}
+      block
       data-launch-primary=""
-      aria-label={me && !uploading && !demoPending ? "Create demo coin and card" : undefined}
       pending={demoPending}
       pendingLabel="Creating your coin…"
-      disabled={pairPending || (!!me && uploading)}
-      onBlocked={pairPending ? focusFirstProblem : undefined}
+      disabled={!!me && uploading}
       feedback={feedback("launch")}
       successLabel="Created"
     >
-      {demoLabel}
+      {uploading && me ? "Uploading art…" : "Create demo coin"}
     </Button>
   );
-  const totalValue = (
-    <>
-      <span className="num">{sol(nativeCost, 3)}</span> <span className="mdx-unit">test SOL</span>
-      {quoteKey !== "sol" && devQuote?.ok ? <span className="cdx-launch-cost__plus"> + <span className="num">{formatQuoteAmount(devQuote.solIn, quoteKey)}</span> test {quoteAsset.symbol}</span> : null}
-    </>
-  );
+  // MintDex's ticket: the content rules, the total with "What is included" behind it, the fee line, the one primary.
   const demoTicket = (
-    <section className="cdx-launch-demo" aria-labelledby={`${viewId}-cost`}>
-      <div className="cdx-launch-ticket__head">
-        <h2 id={`${viewId}-cost`} className="cdx-launch-section">Cost</h2>
-        <SimTag />
-      </div>
-      <dl className="cdx-launch-cost">
-        <div><dt>Launch cost</dt><dd><span className="num">{sol(LAUNCH_FEE, 3)}</span> <span className="mdx-unit">test SOL</span></dd></div>
-        <div><dt>Initial buy</dt><dd>{devQuote?.ok ? <><span className="num">{quoteKey === "sol" ? sol(devQuote.solIn, 3) : formatQuoteAmount(devQuote.solIn, quoteKey)}</span> <span className="mdx-unit">test {quoteAsset.symbol}</span></> : "None"}</dd></div>
-        <div data-total><dt>Total</dt><dd>{totalValue}</dd></div>
-      </dl>
-      <p className="cdx-launch-ticket__note">Launch a Card charges no platform fee. The launch cost stands in for the network fees and account rent a mainnet launch pays. {liveOpen ? "" : "Mainnet launches are not open yet. "}This demo uses test SOL{quoteKey === "sol" ? "" : ` and test ${quoteAsset.symbol}`}: no real coin or card is created.</p>
-      {readyList}
-      {/* What stops the launch, said beside the button: the balance check, a pending pair change, the server's reason. */}
+    <section className="cdx-launch-ticket" aria-labelledby={`${viewId}-total`}>
+      <p className="cdx-launch-rules">By creating this coin you agree to the <TextLink to="/legal" hash="content-rules">content rules</TextLink>.</p>
+      <details className="cdx-launch-total">
+        <summary>
+          <span id={`${viewId}-total`} className="cdx-launch-total__value" aria-live="polite">
+            Total <span className="num">{sol(nativeCost, 3)}</span> <span className="mdx-unit">test SOL</span>
+            {quoteKey !== "sol" && devQuote?.ok ? <span className="cdx-launch-cost__plus"> + <span className="num">{formatQuoteAmount(devQuote.solIn, quoteKey)}</span> test {quoteAsset.symbol}</span> : null}
+          </span>
+          <span className="cdx-launch-total__more">What is included<Icon name="chevron-down" size={14} /></span>
+        </summary>
+        <dl className="cdx-launch-cost">
+          <div><dt>Launch cost</dt><dd><span className="num">{sol(LAUNCH_FEE, 3)}</span> <span className="mdx-unit">test SOL</span></dd></div>
+          <div><dt>Initial buy</dt><dd>{devQuote?.ok ? <><span className="num">{quoteKey === "sol" ? sol(devQuote.solIn, 3) : formatQuoteAmount(devQuote.solIn, quoteKey)}</span> <span className="mdx-unit">test {quoteAsset.symbol}</span></> : "None"}</dd></div>
+        </dl>
+      </details>
+      <p className="cdx-launch-fee-note">Launch a Card charges no platform fee. <TextLink to="/how" hash="fees">Details</TextLink></p>
+      {/* What stops the launch, said beside the button: the balance check, the server's reason. */}
       {balanceError ? <PagedMessage text={balanceError} alert /> : null}
-      {pairPending ? <p className="cdx-pair-notice" role="status">Confirm or cancel the pair change under Pair before creating this demo coin.</p> : null}
       {launchError ? <PagedMessage text={launchError} alert /> : null}
-      <div className="cdx-launch-go">{demoButton(false)}</div>
-      <p className="cdx-launch-rules">By creating this coin you agree to the <TextLink to="/legal" hash="terms">content rules</TextLink>.</p>
+      <div className="cdx-launch-go">{demoButton}</div>
     </section>
   );
-  const liveBarButton = livePrimary ? (
-    livePrimary.kind === "startAnother"
-      ? <Button variant="outline" size="lg" data-launch-primary="" onClick={() => liveRef.current?.startAnother()}>{livePrimary.label}</Button>
-      : <Button type="submit" form={formId} size="lg" data-launch-primary="" pending={livePrimary.pending} pendingLabel={livePrimary.pendingLabel} disabled={livePrimary.disabled} onBlocked={livePrimary.blockedByPair ? focusFirstProblem : undefined}>{livePrimary.label}</Button>
-  ) : <Button size="lg" disabled>Loading…</Button>;
+
+  const spacer = <div aria-hidden className="cdx-launch-spacer" />;
 
   return (
-    <PageFrame className="mdx-page cdx-launch">
-      <PageHeader title="Launch a coin" context={context} wrapContext right={liveOpen || recoveryOpen ? (
-        <nav className="cdx-launch-mode" aria-label="Launch mode">
-          <Link to="/launch" search={{ design: designKey, quote: quoteKey, mode: "live" }} aria-label={liveOpen ? "Mainnet wallet launch" : "Finish a saved mainnet launch"} aria-current={live ? "page" : undefined}>{liveOpen ? "Mainnet" : "Saved launch"}</Link>
-          <Link to="/launch" search={{ design: designKey, quote: quoteKey, mode: "demo" }} aria-current={!live ? "page" : undefined}>Demo</Link>
-        </nav>
-      ) : undefined} />
+    <div className="cdx-launch mdx-page flex min-h-0 flex-col gap-6 short:gap-4 lg:h-full">
+      <header className="cdx-launch-head flex flex-none flex-wrap items-end justify-between gap-x-6 gap-y-3 lg:h-14 lg:flex-nowrap">
+        <div className="min-w-0">
+          <h1 className="mdx-h1 -mb-1 pb-1 lg:truncate max-lg:[text-wrap:balance]">Launch a coin</h1>
+          <p className="mt-1 text-[13px] leading-[1.45] text-slate lg:truncate">{context}</p>
+        </div>
+        {liveOpen || recoveryOpen ? (
+          <nav className="cdx-launch-mode" aria-label="Launch mode">
+            <Link to="/launch" search={{ quote: quoteKey, mode: "live" }} aria-label={liveOpen ? "Mainnet wallet launch" : "Finish a saved mainnet launch"} aria-current={live ? "page" : undefined}>{liveOpen ? "Mainnet" : "Saved launch"}</Link>
+            <Link to="/launch" search={{ quote: quoteKey, mode: "demo" }} aria-current={!live ? "page" : undefined}>Demo</Link>
+          </nav>
+        ) : null}
+      </header>
       {/* Announced once, when the draft first starts saving (the visible words sit in the header line). */}
       <p className="sr-only" aria-live="polite">{draftLine ? "Draft saved in this browser." : ""}</p>
 
-      <form id={formId} onSubmit={submit} onKeyDown={onFormKeyDown} noValidate aria-label="New coin" className="cdx-launch-grid">
-        {/* ------------------------------------------------ the fields: required first, then everything optional */}
-        <div className="cdx-launch-fields mdx-plinth">
-          {recoveryOnly && !liveLocked ? <p className="cdx-launch-fields__note">These fields fill in from your saved launch.</p> : null}
-          <div className="cdx-launch-required">
-            {/* Phones: the live card, turnable, beside Name and Ticker (its controls come first in Tab order, as it
-                reads first). The slot keeps its size when a client render has not placed the card yet. */}
-            <div className="cdx-launch-f cdx-launch-f--card">
-              {phoneCard !== false ? <section aria-label="Your card preview" className="cdx-create-preview"><LaunchCardPreview card={previewCard} /></section> : null}
+      <div className="cdx-launch-grid grid grid-cols-1 gap-5 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:grid-rows-[minmax(0,1fr)]">
+        <form id={formId} onSubmit={submit} onKeyDown={onFormKeyDown} noValidate aria-label="New coin" className="cdx-launch-form mdx-plinth mdx-scroll flex min-w-0 flex-col gap-4 lg:min-h-0 lg:gap-0 lg:overflow-y-auto">
+          {recoveryOnly && !liveLocked ? <p className="cdx-launch-fields__note">Fields fill from your saved launch.</p> : null}
+          {/* Name and Ticker (one row from 1024px); below that, stacked beside the live card. */}
+          <div className="cdx-launch-ident">
+            <div className="cdx-launch-ident__fields">
+              <Field label="Name" htmlFor="name" error={nameMsg} help={<span className="sr-only">2 to 24 characters.</span>} right={<span className="num" aria-hidden>{name.length}/24</span>} className="cdx-launch-f cdx-launch-f--name">
+                <Input
+                  disabled={locked}
+                  ref={nameRef}
+                  id="name"
+                  value={name}
+                  maxLength={24}
+                  required
+                  aria-required="true"
+                  enterKeyHint="next"
+                  onChange={(e) => setName(e.target.value)}
+                  onBlur={() => { setName(n => n.trim()); touch("name")(); }}
+                  placeholder="Glorb"
+                  autoComplete="off"
+                  aria-invalid={nameMsg ? true : undefined}
+                  aria-describedby="name-help"
+                />
+              </Field>
+              <Field label="Ticker" htmlFor="ticker" error={tickerMsg ? `${tickerMsg}${tickerNote ? ` ${tickerNote}` : ""}` : null} help={<><span aria-live="polite">{tickerNote}</span>{tickerNote ? null : <span className="sr-only">{TICKER_HELP}</span>}</>} className="cdx-launch-f cdx-launch-f--ticker">
+                <Input
+                  disabled={locked}
+                  ref={tickerRef}
+                  id="ticker"
+                  prefix="$"
+                  value={ticker}
+                  required
+                  aria-required="true"
+                  enterKeyHint="next"
+                  onChange={(e) => {
+                    // The 8-character limit counts the cleaned ticker, and anything removed is explained.
+                    const typed = e.target.value.toUpperCase();
+                    const clean = typed.replace(/[^A-Z0-9]/g, "");
+                    setTicker(clean.slice(0, 8));
+                    setTickerNote(clean.length < typed.length
+                      ? "Only A to Z and 0 to 9."
+                      : clean.length > 8 ? "Up to 8 characters." : "");
+                  }}
+                  onBlur={touch("ticker")}
+                  placeholder="GLORB"
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                  aria-invalid={tickerMsg ? true : undefined}
+                  aria-describedby="ticker-help"
+                />
+              </Field>
             </div>
-            <Field label="Name" htmlFor="name" error={nameMsg} help={<span className="sr-only">2 to 24 characters.</span>} right={<span className="num" aria-hidden>{name.length}/24</span>} className="cdx-launch-f cdx-launch-f--name">
-              <Input
-                disabled={locked}
-                ref={nameRef}
-                id="name"
-                value={name}
-                maxLength={24}
-                required
-                aria-required="true"
-                enterKeyHint="next"
-                onChange={(e) => setName(e.target.value)}
-                onBlur={() => { setName(n => n.trim()); touch("name")(); }}
-                placeholder="e.g. Glorb"
-                autoComplete="off"
-                aria-invalid={nameMsg ? true : undefined}
-                aria-describedby="name-help"
-              />
-            </Field>
-            <Field label="Ticker" htmlFor="ticker" error={tickerMsg ? `${tickerMsg}${tickerNote ? ` ${tickerNote}` : ""}` : null} help={<span aria-live="polite">{tickerNote || TICKER_HELP}</span>} className="cdx-launch-f cdx-launch-f--ticker">
-              <Input
-                disabled={locked}
-                ref={tickerRef}
-                id="ticker"
-                prefix="$"
-                value={ticker}
-                required
-                aria-required="true"
-                enterKeyHint="next"
-                onChange={(e) => {
-                  // The 8-character limit counts the cleaned ticker, and anything removed is explained.
-                  const typed = e.target.value.toUpperCase();
-                  const clean = typed.replace(/[^A-Z0-9]/g, "");
-                  setTicker(clean.slice(0, 8));
-                  setTickerNote(clean.length < typed.length
-                    ? "Only letters A to Z and numbers 0 to 9 are allowed, so other characters were removed."
-                    : clean.length > 8 ? "Tickers are up to 8 characters, so the rest was left out." : "");
-                }}
-                onBlur={touch("ticker")}
-                placeholder="e.g. GLORB"
-                autoComplete="off"
-                autoCapitalize="characters"
-                spellCheck={false}
-                aria-invalid={tickerMsg ? true : undefined}
-                aria-describedby="ticker-help"
-              />
-            </Field>
-            <Field label="Artwork" htmlFor="art" error={artMsg} help={artGated && !preview ? ART_GATED : undefined} className="cdx-launch-f cdx-launch-f--art">
+            {/* Below 1024px: the live card, turnable, beside Name and Ticker. The slot keeps its size when a client
+                render has not placed the card yet. */}
+            <div className="cdx-launch-phonecard lg:hidden">
+              {phoneCard !== false ? <section aria-label="Your card preview" className="cdx-launch-stage cdx-launch-stage--phone"><LaunchCardPreview card={previewCard} /></section> : null}
+            </div>
+          </div>
+          {spacer}
+
+          {/* The pair HUD: picking a pair picks the card (the live card shows its design). Under Name and Ticker, so
+              on phones it sits right under the card it changes. */}
+          <div className="cdx-launch-f cdx-launch-f--pair">
+            <PairHud value={quoteKey} onChange={pickPair} ticker={ticker} live={live} disabled={locked} balance={!live && me ? quoteFixed(quoteBalance, quoteKey) : undefined} notice={pairNotice} />
+          </div>
+          {spacer}
+
+          {/* Card art and Description side by side, as on MintDex. */}
+          <div className="cdx-launch-artrow">
+            <Field label="Card art" htmlFor="art" error={artMsg} className="cdx-launch-f cdx-launch-f--art">
               <button
                 ref={artRef}
                 disabled={locked}
@@ -871,47 +944,79 @@ function Launch() {
                 type="button"
                 data-over={dragging ? "true" : undefined}
                 data-filled={preview ? "true" : undefined}
-                // The name is the visible words (WCAG 2.5.3), so "click Upload artwork" works by voice.
+                // The name is the visible words (WCAG 2.5.3), so "click Add image" works by voice.
                 aria-labelledby="art-cta art-sub"
-                aria-describedby={artMsg || (artGated && !preview) ? "art-spec art-help" : "art-spec"}
+                aria-describedby="art-spec"
                 aria-invalid={artMsg ? true : undefined}
                 aria-busy={uploading || undefined}
-                onClick={() => live || me ? fileRef.current?.click() : require(() => artRef.current?.focus(), ENTER_TO_UPLOAD, "Start the demo")}
+                onClick={() => fileRef.current?.click()}
                 onDragOver={(e) => { e.preventDefault(); if (!dragging) setDragging(true); }}
                 onDragLeave={() => setDragging(false)}
                 onDrop={onDrop}
-                className={`mdx-drop cdx-launch-art ${artMsg ? "border-down" : ""}`}
+                className="mdx-drop cdx-launch-art"
               >
-                <span className="cdx-launch-art__frame" aria-hidden data-busy={uploading || undefined}>
-                  {preview && !uploading ? <img src={preview} alt="" draggable={false} className="cdx-launch-art__image" /> : uploading ? null : <Icon name="plus" size={20} />}
-                </span>
-                <span className="cdx-launch-art__copy">
-                  <strong id="art-cta">{uploading ? "Preparing artwork…" : preview ? "Replace artwork" : "Upload artwork"}</strong>{" "}
-                  <span id="art-sub">{preview ? "Drop or choose another image" : "Drop an image or choose one"}</span>
+                {preview && !uploading ? <img src={preview} alt="" draggable={false} className="cdx-launch-art__image" /> : null}
+                <span className="cdx-launch-art__copy" data-over-image={preview && !uploading ? "" : undefined}>
+                  <strong id="art-cta">{uploading ? "Preparing…" : preview ? "Replace image" : "Add image"}</strong>
+                  {/* Part of the button's name only: the drop hint is on /how#launch. */}
+                  <span id="art-sub" className="sr-only">{preview ? "or drop another" : "or drop it here"}</span>
                 </span>
               </button>
-              <p id="art-spec" className="cdx-launch-art__spec">
-                <span>PNG, JPG, WEBP or GIF up to 12 MB. Square works best.</span>
-                {preview && !locked && !uploading ? <button type="button" className="mdx-link mdx-hit cdx-launch-art__remove" aria-label="Remove artwork" onClick={removeArt}>Remove</button> : null}
-              </p>
+              <p id="art-spec" className="sr-only">PNG, JPG, WEBP or GIF up to 12 MB. Square works best.</p>
+              {preview && !locked && !uploading ? <button type="button" className="mdx-link mdx-hit cdx-launch-art__remove" aria-label="Remove artwork" onClick={removeArt}>Remove</button> : null}
               <input disabled={locked} ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="sr-only" tabIndex={-1} aria-hidden onChange={(e) => { handleFile(e.target.files?.[0]); e.target.value = ""; }} />
             </Field>
+            <Field label="Description" htmlFor="lore" className="cdx-launch-f cdx-launch-f--lore" right={<span className="num" aria-hidden>{lore.length}/280</span>} help={live ? "Permanent once your coin is created." : undefined}>
+              <textarea ref={loreRef} disabled={locked} id="lore" rows={3} maxLength={280} value={lore} onChange={e => setLore(e.target.value)} placeholder="King of the swamp. Jiggles under pressure, never breaks." aria-describedby="lore-help" className="mdx-input cdx-launch-description" />
+            </Field>
           </div>
+          {spacer}
 
-          <fieldset className="cdx-launch-more">
-            <legend className="cdx-launch-more__legend">Optional</legend>
-            <div className="cdx-launch-more__grid">
-              <div className="cdx-launch-f cdx-launch-f--design">
-                <CardDesignPicker variant="inline" seedReady={draftReady} value={designKey} onChange={pick} onPairChange={changePair} quoteAssetKey={quoteKey} ticker={ticker} previewCard={previewCard} disabled={locked} />
+          <details className="cdx-launch-more" open={moreOpen} onToggle={(e) => setMoreOpen(e.currentTarget.open)}>
+            <summary>
+              <Icon name="chevron-right" size={16} className="cdx-launch-more__chev" />
+              <span className="cdx-launch-more__title">More options</span>
+              <span className="cdx-launch-more__sub">Links, initial buy</span>
+            </summary>
+            <div className="cdx-launch-more__body">
+              <div className="cdx-launch-links">
+                <Field label="Website" htmlFor="website" error={websiteMsg} className="cdx-launch-f cdx-launch-f--website">
+                  <Input
+                    disabled={locked}
+                    ref={websiteRef}
+                    id="website"
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                    onBlur={touch("website")}
+                    placeholder="https://"
+                    inputMode="url"
+                    enterKeyHint="next"
+                    autoComplete="url"
+                    spellCheck={false}
+                    aria-invalid={websiteMsg ? true : undefined}
+                    aria-describedby={websiteMsg ? "website-help" : undefined}
+                  />
+                </Field>
+                <Field label="X link" htmlFor="x" error={xMsg} className="cdx-launch-f cdx-launch-f--x">
+                  <Input
+                    disabled={locked}
+                    ref={xRef}
+                    id="x"
+                    value={xUrl}
+                    onChange={(e) => setXUrl(e.target.value)}
+                    onBlur={touch("x")}
+                    placeholder="https://x.com/yourcoin"
+                    inputMode="url"
+                    enterKeyHint="next"
+                    autoComplete="off"
+                    spellCheck={false}
+                    aria-invalid={xMsg ? true : undefined}
+                    aria-describedby={xMsg ? "x-help" : undefined}
+                  />
+                </Field>
               </div>
-
-              <div className="cdx-launch-f cdx-launch-f--pair">
-                <QuoteAssetPicker variant="inline" value={quoteKey} designKey={designKey} ticker={ticker || "TICKER"} onChange={changePair} onPendingChange={setPairPending} confirmationRef={pairConfirmationRef} live={live} disabled={locked} balance={!live && me ? quoteFixed(quoteBalance, quoteKey) : undefined} />
-                {pairNotice && !pairPending ? <p className="cdx-pair-notice" role="status">{pairNotice}</p> : null}
-              </div>
-
-              <div className="cdx-launch-f cdx-launch-f--buy">
-                <Field label="Initial buy" htmlFor="dev">
+              <div className="cdx-launch-buy">
+                <Field label="Initial buy" htmlFor="dev" className="cdx-launch-f cdx-launch-f--buy">
                   <Input
                     disabled={locked}
                     // A buy that cannot fit is read-only, not disabled, so a creator typing in it keeps their place.
@@ -931,12 +1036,6 @@ function Launch() {
                     aria-describedby="dev-note"
                   />
                 </Field>
-                <div className="cdx-launch-quick" role="group" aria-label="Quick amounts">
-                  <Button variant="chip" size="sm" aria-pressed={sameAmount(devBuy, "")} aria-label="None, no initial buy" disabled={buyOff} onClick={() => setDevBuy("")}>None</Button>
-                  {quickAmounts.map((amount) => (
-                    <Button key={amount} variant="chip" size="sm" className="num" aria-pressed={sameAmount(devBuy, amount)} aria-label={`${amount} ${quoteAsset.symbol}`} disabled={buyOff} onClick={() => setDevBuy(amount)}>{amount}</Button>
-                  ))}
-                </div>
                 {/* Only the estimate is announced as it changes. */}
                 <div id="dev-note" className="cdx-launch-note">
                   {devError ? (
@@ -944,7 +1043,7 @@ function Launch() {
                   ) : buyBlocked ? (
                     <p role="status">{buyOffText}</p>
                   ) : !devQuote?.ok ? (
-                    <p>{live ? `Paid in real ${quoteAsset.symbol} with your coin's creation.${buyFits === null ? ` ${BUY_FIT_AFTER_SIGN_IN}` : ""} The exact amount and slippage show before your wallet opens.` : `Paid in test ${quoteAsset.symbol}. Up to ${quoteFixed(maxDev, quoteKey)} ${quoteAsset.symbol} in this demo.`}</p>
+                    <p>{live ? `Paid in real ${quoteAsset.symbol} with your coin's creation.${buyFits === null ? ` ${BUY_FIT_AFTER_SIGN_IN}` : ""}` : `Up to ${quoteCap(maxDev, quoteKey)} test ${quoteAsset.symbol}.`}</p>
                   ) : null}
                   <p aria-live="polite" className="empty:hidden">
                     {devQuote?.ok && !devError ? (
@@ -958,96 +1057,40 @@ function Launch() {
                     ) : null}
                   </p>
                 </div>
-                {/* Mainnet, with a buy: its slippage, under the buy so the quick amounts above never move. */}
-                {/* A saved launch keeps the slippage it was prepared with, which the page does not hold: hidden there. */}
-                {liveBuyText && !liveLocked ? (
-                  <label className="cdx-live-slippage cdx-launch-slippage">
-                    <span>Slippage</span>
-                    <select className="mdx-select mdx-select--field" value={slippageBps} disabled={locked} onChange={(e) => setSlippageBps(Number(e.target.value))}>
-                      <option value={50}>0.5%</option><option value={100}>1%</option><option value={300}>3%</option>
-                    </select>
-                  </label>
-                ) : null}
               </div>
-
-              <Field label="Description" htmlFor="lore" className="cdx-launch-f cdx-launch-f--lore" right={<span className="num" aria-hidden>{lore.length}/280</span>} help={live ? "Permanent once your coin is created." : "Printed on your card."}>
-                <textarea ref={loreRef} disabled={locked} id="lore" rows={3} maxLength={280} value={lore} onChange={e => setLore(e.target.value)} placeholder="e.g. The first frog to reach the moon." aria-describedby="lore-help" className="mdx-input cdx-launch-description" />
-              </Field>
-
-              <Field label="Website" htmlFor="website" error={websiteMsg} className="cdx-launch-f cdx-launch-f--website">
-                <Input
-                  disabled={locked}
-                  ref={websiteRef}
-                  id="website"
-                  value={website}
-                  onChange={(e) => setWebsite(e.target.value)}
-                  onBlur={touch("website")}
-                  placeholder="https://"
-                  inputMode="url"
-                  enterKeyHint="next"
-                  autoComplete="url"
-                  spellCheck={false}
-                  aria-invalid={websiteMsg ? true : undefined}
-                  aria-describedby={websiteMsg ? "website-help" : undefined}
-                />
-              </Field>
-              <Field label="X link" htmlFor="x" error={xMsg} className="cdx-launch-f cdx-launch-f--x">
-                <Input
-                  disabled={locked}
-                  ref={xRef}
-                  id="x"
-                  value={xUrl}
-                  onChange={(e) => setXUrl(e.target.value)}
-                  onBlur={touch("x")}
-                  placeholder="https://x.com/yourcoin"
-                  inputMode="url"
-                  enterKeyHint="next"
-                  autoComplete="off"
-                  spellCheck={false}
-                  aria-invalid={xMsg ? true : undefined}
-                  aria-describedby={xMsg ? "x-help" : undefined}
-                />
-              </Field>
+              {/* Mainnet, with a buy: its slippage. A saved launch keeps the slippage it was prepared with, which the
+                  page does not hold: hidden there. */}
+              {liveBuyText && !liveLocked ? (
+                <label className="cdx-live-slippage cdx-launch-slippage">
+                  <span>Slippage</span>
+                  <select className="mdx-select mdx-select--field" value={slippageBps} disabled={locked} onChange={(e) => setSlippageBps(Number(e.target.value))}>
+                    <option value={50}>0.5%</option><option value={100}>1%</option><option value={300}>3%</option>
+                  </select>
+                </label>
+              ) : null}
             </div>
-          </fieldset>
-        </div>
+          </details>
+          {spacer}
 
-        {/* ------------------------------------------------ the card, then the ticket (two sticky columns from 1024px) */}
-        <div className="cdx-launch-side">
+          {/* The ticket: the costs, the total and the one primary, at the panel's foot (MintDex). */}
+          <div className="cdx-launch-foot" data-live={live || undefined}>
+            {live ? <Suspense fallback={<div className="mdx-skeleton cdx-launch-live-skeleton" aria-hidden />}><LiveLaunchPanel ref={liveRef} launchesOpen={liveOpen} notice={buyDropped ? buyOffText : null} card={previewCard} draft={liveDraft} draftKey={draftKey} initialBuy={liveBuyText} slippageBps={slippageBps} ready={readyList} onLockedChange={setLiveLocked} onBusyChange={setLiveBusy} onTermsNeeded={setTermsNeeded} onIntentLoaded={restoreLiveIntent} onStartAnother={startAnotherLive} onPrimary={setLivePrimary} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /></Suspense> : demoTicket}
+          </div>
+        </form>
+
+        {/* From 1024px: the live card on its ledge (MintDex's preview column). It is the pair's design. */}
+        <section aria-label="Live preview" className="cdx-launch-preview flex min-w-0 flex-col max-lg:hidden">
           {phoneCard !== true ? (
-            <section id={`${viewId}-card`} aria-label="Your card preview" className="cdx-create-preview">
+            <div className="cdx-launch-stage cdx-launch-stage--column">
               <LaunchCardPreview card={previewCard} />
-              <p className="cdx-create-preview__note">Live preview. It changes as you edit.</p>
-            </section>
-          ) : null}
-
-          <aside className="cdx-launch-ticket" aria-label="Cost and launch" data-live={live || undefined}>
-            <div className="cdx-launch-ticket__panel mdx-plinth">
-              {live ? <Suspense fallback={<div className="mdx-skeleton cdx-launch-live-skeleton" aria-hidden />}><LiveLaunchPanel ref={liveRef} launchesOpen={liveOpen} notice={buyDropped ? buyOffText : null} card={previewCard} draft={liveDraft} draftKey={draftKey} initialBuy={liveBuyText} slippageBps={slippageBps} ready={readyList} pairPending={pairPending} onLockedChange={setLiveLocked} onBusyChange={setLiveBusy} onTermsNeeded={setTermsNeeded} onIntentLoaded={restoreLiveIntent} onStartAnother={startAnotherLive} onPrimary={setLivePrimary} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /></Suspense> : demoTicket}
             </div>
-          </aside>
-        </div>
-      </form>
+          ) : null}
+        </section>
+      </div>
 
       <ConfirmDialog open={resetOpen} onOpenChange={setResetOpen} title="Clear this draft?" tone="danger" cancelLabel="Keep editing" confirmLabel="Clear draft" onConfirm={startOver}>
-        <p>Every field and the uploaded art are cleared. Your draft lives only in this browser, so this cannot be undone.</p>
+        <p>Every field and the art. This can't be undone.</p>
       </ConfirmDialog>
-
-      {/* Below 1024px the primary stays on screen above the tab bar; from 1024px it sits in the ticket. */}
-      <ActionBar phoneOnly label="Launch" className={live ? "cdx-launch-bar cdx-launch-bar--live" : "cdx-launch-bar"}>
-        {live ? (
-          <>
-            {/* What the launch waits on, or why it stopped, beside the button (the ticket's alert announces it). */}
-            {livePrimary?.status ? <p className="cdx-launch-bar__status" data-alert={livePrimary.status.alert || undefined}>{livePrimary.status.alert ? <Icon name="warning" size={14} /> : null}<span>{livePrimary.status.text}</span></p> : null}
-            {liveBarButton}
-          </>
-        ) : (
-          <>
-            <p className="cdx-launch-bar__total"><span>Total</span><span>{totalValue}</span></p>
-            {demoButton(true)}
-          </>
-        )}
-      </ActionBar>
-    </PageFrame>
+    </div>
   );
 }

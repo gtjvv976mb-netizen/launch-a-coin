@@ -1,0 +1,380 @@
+/* Designs (/levels) in mintdex.fun's Designs format (routes/levels.tsx). Unlayered, like the other restored MintDex
+ * sheets. Tokens: carddex-theme.css; the coverflow itself (.mdx-cf*) lives in alive.css.
+ *   desktop (>=1024): the collections' segmented tabs; then the title, the coverflow (the selected design's turntable
+ *     at the centre, its neighbours fanned back), the ledge, the caption row with the one primary; beside it a
+ *     full-height aside: the design table (it scrolls on its own) and the selected design with its pair.
+ *   phones: the tabs scroll sideways; the coverflow shows the near neighbours peeking in; a strip of design chips;
+ *     then the selected design's plinth. The page scrolls as a document.
+ * The pair picks the card, so the tabs are the pair groups and every design shows its pair. Also here: the design
+ * chip and the miniature. */
+
+.cdx-designs {
+  /* The centre card's controls row (Turn over, Pause, View in 3D) under its ledge: 12px + a 40px row, 44px on touch. */
+  --controls-h: 52px;
+}
+@media (pointer: coarse), (max-width: 1023.98px) {
+  .cdx-designs {
+    --controls-h: 56px;
+  }
+}
+
+/* ------------------------------------------------ the pair groups (Tabs) */
+.cdx-designs .mdx-design-collections {
+  scroll-padding-inline: 16px;
+}
+/* Below 1024px all five filters fit the width with no sideways swipe, as Launch's pair HUD filters do: the track
+ * spans the column, the options share it by their length (each at least 44px wide, on the 44px track), and the
+ * counts drop (the heading already says 37 designs). From 1024px the counts and the look are unchanged. */
+@media (max-width: 1023.98px) {
+  .cdx-designs .mdx-design-collections { display: flex; width: 100%; }
+  .cdx-designs .mdx-design-collections .mdx-tabs__count { display: none; }
+  .cdx-designs .mdx-design-collections .mdx-tabs__tab { flex: 1 1 auto; min-width: 44px; justify-content: center; padding: 0 6px; }
+}
+
+/* ------------------------------------------------ the coverflow: the centre turntable stands on the ledge, its controls
+ * row hangs under it, and the fanned neighbours stand on the same ledge (the track ends where the controls begin). */
+.cdx-cf .mdx-cf__stage {
+  --W: min(260px, 72vw, max(160px, calc((100dvh - 470px - var(--controls-h)) * 0.716)));
+}
+@media (min-width: 1024px) {
+  .cdx-cf .mdx-cf__stage {
+    --W: min(calc((100cqh - var(--controls-h)) * 0.95 * 63 / 88), calc(100cqw * 0.5), 400px);
+  }
+}
+.cdx-cf .mdx-cf__track {
+  inset: 0 0 var(--controls-h) 0;
+}
+/* MintDex's ledge under every card, drawn at their feet (one faded hairline, as .mdx-ledge). */
+.cdx-cf .mdx-cf__stage::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--controls-h) - 5px);
+  height: 5px;
+  background: linear-gradient(to right, transparent, var(--color-hairline) 8%, var(--color-hairline) 92%, transparent) top / 100% 1px no-repeat; /* taste-skill-ignore: mintdex.fun ledge or image scrim */
+  pointer-events: none;
+}
+.cdx-designs .cdx-cf .cdx-hero-turntable__controls {
+  height: var(--controls-h);
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 8px;
+  padding-top: 12px;
+}
+@media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
+  .cdx-designs .cdx-cf .cdx-card-control {
+    width: 40px;
+    height: 40px;
+  }
+}
+/* The flat neighbours: the print, no halo. */
+.cdx-cf .mdx-cf__item > .mdx-card {
+  width: 100%;
+}
+
+/* ------------------------------------------------ the caption row under the ledge */
+.cdx-cf-cap {
+  display: flex;
+  min-width: 0;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 12px;
+}
+.cdx-cf-cap__no {
+  flex: none;
+  font-size: 15px;
+  line-height: 1.3;
+  color: var(--color-slate);
+}
+.cdx-cf-cap__name {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cdx-cf-cap__chip {
+  display: inline-flex;
+  flex: none;
+  min-height: 24px;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px 2px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-tint);
+  font-size: 13px;
+  line-height: 1.3;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+.cdx-cf-cap__go {
+  flex: none;
+  margin-left: auto;
+}
+/* Phones: the plate and name on one line, the chip under them, the primary at the right of both. */
+@media (max-width: 1023.98px) {
+  .cdx-cf-cap {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "no name go" "chip chip go";
+    gap: 4px 10px;
+  }
+  .cdx-cf-cap__no { grid-area: no; }
+  .cdx-cf-cap__name { grid-area: name; }
+  .cdx-cf-cap__chip { grid-area: chip; justify-self: start; }
+  .cdx-cf-cap__go { grid-area: go; margin: 0; }
+}
+
+/* ------------------------------------------------ the design chip and miniature (the phone strip) */
+.cdx-design-mini {
+  display: inline-block;
+  flex: none;
+  width: 12px;
+  height: 17px;
+  border-radius: 1.5px;
+  background: linear-gradient(160deg, var(--d2) 0%, var(--d1) 58%, var(--d3) 100%); /* taste-skill-ignore: the design miniature in its own palette */
+  box-shadow: inset 0 0 0 1px rgb(var(--rgb-light) / 0.18); /* taste-skill-ignore: mintdex.fun ring/selected mark */
+  outline: 1px solid var(--image-outline);
+  outline-offset: 0;
+}
+.cdx-design-chip {
+  position: relative;
+  display: inline-flex;
+  height: 40px;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px 0 12px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-ring), inset 0 0 0 1px var(--color-hairline); /* taste-skill-ignore: mintdex.fun ring/selected mark */
+  color: var(--color-ink);
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color var(--t-fast) var(--ease-room),
+    box-shadow var(--t-fast) var(--ease-room),
+    transform var(--t-press) var(--ease-out);
+}
+@media (pointer: coarse), (max-width: 1023.98px) {
+  .cdx-design-chip {
+    height: 44px;
+  }
+}
+.cdx-design-chip[aria-pressed="true"] {
+  background: var(--color-sheet);
+  box-shadow: 0 0 0 1.5px var(--color-ink); /* taste-skill-ignore: mintdex.fun ring/selected mark */
+  font-weight: 600;
+}
+.cdx-design-chip:focus-visible {
+  outline: 2px solid var(--color-zap);
+  outline-offset: 2px;
+}
+.cdx-design-chip:active:not(:disabled) {
+  transform: scale(0.96);
+}
+.cdx-design-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cdx-design-chip:not([aria-pressed="true"]):hover:not(:disabled) {
+    background: var(--color-tint);
+  }
+}
+/* The chip's pair, after its design's name (gold text on the chip reads at 7:1). */
+.cdx-design-chip__pair {
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 600;
+  color: var(--color-neon-text);
+}
+
+/* ------------------------------------------------ the aside: the design table, then the selected design */
+.cdx-designs__aside {
+  gap: 0;
+}
+@media (min-width: 1024px) {
+  /* The table scrolls inside the aside; the selected design stays at its foot. */
+  .cdx-designs__aside {
+    overflow: hidden;
+  }
+}
+/* No display on the head here: it carries max-lg:hidden, which an unlayered display would beat. */
+@media (min-width: 1024px) {
+  .cdx-ladder__head {
+    display: grid;
+  }
+}
+.cdx-ladder__head {
+  height: 24px;
+  flex: none;
+  grid-template-columns: 34px 12px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 10px;
+  margin-inline: -20px;
+  padding-inline: 32px;
+  border-bottom: 1px solid var(--color-hairline); /* taste-skill-ignore: mintdex.fun table rule */
+  font-size: 12px;
+  line-height: 24px;
+  font-weight: 500;
+  color: var(--color-slate);
+}
+.cdx-ladder__head > :first-child {
+  grid-column: span 3;
+}
+.cdx-ladder__head > :last-child {
+  text-align: right;
+}
+.cdx-ladder {
+  --row: 40px;
+  position: relative;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 8px -12px 0;
+}
+@media (min-width: 1024px) and (max-height: 820px) {
+  .cdx-ladder {
+    --row: 36px;
+  }
+}
+.cdx-ladrow {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 100%;
+  height: var(--row);
+  grid-template-columns: 34px 12px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 10px;
+  padding: 0 12px;
+  border-radius: var(--radius-row);
+  text-align: left;
+  transition: background-color var(--t-fast) var(--ease-room);
+}
+.cdx-ladrow__no {
+  font-size: 15px;
+  line-height: 1.25;
+  color: var(--color-slate);
+}
+.cdx-ladrow__name {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.25;
+  font-weight: 500;
+  color: var(--color-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cdx-ladrow__pair {
+  font-size: 13px;
+  color: var(--color-slate);
+  text-align: right;
+}
+.cdx-ladrow[aria-pressed="true"] .cdx-ladrow__no,
+.cdx-ladrow[aria-pressed="true"] .cdx-ladrow__name {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.cdx-ladrow[aria-pressed="true"] .cdx-ladrow__pair {
+  color: var(--color-ink);
+}
+.cdx-ladrow:focus-visible {
+  outline: 2px solid var(--color-zap);
+  outline-offset: -2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cdx-ladrow:not([aria-pressed="true"]):hover {
+    background: var(--color-tint);
+  }
+}
+/* The one sliding mark under the selected row (MintDex: spring travel, room colour). */
+.cdx-ladder__mark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  height: var(--row);
+  border-radius: var(--radius-row);
+  background: var(--color-sheet);
+  box-shadow: inset 0 0 0 1px rgb(var(--rgb-gold) / 0.35); /* taste-skill-ignore: mintdex.fun ring/selected mark */
+  pointer-events: none;
+  transition: transform var(--t-slow) var(--ease-spring);
+}
+.cdx-designs__info {
+  display: grid;
+  flex: none;
+  min-width: 0;
+  gap: 6px;
+}
+@media (min-width: 1024px) {
+  .cdx-designs__info {
+    margin: 0 -20px -20px;
+    padding: 16px 20px 20px;
+    border-top: 1px solid var(--color-hairline); /* taste-skill-ignore: mintdex.fun table rule */
+  }
+}
+.cdx-designs__title {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 8px;
+}
+.cdx-designs__title > :first-child {
+  flex: none;
+  max-width: 100%;
+}
+.cdx-designs__tagline {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-slate);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cdx-designs__desc {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--color-slate);
+  text-wrap: pretty;
+}
+/* The design's pair: its symbol and name (a design no pair has says it is kept by existing coins). */
+.cdx-designs__pair {
+  min-width: 0;
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-slate);
+}
+.cdx-designs__pair strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+/* ------------------------------------------------ reduced motion and Calm: no travel, no press scale */
+@media (prefers-reduced-motion: reduce) {
+  .cdx-ladder__mark,
+  .cdx-ladrow,
+  .cdx-design-chip {
+    transition: none;
+  }
+  .cdx-design-chip:active:not(:disabled) {
+    transform: none;
+  }
+}
+:root[data-motion="calm"] .cdx-design-chip:active {
+  transform: none;
+}

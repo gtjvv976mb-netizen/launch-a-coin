@@ -14,6 +14,7 @@ export function LiveWalletNotice({ plan, card, quote, siteHost, className }: {
   return <section className={className ? `cdx-live-wallet-notice ${className}` : "cdx-live-wallet-notice"} aria-labelledby={id}>
     <h3 id={id} className="cdx-live-wallet-notice-title">{WALLET_NOTICE_TITLE}</h3>
     <ul className="cdx-live-wallet-notice-list">{walletNoticeItems(plan, quote, siteHost, card).map(item => <li key={item.key} data-notice={item.key}>{item.text}</li>)}</ul>
-    <p className="cdx-live-wallet-notice-safety">{WALLET_NOTICE_COPY.safety}</p>
+    {/* The review dialog stays open: the details open in a new tab. */}
+    <p className="cdx-live-wallet-notice-safety">{WALLET_NOTICE_COPY.safety} <a href="/how#wallet" target="_blank" rel="noopener" className="mdx-link mdx-hit">Details</a></p>
   </section>;
 }

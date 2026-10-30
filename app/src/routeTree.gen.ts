@@ -16,6 +16,7 @@ import { Route as MarketRouteImport } from './routes/market'
 import { Route as LevelsRouteImport } from './routes/levels'
 import { Route as LegalRouteImport } from './routes/legal'
 import { Route as LaunchRouteImport } from './routes/launch'
+import { Route as HowRouteImport } from './routes/how'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MDigestRouteImport } from './routes/m/$digest'
@@ -60,6 +61,11 @@ const LegalRoute = LegalRouteImport.update({
 const LaunchRoute = LaunchRouteImport.update({
   id: '/launch',
   path: '/launch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowRoute = HowRouteImport.update({
+  id: '/how',
+  path: '/how',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiscoverRoute = DiscoverRouteImport.update({
@@ -116,6 +122,7 @@ const ApiLiveAssetsSplatRoute = ApiLiveAssetsSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
+  '/how': typeof HowRoute
   '/launch': typeof LaunchRoute
   '/legal': typeof LegalRoute
   '/levels': typeof LevelsRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
+  '/how': typeof HowRoute
   '/launch': typeof LaunchRoute
   '/legal': typeof LegalRoute
   '/levels': typeof LevelsRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/discover': typeof DiscoverRoute
+  '/how': typeof HowRoute
   '/launch': typeof LaunchRoute
   '/legal': typeof LegalRoute
   '/levels': typeof LevelsRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/discover'
+    | '/how'
     | '/launch'
     | '/legal'
     | '/levels'
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/discover'
+    | '/how'
     | '/launch'
     | '/legal'
     | '/levels'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/discover'
+    | '/how'
     | '/launch'
     | '/legal'
     | '/levels'
@@ -234,6 +246,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DiscoverRoute: typeof DiscoverRoute
+  HowRoute: typeof HowRoute
   LaunchRoute: typeof LaunchRoute
   LegalRoute: typeof LegalRoute
   LevelsRoute: typeof LevelsRoute
@@ -300,6 +313,13 @@ declare module '@tanstack/react-router' {
       path: '/launch'
       fullPath: '/launch'
       preLoaderRoute: typeof LaunchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how': {
+      id: '/how'
+      path: '/how'
+      fullPath: '/how'
+      preLoaderRoute: typeof HowRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/discover': {
@@ -378,6 +398,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DiscoverRoute: DiscoverRoute,
+  HowRoute: HowRoute,
   LaunchRoute: LaunchRoute,
   LegalRoute: LegalRoute,
   LevelsRoute: LevelsRoute,

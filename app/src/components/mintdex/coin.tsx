@@ -1,10 +1,10 @@
 /**
- * Coin page pieces (/coin/$id): the market strip (market cap, bonding curve, price, 24h volume, holders), the
- * market-cap chart, the trade ticket (useTradeTicket, TradePanel and the phone TradeActionBar), the activity table,
- * the card's facts, the token's facts and About.
- * Layout lives in routes/coin/$id.tsx and styles/screens/coin.css: one page that scrolls once, one DOM order at every
- * width (no tabs); grid areas place the sections. useSectionParam scrolls an old ?tab= link to its section.
- * CoinHeader, CoinObject, CaptionTop, DesignProgress and PhoneHeroDesign serve the inherited chain page only.
+ * Coin page pieces (/coin/$id, MintDex's format): the object column (the cased card on its ledge, its caption and
+ * the Coin details disclosure), the market column (header row, stats, one plinth block with the market-cap chart
+ * and the recent trades) and the action column (the token's Buy | Sell ticket, then the card and the token's facts).
+ * Phones get the compact hero (CoinPhoneHero), the Trade | Card | Chart tabs and the Card section's full case
+ * (CoinCardPane). Layout lives in routes/coin/$id.tsx; every block carries its own phone plinth so the route can
+ * reorder blocks with `display: contents` wrappers. Styles: styles/screens/coin.css.
  */
 import {
   useEffect,
@@ -15,10 +15,9 @@ import {
   type CSSProperties,
   type FormEvent,
   type KeyboardEvent,
-  type MouseEvent,
   type ReactNode,
+  type Ref,
 } from "react";
-import { Link, useRouter } from "@tanstack/react-router";
 
 import {
   claimFaucet,
@@ -29,6 +28,7 @@ import {
 import { FAUCET_AMOUNT, TOKEN_UNIT, TRADE_FEE_BPS } from "../../lib/mintdex/constants";
 import {
   BOT_HINT,
+  COIN_COPY,
   FLOW,
   IS_SIM,
   MODE_COPY,
@@ -54,6 +54,8 @@ import {
   atName,
   dexNo,
   cleanAmount,
+  sellShare,
+  typedAmount,
   sol,
   timeAgo,
   tokens,
@@ -63,13 +65,14 @@ import {
 import { getCardDesign } from "../../lib/carddex/designs";
 import { getPairAsset } from "../../lib/carddex/pairs";
 import { marketCapText, marketCapWatch, quoteFixed, quoteNumber } from "../../lib/carddex/quote-display";
-import { formatQuoteAmount, parseQuoteAmount, quoteMetrics } from "../../lib/carddex/quote-simulation";
+import { formatQuoteAmount, parseQuoteAmount, quickBuyPresets, quoteMetrics } from "../../lib/carddex/quote-simulation";
 import type { CoinDetail, CoinPage, TradeRow } from "../../lib/mintdex/types";
-import { CardBack, CardCase, GyroChip, View3DButton, useView3DGestures, type Card3DHandle } from "./card3d";
+import { CardBack, CardCase, View3DButton, useView3DGestures, type Card3DHandle } from "./card3d";
 import { useClaimable } from "./cases";
+import { MintCard } from "./MintCard";
 import { prefersReducedMotion, useAction, useLoaderViewport, useNow } from "./hooks";
 import { useMe, useRequireMe } from "./session";
-import { isCoarsePointer, isPhoneNow, useKeyboardSafe } from "./sheet";
+import { isCoarsePointer, useKeyboardSafe } from "./sheet";
 import {
   BotTag,
   ShareButton,
@@ -77,7 +80,6 @@ import {
   coinShare,
 } from "./trust";
 import {
-  ActionBar,
   Address,
   Badge,
   Button,
@@ -86,7 +88,6 @@ import {
   Field,
   FrameMini,
   Icon,
-  KpiGroup,
   LivePause,
   Modal,
   Num,
@@ -94,60 +95,13 @@ import {
   SideToggle,
   Tabs,
   TextLink,
+  dismissToasts,
   useLiveList,
   useSize,
-  type StatItem,
 } from "./ui";
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
-}
-
-// ---------------------------------------------------------------- old ?tab= links
-
-/**
- * Old section links (?tab=trades from a notification, ?tab=card from Portfolio) still land on their section: the
- * page has no tabs any more, so the section with data-section={tab} is scrolled to the top of main (instantly) when
- * it is not already on screen, then `clear` drops ?tab from the URL (replace, no scroll reset). Keyed on the value,
- * not on mount, so a link to the coin already open works too. It waits for the router's render (its own scroll
- * reset runs then), with a double frame as the fallback when that render already happened (a hard load).
- */
-export function useSectionParam(tab: string | undefined, clear: () => void) {
-  const router = useRouter();
-  const clearRef = useRef(clear);
-  clearRef.current = clear;
-  useEffect(() => {
-    if (!tab) return;
-    let done = false;
-    let f1 = 0;
-    let f2 = 0;
-    const stop = () => {
-      unsubscribe();
-      cancelAnimationFrame(f1);
-      cancelAnimationFrame(f2);
-    };
-    const go = () => {
-      if (done) return;
-      done = true;
-      stop();
-      const main = document.querySelector<HTMLElement>('[data-scroll-restoration-id="content"]');
-      const el = main?.querySelector<HTMLElement>(`[data-section="${CSS.escape(tab)}"]`);
-      if (main && el && el.getClientRects().length) {
-        const box = main.getBoundingClientRect();
-        const top = el.getBoundingClientRect().top;
-        if (top < box.top || top > box.bottom - 48) el.scrollIntoView({ block: "start", behavior: "auto" });
-      }
-      clearRef.current();
-    };
-    const unsubscribe = router.subscribe("onRendered", go);
-    f1 = requestAnimationFrame(() => {
-      f2 = requestAnimationFrame(go);
-    });
-    return () => {
-      done = true;
-      stop();
-    };
-  }, [tab, router]);
 }
 
 // ---------------------------------------------------------------- formatting
@@ -211,82 +165,76 @@ function Handle({ handle, bot, you, className = "" }: { handle: string; bot?: bo
   );
 }
 
-// ---------------------------------------------------------------- the market strip
-
-/** Graduation in words, for the curve cell and the details. */
-function curveSentence(coin: CoinDetail) {
-  if (coin.graduated) return MODE_COPY.curveComplete;
-  return IS_SIM
-    ? "The price follows a bonding curve. When the curve sells out, a pump.fun coin graduates to a PumpSwap pool. This curve is simulated."
-    : "The price follows the pump.fun bonding curve. When it sells out, the coin graduates to a PumpSwap pool.";
-}
-
-/** A USD market cap of $100K and up reads compact ($853K, $1.23M) at every width, so the lead cell never overflows. */
-const LEAD_COMPACT_FROM = 100_000;
+// ---------------------------------------------------------------- stats (middle column)
 
 /**
- * The coin's figures, as type in one divided container, in reading order: the market cap leads (30px) with its 24h
- * change, then the bonding curve (the signature track), price, 24h volume and holders. Missing is null (grey dash).
+ * The row under the header (MintDex: Price, Volume 24h, then the coin's own figures): price with its zeros
+ * counted, 24h volume and holders in the coin's quote, and the bonding curve with its track (Launch a Card's
+ * signature). Four up when the column is wide enough, else two up. A long quote unit ("0.0035 CHILLHOUSE") wraps
+ * under its figure rather than run into the next cell (VIS-1).
  */
-function marketItems(coin: CoinDetail): StatItem[] {
-  const native = coin.mcapUsd == null;
-  const compact = (coin.mcapUsd ?? 0) >= LEAD_COMPACT_FROM;
+export function CoinStats({
+  coin,
+  pane,
+  className = "",
+}: {
+  coin: CoinDetail;
+  /** Phones: the coin page section this block belongs to (data-pane, P1-5). */
+  pane?: string;
+  className?: string;
+}) {
   const known = coin.curveProgress != null && Number.isFinite(coin.curveProgress);
-  return [
+  const items: Array<{ key: string; label: ReactNode; value: ReactNode; unit?: string; watch?: number }> = [
     {
-      label: "Market cap",
-      value: native ? quoteNumber(coin.mcapQuote, true) : marketCapText(coin, compact),
-      unit: native ? coin.quoteSymbol : undefined,
-      watch: marketCapWatch(coin),
-      change: (
-        <span className="cdx-coin-screen__chg">
-          <Change v={coin.change24h} pill />
-          <span aria-hidden="true">24h</span>
-        </span>
-      ),
-    },
-    {
-      // The figure and its note are hidden from screen readers: the track's meter says the same words.
-      label: "Bonding curve",
-      value: coin.graduated ? (
-        <span aria-hidden="true">Graduated</span>
-      ) : known ? (
-        <span aria-hidden="true">{Math.round(Math.min(1, Math.max(0, coin.curveProgress)) * 100)}%</span>
-      ) : null,
-      change: !coin.graduated && known ? <span className="cdx-coin-screen__curvenote" aria-hidden="true">to graduation</span> : undefined,
-      sub: <CurveTrack label="Bonding curve" progress={coin.curveProgress} graduated={coin.graduated} />,
-    },
-    {
-      label: "Price",
+      key: "price",
+      label: `Price (${coin.quoteSymbol ?? "SOL"})`,
       value: <PriceFigure value={coin.priceQuote ?? coin.priceSol ?? 0} />,
-      unit: coin.quoteSymbol,
+      watch: coin.priceQuote ?? coin.priceSol ?? undefined,
     },
-    { label: "Volume 24h", value: quoteFixed(coin.volume24hQuote, coin.quoteAssetKey), unit: coin.quoteSymbol },
-    { label: "Holders", value: coin.holders.toLocaleString("en-US") },
+    { key: "volume", label: "Volume 24h", value: quoteFixed(coin.volume24hQuote, coin.quoteAssetKey), unit: coin.quoteSymbol },
+    { key: "holders", label: "Holders", value: coin.holders.toLocaleString("en-US") },
   ];
-}
-
-/**
- * The market strip: market cap (the page's one lead figure), bonding curve, price, 24h volume and holders in one
- * divided surface. Desktop and tablets read it as one row over the chart; phones stack it beside the card. Phones
- * also take the "Enable phone tilt" chip here, in the hero's spare room, instead of a second row under the case.
- */
-export function CoinMarket({ coin, className = "" }: { coin: CoinDetail; className?: string }) {
   return (
-    <section className={cx("cdx-coin-screen__market", className)} aria-label={`${coin.name} market`}>
-      <KpiGroup items={marketItems(coin)} lead />
-      <GyroChip className="cdx-coin-screen__tilt" />
-    </section>
+    <div className={cx("cdx-coin-stats @container", className)} data-pane={pane}>
+      <dl className="cdx-coin-stats__grid">
+        {items.map((it) => (
+          <div key={it.key} className="min-w-0">
+            <dt className="mdx-micro truncate">{it.label}</dt>
+            <dd className="mt-1">
+              <Num size="md" unit={it.unit} watch={it.watch}>
+                {it.value}
+              </Num>
+            </dd>
+          </div>
+        ))}
+        <div className="min-w-0">
+          {/* The figure is hidden from screen readers: the track's meter says the same words. */}
+          <dt className="mdx-micro truncate">Bonding curve</dt>
+          <dd className="mt-1">
+            <span className="num text-[16px] leading-6 text-ink" aria-hidden="true">
+              {coin.graduated ? "Graduated" : known ? `${Math.round(Math.min(1, Math.max(0, coin.curveProgress)) * 100)}%` : "\u2014"}
+            </span>
+            <CurveTrack label="Bonding curve" progress={coin.curveProgress} graduated={coin.graduated} size="sm" className="cdx-coin-stats__curve" />
+          </dd>
+        </div>
+      </dl>
+    </div>
   );
 }
 
 // ---------------------------------------------------------------- the card's facts and the coin's details
 
 /** Owner, launcher and edition of the coin's one-of-one card, as label and value rows. */
-export function CardFacts({ page, className = "" }: { page: CoinPage; className?: string }) {
+export function CardFacts({ page, design, className = "" }: { page: CoinPage; design?: string; className?: string }) {
   const { coin, viewer } = page;
   return (
     <dl className={cx("cdx-coin-facts", className)} aria-label="The creator's card">
+      {design ? (
+        <div>
+          <dt>Design</dt>
+          <dd>{design}</dd>
+        </div>
+      ) : null}
       <div>
         <dt>Owner</dt>
         <dd><Handle handle={coin.ownerHandle} bot={coin.ownerIsBot} you={!!viewer?.isOwner} /></dd>
@@ -350,39 +298,63 @@ export function TokenFacts({ page, className = "" }: { page: CoinPage; className
 }
 
 /**
- * About the coin: its description and what the bonding curve means (at most 65ch), with the facts beside it from
- * 640px of panel width (TokenFacts, and CardFacts when the card column does not show them), then the coin's own
- * links and the owner's Edit description (or Report for everyone else). One column in a narrow panel.
+ * The card block of the action column ("The card", MintDex's place for the card's holder): owner, launcher, edition
+ * and design, then the token's facts (pair, quote asset with its issuer, the quote mint on Solscan, the coin's own
+ * address). What the card is, and the demo's terms, live on /how#cards. Phones show it in the Card section.
  */
-export function CoinAbout({
+export function CardPanel({ page, pane, className = "" }: { page: CoinPage; pane?: string; className?: string }) {
+  const { coin } = page;
+  const design = getCardDesign(coin.cardTemplate);
+  const asset = getPairAsset(coin.quoteAssetKey);
+  const headingId = useId();
+  return (
+    <section data-pane={pane} className={cx("cdx-coin-card", className)} aria-labelledby={headingId}>
+      <SectionHead title={<span id={headingId}>The card</span>} right={<span className="mdx-micro text-ink">1 / 1</span>} />
+      <CardFacts page={page} design={design.name} className="mt-2" />
+      <h3 className="cdx-coin-card__sub">The token</h3>
+      <TokenFacts page={page} />
+      {asset.kind === "stock" ? <p className="cdx-coin-card__note">Stock-paired. Your coin is not company shares.</p> : null}
+      <p className="cdx-coin-card__foot"><TextLink to="/how" hash="cards">How it works</TextLink></p>
+    </section>
+  );
+}
+
+/**
+ * Under the case (MintDex): "No. 001  Launched by @handle" over the design chip, the design line, then the "Coin
+ * details" disclosure: the description, the coin's links, How it works (/how#trading: what the bonding curve means)
+ * and the owner's Edit description (Report for everyone else). Phones show the caption in the Card section (CoinCardPane) and this
+ * block's disclosure open under it.
+ */
+export function CoinDetails({
   page,
   onEdit,
-  cardFacts,
+  pane,
   className = "",
 }: {
   page: CoinPage;
   onEdit: () => void;
-  /** The card's facts, for the arrangements whose card column does not show them. */
-  cardFacts?: ReactNode;
+  pane?: string;
   className?: string;
 }) {
   const { coin } = page;
   const isOwner = !!page.viewer?.isOwner;
-  const asset = getPairAsset(coin.quoteAssetKey);
   const require = useRequireMe();
   const [reportOpen, setReportOpen] = useState(false);
-  const headingId = useId();
   return (
-    <section className={cx("cdx-coin-about", className)} aria-labelledby={headingId}>
-      <SectionHead title={<span id={headingId}>About ${coin.ticker}</span>} />
-      <div className="cdx-coin-about__body">
-        <div className="cdx-coin-about__text">
-          <p className={cx("cdx-coin-about__lore", !coin.lore && "text-slate")}>
-            {coin.lore || "The creator has not added a description."}
+    <div className={cx("cdx-coin-details min-w-0", className)} data-pane={pane}>
+      <CaptionTop coin={coin} className="mb-2 hidden lg:block" />
+      <DesignProgress coin={coin} className="max-lg:hidden" />
+      <details className="cdx-coin-details__more group">
+        <summary className="cdx-coin-details__summary mdx-hit">
+          {COIN_COPY.details}
+          <Icon name="chevron-down" size={16} className="cdx-coin-details__chev" />
+        </summary>
+        <div className="cdx-coin-details__body">
+          <p className={cx("cdx-coin-details__lore", !coin.lore && "text-slate")}>
+            {coin.lore || "No description."}
           </p>
-          <p className="cdx-coin-about__note">{curveSentence(coin)}</p>
-          {asset.kind === "stock" ? <p className="cdx-coin-about__note">Paired with a tokenized stock asset. Your coin does not represent company shares.</p> : null}
-          <div className="cdx-coin-about__actions">
+          {coin.graduated ? <p className="cdx-coin-details__note">{MODE_COPY.curveComplete}</p> : null}
+          <div className="cdx-coin-details__actions">
             {coin.website ? (
               <TextLink href={coin.website} target="_blank" rel="noopener noreferrer nofollow">
                 Website <Icon name="external" size={12} />
@@ -393,69 +365,78 @@ export function CoinAbout({
                 X profile <Icon name="external" size={12} />
               </TextLink>
             ) : null}
+            <TextLink to="/how" hash="trading">How it works</TextLink>
             {isOwner ? (
-              <Button variant="outline" size="sm" onClick={onEdit}>Edit description</Button>
+              <TextLink onClick={onEdit}>Edit description</TextLink>
             ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                aria-haspopup="dialog"
+              <TextLink
+                className="text-slate"
                 onClick={() => require(() => setReportOpen(true), "Try the demo to report a card.")}
               >
                 Report
-              </Button>
+              </TextLink>
             )}
           </div>
-          {MODE_COPY.guideNote ? <p className="cdx-coin-about__foot">{MODE_COPY.guideNote}</p> : null}
         </div>
-        <div className="cdx-coin-about__facts">
-          <TokenFacts page={page} className="cdx-coin-about__token" />
-          {cardFacts}
-        </div>
-      </div>
+      </details>
       <ReportDialog coin={coin} open={reportOpen} onOpenChange={setReportOpen} />
-    </section>
+    </div>
   );
 }
 
-// ---------------------------------------------------------------- inherited chain page pieces
+// ---------------------------------------------------------------- header and caption
 
-/** Header row of the inherited chain page: name, ticker and design | market cap and 24h change. */
-export function CoinHeader({ coin, className = "" }: { coin: CoinDetail; className?: string }) {
+/** The design chip (MintDex's "Mythic design" chip): the frame mini and the design's name. */
+function DesignChip({ coin, className = "" }: { coin: CoinDetail; className?: string }) {
   const design = getCardDesign(coin.cardTemplate);
-  const hero = coin.mcapUsd == null ? quoteNumber(coin.mcapQuote, true) : marketCapText(coin, false);
   return (
-    <header className={cx("flex flex-wrap items-end justify-between gap-x-5 gap-y-3", className)}>
+    <span className={cx("mdx-design-chip", className)}>
+      <FrameMini level={coin.level} />
+      <span className="min-w-0 truncate">{design.name} design</span>
+    </span>
+  );
+}
+
+/**
+ * Header row of the middle column (MintDex): name and Share, the ticker and design chip | the market cap hero
+ * (condensed, rolling) and its 24h change. A quote with no USD reference puts its unit on a line of its own under
+ * the figure, so "38.84K DOGE" never runs into the change pill (VIS-1).
+ */
+export function CoinHeader({ coin, className = "" }: { coin: CoinDetail; className?: string }) {
+  const native = coin.mcapUsd == null;
+  const hero = native ? quoteNumber(coin.mcapQuote, true) : marketCapText(coin, false);
+  return (
+    <header className={cx("cdx-coin-head @container flex flex-wrap items-end justify-between gap-x-5 gap-y-3", className)}>
       <div className="min-w-0 xl:flex-1">
+        {/* Share follows the name: the 28px circle sits inside the title's line box, and a long name truncates first. */}
         <div className="flex min-w-0 items-center gap-1.5">
-          <h1 className="mdx-h1 min-w-0 truncate">{coin.name}</h1>
+          <h1 className="mdx-h1 -mb-1 min-w-0 truncate pb-1">{coin.name}</h1>
           <ShareButton {...coinShare(coin)} label={`Share ${coin.name}`} />
         </div>
-        <div className="mt-1 flex min-w-0 items-center gap-3 whitespace-nowrap text-body text-slate">
+        <div className="mt-1 flex h-[19px] min-w-0 items-center gap-3 whitespace-nowrap text-[13px] leading-[17px] text-slate">
           <span className="flex-none">${coin.ticker}</span>
-          <span className="hidden min-w-0 items-center gap-1.5 font-medium text-ink lg:inline-flex">
-            <FrameMini level={coin.level} />
-            <span className="min-w-0 truncate">{design.name}</span>
-          </span>
+          <DesignChip coin={coin} className="hidden lg:inline-flex" />
         </div>
       </div>
       <div className="flex flex-none items-end gap-5">
         <div className="flex flex-col items-start">
-          <Num size="hero" unit={coin.mcapUsd == null ? coin.quoteSymbol : undefined} watch={marketCapWatch(coin)}>
+          <Num size="hero" unit={native ? coin.quoteSymbol : undefined} watch={marketCapWatch(coin)} odo className="cdx-coin-head__hero">
             {hero}
           </Num>
-          <span className="mt-0.5 inline-flex items-center gap-1.5 text-caption font-medium text-slate">Market cap<SimTag /></span>
+          <span className="mt-0.5 inline-flex items-center gap-1.5 text-[12px] font-medium leading-none text-slate">Market cap<SimTag /></span>
         </div>
-        <div className="flex flex-col items-start">
-          <Change v={coin.change24h} pill />
-          <span className="mt-1 text-caption font-medium text-slate">24h</span>
+        <div className="flex flex-col items-start pb-px">
+          <Change v={coin.change24h} pill className="text-[13px]" />
+          <span className="mt-1 text-[12px] font-medium leading-none text-slate">24h</span>
         </div>
       </div>
     </header>
   );
 }
 
-/** "No. 004  Launched by @handle" (and the "bot" tag) over the design name: the inherited chain page caption. */
+/**
+ * "No. 004  Launched by @handle" (and the "bot" tag for a demo bot launcher) over the design chip, under the case.
+ */
 export function CaptionTop({
   coin,
   chip = true,
@@ -463,33 +444,33 @@ export function CaptionTop({
   className = "",
 }: {
   coin: CoinDetail;
+  /** The design chip under the line (off where the same chip is right above, the phone hero). */
   chip?: boolean;
+  /** A hover note on the design chip (devnet: what a design means). */
   chipTitle?: string;
   className?: string;
 }) {
-  const design = getCardDesign(coin.cardTemplate);
   return (
     <div className={cx("min-w-0", className)}>
-      <div className="flex min-w-0 items-baseline gap-2 text-body text-slate">
-        <span className="num flex-none">{dexNo(coin.dexNo)}</span>
-        <span className="flex min-w-0 items-center gap-1.5">
+      <div className="flex min-w-0 items-baseline gap-2">
+        <span className="mdx-plate num flex-none text-[15px] leading-[1.3] text-slate">{dexNo(coin.dexNo)}</span>
+        <span className="flex min-w-0 items-center gap-1.5 text-[13px] leading-[1.45] text-slate">
           <span className="truncate">Launched by {atName(coin.creatorHandle)}</span>
           {coin.creatorIsBot ? <BotTag /> : null}
         </span>
       </div>
       {chip ? (
-        <p className="mt-2 text-body font-medium text-ink" title={chipTitle}>
-          {design.name}
+        <p className="mt-3" title={chipTitle}>
+          <DesignChip coin={coin} className="mdx-design-chip--lg" />
         </p>
       ) : null}
     </div>
   );
 }
 
-/** The inherited chain page's phone hero design line. */
+/** The phone hero's design chip ("Nova design"), under the market cap. */
 export function PhoneHeroDesign({ coin, className = "" }: { coin: CoinDetail; className?: string }) {
-  const design = getCardDesign(coin.cardTemplate);
-  return <span className={cx("mt-2 block max-w-full truncate text-caption font-medium text-ink", className)}>{design.name}</span>;
+  return <DesignChip coin={coin} className={cx("mdx-design-chip--lg mt-3 self-start", className)} />;
 }
 
 /** The selected print is permanent and independent of token performance. */
@@ -497,7 +478,7 @@ export function DesignProgress({ coin, className = "" }: { coin: CoinDetail; cla
   const design = getCardDesign(coin.cardTemplate);
   return (
     <p className={cx("text-body text-slate", className)}>
-      <span className="font-medium text-ink">{design.name}.</span> Chosen by the creator. This card keeps its design.
+      <span className="sr-only">{design.name} </span>Design kept for good.
     </p>
   );
 }
@@ -575,7 +556,10 @@ export function CoinCase({
   );
 }
 
-/** The inherited chain page's object: a labeled case at xl and a compact holder from 1024 to 1279px. */
+/**
+ * The desktop object (MintDex): the labeled collector case at xl and a compact clear holder from 1024 to 1279px.
+ * The xl width fits the column's height less the control row, so the case and its row never overflow it.
+ */
 export function CoinObject({
   coin,
   latestTradeId,
@@ -597,9 +581,79 @@ export function CoinObject({
   );
 }
 
-/** The inherited chain page's card as an img sizes value (its 112px phone hero, then the desktop columns). */
+/**
+ * The coin page's card as an img sizes value: the 112px hero on phones (CoinPhoneHero), and the desktop card (96px
+ * from 1024, then its column up to 264, 300 and 340px).
+ */
 export const COIN_CARD_SIZES =
   "(max-width: 1023px) 112px, (max-width: 1279px) 96px, (max-width: 1439px) 264px, (max-width: 1679px) 300px, 340px";
+
+/**
+ * Phones (P1-5): the compact hero above the section tabs. A 112px card in its tray (tap it for the Card section)
+ * beside the name, Share, ticker, market cap and 24h change, and the design chip.
+ */
+export function CoinPhoneHero({
+  coin,
+  onCard,
+  ref,
+  className = "",
+}: {
+  coin: CoinDetail;
+  onCard: () => void;
+  ref?: Ref<HTMLElement>;
+  className?: string;
+}) {
+  const native = coin.mcapUsd == null;
+  return (
+    <section ref={ref} aria-label={`${coin.name} at a glance`} className={cx("grid grid-cols-[112px_minmax(0,1fr)] items-start gap-4", className)}>
+      <button
+        type="button"
+        onClick={onCard}
+        aria-label={`Show the ${coin.name} card`}
+        className="mdx-pocket block w-[112px] rounded-[5.04%/3.61%]"
+      >
+        <MintCard card={coin} depth="table" idle="float" className="mdx-card3d--hero" priority sizes={COIN_CARD_SIZES} />
+      </button>
+      <div className="flex min-w-0 flex-col">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <h1 className="mdx-h1 -mb-1 min-w-0 truncate pb-1">{coin.name}</h1>
+          <ShareButton {...coinShare(coin)} label={`Share ${coin.name}`} />
+        </div>
+        <span className="mt-0.5 text-[13px] leading-[17px] text-slate">${coin.ticker}</span>
+        <Num size="hero" unit={native ? coin.quoteSymbol : undefined} watch={marketCapWatch(coin)} tick className="cdx-coin-head__hero mt-2.5 text-[28px]!">
+          {native ? quoteNumber(coin.mcapQuote, true) : marketCapText(coin, false)}
+        </Num>
+        <div className="mt-1.5 flex items-center gap-2">
+          <span className="text-[12px] font-medium leading-none text-slate">Market cap</span>
+          <Change v={coin.change24h} pill className="text-[13px]" />
+        </div>
+        <PhoneHeroDesign coin={coin} />
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Phones (P1-5): the top of the Card section. The full-size card in its case, then its caption (No., launcher) and
+ * the design line; the Coin details and the card's facts follow in the same section.
+ */
+export function CoinCardPane({
+  coin,
+  latestTradeId,
+  className = "",
+}: {
+  coin: CoinDetail;
+  latestTradeId?: string | number | null;
+  className?: string;
+}) {
+  return (
+    <section aria-label={`The ${coin.name} card`} data-pane="card" className={cx("flex flex-col", className)}>
+      <CoinCase coin={coin} latestTradeId={latestTradeId} phone className="mx-auto mt-2 w-[min(260px,74vw)]" />
+      <CaptionTop coin={coin} chip={false} className="mt-6" />
+      <DesignProgress coin={coin} className="mt-3" />
+    </section>
+  );
+}
 
 /** Report a card that breaks the content rules (P1-28): one reason, one button. */
 function ReportDialog({
@@ -627,7 +681,7 @@ function ReportDialog({
             () => reportCoin({ data: { coinId: coin.id, reason } }),
             (res) =>
               res.first
-                ? "Report sent. Coins that break the content rules are hidden."
+                ? "Report sent."
                 : "You already reported this card.",
             // Nothing on screen changes: no refetch.
             { keys: [] },
@@ -638,7 +692,7 @@ function ReportDialog({
         <fieldset>
           <legend className="text-body text-slate">
             What breaks the{" "}
-            <TextLink to="/legal" hash="terms" onClick={() => onOpenChange(false)}>
+            <TextLink to="/legal" hash="content-rules" onClick={() => onOpenChange(false)}>
               content rules
             </TextLink>
             ?
@@ -874,8 +928,8 @@ export function McapChart({
     ? `Market cap after each trade ${def.key === "all" ? "since launch" : def.words.replace(/^in /, "over ")}: ${points.length} ${points.length === 1 ? "trade" : "trades"}, latest ${fullFigure(last.v)}.`
     : "";
   const emptyText = samples.length
-    ? `No trades ${def.words}. Choose a longer range.`
-    : "No trades yet. The chart starts with the first trade.";
+    ? `No trades ${def.words}.`
+    : "No trades yet.";
   const tipLeft = selected ? x(selected.t) : 0;
 
   return (
@@ -959,7 +1013,7 @@ export function McapChart({
         ) : null}
       </div>
       <p className="cdx-chart__note">
-        Each step is a trade · UTC{isTruncated ? ` · latest ${trades.length} trades` : ""}
+        UTC{isTruncated ? ` · latest ${trades.length} trades` : ""}
         {native ? ` · in ${symbol}` : MODE_COPY.usdNote ? ` · ${MODE_COPY.usdNote}` : ""}
       </p>
     </section>
@@ -969,8 +1023,8 @@ export function McapChart({
 // ---------------------------------------------------------------- activity
 
 /**
- * Activity: the latest trades as a table (Time · Trader · amount · Market cap), newest first, in the page (it never
- * scrolls on its own), its header row sticky. Buys read "+0.30" in green and sells "−0.30" in red (the sign carries
+ * Recent trades (MintDex): the latest trades as a table (Time · Trader · amount · Market cap), newest first, its
+ * header row sticky; in the desktop column the table scrolls inside its panel. Buys read "+0.30" in green and sells "−0.30" in red (the sign carries
  * it). Rows hold still under the pointer, with focus inside, or while paused; a trade that lands with a poll washes
  * in once and screen readers hear "1 new trade". It shows the latest `initial` (12) at every width, then one toggle
  * expands every loaded trade in place (focus moves to the first new row) and collapses back to the latest 12.
@@ -1015,7 +1069,7 @@ export function TradesList({
   return (
     <section className={cx("cdx-trades", className)} aria-labelledby={headingId} data-pane={pane}>
       <SectionHead
-        title={<span id={headingId}>Activity</span>}
+        title={<span id={headingId}>Recent trades</span>}
         live={rows[0]?.id}
         livePaused={live.paused}
         right={
@@ -1031,7 +1085,7 @@ export function TradesList({
       />
       <p className="sr-only" role="status" aria-live="polite">{live.said}</p>
       {rows.length === 0 ? (
-        <p className="cdx-trades__empty">No trades yet. The first buy starts the list and the chart.</p>
+        <p className="cdx-trades__empty">No trades yet.</p>
       ) : (
         <div className="cdx-trades__scroll" {...live.bind}>
           <table className="cdx-trades__table">
@@ -1087,6 +1141,29 @@ export function TradesList({
   );
 }
 
+// ---------------------------------------------------------------- action column
+
+/**
+ * The action column (MintDex's full-height aside from 1024px, scrolling on its own when it must): the token's trade
+ * ticket, then the card. On phones its wrapper dissolves (`contents`) and each block is a plinth of its own in its
+ * section (Trade, Card).
+ */
+export function ActionColumn({ page, className = "" }: { page: CoinPage; className?: string }) {
+  const ticket = useTradeTicket(page);
+  return (
+    <aside
+      aria-label={`Trade $${page.coin.ticker}`}
+      className={cx(
+        "cdx-coin-actions mdx-scroll contents lg:flex lg:min-h-0 lg:flex-col lg:gap-6 lg:overflow-y-auto lg:bg-plinth mdx-aside lg:px-5 lg:py-6 short:gap-5 short:p-4",
+        className,
+      )}
+    >
+      <TradePanel page={page} ticket={ticket} pane="trade" className="order-3 rounded-panel bg-plinth p-4 lg:order-none lg:flex-none lg:rounded-none lg:bg-transparent lg:p-0" />
+      <CardPanel page={page} pane="card" className="order-6 rounded-panel bg-plinth p-4 lg:order-none lg:rounded-none lg:bg-transparent lg:p-0" />
+    </aside>
+  );
+}
+
 // ---------------------------------------------------------------- trade ticket
 
 type Quote = BuyQuote | SellQuote;
@@ -1106,8 +1183,15 @@ const EMPTY = <span className="mdx-dash">{"—"}</span>;
 /** The ticket's one message slot (P1-9 step 9): generic, so wallet errors can use it on devnet. */
 type TicketMessage = { kind: "error" | "warning" | "info"; text: ReactNode; plain: string };
 
+/** A quick buy amount's chip: compact from 1,000 ("10K", "5M"), as written below that ("0.5", "200"). */
+const PRESET_COMPACT = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
+function presetLabel(amount: string): string {
+  const value = Number(amount);
+  return value >= 1000 ? PRESET_COMPACT.format(value) : amount;
+}
+
 /** The ticket's foot: what this trade is and is not, in the coin's own quote ("Test DOGE on a simulated curve."). */
-const ticketNote = (symbol: string) => IS_SIM ? `Test ${symbol} on a simulated curve. Nothing is sent on chain.` : "";
+const ticketNote = (symbol: string) => IS_SIM ? `Test ${symbol}. Nothing is sent on chain.` : "";
 
 /** A summary of the quote for screen readers, debounced so typing does not chatter (P1-9 step 3). */
 function useDebounced<T>(value: T, ms: number) {
@@ -1120,10 +1204,9 @@ function useDebounced<T>(value: T, ms: number) {
 }
 
 /**
- * The trade ticket's state, lifted out of the form so the phone action bar can carry the same submit: Buy | Sell,
- * the amount, the live quote (you receive, price impact, the trading fee, max slippage, market cap after), the one
- * message slot, the label and the submit path. Signed out, the submit opens the demo and then places this trade.
- * The route calls it once and hands the result to TradePanel and TradeActionBar.
+ * The trade ticket's state: Buy | Sell, the amount, the live quote (you receive, price impact, the trading fee, max
+ * slippage, market cap after), the one message slot, the label and the submit path. Signed out, the submit opens the
+ * demo and then places this trade. ActionColumn calls it once and hands the result to TradePanel.
  */
 export function useTradeTicket(page: CoinPage) {
   const { coin, viewer } = page;
@@ -1137,11 +1220,8 @@ export function useTradeTicket(page: CoinPage) {
   const inputRef = useRef<HTMLInputElement>(null);
   const msgRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  // The two submits: the ticket's own (from 1024px) and the phone action bar's (below). Enter clicks the shown one.
+  // The ticket's submit: Enter in the amount presses it.
   const inlineRef = useRef<HTMLButtonElement>(null);
-  const barRef = useRef<HTMLButtonElement>(null);
-  // The bar's place in the Tab order (A11Y-5): a stop at the end of the ticket, below 1024px only (TradePanel).
-  const barStopRef = useRef<HTMLSpanElement>(null);
   const formId = useId();
   const now = useNow(60_000);
 
@@ -1150,8 +1230,10 @@ export function useTradeTicket(page: CoinPage) {
   const walletQuote = me?.quoteBalances?.[asset.key] ?? (asset.key === "sol" ? me?.balance ?? 0 : 0);
   const reserves = { vSol: coin.vQuote ?? coin.vSol, vTok: coin.vTok };
   const holding = viewer?.holding ?? 0;
+  // The field keeps what was typed ("1,500"); the amount is what that means (1500; "1,5" is 1.5), read here.
+  const amountText = cleanAmount(input, side === "buy" ? asset.decimals : 6);
   const amount =
-    side === "buy" ? parseQuoteAmount(input || "0", asset.key) ?? NaN : Math.round(parseFloat(input || "0") * TOKEN_UNIT);
+    side === "buy" ? parseQuoteAmount(amountText || "0", asset.key) ?? NaN : Math.round(parseFloat(amountText || "0") * TOKEN_UNIT);
   const quote = useMemo<Quote | null>(() => {
     if (!Number.isFinite(amount) || amount <= 0) return null;
     return side === "buy" ? quoteBuy(reserves, amount) : quoteSell(reserves, amount);
@@ -1169,7 +1251,8 @@ export function useTradeTicket(page: CoinPage) {
     const t = `${quote.reason ?? "Enter an amount"}.`;
     blocker = { kind: "error", text: t, plain: t };
   } else if (short && me) {
-    const plain = asset.key === "sol" ? notEnoughSentence(me, now) : `Not enough test ${asset.symbol}. Your balance is ${fmt(walletQuote)} ${asset.symbol}.`;
+    // The balance in the short form the ticket's own label uses ("10.7M TOAD"), not every decimal.
+    const plain = asset.key === "sol" ? notEnoughSentence(me, now) : `Not enough test ${asset.symbol}. Your balance is ${quoteFixed(walletQuote, asset.key)} ${asset.symbol}.`;
     blocker = {
       kind: "error",
       plain,
@@ -1232,6 +1315,9 @@ export function useTradeTicket(page: CoinPage) {
     setInput(next);
     setAttempted(false);
     reset("trade");
+    // Phones: the last trade's toast sits where this one's fee, slippage and market cap rows are (toasts rise above
+    // the button there, shared.css), so a new amount sends it out and every quote row is in view before the press.
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 1023.98px)").matches) dismissToasts();
   }
 
   function changeSide(s: "buy" | "sell") {
@@ -1297,7 +1383,7 @@ export function useTradeTicket(page: CoinPage) {
     if (!me) {
       const intent = quote?.ok
         ? side === "buy"
-          ? `Start the demo and buy ${input} ${asset.symbol} of $${coin.ticker}`
+          ? `Start the demo and buy ${amountText} ${asset.symbol} of $${coin.ticker}`
           : `Start the demo and sell $${coin.ticker}`
         : "Start the demo";
       require(quote?.ok ? doTrade : () => inputRef.current?.focus(), "Pick a handle to trade.", intent);
@@ -1310,41 +1396,42 @@ export function useTradeTicket(page: CoinPage) {
     void doTrade();
   }
 
-  /** Enter in the amount presses the submit that is on screen (the bar's below 1024px), through its own blocked,
-   * pending and signed-out handling, instead of an implicit submit through a hidden default button. */
+  /**
+   * Phones: once a quick amount is in, the button and its note come into view just above the tab bar (scroll-margin in
+   * coin.css), at once and only as far as needed, so the trade takes no scroll and the quote rows above stay in view.
+   * The ticket does not stick over them: the fee and slippage rows are read before the press.
+   */
+  function revealSubmit() {
+    if (typeof window === "undefined" || !window.matchMedia("(max-width: 1023.98px)").matches) return;
+    requestAnimationFrame(() => {
+      const foot = formRef.current?.querySelector<HTMLElement>(".cdx-trade-ticket__note") ?? inlineRef.current;
+      foot?.scrollIntoView({ block: "nearest", behavior: "instant" as ScrollBehavior });
+    });
+  }
+
+  /** Enter in the amount presses the ticket's submit, through its own blocked, pending and signed-out handling. */
   function onAmountKey(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key !== "Enter" || e.nativeEvent.isComposing) return;
     e.preventDefault();
-    (isPhoneNow() ? barRef : inlineRef).current?.click();
+    inlineRef.current?.click();
   }
 
   const quick =
     side === "buy"
-      ? [0.1, 0.5, 1, 5].map((v) => ({ label: String(v), aria: `${v} ${asset.symbol}`, value: String(v) }))
-      : [0.25, 0.5, 0.75, 1].map((f) => {
-          // 25/50/75% fill whole tokens (two decimals under one token); Max stays exact so it sells everything.
-          const part = (holding * f) / TOKEN_UNIT;
-          return {
-            label: f === 1 ? "Max" : `${f * 100}%`,
-            aria: f === 1 ? "All you hold" : `${f * 100}% of what you hold`,
-            value:
-              holding <= 0
-                ? ""
-                : f === 1
-                  ? String(holding / TOKEN_UNIT)
-                  : String(part >= 1 ? Math.floor(part) : Math.floor(part * 100) / 100),
-          };
-        });
+      // Sized to the pair (SOL's 0.1 / 0.5 / 1 / 5 as the same share of this pair's curve): 10K TOAD, not 0.5 TOAD.
+      ? quickBuyPresets(asset.key).map((v) => ({ label: presetLabel(v), aria: `${Number(v).toLocaleString("en-US", { maximumFractionDigits: asset.decimals })} ${asset.symbol}`, value: v }))
+      : [0.25, 0.5, 0.75, 1].map((f) => ({
+          label: f === 1 ? "Max" : `${f * 100}%`,
+          aria: f === 1 ? "All you hold" : `${f * 100}% of what you hold`,
+          // 25/50/75% are true shares, rounded down to two decimals; Max stays exact so it sells everything.
+          value: sellShare(holding, f),
+        }));
 
-  // A stable label (P1-9 step 2): the reason lives in the message slot, never in the button.
-  const label = !me ? FLOW.enterToTrade : `${side === "buy" ? "Buy" : "Sell"} $${coin.ticker}`;
+  // A stable label (P1-9 step 2): the reason lives in the message slot, never in the button. In the demo it names the
+  // trade signed out too (the header's "Try the demo" only starts the demo; this starts it and trades); off sim a
+  // wallet has to connect first.
+  const label = !me && !IS_SIM ? FLOW.enterToTrade : `${side === "buy" ? "Buy" : "Sell"} $${coin.ticker}`;
   const suffix = side === "buy" ? asset.symbol : `$${coin.ticker}`;
-  // The phone bar's one line: what this trade spends, once there is an amount.
-  const spend = quote?.ok
-    ? side === "buy"
-      ? `You pay ${input} ${asset.symbol}`
-      : `You sell ${tokens(amount)} $${coin.ticker}`
-    : null;
   // The primary stays cream and enabled (Launch's rule): a press with no amount, or one that cannot fill, says why in
   // the ticket's message slot instead of greying the screen's one action out.
   const submitProps = {
@@ -1356,18 +1443,6 @@ export function useTradeTicket(page: CoinPage) {
     feedback: feedback("trade"),
     successLabel: side === "buy" ? "Bought" : "Sold",
     onBlocked: blocked,
-  };
-
-  // Tab from the ticket's last control lands on the bar's button (always on screen, so no scroll); Tab or Shift+Tab
-  // from there carries on from the stop, so the order reads amount, Buy, then the chart (A11Y-5).
-  const toBar = () => barRef.current?.focus({ preventScroll: true });
-  const onBarKey = (e: KeyboardEvent<HTMLButtonElement>) => {
-    const stop = barStopRef.current;
-    if (e.key !== "Tab" || e.altKey || e.ctrlKey || e.metaKey || !stop?.isConnected || !stop.getClientRects().length) return;
-    const next = tabbableBeside(stop, e.shiftKey ? -1 : 1, barRef.current);
-    if (!next) return;
-    e.preventDefault();
-    next.focus();
   };
 
   return {
@@ -1389,9 +1464,9 @@ export function useTradeTicket(page: CoinPage) {
     walletQuote,
     holding,
     quick,
+    revealSubmit,
     label,
     suffix,
-    spend,
     submit,
     submitProps,
     onAmountKey,
@@ -1400,30 +1475,15 @@ export function useTradeTicket(page: CoinPage) {
     inputRef,
     msgRef,
     inlineRef,
-    barRef,
-    barStopRef,
-    toBar,
-    onBarKey,
   };
-}
-
-const TABBABLE = 'a[href], button, input, select, textarea, summary, [tabindex]';
-/** The next (dir 1) or previous (dir -1) element Tab would reach from `from`, skipping `skip` (the bar's button). */
-function tabbableBeside(from: HTMLElement, dir: 1 | -1, skip: HTMLElement | null): HTMLElement | null {
-  const all = [...document.querySelectorAll<HTMLElement>(TABBABLE)].filter((el) => el === from || (
-    el !== skip && el.tabIndex >= 0 && !(el as HTMLButtonElement).disabled && !el.closest("[inert]") && el.getClientRects().length > 0
-  ));
-  const at = all.indexOf(from);
-  return at < 0 ? null : all[at + dir] ?? null;
 }
 
 export type TradeTicket = ReturnType<typeof useTradeTicket>;
 
 /**
- * The trade ticket: Buy | Sell, the amount with its unit, quick amounts (0.1 / 0.5 / 1 / 5, or 25% / 50% / 75% /
- * Max of what you hold), the live quote, one message line and the submit. Below 1024px the submit is the phone
- * action bar's (TradeActionBar), so this one is hidden there (CSS). `hideQuick`, `hideAfter` and `compact` are kept
- * for older callers and no longer change the ticket.
+ * The trade ticket (MintDex): Buy | Sell, the amount with its unit, quick amounts (0.1 / 0.5 / 1 / 5, or 25% / 50% /
+ * 75% / Max of what you hold), the live quote on dotted leaders, one message line, the full-width submit (enabled:
+ * a press with no amount focuses the amount and says why) and the demo note in the coin's own quote (VIS-3).
  */
 export function TradePanel({
   page,
@@ -1433,9 +1493,6 @@ export function TradePanel({
 }: {
   page: CoinPage;
   ticket: TradeTicket;
-  hideQuick?: boolean;
-  hideAfter?: boolean;
-  compact?: boolean;
   pane?: string;
   className?: string;
 }) {
@@ -1489,7 +1546,7 @@ export function TradePanel({
             enterKeyHint="go"
             autoComplete="off"
             value={t.input}
-            onChange={(e) => t.edit(cleanAmount(e.target.value, side === "buy" ? asset.decimals : 6))}
+            onChange={(e) => t.edit(typedAmount(e.target.value, side === "buy" ? asset.decimals : 6))}
             onKeyDown={t.onAmountKey}
             placeholder="0.00"
             className="mdx-input num cdx-trade-ticket__input"
@@ -1510,7 +1567,7 @@ export function TradePanel({
             className="num"
             disabled={!q.value}
             aria-label={q.aria}
-            onClick={() => t.edit(q.value)}
+            onClick={() => { t.edit(q.value); t.revealSubmit(); }}
           >
             {q.label}
           </Button>
@@ -1565,62 +1622,11 @@ export function TradePanel({
         ) : null}
       </div>
 
-      <Button ref={t.inlineRef} {...t.submitProps} block className="cdx-trade-ticket__submit">
+      <Button ref={t.inlineRef} {...t.submitProps} size="lg" variant={me ? side : "primary"} block className="cdx-trade-ticket__submit">
         {t.label}
       </Button>
-      {/* Below 1024px the submit is the action bar's, the view root's last child so that it sticks for the whole page.
-          This stop keeps its place in the Tab order: focus passes straight on to the bar's button (A11Y-5). */}
-      <span ref={t.barStopRef} role="button" tabIndex={0} aria-label={`Go to ${t.label}`} className="cdx-trade-ticket__bar-stop" onFocus={t.toBar} onClick={t.toBar} />
       {IS_SIM ? <p className="cdx-trade-ticket__note">{ticketNote(asset.symbol)}</p> : null}
     </form>
-  );
-}
-
-/**
- * The phone and tablet action bar (density R7): the ticket's submit, kept on screen while the page scrolls, with
- * one line of what the trade spends once there is an amount. It submits the ticket's form by id, so blocked,
- * pending and signed-out behave exactly like the ticket's own button. From 1024px it is hidden (the ticket shows
- * its submit). The route renders it as the view root's last child.
- */
-export function TradeActionBar({ ticket }: { ticket: TradeTicket }) {
-  const t = ticket;
-  return (
-    <ActionBar phoneOnly label={`Buy or sell $${t.coin.ticker}`} className="cdx-trade-bar">
-      <p className="cdx-trade-bar__spend num">{t.spend}</p>
-      {/* Out of the natural Tab order: the ticket's stop (TradePanel) leads here, and Tab from here goes on from it. */}
-      <Button ref={t.barRef} {...t.submitProps} tabIndex={-1} onKeyDown={t.onBarKey} className="cdx-trade-bar__submit">
-        {t.label}
-      </Button>
-    </ActionBar>
-  );
-}
-
-// ---------------------------------------------------------------- back to the list
-
-/**
- * Phones and tablets: "‹ Discover" before the title. When the page was opened from Discover in this tab, it goes
- * back in history (Discover keeps its search and place); otherwise it is a plain link. `compact` is the 44px
- * chevron alone on the title's row (its name, "Back to Discover", for screen readers).
- */
-export function BackToDiscover({ compact = false }: { compact?: boolean } = {}) {
-  return (
-    <Link
-      to="/discover"
-      className={cx("mdx-link mdx-hit cdx-coin-back", compact && "cdx-coin-back--compact")}
-      onClick={(e: MouseEvent<HTMLAnchorElement>) => {
-        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-        const nav = (window as unknown as { navigation?: { currentEntry?: { index: number }; entries?: () => Array<{ url: string | null }> } }).navigation;
-        const index = nav?.currentEntry?.index ?? -1;
-        const previous = index > 0 ? nav?.entries?.()[index - 1]?.url : null;
-        if (previous && new URL(previous).pathname === "/discover") {
-          e.preventDefault();
-          window.history.back();
-        }
-      }}
-    >
-      <Icon name="chevron-left" />
-      {compact ? <span className="sr-only">Back to Discover</span> : "Discover"}
-    </Link>
   );
 }
 

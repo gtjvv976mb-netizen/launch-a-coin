@@ -1,6 +1,7 @@
 /**
- * The live trade ticker (hype arcade): a strip above the page that scrolls the real activity feed (buys, sells,
- * launches, design unlocks, bids and card sales) with the coin's picture, ticker and amount. Fed by the same Home
+ * The activity ticker (MintDex's strip under the status line): it scrolls the real activity feed (buys, sells and
+ * launches; Launch a Card has no design unlocks, bids or card sales, so those rows never show) with the coin's
+ * picture, ticker and amount. Fed by the same Home
  * read the site already polls (GET /home on devnet, the sim's getHome in test mode): no made-up rows. It holds
  * still under the pointer or keyboard focus, pauses offscreen, in a hidden tab and under dialogs, and under calm
  * motion it becomes a still row you can scroll sideways. A design unlock that arrives while you watch plays the
@@ -19,12 +20,15 @@ import type { EventRow } from "../../lib/mintdex/types";
 import { getPairAsset } from "../../lib/carddex/pairs";
 import { quoteAtoms } from "../../lib/carddex/quote-display";
 import { revPoll, useNow } from "./hooks";
+import { BOT_HINT } from "../../lib/mintdex/copy";
 import { FrameMini, Thumb, solFigure, usePauseGate } from "./ui";
 
 /** Seconds each row takes to cross (the strip's speed is the same whatever the row count). */
 const SEC_PER_ROW = 3.4;
 const MAX_ROWS = 24;
 const POLL_MS = IS_SIM ? 15_000 : CHAIN_POLL_MS;
+/** The only feed rows a Launch a Card coin has: token trades and launches. */
+const TICKER_KINDS = new Set<EventRow["kind"]>(["buy", "sell", "launch"]);
 
 type HomeLike = { activity: EventRow[]; rev?: string };
 
@@ -58,11 +62,13 @@ function useActivity(enabled: boolean): EventRow[] {
   const home = qc.getQueryState<HomeLike>(["home"]);
   const tickerAt = qc.getQueryState(["ticker"])?.dataUpdatedAt ?? 0;
   // Whichever read is newer: Home's own poll or ours. Nothing before mount (the server rendered an empty strip).
-  const src = !enabled
-    ? []
-    : home?.data && (!data || home.dataUpdatedAt >= tickerAt)
-      ? home.data.activity
-      : (data?.activity ?? []);
+  const src = (
+    !enabled
+      ? []
+      : home?.data && (!data || home.dataUpdatedAt >= tickerAt)
+        ? home.data.activity
+        : (data?.activity ?? [])
+  ).filter((r) => TICKER_KINDS.has(r.kind));
   const ids = src
     .slice(0, MAX_ROWS)
     .map((r) => r.id)
@@ -110,6 +116,13 @@ function Row({ e, copy }: { e: EventRow; copy: boolean }) {
         <Thumb src={e.image} size={20} />
         <span className="mdx-ticker__tag">{k.tag}</span>
         <span className="mdx-ticker__sym">${e.ticker}</span>
+        {/* A demo bot's trade says so, as Home's Activity rows do (trust.tsx BotTag's chip and words, written out here so
+            the shell does not load that module). */}
+        {IS_SIM && e.isBot ? (
+          <span title={BOT_HINT} className="mdx-tag mdx-ticker__bot">
+            bot<span className="sr-only">, {BOT_HINT.toLowerCase()}</span>
+          </span>
+        ) : null}
         {tier ? (
           <span className="mdx-ticker__amt">
             <FrameMini level={e.level} className="mr-1 inline-block align-[-3px]" />
@@ -169,18 +182,20 @@ export function Ticker() {
     return <div ref={ref} className="mdx-ticker" aria-hidden data-empty="" />;
   }
   const dur = `${Math.max(24, rows.length * SEC_PER_ROW)}s`;
+  // In the demo the strip never says "Live": its rows are test trades, many by demo bots.
+  const recentName = IS_SIM ? "Demo" : "Live";
   return (
     <div
       ref={ref}
       className="mdx-ticker"
       role="region"
-      aria-label={recent ? "Live activity" : "Past activity"}
+      aria-label={recent ? `${recentName} activity` : "Past activity"}
       data-activity={recent ? "live" : "past"}
       data-held={held || undefined}
     >
       <span className="mdx-ticker__live" aria-hidden>
         <span className={recent ? "mdx-live" : "mdx-ticker__past-dot"} />
-        {recent ? "Live" : "Past activity"}
+        {recent ? recentName : "Past activity"}
       </span>
       <div className="mdx-ticker__view">
         <ul className="mdx-ticker__track" style={{ "--dur": dur } as CSSProperties}>
@@ -197,7 +212,7 @@ export function Ticker() {
         type="button"
         className="mdx-ticker__pause"
         aria-pressed={held}
-        aria-label={`${held ? "Play" : "Pause"} ${recent ? "live" : "past"} activity`}
+        aria-label={`${held ? "Play" : "Pause"} ${recent ? recentName.toLowerCase() : "past"} activity`}
         onClick={() => setHeld((h) => !h)}
       >
         {held ? (

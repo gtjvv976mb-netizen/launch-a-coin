@@ -1,8 +1,9 @@
-/* Cascade layer order: reset lowest, then Tailwind/Quanta base, components (mintdex.css primitives), cdx (every
- * shell and screen sheet) and finally utilities, so a Tailwind class on an element always beats a sheet rule.
- * The card internals (card3d.css, meme-icons.css, carddex-cards.css, themed-card-backs.css) stay unlayered and win
- * as before. Declared first, so sheets that join a layer later (route chunks) still sit below utilities. */
-@layer reset, theme, base, components, cdx, utilities;
+/* Cascade layer order: reset lowest, then Tailwind/Quanta base, then `legacy` (the release candidate's per-screen
+ * sheets, kept only until each screen is restored: they fill gaps and never beat a shared rule), components (the
+ * mintdex.css primitives) and utilities. The restored MintDex sheets are unlayered, as in the pre-restyle tree, so
+ * they win over utilities exactly as they did there. Declared first, so route chunks that join a layer later still
+ * sit in this order. */
+@layer reset, theme, base, legacy, components, utilities;
 
 @import "tailwindcss" source(none);
 @source "../src";
@@ -31,27 +32,33 @@
 @import "../packages/quanta/src/css/tailwind/gradient.css";
 
 @import "tw-animate-css";
+/* Tokens first: the one :root / @theme (D1 Logo Ground). */
+@import "./carddex-theme.css";
 @import "./mintdex.css";
-/* Alive 3D (refs/alive-3d-spec.md): the card (CARD) and the page life (SITE). */
+/* Alive 3D (refs/alive-3d-spec.md): the card (CARD) and the page life (SITE): sky, stage, ticker. */
 @import "./card3d.css";
-@import "./styles/screens/viewer.css";
-@import "./alive.css" layer(cdx);
+@import "./alive.css";
 @import "./meme-icons.css";
 /* rarity.css, editions-card.css, edition-studio.css and meme-icons-studio.css style components no page renders
  * (TierCraft, EditionCard, EditionStudio, MemeIconsStudio); each of those imports its own sheet. */
-@import "./carddex-theme.css";
-/* The shell (foundation-owned): the top bar, tab bar and foot, then the viewport mechanics, then the shared card stage. */
-@import "./styles/shell.css" layer(cdx);
-@import "./carddex-viewport.css" layer(cdx);
-@import "./carddex.css" layer(cdx);
-/* Per-screen sheets (styles/screens): each screen group owns its own; see .taste-skill/restyle/ownership.md. */
-@import "./styles/screens/overlays.css" layer(cdx);
-@import "./styles/screens/coin.css" layer(cdx);
-@import "./styles/screens/browse.css" layer(cdx);
-@import "./styles/screens/portfolio.css" layer(cdx);
-@import "./styles/screens/legal.css" layer(cdx);
-@import "./styles/screens/home.css" layer(cdx);
-@import "./styles/screens/launch.css" layer(cdx);
+@import "./carddex-a11y.css";
+@import "./carddex-viewport.css";
+/* Shared primitives, card controls and overlays kept from the release candidate (foundation-owned). */
+@import "./styles/shared.css";
+/* Interim: the release candidate's screen sheets for the screens not yet restored to the MintDex format. Each
+ * screen's owner deletes its sheet and this import when the screen is restored. */
+@import "./styles/screens/browse.css" layer(legacy);
+/* Restored screens (MintDex format, unlayered like the other restored sheets): coin, Discover, legal and 404,
+ * portfolio. */
+@import "./styles/screens/coin.css";
+@import "./styles/screens/discover.css";
+/* Launch and Designs (MintDex format; designs.css also holds the design chip both screens use). */
+@import "./styles/screens/launch.css";
+@import "./styles/screens/designs.css";
+@import "./styles/screens/legal.css";
+/* How it works (/how): the details the screens link to. */
+@import "./styles/screens/how.css";
+@import "./styles/screens/portfolio.css";
 
 @custom-variant dark (&:where([data-theme="default-dark"], [data-theme="default-dark"] *));
 
@@ -139,7 +146,7 @@
     background-color: var(--color-wall);
     color: var(--color-ink);
     font-family: var(--font-sans);
-    font-size: var(--text-body);
+    font-size: 15px;
     line-height: 1.5;
   }
 

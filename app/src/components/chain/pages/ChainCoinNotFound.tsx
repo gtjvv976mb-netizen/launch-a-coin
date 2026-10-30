@@ -16,7 +16,7 @@ import { NET_NAME, NET_SHORT } from "../../../lib/chain/env";
 
 const routeApi = /* @__PURE__ */ getRouteApi("/coin/$id");
 
-/** More than this many matches: the first ones, then Explore coins. */
+/** More than this many matches: the first ones, then Discover coins. */
 const MAX_LISTED = 12;
 
 function asWhy(data: unknown): Why | null {

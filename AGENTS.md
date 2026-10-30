@@ -1,12 +1,16 @@
-> **RELEASE NOTICE (29 Oct 2026, from the Claude session): production runs `eef8f51e-eb19-456f-899e-4699180c4030`**
-> (tag `rc-integration-a7d447d`, branch `claude/integration`): Codex's 6b453309 content (every meme pair, verified side by
-> side) + the true-black-flat restyle, the density pass and the mainnet hardening, with D1 migrations 0001-0015 applied
-> remotely. **Build any later release on `claude/integration`; publishing an older tree (including Codex's folder) would
-> revert all of it.** The Cloudflare for SaaS cutover is complete: launchacard.fun and www are DNS-only CNAMEs to
-> `edge.launchacard.com`, and `app/wrangler.production.jsonc` carries only the `*/*` route on launchacard.com. Never re-add
-> launchacard.fun Worker custom domains. Publish with `wrangler versions upload` + `versions deploy` only.
-> Rollback: `wrangler rollback c908f2e2-b47e-4db6-9df3-6de7a2884143` (previous release) or `6b453309-2236-4491-b93b-90504490d703`
-> (Codex's last; see README for the published_at note).
+> **RELEASE NOTICE (30 Oct 2026, from the Claude session): production runs `f441569e-08a0-4e40-b3a3-f3a14810d614`**
+> (tag `rc-simple-d98e5fd`, branch `claude/classic-mintdex`, PR #3; switched 2026-10-30 09:05:49 UTC at 100%).
+> It contains the MintDex format in the D1 Logo Ground palette, the coin-image GIF, the pair picking the card (Launch's pair
+> picker) and the 30 October simplicity pass, on top of everything in eef8f51e. D1 migrations 0001-0015 are applied
+> remotely, and no new ones are needed. **Build any later release on `claude/classic-mintdex`; publishing an older tree
+> (including Codex's folder) would revert all of it.**
+> The Cloudflare for SaaS cutover is complete: launchacard.fun and www are DNS-only CNAMEs to `edge.launchacard.com`, and
+> `app/wrangler.production.jsonc` carries only the `*/*` route on launchacard.com. Never re-add launchacard.fun Worker
+> custom domains. Publish only with `wrangler versions upload` + `versions deploy`.
+> The account must be on Workers Paid: on Free, Cloudflare refuses the upload because of `limits.cpu_ms` (code 100328),
+> which is the intended guard.
+> Rollback: `wrangler rollback eef8f51e-eb19-456f-899e-4699180c4030` (previous release). A rollback makes GIF coin images
+> return 404 while the older version serves; run the repair query in HANDOFF.md after rolling forward again.
 
 > **DEPLOY NOTICE (28 Oct 2026, from the Claude session): read before any `wrangler deploy`.**
 > PLDT (Philippines) blocks the two Cloudflare IPs of the launchacard.fun zone. The site is being moved behind
@@ -32,7 +36,9 @@ Use the user-level web-design-workflow skill for frontend work. Preserve the rou
 
 Card artwork requirement (owner instruction, 29 October 2026): use **Higgsfield for all new and redesigned card artwork**, including fronts, backs, limited editions, stock/meme themes and custom card-based logos. Do not silently substitute built-in image_gen, another image provider, or code-drawn decorative artwork. Follow `creative/higgsfield/WORKFLOW.md` for matched references, the shared print template, provenance and visual checks. Deterministic content composition, responsive layout, exports and motion remain code responsibilities. Existing verified Higgsfield designs may be reused for supported pair presets; do not describe reuse as newly generated custom artwork. The provider preference does not extend any previously approved credit allocation.
 
-Product: token launches with one creator-selected NFT card design. No automatic evolution, NFT sales, bids, auctions or royalties. Token buy/sell trading remains. Designs must persist through launch, reads and token trades.
+Token GIF clarification (owner, later 29 October 2026): the **existing website card designs and thin turntable geometry are already approved**. Export those directly for the token GIF, with market cap removed from that image. Do not generate a thicker card, slab, case or replacement design for this export. The rejected Higgsfield motion study is retained only as provenance; it must not be installed or published. This is an export task using existing Higgsfield artwork, not authorization for further paid redesigns.
+
+Product: token launches with one NFT card design, chosen by the creator's pair: each pump.fun pair has exactly one design (SOL One Piece, USDC Duel Masters), and Launch never offers a separate design picker. No automatic evolution, NFT sales, bids, auctions or royalties. Token buy/sell trading remains. Designs must persist through launch, reads and token trades.
 
 Default is isolated local simulation. Never sign transactions, move SOL, publish or deploy without specific authorization. No MintDex bindings, wallets, sessions, APIs or shared data. Never read private wallet/secret files or copy credentials.
 

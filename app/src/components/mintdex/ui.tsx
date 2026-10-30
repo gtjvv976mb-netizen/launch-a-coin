@@ -108,8 +108,7 @@
  *   LiveDot        pulse, paused. The 6px live dot; pings on mount and when pulse changes (at most every 2s);
  *                  slate and still while paused.
  *   LivePause      paused (req), onChange (req). "Pause" / "Resume" live updates, for a live list's header.
- *   Hallmark       size = 28. The Holo Seal: a serif M on pastel foil in a hexagon seal; 28 and 32 are
- *                  pixel-hinted at 1x.
+ *   Hallmark       size = 28. The logo mark: the logo card without its lettering.
  *   GenIcon        name (req), size. Mask icon in currentColor (rail and mobile tab bar only).
  *
  * CSS classes (src/mintdex.css): mdx-ledge, mdx-pocket (+ --pocket, mdx-pocket--featured), mdx-leaders, mdx-plate,
@@ -201,14 +200,9 @@ export function GenIcon({
   );
 }
 
-/** Sizes with a pixel-hinted seal for 1x screens (brand/src/logo.py SMALL). */
-const HINTED_SEAL = new Set([28, 32]);
-
 /**
- * The Holo Seal: a serif M on pastel foil in a hexagon seal (light version), the logo in the rail and the
- * mobile header.
- * The seal fills the square box's height. 1x screens get the seal hand-hinted for 28 or 32 px;
- * 2x and up (and every other size) get the vector.
+ * The mark: the Launch a Card logo card without its lettering (creative/brand/README.md), beside the lettered
+ * wordmark in the rail and alone in the phone header, centred in a square box of the given size.
  */
 export function Hallmark({ size = 28, className = "" }: { size?: number; className?: string }) {
   const svg = "/assets/brand/carddex.svg";
@@ -888,7 +882,7 @@ export function Stepper({
       type="button"
       onClick={onTogglePlay}
       aria-label={playing ? "Pause featured cards" : "Play featured cards"}
-      className="mdx-playbtn grid h-8 w-8 flex-none place-items-center rounded-pill text-ink max-lg:h-11 max-lg:w-11"
+      className="mdx-playbtn grid h-10 w-10 flex-none place-items-center rounded-pill text-ink max-lg:h-11 max-lg:w-11"
     >
       <svg width="12" height="12" viewBox="0 0 10 10" aria-hidden fill="currentColor">
         {playing ? (
@@ -903,7 +897,7 @@ export function Stepper({
     </button>
   ) : playing !== undefined ? (
     // Calm turns the button off after hydration: an empty slot of the same size keeps the row from shifting.
-    <span aria-hidden className="h-8 w-8 flex-none max-lg:h-11 max-lg:w-11" />
+    <span aria-hidden className="h-10 w-10 flex-none max-lg:h-11 max-lg:w-11" />
   ) : null;
   return (
     <div
@@ -1150,7 +1144,8 @@ export function Odometer({ text }: { text: string }) {
               </span>
             </span>
           ) : (
-            <span key={i}>{ch}</span>
+            // A space stays a space: a bare " " flex item would collapse to nothing ("3.54MCHILLHOUSE").
+            <span key={i}>{ch === " " ? "\u00a0" : ch}</span>
           ),
         )}
       </span>
@@ -2485,6 +2480,16 @@ const TOAST_OUT_MS = 160;
 /** On screen: ok 5s, level 7s, errors 10s (WCAG 2.2.1 wants time to read). A toast with an action stays. */
 const TOAST_MS: Record<ToastKind, number> = { ok: 5_000, level: 7_000, err: 10_000 };
 const TOAST_MAX = 3;
+/** The event dismissToasts sends to the provider. */
+const DISMISS_TOASTS = "mdx:dismiss-toasts";
+
+/**
+ * Sends every toast on screen out (with its exit), except one with an action, which stays until dismissed. The coin
+ * ticket calls it on phones when the amount changes, so the last trade's toast never covers the next one's quote rows.
+ */
+export function dismissToasts() {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(DISMISS_TOASTS));
+}
 
 type Timer = { timer?: ReturnType<typeof setTimeout>; remaining: number; started: number };
 
@@ -2602,6 +2607,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     },
     [dismiss, start],
   );
+
+  // dismissToasts(): every toast without an action leaves.
+  const listRef = useRef(toasts);
+  listRef.current = toasts;
+  useEffect(() => {
+    const onDismiss = () => {
+      for (const x of listRef.current) if (!x.leaving && !x.action) dismiss(x.id);
+    };
+    window.addEventListener(DISMISS_TOASTS, onDismiss);
+    return () => window.removeEventListener(DISMISS_TOASTS, onDismiss);
+  }, [dismiss]);
 
   // Escape dismisses the newest toast (not while typing, and never under an open dialog or menu).
   useEffect(() => {

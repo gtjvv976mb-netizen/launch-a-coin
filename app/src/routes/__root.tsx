@@ -4,6 +4,7 @@ import {
   Outlet,
   Scripts,
   createRootRouteWithContext,
+  redirect,
   useRouter,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
@@ -92,7 +93,7 @@ function buildHead(meta: AppMeta, devnetSite = false, notFound = false) {
       },
       { title },
       { name: "description", content: description },
-      { name: "theme-color", content: "#0d0c0b" },
+      { name: "theme-color", content: "#26120b" },
       { name: "application-name", content: "Launch a Card" },
       // Which build this is (launch-plan D4 and E checks: curl the HTML and read it). sim, devnet or mainnet.
       { name: "carddex-mode", content: MODE },
@@ -115,9 +116,12 @@ function buildHead(meta: AppMeta, devnetSite = false, notFound = false) {
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      // No font preload (F17): Instrument Sans is not used early enough for one to pay off, and Chrome warned on
-      // every route that the preloaded file went unused. Its @font-face (font-display: swap) loads it on use.
-      // The same wordless gold card-and-crown mark serves browser, mobile and installed-app branding.
+      // No Instrument Sans preload (F17): it is not used early enough for one to pay off, and Chrome warned on every
+      // route that the preloaded file went unused. Its @font-face (font-display: swap) loads it on use.
+      // The D1 heading serif is preloaded: every route paints a heading in it in the first screen (Home's display
+      // line, each page title, the 404's screen-reader title), so the request starts with the HTML, not after the CSS.
+      { rel: "preload", href: "/fonts/roboto-serif-900-wdth80-latin.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" as const },
+      // The owner's logo (creative/brand/README.md): the wordless card as the favicon, the whole logo as app icons.
       { rel: "icon", href: "/assets/brand/carddex.svg", type: "image/svg+xml" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/assets/brand/carddex-180.png" },
       // One manifest per mode under its own name (lib/mintdex/manifest.ts; vite.config.ts emits it).
@@ -141,7 +145,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="grid h-full min-h-[60dvh] place-items-center px-4">
       <div className="flex max-w-md flex-col items-center gap-2 text-center">
         <h1 className="mdx-h1">{ROUTE_ERROR.title}</h1>
-        <p className="text-body text-slate">{ROUTE_ERROR.body}</p>
+        {ROUTE_ERROR.body ? <p className="text-body text-slate">{ROUTE_ERROR.body}</p> : null}
         <div className="mt-4 flex items-center gap-5">
           <Button
             onClick={() => {
@@ -173,6 +177,12 @@ async function loadRootData({location,context}:{location:{pathname:string;search
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: ({ loaderData, match }) => buildHead(appMeta, loaderData?.devnetSite ?? false, !!match.globalNotFound),
+  // An old linkable guide (P1-7: any page with ?guide=1) lands on the details page, /how, on the server and the client.
+  // The parameter is typed by hand: inferring it from the route tree makes the root's type circular.
+  beforeLoad: ({ location }: { location: { search: unknown } }) => {
+    const g = (location.search as { guide?: unknown } | undefined)?.guide;
+    if (g === 1 || g === "1") throw redirect({ to: "/how", replace: true });
+  },
   // `now` is the page's clock for its first frame (see useNow in hooks.ts): it is dehydrated with the
   // loader data, so server HTML and the hydrating client compute the same relative times. `vp` is the
   // viewport cookie (P1-20), so fitted grids lay out their server HTML for this screen.

@@ -5,7 +5,7 @@ import { liveTokenFromRequest, liveWalletFromToken, sha256 } from "./auth.server
 import { publicOrigin, requireLiveConfig } from "./config.server";
 import type { LiveAsset, LiveAssets } from "./types";
 
-const EXT: Record<string, string> = {"image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "application/json": "json"};
+const EXT: Record<string, string> = {"image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "image/gif": "gif", "application/json": "json"};
 const IMMUTABLE = "public, max-age=31536000, immutable";
 /** How long a saved launch's assets are public before its coin is signed: its wallet approval (SEC-R5). */
 export const PREVIEW_MS = 3_600_000;
@@ -20,6 +20,7 @@ export function sniffLiveImage(bytes: Uint8Array): string | null {
   if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return "image/png";
   if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image/jpeg";
   if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 && bytes[8] === 0x57 && bytes[9] === 0x45) return "image/webp";
+  if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38 && (bytes[4] === 0x37 || bytes[4] === 0x39) && bytes[5] === 0x61) return "image/gif";
   return null;
 }
 /**
@@ -124,7 +125,7 @@ export async function fetchPublicBytes(url: string, maxBytes = MAX_BYTES): Promi
   // Workers rejects redirect:"error" before sending a request. Manual mode keeps
   // this same-origin check intact; every 3xx fails the !ok check below. Launch assets not yet published are read with
   // this Worker's own check key, which goes only to this configured origin.
-  const headers: Record<string, string> = {accept: "image/png,image/webp,image/jpeg,application/json"};
+  const headers: Record<string, string> = {accept: "image/png,image/webp,image/jpeg,image/gif,application/json"};
   if (/^\/(?:m|api\/live\/assets)\//.test(parsed.pathname)) headers[ASSET_CHECK_HEADER] = await assetCheck();
   const response = await fetchOwnOrigin(url, {redirect: "manual", signal: AbortSignal.timeout(15_000), headers});
   if (!response.ok || Number(response.headers.get("content-length") ?? 0) > maxBytes) throw new UserError("A public launch asset is not reachable or exceeds the size limit.");
@@ -165,7 +166,7 @@ const notFound = () => new Response("Not found", {status: 404, headers: {"cache-
  * offline.
  */
 export async function serveLiveAsset(filename: string, request?: Request, now = Date.now()): Promise<Response> {
-  if (!/^[a-f0-9]{64}\.(png|jpg|webp|json)$/.test(filename)) return notFound();
+  if (!/^[a-f0-9]{64}\.(png|jpg|webp|gif|json)$/.test(filename)) return notFound();
   let access: "public" | "preview" | "check" = "public";
   try {
     const row = await one<{published_at: number | null; public_until: number | null}>("SELECT published_at, public_until FROM live_assets WHERE sha256 = ?", filename.slice(0, 64));

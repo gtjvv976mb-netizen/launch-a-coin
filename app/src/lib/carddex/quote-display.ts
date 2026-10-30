@@ -17,6 +17,25 @@ export function quoteFixed(atoms: number | string, key?: string | null): string 
   return size.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+/**
+ * An upper limit in a quote asset, shown so that typing it back is always allowed: rounded down (never up) to two
+ * decimals, or to two significant digits below 0.01, with grouped digits and never compact ("27,781.12", "10.10").
+ * Takes the quote's atoms.
+ */
+export function quoteCap(atoms: number | string, key?: string | null): string {
+  const decimals = getPairAsset(key).decimals;
+  const value = Number(atoms);
+  if (!Number.isFinite(value) || value <= 0) return "0";
+  const raw = BigInt(Math.floor(value));
+  const unit = 10n ** BigInt(decimals);
+  // Two decimals; under 0.01, enough decimals for two significant digits (within the asset's own decimals).
+  const places = raw * 100n < unit ? Math.min(decimals, decimals - raw.toString().length + 2) : Math.min(2, decimals);
+  const kept = raw / 10n ** BigInt(decimals - places);
+  const step = 10n ** BigInt(places);
+  const whole = new Intl.NumberFormat("en-US").format(kept / step);
+  return places ? `${whole}.${(kept % step).toString().padStart(places, "0")}` : whole;
+}
+
 export function quoteNumber(value: number, compact = false): string {
   if (!Number.isFinite(value)) return "—";
   if (value !== 0 && Math.abs(value) < .00001) return value.toPrecision(3);

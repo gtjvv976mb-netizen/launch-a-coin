@@ -19,10 +19,10 @@ import {
 import { FLOW, notEnoughSentence } from "../copy";
 import { looksLikeAddress } from "../seo";
 import { filterByDesign, sortCoins } from "../sort";
-import { CARD_DESIGNS, DEFAULT_CARD_DESIGN, getCardDesign, isCardDesignKey } from "../../carddex/designs";
+import { CARD_DESIGNS, getCardDesign } from "../../carddex/designs";
 import { getTradingPair } from "../../carddex/pairs";
 import { initialQuoteReserves, maxInitialBuyQuoteAtoms, quoteAtomsToSol, quoteCurveProgress, quoteMetrics } from "../../carddex/quote-simulation";
-import { demoQuoteBalances, ensureDemoQuoteWallet, launchQuote, quoteIdentity, resolveStoredQuote } from "./quotes.server";
+import { demoQuoteBalances, ensureDemoQuoteWallet, newLaunchPair, quoteIdentity, resolveStoredQuote } from "./quotes.server";
 import type {
   CoinDetail,
   CoinPage,
@@ -784,10 +784,10 @@ export async function launchCoin(user: SessionUser, input: LaunchInput): Promise
   const name = input.name.trim().replace(/\s+/g, " ");
   const ticker = input.ticker.trim().replace(/^\$/, "").toUpperCase();
   const lore = input.lore.trim();
-  const cardTemplate = input.cardTemplate ?? DEFAULT_CARD_DESIGN;
-  if (!isCardDesignKey(cardTemplate)) throw new UserError("Choose an available card design.");
+  // The pair picks the card: a pair alone takes its design, an older design-only request takes that design's pair,
+  // and a design that is not its pair's (or has no pair) is refused before anything is written.
+  const { asset, designKey: cardTemplate } = newLaunchPair(input);
   const design = getCardDesign(cardTemplate);
-  const asset = launchQuote(cardTemplate, input);
   const stockTicker = asset.kind === "stock" ? asset.referenceTicker : undefined;
   const tokenPair = asset.kind === "stock" ? getTradingPair(ticker, asset.key) : undefined;
   if (input.stockTicker !== undefined && input.stockTicker !== stockTicker) {

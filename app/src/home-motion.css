@@ -1,0 +1,490 @@
+/* Home's authored arrival and collector-display lighting. The display's new motion lives on its own
+ * elements, never on a Card3D transform. Full motion remains the owner's default; the existing explicit
+ * Calm control removes it, and the stage gate pauses it offscreen, behind dialogs and under Pause. */
+.mdx-home.mdx-page {
+  animation: none;
+}
+
+@keyframes mdx-home-arrive {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes mdx-home-arrive-soft {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+:root:not([data-motion="calm"]) .mdx-home-arrival {
+  animation: mdx-home-arrive 500ms var(--ease-room) var(--home-arrival-delay, 0ms) both;
+}
+.mdx-home-arrival--copy {
+  --home-arrival-delay: 60ms;
+}
+.mdx-home-arrival--actions {
+  --home-arrival-delay: 120ms;
+}
+:root[data-motion="lite"] .mdx-home-arrival {
+  animation-name: mdx-home-arrive-soft;
+  animation-duration: var(--t-base);
+}
+
+/* An actual circular tracer is projected into the ellipse of the plinth. Keeping projection and spin
+ * on separate elements preserves the ellipse while only transform changes during each orbit. */
+.mdx-tt__orbit {
+  position: absolute;
+  left: -1%;
+  top: -1%;
+  width: 102%;
+  aspect-ratio: 1;
+  transform: scaleY(0.217);
+  transform-origin: 50% 0;
+  pointer-events: none;
+}
+.mdx-tt__orbit > b {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: 50%;
+  background: conic-gradient(from 35deg,
+    transparent 0deg 188deg,
+    var(--pool, var(--color-neon)) 230deg,
+    var(--color-ink) 250deg,
+    transparent 253deg 360deg);
+  -webkit-mask-image: radial-gradient(closest-side, transparent calc(100% - 3px), black calc(100% - 2px));
+  mask-image: radial-gradient(closest-side, transparent calc(100% - 3px), black calc(100% - 2px));
+  opacity: 0.9;
+  transform: rotate(0deg);
+}
+
+/* A low light runs over the stand's front face; its text-free surface gives the turntable a powered
+ * state without moving the caption, the controls or the information on the card. */
+.mdx-tt__charge {
+  position: absolute;
+  inset: auto 1% 2%;
+  height: 44%;
+  overflow: clip;
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  pointer-events: none;
+}
+.mdx-tt__charge > b {
+  position: absolute;
+  inset: 0 auto 0 -24%;
+  display: block;
+  width: 24%;
+  background: linear-gradient(105deg, transparent, rgb(var(--rgb-ink) / 0.48), transparent);
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
+}
+@keyframes mdx-home-orbit {
+  to { transform: rotate(360deg); }
+}
+@keyframes mdx-home-charge {
+  0%, 58% { opacity: 0; transform: translate3d(0, 0, 0); }
+  64% { opacity: 0.65; }
+  86% { opacity: 0.65; }
+  94%, 100% { opacity: 0; transform: translate3d(525%, 0, 0); }
+}
+:root:not([data-motion]) .mdx-tt__plinth[data-lit] .mdx-tt__orbit > b {
+  animation: mdx-home-orbit 8s linear infinite;
+}
+:root:not([data-motion]) .mdx-tt__plinth[data-lit] .mdx-tt__charge > b {
+  animation: mdx-home-charge 8s linear infinite;
+}
+.mdx-home[data-ambient-paused] .mdx-home-arrival,
+body[data-scroll-locked] .mdx-home-arrival,
+body[data-scroll-locked] .mdx-tt__orbit > b,
+body[data-scroll-locked] .mdx-tt__charge > b {
+  animation-play-state: paused !important;
+}
+:root[data-motion="calm"] .mdx-home-arrival {
+  animation: none;
+}
+:root[data-motion] .mdx-tt__orbit,
+:root[data-motion] .mdx-tt__charge {
+  display: none;
+}
+/* Phones: rotation belongs to the card; navigation belongs to a separate, predictable control area.
+ * The dots keep real 44px targets instead of being squeezed between the previous/next arrows. */
+@media (max-width: 1023.98px) {
+  /* Phones already have an in-flow drag hint and sensor control below the caption. */
+  .mdx-home .mdx-tt__hint,
+  .mdx-home .mdx-tt__chip {
+    display: none;
+  }
+  .mdx-home .mdx-tt__touchtools {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    width: 100%;
+  }
+  .mdx-home .mdx-tt__phonegyro {
+    position: static;
+    min-height: 44px;
+    transform: none;
+    touch-action: manipulation;
+    transition: transform 120ms var(--ease-room);
+  }
+  .mdx-home .mdx-tt__phonegyro:active {
+    transform: scale(0.97);
+  }
+  .mdx-home .mdx-tt__phonecontrols {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    align-items: center;
+    width: min(352px, 100%);
+    margin-top: 4px;
+  }
+  .mdx-home .mdx-tt__phonecontrols > button {
+    grid-row: 1;
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .mdx-home .mdx-tt__phonecontrols > button:first-child {
+    grid-column: 1;
+  }
+  .mdx-home .mdx-tt__phonecontrols > button:last-child {
+    grid-column: 3;
+  }
+  .mdx-home .mdx-tt__phonestepper {
+    display: contents;
+  }
+  .mdx-home .mdx-tt__phonestepper > .mdx-playbtn {
+    grid-row: 1;
+    grid-column: 2;
+    justify-self: center;
+  }
+  .mdx-home .mdx-tt__phonestepper > [role="group"] {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+  .mdx-home .mdx-tt__phonestepper > [role="group"] > button {
+    flex: 0 0 44px;
+    width: 44px;
+    min-height: 44px;
+  }
+}
+@media (forced-colors: active) {
+  .mdx-tt__orbit,
+  .mdx-tt__charge { display: none; }
+}
+
+/* ---------------------------------------------------------------- Home layout (MintDex format)
+ * The headline block, then the featured stage: at fit (1280x720 and up) the card and its caption column sit side by
+ * side, a chevron on each card edge at mid-height and the dots with Pause under the caption; 1024 to 1279 puts the
+ * caption under the card; phones stack card, caption, Launch a coin and Discover coins (on the first screen, above the
+ * tab bar), the drag line and tilt chip, then the 44px chevrons with Pause between them and the dots. */
+.cdx-home__intro {
+  position: relative;
+  z-index: 2;
+}
+/* The stage is its own stacking layer under the headline block: a card swaying toward you passes behind the
+ * actions, so they stay readable and clickable at every width. */
+.cdx-home .mdx-stage {
+  z-index: 1;
+}
+.cdx-home__copy {
+  max-width: 60ch;
+  margin-top: 10px;
+  color: var(--color-slate);
+  font-size: 15px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+/* The hero's "pair" link is one short word: its hit area (.mdx-hit) is at least 44px wide as well as tall. */
+.cdx-home__pair.mdx-hit::before {
+  left: min(-8px, calc((100% - 44px) / 2));
+  right: min(-8px, calc((100% - 44px) / 2));
+}
+.cdx-home__actions {
+  margin-top: 22px;
+}
+.cdx-home__lot {
+  gap: 0;
+}
+.cdx-home__side {
+  position: relative;
+  z-index: 4;
+  width: min(100%, calc(var(--W) * 1.3));
+  margin-top: 4px;
+}
+.cdx-home__stepper {
+  margin-top: 14px;
+}
+.cdx-home__design {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.cdx-home__chip {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-tint);
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 500;
+}
+/* Phones (MintDex): a smaller card, so the headline, card, caption, controls and dots share the first screen; the
+ * design chip is a desktop line there. */
+@media (max-width: 1023.98px) {
+  .mdx-lot.cdx-home__lot {
+    /* The sway room (--sway-room) comes out of the card's own height budget, so the dots and Pause keep their place
+     * above the tab bar while the swaying card stays under the supporting line. */
+    --W: min(260px, calc(100vw - 32px), max(164px, calc((100dvh - 520px) / (1.85 + var(--sway-room)))));
+    margin-top: max(12px, calc(var(--W) * var(--sway-room)));
+  }
+  .cdx-home__design {
+    display: none;
+  }
+}
+/* From 1024px the stage starts a little under the actions, so a card swaying toward you clears them. Under the fit
+ * template the lot's own top padding holds the sway room (alive.css); below it the lot gets the same room here. */
+@media (min-width: 1024px) {
+  .cdx-home .mdx-stage {
+    margin-top: 16px;
+  }
+}
+@media (min-width: 1024px) and (not ((min-width: 1280px) and (min-height: 720px))) {
+  .mdx-lot.cdx-home__lot {
+    padding-top: calc(var(--W) * var(--sway-room));
+  }
+}
+/* The chevrons on the card's edges, centred on them at the card's mid-height (88/63 W tall: 44/63 W down). */
+.mdx-tt .cdx-home__chev {
+  position: absolute;
+  top: calc(var(--W) * 44 / 63 - 16px);
+  z-index: 5;
+}
+.mdx-tt .cdx-home__chev--prev {
+  left: -16px;
+}
+.mdx-tt .cdx-home__chev--next {
+  right: -16px;
+}
+/* A 40px target around the 32px chevron under a fine pointer. */
+.mdx-tt .cdx-home__chev::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+}
+@media (min-width: 1280px) and (min-height: 720px) {
+  .mdx-lot.cdx-home__lot {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 36px;
+  }
+  .cdx-home__side {
+    width: 240px;
+    flex: none;
+    margin-top: 0;
+    margin-bottom: calc(var(--W) * 0.12);
+  }
+}
+@media (max-width: 1023.98px) {
+  .cdx-home__intro .mdx-display {
+    font-size: 36px;
+  }
+  .cdx-home__copy {
+    margin-top: 6px;
+  }
+  .cdx-home__side {
+    width: 100%;
+    margin-top: 0;
+  }
+  .cdx-home__actions--phone {
+    width: 100%;
+    margin-top: 14px;
+  }
+  .cdx-home__touchtools {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .cdx-home__controls {
+    width: 100%;
+    margin-top: 12px;
+  }
+  .cdx-home__controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .cdx-home__dots {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+/* ---------------------------------------------------------------- the rail: Trending, Launched on pump.fun, Activity
+ * Desktop: the rail never scrolls (MintDex). Activity takes the height that is left; rows that do not fit whole wrap
+ * out of view to the right (never cut, never a scrollbar). Phones stack the rail under the stage as one panel and
+ * show the first five activity rows. */
+.cdx-home__activity {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  column-gap: 64px; /* a wrapped column lands well past the clip, never peeking in */
+  overflow: hidden;
+}
+.cdx-home__activity > * {
+  width: 100%;
+  flex: none;
+}
+@media (max-width: 1023.98px) {
+  .cdx-home__aside.mdx-plinth {
+    padding: 16px;
+    border-radius: var(--radius-panel);
+  }
+  .cdx-home__activity {
+    flex-wrap: nowrap;
+    overflow: visible;
+  }
+  .cdx-home__activity > :nth-child(n + 6) {
+    display: none;
+  }
+}
+.cdx-home-launched__list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+}
+.cdx-feed-launch {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  margin-inline: -8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-row);
+}
+.cdx-feed-launch__card {
+  display: block;
+  width: 30px;
+  height: 42px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--color-sleeve);
+  box-shadow: 0 0 0 1px var(--image-outline);
+}
+.cdx-feed-launch__card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cdx-feed-launch__card[data-art] img {
+  object-fit: cover;
+}
+.cdx-feed-launch__id {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.cdx-feed-launch__name {
+  overflow: hidden;
+  color: var(--color-ink);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cdx-feed-launch__meta {
+  overflow: hidden;
+  color: var(--color-slate);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cdx-feed-launch__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 14px;
+  font-size: 12px;
+}
+.cdx-feed-launch__links .mdx-link {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  gap: 4px;
+}
+.cdx-feed-launch[data-skeleton] .cdx-feed-launch__card,
+.cdx-feed-launch__bar {
+  background: var(--color-wall-deep);
+}
+.cdx-feed-launch__bar {
+  display: block;
+  height: 10px;
+  margin-top: 4px;
+  border-radius: var(--radius-pill);
+}
+.cdx-feed-launch__bar[data-w="name"] {
+  width: 60%;
+}
+.cdx-feed-launch__bar[data-w="meta"] {
+  width: 40%;
+}
+.cdx-home-launched__error {
+  display: flex;
+  min-height: 54px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  color: var(--color-slate);
+  font-size: 13px;
+  line-height: 1.45;
+}
+/* Phones: the caption's View coin and the stepping row are whole 44px targets (MintDex's phone pills). */
+@media (max-width: 1023.98px) {
+  .cdx-home__caption .mdx-btn {
+    min-height: 44px;
+    padding-inline: 18px;
+    font-size: 15px;
+  }
+  .cdx-home__controls .mdx-btn--icon {
+    width: 44px;
+    height: 44px;
+  }
+}
+/* A market cap in a long quote unit ("3.54M CHILLHOUSE"): the label never truncates, the unit is caption-size, and
+ * on a narrow column the figure takes the next line under its leader. */
+.cdx-home__caption .mdx-leaders > div {
+  flex-wrap: wrap;
+  row-gap: 2px;
+}
+.cdx-home__caption .mdx-leaders dt {
+  flex: none;
+}
+.cdx-home__caption .mdx-leaders .mdx-unit {
+  font-size: 13px;
+}
+/* Narrow phones: the caption's market cap row keeps its "Market cap" label whole; the status strip above the page
+ * already says the trading is simulated. */
+@media (max-width: 399.98px) {
+  .cdx-home__caption .cdx-home__sim {
+    display: none;
+  }
+}
