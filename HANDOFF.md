@@ -1,3 +1,40 @@
+# 30 October impeccable audit — fixes on `claude/impeccable-fixes` (local only, not pushed or deployed)
+
+**Scores.** Accessibility 3, performance 3, theming 3, responsive 3, integrity 2: 14/20. Fixes branch from f603773 (the source of live f441569e). Measured before and after on local production builds with headless Chromium (390x844 and 360x800 touch at 2x, 1440x900, 1280x800, 1024x768 touch); evidence in the session scratchpad `audfix/fix/` (`before/`, `after/`, `scripts/`).
+
+**Fixed.**
+- *Focus under the phone bars (A11Y-1).* Under 1024px, html's scroll padding reserves the sticky header and the tab bar (none for the tab bar while the keyboard hides it). Focused controls fully covered, Tab and Shift+Tab: /launch 2/44 and 6/30 to 0; /levels 22/40 and 25/30 to 0; / 7/39 and 4/30 to 0; 360x800 and 820x1180 also 0.
+- *Selected segment ring (A11Y-2).* Full gold: 2.5:1 to 4.7:1 on the track, 2.2:1 to 4.1:1 on the thumb. The glow stays.
+- *3D viewer (A11Y-3).* The stage is a tab stop with a ring. Forward Tab now goes Pause spin, Flip, Close; before, it stayed on the stage.
+- *Card art (A11Y-4).* Its description starts "Required."; the error is tied to the button (`art-help art-spec`).
+- *Pause toggles (A11Y-5).* The ticker pause and the spin toggle keep the Play/Pause label and drop aria-pressed ("Play spin [pressed]" before).
+- *Discover first desktop visit (PERF-1).* Chromium's "not mobile" hint gets a 1360x850 guess. Cold CLS: 1280x800 0.356 to 0; 1440x900 0.216 to 0.009; 1024x768 0.263 to 0. Phones are 0 at 390 and 360. Home and the coin page are unchanged (0.007, 0).
+- *Discover art (PERF-3).* The phone sizes value is 36vw. The creature art now loads w320 instead of w480 (about 128 KB less on a first visit); the frame keeps 480w.
+- *Skins (THEME-1).* Token fills and rims sit under the skinned buttons, chips, icon buttons and the Calm switch. With the skins blocked, buttons were transparent; now they show red (8 controls) or sheet (16). The loaded look is unchanged.
+- *Scrollbar (THEME-2).* `--scroll-thumb`: 1.38:1 to 4.22:1. Chrome draws the hover shade itself: 2.37:1, was 2.52:1.
+- *Larger default font (RESP-1).* The tab bar and the page clearance both come from `--tabbar-h`. At 32px default the bar stays 64px, not 128. Covered: Create demo coin 32/48px to 0, Portfolio 16/23 to 0, Discover's last row 48px to 0. Tab labels peak at 15.6px with no overlap (Portfolio ended at x 400 on a 390 screen).
+- *Touch screens 1024px and wider (RESP-2).* The 44px rules follow (pointer: coarse). Targets under 44 at 1024x768: coin 20 to 0, Home 15 to 0, Designs 27 to 1 (a ladder row clipped by its own pane).
+- *Discover selects.* 15px to 16px on phones and touch screens.
+- *Home announcement (INTEGRITY-1).* It names the chip's design ("Glorb, Jade Reliquary design", was "Legend design").
+- *Trending figure (INTEGRITY-2).* It carries "MC" and an sr-only ", market cap".
+- *Fee table (INTEGRITY-3).* Launch a Card's fee and share are both "None.", with no "currently". The pump.fun integration sends nothing to a platform wallet. No code constant gives a typical NFT total, and pump.fun's pages answered 403, so the total and the link were left out instead of invented.
+- *Designs (INTEGRITY-5, -8).* The Classic/Premium/Limited label is gone; the chip reads "DOGE pair". The sample card shows Holders "—", was 842.
+- *Discover 24h change (INTEGRITY-7).* All 10 cells show the change (was 2) and say it in the link name (was 0).
+
+**Left.**
+- **INTEGRITY-4: the owner, with counsel, must supply the legal facts.** The audit found 14 `[TO FILL]` slots. INTEGRITY-3 closed the 3 fee slots, so 11 remain: Terms 10 (operator name, address, contact email, takedown contact, minimum age, restricted regions, warranty and liability, governing law, courts or disputes, how changes are announced) and Privacy 1 (contact email). None were invented. Keep the wallet launch switch closed until they are filled.
+- Not in this pass: PERF-2 (phone Discover renders every coin), PERF-4 (wallet signing code on every page), PERF-5, THEME-3 (dead shadow utilities), THEME-4 (unused Quanta theme), THEME-5 (token aliases), RESP-3 (type in px), RESP-4 (/how strip cue), RESP-5 (tickers cut at 360), INTEGRITY-9 (inherited dead code), INTEGRITY-12. A11Y-6, THEME-6, INTEGRITY-6, -10 and -11 were refuted or are by design.
+
+**Gates.**
+- TypeScript, 502 app tests, 125 pumpfun tests and the Vite build pass.
+- Taste lint on the changed files shows the same rules before and after. Shadow hits went from 116 to 119: the 1px rims under the skins, hidden once the art loads.
+- **Not verified:**
+  - real phones and screen readers;
+  - iOS focus zoom;
+  - the inspector "before" (the after run shows only the pinned sky, glow and card-type classes);
+  - Safari and Firefox desktop first visits, which send no client hints and so still get Discover's phone grid first;
+  - landscape tab labels at large font sizes.
+
 # 30 October simplicity pass on `claude/classic-mintdex` — live as f441569e
 
 **Release status (30 October).** Pushed as `claude/classic-mintdex`, PR #3 (base `claude/integration`). Final commit 95fd09e. The main session re-ran the gates: TypeScript, 499 app tests, 125 pumpfun tests and the build. It also ran a local production-build browser check:
