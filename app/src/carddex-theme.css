@@ -253,6 +253,7 @@
   --rail-w: 224px;
   --mhead-h: 56px; /* the phone header; 0 when it scrolls away (phones held sideways) */
   --tabbar-h: 64px;
+  --scroll-thumb: var(--color-control-border); /* scrollbar thumbs: 4.2:1 on plinth, above 3:1 on wall (THEME-2) */
   --status-h: 28px; /* the status strip under 1024px: one 13/20 line plus 4px above and below */
   --ticker-h: 40px; /* MintDex 34px, raised so Pause is a 40px target; 44px under 1024px */
   --main-pad: 24px;
@@ -367,7 +368,7 @@
     color: var(--color-ink);
   }
   html {
-    scrollbar-color: var(--color-hairline) var(--color-wall);
+    scrollbar-color: var(--scroll-thumb) var(--color-wall);
   }
   ::selection {
     background: var(--color-neon);

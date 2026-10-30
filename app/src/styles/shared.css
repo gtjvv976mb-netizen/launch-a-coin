@@ -67,7 +67,8 @@
   }
   /* Danger (Start over): the secondary suede skin with a red label. */
   .mdx-btn--danger {
-    background: none;
+    background: var(--color-sheet);
+    box-shadow: inset 0 0 0 1px var(--color-control-border);
     border-image: var(--skin-secondary) var(--skin-secondary-slice) / calc(var(--skin-h) * 0.34) calc(var(--skin-h) * 0.5) stretch;
     color: var(--color-down-hover);
   }
@@ -734,7 +735,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: var(--color-hairline) transparent;
+  scrollbar-color: var(--scroll-thumb) transparent;
 }
 .cdx-overlay--sheet .cdx-overlay__body {
   margin: 0;
