@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   useEffect,
@@ -18,52 +18,39 @@ import {
   View3DHost,
   useMotionLevel,
 } from "../components/mintdex/card3d";
-import { CoinRow, EventItem, LaunchedItem, LaunchedSkeleton } from "../components/mintdex/feeds";
+import { LaunchedItem, LaunchedSkeleton } from "../components/mintdex/feeds";
 import { MintCardFace, faceSlot, type CardData } from "../components/mintdex/MintCard";
-import { prefersReducedMotion, revPoll, useNow, usePageKeys } from "../components/mintdex/hooks";
+import { prefersReducedMotion, useNow, usePageKeys } from "../components/mintdex/hooks";
 import {
   ButtonLink,
   Caption,
-  LivePause,
-  Num,
   SectionHead,
   ChevronButton,
   Stepper,
   TextLink,
-  TierTag,
-  useFlip,
-  useLiveList,
   usePauseGate,
-  useSettled,
 } from "../components/mintdex/ui";
-import { SimTag } from "../components/mintdex/trust";
-import { CHAIN_POLL_MS, chainHome, chainHomeLoader, chainInitial } from "../lib/chain/data";
-import { getHome } from "../lib/mintdex/api";
-import { hasRecentActivity } from "../lib/mintdex/activity-freshness";
-import { CARD_BIDDING_SUSPENDED } from "../lib/mintdex/card-bidding";
-import { fetchLiveLaunches } from "../lib/carddex/live/launches";
+import { PairLogo } from "../components/carddex/PairLogo";
+import { launchCard, liveLaunchesQuery, SOLANA_ADDRESS, type PublicLiveLaunch } from "../lib/carddex/live/launches";
+import { getLaunchedCoins } from "../lib/carddex/live/launched";
 import { getCardDesign } from "../lib/carddex/designs";
 import { designChipText, featuredStepText } from "../lib/carddex/featured-copy";
-import { marketCapText, marketCapWatch } from "../lib/carddex/quote-display";
-import { EXPLORE_COINS, HOME_COPY, IS_SIM, WORDS } from "../lib/mintdex/copy";
-import { sol, usdCompact } from "../lib/mintdex/format";
+import { getPairAsset } from "../lib/carddex/pairs";
 import { tierForLevel } from "../lib/mintdex/tiers";
+import { EXPLORE_COINS, HOME_COPY, WORDS } from "../lib/mintdex/copy";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_ORIGIN, pageHead } from "../lib/mintdex/seo";
-import type { CoinSummary } from "../lib/mintdex/types";
 import "../home-motion.css";
 import { Card3DView } from "../components/mintdex/card3d/Card3D";
 import { Engine, motionLevel, type Body } from "../components/mintdex/card3d/motion3d";
 import type { SceneCtl } from "../components/mintdex/card3d/scene";
 
 /**
- * Back keeps your place (P1-14): the featured card on the ledge is mirrored in the URL (/?card=glorb), so
+ * Back keeps your place (P1-14): the featured card on the ledge is mirrored in the URL (/?card=<mint>), so
  * Back from its coin page returns to the same card. Hand-written validation: anything odd is ignored.
  */
 type HomeSearch = { card?: string };
-/** A coin id: the sim's slug, or a mint address on devnet. */
-const CARD_PARAM = IS_SIM ? /^[a-z0-9_]{2,16}$/ : /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 function validateHomeSearch(raw: Record<string, unknown>): HomeSearch {
-  return { card: typeof raw.card === "string" && CARD_PARAM.test(raw.card) ? raw.card : undefined };
+  return { card: typeof raw.card === "string" && SOLANA_ADDRESS.test(raw.card) ? raw.card : undefined };
 }
 
 const HOME_JSON_LD = JSON.stringify({
@@ -91,15 +78,14 @@ export const Route = createFileRoute("/")({
   validateSearch: validateHomeSearch,
   // Stepping the featured card stays on this match: no reload (the polled query keeps the data fresh).
   shouldReload: ({ cause }) => cause !== "stay",
-  loader: IS_SIM ? () => getHome() : chainHomeLoader,
+  loader: () => getLaunchedCoins(),
   head: () => ({
     ...pageHead({
       path: "/",
       title: "Launch a Card: every coin is a one-of-one card",
       description: SITE_DESCRIPTION,
     }),
-    // SEO-5: who runs the site and what it is, from facts the site already states. No sameAs: the site links
-    // no Launch a Card social account yet ([TO FILL: official X and Telegram URLs]).
+    // SEO-5: what the site is, from facts it already states. No sameAs: it links no social account.
     scripts: [{ type: "application/ld+json", children: HOME_JSON_LD }],
   }),
   component: Home,
@@ -109,19 +95,20 @@ export const Route = createFileRoute("/")({
  * Home (spec 8.1, family A; refs/alive-3d-spec.md 5.1, the Turntable vitrine): stage + aside.
  *
  * The MintDex home (mintdex.fun, in the D1 Logo Ground palette): headline and actions over the featured-card stage, the
- * rail with Trending, Launched on pump.fun (real mainnet launches) and Activity on the right; phones stack the rail
- * under the stage as one panel.
+ * rail with Launched on pump.fun on the right; phones stack the rail under the stage as one panel. Every coin here is
+ * a finished mainnet launch (GET /api/live/launches): the newest four stand on the stage as the cards they minted.
+ * Before the first launch the stage holds a card back and says so, and the rail says "No coins yet".
  *
  * Two regimes, one DOM:
  * - fit (1280x720 and up): the no-scroll template. The headline block sits top left; under it the featured card
  *   floats over a holo plinth in a size container that runs to the stage's foot, sized so the card and the whole
  *   plinth fit (alive.css). The card and its caption sit centered as one group (the previous coin's ghost has room
- *   on the left), a chevron on each card edge, the dots and Pause right under the caption. The aside fits
- *   Trending (5) and as many activity rows as fit.
+ *   on the left), a chevron on each card edge, the dots and Pause right under the caption. The aside lists the
+ *   launches.
  * - everything else (phones, 1024 to 1279, short windows): natural flow. The card is up to 260px wide over its
- *   plinth, with a chevron on each edge, the caption, the dots and Pause, then Trending (5) and Activity (5). Phones
+ *   plinth, with a chevron on each edge, the caption, the dots and Pause, then the launches. Phones
  *   move the chevrons below the card into a dedicated control row so a full-width drag never hits an arrow.
- *   A compact caption keeps View coin beside the name and figures; short phones scroll naturally.
+ *   A compact caption keeps View card beside the name and pair; short phones scroll naturally.
  *
  * One "no real value" per screen: on the devnet test site (useDevnetSite) the banner above the page says it, and the
  * hero keeps only the bid line.
@@ -154,15 +141,10 @@ const CAPTION_FALLBACK_MS = 1800;
 const HINT_KEY = "mdx-hint-drag";
 /** The visitor's Pause on the featured cards, kept for later visits (MOT-7). */
 const PAUSE_KEY = "mdx-featured-paused";
-/** Featured cards on the stage (MintDex: four), rarest design first. */
+/** Featured cards on the stage (MintDex: four), newest launch first. */
 const FEATURED_COUNT = 4;
-/** Trending rows in the rail (MintDex: five, ranked 01 to 05). */
-const TRENDING_ROWS = 5;
-/** Activity rows the rail renders: as many as its height holds show (the rest wrap out of view, never cut); phones
- *  show the first five (alive.css .cdx-home__activity). */
-const ACTIVITY_ROWS = 10;
-/** Launches the rail lists at first; the rest open in place. */
-const LAUNCHED_ROWS = 3;
+/** Launches the rail lists; "See all" opens the rest on Discover. */
+const LAUNCHED_ROWS = 8;
 /** The featured card's image sizes (LCP): the laid-out card at each width, so a 1.75x phone takes the 480w copy. */
 const FACE_SIZES = "(max-width: 639px) 270px, (max-width: 1023px) 400px, (max-width: 1439px) 300px, 400px";
 
@@ -171,7 +153,14 @@ const FACE_SIZES = "(max-width: 639px) 270px, (max-width: 1023px) 400px, (max-wi
  * across polls, so a refetch never swaps the card under the viewer; if the coin leaves the featured set, the
  * same slot stays selected. Manual steps announce and call onSelect (the URL); auto steps do neither.
  */
-function useLot(featured: CoinSummary[], initialId?: string, onSelect?: (id: string) => void) {
+/** A featured launch: its mint as the id (the coin page's address), its name, and the card it minted. */
+type Featured = { id: string; name: string; ticker: string; level: number; cardTemplate: string; launch: PublicLiveLaunch; card: CardData };
+function featuredOf(launch: PublicLiveLaunch): Featured {
+  const card = launchCard(launch);
+  return { id: launch.tokenMint, name: launch.name, ticker: launch.ticker, level: card.level, cardTemplate: launch.designKey, launch, card };
+}
+
+function useLot(featured: Featured[], initialId?: string, onSelect?: (id: string) => void) {
   const [sel, setSel] = useState<{ id: string | null; i: number }>({ id: initialId ?? null, i: 0 });
   // What the stepper's live region says after a step (P1-21): set on a manual step only, so polls never repeat it.
   const [announce, setAnnounce] = useState("");
@@ -201,9 +190,9 @@ function useLot(featured: CoinSummary[], initialId?: string, onSelect?: (id: str
   return { index, count, selected, dir, step, announce };
 }
 
-/** The face a featured coin shows on the turntable (no owner line, as before). */
-function featuredCard(c: CoinSummary): CardData {
-  return { ...c, ownerHandle: undefined };
+/** The face a featured coin shows on the turntable: the card it minted. */
+function featuredCard(c: Featured): CardData {
+  return c.card;
 }
 
 /** Exhibition light belongs to the site palette (D1: a soft amber halo of amber, antique gold, warm cream and deep
@@ -353,8 +342,8 @@ function Ghosts({
   onStep,
   paused,
 }: {
-  prev: CoinSummary | null;
-  next: CoinSummary | null;
+  prev: Featured | null;
+  next: Featured | null;
   onStep: (dir: 1 | -1) => void;
   paused: boolean;
 }) {
@@ -382,59 +371,28 @@ function Ghosts({
   );
 }
 
-/** A caption figure: right-aligned so every number in the caption shares one right edge. */
-function Figure({ children }: { children: ReactNode }) {
-  return <span className="flex min-w-0 items-baseline justify-end gap-2">{children}</span>;
-}
-
-/** A market cap in the coin's own quote ("3.54M CHILLHOUSE"): the figure rolls, the symbol is its unit. */
-function mcapUnit(c: CoinSummary) {
-  const text = marketCapText(c);
-  const cut = c.mcapUsd == null ? text.lastIndexOf(" ") : -1;
-  return cut > 0 ? text.slice(cut + 1) : undefined;
-}
-function mcapFigure(c: CoinSummary) {
-  const text = marketCapText(c);
-  const cut = c.mcapUsd == null ? text.lastIndexOf(" ") : -1;
-  return cut > 0 ? text.slice(0, cut) : text;
-}
-
-/** How many figure rows a coin's caption shows: market cap always, Buy now and Top bid only when there is one. */
-function figureRows(c: CoinSummary) {
-  return 1;
-}
-
 /**
- * The featured caption: the coin's name, its design (from 1024px up: the card face names it too), only the figures
- * it has (market cap always, without a 0.0% pill; Buy now and Top bid only when there is one) and one View coin
- * button. Phones: a compact block under the card with the button beside the name and figures, so the card, its
- * name, its market cap and the button share the first screen. `rows` reserves room for the most rows any featured
- * coin shows, so a turn to the next coin never moves what is under the caption.
+ * The featured caption: the coin's name, its design (from 1024px up: the card face names it too), its pair with the
+ * pair's logo, and one View card button. Phones: a compact block under the card with the button beside the name and
+ * pair, so the card, its name and the button share the first screen.
  */
-function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
+function LotCaption({ coin: c }: { coin: Featured }) {
+  const pair = getPairAsset(c.launch.quoteAssetKey);
   return (
     <div className="mdx-caption max-lg:grid max-lg:grid-cols-[minmax(0,1fr)_auto] max-lg:items-center max-lg:gap-x-4">
       <h2 className="mdx-name mt-0 truncate">{c.name}</h2>
-      {/* The coin's one creator-chosen design (MintDex's design chip), then the demo's Simulated tag. */}
+      {/* The coin's one creator-chosen design (MintDex's design chip). */}
       <p className="cdx-home__design max-lg:hidden">
         <span className="cdx-home__chip">{designChipText(c)}</span>
-        <SimTag className="self-center" />
       </p>
-      <dl
-        className="mdx-leaders mt-4 flex flex-col gap-2 max-lg:col-start-1 max-lg:mt-1"
-        style={{ minHeight: `${rows * 30 - 8}px` }}
-      >
+      <dl className="mdx-leaders mt-4 flex flex-col gap-2 max-lg:col-start-1 max-lg:mt-1">
         <div>
-          <dt className="text-[13px] text-slate">Market cap</dt>
-          <dd>
-            <Figure>
-              {/* The odometer stays mounted across a step and rolls to the next coin's figure; flashKey keeps the
-                  up/down flash for real moves of one coin only (a step is not a market move). */}
-              <Num size="lg" watch={marketCapWatch(c)} flashKey={c.id} odo unit={mcapUnit(c)}>
-                {mcapFigure(c)}
-              </Num>
-              <SimTag className="cdx-home__sim self-center lg:hidden" />
-            </Figure>
+          <dt className="text-[13px] text-slate">Pair</dt>
+          <dd className="flex min-w-0 items-center justify-end gap-2">
+            <PairLogo asset={pair} size={20} />
+            <span className="truncate">
+              ${c.ticker} / {pair.symbol}
+            </span>
           </dd>
         </div>
       </dl>
@@ -489,52 +447,51 @@ function EmptyLine({ children }: { children: ReactNode }) {
 }
 
 /**
- * Launched on pump.fun: the real mainnet launches (never simulated), newest first, from the public launch list (at most
- * 12). The rail lists the first three; "Show all" opens the rest in place. Loading keeps one row's height, so the
- * rail never jumps when the answer lands.
+ * Launched on pump.fun: every coin the site lists, newest first. The rail shows the first LAUNCHED_ROWS; "See all"
+ * opens Discover. Loading keeps one row's height, so the rail never jumps when the answer lands; before the first
+ * launch it says "No coins yet" with the Launch link.
  */
-function LaunchedSection({ now }: { now: number }) {
+function LaunchedSection({
+  now,
+  rows,
+  pending,
+  failed,
+  retrying,
+  retry,
+}: {
+  now: number;
+  rows: PublicLiveLaunch[];
+  pending: boolean;
+  failed: boolean;
+  retrying: boolean;
+  retry: () => void;
+}) {
   const headId = useId();
-  const [all, setAll] = useState(false);
-  const launches = useQuery({
-    queryKey: ["live-launches"],
-    queryFn: fetchLiveLaunches,
-    staleTime: 30_000,
-    refetchInterval: 60_000,
-    retry: 1,
-  });
-  const rows = launches.data ?? [];
-  const shown = all ? rows : rows.slice(0, LAUNCHED_ROWS);
-  // Loaded with no launches (the demo, or before the first real one): no block at all, so the rail never says "No
-  // launches yet" over Activity rows that read "launched". A failed load still says so: there may be launches.
-  if (launches.isSuccess && !rows.length) return null;
   return (
-    <section aria-labelledby={headId} className="cdx-home-launched flex flex-none flex-col gap-1">
+    <section aria-labelledby={headId} className="cdx-home-launched flex min-h-0 flex-1 flex-col gap-1">
       <SectionHead
         title={<span id={headId}>Launched on pump.fun</span>}
-        right={
-          rows.length > LAUNCHED_ROWS ? (
-            <TextLink onClick={() => setAll((v) => !v)} aria-expanded={all}>
-              {all ? "Show fewer" : `Show all ${rows.length}`}
-            </TextLink>
-          ) : undefined
-        }
+        right={rows.length > LAUNCHED_ROWS ? <TextLink to="/discover">See all {rows.length}</TextLink> : undefined}
       />
-      {launches.isPending ? (
+      {pending ? (
         <LaunchedSkeleton rows={1} />
-      ) : launches.isError && !rows.length ? (
+      ) : failed && !rows.length ? (
         <div role="alert" className="cdx-home-launched__error">
           <p>Couldn't load launches.</p>
-          <TextLink onClick={() => void launches.refetch()} disabled={launches.isFetching}>
-            {launches.isFetching ? "Trying again…" : "Try again"}
+          <TextLink onClick={retry} disabled={retrying}>
+            {retrying ? "Trying again…" : "Try again"}
           </TextLink>
         </div>
-      ) : (
+      ) : rows.length ? (
         <ul className="cdx-home-launched__list">
-          {shown.map((l) => (
+          {rows.slice(0, LAUNCHED_ROWS).map((l) => (
             <LaunchedItem key={l.tokenMint} launch={l} now={now} />
           ))}
         </ul>
+      ) : (
+        <EmptyLine>
+          No coins yet. <TextLink to="/launch">Launch the first one</TextLink>
+        </EmptyLine>
       )}
     </section>
   );
@@ -542,30 +499,21 @@ function LaunchedSection({ now }: { now: number }) {
 
 function Home() {
   const initial = Route.useLoaderData();
-  const qc = useQueryClient();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
-  const { data } = useQuery({
-    queryKey: ["home"],
-    // Skips the refetch when nothing changed since the last poll (P0-12).
-    queryFn: IS_SIM ? revPoll(qc, ["home"], () => getHome()) : revPoll(qc, ["home"], chainHome),
-    initialData: initial,
-    ...(IS_SIM ? null : chainInitial(initial)),
-    staleTime: 10_000,
-    refetchInterval: IS_SIM ? 15_000 : CHAIN_POLL_MS,
-  });
+  // The server render's list seeds the shared query (Discover and the header search read the same one); a failed
+  // server read leaves it to the browser.
+  const launches = useQuery({ ...liveLaunchesQuery, initialData: initial ?? undefined });
+  const rows = launches.data ?? [];
   const now = useNow();
   const level = useMotionLevel();
-  // The devnet test site's banner already says devnet SOL has no real value: the hero leaves its own line out.
-
-  // getHome lists the top coin of each design, lowest design first. The stepper starts on the rarest.
-  const featured = useMemo(() => [...data.featured].reverse().slice(0, FEATURED_COUNT), [data.featured]);
+  // The newest launches stand on the stage, newest first.
+  const featured = useMemo(() => rows.slice(0, FEATURED_COUNT).map(featuredOf), [rows]);
   // The 3D viewer steps through the featured cards in the stepper's order.
   const v3dList = useMemo(
     () => featured.map((c) => ({ id: c.id, card: featuredCard(c) })),
     [featured],
   );
-  const captionRows = featured.reduce((n, c) => Math.max(n, figureRows(c)), 1);
   const lot = useLot(
     featured,
     search.card,
@@ -611,7 +559,7 @@ function Home() {
   // The faces staged on the card: what it shows now, the target and its neighbours (decoded ahead of the turn).
   const faces = useMemo(() => {
     const ids: string[] = [];
-    const add = (c: CoinSummary | null | undefined) => {
+    const add = (c: Featured | null | undefined) => {
       if (c && !ids.includes(c.id)) ids.push(c.id);
     };
     add(shown);
@@ -821,31 +769,6 @@ function Home() {
   }, [count]);
   const hint = hintOn !== null && hintOn === target?.id;
 
-  const trending = data.trending.slice(0, TRENDING_ROWS);
-  // What the order means (the Worker ranks by 24h volume against each pair's own curve, then by the latest trade): on
-  // a quiet day every coin has zero volume and the list is simply the most recently traded. The volume is read in the
-  // coin's own quote, so a pair with no USD reference counts too.
-  const trendingBasis = trending.some((c) => Number(c.volume24hQuote ?? 0) > 0)
-    ? HOME_COPY.trendingByVolume
-    : HOME_COPY.trendingByLatest;
-  // A poll that only reorders Trending must not replay the rows' entrance (delta 13.4); rows glide to their new
-  // places instead (M20).
-  const trendingSettled = useSettled();
-  const trendingRef = useRef<HTMLDivElement>(null);
-  useFlip(
-    trendingRef,
-    trending.map((c) => c.id),
-  );
-  // Live activity (P1-17): rows hold still under the pointer, with focus inside, or while paused; the rows
-  // that arrived since enter with the sky wash, and screen readers hear "2 new activity events".
-  const live = useLiveList(data.activity, (e) => e.id, ["activity event", "activity events"]);
-  // Newest first across every coin (seeded ids are grouped by coin, so the time decides, then the id).
-  const activity = useMemo(
-    () => [...live.shown].sort((a, b) => b.createdAt - a.createdAt || b.id - a.id),
-    [live.shown],
-  );
-  // The live dot means "this is happening now": only while the newest event is under an hour old.
-  const recent = hasRecentActivity(activity, now);
   const keysHint = useId();
 
   const captionMotion = capPhase === "in" ? "mdx-fade" : "";
@@ -903,10 +826,9 @@ function Home() {
           <h1 className="mdx-display">
             Every coin is a <span className={cx("mdx-holo-ink", still && "is-paused")}>card.</span>
           </h1>
-          {/* What is real first (P0-5), then why anyone bids (P1-27). On the devnet test site the banner above
-              the page already says what is real, so the hero keeps one line. */}
+          {/* What it is, in one line: a pump.fun launch whose pair picks its card. */}
           <p className="cdx-home__copy mdx-home-arrival mdx-home-arrival--copy">
-            <PairLinked text={!IS_SIM && CARD_BIDDING_SUSPENDED ? "Pick a pair. Its card comes with it." : WORDS.heroBid} />
+            <PairLinked text={WORDS.heroBid} />
           </p>
           {/* MintDex: Launch a coin, Discover coins and How it works on the first screen from 1024px up; phones put the
               pair under the featured card (the tab bar carries Launch and Discover too). */}
@@ -941,7 +863,7 @@ function Home() {
           <div
             role="group"
             aria-roledescription="slide"
-            aria-label={lot.count ? `${lot.index + 1} of ${lot.count}` : "No cards yet"}
+            aria-label={lot.count ? `${lot.index + 1} of ${lot.count}` : "No coins yet"}
             className="cdx-home__display relative fit:min-h-0 fit:flex-1 fit:[container-type:size]"
           >
             {/* Phones: reserve room for the funding notice, sticky header, ticker, headline, caption and the
@@ -1040,9 +962,9 @@ function Home() {
                 <div className="cdx-home__caption">
                   <div className={captionMotion}>
                     {caption ? (
-                      <LotCaption coin={caption} rows={captionRows} />
+                      <LotCaption coin={caption} />
                     ) : (
-                      <Caption as="h2" name="No cards yet">
+                      <Caption as="h2" name="No coins yet">
                         <p className="mt-2 text-[13px] leading-[1.45] text-slate">
                           Launch the first coin and its card will stand here.
                         </p>
@@ -1125,49 +1047,19 @@ function Home() {
       {/* ------------------------------------------------ aside (plinth)
           Desktop: one full-height aside (mdx-aside): flush with the top, right and bottom edges on short
           screens, floating 12px off them above 820px. The top padding takes the float gutter back, so
-          "Trending" keeps its y either way. Like the Market, Levels and Coin asides. */}
+          the heading keeps its y either way. Like the Levels and Coin asides. */}
       <aside
-        aria-label="Trending and activity"
+        aria-label="Launched coins"
         className="cdx-home__aside mdx-plinth mdx-aside flex min-w-0 flex-col gap-6 lg:pt-[calc(2rem_-_var(--gutter))] short:gap-5 short:pt-6 fit:min-h-0 fit:overflow-hidden"
       >
-        <section className="flex flex-none flex-col gap-1">
-          <SectionHead title="Trending" right={<TextLink to="/discover">See all</TextLink>} />
-          {trending.length ? (
-            <>
-              <p className="flex min-w-0 items-center gap-1.5 text-[12px] leading-4 text-slate">{trendingBasis}<SimTag /></p>
-              <div ref={trendingRef} className="mdx-stagger" data-settled={trendingSettled || undefined}>
-                {trending.map((c, i) => (
-                  <CoinRow key={c.id} coin={c} rank={i + 1} flipId={c.id} />
-                ))}
-              </div>
-            </>
-          ) : (
-            <EmptyLine>No coins yet.</EmptyLine>
-          )}
-        </section>
-        <LaunchedSection now={now} />
-        <section className="flex min-h-0 flex-1 flex-col gap-1">
-          {/* "Activity" (MintDex), never "Live activity": in test mode most rows are demo bots, each tagged "bot"
-              (what that means is on /how#demo). */}
-          <SectionHead
-            title="Activity"
-            live={recent ? activity[0].id : undefined}
-            livePaused={live.paused}
-            right={activity.length ? <LivePause paused={live.paused} onChange={live.setPaused} /> : undefined}
-          />
-          <p className="sr-only" role="status" aria-live="polite">
-            {live.said}
-          </p>
-          {activity.length ? (
-            <div {...live.bind} aria-label="Recent activity" className="cdx-home__activity mdx-stagger">
-              {activity.slice(0, ACTIVITY_ROWS).map((e) => (
-                <EventItem key={e.id} e={e} now={now} isNew={live.fresh.has(e.id)} />
-              ))}
-            </div>
-          ) : (
-            <EmptyLine>No activity yet.</EmptyLine>
-          )}
-        </section>
+        <LaunchedSection
+          now={now}
+          rows={rows}
+          pending={launches.isPending}
+          failed={launches.isError}
+          retrying={launches.isFetching}
+          retry={() => void launches.refetch()}
+        />
       </aside>
     </div>
   );

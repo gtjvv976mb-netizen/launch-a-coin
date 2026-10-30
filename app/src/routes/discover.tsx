@@ -1,17 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { num, oneOf, searchSchema, text } from "../lib/mintdex/search";
-import { MintCard } from "../components/mintdex/MintCard";
+import { num, searchSchema, text } from "../lib/mintdex/search";
+import { MintCard, type CardData } from "../components/mintdex/MintCard";
 import { View3DHost } from "../components/mintdex/card3d";
 import {
   Button,
-  Change,
-  changeWords,
   GridCaption,
   Icon,
   IconButton,
-  Num,
   PageFrame,
   PageHeader,
   Pager,
@@ -23,47 +20,41 @@ import {
 } from "../components/mintdex/ui";
 import { EmptyState } from "../components/mintdex/empty-state";
 import { useLoaderViewport } from "../components/mintdex/hooks";
-import { listCoins } from "../lib/mintdex/api";
+import { PairLogo } from "../components/carddex/PairLogo";
+import { launchCard, liveLaunchesQuery, matchesLaunch, type PublicLiveLaunch } from "../lib/carddex/live/launches";
+import { getLaunchedCoins } from "../lib/carddex/live/launched";
 import { getCardDesign } from "../lib/carddex/designs";
-import { marketCapText, marketCapWatch } from "../lib/carddex/quote-display";
+import { getPairAsset } from "../lib/carddex/pairs";
 import { pageHead } from "../lib/mintdex/seo";
-import { sortCoins } from "../lib/mintdex/sort";
-import type { CoinSummary } from "../lib/mintdex/types";
 
 /*
- * Discover (MintDex's format): the header row (Discover, the count, then the Design and Sort pills), then the shelf:
- * every coin's card in its tray on a ledge, with its caption (name and market cap, ticker and 24h). Desktop fits one
- * page of cards to the screen (the pager in the header row turns pages, kept in ?page=); phones show every card two
- * up and the page scrolls, with the search field on top. The shelf deals in, leans toward the pointer and shuffles on a Design or
- * Sort change (Shelf, ui.tsx). Styles: styles/screens/discover.css.
+ * Discover (MintDex's format): the header row (Discover, the count, then the Design pill), then the shelf: every
+ * launched coin's card in its tray on a ledge, newest first, with its caption (name, then ticker and pair). Desktop
+ * fits one page of cards to the screen (the pager in the header row turns pages, kept in ?page=); phones show every
+ * card two up and the page scrolls, with the search field on top. The shelf deals in, leans toward the pointer and
+ * shuffles on a Design change (Shelf, ui.tsx). Before the first launch: "No coins yet" and the Launch link.
+ * Styles: styles/screens/discover.css.
  */
 export const Route = createFileRoute("/discover")({
   validateSearch: searchSchema({
     q: text(40),
-    sort: oneOf(["trending", "mcap", "new", "next"]),
     design: text(40),
     focus: num(),
-    tier: num(),
     page: num(),
   }),
-  loader: () => listCoins({ data: {} }),
+  loader: () => getLaunchedCoins(),
   shouldReload: ({ cause }) => cause !== "stay",
   head: () =>
     pageHead({
       path: "/discover",
       title: "Discover | Launch a Card",
-      description:
-        "Discover coins and the cards their pairs pick. A demo with simulated pump.fun trading.",
+      description: "Every coin launched on pump.fun through Launch a Card, with the one-of-one card its pair picked.",
     }),
   component: Discover,
 });
 
-const SORTS = [
-  { value: "trending", label: "Trending" },
-  { value: "mcap", label: "Market cap" },
-  { value: "new", label: "Newest" },
-] as const;
-type Sort = (typeof SORTS)[number]["value"];
+/** A shelf item: the coin's mint as its id, the launch and the card it minted. */
+type Cell = { id: string; launch: PublicLiveLaunch; card: CardData };
 
 /** The fitted desktop shelf: a 56px caption strip under each card, cards 132 to 240px wide (compact under 190). */
 const FIT = { strip: 56, gap: 20, minW: 132, maxW: 240 };
@@ -84,43 +75,37 @@ function Discover() {
     search = Route.useSearch();
   const navigate = useNavigate({ from: "/discover" });
   const query = search.q ?? "";
-  const sort: Sort = search.sort === "mcap" || search.sort === "new" ? search.sort : "trending";
   const design = search.design ?? "";
-  const go = (next: { q?: string; sort?: Sort; design?: string; page?: number }) =>
+  const go = (next: { q?: string; design?: string; page?: number }) =>
     void navigate({
       search: (previous) => ({ ...previous, ...next, page: next.page }),
       replace: true,
       resetScroll: false,
     });
   const setQuery = (value: string) => go({ q: value || undefined });
-  const { data } = useQuery({
-    queryKey: ["coins", {}],
-    queryFn: () => listCoins({ data: {} }),
-    initialData: initial,
-    staleTime: 10000,
-    refetchInterval: 20000,
-  });
+  // The server render's list seeds the query Home and the header search share; a failed server read leaves it to the
+  // browser.
+  const launches = useQuery({ ...liveLaunchesQuery, initialData: initial ?? undefined });
+  const data = useMemo(() => launches.data ?? [], [launches.data]);
   // The Design pill lists the designs the coins on the shelf wear, by name.
   const designs = useMemo(() => {
     const seen = new Map<string, string>();
-    for (const c of data) {
-      const d = getCardDesign(c.cardTemplate);
+    for (const l of data) {
+      const d = getCardDesign(l.designKey);
       seen.set(d.key, d.name);
     }
     return [...seen].sort((a, b) => a[1].localeCompare(b[1]));
   }, [data]);
-  // One order for every sort, shared with the server and Home (lib/mintdex/sort.ts): fair across pairs.
-  const coins = useMemo(
+  // Newest first, as the list arrives.
+  const coins = useMemo<Cell[]>(
     () =>
-      sortCoins(
-        data
-          .filter((c) => `${c.name} ${c.ticker}`.toLowerCase().includes(query.trim().toLowerCase().replace(/^\$/, "")))
-          .filter((c) => !design || getCardDesign(c.cardTemplate).key === design),
-        sort,
-      ),
-    [data, query, sort, design],
+      data
+        .filter((l) => matchesLaunch(l, query))
+        .filter((l) => !design || getCardDesign(l.designKey).key === design)
+        .map((l) => ({ id: l.tokenMint, launch: l, card: launchCard(l) })),
+    [data, query, design],
   );
-  const items = useMemo(() => coins.map((c) => ({ id: c.id, card: c })), [coins]);
+  const items = useMemo(() => coins.map((c) => ({ id: c.id, card: c.card })), [coins]);
   const order = useMemo(() => new Map(coins.map((c, i) => [c.id, i])), [coins]);
 
   // The shelf's room: measured once mounted; the first frame (server and hydration) estimates it from the viewport.
@@ -166,16 +151,6 @@ function Discover() {
           {designs.map(([key, name]) => (
             <option key={key} value={key}>{name}</option>
           ))}
-        </select>
-      </label>
-      <label className="cdx-dex__pill">
-        <span className="cdx-dex__pill-label">Sort</span>
-        <select
-          className="mdx-select"
-          value={sort}
-          onChange={(e) => go({ sort: e.target.value === "trending" ? undefined : (e.target.value as Sort) })}
-        >
-          {SORTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
       </label>
     </>
@@ -233,12 +208,12 @@ function Discover() {
             cardW={fit ? fit.cardW : undefined}
             gap={fit ? FIT.gap : 12}
             rowGap={fit ? FIT.gap : 16}
-            keyOf={(c: CoinSummary) => c.id}
-            dealKey={`${sort}|${design}|${trimmed}|${page}`}
-            shuffleKey={`${sort}|${design}`}
+            keyOf={(c: Cell) => c.id}
+            dealKey={`${design}|${trimmed}|${page}`}
+            shuffleKey={design}
             parallax={desk}
-            seedOf={(c: CoinSummary) => c.dexNo}
-            render={(c: CoinSummary, w) => <CoinCell coin={c} width={w} list={items} index={order.get(c.id) ?? 99} />}
+            seedOf={(c: Cell) => order.get(c.id) ?? 0}
+            render={(c: Cell, w) => <CoinCell coin={c} width={w} list={items} index={order.get(c.id) ?? 99} />}
           />
         ) : trimmed || design ? (
           <EmptyState
@@ -261,44 +236,30 @@ function Discover() {
   );
 }
 
-/**
- * One shelf cell: the card in its tray (a link to the coin), then its caption. A market cap in the coin's own quote
- * ("38.84K DOGE") takes the second line beside the ticker, so a long name never pushes it out (VIS-5).
- */
-function CoinCell({ coin, width, list, index }: { coin: CoinSummary; width: number; list: Array<{ id: string; card: CoinSummary }>; index: number }) {
-  const mc = marketCapText(coin);
-  const native = coin.mcapUsd == null;
-  // The 24h change as Change prints it, for the link's name (Home's rows read it too).
-  const changeText = changeWords(coin.change24h);
-  const figure = (
-    <Num size="sm" tone="inherit" watch={marketCapWatch(coin)}>
-      {mc}
-    </Num>
-  );
+/** One shelf cell: the card in its tray (a link to the coin's page), then its caption: name, ticker and pair. */
+function CoinCell({ coin, width, list, index }: { coin: Cell; width: number; list: Array<{ id: string; card: CardData }>; index: number }) {
+  const { launch } = coin;
+  const pair = getPairAsset(launch.quoteAssetKey);
   return (
-    <View3DHost item={{ id: coin.id, card: coin }} list={list} style={{ maxWidth: width }}>
+    <View3DHost item={{ id: coin.id, card: coin.card }} list={list} style={{ maxWidth: width }}>
       <Link
         to="/coin/$id"
         params={{ id: coin.id }}
         className="block"
-        aria-label={`${coin.name}, $${coin.ticker}, market cap ${mc}, ${changeText}, ${getCardDesign(coin.cardTemplate).name} design`}
+        aria-label={`${launch.name}, $${launch.ticker}, ${pair.symbol} pair, ${getCardDesign(launch.designKey).name} design`}
       >
         <ShelfItem
           width={width}
           card={
-            // The first four load at once and at high priority; the rest when they near the screen. The sizes follow
-            // the creature art, about 79% of the card (36vw of a phone's under-half-screen card, at most 240px on the
-            // fitted desktop shelf); a phone's frame still takes its smallest copy, 480w.
-            <MintCard card={coin} compact={width < 190} priority={index < 4} sizes="(max-width: 1023px) 36vw, 240px" />
+            // The first four load at once and at high priority; the rest when they near the screen.
+            <MintCard card={coin.card} compact={width < 190} priority={index < 4} sizes="(max-width: 1023px) 36vw, 240px" />
           }
           caption={
             <GridCaption
-              name={coin.name}
-              // A market cap in its own quote is long, so it takes the ticker's line and the change moves up beside
-              // the name: every cell shows its 24h change, as Home does.
-              value={native ? <Change v={coin.change24h} /> : figure}
-              sub={<span className="text-slate">${coin.ticker}</span>}
-              subRight={native ? figure : <Change v={coin.change24h} />}
+              name={launch.name}
+              value={<PairLogo asset={pair} size={16} />}
+              sub={<span className="text-slate">${launch.ticker}</span>}
+              subRight={<span className="text-slate">{pair.symbol}</span>}
             />
           }
         />

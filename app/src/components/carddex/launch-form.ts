@@ -42,8 +42,8 @@ export function launchDesign(pair: string, savedDesign?: string | null): CardDes
 }
 
 /**
- * The card the Launch page shows and sends in its current mode. A saved launch's own design belongs to mainnet mode
- * only: Demo always shows (and sends) the pair's own card, since the demo launch refuses any other.
+ * The card the Launch page shows and sends. A saved launch keeps its own design while the panel is open (`live`);
+ * otherwise the pair's own card.
  */
 export function formDesign(pair: string, savedDesign: string | null, live: boolean): CardDesignKey {
   return launchDesign(pair, live ? savedDesign : null);
@@ -88,17 +88,4 @@ export function firstProblem<K extends string>(order: readonly FormCheck<K>[]): 
  */
 export function enterTarget<K extends string>(order: readonly FormCheck<K>[]): K | "primary" {
   return firstProblem(order) ?? "primary";
-}
-
-/**
- * The Demo primary pressed while signed out: the first required field still missing (it takes focus, and no dialog
- * opens), or "enter" once name, ticker and art are all there, so the one demo prompt opens and finishes the launch.
- * Art picked while signed out counts: it is kept in the page and uploaded when the demo starts.
- */
-export function signedOutPress(form: { nameOk: boolean; tickerOk: boolean; hasArt: boolean }): "name" | "ticker" | "art" | "enter" {
-  return firstProblem([
-    { key: "name" as const, ok: form.nameOk },
-    { key: "ticker" as const, ok: form.tickerOk },
-    { key: "art" as const, ok: form.hasArt },
-  ]) ?? "enter";
 }

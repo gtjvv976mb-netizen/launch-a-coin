@@ -34,9 +34,8 @@ export const STATIC_PATHS = ["/", "/discover", "/launch", "/levels", "/how", "/l
 export const STATIC_LASTMOD = "2026-10-29";
 
 /**
- * Coin pages and /portfolio stay out of search while coins are simulated (decision C4). SEO-3, checked 2026-10-28:
- * MODE is "sim" (mode.ts), so every coin page shows demo data, and noindex plus no sitemap entries is intended.
- * Both follow MODE: a devnet or mainnet build indexes coin pages and lists them in sitemap.xml with their last trade.
+ * /portfolio (one wallet's own list) stays out of search. Coin pages are finished mainnet launches
+ * (routes/coin/$id.tsx), indexed and listed in sitemap.xml; these flags only steer the inherited chain pages.
  */
 export const NOINDEX_COINS = IS_SIM;
 export const NOINDEX_PORTFOLIO = IS_SIM;

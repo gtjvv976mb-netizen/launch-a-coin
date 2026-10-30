@@ -19,17 +19,15 @@ describe("live launch fee disclosure", () => {
     expect(panel).toContain("Solana network and priority fees, account rent for the new accounts, the Metaplex NFT fee for the card, and pump.fun's protocol and creator fees inside any initial buy");
     expect(read("src/routes/legal.tsx")).toContain("the Metaplex NFT fee");
   });
-  test("the legal fee table says what /how and Launch say, and the owner's fill slots stay", () => {
+  test("the legal fee table says what /how and Launch say, and the terms carry no fill-in slot or demo item", () => {
     const legal = read("src/routes/legal.tsx");
     // No transfer in the pump.fun launch goes to a Launch a Card wallet, so both platform rows say None, unhedged.
     expect(legal).toContain("None. Launch a Card adds no fee to launch or card transactions.");
     expect(legal).not.toContain("currently adds");
-    // No invented total or unconfirmed link: those cells keep only what the code does.
-    for (const gone of ["platform fee per launch", "platform share of trading fees, or none", "typical total in SOL", "link to pump.fun fee schedule"]) expect(legal).not.toContain(`<Fill>${gone}</Fill>`);
-    // Legal terms are the owner's and counsel's to write (readiness audit): age, regions, liability and how changes are
-    // announced stay marked slots, with the operator facts, until they are supplied. Nothing is drafted in their place.
-    for (const slot of ["operator legal name", "contact email", "governing law", "minimum age", "restricted countries and regions", "warranty disclaimer and limitation of liability, written by counsel", "how changes are announced"]) expect(legal).toContain(`<Fill>${slot}</Fill>`);
-    for (const drafted of ["at least 18", "Syria", "“as is”", "12 months before the claim", "means you accept"]) expect(legal).not.toContain(drafted);
+    // The owner asked (31 October 2026) for every slot needing their details removed and the rest filled: the policy
+    // items are written out, and nothing marked or demo remains.
+    for (const filled of ["at least 18", "Syria", "“as is”", "12 months before the claim", "means you accept"]) expect(legal).toContain(filled);
+    for (const gone of ["[TO FILL", "<Fill>", "operator legal name", "Governing law", "privacy contact", "Test data", "Demo values", "test SOL", "demo"]) expect(legal).not.toContain(gone);
   });
   test("the initial-buy notes are plain and name when the size is checked", async () => {
     const copy = await import("../../src/lib/carddex/live/copy");

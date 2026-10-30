@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { draftPair, enterTarget, firstProblem, formDesign, launchDesign, pairFromSearch, pickPair, sameAmount, signedOutPress } from "../../src/components/carddex/launch-form";
+import { draftPair, enterTarget, firstProblem, formDesign, launchDesign, pairFromSearch, pickPair, sameAmount } from "../../src/components/carddex/launch-form";
 import { ORDERED_PAIRS, PAIR_GROUPS, filterPairs, gridStep, groupAlias, isPairGroup, pairGroupOf, pairMonogram, pairsInGroup, shortPairName, tileName } from "../../src/components/carddex/pair-groups";
 import { PAIR_DESIGNS_2026_10_30 } from "../../src/lib/carddex/design-pairings";
 import { walletNoticeItems, walletNoticePreview, WALLET_NOTICE_COPY } from "../../src/components/carddex/live/wallet-notice";
@@ -215,15 +215,6 @@ describe("where focus goes", () => {
     expect(enterTarget(order({ name: false }))).toBe("name");
     expect(enterTarget(order({ art: false }))).toBe("art");
     expect(enterTarget(order())).toBe("primary");
-  });
-  test("signed-out art is kept until the demo starts: the demo prompt opens only once name, ticker and art are in", () => {
-    const all = { nameOk: true, tickerOk: true, hasArt: true };
-    // Art picked while signed out is held in the page, so it counts: the one prompt opens at Create.
-    expect(signedOutPress(all)).toBe("enter");
-    // Anything missing takes focus instead of opening a dialog, in the form's order.
-    expect(signedOutPress({ ...all, hasArt: false })).toBe("art");
-    expect(signedOutPress({ ...all, tickerOk: false, hasArt: false })).toBe("ticker");
-    expect(signedOutPress({ nameOk: false, tickerOk: false, hasArt: false })).toBe("name");
   });
 });
 

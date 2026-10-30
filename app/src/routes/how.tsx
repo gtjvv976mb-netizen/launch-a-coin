@@ -1,11 +1,9 @@
 import { Link, createFileRoute, useRouterState } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
-import { useLiveLaunchOpen } from "../components/carddex/live/readiness";
 import { WALLET_NOTICE_COPY, WALLET_NOTICE_TITLE } from "../components/carddex/live/wallet-notice";
 import { CalmSwitch, PageFrame, PageHeader, TextLink } from "../components/mintdex/ui";
-import { FAUCET_AMOUNT, FAUCET_BELOW, LAMPORTS, LAUNCH_FEE, SOL_USD, START_BALANCE, TRADE_FEE_BPS } from "../lib/mintdex/constants";
-import { IS_SIM, WORDS, pct } from "../lib/mintdex/copy";
+import { WORDS } from "../lib/mintdex/copy";
 import { pageHead } from "../lib/mintdex/seo";
 import { getCardDesign } from "../lib/carddex/designs";
 import { OFFERED_PAIRS, designForPair, isDirectPair, mainnetPairHold } from "../lib/carddex/pairs";
@@ -22,8 +20,7 @@ const DIRECT_HELD = OFFERED_PAIRS.filter(isDirectPair).every((asset) => mainnetP
  * carry the fewest words that let someone act, and each links here with one "How it works" or "Details" link).
  * MintDex's reading format, like /legal: the title row, a section list (a column from 1024px, a row on phones)
  * beside one plinth panel. The panel opens with the old guide's three steps, then one anchored section per topic, in
- * the order a newcomer needs them (#launch, #pairs, #cards, #fees, #demo, #trading, then the mainnet-only #wallet and
- * #recovery, and #motion). From 1024px the panel scrolls on
+ * the order a newcomer needs them (#launch, #pairs, #cards, #fees, #trading, #wallet, #recovery and #motion). From 1024px the panel scrolls on
  * its own; phones scroll the page. A #hash link lands its section at the top and moves focus to its heading.
  * Terms, privacy and risks stay at /legal. Styles: styles/screens/how.css.
  */
@@ -33,31 +30,14 @@ export const Route = createFileRoute("/how")({
       path: "/how",
       title: "How it works | Launch a Card",
       description:
-        "Launch a pump.fun coin whose pair picks its card design. Pairs, trading, wallet approvals, fees and the demo, in short.",
+        "Launch a pump.fun coin whose pair picks its card design. Pairs, trading, wallet approvals and fees, in short.",
     }),
   component: How,
 });
 
-const sol = (lamports: number) => (lamports / LAMPORTS).toLocaleString("en-US");
-const START_SOL = sol(START_BALANCE);
-
 type Step = { title: string; body: string };
-/** The guide's three steps (formerly the "How Launch a Card works" dialog), demo first while mainnet launches are off. */
-const DEMO_STEPS: Step[] = [
-  {
-    title: "Launch your coin",
-    body: "Give it a name, ticker and artwork, and pick its pair. The demo runs on test SOL.",
-  },
-  {
-    title: "The pair picks its card",
-    body: "Each pair has one card design, shown as you pick. Its one-of-one card goes into your demo collection.",
-  },
-  {
-    title: "Trade the coin. Keep the card.",
-    body: "Trade with test funds on a simulated pump.fun curve. No real coin or NFT is minted.",
-  },
-];
-const LIVE_STEPS: Step[] = [
+/** The guide's three steps (formerly the "How Launch a Card works" dialog). */
+const STEPS: Step[] = [
   {
     title: "Launch your coin",
     body: "Give it a name, ticker and artwork. Pick its pair, then review the pump.fun launch in your wallet.",
@@ -68,21 +48,11 @@ const LIVE_STEPS: Step[] = [
   },
   {
     title: "Trade the coin. Keep the card.",
-    body: "Trade your coin on pump.fun and keep its card NFT in your wallet. The demo lets you try it with test SOL.",
+    body: "Your coin trades on pump.fun. Its one-of-one card NFT stays in your wallet.",
   },
 ];
 
 type Section = { id: string; nav: string; title: string; body: ReactNode };
-
-/** The demo's first line. "Not open yet" only while mainnet launches are off: production opens them beside the demo. */
-function DemoLine() {
-  const liveOpen = useLiveLaunchOpen();
-  return (
-    <li>
-      {liveOpen ? "" : "Mainnet launches are not open yet. "}The demo uses test SOL: no real coin or card is created.
-    </li>
-  );
-}
 
 const SECTIONS: Section[] = [
   {
@@ -100,8 +70,8 @@ const SECTIONS: Section[] = [
         <li>
           Creating a coin means you accept the <TextLink to="/legal" hash="content-rules">content rules</TextLink>: {WORDS.contentRule}
         </li>
-        <li>Anyone can report a coin from its Coin details. Coins that break the content rules are hidden.</li>
-        <li>Home's Launched on pump.fun list shows real launches on Solana mainnet, newest first.</li>
+        <li>Every launch is a real Solana mainnet coin. Home, Discover and search list them, newest first.</li>
+        <li>Portfolio lists the coins your connected wallet launched here, each with its card.</li>
       </ul>
     ),
   },
@@ -120,7 +90,6 @@ const SECTIONS: Section[] = [
         <li>The pair funds the optional initial buy, so changing the pair clears it. SOL also pays network and account costs.</li>
         <li>Stock pairs use tokenized quote assets. They grant no equity: your coin is not company shares.</li>
         <li>Each quote asset has its own issuer terms, availability and risks.</li>
-        {IS_SIM ? <li>Demo pairs use no real assets.</li> : null}
       </ul>
     ),
   },
@@ -135,7 +104,7 @@ const SECTIONS: Section[] = [
         <li>Picking another pair keeps your coin details and artwork; only the pair and its card change.</li>
         <li>Designs shows one sample coin in each pair's design, grouped as Memes, Stocks, Crypto and Collector.</li>
         <li>Designs with no pair are kept by the coins already made with them. They are not offered for new coins.</li>
-        <li>In the demo the card goes into your demo collection. On mainnet it is permanent once your coin is created.</li>
+        <li>The card is permanent once your coin is created.</li>
         <li>There are no card sales, bids, auctions or royalties. The card NFT gives no token ownership or stock rights.</li>
       </ul>
     ),
@@ -152,35 +121,9 @@ const SECTIONS: Section[] = [
           fee for the card, and pump.fun's protocol and creator fees inside any initial buy.
         </li>
         <li>Coin creation and card issuance are paid mainnet transactions. Exact costs show before your wallet asks.</li>
-        {IS_SIM ? (
-          <li>
-            In the demo, the {sol(LAUNCH_FEE)} test SOL launch cost stands in for those network fees and account rent.
-            Demo trades pay {pct(TRADE_FEE_BPS)}.
-          </li>
-        ) : null}
         <li>
           Every fee in one table: <TextLink to="/legal" search={{ tab: "fees" }}>Fees</TextLink>.
         </li>
-      </ul>
-    ),
-  },
-  {
-    id: "demo",
-    nav: "Demo",
-    title: "The demo",
-    body: (
-      <ul>
-        <DemoLine />
-        <li>Pick a handle to get {START_SOL} test SOL. No wallet needed.</li>
-        <li>Your test account lives in this browser. Clearing site data ends access to it.</li>
-        <li>Balances, the bonding curve and trades are simulated. Each quote asset has its own demo balance.</li>
-        <li>Activity includes demo bots: simulated traders, marked bot.</li>
-        <li>Portfolio holds your coins and your one-of-one cards. Value is test SOL plus your coins; 24h is their price move.</li>
-        <li>
-          Under {sol(FAUCET_BELOW)} test SOL, the faucet in your wallet menu gives {sol(FAUCET_AMOUNT)} more.
-        </li>
-        <li>Start over leaves your handle for good. Its coins and cards stay with it, and nobody can enter it again.</li>
-        <li>Only demo coins have cards here. Coins on Solana devnet or mainnet don't, yet.</li>
       </ul>
     ),
   },
@@ -191,19 +134,12 @@ const SECTIONS: Section[] = [
     body: (
       <ul>
         <li>
-          The price follows a pump.fun bonding curve. When the curve sells out, the coin graduates to a PumpSwap pool.
-          {IS_SIM ? " The demo's curve is simulated." : ""}
+          Coins trade on pump.fun, priced by its bonding curve. When the curve sells out, the coin graduates to a
+          PumpSwap pool.
         </li>
-        <li>Bonding curve shows how far a coin is from graduating.</li>
-        <li>Each step on the chart is a trade. The first buy starts the chart and the trade list.</li>
-        <li>A range with no trades stays empty. Choose a longer one.</li>
-        <li>Check the price impact, fee and max slippage before you confirm a trade.</li>
-        {IS_SIM ? (
-          <li>
-            Demo trades pay a {pct(TRADE_FEE_BPS)} fee in test SOL. USD is shown at a fixed ${SOL_USD} per SOL, a test
-            rate. Market data is simulated, not live quotes.
-          </li>
-        ) : null}
+        <li>Each coin's page links to its pump.fun page, where you trade it, and to its Solscan record.</li>
+        <li>Launch a Card shows no prices or charts and takes no fee on trades.</li>
+        <li>Check the price impact, fees and slippage on pump.fun before you confirm a trade.</li>
       </ul>
     ),
   },
@@ -259,7 +195,7 @@ const SECTIONS: Section[] = [
     title: "Calm motion",
     body: (
       <>
-        <p>Stops the sky, the card turns and the ticker. It starts on when your device asks for reduced motion.</p>
+        <p>Stops the sky and the card turns. It starts on when your device asks for reduced motion.</p>
         <CalmSwitch size="md" className="cdx-how__calm" />
       </>
     ),
@@ -269,8 +205,6 @@ const SECTIONS: Section[] = [
 const IDS = new Set(SECTIONS.map((s) => s.id));
 
 function How() {
-  const liveOpen = useLiveLaunchOpen();
-  const steps = liveOpen || !IS_SIM ? LIVE_STEPS : DEMO_STEPS;
   const hash = useRouterState({ select: (s) => s.location.hash });
 
   // A #hash (a link from a screen, or the section list) lands its section at the top and focus on its heading.
@@ -312,7 +246,7 @@ function How() {
         </nav>
         <div className="cdx-how__doc mdx-scroll">
           <ol className="cdx-guide__steps cdx-how__steps" role="list" aria-label="In three steps">
-            {steps.map((s, i) => (
+            {STEPS.map((s, i) => (
               <li key={s.title} className="cdx-guide__step">
                 <span className="cdx-guide__n num" aria-hidden>
                   {i + 1}

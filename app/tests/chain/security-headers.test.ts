@@ -86,8 +86,8 @@ describe("request body limits at the Worker entry", async () => {
     const small = post("/api/live/compose", chunked(100_000));
     const passed = await limitRequestBody(small, new URL(small.url));
     expect(passed).toBeInstanceOf(Request); expect((await (passed as Request).arrayBuffer()).byteLength).toBe(100_000);
-    const upload = post("/api/upload", chunked(6 * 1024 * 1024 + 1));
-    expect(((await limitRequestBody(upload, new URL(upload.url))) as Response).status).toBe(413);
+    const compose = post("/api/live/compose", chunked(5 * 1024 * 1024 + 1));
+    expect(((await limitRequestBody(compose, new URL(compose.url))) as Response).status).toBe(413);
   });
   test("reads are never touched", async () => {
     const get = new Request("https://launchacard.fun/launch");

@@ -3,9 +3,7 @@ import { getRouteApi } from "@tanstack/react-router";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { checkRev as chainCheckRev } from "../../lib/chain/client";
-import { checkRev, type Result } from "../../lib/mintdex/api";
 import { FLOW } from "../../lib/mintdex/copy";
-import { IS_SIM } from "../../lib/mintdex/mode";
 import type { Me } from "../../lib/mintdex/types";
 import type { Viewport } from "../../lib/mintdex/viewport";
 import { useToast, type ActionState, type Feedback, type ToastAction } from "./ui";
@@ -54,6 +52,9 @@ export function useNow(every = 15_000) {
   return now;
 }
 
+/** A write's answer: its fields, or why it failed (never a throw for an expected failure). */
+export type Result<T = object> = ({ ok: true } & T) | { ok: false; error: string };
+
 // ---------------------------------------------------------------- the wallet in the cache
 
 /**
@@ -86,10 +87,8 @@ function revIn(data: unknown): string | undefined {
  * read before the data so the held revision is never newer than the data. Any failure falls back to a plain
  * fetch. Revisions roll every minute, so 24h figures still refresh.
  */
-/** The revision check behind revPoll: the sim's server function, or GET /api/chain/rev on devnet (m3-contract §3.8). */
-const askRev: (rev?: string) => Promise<{ rev: string; changed: boolean }> = IS_SIM
-  ? (rev) => checkRev({ data: rev === undefined ? {} : { rev } })
-  : (rev) => chainCheckRev(rev);
+/** The revision check behind revPoll: GET /api/chain/rev (m3-contract §3.8), for the inherited chain pages. */
+const askRev: (rev?: string) => Promise<{ rev: string; changed: boolean }> = (rev) => chainCheckRev(rev);
 
 export function revPoll<T>(
   qc: QueryClient,

@@ -19,7 +19,7 @@ export function manifestFileName(mode: ManifestMode): string {
 }
 
 const DESCRIPTION: Record<ManifestMode, string> = {
-  sim: "Pick a pair and its card comes with it. Launch through pump.fun. Explore the separate demo collection with test funds.",
+  sim: "Pick a pair and its card comes with it. Launch your coin on pump.fun with its one-of-one card.",
   devnet: "The vintage card launchpad. Every coin is a one-of-one card. Live on Solana devnet.",
   mainnet: "The vintage card launchpad. Every coin is a one-of-one card.",
 };

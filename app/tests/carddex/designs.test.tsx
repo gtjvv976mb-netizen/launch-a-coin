@@ -109,11 +109,10 @@ describe("permanent creator-selected card designs", () => {
     }
   });
 
-  test("created demo cards show their real local holder count without inventing a mint", () => {
+  test("a card without a mint shows its holder count and never invents an address or a demo label", () => {
     const print = renderToStaticMarkup(<MintCardFace card={{ ...TOKEN, cardTemplate: "pokemon-classic", holders: 17 }} />);
-    expect(print).toContain("Demo token");
+    expect(print).not.toContain("Demo token");
     expect(print).toContain(">17<");
-    expect(print).not.toContain("Not launched");
     expect(print).not.toContain(">Preview<");
   });
 

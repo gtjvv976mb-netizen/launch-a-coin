@@ -4,7 +4,7 @@ import { isMirrorHost } from '../lib/canonical-url'
 import { SITE_ORIGIN } from '../lib/mintdex/seo'
 
 // Crawlers always hear about mintdex.fun (backlog P0-11), even when this answers on the origin host behind the
-// proxy: request.url is not the public origin. Coin art under /api/img stays crawlable so link previews show it.
+// proxy: request.url is not the public origin.
 export const Route = createFileRoute('/robots.txt')({
   server: {
     handlers: {
@@ -19,7 +19,6 @@ export const Route = createFileRoute('/robots.txt')({
         const body = [
           'User-agent: *',
           'Allow: /',
-          'Allow: /api/img/',
           'Disallow: /api/',
           'Disallow: /_serverFn/',
           '',

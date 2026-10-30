@@ -28,7 +28,7 @@ export function TradingCardFace({ card, design, priority = false, sizes, compact
     "--card-radius": "5.04% / 3.61%", aspectRatio: "63 / 88", ...outerStyle,
   } as CSSProperties;
   const sample = card.dexLabel === "Sample";
-  const address = card.mintAddress ? `${card.mintAddress.slice(0, 5)}…${card.mintAddress.slice(-4)}` : sample ? "Sample token" : card.dexNo > 0 ? "Demo token" : "Not launched";
+  const address = card.mintAddress ? `${card.mintAddress.slice(0, 5)}…${card.mintAddress.slice(-4)}` : sample ? "Sample token" : "Not launched";
   const quote = card.mcapLabel ?? marketCapText(card);
   return <div className={`mdx-card cdx-trading-card ${compact ? "cdx-trading-card--compact" : ""} ${className}`} data-classic-layout={design.layout} data-card-template={design.key} data-finish={design.finish} data-carddex-premium="" style={style} role={label ? "img" : undefined} aria-label={label}>
     <div className="cdx-trading-card__stock" aria-hidden />

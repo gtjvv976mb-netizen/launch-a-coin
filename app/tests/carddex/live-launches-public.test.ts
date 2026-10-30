@@ -25,7 +25,7 @@ const payload = {
 };
 
 describe("public live launch rows", () => {
-  test("carry the named fields only, with the creator shortened", () => {
+  test("carry the named fields only, with the creator shortened and the description the card prints", () => {
     const out = publicLaunchFromRow(row(payload));
     expect(out).toMatchObject({
       name: "Honk",
@@ -39,7 +39,8 @@ describe("public live launch rows", () => {
     const text = JSON.stringify(out);
     expect(text).not.toContain(WALLET);
     expect(text).not.toContain("initialBuy");
-    expect(text).not.toContain("A goose");
+    // The description is printed on the public card and in the public token metadata.
+    expect(out?.lore).toBe("A goose");
   });
   test("drop asset URLs that are not this Worker's own content paths", () => {
     const out = publicLaunchFromRow(

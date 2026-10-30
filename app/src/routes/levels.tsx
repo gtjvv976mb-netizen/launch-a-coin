@@ -11,7 +11,7 @@ import { pageHead } from "../lib/mintdex/seo";
 import { boundQuoteForDesign, defaultQuoteForDesign, designForPair, isOfferedPair, pairForDesign, type PairAsset } from "../lib/carddex/pairs";
 import { isHeldPairDesign } from "../lib/carddex/pair-designs";
 import { ORDERED_PAIRS, PAIR_GROUPS, groupAlias, isPairGroup, pairGroupOf, shortPairName, type PairGroup } from "../components/carddex/pair-groups";
-import { initialQuoteReserves, quoteMetrics } from "../lib/carddex/quote-simulation";
+import { CREATION_MCAP_LABEL } from "../lib/carddex/card-template";
 
 /**
  * Designs (/levels), in mintdex.fun's Designs format: the pair groups as segmented tabs, the selected design at the
@@ -103,7 +103,6 @@ function Designs() {
   // The sample card's quote: the design's pair; a design no pair has shows the quote coins made with it read as.
   const quote = pair ?? defaultQuoteForDesign(design.key);
   const index = shown.findIndex((d) => d.design.key === design.key);
-  const sampleMetrics = quoteMetrics(initialQuoteReserves(quote.key), quote.key);
   const card: CardData = {
     cardTemplate: design.key,
     name: "Glorb",
@@ -112,8 +111,9 @@ function Designs() {
     level: design.materialLevel,
     quoteAssetKey: quote.key,
     quoteMint: quote.mint,
-    mcapUsd: sampleMetrics.mcapUsd,
-    mcapQuote: sampleMetrics.mcapQuote,
+    // As a minted card prints it: the site reads no market data.
+    mcapUsd: null,
+    mcapLabel: CREATION_MCAP_LABEL,
     holders: 0, // not launched: CardPrint prints "—" for the sample, as the Launch preview does
     dexNo: 0,
     dexLabel: "Sample",
@@ -126,7 +126,6 @@ function Designs() {
     level: d.materialLevel,
     quoteAssetKey: p.key,
     quoteMint: p.mint,
-    ...quoteMetrics(initialQuoteReserves(p.key), p.key),
   });
   // A pick keeps you on the page (comparing designs is pick, look, pick again); the caption and this line say what is
   // selected.

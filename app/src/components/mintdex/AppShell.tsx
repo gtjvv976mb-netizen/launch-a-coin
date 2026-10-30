@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import {
   lazy,
@@ -8,7 +8,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type ComponentProps,
   type CSSProperties,
   type FormEvent,
   type KeyboardEvent as ReactKeyboardEvent,
@@ -16,44 +15,30 @@ import {
   type RefObject,
 } from "react";
 
-import { chainCoinList } from "../../lib/chain/data";
-import { claimFaucet, listCoins, signOut } from "../../lib/mintdex/api";
-import { IS_DEVNET, IS_SIM } from "../../lib/mintdex/mode";
-import { ChainHeaderAccount, ChainRailWallet } from "../chain/ConnectWallet";
-import { FAUCET_AMOUNT, FAUCET_BELOW } from "../../lib/mintdex/constants";
-import { FLOW, MODE_COPY } from "../../lib/mintdex/copy";
-import { sol, untilText } from "../../lib/mintdex/format";
-import type { CoinSummary, Me } from "../../lib/mintdex/types";
+import { IS_DEVNET } from "../../lib/mintdex/mode";
+import { liveLaunchesQuery, type PublicLiveLaunch } from "../../lib/carddex/live/launches";
 import { DEVNET_SITE_NOTE } from "../../lib/mintdex/site-host";
 import { writeViewport } from "../../lib/mintdex/viewport";
-import { setMe } from "./hooks";
-import { useMe, useSessionUi } from "./session";
-import { Sheet } from "./sheet";
 import { afterLoadIdle } from "./opened-once";
 import { useMotionLevel } from "./card3d/motion3d";
 import { GyroChip } from "./card3d/GyroChip";
-import { Ticker } from "./Ticker";
 // The live launch sheet stays here (lazy chrome below) so the global CSS keeps its order.
 import "../../carddex-live.css";
 import { useLiveRecoveryOpen } from "../carddex/live/readiness";
 import { LiveLaunchGuide } from "../carddex/live/LiveLaunchGuide";
-import { ConfirmDialog } from "./confirm";
 import {
-  Avatar,
-  Button,
   CalmSwitch,
   GenIcon,
   Hallmark,
   isDialogOpen,
   isTypingTarget,
-  Num,
   Thumb,
-  useToast,
   type GenIconName,
 } from "./ui";
 
-// Live launch chrome shows only on /launch?mode=live. Its wallet code (wallet-standard, ed25519) loads on demand so
-// it stays out of every page's first download; its help control is a plain link to /how#wallet.
+// The mainnet wallet control, in the rail and the phone header on every page (Portfolio reads the wallet it connects;
+// Launch signs with it). Its wallet code (wallet-standard, ed25519) loads on demand so it stays out of every page's
+// first download; on Launch its help control is a plain link to /how#wallet.
 const LiveWalletButton = lazy(() => import("../carddex/live/LiveWalletButton").then((m) => ({ default: m.LiveWalletButton })));
 
 type TabPath = "/" | "/discover" | "/launch" | "/market" | "/levels" | "/portfolio";
@@ -167,11 +152,6 @@ function RouteAnnouncer() {
   );
 }
 
-/** The simplified collection has no unread marketplace notifications. */
-function unreadOf(me: Me) {
-  return 0;
-}
-
 // ---------------------------------------------------------------- rail pieces
 
 /** The rail's logo row (MintDex: mark and wordmark, 32px tall): Launch a Card's own mark and name. */
@@ -192,10 +172,10 @@ function norm(text: string) {
 }
 
 /** Up to five coins for the suggestion list: exact name or ticker first, then prefixes, then the rest. */
-function suggest(coins: CoinSummary[], text: string) {
+function suggest(coins: PublicLiveLaunch[], text: string) {
   const t = norm(text);
   if (!t) return [];
-  const rank = (c: CoinSummary) => {
+  const rank = (c: PublicLiveLaunch) => {
     const name = c.name.toLowerCase();
     const ticker = c.ticker.toLowerCase();
     if (name === t || ticker === t) return 0;
@@ -232,22 +212,17 @@ function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> 
   // Follow the router: a Clear on Discover, Back, or leaving Discover shows the search that is on screen.
   useEffect(() => setQ(routerQ), [routerQ]);
 
-  // The coin list for suggestions, fetched the first time the field is used (shared with Discover's cache).
+  // The launched coins for suggestions, fetched the first time the field is used (shared with Home and Discover).
   const [wanted, setWanted] = useState(false);
-  const { data: coins } = useQuery({
-    queryKey: ["coins", {}],
-    queryFn: () => (IS_SIM ? listCoins({ data: {} }) : chainCoinList()),
-    enabled: wanted,
-    staleTime: 60_000,
-  });
+  const { data: coins } = useQuery({ ...liveLaunchesQuery, enabled: wanted });
   const matches = useMemo(() => suggest(coins ?? [], q), [coins, q]);
   const open = focused && !dismissed && matches.length > 0;
 
-  function go(coin: CoinSummary) {
+  function go(coin: PublicLiveLaunch) {
     setActive(-1);
     setDismissed(true);
     inputRef.current?.blur();
-    void navigate({ to: "/coin/$id", params: { id: coin.id } });
+    void navigate({ to: "/coin/$id", params: { id: coin.tokenMint } });
   }
 
   function submit(e: FormEvent) {
@@ -292,7 +267,7 @@ function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> 
     }
   }
 
-  const activeId = open && active >= 0 && matches[active] ? `${listId}-${matches[active].id}` : undefined;
+  const activeId = open && active >= 0 && matches[active] ? `${listId}-${matches[active].tokenMint}` : undefined;
 
   return (
     <form onSubmit={submit} role="search" className="relative w-full">
@@ -364,8 +339,8 @@ function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> 
         {open
           ? matches.map((c, i) => (
               <li
-                key={c.id}
-                id={`${listId}-${c.id}`}
+                key={c.tokenMint}
+                id={`${listId}-${c.tokenMint}`}
                 role="option"
                 aria-selected={i === active}
                 data-active={i === active || undefined}
@@ -375,7 +350,7 @@ function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> 
                 onMouseEnter={() => setActive(i)}
                 className="mdx-menu-item mdx-suggest cursor-pointer gap-2.5"
               >
-                <Thumb src={c.image} size={24} />
+                <Thumb src={c.image ?? ""} size={24} />
                 <span className="min-w-0 flex-1 truncate text-[14px] text-ink">{c.name}</span>
                 <span className="flex-none text-[12px] text-slate">${c.ticker}</span>
               </li>
@@ -392,7 +367,6 @@ function SearchBox({ inputRef }: { inputRef: RefObject<HTMLInputElement | null> 
  */
 function RailNav({ pending }: { pending: boolean }) {
   const active = useActiveTab();
-  const unread = unreadOf(useMe());
   return (
     <nav aria-label="Main" className="relative flex flex-col">
       {TABS.map((t, i) => (
@@ -416,7 +390,6 @@ function RailNav({ pending }: { pending: boolean }) {
             <GenIcon name={t.icon} size={18} />
           </span>
           {t.label}
-          {t.to === "/portfolio" && unread > 0 ? <UnreadBadge count={unread} /> : null}
         </Link>
       ))}
       {/* One pill for the whole nav: it springs to the active row (z-index keeps it under the links). */}
@@ -429,168 +402,6 @@ function RailNav({ pending }: { pending: boolean }) {
   );
 }
 
-/** The unread count on the Portfolio tab (P1-13): an ink pill, read as ", 3 new" by screen readers. */
-function UnreadBadge({ count, dot = false }: { count: number; dot?: boolean }) {
-  const text = count > 9 ? "9+" : String(count);
-  return (
-    <>
-      <span aria-hidden className={dot ? "mdx-badge mdx-badge--dot" : "mdx-badge num"}>
-        {dot ? null : text}
-      </span>
-      <span className="sr-only">, {count} new</span>
-    </>
-  );
-}
-
-export function useWalletActions(close: () => void) {
-  const toast = useToast();
-  const qc = useQueryClient();
-  const { openEnter } = useSessionUi();
-  const [busy, setBusy] = useState(false);
-  const [leaving, setLeaving] = useState(false);
-
-  async function faucet() {
-    setBusy(true);
-    try {
-      const r = await claimFaucet();
-      if (r.ok) {
-        toast("ok", `Faucet sent ${sol(FAUCET_AMOUNT, 0)} ${MODE_COPY.walletUnit}.`);
-        close();
-        // The answer carries the fresh wallet (P0-12): show it now, refresh the portfolio in the background.
-        setMe(qc, r.me);
-        void qc.invalidateQueries({ queryKey: ["portfolio"] });
-      } else toast("err", r.error);
-    } catch {
-      toast("err", FLOW.connection);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  /**
-   * Start over (backlog P0-7, decision C12): leaves this test account for good, behind a ConfirmDialog that
-   * says exactly what is lost. There is no Sign out in test mode, because a handle cannot be entered again.
-   */
-  async function leave(handle: string) {
-    setLeaving(true);
-    try {
-      const r = await signOut().catch(() => null);
-      if (!r?.ok) {
-        toast("err", `${FLOW.connection} You are still @${handle}.`);
-        return false;
-      }
-      qc.setQueryData(["me"], null);
-      // Viewer-specific data (holdings, bids, the portfolio) refreshes in the background; the wallet is set.
-      void qc.invalidateQueries({ predicate: (q) => q.queryKey[0] !== "me" });
-      toast("ok", `You left @${handle}.`);
-      openEnter("Pick a new handle to start again.");
-      return true;
-    } finally {
-      setLeaving(false);
-    }
-  }
-
-  return { faucet, leave, busy, leaving };
-}
-
-/** The faucet row's words: claim now, when it opens again, or the balance it opens under. */
-export function faucetLabelOf(me: NonNullable<Me>) {
-  return me.canFaucet
-    ? FLOW.claimFaucet
-    : me.balance < FAUCET_BELOW && me.faucetReadyAt
-      ? `Faucet opens ${untilText(me.faucetReadyAt)}`
-      : `Faucet opens under ${sol(FAUCET_BELOW, 0)} SOL`;
-}
-
-/** Start over (P0-7): leaving a test account for good, behind a dialog that says exactly what is lost. */
-export function StartOverDialog({
-  handle,
-  open,
-  onOpenChange,
-  leaving,
-  leave,
-}: {
-  handle: string;
-  open: boolean;
-  onOpenChange: (o: boolean) => void;
-  leaving: boolean;
-  leave: (handle: string) => Promise<boolean>;
-}) {
-  return (
-    <ConfirmDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Start over with a new handle?"
-      tone="danger"
-      confirmLabel={`Leave @${handle}`}
-      cancelLabel="Keep playing"
-      pending={leaving}
-      pendingLabel="Leaving..."
-      onConfirm={async () => {
-        if (await leave(handle)) onOpenChange(false);
-      }}
-    >
-      {/* The consequence in two short lines; the rest is on /how#demo. */}
-      <p>
-        Nobody can enter @{handle} again, you included. Its coins and cards stay with it.
-      </p>
-    </ConfirmDialog>
-  );
-}
-
-const loadWalletMenu = () => import("./wallet-menu");
-const WalletMenu = lazy(loadWalletMenu);
-
-/** The pill shows "99.88 SOL": its name keeps those words together (WCAG 2.5.3) and says the kind after them. */
-const BALANCE_NOTE = MODE_COPY.walletUnit === "SOL" ? "" : `, ${MODE_COPY.walletUnit.replace(/ SOL$/, "")} balance`;
-
-/** The signed-in rail wallet's face. The Radix menu around it (wallet-menu.tsx) is a lazy chunk. */
-export function WalletButton({ me, ...rest }: { me: NonNullable<Me> } & ComponentProps<"button">) {
-  return (
-    <button
-      type="button"
-      aria-label={`Wallet, @${me.handle}, ${sol(me.balance, 2)} SOL${BALANCE_NOTE}`}
-      // Where focus lands when "Try the demo" leaves with the sign-in it opened (focus.ts focusNear).
-      data-focus-home=""
-      {...rest}
-      className="flex h-[52px] items-center gap-3 rounded-pop bg-sheet px-3 text-left shadow-raise transition-[box-shadow,translate] duration-(--t-base) ease-room hover:-translate-y-px hover:shadow-lift data-[state=open]:shadow-lift"
-    >
-      <Avatar handle={me.handle} />
-      <span className="min-w-0">
-        <span className="block truncate text-[13px] leading-[1.3] text-slate">
-          @{me.handle}
-        </span>
-        <span className="block leading-[1.2]">
-          <Num size="md" watch={me.balance} tick>
-            {sol(me.balance, 2)}
-          </Num>
-          <span className="text-[13px] font-medium text-slate"> SOL</span>
-        </span>
-      </span>
-    </button>
-  );
-}
-
-function WalletBlock() {
-  const me = useMe();
-  const { openEnter } = useSessionUi();
-
-  if (!me) {
-    return (
-      <Button block onClick={() => openEnter()}>
-        Try the demo
-      </Button>
-    );
-  }
-
-  // Server HTML keeps its menu markup while the chunk loads; a fresh sign-in shows the plain button meanwhile.
-  return (
-    <Suspense fallback={<WalletButton me={me} />}>
-      <WalletMenu me={me} />
-    </Suspense>
-  );
-}
-
 function Rail({
   searchRef,
   pending,
@@ -600,7 +411,6 @@ function Rail({
   pending: boolean;
   liveLaunch?: boolean;
 }) {
-  const me = useMe();
   return (
     <aside className="mdx-rail mdx-scroll hidden w-[224px] flex-none flex-col overflow-y-auto overflow-x-hidden px-4 pb-4 pt-5 lg:flex">
       {/* The test-mode pill sits inline beside the wordmark (backlog P0-5), so it adds no rail row. */}
@@ -631,18 +441,9 @@ function Rail({
             Terms &amp; risks
           </Link>
         </div>
-        {liveLaunch ? (
-          <Suspense fallback={null}>
-            <LiveWalletButton />
-          </Suspense>
-        ) : IS_SIM ? (
-          <WalletBlock />
-        ) : (
-          <ChainRailWallet />
-        )}
-        {!liveLaunch && me && MODE_COPY.walletNote ? (
-          <p className="text-[12px] leading-[1.3] text-slate">{MODE_COPY.walletNote}</p>
-        ) : null}
+        <Suspense fallback={null}>
+          <LiveWalletButton />
+        </Suspense>
         {/* Under the wallet block: the site-wide Calm motion switch (10.2). */}
         <CalmSwitch />
       </div>
@@ -651,14 +452,6 @@ function Rail({
 }
 
 // ---------------------------------------------------------------- mobile
-
-/**
- * Open the next sheet once the closing one has gone (its 200ms slide, and its focus handed back to the header
- * button), so the next sheet remembers that button and returns focus to it.
- */
-function afterSheet(fn: () => void) {
-  setTimeout(fn, 260);
-}
 
 function SearchGlyph({ size = 18 }: { size?: number }) {
   return (
@@ -727,101 +520,10 @@ function GuideGlyph() {
 }
 
 /**
- * The account sheet (P1-6): handle and wallet, then Portfolio, the faucet with its timer, How it works (/how),
- * Terms & risks, and Start over. On devnet this is where wallet connect, disconnect, the address
- * copy and the network badge go.
- */
-function AccountSheet({
-  me,
-  open,
-  onOpenChange,
-}: {
-  me: NonNullable<Me>;
-  open: boolean;
-  onOpenChange: (o: boolean) => void;
-}) {
-  const [confirm, setConfirm] = useState(false);
-  const close = () => onOpenChange(false);
-  const { faucet, leave, busy, leaving } = useWalletActions(close);
-  const unread = unreadOf(me);
-  return (
-    <>
-      <Sheet open={open} onOpenChange={onOpenChange} title="Your account">
-        <div className="flex items-center gap-3 rounded-pop bg-sheet p-3 shadow-raise">
-          <Avatar handle={me.handle} size={40} />
-          <div className="min-w-0">
-            <p className="truncate text-[14px] leading-[1.3] text-slate">@{me.handle}</p>
-            <p className="leading-[1.2]">
-              <Num size="lg" watch={me.balance} tick>
-                {sol(me.balance, 2)}
-              </Num>
-              <span className="text-[14px] font-medium text-slate"> SOL</span>
-            </p>
-          </div>
-          {MODE_COPY.walletNote ? (
-            <span className="ml-auto self-start whitespace-nowrap text-[12px] leading-[1.3] text-slate">
-              {MODE_COPY.walletNote}
-            </span>
-          ) : null}
-        </div>
-        {/* Devnet: wallet connect and disconnect, the address copy and the network badge go here. */}
-        <nav aria-label="Account" className="-mx-3 mt-3 flex flex-col">
-          <Link to="/portfolio" className="mdx-menu-item gap-2 text-[15px]" onClick={close}>
-            Portfolio
-            {unread > 0 ? (
-              <span className="text-[13px] text-slate">
-                <span className="num">{unread}</span> new
-              </span>
-            ) : null}
-          </Link>
-          <button
-            type="button"
-            className="mdx-menu-item text-[15px]"
-            onClick={faucet}
-            disabled={!me.canFaucet || busy}
-          >
-            {busy ? "Claiming..." : faucetLabelOf(me)}
-          </button>
-          <Link to="/how" className="mdx-menu-item text-[15px]" onClick={close}>
-            How it works
-          </Link>
-          <Link to="/legal" className="mdx-menu-item text-[15px]" onClick={close}>
-            Terms &amp; risks
-          </Link>
-          <button
-            type="button"
-            className="mdx-menu-item text-[15px] text-slate"
-            onClick={() => {
-              close();
-              afterSheet(() => setConfirm(true));
-            }}
-          >
-            Start over
-          </button>
-        </nav>
-        <CalmSwitch size="md" className="mt-2 border-t border-rule pt-3" />
-      </Sheet>
-      <StartOverDialog
-        handle={me.handle}
-        open={confirm}
-        onOpenChange={setConfirm}
-        leaving={leaving}
-        leave={leave}
-      />
-    </>
-  );
-}
-
-/**
- * Phone header (P1-6): the Launch a Card mark and the test-mode pill, then one-tap search and either the wallet button
- * (balance and avatar: opens the account sheet, with a dot for unread notifications) or the guide icon and
- * Enter Launch a Card. 44px targets; the side insets clear a notch held sideways.
+ * Phone header (P1-6): the Launch a Card mark, then one-tap search, How it works (on Launch, the wallet guide) and the
+ * mainnet wallet button. 44px targets; the side insets clear a notch held sideways.
  */
 function MobileHeader({ liveLaunch = false }: { liveLaunch?: boolean }) {
-  const me = useMe();
-  const { openEnter } = useSessionUi();
-  const [account, setAccount] = useState(false);
-  const unread = unreadOf(me);
   return (
     <header className="mdx-mhead sticky top-0 z-30 flex h-14 flex-none items-center gap-3 bg-wall px-4 lg:hidden">
       <Link to="/" aria-label="Launch a Card home" className="-ml-2 grid h-11 w-11 place-items-center">
@@ -830,66 +532,20 @@ function MobileHeader({ liveLaunch = false }: { liveLaunch?: boolean }) {
       <div className="-mr-1.5 ml-auto flex items-center gap-1">
         <SearchButton />
         {liveLaunch ? (
-          <>
-            <LiveLaunchGuide compact />
-            <Suspense fallback={null}>
-              <LiveWalletButton compact />
-            </Suspense>
-          </>
-        ) : !IS_SIM ? (
-          <ChainHeaderAccount />
-        ) : me ? (
-          <>
-            {/* How it works stays one tap away once signed in (Terms & risks is linked from it). */}
-            <Link
-              to="/how"
-              aria-label="How it works"
-              className="grid h-11 w-11 place-items-center rounded-pill text-ink transition-colors duration-(--t-fast) ease-room hover:bg-track"
-            >
-              <GuideGlyph />
-            </Link>
-          <button
-            type="button"
-            onClick={() => setAccount(true)}
-            aria-haspopup="dialog"
-            aria-label={`Wallet, @${me.handle}, ${sol(me.balance, 2)} SOL${BALANCE_NOTE}${unread ? `, ${unread} new` : ""}`}
-            className="flex h-11 items-center gap-2 rounded-pill pl-2 pr-1 transition-colors duration-(--t-fast) ease-room hover:bg-track"
-          >
-            {/* The unit says test SOL: once the status strip has scrolled away, the balance alone must not read as SOL. */}
-            <span className="whitespace-nowrap">
-              <Num size="sm" watch={me.balance} tick className="text-[15px]!">
-                {sol(me.balance, 2)}
-              </Num>
-              <span className="text-[13px] font-medium text-slate">&nbsp;{MODE_COPY.walletUnit}</span>
-            </span>
-            <span className="relative">
-              <Avatar handle={me.handle} size={30} />
-              {unread > 0 ? (
-                <span
-                  aria-hidden
-                  className="mdx-badge mdx-badge--dot -right-0.5 -top-0.5 shadow-[0_0_0_2px_var(--color-wall)]"
-                />
-              ) : null}
-            </span>
-          </button>
-          </>
+          <LiveLaunchGuide compact />
         ) : (
-          <>
-            <Link
-              to="/how"
-              aria-label="How it works"
-              className="grid h-11 w-11 place-items-center rounded-pill text-ink transition-colors duration-(--t-fast) ease-room hover:bg-track"
-            >
-              <GuideGlyph />
-            </Link>
-            <Button className="ml-1" onClick={() => openEnter()}>
-              <span className="max-[359px]:hidden">Try the demo</span>
-              <span className="hidden max-[359px]:inline">Demo</span>
-            </Button>
-          </>
+          <Link
+            to="/how"
+            aria-label="How it works"
+            className="grid h-11 w-11 place-items-center rounded-pill text-ink transition-colors duration-(--t-fast) ease-room hover:bg-track"
+          >
+            <GuideGlyph />
+          </Link>
         )}
+        <Suspense fallback={null}>
+          <LiveWalletButton compact />
+        </Suspense>
       </div>
-      {!liveLaunch && IS_SIM && me ? <AccountSheet me={me} open={account} onOpenChange={setAccount} /> : null}
     </header>
   );
 }
@@ -934,7 +590,6 @@ function useKeyboardFlag() {
 
 function MobileTabs({ pending }: { pending: boolean }) {
   const active = useActiveTab();
-  const unread = unreadOf(useMe());
   useKeyboardFlag();
   return (
     <nav
@@ -954,7 +609,6 @@ function MobileTabs({ pending }: { pending: boolean }) {
         >
           <span className="mdx-mtab__icon">
             <GenIcon name={t.icon} size={20} />
-            {t.to === "/portfolio" && unread > 0 ? <UnreadBadge count={unread} dot /> : null}
           </span>
           {t.label}
         </Link>
@@ -1195,9 +849,9 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
   const searchRef = useRef<HTMLInputElement>(null);
   const pending = useRoutePending();
   const path = useRouterState({ select: (s) => s.location.pathname });
-  // The mainnet banner and wallet chrome show only for an explicit mainnet choice while the owner has launches, or
-  // at least saved-launch recovery, on.
-  const liveLaunch = useLiveRecoveryOpen(useRouterState({ select: s => s.location.pathname === "/launch" && (s.location.search as { mode?: string }).mode === "live" }));
+  // On Launch, while the owner has launches (or at least saved-launch recovery) on, the strip asks for the wallet and
+  // the phone header carries the wallet guide.
+  const liveLaunch = useLiveRecoveryOpen(useRouterState({ select: s => s.location.pathname === "/launch" }));
 
   // Dynamic browser chrome and software keyboards resize the actual usable canvas.
   useEffect(() => {
@@ -1229,7 +883,7 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
     };
   }, []);
 
-  // While a modal dialog is open (the demo, guide, 3D, Inspect or account dialog, portaled outside this root), the
+  // While a modal dialog is open (the wallet, guide, 3D or Inspect dialog, portaled outside this root), the
   // page behind it is inert: Radix's aria-hidden skips live regions and their ancestors, so the activity log and its
   // links stayed reachable. Popovers and menus are not modal (no aria-modal) and leave the page alone. The flag
   // drops as soon as the dialog reports data-state="closed", before Radix hands focus back to the opener.
@@ -1295,17 +949,17 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
         <RouteProgress loading={pending} />
         <RouteAnnouncer />
         {/* The status strip (MintDex): what is real here. IS_DEVNET is a literal: the devnet line and its words are not
-            in the mainnet or sim bundle. */}
+            in the mainnet bundle. */}
         {IS_DEVNET && devnetSite ? (
           <DevnetSiteNote />
-        ) : liveLaunch ? (
-          <StatusStrip testId="live-launch-note" lead="Solana mainnet" rest="Wallet approval required." />
-        ) : IS_SIM ? (
-          <StatusStrip testId="local-demo-note" lead="Demo" rest="Test SOL only." />
-        ) : null}
+        ) : (
+          <StatusStrip
+            testId="mainnet-note"
+            lead="Solana mainnet"
+            rest={liveLaunch ? "Wallet approval required." : "Real coins on pump.fun."}
+          />
+        )}
         <MobileHeader liveLaunch={liveLaunch} />
-        {/* The activity ticker (MintDex): the real feed, scrolling; still and scrollable under Calm motion. */}
-        <Ticker />
         {/* --main-pad mirrors the padding so full-height asides can bleed to the content edges with
             calc(var(--main-pad) * -1) instead of copying 24px / 16px.
             Phones clip sideways (clip, not hidden: no scroll container, sticky still works): before

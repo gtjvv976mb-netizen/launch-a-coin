@@ -2,8 +2,6 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { oneOf, searchSchema } from "../lib/mintdex/search";
 import { PageFrame, PageHeader, TextLink } from "../components/mintdex/ui";
-import { LAMPORTS, LAUNCH_FEE, TRADE_FEE_BPS } from "../lib/mintdex/constants";
-import { pct } from "../lib/mintdex/copy";
 import { pageHead } from "../lib/mintdex/seo";
 
 export const Route = createFileRoute("/legal")({
@@ -19,17 +17,10 @@ export const Route = createFileRoute("/legal")({
   component: Legal,
 });
 
-const UPDATED = "30 October 2026";
-
-/** A fact the operator still has to supply. Shown as an obvious marked slot, never as a guess. */
-function Fill({ children }: { children: string }) {
-  return <mark className="cdx-legal__fill">[TO FILL: {children}]</mark>;
-}
+const UPDATED = "31 October 2026";
 
 type Item = { id: string; title: string; body: ReactNode };
 type Section = { id: "terms" | "fees" | "privacy" | "risks"; title: string; items: Item[] };
-
-const DEMO_LAUNCH_FEE = (LAUNCH_FEE / LAMPORTS).toLocaleString("en-US");
 
 const SECTIONS: Section[] = [
   {
@@ -37,38 +28,27 @@ const SECTIONS: Section[] = [
     title: "Terms",
     items: [
       {
-        id: "operator",
-        title: "Who runs Launch a Card",
+        id: "eligibility",
+        title: "Who can use it",
         body: (
           <>
+            <p>You must be at least 18, or the age of majority where you live if that is higher.</p>
             <p>
-              Launch a Card is operated by <Fill>operator legal name</Fill>, <Fill>registered address</Fill>.
-            </p>
-            <p>
-              Questions about these terms: <Fill>contact email</Fill>. Rights and takedown requests:{" "}
-              <Fill>takedown contact</Fill>.
+              Not available to anyone in, or ordinarily resident in, a country or region under comprehensive sanctions
+              (including Cuba, Iran, North Korea, Syria, and the Crimea, Donetsk and Luhansk regions of Ukraine), or to
+              anyone named on a government sanctions list. You are responsible for following the laws that apply to you.
             </p>
           </>
         ),
       },
       {
-        id: "eligibility",
-        title: "Who can use it",
-        body: (
-          <p>
-            Minimum age: <Fill>minimum age</Fill>. Not available in: <Fill>restricted countries and regions</Fill>.
-          </p>
-        ),
-      },
-      {
         id: "wallet-launches",
-        title: "Wallet launches and demo trading",
+        title: "Wallet launches",
         body: (
           <p>
-            The wallet launch flow, when configured and enabled, creates a real pump.fun token and a separate
-            collectible NFT on Solana mainnet. Each transaction requires your wallet approval and real network costs.
-            Pages labelled demo use simulated tokens, balances and trading; test funds have no cash value. On this
-            site, a coin means a token created on pump.fun.
+            A launch creates a real pump.fun token and a separate collectible NFT on Solana mainnet. Each transaction
+            requires your wallet approval and real network costs. Tokens trade on pump.fun, not on Launch a Card. On
+            this site, a coin means a token created on pump.fun.
           </p>
         ),
       },
@@ -95,26 +75,23 @@ const SECTIONS: Section[] = [
         ),
       },
       {
-        id: "test-data",
-        title: "Test data",
-        body: <p>Demo tokens and balances may be reset during development. The demo is provided as is.</p>,
-      },
-      {
         id: "liability",
         title: "Liability",
         body: (
-          <p>
-            <Fill>warranty disclaimer and limitation of liability, written by counsel</Fill>
-          </p>
-        ),
-      },
-      {
-        id: "governing-law",
-        title: "Governing law and disputes",
-        body: (
-          <p>
-            Governing law: <Fill>governing law</Fill>. Disputes: <Fill>courts or dispute process</Fill>.
-          </p>
+          <>
+            <p>
+              Launch a Card is provided “as is” and “as available”, without warranties of any kind, express or implied,
+              including merchantability, fitness for a particular purpose and non-infringement. Launch a Card does not
+              control Solana, pump.fun, wallets or quote-asset issuers and is not responsible for their availability,
+              fees, errors or losses.
+            </p>
+            <p>
+              To the fullest extent the law allows, Launch a Card and its operator are not liable for indirect,
+              incidental, special, consequential or punitive damages, or for lost profits, tokens, funds or data. Total
+              liability for any claim is limited to the fees you paid to Launch a Card in the 12 months before the claim.
+              Nothing here limits liability that the law does not allow to be limited.
+            </p>
+          </>
         ),
       },
       {
@@ -122,8 +99,8 @@ const SECTIONS: Section[] = [
         title: "Changes to these terms",
         body: (
           <p>
-            The Updated date at the top of this page shows the current version. How changes are announced:{" "}
-            <Fill>how changes are announced</Fill>.
+            The Updated date at the top of this page shows the current version. Changes are posted on this page with a
+            new Updated date. Using Launch a Card after a change means you accept the updated terms.
           </p>
         ),
       },
@@ -171,13 +148,6 @@ const SECTIONS: Section[] = [
                   <th scope="row">Solana network fees</th>
                   <td>Paid to the network for each transaction you sign.</td>
                 </tr>
-                <tr>
-                  <th scope="row">Demo</th>
-                  <td>
-                    Launch fee {DEMO_LAUNCH_FEE} test SOL. Trading fee {pct(TRADE_FEE_BPS)} in test SOL. Test SOL has
-                    no cash value.
-                  </td>
-                </tr>
               </tbody>
             </table>
           </>
@@ -194,8 +164,8 @@ const SECTIONS: Section[] = [
         title: "Browser session",
         body: (
           <p>
-            Separate session cookies remember your demo account and wallet-authenticated launch session. Wallet
-            authentication uses a clearly labelled message, not a transaction. No wallet private keys are requested or
+            A session cookie remembers your wallet-authenticated launch session. Wallet authentication uses a clearly
+            labelled message, not a transaction. No wallet private keys are requested or
             stored by the server.
           </p>
         ),
@@ -222,30 +192,12 @@ const SECTIONS: Section[] = [
           </p>
         ),
       },
-      {
-        id: "privacy-requests",
-        title: "Questions about your data",
-        body: (
-          <p>
-            Contact <Fill>privacy contact email</Fill>.
-          </p>
-        ),
-      },
     ],
   },
   {
     id: "risks",
     title: "Risks",
     items: [
-      {
-        id: "demo-values",
-        title: "Demo values",
-        body: (
-          <p>
-            Prices and market caps in this demo are simulated. They are not investment advice or live market quotes.
-          </p>
-        ),
-      },
       {
         id: "live-launches",
         title: "Live launches",
@@ -295,8 +247,7 @@ function sectionOf(hash: string): SectionId | null {
  * Terms, privacy and risks (MintDex's format): the title row, then a vertical list of the four sections (a row of
  * them on phones) beside one panel with the chosen section's topics, in two columns on wide screens. From 1024px
  * the panel scrolls on its own; phones scroll the page. The section lives in ?tab=, so a link opens it; an old
- * #hash link opens its section and brings the topic into view. The [TO FILL] slots stay marked until the operator
- * supplies the facts. Styles: styles/screens/legal.css.
+ * #hash link opens its section and brings the topic into view. Styles: styles/screens/legal.css.
  */
 function Legal() {
   const { tab } = Route.useSearch();
@@ -365,8 +316,8 @@ function Legal() {
                 <aside className="cdx-legal__summary" aria-labelledby="legal-summary">
                   <h3 id="legal-summary">The short version</h3>
                   <ul>
-                    <li>Demo prices, balances and trades are simulated. Test funds have no cash value.</li>
-                    <li>Wallet launches create a real pump.fun token and cost real SOL. You approve each transaction.</li>
+                    <li>Every launch creates a real pump.fun token and costs real SOL. You approve each transaction.</li>
+                    <li>Coins trade on pump.fun. Launch a Card takes no fee on launches or trades.</li>
                     <li>Real memecoins can lose all value.</li>
                   </ul>
                 </aside>

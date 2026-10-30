@@ -43,7 +43,7 @@ export function CardPrint({ card, layout, preview = false }: { card: CardData; l
         <div className="mdx-card__row" data-card-slot="address">
           <span><span className="mdx-card__long">Token address</span><span className="mdx-card__short">Address</span></span>
           <i />
-          <b>{card.mintAddress ? <MintAddress address={card.mintAddress} /> : card.dexLabel === "Sample" ? "Sample token" : card.dexNo > 0 ? "Demo token" : "—"}</b>
+          <b>{card.mintAddress ? <MintAddress address={card.mintAddress} /> : card.dexLabel === "Sample" ? "Sample token" : "—"}</b>
         </div>
         <div className="mdx-card__row" data-card-slot="market-cap">
           <span>Market cap</span><i /><b>{card.mcapLabel ?? marketCapText(card)}</b>

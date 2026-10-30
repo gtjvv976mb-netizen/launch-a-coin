@@ -1229,11 +1229,11 @@ describe("platform hardening on the server", () => {
     expect(clientKey("2001:db8:1:2:0:0:198.51.100.4")).toBe("2001:db8:1:2::/64");
     expect(clientKey("")).toBeNull(); expect(clientKey(null)).toBeNull(); expect(clientKey(undefined)).toBeNull();
     // The review's reproduction, inverted: one /64 is refused like one address.
-    for (let i = 0; i < LIMITS.demoEnterIp.max; i++) await enforceLimit(LIMITS.demoEnterIp, clientKey(`2001:db8:1:2::${(i + 1).toString(16)}`));
+    for (let i = 0; i < LIMITS.composeIp.max; i++) await enforceLimit(LIMITS.composeIp, clientKey(`2001:db8:1:2::${(i + 1).toString(16)}`));
     let accepted = 0;
-    for (let i = 2; i < 50; i++) await enforceLimit(LIMITS.demoEnterIp, clientKey(`2001:db8:1:2:${i.toString(16)}:${(i * 7).toString(16)}::${i.toString(16)}`)).then(() => accepted++, () => undefined);
+    for (let i = 2; i < 50; i++) await enforceLimit(LIMITS.composeIp, clientKey(`2001:db8:1:2:${i.toString(16)}:${(i * 7).toString(16)}::${i.toString(16)}`)).then(() => accepted++, () => undefined);
     expect(accepted).toBe(0);
-    await enforceLimit(LIMITS.demoEnterIp, clientKey("2001:db8:1:3::1"));
+    await enforceLimit(LIMITS.composeIp, clientKey("2001:db8:1:3::1"));
     for (let i = 0; i < LIMITS.signInIp.max; i++) await auth.createSignInChallenge(clientKey(`2001:db8:9:9::${(i + 1).toString(16)}`));
     await expect(auth.createSignInChallenge(clientKey("2001:db8:9:9:ffff::1"))).rejects.toThrow("Wait a minute");
   });
@@ -1264,7 +1264,8 @@ describe("platform hardening on the server", () => {
   test("every connecting-address read goes through clientKey, and the size check and sessions are limited per address (SEC-R1, SEC-R2)", () => {
     const sources = (dir: string): string[] => readdirSync(dir, {withFileTypes: true}).flatMap(entry => entry.isDirectory() ? sources(resolve(dir, entry.name)) : /\.(ts|tsx)$/.test(entry.name) ? [resolve(dir, entry.name)] : []);
     const reads = sources(resolve(import.meta.dir, "../../src")).flatMap(file => readFileSync(file, "utf8").split("\n").filter(line => /cf-connecting-ip/i.test(line) && !/^\s*(\/\/|\*)/.test(line)).map(line => [file, line] as const));
-    expect(reads.length).toBeGreaterThanOrEqual(4);
+    // The live API's reads (the demo's account and upload reads went with the demo).
+    expect(reads.length).toBeGreaterThanOrEqual(2);
     for (const [file, line] of reads) expect([file, /clientKey\(/.test(line)]).toEqual([file, true]);
     const api = readFileSync(resolve(import.meta.dir, "../../src/lib/carddex/live/api.ts"), "utf8");
     const handler = (name: string) => api.slice(api.indexOf(`export const ${name} =`), api.indexOf("\nexport const", api.indexOf(`export const ${name} =`) + 1));

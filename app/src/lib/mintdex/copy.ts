@@ -85,35 +85,6 @@ export type ModeCopy = {
 // devnet and mainnet are provisional: confirm them when MODE flips (M4).
 // One top-level constant per mode, picked by MODE below: Vite makes MODE a literal, so the minifier drops the
 // other modes' strings from each build (C9: the devnet client bundle carries no simulation words).
-const SIM_COPY: ModeCopy = {
-  badge: "Demo",
-  explainer: "Demo: simulated pump.fun trading and NFT cards with test SOL. No real coins or funds.",
-  metaSuffix: "A demo with test SOL.",
-  coinQualifier: "Demo: simulated market.",
-  usdNote: `USD at $${SOL_USD} per SOL (test rate)`,
-  addressLabel: "Test address, not on chain",
-  copyAddress: "Copy test address",
-  addressCopied: "Test address copied.",
-  addressNotFound: "Only demo coins have cards here.",
-  hero: "Try it with test SOL on a simulated pump.fun curve.",
-  launchContext:
-    "Pick a pair and its card comes with it. Add your coin and try the pump.fun launch flow with test SOL.",
-  guideLaunch:
-    "Pick a pair (its card comes with it), add your coin art and launch. The demo creates a simulated coin and one-of-one card in your collection.",
-  guideNote: "Demo: separate test balances and a simulated bonding curve. No real coin or NFT is minted.",
-  curveComplete: "Curve complete (simulated)",
-  botsNote: "Includes demo bots.",
-  walletUnit: "test SOL",
-  enterForSol: `Try the demo for ${START_SOL} test SOL`,
-  accountNote: "Saved in this browser only.",
-  enterGift: `You get ${START_SOL} test SOL.`,
-  enterWelcome: `${START_SOL} test SOL is in your wallet.`,
-  walletContext: "Test wallet",
-  portfolioSignedOut: `Try the demo to get a test wallet with ${START_SOL} test SOL. Your coins and cards will live here.`,
-  walletNote: "Test SOL",
-  railStart: `Get ${START_SOL} test SOL to start. No real funds.`,
-  shareSuffix: " (demo)",
-};
 const DEVNET_COPY: ModeCopy = {
   badge: "Devnet",
   explainer: "Launch a Card runs on Solana devnet, a free test network. Devnet SOL has no real value.",
@@ -174,16 +145,9 @@ const MAINNET_COPY: ModeCopy = {
   shareSuffix: "",
 };
 
-export const MODE_COPY: ModeCopy =
-  MODE === "devnet" ? DEVNET_COPY : MODE === "mainnet" ? MAINNET_COPY : SIM_COPY;
+// The site is mainnet-only: this build (MODE "sim", the inherited chain modes off) speaks as mainnet.
+export const MODE_COPY: ModeCopy = MODE === "devnet" ? DEVNET_COPY : MAINNET_COPY;
 
-/**
- * The small tag beside simulated market figures (market cap, 24h change, trades) in test mode, and what the bot chip
- * means. Empty off sim: real figures carry no tag.
- */
-export const SIM_TAG = IS_SIM ? "Simulated" : "";
-export const SIM_TAG_HINT = "Simulated market data in the demo, not live quotes";
-export const BOT_HINT = "Simulated trader in the demo";
 
 /** The one label for "go and look at the coins" (Home hero, not-found pages, empty states): links to /discover, so it
  * uses the tab's own name. */

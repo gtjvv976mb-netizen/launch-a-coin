@@ -9,11 +9,18 @@ const xmlEscape = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
 
 /**
- * Coin pages, newest activity first, with lastmod = the last trade. Written now, emitted only once coins are
- * real (MODE is not 'sim'): simulated coins and their market caps stay out of search (decision C4, P2-4).
+ * Coin pages: every finished mainnet launch (/coin/<mint>), newest first, with lastmod = its launch day. A failed read
+ * lists the static pages only.
  */
 async function coinEntries(): Promise<Entry[]> {
-  if (IS_SIM) return []
+  if (IS_SIM) {
+    const { listCompletedLaunches } = await import('../lib/carddex/live/launches.server')
+    const launches = await listCompletedLaunches().catch(() => [])
+    return launches.map((l) => ({
+      loc: absoluteUrl(`/coin/${l.tokenMint}`),
+      lastmod: new Date(l.createdAt).toISOString().split('T')[0],
+    }))
+  }
   // Devnet: every coin with a MintDex card, from the chain API (never throws; whatever it read in time).
   if (IS_CHAIN) {
     const { chainSitemapCoins } = await import('../lib/chain/data')

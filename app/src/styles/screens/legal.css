@@ -70,16 +70,6 @@
 .cdx-legal__item p,
 .cdx-legal__item li { max-width: 34em; margin-top: 6px; font-size: 15px; line-height: 1.5; color: var(--color-slate); text-wrap: pretty; }
 .cdx-legal__item ul { padding-left: 20px; list-style: disc; }
-.cdx-legal__fill {
-  padding: 0 4px;
-  border: 1px dashed var(--color-hype-ink);
-  border-radius: var(--radius-chip);
-  background: var(--color-tint);
-  color: var(--color-ink);
-  font-weight: 600;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-}
 .cdx-legal__fees { width: 100%; margin-top: 12px; border-collapse: collapse; font-size: var(--text-body); line-height: 1.5; }
 .cdx-legal__fees th,
 .cdx-legal__fees td { padding: 8px 12px 8px 0; border-bottom: 1px solid var(--color-rule); text-align: left; vertical-align: top; color: var(--color-slate); }

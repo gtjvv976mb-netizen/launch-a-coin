@@ -1,13 +1,12 @@
 /**
  * The largest request body each POST path takes (SEC-5): server functions carry small JSON, the composition upload one
- * artwork of up to 4 MB, the demo upload an image and its smaller copies. A declared Content-Length over the limit is
+ * artwork of up to 4 MB. A declared Content-Length over the limit is
  * refused before anything reads it. A body without one (chunked) is read only up to the limit, then handed on as bytes,
  * so no request can make the Worker buffer more than its path allows.
  */
 const BODY_LIMITS: [RegExp, number][] = [
   [/^\/_serverFn\//, 64 * 1024],
   [/^\/api\/live\/compose$/, 5 * 1024 * 1024],
-  [/^\/api\/upload$/, 6 * 1024 * 1024],
 ];
 const DEFAULT_BODY_LIMIT = 1024 * 1024;
 const tooLarge = () => new Response(JSON.stringify({ ok: false, error: "That request is too large." }), {

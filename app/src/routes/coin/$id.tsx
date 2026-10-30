@@ -1,295 +1,158 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { num, oneOf, searchSchema } from "../../lib/mintdex/search";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 
-import {
-  ActionColumn,
-  CoinCardPane,
-  CoinDetails,
-  CoinHeader,
-  CoinObject,
-  CoinPhoneHero,
-  CoinStats,
-  LoreEditor,
-  McapChart,
-  TradesList,
-} from "../../components/mintdex/coin";
-import { revPoll } from "../../components/mintdex/hooks";
-import { LaunchedDialog } from "../../components/mintdex/trust";
-import { Ledge, Modal, Tabs, TextLink, prefersReducedMotion } from "../../components/mintdex/ui";
+import { LaunchCardPreview } from "../../components/carddex/live/LaunchCardPreview";
+import { PairLogo } from "../../components/carddex/PairLogo";
 import { EmptyState } from "../../components/mintdex/empty-state";
-import { ChainCoinNotFound } from "../../components/chain/pages/ChainCoinNotFound";
-import { ChainCoinView } from "../../components/chain/pages/ChainCoinPage";
-import { chainCoinHead, chainCoinLoader, type ChainCoinRoute } from "../../lib/chain/data";
-import { getCoin, getCoinRoute } from "../../lib/mintdex/api";
-import { COIN_NOT_FOUND, IS_SIM, MODE_COPY } from "../../lib/mintdex/copy";
-import {
-  NOINDEX_COINS,
-  canonicalCoinPath,
-  clip,
-  looksLikeAddress,
-  pageHead,
-  sentences,
-  shareArt,
-} from "../../lib/mintdex/seo";
+import { Icon, PageFrame, PageHeader, TextLink, buttonClass } from "../../components/mintdex/ui";
 import { getCardDesign } from "../../lib/carddex/designs";
-import type { CoinDetail, CoinPage } from "../../lib/mintdex/types";
+import { getLaunchedCoin } from "../../lib/carddex/live/launched";
+import {
+  SOLANA_ADDRESS,
+  launchCard,
+  pumpFunCoinUrl,
+  solscanTokenUrl,
+  type PublicLiveLaunch,
+} from "../../lib/carddex/live/launches";
+import { getPairAsset } from "../../lib/carddex/pairs";
+import { clip, pageHead, sentences, shareArt } from "../../lib/mintdex/seo";
 
-/**
- * Phone sections (P1-5, MintDex): Trade | Card | Chart, one at a time under the hero, kept in ?tab= so a shared or
- * notification link opens its section. Older links keep working: ?tab=trades opens Chart (the trades sit under the
- * chart) and ?tab=details opens Card (the coin details sit under the card). Desktop shows every section; nothing
- * scrolls to a section.
+/*
+ * A launched coin's page, at /coin/<its pump.fun mint>: the one-of-one card it minted (the rounded 3D card, turnable,
+ * with its shimmer on both faces), what the card records (design, pair, creator, when), and the two places the coin
+ * lives: pump.fun to trade it, Solscan for the chain record. Anything that is not a finished launch's mint is a real
+ * 404 inside the app shell. The page reads the launch receipt this Worker stored, never the chain or a price.
  */
-type CoinTab = "trade" | "card" | "chart";
-const TAB_OPTIONS: Array<{ value: CoinTab; label: string }> = [
-  { value: "trade", label: "Trade" },
-  { value: "card", label: "Card" },
-  { value: "chart", label: "Chart" },
-];
-const tabOf = (tab: string | undefined): CoinTab =>
-  tab === "card" || tab === "details" ? "card" : tab === "chart" || tab === "trades" ? "chart" : "trade";
-
-/**
- * ?minted=1: the launcher just minted this card, so the page opens "Your card is live" once (P1-12).
- * ?tab=card|chart|trades|details: the phone section that shows (Trade when absent; see tabOf). Desktop shows all.
- */
-const coinSearch = searchSchema({
-  minted: num(true),
-  tab: oneOf(["trade", "card", "chart", "trades", "details"]),
-});
-
 export const Route = createFileRoute("/coin/$id")({
-  validateSearch: coinSearch,
-  // Links people type (P0-10): a canonical id loads the page; a ticker ($HONK, honk, CORGI) or another casing
-  // answers 301 to /coin/{id}; anything else, a real devnet mint included, is a real 404 rendered inside the
-  // app shell by notFoundComponent below. Never a 500.
-  loader: async ({ params, location }) => {
-    if (params.id.length > 200) throw notFound();
-    // Devnet: the id is a mint and the data comes from the chain API (lib/chain/data.ts; page: ChainCoinPage.tsx);
-    // a ticker or name slug answers 301 to its mint when exactly one visible coin goes by it.
-    if (!IS_SIM) return (await chainCoinLoader(params.id, location.search)) as never;
-    const res = await getCoinRoute({ data: { id: params.id } });
-    // The query string goes along (?tab=card from a shared or notification link keeps its section).
-    if (res.status === "moved") {
-      throw redirect({ to: "/coin/$id", params: { id: res.id }, search: location.search, statusCode: 301 });
-    }
-    if (res.status === "missing") throw notFound();
-    return res.page;
+  loader: async ({ params }) => {
+    const id = params.id.trim();
+    if (!SOLANA_ADDRESS.test(id)) throw notFound();
+    const coin = await getLaunchedCoin({ data: { mint: id } });
+    if (!coin) throw notFound();
+    return coin;
   },
   head: ({ loaderData }) =>
-    !IS_SIM
-      ? chainCoinHead(loaderData as unknown as ChainCoinRoute, coinHead)
-      : loaderData
-        ? coinHead(loaderData.coin)
-        : { meta: [{ title: "Card not found | Launch a Card" }, { name: "robots", content: "noindex" }] },
-  notFoundComponent: IS_SIM ? CoinNotFound : ChainCoinNotFound,
-  component: IS_SIM ? CoinView : ChainCoinView,
+    loaderData ? coinHead(loaderData) : { meta: [{ title: "Coin not found | Launch a Card" }, { name: "robots", content: "noindex" }] },
+  notFoundComponent: CoinNotFound,
+  component: CoinView,
 });
 
-/** Title, description and share tags (P0-11, P1-12): no simulated $ figure while in test mode (decision C5). */
-function coinHead(coin: CoinDetail) {
-  const design = getCardDesign(coin.cardTemplate);
-  const head = pageHead({
-    path: canonicalCoinPath(coin),
+function coinHead(coin: PublicLiveLaunch) {
+  const design = getCardDesign(coin.designKey);
+  return pageHead({
+    path: `/coin/${coin.tokenMint}`,
     title: `${coin.name} ($${coin.ticker}) | Launch a Card`,
-    description: sentences(clip(coin.lore, 140), `${design.name}, creator-selected NFT card`, MODE_COPY.coinQualifier),
-    image: shareArt(coin.image),
-    imageAlt: `${coin.name} card art`,
+    description: sentences(clip(coin.lore, 140), `${design.name}, its one-of-one card`, "Launched on pump.fun"),
+    image: shareArt(coin.cardImage ?? coin.image ?? ""),
+    imageAlt: `${coin.name} card`,
     card: "summary",
-    noindex: NOINDEX_COINS,
   });
-  // twitter:creator from the coin's own X link, when it has one (P1-12).
-  const xHandle = coin.xUrl?.match(/^https:\/\/(?:www\.)?(?:x|twitter)\.com\/([A-Za-z0-9_]{1,15})(?:[/?#]|$)/)?.[1];
-  if (xHandle) head.meta.push({ name: "twitter:creator", content: `@${xHandle}` });
-  return head;
 }
 
 function CoinNotFound() {
-  const { id } = Route.useParams();
   return (
     <EmptyState
       className="mdx-page"
-      title={COIN_NOT_FOUND.title}
-      body={looksLikeAddress(id) ? COIN_NOT_FOUND.address : COIN_NOT_FOUND.unknown}
-      action={<TextLink to="/discover">{COIN_NOT_FOUND.action}</TextLink>}
+      title="No coin here"
+      body="This address is not a coin launched through Launch a Card."
+      action={<TextLink to="/discover">Discover coins</TextLink>}
     />
   );
 }
 
-/*
- * Layout (MintDex's coin page). One grid, three arrangements:
- * - 1280 and up: object column (the cased card on its ledge, its caption and Coin details) | market column (header
- *   row, stats, one plinth block with the chart and the recent trades) | action column (plinth, full height, bleeding
- *   to the content edges). It fits one screen; the trades and the action column scroll inside their panels.
- * - 1024 to 1279: the object column folds away. A 96px card stands on a short ledge left of the header and stats,
- *   the caption moves under them, and main scrolls.
- * - Phones (P1-5): the column wrappers dissolve (`contents`). A compact hero (112px card, name, market cap, design)
- *   and the Trade | Card | Chart tabs, sticky under the header, then one section at a time. The section lives in
- *   ?tab=, rendered by the server, and CSS (.mdx-coin[data-tab]) hides the others.
- */
-function CoinView() {
-  const initial = Route.useLoaderData();
-  const { id } = Route.useParams();
-  const { minted } = Route.useSearch();
-  const navigate = Route.useNavigate();
-  // "Your card is live" opens after mount (never in the server HTML) and only for the coin's launcher, so a
-  // pasted ?minted=1 link shows nothing to anyone else. Closing it drops ?minted from the URL.
-  const isLauncher = !!initial?.viewer?.isCreator;
-  const [launched, setLaunched] = useState(false);
-  useEffect(() => {
-    if (!minted) return;
-    if (isLauncher) setLaunched(true);
-    else void navigate({ search: (p) => ({ ...p, minted: undefined }), replace: true, resetScroll: false });
-  }, [minted, isLauncher, navigate]);
-  const qc = useQueryClient();
-  const { data: page } = useQuery({
-    queryKey: ["coin", id],
-    // The 6s poll asks checkRev first and keeps the page it has when nothing changed (P0-12).
-    queryFn: revPoll(qc, ["coin", id], () => getCoin({ data: { id } })),
-    initialData: initial,
-    staleTime: 3_000,
-    refetchInterval: 6_000,
-  });
-  const [loreOpen, setLoreOpen] = useState(false);
-
-  // The coin left the dex while the page was open (hidden under the content rules): the same honest
-  // not-found state the route answers with (P0-10).
-  if (!page) {
-    return (
-      <EmptyState
-        className="mdx-page"
-        title={COIN_NOT_FOUND.title}
-        action={<TextLink to="/discover">{COIN_NOT_FOUND.action}</TextLink>}
-      />
-    );
-  }
-  // Keyed by coin: another coin starts with a fresh ticket, case and lists, and the entrance plays again.
-  return <CoinScreen key={page.coin.id} page={page} loreOpen={loreOpen} setLoreOpen={setLoreOpen} launched={launched} setLaunched={setLaunched} />;
+function External({ href, children, primary = false, label }: { href: string; children: string; primary?: boolean; label: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`${label} (opens in a new tab)`}
+      className={buttonClass({ variant: primary ? "primary" : "outline", size: "md", block: false })}
+    >
+      {children}
+      <Icon name="external" size={16} />
+    </a>
+  );
 }
 
-/** The coin page itself, once there is a page. */
-function CoinScreen({
-  page,
-  loreOpen,
-  setLoreOpen,
-  launched,
-  setLaunched,
-}: {
-  page: CoinPage;
-  loreOpen: boolean;
-  setLoreOpen: (open: boolean) => void;
-  launched: boolean;
-  setLaunched: (open: boolean) => void;
-}) {
-  const { minted, tab: tabParam } = Route.useSearch();
-  const tab = tabOf(tabParam);
-  const navigate = Route.useNavigate();
-  const heroRef = useRef<HTMLElement>(null);
-  const { coin, trades } = page;
-  // The newest trade (trades run oldest first): each new one jolts the case.
-  const latestTradeId = trades.length ? trades[trades.length - 1].id : null;
+const short = (address: string) => `${address.slice(0, 4)}…${address.slice(-4)}`;
 
-  const setTab = (next: CoinTab) => {
-    void navigate({
-      search: (p) => ({ ...p, tab: next === "trade" ? undefined : next }),
-      replace: true,
-      resetScroll: false,
-    });
-    // When the tabs are stuck under the header (scrolled into a long section), bring the new section's top just
-    // under them instead of leaving the reader halfway down a shorter one.
-    const tabs = heroRef.current?.nextElementSibling as HTMLElement | null | undefined;
-    if (!tabs) return;
-    const stuck = tabs.getBoundingClientRect().top <= parseFloat(getComputedStyle(tabs).top || "0") + 1;
-    if (stuck && heroRef.current) {
-      const top = heroRef.current.getBoundingClientRect().bottom + window.scrollY - (parseFloat(getComputedStyle(tabs).top) || 0);
-      window.scrollTo({ top: Math.max(0, top), behavior: prefersReducedMotion() ? "auto" : "smooth" });
-    }
-  };
-
+function CoinView() {
+  const coin = Route.useLoaderData();
+  const design = getCardDesign(coin.designKey);
+  const pair = getPairAsset(coin.quoteAssetKey);
+  const launched = new Date(coin.createdAt);
   return (
-    <div
-      data-tab={tab}
-      className={[
-        // Tablets in portrait keep the phone sections in a centered 600px column.
-        "mdx-page mdx-coin cdx-coin grid grid-cols-[minmax(0,1fr)] gap-3 md:max-lg:mx-auto md:max-lg:w-full md:max-lg:max-w-[600px]",
-        "lg:grid-cols-[96px_minmax(0,1fr)_304px] lg:grid-rows-[auto_auto_auto_1fr] lg:gap-x-5 lg:gap-y-4",
-        "xl:h-full xl:min-h-[600px] xl:grid-cols-[264px_minmax(0,1fr)_320px] xl:grid-rows-[minmax(0,1fr)] xl:gap-5",
-        "wide:grid-cols-[300px_minmax(0,1fr)_360px] xwide:grid-cols-[340px_minmax(0,1fr)_380px]",
-      ].join(" ")}
-    >
-      {/* Phones: the compact hero and the section tabs (sticky under the header). */}
-      <CoinPhoneHero ref={heroRef} coin={coin} onCard={() => setTab("card")} className="order-1 lg:hidden" />
-      <div className="mdx-coin__tabs sticky z-20 order-2 -mx-4 bg-wall px-4 py-1.5 lg:hidden">
-        <Tabs value={tab} options={TAB_OPTIONS} onChange={setTab} label="Coin sections" className="mdx-tabs--fill" />
-      </div>
-      <CoinCardPane coin={coin} latestTradeId={latestTradeId} className="order-4 lg:hidden" />
-
-      {/* The object: the cased card on the ledge, then its caption and the details. */}
-      <div className="contents xl:flex xl:min-h-0 xl:flex-col xl:[grid-area:1/1/2/2]">
-        <div aria-hidden className="mdx-case-spacer hidden xl:block xl:min-h-0 xl:flex-[1_1_0%] xl:max-h-[72px]" />
-        <section
-          aria-label={`${coin.name} collectible card`}
-          className="order-1 flex flex-col max-lg:hidden lg:order-none lg:self-end lg:[grid-area:1/1/3/2] xl:min-h-0 xl:max-h-[calc(264px*173.683/112+65px)] xl:flex-[1000_1_0%] xl:self-stretch wide:max-h-[calc(300px*173.683/112+65px)] xwide:max-h-[calc(340px*173.683/112+65px)]"
-        >
-          <div className="relative flex justify-center pt-6 lg:pt-0 xl:min-h-0 xl:flex-1 xl:items-end xl:justify-start xl:[container-type:size]">
-            <CoinObject coin={coin} latestTradeId={latestTradeId} />
-          </div>
-          <Ledge />
-        </section>
-        <CoinDetails
-          page={page}
-          onEdit={() => setLoreOpen(true)}
-          pane="card"
-          className="order-5 lg:order-none lg:[grid-area:3/1/4/3] xl:mt-4 xl:flex-none"
-        />
-      </div>
-
-      {/* The market: header row, stats, chart and recent trades. */}
-      <div className="contents xl:flex xl:min-h-0 xl:flex-col xl:gap-4 xl:[grid-area:1/2/2/3]">
-        {/* 56px tall (MintDex), growing only for a quote unit on its own line under the market cap ("3.54M" over
-            "CHILLHOUSE"), which would otherwise rise out of the row into the ticker. */}
-        <CoinHeader
-          coin={coin}
-          className="max-lg:hidden lg:order-none lg:self-end lg:[grid-area:1/2/2/3] xl:min-h-14 xl:flex-none xl:flex-nowrap xl:self-stretch"
-        />
-        <CoinStats coin={coin} pane="chart" className="order-7 max-lg:pt-1 lg:order-none lg:[grid-area:2/2/3/3] xl:flex-none" />
-        <div className="cdx-coin-market contents lg:flex lg:flex-col lg:rounded-panel lg:bg-plinth lg:p-4 lg:shadow-ring lg:[grid-area:4/1/5/3] xl:min-h-0 xl:flex-1">
-          <McapChart
-            trades={trades}
-            tradeCount={coin.trades}
-            currentUsd={coin.mcapUsd}
-            currentQuote={coin.mcapQuote}
-            quoteAssetKey={coin.quoteAssetKey}
-            createdAt={coin.createdAt}
-            level={coin.level}
-            pane="chart"
-            className="order-8 rounded-panel bg-plinth p-4 lg:order-none lg:rounded-none lg:bg-transparent lg:p-0 xl:min-h-0 xl:flex-[1.15]"
-          />
-          <TradesList
-            trades={trades}
-            count={coin.trades}
-            pane="chart"
-            className="order-9 rounded-panel bg-plinth p-4 lg:order-none lg:mt-4 lg:rounded-none lg:bg-transparent lg:p-0 xl:min-h-0 xl:flex-1"
-          />
-        </div>
-      </div>
-
-      {/* The actions: the trade ticket, then the card. */}
-      <ActionColumn page={page} className="lg:[grid-area:1/3/5/4] xl:[grid-area:1/3/2/4]" />
-
-      <Modal open={loreOpen} onOpenChange={setLoreOpen} title="Edit description">
-        <LoreEditor coinId={coin.id} lore={coin.lore} onDone={() => setLoreOpen(false)} />
-      </Modal>
-      <LaunchedDialog
-        coin={coin}
-        open={launched}
-        onOpenChange={(o) => {
-          setLaunched(o);
-          if (!o && minted) void navigate({ search: (p) => ({ ...p, minted: undefined }), replace: true, resetScroll: false });
-        }}
+    <PageFrame className="mdx-page cdx-coin-launched">
+      <PageHeader
+        title={coin.name}
+        context={
+          <>
+            <span className="num">${coin.ticker}</span> · {design.name} design ·{" "}
+            <TextLink to="/how" hash="cards">How it works</TextLink>
+          </>
+        }
       />
-    </div>
+      <div className="cdx-coin-launched__body">
+        <section aria-label={`${coin.name} card`} className="cdx-launch-stage cdx-coin-launched__card">
+          <LaunchCardPreview card={launchCard(coin)} />
+        </section>
+        <section aria-label="Coin details" className="cdx-coin-launched__facts mdx-plinth">
+          {coin.lore ? <p className="cdx-coin-launched__lore">{coin.lore}</p> : null}
+          <dl className="cdx-coin-launched__list">
+            <div>
+              <dt>Pair</dt>
+              <dd className="cdx-coin-launched__pair">
+                <PairLogo asset={pair} size={20} />
+                <span>
+                  ${coin.ticker} / {pair.symbol}
+                </span>
+              </dd>
+            </div>
+            <div>
+              <dt>Card design</dt>
+              <dd>{design.name}</dd>
+            </div>
+            {coin.creator ? (
+              <div>
+                <dt>Creator</dt>
+                <dd className="num">{coin.creator}</dd>
+              </div>
+            ) : null}
+            <div>
+              <dt>Launched</dt>
+              <dd>
+                <time dateTime={launched.toISOString()}>
+                  {launched.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })}
+                </time>
+              </dd>
+            </div>
+            <div>
+              <dt>Coin</dt>
+              <dd className="num">{short(coin.tokenMint)}</dd>
+            </div>
+            {coin.nftMint ? (
+              <div>
+                <dt>Card NFT</dt>
+                <dd>
+                  <TextLink href={solscanTokenUrl(coin.nftMint)} target="_blank">
+                    <span className="num">{short(coin.nftMint)}</span>
+                    <span className="sr-only"> on Solscan (opens in a new tab)</span>
+                    <Icon name="external" size={14} />
+                  </TextLink>
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+          <div className="cdx-coin-launched__actions">
+            <External href={pumpFunCoinUrl(coin.tokenMint)} primary label={`Trade ${coin.name} on pump.fun`}>
+              Trade on pump.fun
+            </External>
+            <External href={solscanTokenUrl(coin.tokenMint)} label={`${coin.name} on Solscan`}>
+              Solscan
+            </External>
+          </div>
+        </section>
+      </div>
+    </PageFrame>
   );
 }

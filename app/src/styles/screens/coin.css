@@ -273,3 +273,26 @@
 }
 .cdx-trades__meta .mdx-livepause { position: relative; }
 .cdx-trades__meta .mdx-livepause::after { inset: calc((100% - 40px) / 2) -6px; }
+
+/* ------------------------------------------------ a launched coin's page (routes/coin/$id.tsx)
+ * Desktop: the minted card on its ledge, as large as the column allows, beside a plinth with what the card records and
+ * the two links out (pump.fun, Solscan). Phones: the card on top, the plinth under it; the page scrolls. */
+.cdx-coin-launched__body { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+.cdx-coin-launched__card { --controls-h: 64px; display: flex; justify-content: center; }
+.cdx-coin-launched__card .cdx-launch-card { --cw: min(78vw, 300px); }
+.cdx-coin-launched__card .cdx-launch-card .mdx-card3d__halo { display: none; }
+.cdx-coin-launched__card .cdx-hero-turntable__controls { height: var(--controls-h); gap: 8px; padding-top: 12px; }
+.cdx-coin-launched__facts { display: flex; flex-direction: column; gap: 20px; padding: var(--pad-panel); border-radius: var(--radius-panel); align-self: start; }
+.cdx-coin-launched__lore { margin: 0; font-size: 15px; line-height: 1.5; color: var(--color-ink); text-wrap: pretty; }
+.cdx-coin-launched__list { display: flex; flex-direction: column; margin: 0; }
+.cdx-coin-launched__list > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; border-top: 1px solid var(--color-rule); }
+.cdx-coin-launched__list > div:first-child { border-top: 0; }
+.cdx-coin-launched__list dt { font-size: 14px; color: var(--color-slate); }
+.cdx-coin-launched__list dd { margin: 0; min-width: 0; font-size: 14px; color: var(--color-ink); text-align: right; overflow-wrap: anywhere; }
+.cdx-coin-launched__pair { display: inline-flex; align-items: center; gap: 8px; }
+.cdx-coin-launched__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.cdx-coin-launched__actions > a { gap: 8px; }
+@media (min-width: 1024px) {
+  .cdx-coin-launched__body { grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr); align-items: start; }
+  .cdx-coin-launched__card .cdx-launch-card { --cw: min(100%, 400px); }
+}

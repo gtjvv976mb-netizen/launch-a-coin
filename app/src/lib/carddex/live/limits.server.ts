@@ -34,12 +34,6 @@ export const LIMITS = {
   submitWallet: { scope: "live:submit:wallet", max: 20, windowMs: MINUTE },
   abandonWallet: { scope: "live:abandon:wallet", max: 20, windowMs: MINUTE },
   reportWallet: { scope: "live:report:wallet", max: 10, windowMs: MINUTE },
-  // The demo: free accounts and public art uploads, per address and, above every address, for the whole site.
-  demoEnterIp: { scope: "demo:enter:ip", max: 20, windowMs: HOUR },
-  demoEnterSite: { scope: "demo:enter:site", max: 300, windowMs: HOUR },
-  demoUploadUser: { scope: "demo:upload:user", max: 30, windowMs: HOUR },
-  demoUploadIp: { scope: "demo:upload:ip", max: 60, windowMs: HOUR },
-  demoUploadSite: { scope: "demo:upload:site", max: 300, windowMs: HOUR },
 } as const satisfies Record<string, LimitRule>;
 /** The key for a site-wide rule: one bucket for every client. */
 export const SITE = "site";

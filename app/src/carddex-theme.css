@@ -255,7 +255,6 @@
   --tabbar-h: 64px;
   --scroll-thumb: var(--color-control-border); /* scrollbar thumbs: 4.2:1 on plinth, above 3:1 on wall (THEME-2) */
   --status-h: 28px; /* the status strip under 1024px: one 13/20 line plus 4px above and below */
-  --ticker-h: 40px; /* MintDex 34px, raised so Pause is a 40px target; 44px under 1024px */
   --main-pad: 24px;
   --page-gutter: 16px;
   --topbar-h: var(--mhead-h); /* release-candidate name for the phone header height */
@@ -331,14 +330,8 @@
     --hit: 40px;
   }
 }
-@media (pointer: coarse) {
-  :root {
-    --ticker-h: 44px; /* a touch screen at desktop width keeps the 44px Pause */
-  }
-}
 @media (max-width: 1023.98px) {
   :root {
-    --ticker-h: 44px;
     --main-pad: 16px;
     --pad-panel: 16px;
   }

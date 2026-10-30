@@ -140,3 +140,10 @@
 
 /* ---- signed out: the fan fills the frame */
 .cdx-portfolio--out .cdx-portfolio-empty { flex: 1 1 auto; }
+
+/* The connected wallet's launches: its cards two up on phones, as many 220px columns as fit from 1024px. */
+.cdx-portfolio-launches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; margin: 0; padding: 0; list-style: none; }
+.cdx-portfolio-launches .mdx-grid-caption, .cdx-portfolio-launches > li > * > a > :last-child { margin-top: 8px; }
+@media (min-width: 1024px) {
+  .cdx-portfolio-launches { grid-template-columns: repeat(auto-fill, minmax(180px, 220px)); gap: 24px 20px; }
+}

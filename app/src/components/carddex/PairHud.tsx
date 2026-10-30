@@ -17,14 +17,12 @@ const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayout
  * thumbnail or swatch. Under it, the chosen pair's safety facts: its name and issuer, the full mint, when it was
  * reviewed and the terms links. Explanations live at /how#pairs. Styles: styles/screens/launch.css.
  */
-export function PairHud({ value, onChange, ticker, live = false, disabled = false, balance, notice }: {
+export function PairHud({ value, onChange, ticker, live = false, disabled = false, notice }: {
   value: string;
   onChange: (pair: PairAssetKey) => void;
   ticker: string;
   live?: boolean;
   disabled?: boolean;
-  /** The demo's balance in this pair (a signed-in test account). */
-  balance?: string;
   /** One line from the form about the last change (an initial buy cleared, a link's pair unavailable). */
   notice?: string;
 }) {
@@ -173,7 +171,7 @@ export function PairHud({ value, onChange, ticker, live = false, disabled = fals
       <div className="cdx-pair-hud__picked">
         <p className="cdx-pair-hud__line">
           <strong><PairLogo asset={asset} size={20} className="cdx-pair-hud__logo" />{getTradingPair(ticker || "TICKER", asset.key)}</strong>
-          {balance ? <span>Balance <span className="num">{balance}</span> test {asset.symbol}</span> : live ? <span>Real assets</span> : null}
+          {live ? <span>Real assets</span> : null}
         </p>
         <QuoteAssetMeta quoteAssetKey={asset.key} live={live} />
         {/* Always in the page, so a change is announced when its words arrive. */}

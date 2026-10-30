@@ -21,11 +21,9 @@ import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MDigestRouteImport } from './routes/m/$digest'
 import { Route as CoinIdRouteImport } from './routes/coin/$id'
-import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as ApiLiveLaunchesRouteImport } from './routes/api/live/launches'
 import { Route as ApiLiveHealthRouteImport } from './routes/api/live/health'
 import { Route as ApiLiveComposeRouteImport } from './routes/api/live/compose'
-import { Route as ApiImgSplatRouteImport } from './routes/api/img/$'
 import { Route as ApiLiveAssetsSplatRouteImport } from './routes/api/live/assets/$'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -88,11 +86,6 @@ const CoinIdRoute = CoinIdRouteImport.update({
   path: '/coin/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiUploadRoute = ApiUploadRouteImport.update({
-  id: '/api/upload',
-  path: '/api/upload',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiLiveLaunchesRoute = ApiLiveLaunchesRouteImport.update({
   id: '/api/live/launches',
   path: '/api/live/launches',
@@ -106,11 +99,6 @@ const ApiLiveHealthRoute = ApiLiveHealthRouteImport.update({
 const ApiLiveComposeRoute = ApiLiveComposeRouteImport.update({
   id: '/api/live/compose',
   path: '/api/live/compose',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiImgSplatRoute = ApiImgSplatRouteImport.update({
-  id: '/api/img/$',
-  path: '/api/img/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiLiveAssetsSplatRoute = ApiLiveAssetsSplatRouteImport.update({
@@ -130,10 +118,8 @@ export interface FileRoutesByFullPath {
   '/portfolio': typeof PortfolioRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/api/upload': typeof ApiUploadRoute
   '/coin/$id': typeof CoinIdRoute
   '/m/$digest': typeof MDigestRoute
-  '/api/img/$': typeof ApiImgSplatRoute
   '/api/live/compose': typeof ApiLiveComposeRoute
   '/api/live/health': typeof ApiLiveHealthRoute
   '/api/live/launches': typeof ApiLiveLaunchesRoute
@@ -150,10 +136,8 @@ export interface FileRoutesByTo {
   '/portfolio': typeof PortfolioRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/api/upload': typeof ApiUploadRoute
   '/coin/$id': typeof CoinIdRoute
   '/m/$digest': typeof MDigestRoute
-  '/api/img/$': typeof ApiImgSplatRoute
   '/api/live/compose': typeof ApiLiveComposeRoute
   '/api/live/health': typeof ApiLiveHealthRoute
   '/api/live/launches': typeof ApiLiveLaunchesRoute
@@ -171,10 +155,8 @@ export interface FileRoutesById {
   '/portfolio': typeof PortfolioRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/api/upload': typeof ApiUploadRoute
   '/coin/$id': typeof CoinIdRoute
   '/m/$digest': typeof MDigestRoute
-  '/api/img/$': typeof ApiImgSplatRoute
   '/api/live/compose': typeof ApiLiveComposeRoute
   '/api/live/health': typeof ApiLiveHealthRoute
   '/api/live/launches': typeof ApiLiveLaunchesRoute
@@ -193,10 +175,8 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/robots.txt'
     | '/sitemap.xml'
-    | '/api/upload'
     | '/coin/$id'
     | '/m/$digest'
-    | '/api/img/$'
     | '/api/live/compose'
     | '/api/live/health'
     | '/api/live/launches'
@@ -213,10 +193,8 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/robots.txt'
     | '/sitemap.xml'
-    | '/api/upload'
     | '/coin/$id'
     | '/m/$digest'
-    | '/api/img/$'
     | '/api/live/compose'
     | '/api/live/health'
     | '/api/live/launches'
@@ -233,10 +211,8 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/robots.txt'
     | '/sitemap.xml'
-    | '/api/upload'
     | '/coin/$id'
     | '/m/$digest'
-    | '/api/img/$'
     | '/api/live/compose'
     | '/api/live/health'
     | '/api/live/launches'
@@ -254,10 +230,8 @@ export interface RootRouteChildren {
   PortfolioRoute: typeof PortfolioRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  ApiUploadRoute: typeof ApiUploadRoute
   CoinIdRoute: typeof CoinIdRoute
   MDigestRoute: typeof MDigestRoute
-  ApiImgSplatRoute: typeof ApiImgSplatRoute
   ApiLiveComposeRoute: typeof ApiLiveComposeRoute
   ApiLiveHealthRoute: typeof ApiLiveHealthRoute
   ApiLiveLaunchesRoute: typeof ApiLiveLaunchesRoute
@@ -350,13 +324,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoinIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/upload': {
-      id: '/api/upload'
-      path: '/api/upload'
-      fullPath: '/api/upload'
-      preLoaderRoute: typeof ApiUploadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/live/launches': {
       id: '/api/live/launches'
       path: '/api/live/launches'
@@ -376,13 +343,6 @@ declare module '@tanstack/react-router' {
       path: '/api/live/compose'
       fullPath: '/api/live/compose'
       preLoaderRoute: typeof ApiLiveComposeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/img/$': {
-      id: '/api/img/$'
-      path: '/api/img/$'
-      fullPath: '/api/img/$'
-      preLoaderRoute: typeof ApiImgSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/live/assets/$': {
@@ -406,10 +366,8 @@ const rootRouteChildren: RootRouteChildren = {
   PortfolioRoute: PortfolioRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  ApiUploadRoute: ApiUploadRoute,
   CoinIdRoute: CoinIdRoute,
   MDigestRoute: MDigestRoute,
-  ApiImgSplatRoute: ApiImgSplatRoute,
   ApiLiveComposeRoute: ApiLiveComposeRoute,
   ApiLiveHealthRoute: ApiLiveHealthRoute,
   ApiLiveLaunchesRoute: ApiLiveLaunchesRoute,
