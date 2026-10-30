@@ -59,15 +59,30 @@ function useDesk() {
   return useSyncExternalStore(subscribeDesk, () => window.matchMedia(DESK_QUERY).matches, () => true);
 }
 
-/** Coins held: one whole-row link each (Coin, Held, Value in the coin's quote, 24h, Design). */
-function Holdings({ rows }: { rows: PortfolioData["holdings"] }) {
+/** A Coins row: a coin held, or one you launched and hold none of (`launched`: no amount, value or 24h of yours). */
+type CoinRow = { coin: PortfolioData["holdings"][number]["coin"]; amount: number; valueQuote: string | number; launched: boolean };
+
+/**
+ * The Coins rows: what you hold, then every coin you launched that you hold none of (its card is under Cards), so a
+ * creator finds their coin on the first tab. A coin you launched and hold appears once, as a holding.
+ */
+function coinRows(data: PortfolioData): CoinRow[] {
+  const held = new Set(data.holdings.map((h) => h.coin.id));
+  return [
+    ...data.holdings.map((h) => ({ coin: h.coin, amount: h.amount, valueQuote: h.valueQuote, launched: false })),
+    ...data.deeds.filter((d) => !held.has(d.coin.id)).map((d) => ({ coin: d.coin, amount: 0, valueQuote: 0, launched: true })),
+  ];
+}
+
+/** Coins: one whole-row link each (Coin, Held, Value in the coin's quote, 24h, Design). */
+function Holdings({ rows }: { rows: CoinRow[] }) {
   return (
     <div className="cdx-holdings">
       <div className="cdx-holdings__head mdx-micro" aria-hidden="true">
         <span>Coin</span><span>Held</span><span>Value</span><span>24h</span><span>Design</span>
       </div>
       <div className="mdx-stagger cdx-holdings__rows">
-        {rows.map(({ coin, amount, valueQuote }) => (
+        {rows.map(({ coin, amount, valueQuote, launched }) => (
           <Link key={coin.id} to="/coin/$id" params={{ id: coin.id }} className="cdx-holding mdx-row">
             <span className="cdx-holding__id">
               <Thumb src={coin.image} size={40} />
@@ -75,16 +90,25 @@ function Holdings({ rows }: { rows: PortfolioData["holdings"] }) {
                 <span className="cdx-holding__name">{coin.name}</span>
                 <span className="cdx-holding__sub">
                   ${coin.ticker}
-                  <span className="lg:hidden"> · <span className="num">{tokens(amount)}</span></span>
+                  <span className="lg:hidden"> · {launched ? "Launched" : <span className="num">{tokens(amount)}</span>}</span>
                 </span>
               </span>
             </span>
-            <span className="cdx-holding__held num">{tokens(amount)}</span>
-            <span className="cdx-holding__value">
-              <Num size="sm" unit={coin.quoteSymbol}>{quoteFixed(valueQuote, coin.quoteAssetKey)}</Num>
-              <Change v={coin.change24h} className="cdx-holding__chg-sub" />
-            </span>
-            <span className="cdx-holding__chg"><Change v={coin.change24h} /></span>
+            <span className="cdx-holding__held num">{launched ? "Launched" : tokens(amount)}</span>
+            {launched ? (
+              <>
+                <span className="cdx-holding__value cdx-holding__none"><span aria-hidden>—</span><span className="sr-only">No value: you hold none</span></span>
+                <span className="cdx-holding__chg cdx-holding__none" aria-hidden>—</span>
+              </>
+            ) : (
+              <>
+                <span className="cdx-holding__value">
+                  <Num size="sm" unit={coin.quoteSymbol}>{quoteFixed(valueQuote, coin.quoteAssetKey)}</Num>
+                  <Change v={coin.change24h} className="cdx-holding__chg-sub" />
+                </span>
+                <span className="cdx-holding__chg"><Change v={coin.change24h} /></span>
+              </>
+            )}
             <span className="cdx-holding__design">{getCardDesign(coin.cardTemplate).name}</span>
           </Link>
         ))}
@@ -117,10 +141,13 @@ function Cards({ rows }: { rows: PortfolioData["deeds"] }) {
   );
 }
 
-/** Test balances: SOL first, then the quotes you hold or trade in, then the zeros, each group by symbol. */
+/**
+ * Test balances: SOL first, then the quotes your coins are in, then every other quote, each group by symbol. Every
+ * quote starts with a demo balance, so the quotes you trade in are what lifts a tile to the front.
+ */
 function balanceRows(me: NonNullable<Me>, byQuote: Record<string, string>): Array<[string, number]> {
   const entries = Object.entries(me.quoteBalances ?? { sol: me.balance });
-  const rank = ([key, value]: [string, number]) => (key === "sol" ? 0 : value > 0 || Number(byQuote[key] ?? 0) > 0 ? 1 : 2);
+  const rank = ([key]: [string, number]) => (key === "sol" ? 0 : Number(byQuote[key] ?? 0) > 0 ? 1 : 2);
   return [...entries].sort((a, b) => rank(a) - rank(b) || getPairAsset(a[0]).symbol.localeCompare(getPairAsset(b[0]).symbol));
 }
 
@@ -133,7 +160,8 @@ function Balances({ rows, byQuote }: { rows: Array<[string, number]>; byQuote: R
           <div key={key}>
             <dt><span className="cdx-balance-grid__sym">{asset.symbol}</span> <span className="cdx-balance-grid__name">{asset.name}</span></dt>
             <dd className="num">{quoteFixed(value, key)}</dd>
-            <dd className="cdx-balance-grid__in">In coins <span className="num">{quoteFixed(byQuote[key] ?? 0, key)}</span></dd>
+            {/* Only for a quote your coins are in: 36 lines of "In coins 0.00" said nothing. */}
+            {Number(byQuote[key] ?? 0) > 0 ? <dd className="cdx-balance-grid__in">In coins <span className="num">{quoteFixed(byQuote[key] ?? 0, key)}</span></dd> : null}
           </div>
         );
       })}
@@ -174,7 +202,8 @@ function Collection({ me }: { me: NonNullable<Me> }) {
   const view: View = search.tab === "cards" ? "cards" : search.tab === "balances" ? "balances" : "coins";
   const byQuote = data?.totals.holdingsValueByQuote ?? {};
   const balances = balanceRows(me, byQuote);
-  const count = view === "cards" ? data?.deeds.length ?? 0 : view === "balances" ? balances.length : data?.holdings.length ?? 0;
+  const coins = data ? coinRows(data) : [];
+  const count = view === "cards" ? data?.deeds.length ?? 0 : view === "balances" ? balances.length : coins.length;
   const tabsId = useId();
   // One fitted page per view on desktop (MintDex): rows of 64px, cards of about 300px, balance tiles of 84px; the
   // pager turns. Phones show the whole list (the columns still follow the width).
@@ -191,7 +220,13 @@ function Collection({ me }: { me: NonNullable<Me> }) {
   const from = page * perPage;
   const setPage = (next: number) => void navigate({ search: (s) => ({ ...s, page: next > 0 ? next + 1 : undefined }), replace: true, resetScroll: false });
   const coinValue = data?.holdings.reduce((s, h) => s + (h.valueSol ?? 0), 0) ?? 0;
-  const unpriced = data ? data.holdings.some((h) => h.valueSol == null) : false;
+  // Coins in quotes with no SOL reference are valued in their own quote, never converted: each such quote's total,
+  // in the order the holdings list them (two shown, then how many more).
+  const priced = data ? data.holdings.some((h) => h.valueSol != null) : false;
+  const ownQuotes = data
+    ? [...new Set(data.holdings.filter((h) => h.valueSol == null).map((h) => h.coin.quoteAssetKey ?? "sol"))]
+        .filter((key) => Number(byQuote[key] ?? 0) > 0)
+    : [];
   return (
     <PageFrame className="mdx-page cdx-portfolio">
       <PageHeader
@@ -205,17 +240,22 @@ function Collection({ me }: { me: NonNullable<Me> }) {
           ) : undefined
         }
       />
-      <dl className="cdx-portfolio__summary">
+      <dl className="cdx-portfolio__summary" data-quotes={ownQuotes.length || undefined}>
         <div><dt className="mdx-micro">Test SOL</dt><dd><Num size="lg" unit="SOL" watch={me.balance}>{sol(me.balance, 2)}</Num></dd></div>
         <div>
           <dt className="mdx-micro">Coins</dt>
           <dd>
             {data ? (
-              <>
-                <Num size="lg" unit="SOL">{sol(coinValue, 2)}</Num>
-                {/* Coins in other quotes are valued in their own quote (the Balances tab, In coins). */}
-                {unpriced ? <span className="cdx-portfolio__plus" role="img" aria-label="plus coins in other quotes">+</span> : null}
-              </>
+              <span className="cdx-portfolio__coins">
+                {priced || !ownQuotes.length ? <Num size="lg" unit="SOL">{sol(coinValue, 2)}</Num> : null}
+                {ownQuotes.slice(0, 2).map((key, i) => (
+                  <span key={key} className="cdx-portfolio__coin-quote">
+                    {priced || i > 0 ? <span aria-hidden className="cdx-portfolio__sep">·</span> : null}
+                    <Num size="lg" unit={getPairAsset(key).symbol}>{quoteFixed(byQuote[key] ?? 0, key)}</Num>
+                  </span>
+                ))}
+                {ownQuotes.length > 2 ? <span className="cdx-portfolio__more">+{ownQuotes.length - 2} more<span className="sr-only"> quotes</span></span> : null}
+              </span>
             ) : <Skeleton className="h-7 w-24 rounded-chip" />}
           </dd>
         </div>
@@ -229,7 +269,7 @@ function Collection({ me }: { me: NonNullable<Me> }) {
         className="cdx-portfolio__tabs"
         onChange={(next) => void navigate({ search: { tab: next === "coins" ? undefined : next }, replace: true, resetScroll: false })}
         options={[
-          { value: "coins", label: "Coins", count: data?.holdings.length },
+          { value: "coins", label: "Coins", count: data ? coins.length : undefined },
           { value: "cards", label: "Cards", count: data?.deeds.length },
           { value: "balances", label: "Balances" },
         ]}
@@ -258,8 +298,8 @@ function Collection({ me }: { me: NonNullable<Me> }) {
           ) : (
             <EmptyState title="No cards yet" action={<ButtonLink to="/launch">Launch a coin</ButtonLink>} />
           )
-        ) : data.holdings.length ? (
-          <Holdings rows={data.holdings.slice(from, from + perPage)} />
+        ) : coins.length ? (
+          <Holdings rows={coins.slice(from, from + perPage)} />
         ) : (
           <EmptyState title="No coins yet" action={<ButtonLink to="/discover">Explore coins</ButtonLink>} />
         )}

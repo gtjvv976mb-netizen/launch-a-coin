@@ -22,9 +22,17 @@
 .cdx-portfolio__summary > div { min-width: 0; }
 .cdx-portfolio__summary dd { display: flex; align-items: baseline; gap: 4px; margin-top: 4px; }
 .cdx-portfolio__summary .num { font-stretch: 85%; }
-.cdx-portfolio__plus { color: var(--color-slate); font-size: var(--text-lead); }
+/* Coins: the SOL figure, then each other quote's own total ("0.22 SOL · 0.10 TOAD +2 more"), wrapping in a narrow
+ * column rather than overflowing it. */
+.cdx-portfolio__coins { display: flex; min-width: 0; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; }
+.cdx-portfolio__coin-quote { display: inline-flex; min-width: 0; align-items: baseline; gap: 6px; }
+.cdx-portfolio__sep,
+.cdx-portfolio__more { color: var(--color-slate); font-size: var(--text-body); }
+.cdx-holding__none { color: var(--color-slate); }
 @media (max-width: 639.98px) {
   .cdx-portfolio__summary { gap: 8px 12px; padding: 12px 16px; }
+  /* Coins in other quotes: the middle column takes the room the other two do not need ("9,910.68 TOAD" stays whole). */
+  .cdx-portfolio__summary[data-quotes] { grid-template-columns: auto minmax(0, 1fr) auto; }
   .cdx-portfolio__summary .mdx-num, .cdx-portfolio__summary .num { font-size: var(--text-lead); }
 }
 
