@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { draftPair, enterTarget, firstProblem, formDesign, launchDesign, pairFromSearch, pickPair, quickBuyAmounts, sameAmount } from "../../src/components/carddex/launch-form";
-import { ORDERED_PAIRS, PAIR_GROUPS, filterPairs, gridStep, pairGroupOf, pairMonogram, pairsInGroup, shortPairName } from "../../src/components/carddex/pair-groups";
+import { draftPair, enterTarget, firstProblem, formDesign, launchDesign, pairFromSearch, pickPair, quickBuyAmounts, sameAmount, signedOutPress } from "../../src/components/carddex/launch-form";
+import { ORDERED_PAIRS, PAIR_GROUPS, filterPairs, gridStep, pairGroupOf, pairMonogram, pairsInGroup, shortPairName, tileName } from "../../src/components/carddex/pair-groups";
 import { walletNoticeItems, walletNoticePreview, WALLET_NOTICE_COPY } from "../../src/components/carddex/live/wallet-notice";
 import { CARD_DESIGNS } from "../../src/lib/carddex/designs";
 import { PAIR_ASSETS, designForPair, getPairAsset, pairForDesign } from "../../src/lib/carddex/pairs";
@@ -90,7 +90,16 @@ describe("the pair HUD", () => {
     expect(filterPairs("stocks", "chill")).toEqual([]);
     expect(filterPairs("memes", "  ")).toEqual(pairsInGroup("memes"));
   });
-  test("tiles read as a symbol, a short name and a monogram, never a design", () => {
+  test("tiles read as a symbol, a short name (unless it only repeats the symbol) and a monogram, never a design", () => {
+    expect(tileName(getPairAsset("doge"))).toBe("Dogecoin");
+    expect(tileName(getPairAsset("tslax"))).toBe("Tesla");
+    // Seven pairs' short names only repeat their symbol: their tiles show the symbol alone.
+    const repeats = ORDERED_PAIRS.filter(pair => tileName(pair) === null).map(pair => pair.key);
+    expect(repeats.sort()).toEqual(["aura", "bonk", "fartcoin", "michi", "pippin", "troll", "zerebro"]);
+    for (const pair of ORDERED_PAIRS) {
+      const name = tileName(pair);
+      if (name !== null) expect(name.toLowerCase()).not.toBe(pair.symbol.toLowerCase());
+    }
     expect(shortPairName(getPairAsset("doge"))).toBe("Dogecoin");
     expect(shortPairName(getPairAsset("tslax"))).toBe("Tesla");
     expect(shortPairName(getPairAsset("amc"))).toBe("AMC Entertainment");
@@ -153,6 +162,15 @@ describe("where focus goes", () => {
     expect(enterTarget(order({ name: false }))).toBe("name");
     expect(enterTarget(order({ art: false }))).toBe("art");
     expect(enterTarget(order())).toBe("primary");
+  });
+  test("signed-out art is kept until the demo starts: the demo prompt opens only once name, ticker and art are in", () => {
+    const all = { nameOk: true, tickerOk: true, hasArt: true };
+    // Art picked while signed out is held in the page, so it counts: the one prompt opens at Create.
+    expect(signedOutPress(all)).toBe("enter");
+    // Anything missing takes focus instead of opening a dialog, in the form's order.
+    expect(signedOutPress({ ...all, hasArt: false })).toBe("art");
+    expect(signedOutPress({ ...all, tickerOk: false, hasArt: false })).toBe("ticker");
+    expect(signedOutPress({ nameOk: false, tickerOk: false, hasArt: false })).toBe("name");
   });
 });
 

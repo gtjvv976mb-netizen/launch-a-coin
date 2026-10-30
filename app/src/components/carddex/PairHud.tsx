@@ -2,7 +2,7 @@ import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type Keyb
 import { getPairAsset, getTradingPair, type PairAssetKey } from "../../lib/carddex/pairs";
 import { Icon, IconButton, Tabs, TextLink } from "../mintdex/ui";
 import { QuoteAssetMeta } from "./QuoteAssetMeta";
-import { PAIR_GROUPS, filterPairs, gridStep, pairMonogram, shortPairName, type PairGroup } from "./pair-groups";
+import { PAIR_GROUPS, filterPairs, gridStep, pairMonogram, tileName, type PairGroup } from "./pair-groups";
 
 /** A layout effect in the browser (measured before paint), a plain one on the server (where neither runs). */
 const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
@@ -10,7 +10,7 @@ const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayout
 /**
  * Launch's pair HUD: the pair picks the card. A filter (All, Memes, Stocks, Collector, Base), a search for a symbol or
  * name, and every pair as a tile in one radio group (arrow keys move and select, as radio groups do): a grid from
- * 1024px, one sideways strip below it so the HUD stays short on phones. Choosing a pair
+ * 1024px, a sideways strip two tiles tall below it so the HUD stays short on phones. Choosing a pair
  * is choosing its card: the live card preview shows that pair's design at once, so the HUD never shows a design name,
  * thumbnail or swatch. Under it, the chosen pair's safety facts: its name and issuer, the full mint, when it was
  * reviewed and the terms links. Explanations live at /how#pairs. Styles: styles/screens/launch.css.
@@ -37,17 +37,23 @@ export function PairHud({ value, onChange, ticker, live = false, disabled = fals
   const checked = shown.findIndex((pair) => pair.key === asset.key);
   const tabStop = checked >= 0 ? checked : 0;
 
-  // Below 1024px the tiles are one sideways strip (launch.css): the chosen tile is brought to its middle, as the
-  // Designs strip does, at once (no travel). From 1024px the grid does not scroll and this does nothing.
+  // Below 1024px the tiles are a sideways strip two tiles tall (launch.css): the chosen tile's column is brought to its
+  // middle, as the Designs strip does, at once (no travel). From 1024px the grid does not scroll and this does nothing.
   useIsoLayoutEffect(() => {
     const strip = gridRef.current;
-    const tile = strip?.querySelector<HTMLElement>(`[data-pair="${asset.key}"]`);
-    if (!strip || !tile || strip.scrollWidth <= strip.clientWidth) return;
+    if (!strip || strip.scrollWidth <= strip.clientWidth) return;
+    const tile = strip.querySelector<HTMLElement>(`[data-pair="${asset.key}"]`);
+    // A filter or search that hides the chosen pair starts at its own first tile, not at the old scroll position.
+    if (!tile) { strip.scrollLeft = 0; return; }
     const left = tile.getBoundingClientRect().left - strip.getBoundingClientRect().left + strip.scrollLeft;
     strip.scrollLeft = left - (strip.clientWidth - tile.offsetWidth) / 2;
   }, [asset.key, group, query]);
 
-  /** How many tiles share the first row (the grid's track count at this width; a strip is one row). */
+  /**
+   * How many tiles share the first row (the grid's track count at this width). The phone strip fills each column top
+   * to bottom, so its second tile is already on the next row: 1, and the arrow keys step in reading order (the order
+   * the strip scrolls), as a radio group does.
+   */
   const columns = () => {
     const tiles = gridRef.current?.querySelectorAll<HTMLElement>("[role='radio']");
     if (!tiles?.length) return 1;
@@ -139,7 +145,8 @@ export function PairHud({ value, onChange, ticker, live = false, disabled = fals
                 <span aria-hidden className="cdx-pair-tile__mono">{pairMonogram(pair)}</span>
                 <span className="cdx-pair-tile__text">
                   <span className="cdx-pair-tile__sym">{pair.symbol}</span>
-                  <span className="cdx-pair-tile__name">{shortPairName(pair)}</span>
+                  {/* No second line that only repeats the symbol (BONK, Bonk). */}
+                  {tileName(pair) ? <span className="cdx-pair-tile__name">{tileName(pair)}</span> : null}
                 </span>
                 {on ? <span aria-hidden className="cdx-pair-tile__check"><Icon name="check" size={12} strokeWidth={2.5} /></span> : null}
               </button>

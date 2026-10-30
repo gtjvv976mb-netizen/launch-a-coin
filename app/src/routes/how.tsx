@@ -216,7 +216,6 @@ const SECTIONS: Section[] = [
         <DemoLine />
         <li>Pick a handle to get {START_SOL} test SOL. No wallet needed.</li>
         <li>Your test account lives in this browser. Clearing site data ends access to it.</li>
-        <li>Start the demo to upload art. You can fill in everything else first.</li>
         <li>Balances, the bonding curve and trades are simulated. Each quote asset has its own demo balance.</li>
         <li>Activity includes demo bots: simulated traders, marked bot.</li>
         <li>Portfolio holds your coins and your one-of-one cards. Value is test SOL plus your coins; 24h is their price move.</li>

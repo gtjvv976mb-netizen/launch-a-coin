@@ -30,11 +30,11 @@ import { LaunchCardPreview } from "../components/carddex/live/LaunchCardPreview"
 import { PairHud } from "../components/carddex/PairHud";
 import { getCardDesign } from "../lib/carddex/designs";
 import { getPairAsset, isPairAssetKey, type PairAssetKey } from "../lib/carddex/pairs";
-import { formatQuoteAmount, initialQuoteReserves, maxInitialBuyQuoteAtoms, parseQuoteAmount, quoteMetrics } from "../lib/carddex/quote-simulation";
-import { quoteFixed } from "../lib/carddex/quote-display";
+import { formatQuoteAmount, initialQuoteReserves, isQuoteDecimal, maxInitialBuyQuoteAtoms, parseQuoteAmount, quoteMetrics } from "../lib/carddex/quote-simulation";
+import { quoteCap, quoteFixed } from "../lib/carddex/quote-display";
 import { CREATION_MCAP_LABEL } from "../lib/carddex/card-template";
 import type { LiveLaunchHandle, LivePrimary } from "../components/carddex/live/LiveLaunchPanel";
-import { draftPair, firstProblem, enterTarget, formDesign, pairFromSearch, pickPair as nextPick, type FormCheck } from "../components/carddex/launch-form";
+import { draftPair, firstProblem, enterTarget, formDesign, pairFromSearch, pickPair as nextPick, signedOutPress, type FormCheck } from "../components/carddex/launch-form";
 import { liveReadinessQuery, useLiveLaunchOpen, useLiveRecoveryOpen } from "../components/carddex/live/readiness";
 import { formatLiveAmount, parseLiveAmount } from "../components/carddex/live/amounts";
 import { BUY_FIT_AFTER_SIGN_IN, liveBuyOff, useLiveBuyFit, useLiveBuyRefusal } from "../components/carddex/live/buy-fit";
@@ -68,7 +68,6 @@ export const Route = createFileRoute("/launch")({
 
 // The screen carries the fewest words that let someone act; every explanation lives at /how#launch (and its
 // #fees, #pairs, #wallet, #demo and #recovery sections), one short link away.
-const ENTER_TO_UPLOAD = "Start the demo to upload art.";
 /** Mainnet mode while new launches are off: a creator can still finish a saved launch. */
 const MAINNET_RECOVERY = "Finish a saved launch.";
 /** Screen-reader text only: the field's rule (the error repeats it when it fails). */
@@ -159,6 +158,25 @@ async function artCopies(art: Blob): Promise<Array<{ width: number; blob: Blob }
   }
 }
 
+/** A demo upload's answer: the stored image's address, or the reason it failed. */
+type DemoUpload = { ok: true; url: string } | { ok: false; error: string };
+
+/**
+ * The demo upload (it needs a demo account): the prepared art and its sized copies. A network failure throws; the
+ * caller says it.
+ */
+async function uploadDemoArt(blob: Blob): Promise<DemoUpload> {
+  const form = new FormData();
+  form.append("file", blob, blob.type === "image/webp" ? "art.webp" : "art.png");
+  // The sized copies ride along; if making them fails, the original alone still uploads.
+  for (const c of await artCopies(blob).catch(() => []))
+    form.append(`w${c.width}`, c.blob, `art-w${c.width}.webp`);
+  const res = await fetch("/api/upload", { method: "POST", body: form });
+  const body = (await res.json().catch(() => null)) as { ok: boolean; url?: string; error?: string } | null;
+  if (!res.ok || !body?.ok || !body.url) return { ok: false, error: body?.error ?? "Upload failed. Try again." };
+  return { ok: true, url: body.url };
+}
+
 /** Mirrors the server's link rules so the error shows under the field instead of as a toast. */
 function linkError(value: string, kind: "web" | "x"): string | null {
   const t = value.trim();
@@ -229,6 +247,13 @@ function Launch() {
   const [preview, setPreview] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [preparedArt, setPreparedArt] = useState<Blob | null>(null);
+  // Signed out in Demo: the prepared art waits here (the upload needs a demo account) and goes up when Create starts
+  // the demo. A ref too, since the launch then runs from a closure made before sign-in.
+  const [heldArt, setHeldArt] = useState<Blob | null>(null);
+  const heldArtRef = useRef<Blob | null>(null);
+  // The held art's upload, kept so a launch that fails after it does not upload the same image again.
+  const heldUploadRef = useRef<{ blob: Blob; url: string } | null>(null);
+  const holdArt = (blob: Blob | null) => { heldArtRef.current = blob; setHeldArt(blob); };
   const [liveLocked, setLiveLocked] = useState(false);
   // A mainnet step is running (sign-in, the artwork upload, preparing): the press already captured the fields.
   const [liveBusy, setLiveBusy] = useState(false);
@@ -268,7 +293,7 @@ function Launch() {
   useEffect(() => {
     if (previousMode.current === live) return;
     previousMode.current = live;
-    setPreview(null); setImageUrl(null); setPreparedArt(null); setShowErrors(false);
+    setPreview(null); setImageUrl(null); setPreparedArt(null); holdArt(null); setShowErrors(false);
     // A saved launch's own design stays in mainnet mode (the panel reports it again when the page comes back).
     if (!live) setSavedDesign(null);
   }, [live]);
@@ -354,8 +379,10 @@ function Launch() {
   const liveDev = parseLiveAmount(devBuy, quoteAsset.decimals);
   const devAtoms = parsedDev ?? 0;
   const maxDev = maxInitialBuyQuoteAtoms(quoteKey);
-  const devNaN = live ? liveDev === null : !!devBuy && parsedDev === null;
-  const devOver = !live && devAtoms > maxDev;
+  // A plain decimal the parser still refuses is too large to count (past the safe integer range): over the cap.
+  const devHuge = !live && !!devBuy && parsedDev === null && isQuoteDecimal(devBuy, quoteKey);
+  const devNaN = live ? liveDev === null : !!devBuy && parsedDev === null && !devHuge;
+  const devOver = !live && (devHuge || devAtoms > maxDev);
   const devQuote = !live && devAtoms > 0 && !devNaN && !devOver ? quoteBuy(initialReserves, devAtoms) : null;
   const after = devQuote?.ok ? devQuote.after : initialReserves;
   const metrics = quoteMetrics(after, quoteKey);
@@ -364,7 +391,7 @@ function Launch() {
   const devError = devNaN
     ? `Enter a valid ${quoteAsset.symbol} amount with up to ${quoteAsset.decimals} decimals.`
     : devOver
-      ? `Initial buy is capped at ${quoteFixed(maxDev, quoteKey)} ${quoteAsset.symbol} in this demo.`
+      ? `Initial buy is capped at ${quoteCap(maxDev, quoteKey)} ${quoteAsset.symbol} in this demo.`
       : devQuote && !devQuote.ok ? `${devQuote.reason}.` : null;
   const balanceError = !live && me && !devError
     ? me.balance < nativeCost
@@ -398,7 +425,7 @@ function Launch() {
   }, [devBuy, website, xUrl]);
   const websiteError = linkError(website, "web");
   const xError = linkError(xUrl, "x");
-  const hasArt = !!(live ? preparedArt : imageUrl);
+  const hasArt = !!(live ? preparedArt : imageUrl || heldArt);
   const ready =
     nameOk &&
     tickerOk &&
@@ -439,11 +466,6 @@ function Launch() {
     if (!file) return;
     if (live && liveLocked) return;
     const selectedMode = modeRef.current;
-    if (!live && !me) {
-      // After Enter, focus comes back to the dropzone (a file picker cannot reopen without a click).
-      require(() => artRef.current?.focus(), ENTER_TO_UPLOAD, "Start the demo");
-      return;
-    }
     if (!/^image\/(png|jpe?g|webp|gif)$/.test(file.type)) {
       toast("err", "Use a PNG, JPG, WEBP or GIF image.");
       return;
@@ -463,25 +485,22 @@ function Launch() {
         setImageUrl(null);
         return;
       }
-      const form = new FormData();
-      form.append("file", blob, blob.type === "image/webp" ? "art.webp" : "art.png");
-      // The sized copies ride along; if making them fails, the original alone still uploads.
-      for (const c of await artCopies(blob).catch(() => []))
-        form.append(`w${c.width}`, c.blob, `art-w${c.width}.webp`);
-      const res = await fetch("/api/upload", { method: "POST", body: form });
-      const body = (await res.json().catch(() => null)) as {
-        ok: boolean;
-        url?: string;
-        error?: string;
-      } | null;
-      if (!res.ok || !body?.ok || !body.url)
-        throw new Error(body?.error ?? "Upload failed. Try again.");
-      setImageUrl(body.url);
+      // Signed out: the card shows the art at once and it is kept until Create starts the demo, which uploads it.
+      if (!me) {
+        holdArt(blob);
+        setImageUrl(null);
+        return;
+      }
+      holdArt(null);
+      const up = await uploadDemoArt(blob);
+      if (!up.ok) throw new Error(up.error);
+      setImageUrl(up.url);
     } catch (e) {
       // Nothing half-uploaded stays on screen: the dropzone comes back with the reason in a toast.
       setPreview(null);
       setImageUrl(null);
       setPreparedArt(null);
+      holdArt(null);
       toast("err", e instanceof Error ? e.message : "Upload failed. Try again.");
     } finally {
       setUploading(false);
@@ -496,13 +515,9 @@ function Launch() {
 
   /** Remove the art: the dropzone comes back empty and takes focus (the blob preview is released by the effect above). */
   function removeArt() {
-    setPreview(null); setImageUrl(null); setPreparedArt(null);
+    setPreview(null); setImageUrl(null); setPreparedArt(null); holdArt(null);
     requestAnimationFrame(() => artRef.current?.focus({ preventScroll: true }));
   }
-
-  // Signed out in test mode, art cannot be uploaded yet: every other field still works, and the art field and the
-  // Launch button ask them to try the demo.
-  const artGated = !live && !me;
 
   // ------------------------------------------------ where focus goes when something is missing
   const checks = (): FormCheck<ProblemKey>[] => [
@@ -558,7 +573,7 @@ function Launch() {
   function clearFields() {
     writeDraft(null);
     setName(""); setTicker(""); setLore(""); setWebsite(""); setXUrl(""); setDevBuy("");
-    setPreview(null); setImageUrl(null); setPreparedArt(null); setTickerNote("");
+    setPreview(null); setImageUrl(null); setPreparedArt(null); holdArt(null); setTickerNote("");
     setTouched({}); setShowErrors(false);
     reset("launch");
   }
@@ -590,28 +605,42 @@ function Launch() {
   async function attempt() {
     if (modeRef.current) return;
     if (pending === "launch" || uploading) return;
-    if (!ready || !imageUrl) {
+    // Art picked before the demo started is read from the ref: after sign-in this runs from the press's closure.
+    const held = heldArtRef.current;
+    if (!ready || (!imageUrl && !held)) {
       setShowErrors(true);
       focusFirstProblem();
       return;
     }
     const res = await run(
       "launch",
-      () =>
-        launch({
+      async () => {
+        let image = imageUrl;
+        if (!image && held) {
+          const kept = heldUploadRef.current;
+          if (kept?.blob === held) image = kept.url;
+          else {
+            const up = await uploadDemoArt(held);
+            if (!up.ok) return up;
+            heldUploadRef.current = { blob: held, url: up.url };
+            image = up.url;
+          }
+        }
+        return launch({
           data: {
             name,
             cardTemplate: designKey,
             quoteAssetKey: quoteKey,
             quoteMint: quoteAsset.mint,
             ticker,
-            image: imageUrl,
+            image: image!,
             lore,
             website: website.trim() || undefined,
             xUrl: xUrl.trim() || undefined,
             devBuy: devQuote?.ok ? devAtoms : 0,
           },
-        }),
+        });
+      },
       undefined,
       { keys: [["home"], ["coins"], ["market"], ["portfolio"]] },
     );
@@ -628,12 +657,18 @@ function Launch() {
       liveRef.current?.submit();
       return;
     }
-    // Signed out: a missing name or ticker is pointed at first; then the Enter dialog names the launch and finishes
-    // it (P1-11). Without art yet, that means pointing at the art field, the one thing left to do.
-    if (!me && (!nameOk || !tickerOk)) { setShowErrors(true); focusFirstProblem(); return; }
-    require(() => void attempt(), imageUrl ? "Try the demo to launch a coin." : ENTER_TO_UPLOAD, ticker && imageUrl
-      ? `Start the demo and launch $${ticker}`
-      : "Start the demo");
+    // Signed out: anything missing is pointed at first, with no dialog; once the form is complete the one demo
+    // prompt names the launch and finishes it (P1-11), uploading the art it kept.
+    if (!me) {
+      if (signedOutPress({ nameOk, tickerOk, hasArt: hasArt && !uploading }) !== "enter" || firstProblem(checks())) {
+        setShowErrors(true);
+        focusFirstProblem();
+        return;
+      }
+      require(() => void attempt(), undefined, `Start the demo and launch $${ticker}`);
+      return;
+    }
+    void attempt();
   }
 
   const tickerText = ticker ? `$${ticker}` : "coins";
@@ -877,7 +912,7 @@ function Launch() {
                 aria-describedby="art-spec"
                 aria-invalid={artMsg ? true : undefined}
                 aria-busy={uploading || undefined}
-                onClick={() => live || me ? fileRef.current?.click() : require(() => artRef.current?.focus(), ENTER_TO_UPLOAD, "Start the demo")}
+                onClick={() => fileRef.current?.click()}
                 onDragOver={(e) => { e.preventDefault(); if (!dragging) setDragging(true); }}
                 onDragLeave={() => setDragging(false)}
                 onDrop={onDrop}
@@ -971,7 +1006,7 @@ function Launch() {
                   ) : buyBlocked ? (
                     <p role="status">{buyOffText}</p>
                   ) : !devQuote?.ok ? (
-                    <p>{live ? `Paid in real ${quoteAsset.symbol} with your coin's creation.${buyFits === null ? ` ${BUY_FIT_AFTER_SIGN_IN}` : ""}` : `Up to ${quoteFixed(maxDev, quoteKey)} test ${quoteAsset.symbol}.`}</p>
+                    <p>{live ? `Paid in real ${quoteAsset.symbol} with your coin's creation.${buyFits === null ? ` ${BUY_FIT_AFTER_SIGN_IN}` : ""}` : `Up to ${quoteCap(maxDev, quoteKey)} test ${quoteAsset.symbol}.`}</p>
                   ) : null}
                   <p aria-live="polite" className="empty:hidden">
                     {devQuote?.ok && !devError ? (

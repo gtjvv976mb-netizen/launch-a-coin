@@ -244,15 +244,24 @@
 }
 .cdx-pair-hud__glyph { position: absolute; top: 50%; left: 12px; color: var(--color-slate); pointer-events: none; transform: translateY(-50%); }
 .cdx-pair-hud__clear { position: absolute; top: 50%; right: 2px; transform: translateY(-50%); }
-/* The tiles: from 1024px as many 116px tracks as fit (four in the desktop form panel). */
-.cdx-pair-hud__grid { display: grid; min-width: 0; grid-template-columns: repeat(auto-fill, minmax(116px, 1fr)); gap: 6px; }
-/* Below 1024px: one sideways strip (MintDex's .mdx-strip, as Designs uses on phones), so the HUD stays one row tall
- * and Card art stays close under it. It runs to the well's edges, so the cut tile at the edge says it scrolls; the
- * padding above and below keeps the chosen tile's check and the focus ring inside the scroller. PairHud centres the
- * chosen tile, at once. */
+/* The tiles: from 1024px as many 100px tracks as fit (five in the 1440px form panel, four at 1280), with a little less
+ * inner padding there so the longest symbol (CHILLHOUSE) still fits whole. */
+.cdx-pair-hud__grid { display: grid; min-width: 0; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 6px; }
+@media (min-width: 1024px) {
+  .cdx-pair-hud__grid > .cdx-pair-tile { column-gap: 6px; padding-inline: 6px; }
+}
+/* Below 1024px: one sideways strip (MintDex's .mdx-strip, as Designs uses on phones) two tiles tall: the tiles fill
+ * each column top to bottom, so the strip is half as long (twice the pairs in view, half the swipes) for one tile
+ * row of height, and Card art stays close under it. It runs to the well's edges, so the cut tile at the edge says it
+ * scrolls; the padding above and below keeps the chosen tile's check and the focus ring inside the scroller. PairHud
+ * centres the chosen tile, at once. */
 @media (max-width: 1023.98px) {
   .cdx-pair-hud__grid {
-    display: flex;
+    display: grid;
+    grid-template-columns: none;
+    grid-template-rows: repeat(2, auto);
+    grid-auto-flow: column;
+    grid-auto-columns: 128px;
     margin-inline: -12px;
     padding: 6px 12px;
     overflow-x: auto;
@@ -262,8 +271,10 @@
     scrollbar-width: none;
   }
   .cdx-pair-hud__grid::-webkit-scrollbar { display: none; }
-  .cdx-pair-hud__grid > .cdx-pair-tile { flex: none; width: 128px; scroll-snap-align: center; }
-  .cdx-pair-hud__grid > .cdx-pair-hud__empty { flex: 1 0 100%; }
+  .cdx-pair-hud__grid > .cdx-pair-tile { scroll-snap-align: center; }
+  /* No match: the line takes the strip's whole width, across both rows. */
+  .cdx-pair-hud__grid:has(> .cdx-pair-hud__empty) { grid-auto-columns: 100%; }
+  .cdx-pair-hud__grid > .cdx-pair-hud__empty { grid-row: 1 / -1; }
 }
 .cdx-pair-tile {
   position: relative;
@@ -370,6 +381,12 @@
 /* The mint starts beside its label and fills each line (break-all), rather than dropping whole to the next one. */
 .cdx-pair-meta .cdx-pair-mint { display: inline; word-break: break-all; }
 .cdx-pair-meta .cdx-pair-mint > svg { display: inline-block; margin: 0 0 0 2px; vertical-align: -1px; }
+/* Touch: the mint (two lines on phones) is a 44px-tall target. Vertical padding on an inline link grows only its hit
+ * area, never the lines, so the mint wraps and reads exactly as before. It reaches up over the plain-text asset line
+ * (nothing to tap there); below, the "Mint reviewed" line starts 2px under it and keeps its own taps. */
+@media (pointer: coarse), (max-width: 1023.98px) {
+  .cdx-pair-meta .cdx-pair-mint { padding-block: 11px 2px; }
+}
 
 /* ------------------------------------------------ the mainnet panel (live mode: the ticket's body) */
 .cdx-live-panel { display: grid; min-width: 0; gap: 16px; font-size: var(--text-body); line-height: 20px; color: var(--color-slate); }

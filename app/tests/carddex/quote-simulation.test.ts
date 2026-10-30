@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { PAIR_ASSETS } from "../../src/lib/carddex/pairs";
-import { demoQuoteStartBalance, formatQuoteAmount, initialQuoteReserves, maxInitialBuyQuoteAtoms, parseQuoteAmount, quoteAtomsToSol, quoteMetrics, quoteUnit } from "../../src/lib/carddex/quote-simulation";
+import { PAIR_ASSETS, PAIR_ASSET_KEYS } from "../../src/lib/carddex/pairs";
+import { quoteCap } from "../../src/lib/carddex/quote-display";
+import { demoQuoteStartBalance, formatQuoteAmount, initialQuoteReserves, isQuoteDecimal, maxInitialBuyQuoteAtoms, parseQuoteAmount, quoteAtomsToSol, quoteMetrics, quoteUnit } from "../../src/lib/carddex/quote-simulation";
 
 function decimal(atoms: bigint, unit: bigint, decimals: number) {
   return `${atoms / unit}.${String(atoms % unit).padStart(decimals, "0")}`;
@@ -64,5 +65,31 @@ describe("quote-native simulation units", () => {
       expect(quoteAtomsToSol(123 * unit + 1, key)).toBeNull();
       expect(quoteMetrics(initialQuoteReserves(key), key)).toMatchObject({mcapUsd: null, priceSol: null, valuationMode: "quote-native"});
     }
+  });
+});
+
+describe("the initial-buy cap as Launch shows it", () => {
+  test("typing back the cap shown is always allowed: rounded down, exact, never compact", () => {
+    for (const key of PAIR_ASSET_KEYS) {
+      const max = maxInitialBuyQuoteAtoms(key);
+      const shown = quoteCap(max, key);
+      expect(shown).not.toMatch(/[KMB]/);
+      const typed = parseQuoteAmount(shown.replace(/,/g, ""), key);
+      expect(typed).not.toBeNull();
+      expect(typed!).toBeLessThanOrEqual(max);
+    }
+    expect(quoteCap(maxInitialBuyQuoteAtoms("doge"), "doge")).toBe("27,781.11");
+    expect(quoteCap(maxInitialBuyQuoteAtoms("nvdax"), "nvdax")).toBe("10.10");
+    expect(quoteCap(maxInitialBuyQuoteAtoms("sol"), "sol")).toBe("20.00");
+    // Below 0.01: two significant digits, still rounded down.
+    expect(quoteCap(1_299_999, "sol")).toBe("0.0012");
+    expect(quoteCap(0, "sol")).toBe("0");
+  });
+  test("a plain decimal too large to count is told apart from a malformed one", () => {
+    expect(isQuoteDecimal("999999999", "doge")).toBe(true);
+    expect(parseQuoteAmount("999999999", "doge")).toBeNull();
+    expect(isQuoteDecimal("1.123456789", "doge")).toBe(false);
+    expect(isQuoteDecimal("1.2.3", "doge")).toBe(false);
+    expect(isQuoteDecimal("12.5", "doge")).toBe(true);
   });
 });

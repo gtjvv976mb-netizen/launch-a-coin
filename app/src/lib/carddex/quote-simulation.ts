@@ -29,6 +29,13 @@ export function parseQuoteAmount(text: string, key: string): number | null {
   return atoms <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(atoms) : null;
 }
 
+/** A plain decimal the quote can hold (digits, one point, at most its decimals): what parseQuoteAmount reads, of any size. */
+export function isQuoteDecimal(text: string, key: string): boolean {
+  const input = text.trim();
+  if (input.length > 100 || !/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(input)) return false;
+  return (input.split(".")[1] ?? "").length <= assetOf(key).decimals;
+}
+
 export function formatQuoteAmount(atoms: number, key: string, maxFractionDigits = 6): string {
   const asset = assetOf(key);
   const value = atoms / quoteUnit(key);

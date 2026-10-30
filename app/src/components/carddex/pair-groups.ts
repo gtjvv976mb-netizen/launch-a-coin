@@ -32,6 +32,12 @@ export function shortPairName(asset: Readonly<PairAsset>): string {
   return asset.name.replace(/\s*\(.*\)\s*$/, "").replace(/\s+(?:xStock|tokenized equity)$/i, "").trim() || asset.name;
 }
 
+/** The name line a tile shows under its symbol, or null when the short name only repeats the symbol ("BONK", "Bonk"). */
+export function tileName(asset: Readonly<PairAsset>): string | null {
+  const name = shortPairName(asset);
+  return name.toLowerCase() === asset.symbol.toLowerCase() ? null : name;
+}
+
 /** The pairs in a group whose symbol or name contains the query (case and spacing ignored); all of them for "". */
 export function filterPairs(group: PairGroup, query: string): readonly Readonly<PairAsset>[] {
   const q = query.trim().toLowerCase().replace(/^\$/, "").replace(/\s+/g, " ");
