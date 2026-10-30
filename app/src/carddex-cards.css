@@ -200,6 +200,8 @@
 /* One print grid for every creator. Atlas pixels change the decoration, never these live roles. */
 .cdx-canonical-card { background: var(--design-base); color: var(--canonical-ink); line-height: 1.25; text-align: left; }
 .cdx-canonical-skin, .cdx-canonical-skin__surface { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: inherit; overflow: hidden; pointer-events: none; }
+/* A decoded atlas owns its real outer alpha; loading geometry must not fill it. */
+.cdx-canonical-skin[data-card-skin-ready] > .cdx-canonical-skin__surface { visibility: hidden; }
 .cdx-canonical-skin { z-index: 1; }
 .cdx-canonical-skin__loader { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
 .cdx-canonical-skin__image { position: absolute; inset: 0; display: block; width: 100%; height: 100%; border-radius: inherit; pointer-events: none; }

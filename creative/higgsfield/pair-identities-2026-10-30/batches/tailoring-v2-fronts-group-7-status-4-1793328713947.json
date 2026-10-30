@@ -1,0 +1,53 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "jobs[4]{index,job_id,status,type,model,result_url}:\n  425,571a0aa6-e054-4265-8bc0-ce53a8a35333,completed,image,seedream_5_0_flash,\"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_025116_571a0aa6-e054-4265-8bc0-ce53a8a35333.png\"\n  426,ed3f1618-4444-4ffe-8de5-0de26b1b176e,completed,image,seedream_5_0_flash,\"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_025116_ed3f1618-4444-4ffe-8de5-0de26b1b176e.png\"\n  427,43d3b5a2-e992-436c-8e1a-8a5699793cf4,completed,image,seedream_5_0_flash,\"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_025119_43d3b5a2-e992-436c-8e1a-8a5699793cf4.png\"\n  428,86fd9102-c061-4bad-b4b3-33356970384e,completed,image,seedream_5_0_flash,\"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_025119_86fd9102-c061-4bad-b4b3-33356970384e.png\"\nsummary:\n  total: 4\n  completed: 4\n  failed: 0\n  active: 0\n  errors: 0\nall_terminal: true"
+    }
+  ],
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 425,
+        "job_id": "571a0aa6-e054-4265-8bc0-ce53a8a35333",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_025116_571a0aa6-e054-4265-8bc0-ce53a8a35333.png"
+      },
+      {
+        "index": 426,
+        "job_id": "ed3f1618-4444-4ffe-8de5-0de26b1b176e",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_025116_ed3f1618-4444-4ffe-8de5-0de26b1b176e.png"
+      },
+      {
+        "index": 427,
+        "job_id": "43d3b5a2-e992-436c-8e1a-8a5699793cf4",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_025119_43d3b5a2-e992-436c-8e1a-8a5699793cf4.png"
+      },
+      {
+        "index": 428,
+        "job_id": "86fd9102-c061-4bad-b4b3-33356970384e",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_025119_86fd9102-c061-4bad-b4b3-33356970384e.png"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "completed": 4,
+      "failed": 0,
+      "active": 0,
+      "errors": 0
+    },
+    "all_terminal": true
+  },
+  "isError": false
+}

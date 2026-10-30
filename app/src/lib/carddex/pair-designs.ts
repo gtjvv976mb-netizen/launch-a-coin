@@ -1,0 +1,75 @@
+import staged from "./pair-designs.json";
+import quotes from "./pair-assets.json";
+import { CARD_GENERATED_ASSETS } from "./generated-assets";
+import layouts from "./generated-layouts.json";
+import atlases from "./render-assets.json";
+import reverses from "./token-back-assets.json";
+import reviewed from "../../../../integrations/pumpfun/src/design-assets.json";
+import { CARD_RENDERER_VERSION } from "./card-template";
+
+export type PairDesignKey = `pair-${string}`;
+export type PairDesign = {
+  key: PairDesignKey; quoteKey: string; quoteMint: string; name: string; description: string;
+  category: "stocks" | "memes" | "crypto"; materialLevel: number;
+  palette: readonly [string, string, string]; finish: "holo" | "gold" | "prism";
+};
+type Source = {path:string;sha256:string};
+type Assets = {front?:string;back?:string;front320?:string;back320?:string};
+type Atlas = {designKey:string;path:string;previewPath:string;sha256:string;previewSha256:string;sourceSha256:string;rendererVersion:string;width:number;height:number};
+type Reverse = {designKey:string;path:string;sha256:string;sourceSha256:string;conversionVersion:string;width:number;height:number};
+export type PairDesignInstallation = {
+  assets?: Assets; layout?: unknown; source?: {front:Source;back:Source};
+  atlas?: Atlas; reverse?: Reverse; quoteMint?: string;
+};
+const hash = (value?:string) => !!value && /^[a-f0-9]{64}$/.test(value);
+function measuredLayout(value:unknown):boolean {
+  if(!value || typeof value!=="object")return false;
+  const layout=value as {art?:unknown;mask?:{width?:number;height?:number;path?:string};prints?:Record<string,unknown>};
+  const box=(value:unknown)=>{
+    if(!value || typeof value!=="object")return false;
+    const b=value as {x:number;y:number;w:number;h:number};
+    return [b.x,b.y,b.w,b.h].every(Number.isFinite) && b.x>=0 && b.y>=0 && b.w>0 && b.h>0 && b.x+b.w<=1.001 && b.y+b.h<=1.001;
+  };
+  return box(layout.art) && !!layout.mask && Number.isFinite(layout.mask.width) && layout.mask.width!>0 &&
+    Number.isFinite(layout.mask.height) && layout.mask.height!>0 && typeof layout.mask.path==="string" && layout.mask.path.length>0 &&
+    !!layout.prints && ["name","type","text"].every(key=>box(layout.prints?.[key]));
+}
+
+/** No pending generation or incomplete conversion may expose a generic card as an identity design. */
+export function isPairDesignInstalled(design:PairDesign, install:PairDesignInstallation):boolean {
+  const {assets,layout,source,atlas,reverse,quoteMint}=install;
+  const prefix=`/assets/carddex/higgsfield/${design.key}`;
+  const atlasKey=design.key+(design.category==="stocks"?"--stock":"");
+  return !!quoteMint && quoteMint===design.quoteMint && measuredLayout(layout) && !!source && !!assets && !!atlas && !!reverse &&
+    assets.front===`${prefix}-front.webp` && assets.back===`${prefix}-back.webp` &&
+    assets.front320===`${prefix}-front-320.webp` && assets.back320===`${prefix}-back-320.webp` &&
+    source.front.path===assets.front && source.back.path===assets.back && hash(source.front.sha256) && hash(source.back.sha256) &&
+    atlas.designKey===design.key && atlas.path===`/assets/carddex/render/${atlasKey}.png` &&
+    atlas.previewPath===`/assets/carddex/render/preview/${atlasKey}.png` &&
+    hash(atlas.sha256) && hash(atlas.previewSha256) && atlas.sourceSha256===source.front.sha256 &&
+    atlas.rendererVersion===CARD_RENDERER_VERSION && atlas.width===1260 && atlas.height===1760 &&
+    reverse.designKey===design.key && reverse.path===`/assets/carddex/token-backs/${design.key}.png` &&
+    hash(reverse.sha256) && reverse.sourceSha256===source.back.sha256 && reverse.width===630 && reverse.height===880 &&
+    reverse.conversionVersion==="launchacard-token-back-png-v1";
+}
+
+export const STAGED_PAIR_DESIGNS = Object.freeze(staged.map(design=>{
+  if(design.key!==`pair-${design.quoteKey}` || !/^[a-z0-9-]+$/.test(design.quoteKey) ||
+    !["stocks","memes","crypto"].includes(design.category) || !["holo","gold","prism"].includes(design.finish) ||
+    design.palette.length!==3 || design.palette.some(color=>!/^#[a-fA-F0-9]{6}$/.test(color))) {
+    throw new Error("Invalid staged pair-design metadata.");
+  }
+  return Object.freeze(design) as unknown as PairDesign;
+}));
+export const ACTIVE_PAIR_DESIGNS:readonly PairDesign[] = Object.freeze(STAGED_PAIR_DESIGNS.filter(design => {
+  const quote=quotes.find(asset=>asset.key===design.quoteKey);
+  const atlasKey=design.key+(design.category==="stocks"?"--stock":"");
+  return isPairDesignInstalled(design, {
+    assets:(CARD_GENERATED_ASSETS as Record<string,Assets>)[design.key],
+    layout:(layouts as Record<string,unknown>)[design.key],
+    source:(reviewed as Record<string,{front:Source;back:Source}>)[design.key],
+    atlas:(atlases as Record<string,Atlas>)[atlasKey],
+    reverse:(reverses as Record<string,Reverse>)[design.key],quoteMint:quote?.mint,
+  });
+}));
+export const activePairDesignForQuote = (key:string) => ACTIVE_PAIR_DESIGNS.find(design=>design.quoteKey===key) ?? null;

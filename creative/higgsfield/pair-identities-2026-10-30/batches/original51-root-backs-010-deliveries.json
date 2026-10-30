@@ -1,0 +1,18 @@
+[
+  {
+    "index": 90,
+    "key": "sui",
+    "face": "back",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/sui-back.png"
+  },
+  {
+    "index": 92,
+    "key": "arb",
+    "face": "back",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/arb-back.png"
+  }
+]

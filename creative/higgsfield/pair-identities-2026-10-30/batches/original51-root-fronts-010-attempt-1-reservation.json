@@ -1,0 +1,10 @@
+{
+  "executor": "root",
+  "status": "reserved-before-one-write",
+  "indices": [
+    93,
+    95
+  ],
+  "quotedCredits": 5.5,
+  "retryOnlyAfterExplicitZeroSubmission429": true
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "quoteKey": "biketyson",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/biketyson-c18f3b75f0d1.png",
+    "sha256": "c18f3b75f0d1e1f3b97aed507773a2c99b8ab68675caf13fd53483c8abf20aaa",
+    "mediaId": "03b5908b-31f5-43dd-ab4a-cf5974c62b4c",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/03b5908b-31f5-43dd-ab4a-cf5974c62b4c.png",
+    "putStatus": 200,
+    "status": "uploaded",
+    "error": null
+  },
+  {
+    "quoteKey": "claudia",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/claudia-74686a62f4c5.png",
+    "sha256": "74686a62f4c5124281123f9c5123edbd1835fef3f45637fc6bb93aceda422eb9",
+    "mediaId": "dc5931c0-8620-49f3-b8c2-0ce8d0dd1a9b",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/dc5931c0-8620-49f3-b8c2-0ce8d0dd1a9b.png",
+    "putStatus": 200,
+    "status": "uploaded",
+    "error": null
+  },
+  {
+    "quoteKey": "plague",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/plague-68bb5af167cd.jpg",
+    "sha256": "68bb5af167cd23f12dab24c013648cf5e00dbcb4de1a2c3d25bb4da9b8441304",
+    "mediaId": "702af55c-3303-4d2e-802b-b9647200eb57",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/702af55c-3303-4d2e-802b-b9647200eb57.jpg",
+    "putStatus": 200,
+    "status": "uploaded",
+    "error": null
+  }
+]

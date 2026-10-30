@@ -1,0 +1,37 @@
+{
+  "context": "Remove invented labels and carried empty plates while preserving the exact accepted meme identity artwork.",
+  "requests": [
+    {
+      "index": 811,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "822836c7-ae3d-4575-94da-0ca943d40354"
+          }
+        ],
+        "prompt": "Edit this exact completed REVERSE image. Remove ONLY the small word Repeat near the bottom. Continue the dark material field through that tiny word area. Preserve every original ASCII figure stroke, punctuation and line, all frame traces and the full composition unchanged. Keep the outer card outline, matched material palette, thin physical construction, smooth rounded edges and all other existing artwork unchanged. This is a targeted cleanup only. The repaired area must blend seamlessly with its neighbors. The whole reverse is finished pictorial artwork: add no new lettering, numbers, labels, emblems or empty plates."
+      }
+    },
+    {
+      "index": 812,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "148a4dc9-b6a8-4b80-b2bf-32eb29cb74be"
+          }
+        ],
+        "prompt": "Edit this exact completed REVERSE image. Remove the EMPTY header plate and its inner outline, and remove the profile-name and @handle text below the avatar. Continue the same gray geometric material field through those removed areas. Preserve the exact anonymous source avatar silhouette and its original circle proportions, along with the outer frame. Keep the outer card outline, matched material palette, thin physical construction, smooth rounded edges and all other existing artwork unchanged. This is a targeted cleanup only. The repaired area must blend seamlessly with its neighbors. The whole reverse is finished pictorial artwork: add no new lettering, numbers, labels, emblems or empty plates."
+      }
+    }
+  ]
+}

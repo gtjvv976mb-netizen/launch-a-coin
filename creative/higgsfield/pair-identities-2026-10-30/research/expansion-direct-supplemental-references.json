@@ -1,0 +1,173 @@
+{
+  "assets": [
+    {
+      "key": "stonk-primary",
+      "symbol": "STONK",
+      "mint": "6GmAFSYs4gk3FDao5FzzySQpPZaWsa4rUJHacpMpUNgx",
+      "imageUri": "https://www.stonkfun.xyz/stonk-mark.svg",
+      "imageSourceKind": "primary-project-website-exact-token-link-and-brand-mark",
+      "primaryPageProof": {
+        "path": "research/expansion-direct-fallback-stonk-home.html",
+        "sha256": "6b0bd731f3e4f89492421c689bf92bd3c7419204e66704eed2a7d84b315f2804",
+        "exactMintTokenLinkPresent": true,
+        "observedImageSrc": "/stonk-mark.svg"
+      },
+      "visualInspection": "pending",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "expansion-direct-references/stonk-primary-7417b870b953.svg",
+        "sha256": "7417b870b953aaf29f1c51c9029374e9e6b0beb6ff0612eb0ce8724ea07228bb",
+        "bytes": 810,
+        "width": 295.81,
+        "height": 289.2,
+        "mode": "vector",
+        "format": "SVG",
+        "frames": 1,
+        "contentType": "image/svg+xml",
+        "referenceSourceUri": "https://www.stonkfun.xyz/stonk-mark.svg",
+        "downloadUri": "https://www.stonkfun.xyz/stonk-mark.svg",
+        "resolvedUri": "https://www.stonkfun.xyz/stonk-mark.svg",
+        "attempts": [
+          {
+            "uri": "https://www.stonkfun.xyz/stonk-mark.svg",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+        "deterministicPngExport": {
+          "path": "expansion-direct-references/stonk-primary-7417b870b953-reference-1024.png",
+          "sha256": "443b13e4df95b72b0157c699d7e23c0aa70d12ae92be2d5d050902fa2b2c641f",
+          "bytes": 24232,
+          "width": 1024,
+          "height": 1001,
+          "transform": "Installed ResvgWASM rasterization of validated original SVG; original retained; no new artwork"
+        }
+      },
+      "imageBytesDownloaded": true
+    },
+    {
+      "key": "pill-primary",
+      "symbol": "pill",
+      "mint": "DvdmEnztCmXwBnAbedD48XVGZJSxq31zNvnyftXdpump",
+      "imageUri": "https://metadata.j7tracker.io/m/kWdud9h3TW-img",
+      "additionalImageSourceUris": [
+        "https://images.pump.fun/coin-image/DvdmEnztCmXwBnAbedD48XVGZJSxq31zNvnyftXdpump?placeholder=none&src=https%3A%2F%2Fmetadata.j7tracker.io%2Fm%2FkWdud9h3TW-img&variant=80x80"
+      ],
+      "imageSourceKind": "primary-Pump-exact-mint-page-image-link",
+      "primaryPageReference": "https://pump.fun/coin/DvdmEnztCmXwBnAbedD48XVGZJSxq31zNvnyftXdpump",
+      "observedVia": "Official Pump page image link47 / turn193view1,30October2026",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "expansion-direct-references/pill-primary-b90d439fa4d9.jpg",
+        "sha256": "b90d439fa4d997aa93494da615c0fa19a1b4a3e178ca41237ae626e40ab4b470",
+        "bytes": 1286,
+        "width": 80,
+        "height": 80,
+        "mode": "RGB",
+        "format": "JPEG",
+        "frames": 1,
+        "contentType": "image/jpeg",
+        "referenceSourceUri": "https://metadata.j7tracker.io/m/kWdud9h3TW-img",
+        "downloadUri": "https://images.pump.fun/coin-image/DvdmEnztCmXwBnAbedD48XVGZJSxq31zNvnyftXdpump?placeholder=none&src=https%3A%2F%2Fmetadata.j7tracker.io%2Fm%2FkWdud9h3TW-img&variant=80x80",
+        "resolvedUri": "https://images.pump.fun/coin-image/DvdmEnztCmXwBnAbedD48XVGZJSxq31zNvnyftXdpump?placeholder=none&src=https%3A%2F%2Fmetadata.j7tracker.io%2Fm%2FkWdud9h3TW-img&variant=80x80",
+        "attempts": [
+          {
+            "uri": "https://metadata.j7tracker.io/m/kWdud9h3TW-img",
+            "error": "<urlopen error _ssl.c:1063: The handshake operation timed out>"
+          },
+          {
+            "uri": "https://images.pump.fun/coin-image/DvdmEnztCmXwBnAbedD48XVGZJSxq31zNvnyftXdpump?placeholder=none&src=https%3A%2F%2Fmetadata.j7tracker.io%2Fm%2FkWdud9h3TW-img&variant=80x80",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only"
+      },
+      "imageBytesDownloaded": true
+    },
+    {
+      "key": "shib-primary",
+      "symbol": "SHIB",
+      "mint": "shib5gSoVKPjwkXrxRk7SbQFzb2R9rQB3TgQWYX4RwW",
+      "imageUri": "https://shib.mypinata.cloud/ipfs/bafybeidvkdvjgb7efb2b4n5pthoyw4cwmc3h2wanbcm7zoyu4ksjbtwwu4/images/redesign/shibio_logo.svg",
+      "imageSourceKind": "primary-project-official-brand-image",
+      "primaryPageReference": "https://shib.io/tokens/shib",
+      "observedVia": "Official Shib.io header logo link0 / turn193view0,30October2026",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "expansion-direct-references/shib-primary-3a2ed84b4adf.svg",
+        "sha256": "3a2ed84b4adfc20692f675ddd6339b894979c4ade2fe4f610113f48c4a89778d",
+        "bytes": 5249,
+        "width": 387.0,
+        "height": 122.0,
+        "mode": "vector",
+        "format": "SVG",
+        "frames": 1,
+        "contentType": "image/svg+xml",
+        "referenceSourceUri": "https://shib.mypinata.cloud/ipfs/bafybeidvkdvjgb7efb2b4n5pthoyw4cwmc3h2wanbcm7zoyu4ksjbtwwu4/images/redesign/shibio_logo.svg",
+        "downloadUri": "https://shib.mypinata.cloud/ipfs/bafybeidvkdvjgb7efb2b4n5pthoyw4cwmc3h2wanbcm7zoyu4ksjbtwwu4/images/redesign/shibio_logo.svg",
+        "resolvedUri": "https://shib.mypinata.cloud/ipfs/bafybeidvkdvjgb7efb2b4n5pthoyw4cwmc3h2wanbcm7zoyu4ksjbtwwu4/images/redesign/shibio_logo.svg",
+        "attempts": [
+          {
+            "uri": "https://shib.mypinata.cloud/ipfs/bafybeidvkdvjgb7efb2b4n5pthoyw4cwmc3h2wanbcm7zoyu4ksjbtwwu4/images/redesign/shibio_logo.svg",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+        "deterministicPngExport": {
+          "path": "expansion-direct-references/shib-primary-3a2ed84b4adf-reference-1024.png",
+          "sha256": "18a435cdf1d26c5c19e53c1d8ac5e1fee6fa6a375d656dbac7afce678c8c3af3",
+          "bytes": 33176,
+          "width": 1024,
+          "height": 323,
+          "transform": "Installed ResvgWASM rasterization of validated original SVG; original retained; no new artwork"
+        }
+      },
+      "imageBytesDownloaded": true
+    },
+    {
+      "key": "paid-primary",
+      "symbol": "PAID",
+      "mint": "98kfF7rmsg1QDUEoCqNE7g7M1FdrTt92TEp2CLzypump",
+      "imageUri": "https://usepaid.app/icon.svg?icon.2creho8k8jcx4.svg",
+      "imageSourceKind": "primary-project-observed-icon-asset",
+      "primaryPageReference": "https://usepaid.app/links",
+      "exactMintLinkConfirmed": true,
+      "observedVia": "Primary homepage icon link href observed in downloaded HTML; official links page contains exact PAID mint.",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "expansion-direct-references/paid-primary-7fe42e316e42.svg",
+        "sha256": "7fe42e316e420721f072658b55e45cc97dce29315fcfe41f4217b2dd236a215b",
+        "bytes": 4439,
+        "width": 2048.0,
+        "height": 2048.0,
+        "mode": "vector",
+        "format": "SVG",
+        "frames": 1,
+        "contentType": "image/svg+xml",
+        "referenceSourceUri": "https://usepaid.app/icon.svg?icon.2creho8k8jcx4.svg",
+        "downloadUri": "https://usepaid.app/icon.svg?icon.2creho8k8jcx4.svg",
+        "resolvedUri": "https://usepaid.app/icon.svg?icon.2creho8k8jcx4.svg",
+        "attempts": [
+          {
+            "uri": "https://usepaid.app/icon.svg?icon.2creho8k8jcx4.svg",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+        "deterministicPngExport": {
+          "path": "expansion-direct-references/paid-primary-7fe42e316e42-reference-1024.png",
+          "sha256": "6cd02ff39f2370882c1c8ae3b51b0729531a32c06a448d36e504fb59670e7783",
+          "bytes": 32320,
+          "width": 1024,
+          "height": 1024,
+          "transform": "Installed ResvgWASM rasterization of validated original SVG; original retained; no new artwork"
+        }
+      },
+      "imageBytesDownloaded": true
+    }
+  ]
+}

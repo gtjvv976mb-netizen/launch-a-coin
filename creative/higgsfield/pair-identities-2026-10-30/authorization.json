@@ -1,0 +1,134 @@
+{
+  "date": "2026-10-30",
+  "userInstruction": "i have 500+ credits, maximize the use of it, do all meme card designs/pairs you can",
+  "logoLettering": "Use exact logos, including their lettering",
+  "startingAvailableCredits": 596.5,
+  "spendingCapCredits": 596.5,
+  "plannedDesigns": 97,
+  "plannedImages": 194,
+  "quotedCreditsPerImage": 2.75,
+  "plannedQuotedCredits": 533.5,
+  "qualityCorrectionReserve": 60.5,
+  "automaticPurchases": false,
+  "automaticDuplicateRetries": false,
+  "existingCreditApprovalsReused": false,
+  "deploymentAuthorized": false,
+  "scope": "Original37reviewed +14 majorcrypto +21 additionalpublishedmemes +17 exactdirectQuoteControlenabledmemes; direct-onlyprovenance explicit; existing48keys/immutablehistory preserved.; plus8freshlyverifieddistinct PUMP/ALCH/PUMPCADE/CODEC/APE/LINK/ORE/SKR identities.",
+  "routineQualityCorrectionCapCredits": 60.5,
+  "combinedExecutorCapCredits": 594,
+  "rootHeldReserveCredits": 2.5,
+  "executorCaps": {
+    "original51": {
+      "maximumSubmissions": 112,
+      "maximumQuotedCredits": 308
+    },
+    "extra38": {
+      "maximumSubmissions": 88,
+      "maximumQuotedCredits": 242
+    },
+    "final8": {
+      "maximumSubmissions": 16,
+      "maximumQuotedCredits": 44,
+      "correctionsRequireRootReallocationWithinExisting596_5Cap": true
+    }
+  },
+  "absoluteAvailableReserveBeyondExecutorCaps": 2.5,
+  "freshBalanceCheck": {
+    "credits": 53.5,
+    "date": "2026-10-30T03:21:28.918178+00:00",
+    "startingAvailableCredits": 596.5,
+    "observedNetBalanceReduction": 543,
+    "knownGrossQuotedSubmissions": 548.5,
+    "unattributedDifference": 5.5,
+    "accountBalanceIsNotItemizedJobBilling": true,
+    "unknownSubmissionReserveStillHeldCredits": 27.5
+  },
+  "tailoringV2": {
+    "userSteering": "make each card design unique and tailored to the identity of the MEME",
+    "knownFirstPassJobs": 180,
+    "knownFirstPassQuotedCredits": 495,
+    "unknownFirstPassJobs": 10,
+    "unknownFirstPassReservedCredits": 27.5,
+    "unsubmittedGptRequestsHeld": true,
+    "pilotModel": "seedream_5_0_flash",
+    "pilotResolution": "2k",
+    "pilotQuotedCreditsPerImage": 0.5,
+    "pilotFronts": 2,
+    "pilotQuotedCredits": 1,
+    "widerRolloutRequiresActualVisualQualityPass": true,
+    "plannedReplacementPairs": 62,
+    "plannedReplacementFaces": 124,
+    "plannedReplacementQuotedCredits": 62,
+    "possibleRemainingCryptoBacks": 13,
+    "possibleRemainingCryptoBackQuotedCredits": 6.5,
+    "combinedWorstQuotedCredits": 591,
+    "maximumInternalQuotedCredits": 594,
+    "automaticPurchases": false,
+    "status": "Generation complete; final source-only identity corrections and native acceptance in progress. No new paid calls planned.",
+    "pilotImagesSubmitted": 7,
+    "pilotQuotedCreditsSubmitted": 3.5,
+    "pilotKnownJobIndices": [
+      301,
+      302,
+      303,
+      304,
+      305,
+      306
+    ],
+    "pilotRejectedFronts": [
+      301,
+      302
+    ],
+    "candidateReplacementFronts": [
+      303,
+      304
+    ],
+    "knownFirstPassAndPilotQuotedCredits": 498.5,
+    "combinedWorstQuotedCreditsIncludingTwoRejectedPilots": 592,
+    "remainingInternalCorrectionReserve": 2.5,
+    "combinedWorstQuotedCreditsIncludingRejectedPilots": 592.5,
+    "frontBulkGate": "Root passed native2K and populated canonical proofs303/304; all60 remaining identity-specific fronts frozen for30credits. FONE background alpha cleanup required before integration.",
+    "knownSubmissions": 67,
+    "knownQuotedCredits": 33.5,
+    "frontBulkCompleted": 60,
+    "frontBulkFailures": 0,
+    "remainingUnsubmittedMemeBacks": 60,
+    "remainingUnsubmittedCryptoBacks": 11,
+    "unknownCryptoBacksExcluded": [
+      "aave",
+      "uni"
+    ],
+    "combinedWorstGrossQuotedCredits": 591.5
+  },
+  "remainingQualityAllocation": {
+    "basis": "Use verified current existing-credit balance; all known receipts remain gross-quoted in ledgers. No purchases. Do not attribute observed balance difference to individual jobs.",
+    "availableExistingCredits": 53.5,
+    "unknownPriorCallsReservedCredits": 27.5,
+    "absoluteNewSpendLimitFromCurrentBalance": 26,
+    "plannedUnsubmittedMemeBacks": 32,
+    "plannedUnsubmittedMemeBackQuotedCredits": 16,
+    "first28HeldReverseRepairs": 14,
+    "reverseRepairQuotedCredits": 7,
+    "internalHeldReserve": 2.5,
+    "initialStrategyPilotImages": 2,
+    "initialStrategyPilotIncludedIn32": true,
+    "remainingInternalHeadroomAfterPlannedWork": 0.5,
+    "rootOnlyExecutor": true,
+    "accountingModeForNextBroker": "verified-current-balance; startingCredits543, maximumCredits594, reservedCredits27.5"
+  },
+  "finalBalanceReview": {
+    "checkedAt": "2026-10-30T04:16:30.812973+00:00",
+    "startingAvailableCredits": 596.5,
+    "verifiedRemainingCredits": 29.5,
+    "observedNetBalanceReduction": 567,
+    "heldUnknownSubmissionReserveCredits": 27.5,
+    "unreservedExistingCredits": 2,
+    "knownGrossQuotedSubmittedCreditsExpectedAfterLateReceiptAdoption": 573.5,
+    "grossQuoteVersusNetBalanceDifference": 6.5,
+    "individualJobRefundAttribution": "Unavailable; no individual refunds inferred from account balance.",
+    "newPaidCallsPlanned": false,
+    "purchasesMade": false,
+    "deploymentAuthorized": false,
+    "note": "All known new jobs settled. Unknown historical ten-image reserve remains held. Final ledgers, not this snapshot, are authoritative for individual source attempts."
+  }
+}

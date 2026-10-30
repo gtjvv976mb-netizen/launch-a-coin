@@ -1,0 +1,36 @@
+{
+  "createdAt": "2026-10-29T23:28:09.906299+00:00",
+  "referenceCount": 17,
+  "scope": "Actual identity reference proof; not card artwork or claim of public listing.",
+  "pages": [
+    {
+      "path": "expansion-direct-references/contact-sheet-01.jpg",
+      "sha256": "ddd5ef7b37b631778ecf065985ef12b279863c4fe5422d9911c8d9779a9239ad",
+      "quotes": [
+        "gork",
+        "stonk",
+        "solangeles",
+        "paid",
+        "pepe",
+        "jeanphil",
+        "pill",
+        "biketyson",
+        "npc",
+        "wojak",
+        "eacc",
+        "hodl"
+      ]
+    },
+    {
+      "path": "expansion-direct-references/contact-sheet-02.jpg",
+      "sha256": "46ea2d83dc49eab8348a6c88abdc1511ed51401a0f054dfb2d10e55187e8707a",
+      "quotes": [
+        "agency",
+        "claudia",
+        "shib",
+        "swordcat",
+        "plague"
+      ]
+    }
+  ]
+}

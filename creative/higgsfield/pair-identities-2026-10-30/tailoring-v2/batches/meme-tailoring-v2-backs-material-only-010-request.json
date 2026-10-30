@@ -1,0 +1,45 @@
+{
+  "context": "Create unique pictorial meme card artwork with exact identities and matching cropped material references.",
+  "requests": [
+    {
+      "index": 549,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "57e379b4-4007-4249-b1b6-79cf9975d31e"
+          },
+          {
+            "role": "image",
+            "value": "b7b80385-c405-419a-a193-0a356824a78c"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact bright green round smiling toad face with large dark eyes and the source cheek/mouth contours. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact toad expression framed by broad smooth cheek-shaped relief and paired polished eye-like lens details, with a quiet deep-blue field from the source. The unique outer frame follows this character: Rounded green cheek-arc rails, twin eye-lens-like corner nodes and a low smiling-curve inset confined to the outside perimeter. Matching materials: Lime/moss enamel, dark glass eye accents and warm brushed brass. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    },
+    {
+      "index": 550,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "23d82beb-4784-402f-9f45-206f54452ca8"
+          },
+          {
+            "role": "image",
+            "value": "8965f216-9264-4813-9228-b935d283bcb2"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact cyan long-nosed line character in its raised-leg pose on yellow; preserve actual nose and limbs. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact source character in a clear yellow field with its long-nose and lifted-leg contour rhythm flowing through the perimeter. The unique outer frame follows this character: Long-nose and raised-knee contour rails: playful asymmetrical cyan strokes, yellow open gaps and delicate black line etching. Matching materials: Cyan enamel, bright yellow ceramic and very slim blackened metal. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    }
+  ]
+}

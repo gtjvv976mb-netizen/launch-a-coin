@@ -1,0 +1,31 @@
+{
+  "derivedFrom": "root-fronts-resume-group-3-status-4.json",
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 85,
+        "job_id": "ef8a619a-118b-4421-998c-47d86796c82f",
+        "status": "completed",
+        "type": "image",
+        "model": "gpt_image_2_5",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_014316_ef8a619a-118b-4421-998c-47d86796c82f.png"
+      },
+      {
+        "index": 87,
+        "job_id": "171ddcac-daab-4f68-a541-4cbe76e49bce",
+        "status": "completed",
+        "type": "image",
+        "model": "gpt_image_2_5",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_014316_171ddcac-daab-4f68-a541-4cbe76e49bce.png"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "completed": 4,
+      "failed": 0,
+      "active": 0,
+      "errors": 0
+    },
+    "all_terminal": true
+  }
+}

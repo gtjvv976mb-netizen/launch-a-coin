@@ -1,0 +1,146 @@
+{
+  "rawReceiptIgnoredPath": "output/higgsfield/pair-identities-2026-10-30/upload-receipts/extra-reference-upload-slots1.json",
+  "uploads": [
+    {
+      "media_id": "59b28d0d-a0a5-474a-a8a0-342f7ad59628",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/59b28d0d-a0a5-474a-a8a0-342f7ad59628.jpg",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/jpeg"
+    },
+    {
+      "media_id": "6476e682-af04-48e1-bab4-285a05dae0f1",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/6476e682-af04-48e1-bab4-285a05dae0f1.jpg",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/jpeg"
+    },
+    {
+      "media_id": "7a4e5317-1f14-4776-accb-5e9d138f87af",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/7a4e5317-1f14-4776-accb-5e9d138f87af.jpg",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/jpeg"
+    },
+    {
+      "media_id": "e41cff4a-a396-4a9f-adb0-61dcc01036ad",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/e41cff4a-a396-4a9f-adb0-61dcc01036ad.jpg",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/jpeg"
+    },
+    {
+      "media_id": "be4766d7-a415-44cd-989a-d4de19d7ec41",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/be4766d7-a415-44cd-989a-d4de19d7ec41.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    },
+    {
+      "media_id": "f3ae9c63-0dc0-4a2f-8387-d496cc7465f9",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/f3ae9c63-0dc0-4a2f-8387-d496cc7465f9.jpg",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/jpeg"
+    },
+    {
+      "media_id": "4f47e63c-ce8a-4c9d-b8a9-9c6927ebc351",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/4f47e63c-ce8a-4c9d-b8a9-9c6927ebc351.jpg",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/jpeg"
+    },
+    {
+      "media_id": "f3805729-89f9-4e59-980c-bf02c416c962",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/f3805729-89f9-4e59-980c-bf02c416c962.jpg",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/jpeg"
+    },
+    {
+      "media_id": "7e2a83d7-d89e-4a7c-807e-82c0170fc943",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/7e2a83d7-d89e-4a7c-807e-82c0170fc943.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    },
+    {
+      "media_id": "23d82beb-4784-402f-9f45-206f54452ca8",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/23d82beb-4784-402f-9f45-206f54452ca8.jpg",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/jpeg"
+    },
+    {
+      "media_id": "d78849bc-a209-4531-b875-d99f754b7dc1",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/d78849bc-a209-4531-b875-d99f754b7dc1.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    },
+    {
+      "media_id": "56bb881f-7452-407b-bd72-f44d23cc1719",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/56bb881f-7452-407b-bd72-f44d23cc1719.webp",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/webp"
+    },
+    {
+      "media_id": "5c198473-3700-47c0-80a6-2e81325e11ea",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/5c198473-3700-47c0-80a6-2e81325e11ea.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    },
+    {
+      "media_id": "ed0f493f-cb80-41d8-9a70-2ead067f2f48",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/ed0f493f-cb80-41d8-9a70-2ead067f2f48.jpg",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/jpeg"
+    },
+    {
+      "media_id": "b92becd5-dfef-486c-825f-8b7a4210a914",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/b92becd5-dfef-486c-825f-8b7a4210a914.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    },
+    {
+      "media_id": "4d38b80d-d45a-4ae4-b23f-5c2a8b790883",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/4d38b80d-d45a-4ae4-b23f-5c2a8b790883.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    },
+    {
+      "media_id": "24a3bf04-ad7b-4fa2-811f-b48b39addf1a",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/24a3bf04-ad7b-4fa2-811f-b48b39addf1a.jpg",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/jpeg"
+    },
+    {
+      "media_id": "246ae920-69f0-469a-a6bc-9e8c5752f7b1",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/246ae920-69f0-469a-a6bc-9e8c5752f7b1.jpg",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/jpeg"
+    },
+    {
+      "media_id": "7d52d947-8f00-4124-9a31-5d978ee4c45e",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/7d52d947-8f00-4124-9a31-5d978ee4c45e.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    },
+    {
+      "media_id": "624050de-7c3b-4b61-9aad-508c13d4ab31",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/624050de-7c3b-4b61-9aad-508c13d4ab31.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    }
+  ],
+  "note": "PresignedwriteURLs/instructionsretainedonlyinignoredoutput;allmatchingbytesuploadedandconfirmed."
+}

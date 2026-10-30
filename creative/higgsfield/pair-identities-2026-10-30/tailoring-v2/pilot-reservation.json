@@ -1,0 +1,19 @@
+{
+  "provider": "Higgsfield",
+  "model": "seedream_5_0_flash",
+  "resolution": "2k",
+  "quoteCreditsPerImage": 0.5,
+  "imageCount": 2,
+  "maximumQuotedCredits": 1,
+  "source": "existing user-authorized balance",
+  "startingKnownQuoted": 495,
+  "reservedUnknownQuoted": 27.5,
+  "pilotBudgetFits594": true,
+  "guide": {
+    "mediaId": "1bfffe64-cd4a-4541-9813-710a65687caa",
+    "sha256": "b5d1c0d6c02a3193f2ad28d7e2c683f2c440bcb47fe0df5722500ea89ca02f06",
+    "purpose": "remotely created geometry-only canonical slot guide"
+  },
+  "status": "reserved-before-one-write",
+  "automaticUnknownRetry": false
+}

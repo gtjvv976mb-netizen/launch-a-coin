@@ -1,0 +1,45 @@
+{
+  "context": "Create unique pictorial meme card artwork with exact identities and matching cropped material references.",
+  "requests": [
+    {
+      "index": 543,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "dd0ae0dd-3e57-49b6-964a-9b651e9d62fc"
+          },
+          {
+            "role": "image",
+            "value": "f985e880-1ed5-40f9-865f-a55bd3d015f3"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact SHIB emblem: orange Shiba face, red circle, pointed ears, white forehead spots/muzzle and tiny dark fangs. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact source emblem expanded into an angular ear/fang relief field, retaining its true face and circle while avoiding extra royal framing. The unique outer frame follows this character: Angular ear-and-fang frame: sharp orange ear-triangle outer joints, white muzzle-curve lower rail and dark fang-shaped notches on a red ground. Matching materials: Orange/red enamel, white ceramic and dark polished metal with narrow gold edges. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    },
+    {
+      "index": 544,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "7ba5f850-1f00-4762-bdd1-df977adf3065"
+          },
+          {
+            "role": "image",
+            "value": "11a59f58-7c78-4f64-a388-82c3925041ce"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact circular City of SolAngeles seal with four figures, cyan-violet border and authentic on-seal lettering. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact four-figure seal remains unaltered while an asymmetric four-quadrant mosaic field quotes its color arrangement into the card edges. The unique outer frame follows this character: Seal-derived mosaic perimeter: four separate character-color quadrants, cyan/violet stepped bands and source border geometry; no invented city skyline. Matching materials: Cyan/violet iridescent enamel, source-figure accent colors and dark polished metal. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    }
+  ]
+}

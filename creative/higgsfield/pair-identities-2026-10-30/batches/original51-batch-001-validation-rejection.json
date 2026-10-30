@@ -1,0 +1,123 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Parameters failed connector schema validation: requests[0].params.medias[0].role [enum]: Value 'image_references' not in allowed enum; requests[0].params.medias[1].role [enum]: Value 'image_references' not in allowed enum; requests[1].params.medias[0].role [enum]: Value 'image_references' not in allowed enum; 5 additional validation error(s)"
+    }
+  ],
+  "structuredContent": {
+    "error": "Parameters failed connector schema validation: requests[0].params.medias[0].role [enum]: Value 'image_references' not in allowed enum; requests[0].params.medias[1].role [enum]: Value 'image_references' not in allowed enum; requests[1].params.medias[0].role [enum]: Value 'image_references' not in allowed enum; 5 additional validation error(s)",
+    "error_code": "INVALID_ARGUMENT",
+    "error_data": {
+      "reason": "INVALID_PARAMETERS",
+      "clamp_errors": [
+        {
+          "path": [
+            "requests",
+            0,
+            "params",
+            "medias",
+            0,
+            "role"
+          ],
+          "message": "Value 'image_references' not in allowed enum",
+          "keyword": "enum",
+          "value": "image_references"
+        },
+        {
+          "path": [
+            "requests",
+            0,
+            "params",
+            "medias",
+            1,
+            "role"
+          ],
+          "message": "Value 'image_references' not in allowed enum",
+          "keyword": "enum",
+          "value": "image_references"
+        },
+        {
+          "path": [
+            "requests",
+            1,
+            "params",
+            "medias",
+            0,
+            "role"
+          ],
+          "message": "Value 'image_references' not in allowed enum",
+          "keyword": "enum",
+          "value": "image_references"
+        },
+        {
+          "path": [
+            "requests",
+            1,
+            "params",
+            "medias",
+            1,
+            "role"
+          ],
+          "message": "Value 'image_references' not in allowed enum",
+          "keyword": "enum",
+          "value": "image_references"
+        },
+        {
+          "path": [
+            "requests",
+            2,
+            "params",
+            "medias",
+            0,
+            "role"
+          ],
+          "message": "Value 'image_references' not in allowed enum",
+          "keyword": "enum",
+          "value": "image_references"
+        },
+        {
+          "path": [
+            "requests",
+            2,
+            "params",
+            "medias",
+            1,
+            "role"
+          ],
+          "message": "Value 'image_references' not in allowed enum",
+          "keyword": "enum",
+          "value": "image_references"
+        },
+        {
+          "path": [
+            "requests",
+            3,
+            "params",
+            "medias",
+            0,
+            "role"
+          ],
+          "message": "Value 'image_references' not in allowed enum",
+          "keyword": "enum",
+          "value": "image_references"
+        },
+        {
+          "path": [
+            "requests",
+            3,
+            "params",
+            "medias",
+            1,
+            "role"
+          ],
+          "message": "Value 'image_references' not in allowed enum",
+          "keyword": "enum",
+          "value": "image_references"
+        }
+      ],
+      "clamp_rewrites": []
+    }
+  },
+  "isError": true
+}

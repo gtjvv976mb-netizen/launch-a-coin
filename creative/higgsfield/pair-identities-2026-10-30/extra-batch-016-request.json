@@ -1,0 +1,104 @@
+{
+  "requests": [
+    {
+      "index": 187,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "d12dedad-d017-4404-87bd-7d6a94373594"
+          },
+          {
+            "role": "image",
+            "value": "22e58a58-0eca-4a2d-889f-c28a8b121ea0"
+          },
+          {
+            "role": "image",
+            "value": "d711adf3-77d9-425e-9e00-ee20ea2ddda5"
+          }
+        ],
+        "prompt": "Edit only the supplied HODL FRONT card print in Image1. Image2 is the authoritative shared content geometry and Image3 is the exact source portrait. Preserve the thin smooth rounded63:88 print, the monochrome graphite/palladium marble finish, four small faithful portrait reliefs and completely blank light ivory name, art, type and description areas. ONE PRECISE CORRECTION: Remove every tiny HODL word/caption that the prior generation invented below the four corner portrait reliefs. The source image has no lettering at all, so there must be ZERO words, letters, numerals or captions anywhere on this decorative front. Replace just those tiny word plaques with continuous matching graphite/silver native corner material; do not erase the actual face reliefs. Do not add new labels or marks. Keep the large creator art window empty and all shared print areas blank/light. No added art inside any content aperture, no footer boxes or serials. Flat orthographic portrait2:3 high2K image, thin rounded print, no slab/case/thickness/pedestal/perspective."
+      }
+    },
+    {
+      "index": 186,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "a0bd05f3-7ee0-4fb1-9a26-5d6b9d81dbd7"
+          },
+          {
+            "role": "image",
+            "value": "03b5908b-31f5-43dd-ab4a-cf5974c62b4c"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ],
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: BIKE TYSON (biketyson). The exact BIKE TYSON meme: a muscular human body forming the bicycle frame between two wheels, with the original head, handlebars and saddle arrangement. Preserve the absurd source structure instead of drawing a normal cyclist. Make that exact source identity the reverse hero, set in bronze enamel, dark wheel-like rail fittings and brushed steel, matching the front. Source-matched face, pose, silhouette, proportions and colors are mandatory. Make the exact identity unmistakable and dominant. Omit unrelated captions, scene signage and clothing slogans. Only authentic exact identity-logo lettering is allowed under the owner\u2019s approval; no extra theme names, ticker labels, serials or platform words.\nIMPORTANT REVERSE STRUCTURE: The reverse is fully decorative edge-to-edge. Remove ALL blank nameplates, horizontal title cartouches, pale writing strips, labels and front content panels from Image1. No empty top band or titlebar anywhere. Continue the exact themed ornamental material through the top and bottom border; central identity hero fills the composition.\nBENIGN PRODUCT-ILLUSTRATION CLARIFICATION: This is a nonsexual absurd bicycle meme, rendered as a small sophisticated bronze bas-relief, not an anatomical study. Preserve the recognizable source head, absurd mechanical bicycle-frame silhouette, both wheels, original handlebars and saddle arrangement. Match the admitted exact source identity; do not replace it with a regular cyclist. Keep the sculpture modest and product-focused, with no genitals, explicit anatomy, sexual content, injury, blood or violence. Refined bronze/steel collector-card ornament around the exact bicycle relief. No text. Continuous reverse with zero writing panels."
+      }
+    },
+    {
+      "index": 166,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "d310422a-4a02-4555-8d11-42f382a2f925"
+          },
+          {
+            "role": "image",
+            "value": "aae07117-1542-42d0-b229-1ec0d9e6773d"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ],
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: Effective Accelerationism (e/acc). The exact luminous cyan human silhouette ascending diagonally through a dark blue-purple field, with the actual source pose and trailing light contour. Do not substitute an e/acc wordmark. Make that exact source identity the reverse hero, set in midnight-blue ceramic, cyan luminous enamel and violet-silver foil, matching the front. Source-matched face, pose, silhouette, proportions and colors are mandatory. Make the exact identity unmistakable and dominant. Omit unrelated captions, scene signage and clothing slogans. Only authentic exact identity-logo lettering is allowed under the owner\u2019s approval; no extra theme names, ticker labels, serials or platform words.\nIMPORTANT REVERSE STRUCTURE: The reverse is fully decorative edge-to-edge. Remove ALL blank nameplates, horizontal title cartouches, pale writing strips, labels and front content panels from Image1. No empty top band or titlebar anywhere. Continue the exact themed ornamental material through the top and bottom border; central identity hero fills the composition."
+      }
+    },
+    {
+      "index": 169,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "22e58a58-0eca-4a2d-889f-c28a8b121ea0"
+          },
+          {
+            "role": "image",
+            "value": "ae24adf0-291b-45dd-a31e-b5855a0f03eb"
+          }
+        ],
+        "prompt": "Create one exceptionally refined, production-ready premium collectible trading-card print. Output portrait 2:3 at high 2K quality. Orthographic front view, absolutely flat thin printed card with tiny satin bevel, smooth 63:88 rounded silhouette, precise manufacturable edges. No case, slab, pedestal, 3D thickness, protruding ornaments, words floating outside or perspective.\nREFERENCE PRIORITY: Image 1 is the CURRENT approved Launch a Card v2 FRONT and is authoritative ONLY for the shared content grid, thin print construction and collector quality. Image 2 is the EXACT real asset identity and is authoritative for recognizable emblem/mascot shape, proportions, pose and colors. Replace every existing Doge motif in Image 1 unless this is the DOGE request. Do not copy its gold/black palette into a different identity.\nSHARED FRONT GRID measured relative to the card: all live content spans x10%\u201390%. Leave a clean LIGHT warm-ivory/pearl writing surface for the name at y5.5%\u201311.5%. Leave a completely clear creator-art aperture x10%\u201390%,y15%\u201359%, with no logo, mascot, objects, illustration or live text inside it. Leave a LIGHT clean narrow ticker/pair writing strip y61.5%\u201364.9%. Leave a LIGHT continuous clean description writing surface x10%\u201390%,y67%\u201392.5%. These paper surfaces must be light enough for dark near-black printed ink. Do not make those live text surfaces dark. No footer slots, no serial, no market-cap box, no token number, no platform label. The bottom below the description must continue the native themed material to the rounded bottom edge, without extra empty boxes.\nThe asset identity belongs only in small impeccable motifs in the outer perimeter rails/corner hardware, never covering or duplicating the creator art. Material treatment, finish, foil edges and ornamental detail must clearly express this exact asset. Restrained depth, coherent studio light, meticulous micro-engraving and polished material separation. Preserve the useful blank content areas. No generated placeholder type, theme title, token data, watermark or decorative caption. Authentic letters that are part of the supplied exact logo are allowed only within that logo; no new lettering.\n\nEXACT ASSET IDENTITY: Agency (Agency). The exact cream pixel terminal emblem on the dark source field, with its small authentic AI-company emblem arrangement on the screen. Preserve source geometry; no invented agency crest or affiliation claims. The supplied Image 2 is identity authority; preserve its actual shapes, colors and expression.\nBESPOKE FRONT: Use black ceramic, warm cream enamel and pale bronze. Work small exact Agency identity reliefs into the outside perimeter only, clear of every shared creator-content aperture. No substitute generic related motif.\nSupport material colors: #171716, #DCC7A5, #F4EDDC. Preserve identity colors; no incidental source slogans, photograph background, captions, signage or text. Only exact intrinsic identity-logo lettering is allowed. No added words. Keep all live print surfaces LIGHT and blank.\nOmit unrelated captions, scene signage and clothing slogans. Only authentic exact identity-logo lettering is allowed under the owner\u2019s approval; no extra theme names, ticker labels, serials or platform words.\nCRITICAL FRONT CONTENT CLEARANCE: The LARGE CENTRAL CREATOR-ART WINDOW MUST BE COMPLETELY EMPTY, BLANK, SOLID LIGHT PEARL. Do NOT place the source mascot, logo, character, photo, scene or emblem inside that large window. No central character on the FRONT. The only identity motifs are SMALL CORNER/PERIMETER reliefs outside all blank writing/art apertures. Exact large central mascot is reserved exclusively for the separate BACK generation. Preserve every front content area as empty light printable material."
+      }
+    }
+  ]
+}

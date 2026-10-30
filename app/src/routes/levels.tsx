@@ -7,14 +7,12 @@ import { PageControls, usePageCapacity } from "../components/carddex/Viewport";
 import { PageFrame } from "../components/mintdex/ui";
 import {
   CARD_DESIGNS,
-  DEFAULT_CARD_DESIGN,
-  getCardDesign,
-  isCardDesignKey,
   type CardDesign,
 } from "../lib/carddex/designs";
 import { pageHead } from "../lib/mintdex/seo";
 import { PAIR_ASSETS, allowedQuotesForDesign, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, isPairAssetKey, preferredDesignForQuote, recommendedMemeQuoteForDesign } from "../lib/carddex/pairs";
 import { MEME_PAIR_PRESETS } from "../lib/carddex/design-pairings";
+import { cardMatchesCollection, designForCollection } from "../lib/carddex/design-collections";
 import { initialQuoteReserves, quoteMetrics } from "../lib/carddex/quote-simulation";
 import { PairBadge, QuoteAssetPicker } from "../components/carddex/QuoteAssetPicker";
 import "../carddex.css";
@@ -42,12 +40,11 @@ const GROUPS = [
   { key: "premium", name: "Premium" },
   { key: "stocks", name: "Stock pairs" },
   { key: "memes", name: "Meme pairs" },
+  { key: "crypto", name: "Crypto pairs" },
   { key: "limited", name: "Limited" },
 ] as const;
 
-const matchesCategory = (design: CardDesign, group: string) => group === "all" || (group === "stocks"
-  ? boundQuoteForDesign(design.key)?.kind === "stock"
-  : group === "memes" ? !!recommendedMemeQuoteForDesign(design.key) : design.category === group);
+const matchesCategory = cardMatchesCollection;
 const memePairKeys = new Set<string>(MEME_PAIR_PRESETS.map(preset => preset.quote));
 const memePairAssets = PAIR_ASSETS.filter(asset => memePairKeys.has(asset.key));
 const matchesMemePair = (design: CardDesign, quoteKey: string) => MEME_PAIR_PRESETS.some(preset => preset.design === design.key && preset.quote === quoteKey);
@@ -58,15 +55,12 @@ function Designs() {
   const key = search.design ?? search.icon ?? search.edition;
   const collection = search.collection === "icons" ? "limited" : search.collection;
   const category = GROUPS.some(group => group.key === collection) ? collection! : "all";
-  const selected = isCardDesignKey(key) ? getCardDesign(key) : null;
   const preferred = isPairAssetKey(search.quote) ? preferredDesignForQuote(search.quote) : null;
-  const family = category === "stocks" ? "stock" : category === "memes" ? "meme" : null;
-  const fallback = family ? CARD_DESIGNS.find(d => d.key === preferred && matchesCategory(d, category)) ?? CARD_DESIGNS.find(d => matchesCategory(d, category)) : null;
-  const design = selected ?? fallback ?? getCardDesign(DEFAULT_CARD_DESIGN);
+  const design = designForCollection(key,category,isPairAssetKey(search.quote)?search.quote:undefined);
   const setCategory = (collection: string) => {
     setPageIndex(0);
     setMemePairFilter("all");
-    const paired = collection === "stocks" || collection === "memes";
+    const paired = collection === "stocks" || collection === "memes" || collection === "crypto";
     const next = paired ? (matchesCategory(design, collection) ? design : CARD_DESIGNS.find(d => d.key === preferred && matchesCategory(d, collection)) ?? CARD_DESIGNS.find(d => matchesCategory(d, collection))) : null;
     const nextQuote = next ? boundQuoteForDesign(next.key) ?? (collection === "memes" ? recommendedMemeQuoteForDesign(next.key, quote.key) : null) ?? defaultQuoteForDesign(next.key) : null;
     void navigate({search: {...search, collection: collection === "all" ? undefined : collection, ...(next && nextQuote ? {design:next.key,quote:nextQuote.key} : {})}, replace: true, resetScroll: false});
@@ -232,7 +226,7 @@ function Designs() {
                   {paired ? <span className="cdx-design-row__pair">{d.stock?.ticker ? `${d.stock.ticker} · ` : ""}{tileQuote.symbol}</span> : null}
                   <small>
                     {boundQuoteForDesign(d.key)
-                      ? `${boundQuoteForDesign(d.key)!.symbol} · ${boundQuoteForDesign(d.key)!.kind === "stock" ? "Tokenized stock quote" : "Memecoin quote"}`
+                      ? `${boundQuoteForDesign(d.key)!.symbol} · ${boundQuoteForDesign(d.key)!.kind === "stock" ? "Tokenized stock quote" : d.category==="crypto" ? "Crypto quote" : "Memecoin quote"}`
                       : d.category === "classic" ? "Trading card classic" : d.category === "limited" ? "Limited edition finish" : "Premium foil"}
                   </small>
                 </span>
@@ -250,7 +244,7 @@ function Designs() {
           <PageControls page={page} pages={pages} onPage={setPageIndex} label={`${shown.length} ${shown.length === 1 ? "design" : "designs"}`} />
           </>}
           <p className="cdx-library__foot">
-            {category === "memes" ? "Meme & collector presets use the shown quote. Asset details identify the exact mint." : "Stock pairs use tokenized quote assets; they do not grant equity."}
+            {category === "memes" ? "Meme & collector designs use the shown quote. Asset details identify the exact mint." : category === "crypto" ? "Crypto designs use their exact Solana quote. Wrapped assets show their provider in Pair details." : "Stock pairs use tokenized quote assets; they do not grant equity."}
           </p>
         </section>
       </div>

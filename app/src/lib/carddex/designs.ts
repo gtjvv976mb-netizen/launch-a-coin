@@ -3,15 +3,16 @@ import { EDITION_CATALOG, type EditionKey } from "../mintdex/editions";
 import { MEME_ICON_CATALOG, type MemeIconKey } from "../mintdex/meme-icons";
 import verifiedAssets from "./pair-assets.json";
 import { DESIGN_QUOTE_KEYS } from "./design-pairings";
+import { ACTIVE_PAIR_DESIGNS, type PairDesignKey } from "./pair-designs";
 
 export type StockDesignKey = "stock-gme" | "stock-tsla" | "stock-nvda" | "stock-aapl" | "stock-mstr" | "stock-coin";
 export type ClassicDesignKey = StockDesignKey | "pokemon-classic" | "pokemon-full-art" | "yugioh-monster" | "yugioh-spell" | "magic-etched" | "duel-masters" | "one-piece" | "obsidian-archive";
-export type CardDesignKey = TierKey | EditionKey | MemeIconKey | ClassicDesignKey;
+export type CardDesignKey = TierKey | EditionKey | MemeIconKey | ClassicDesignKey | PairDesignKey;
 export type CardDesign = {
   key: CardDesignKey;
   name: string;
   description: string;
-  category: "classic" | "premium" | "limited" | "stocks";
+  category: "classic" | "premium" | "limited" | "stocks" | "memes" | "crypto";
   /** The bound tokenized quote's stock reference; never a company share or affiliation. */
   stock?: { ticker: string; name: string; quoteAssetKey: string };
   /** Fixed print/material reference. This never reads the token's price or market cap. */
@@ -71,8 +72,9 @@ const BASE_CARD_DESIGNS: readonly CardDesign[] = [
   ...EDITION_CATALOG.map((edition): CardDesign => ({ key: edition.key, name: edition.name, description: edition.description.replaceAll("MintDex", "Launch a Card"), category: "limited", materialLevel: edition.key === "astral" ? 13 : 14, palette: edition.palette, finish: edition.key === "astral" ? "prism" : "gold", edition: edition.key })),
 ];
 
-export const CARD_DESIGNS: readonly CardDesign[] = BASE_CARD_DESIGNS.map(design => {
-  const key = DESIGN_QUOTE_KEYS[design.key as keyof typeof DESIGN_QUOTE_KEYS];
+export const LEGACY_CARD_DESIGNS = BASE_CARD_DESIGNS;
+export const CARD_DESIGNS: readonly CardDesign[] = [...BASE_CARD_DESIGNS,...ACTIVE_PAIR_DESIGNS].map(design => {
+  const key = DESIGN_QUOTE_KEYS[design.key];
   const asset = verifiedAssets.find(asset => asset.key === key && asset.kind === "stock");
   return asset?.referenceTicker ? {...design, stock: {ticker:asset.referenceTicker,name:asset.name,quoteAssetKey:asset.key}} : design;
 });

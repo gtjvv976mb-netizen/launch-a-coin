@@ -1,0 +1,18 @@
+[
+  {
+    "index": 73,
+    "key": "usduc",
+    "face": "front",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/usduc-front.png"
+  },
+  {
+    "index": 79,
+    "key": "hype",
+    "face": "front",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/hype-front.png"
+  }
+]

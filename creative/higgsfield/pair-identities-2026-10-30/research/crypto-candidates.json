@@ -1,0 +1,16 @@
+[
+  {"key":"wbtc","symbol":"WBTC","name":"Wrapped BTC (Wormhole Solana representation)","mint":"3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh","listingProvider":"Wormhole Portal"},
+  {"key":"eth","symbol":"ETH","name":"Ether (Wormhole Solana representation)","mint":"7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs","listingProvider":"Wormhole Portal"},
+  {"key":"hype","symbol":"HYPE","name":"Hyperliquid (Sunrise Solana representation)","mint":"98sMhvDwXj1RQi5c5Mndm3vPe9cBqPrbLaufMXFNMh5g","listingProvider":"Sunrise (Wormhole Labs)"},
+  {"key":"zec","symbol":"ZEC","name":"Zcash (NEAR Omni Bridge Solana representation)","mint":"A7bdiYdS5GjqGFtxf17ppRHtDKPkkRqbKtR27dxvQXaS","listingProvider":"NEAR Omni Bridge"},
+  {"key":"near","symbol":"NEAR","name":"NEAR Protocol (Omni Bridge Solana representation)","mint":"3ZLekZYq2qkZiSpnSvabjit34tUkjSwD1JFuW9as9wBG","listingProvider":"NEAR Omni Bridge"},
+  {"key":"xrp","symbol":"XRP","name":"Ripple (Hex Trust wrapped XRP)","mint":"6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2","listingProvider":"Hex Trust"},
+  {"key":"xmr","symbol":"XMR","name":"Monero (wXMR Solana representation)","mint":"WXMRyRZhsa19ety5erZhHg4N3xj3EVN92u94422teJp","listingProvider":"wXMR"},
+  {"key":"sui","symbol":"SUI","name":"Sui (Sunrise Solana representation)","mint":"suifhC9gU1VbJAPYPTBkHJyyyStKGLLYPVDTmPoqbvA","listingProvider":"Sunrise (Wormhole Labs)"},
+  {"key":"arb","symbol":"ARB","name":"Arbitrum (Sunrise Solana representation)","mint":"ARBzQTYDCW2KnVEjs1Mc81LekB1ibVFZKbSVmorkoT9d","listingProvider":"Sunrise (Wormhole Labs)"},
+  {"key":"aave","symbol":"AAVE","name":"Aave (Sunrise Solana representation)","mint":"AavE1kKKnesPw4MuRJmJ9jZs9QzEE8CPxQ3ViczUDfc1","listingProvider":"Sunrise (Wormhole Labs)"},
+  {"key":"uni","symbol":"UNI","name":"Uniswap (Sunrise Solana representation)","mint":"uniHfuPhEQSrtpzXpJZDCSq53yaejKKpNhFUiKoHKHV","listingProvider":"Sunrise (Wormhole Labs)"},
+  {"key":"tao","symbol":"TAO","name":"Bittensor (Sunrise Solana representation)","mint":"taoC6xyv2v8tDLcev4uaGUgV4vdQsWJrGft2kcBRrBY","listingProvider":"Sunrise (Wormhole Labs)"},
+  {"key":"peaq","symbol":"PEAQ","name":"peaq (Sunrise Solana representation)","mint":"PEAQjk7SRS6rXHVFFmpRr7zrC4g5ZuEebpwTxvaLr3b","listingProvider":"Sunrise (Wormhole Labs)"},
+  {"key":"mon","symbol":"MON","name":"Monad (Sunrise Solana representation)","mint":"CrAr4RRJMBVwRsZtT62pEhfA9H5utymC2mVx8e7FreP2","listingProvider":"Sunrise (Wormhole Labs)"}
+]

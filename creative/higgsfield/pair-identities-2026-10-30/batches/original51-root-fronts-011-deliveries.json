@@ -1,0 +1,18 @@
+[
+  {
+    "index": 97,
+    "key": "tao",
+    "face": "front",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/tao-front.png"
+  },
+  {
+    "index": 99,
+    "key": "peaq",
+    "face": "front",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/peaq-front.png"
+  }
+]

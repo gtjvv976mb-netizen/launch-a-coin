@@ -1,3 +1,4 @@
+import { ACTIVE_PAIR_DESIGNS } from "../../src/lib/carddex/pair-designs";
 import { describe, expect, test } from "bun:test";
 import { ed25519 } from "@noble/curves/ed25519.js";
 import { parseLiveAmount, formatLiveAmount } from "../../src/components/carddex/live/amounts";
@@ -72,22 +73,39 @@ describe("real quote amount precision", () => {
   });
 });
 describe("creator-wallet transaction commitments", () => {
-  test("stock and collector/meme presets verify exact token accounts and NFT binding attributes", () => {
+  test("all reviewed quotes and creator-design presets verify exact token accounts and NFT binding attributes", () => {
     const stockPairs = {"stock-gme": "gmex", "stock-tsla": "tslax", "stock-nvda": "nvdax", "stock-aapl": "aaplx", "stock-mstr": "mstrx", "stock-coin": "coinx", gamestop: "gmex", amc: "amc", coinbase: "coinx", strategy: "mstrx"};
-    const pairs = [...Object.entries(stockPairs), ...MEME_PAIR_PRESETS.map(({design, quote}) => [design, quote] as const)];
+    // Neutral-design wire fixtures cover every quote even while its new artwork is pending.
+    const pairs = [...Object.entries(stockPairs), ...MEME_PAIR_PRESETS.map(({design, quote}) => [design, quote] as const), ...ACTIVE_PAIR_DESIGNS.filter(design=>design.category!=="memes").map(design=>[design.key,design.quoteKey] as const), ...PAIR_ASSETS.map(asset=>["pokemon-classic",asset.key] as const)];
     for (const [design, quoteKey] of pairs) {
       const token = fixture(design, quoteKey), nft = nftFixture(design, quoteKey);
-      expect(validateLivePlan(token.plan, token.expected).signers).toEqual([creator, mint]);
+      const wire=validateLivePlan(token.plan, token.expected);
+      expect(wire.signers).toEqual([creator, mint]);
       expect(validateLivePlan(nft.plan, nft.expected).signers[0]).toBe(creator);
-      const wrongProgram = getPairAsset(quoteKey).tokenProgram === getPairAsset("sol").tokenProgram ? getPairAsset("gmex").tokenProgram : getPairAsset("sol").tokenProgram;
-      expect(() => validateLivePlan(token.plan, {...token.expected, quoteTokenProgram: wrongProgram})).toThrow();
+      const asset=getPairAsset(quoteKey);
+      const differentMint=getPairAsset(quoteKey==="sol"?"usdc":"sol").mint;
+      expect(differentMint).not.toBe(asset.mint);
+      const wrongProgram = asset.tokenProgram === getPairAsset("sol").tokenProgram ? getPairAsset("gmex").tokenProgram : getPairAsset("sol").tokenProgram;
+      const create=wire.instructions.find(instruction=>instruction.program===LIVE_PROGRAMS.pump)!;
+      if(quoteKey!=="sol"){
+        expect(create.accounts[18]).toBe(asset.tokenProgram);
+        expect(() => validateLivePlan(token.plan, {...token.expected, quoteTokenProgram: wrongProgram})).toThrow("creation accounts");
+      }else{
+        // Native SOL create_v2 has no quote-program account to substitute.
+        expect(create.accounts).toHaveLength(16);
+        expect(wire.keys).not.toContain(wrongProgram);
+      }
       expect(() => validateLivePlan(token.plan, {...token.expected, quoteDecimals: token.expected.quoteDecimals + 1})).toThrow("quote or initial buy changed");
-      expect(() => validateLivePlan(token.plan, {...token.expected, quoteMint: getPairAsset("sol").mint})).toThrow("quote or initial buy changed");
+      expect(() => validateLivePlan(token.plan, {...token.expected, quoteMint: differentMint})).toThrow("quote or initial buy changed");
       const wrongDesign = CARD_DESIGNS.find(candidate => candidate.key !== design)!.key;
       expect(() => validateLivePlan(nft.plan, {...nft.expected, cardTemplate: wrongDesign})).toThrow("card NFT attributes");
-      expect(() => validateLivePlan(nft.plan, {...nft.expected, quoteMint: getPairAsset("sol").mint})).toThrow("quote or initial buy changed");
-      // Matching review labels and decimal precision do not make a different mint valid.
-      const replacement = PAIR_ASSETS.find(asset => asset.key !== quoteKey && asset.decimals === token.expected.quoteDecimals)!;
+      expect(() => validateLivePlan(nft.plan, {...nft.expected, quoteMint: differentMint})).toThrow("quote or initial buy changed");
+      // Prefer equal precision; unique-unit quotes such as XMR still reject a coherently relabelled different mint.
+      const replacement = PAIR_ASSETS.find(candidate => candidate.key !== quoteKey && candidate.key!=="sol" && candidate.decimals === token.expected.quoteDecimals)
+        ?? PAIR_ASSETS.find(candidate=>candidate.key!==quoteKey && candidate.key!=="sol");
+      if(!replacement)throw new Error(`A distinct non-native quote fixture is required for ${quoteKey}.`);
+      expect(replacement.mint).not.toBe(asset.mint);
+      expect(wire.keys).not.toContain(replacement.mint);
       const changedQuote = {quoteKey: replacement.key, quoteMint: replacement.mint, quoteDecimals: replacement.decimals};
       expect(() => validateLivePlan({...token.plan, review: {...token.plan.review, ...changedQuote}}, {...token.expected, ...changedQuote, quoteTokenProgram: replacement.tokenProgram})).toThrow("selected quote mint");
       expect(() => validateLivePlan({...nft.plan, review: {...nft.plan.review, ...changedQuote}}, {...nft.expected, ...changedQuote, quoteTokenProgram: replacement.tokenProgram})).toThrow("card NFT attributes");

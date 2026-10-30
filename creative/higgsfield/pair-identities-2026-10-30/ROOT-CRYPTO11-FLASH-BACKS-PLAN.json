@@ -1,0 +1,748 @@
+{
+  "planId": "crypto11-matching-backs-seedream-flash-root-only",
+  "preparedAt": "2026-10-30T03:04:58.019909+00:00",
+  "paidExecutor": "root-only",
+  "childPaidCallsPaused": true,
+  "model": "seedream_5_0_flash",
+  "resolution": "2k",
+  "creditsPerImage": 0.5,
+  "costQuoteFile": "research/crypto11-flash-cost-quote.json",
+  "imageCount": 11,
+  "quotedPlanCredits": 5.5,
+  "maximumImagesPerCall": 2,
+  "maximumKnownInFlightJobs": 4,
+  "providerAutomaticProjectCreation": false,
+  "folderId": null,
+  "allFrontsActuallyAccepted": true,
+  "recoveryExcludedUnknownIndices": [
+    38,
+    40,
+    41,
+    43,
+    94,
+    96,
+    138,
+    140,
+    141,
+    143
+  ],
+  "original51StartingKnownJobs": 95,
+  "original51StartingQuotedCredits": 261.25,
+  "original51ReservedUnknownJobs": 6,
+  "original51ReservedUnknownQuotedCredits": 16.5,
+  "original51AfterThisPlanKnownJobs": 98,
+  "original51AfterThisPlanKnownQuotedCredits": 262.75,
+  "final8StartingKnownJobs": 8,
+  "final8StartingQuotedCredits": 22,
+  "final8AfterThisPlanKnownJobs": 16,
+  "final8AfterThisPlanKnownQuotedCredits": 26,
+  "referenceRule": "Image1 exact confirmed source; Image2 its own accepted completed front. No unrelated Doge reverse construction or template reference.",
+  "instructions": [
+    "Submit each frozen payload at most once; persist raw actual receipt before next call.",
+    "Transport ambiguity remains unknown and reserved; never retry without exact recovery.",
+    "Final8 receipts/acceptance belong to crypto_pair_research; first3 original receipts/acceptance to extra_pair_art.",
+    "Original98/100/102 and final8 prior202..216 back plans were unsubmitted and superseded by these new601..611 payloads. Do not also submit the retired payloads.",
+    "Flash quoted unit cost0.5 is separate from historical GPT2.75 pricing; ledger adoption must sum actual per-job quoted costs."
+  ],
+  "requests": [
+    {
+      "index": 601,
+      "quoteKey": "tao",
+      "designKey": "pair-tao",
+      "exactQuoteMint": "taoC6xyv2v8tDLcev4uaGUgV4vdQsWJrGft2kcBRrBY",
+      "legacyUnsubmittedBackIndex": 98,
+      "owningLedger": "generation-ledger-51.json",
+      "ledgerAndAcceptanceWriter": "extra_pair_art",
+      "acceptedFrontJobId": "15b50ea2-fdd3-407a-85f2-fe739a77bd7e",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/tao-front.png",
+      "acceptedFrontSha256": "46497729032e8394571ebb11c75bf07e7d7564cd940412b930be36645f6e4188",
+      "exactSourceMediaId": "cf709461-5bba-4aec-8406-de2d5c60bc7f",
+      "exactSourcePath": "creative/higgsfield/pair-identities-2026-10-30/references/tao-primary-inline-432636a22810-reference-1024.png",
+      "exactSourceSha256": "14822972f8b7c066c75e620168f5e1bad9beb368932c5e543b14b6c9c96852a5",
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified Bittensor identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the exact black tau silhouette in Image1: its long broad upper stroke, the characteristic left end and the curved tapered descending stem, including the white negative field. Keep its distinctive proportions as a crisp black inlay.\nMATCHED MATERIAL LANGUAGE: Black ceramic and satin palladium from Image2, with fine parallel contour tracks following the exact tau curves in the surrounding field.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "cf709461-5bba-4aec-8406-de2d5c60bc7f"
+          },
+          {
+            "role": "image",
+            "value": "15b50ea2-fdd3-407a-85f2-fe739a77bd7e"
+          }
+        ]
+      }
+    },
+    {
+      "index": 602,
+      "quoteKey": "peaq",
+      "designKey": "pair-peaq",
+      "exactQuoteMint": "PEAQjk7SRS6rXHVFFmpRr7zrC4g5ZuEebpwTxvaLr3b",
+      "legacyUnsubmittedBackIndex": 100,
+      "owningLedger": "generation-ledger-51.json",
+      "ledgerAndAcceptanceWriter": "extra_pair_art",
+      "acceptedFrontJobId": "23410be1-545f-471e-9e87-067f7a2989d6",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/peaq-front.png",
+      "acceptedFrontSha256": "9e3e51deb0fdda55bee6e8f6bf6321c60c4700c9a4e0fabd5ba8b5be21a69c8c",
+      "exactSourceMediaId": "6a51578d-bd44-4436-8c8b-79044cbe3b54",
+      "exactSourcePath": "creative/higgsfield/pair-identities-2026-10-30/references/peaq-c1f813eb9e81.png",
+      "exactSourceSha256": "c1f813eb9e810b97f9c30267942e12cb49f01bf023c00f160547e4e7a0487282",
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified peaq identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the exact purple open-link glyph in Image1, preserving its two joined looping curves, open terminals, diagonal flow and the source purple color. The large hero is the precise purple source mark rather than a generic infinity sign.\nMATCHED MATERIAL LANGUAGE: Deep jade enamel, dark stone ceramic and fine satin silver edge fittings from Image2. Place the exact purple source glyph clearly against a quiet compatible field; purple remains the hero identity color.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "6a51578d-bd44-4436-8c8b-79044cbe3b54"
+          },
+          {
+            "role": "image",
+            "value": "23410be1-545f-471e-9e87-067f7a2989d6"
+          }
+        ]
+      }
+    },
+    {
+      "index": 603,
+      "quoteKey": "mon",
+      "designKey": "pair-mon",
+      "exactQuoteMint": "CrAr4RRJMBVwRsZtT62pEhfA9H5utymC2mVx8e7FreP2",
+      "legacyUnsubmittedBackIndex": 102,
+      "owningLedger": "generation-ledger-51.json",
+      "ledgerAndAcceptanceWriter": "extra_pair_art",
+      "acceptedFrontJobId": "d4a996bf-2b28-4b31-a9b6-95ba707afa18",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/mon-front.png",
+      "acceptedFrontSha256": "35f43632bf7a093705e9a709f7104ec8ae3b81d98d5196fdab62360c6429fe4d",
+      "exactSourceMediaId": "a896fbce-db3b-4db4-ae6a-b0ec28dcbd60",
+      "exactSourcePath": "creative/higgsfield/pair-identities-2026-10-30/references/mon-3625ee5cdc35.png",
+      "exactSourceSha256": "3625ee5cdc357de28f1a28decbaa84a1985ba2b8039bed798d7ff695cd72162c",
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified Monad identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the exact tilted hollow rounded-diamond mark in Image1, preserving its white silhouette, purple field, rounded inner opening and precise tilt.\nMATCHED MATERIAL LANGUAGE: Violet optical enamel, dark plum ceramic and satin palladium from Image2, with offset rounded-diamond contour relief in the surrounding field.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "a896fbce-db3b-4db4-ae6a-b0ec28dcbd60"
+          },
+          {
+            "role": "image",
+            "value": "d4a996bf-2b28-4b31-a9b6-95ba707afa18"
+          }
+        ]
+      }
+    },
+    {
+      "index": 604,
+      "quoteKey": "pump",
+      "designKey": "pair-pump",
+      "exactQuoteMint": "pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn",
+      "legacyUnsubmittedBackIndex": 202,
+      "owningLedger": "generation-ledger-final.json",
+      "ledgerAndAcceptanceWriter": "crypto_pair_research",
+      "acceptedFrontJobId": "2476f7d1-b25b-4878-adbd-afb59263028e",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/pump-front.png",
+      "acceptedFrontSha256": "5d54eca5d7ac588c3e3da3664819c5e33f518d77db272d87f211dc0e30be2b37",
+      "exactSourceMediaId": "1bc1874b-26e3-4b8f-818c-5dce386f6319",
+      "exactSourcePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-final-references/pump-380ece26fcc6.png",
+      "exactSourceSha256": "380ece26fcc65d4707b14b292bb2d27b242bb5249de2f7376ef9bdc267cfb64b",
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified Pump identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the exact green-and-white capsule on the navy disk in Image1: green half at lower left, white half at upper right, diagonal orientation, dark green outline and source highlight.\nMATCHED MATERIAL LANGUAGE: Navy ceramic, mint-green enamel and cool palladium from Image2, with restrained diagonal capsule-contour rail relief.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "1bc1874b-26e3-4b8f-818c-5dce386f6319"
+          },
+          {
+            "role": "image",
+            "value": "2476f7d1-b25b-4878-adbd-afb59263028e"
+          }
+        ]
+      }
+    },
+    {
+      "index": 605,
+      "quoteKey": "alch",
+      "designKey": "pair-alch",
+      "exactQuoteMint": "HNg5PYJmtqcmzXrv6S9zP1CDKk5BgDuyFBxbvNApump",
+      "legacyUnsubmittedBackIndex": 204,
+      "owningLedger": "generation-ledger-final.json",
+      "ledgerAndAcceptanceWriter": "crypto_pair_research",
+      "acceptedFrontJobId": "98b9b952-e006-4504-a656-c79ac833e864",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/alch-front.png",
+      "acceptedFrontSha256": "1718bdff9d2720463bae163d963bdf7b37aa7c83b5a8aaa4442901490f66b272",
+      "exactSourceMediaId": "39c391ba-feeb-456b-8a8b-cec25c2c6e0e",
+      "exactSourcePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-final-references/alch-d8434afffbae.jpg",
+      "exactSourceSha256": "d8434afffbaeb979cd6bf5d41a868f6510b8636c46e246eff4afe6c938fe3f53",
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified Alchemist AI identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the exact red and yellow/gold pixel A in Image1, preserving its stepped pixel silhouette, internal golden highlights and detached glowing square pixels on black.\nMATCHED MATERIAL LANGUAGE: Near-black ceramic, warm gold metal and tiny source-red/gold pixel enamel details from Image2. Keep the A as the authentic pixel art, with precise square edges.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "39c391ba-feeb-456b-8a8b-cec25c2c6e0e"
+          },
+          {
+            "role": "image",
+            "value": "98b9b952-e006-4504-a656-c79ac833e864"
+          }
+        ]
+      }
+    },
+    {
+      "index": 606,
+      "quoteKey": "pumpcade",
+      "designKey": "pair-pumpcade",
+      "exactQuoteMint": "Eg2ymQ2aQqjMcibnmTt8erC6Tvk9PVpJZCxvVPJz2agu",
+      "legacyUnsubmittedBackIndex": 206,
+      "owningLedger": "generation-ledger-final.json",
+      "ledgerAndAcceptanceWriter": "crypto_pair_research",
+      "acceptedFrontJobId": "d7686101-5f28-4858-8c39-5c0c726a230d",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/pumpcade-front.png",
+      "acceptedFrontSha256": "ee5f6fb30daa2556b8bfe7b9e3a2f7b7708771169e0762189812353d9aabcf21",
+      "exactSourceMediaId": "49c62066-9b68-48ef-a110-846ea0fab7bc",
+      "exactSourcePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-final-references/pumpcade-7986d3ba9bc6.jpg",
+      "exactSourceSha256": "7986d3ba9bc689dd0be8892d95e9a9d11910251c24ed20b118aedca89e8fa86e",
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified Pumpcade identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the complete gold arcade medallion in Image1: exact joystick, speech-bubble icon, authentic PUMPCADE lettering along its top and bottom arcs and the existing star marks. Preserve the original complete logo as supplied.\nMATCHED MATERIAL LANGUAGE: Dark red lacquer and warm gold metal from Image2; use compact joystick-gate geometry in the continuous surrounding field. The existing logo lettering is the only lettering.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "49c62066-9b68-48ef-a110-846ea0fab7bc"
+          },
+          {
+            "role": "image",
+            "value": "d7686101-5f28-4858-8c39-5c0c726a230d"
+          }
+        ]
+      }
+    },
+    {
+      "index": 607,
+      "quoteKey": "codec",
+      "designKey": "pair-codec",
+      "exactQuoteMint": "69LjZUUzxj3Cb3Fxeo1X4QpYEQTboApkhXTysPpbpump",
+      "legacyUnsubmittedBackIndex": 208,
+      "owningLedger": "generation-ledger-final.json",
+      "ledgerAndAcceptanceWriter": "crypto_pair_research",
+      "acceptedFrontJobId": "12d5f3d1-54cb-4eb9-b04d-afb15aecae58",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/codec-front.png",
+      "acceptedFrontSha256": "9d5e3cbe52ca569a284342dc08b521df659752db6da1ffd33df71305afdc174e",
+      "exactSourceMediaId": "762d3608-7b4c-4846-a3bc-80ec601cb1db",
+      "exactSourcePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-final-references/codec-84b41e87625c.png",
+      "exactSourceSha256": "84b41e87625c6e9bf2a21c3ae38471cf46da233114b8a2a9524115cfa7648ae1",
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified CODEC identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the complete white segmented CODEC wordmark in Image1. Preserve its exact square terminals, letter proportions and intentional black gaps.\nMATCHED MATERIAL LANGUAGE: Matte black ceramic, brushed silver and source-derived square-step contour details from Image2. Keep the full authentic wordmark intact as the sole lettering.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "762d3608-7b4c-4846-a3bc-80ec601cb1db"
+          },
+          {
+            "role": "image",
+            "value": "12d5f3d1-54cb-4eb9-b04d-afb15aecae58"
+          }
+        ]
+      }
+    },
+    {
+      "index": 608,
+      "quoteKey": "ape",
+      "designKey": "pair-ape",
+      "exactQuoteMint": "C1MHyoTJpRTeS9AQCyspNVu2EWAYCZwmJ1jNkEArFP1f",
+      "legacyUnsubmittedBackIndex": 210,
+      "owningLedger": "generation-ledger-final.json",
+      "ledgerAndAcceptanceWriter": "crypto_pair_research",
+      "acceptedFrontJobId": "2748331d-99d5-48a5-8c6a-8397aba4342f",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/ape-front.png",
+      "acceptedFrontSha256": "7ec4de5974baaa004899d9d6137c3f90184ddf5fa4e6d36db3e57a28ae082893",
+      "exactSourceMediaId": "4fe9a66e-f07c-4a66-a606-cb390672494a",
+      "exactSourcePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-final-references/ape-40c62c5756b7.png",
+      "exactSourceSha256": "40c62c5756b75424b3264d0f7484075219806ce6e0072c84b730f07d7d305044",
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified APE exact quote identity identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the precise white walking gorilla in left-facing profile on its vivid blue disk in Image1. Preserve the gorilla full body, limbs, head, orientation and white negative-space divisions exactly.\nMATCHED MATERIAL LANGUAGE: Vivid cobalt enamel, dark blue ceramic and satin silver from Image2, with perimeter flow following the supplied walking profile. The actual source walking gorilla is the sole hero identity.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "4fe9a66e-f07c-4a66-a606-cb390672494a"
+          },
+          {
+            "role": "image",
+            "value": "2748331d-99d5-48a5-8c6a-8397aba4342f"
+          }
+        ]
+      }
+    },
+    {
+      "index": 609,
+      "quoteKey": "link",
+      "designKey": "pair-link",
+      "exactQuoteMint": "LinkhB3afbBKb2EQQu7s7umdZceV3wcvAUJhQAfQ23L",
+      "legacyUnsubmittedBackIndex": 212,
+      "owningLedger": "generation-ledger-final.json",
+      "ledgerAndAcceptanceWriter": "crypto_pair_research",
+      "acceptedFrontJobId": "5951ab14-9944-4d64-970f-15be34c6ee96",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/link-front.png",
+      "acceptedFrontSha256": "7854525aa3c42f51218301cc78988c958e369378b6af971a50d24c66053e276d",
+      "exactSourceMediaId": "7785acec-1928-4b56-abb8-d4f53135c4d8",
+      "exactSourcePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-final-references/link-878946df941b-reference-1024.png",
+      "exactSourceSha256": "f053ea8c93d6984d5eb64c2a7e94974649617f9575fc9a34044d239e47f0f1a3",
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified Chainlink identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the precise white hollow hexagonal ring on the blue disk in Image1, including its six equal sides, blue inner opening and exact ring thickness.\nMATCHED MATERIAL LANGUAGE: Cobalt enamel and satin silver from Image2, with the same six-sided angle rhythm carried subtly into the uninterrupted surrounding material.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "7785acec-1928-4b56-abb8-d4f53135c4d8"
+          },
+          {
+            "role": "image",
+            "value": "5951ab14-9944-4d64-970f-15be34c6ee96"
+          }
+        ]
+      }
+    },
+    {
+      "index": 610,
+      "quoteKey": "ore",
+      "designKey": "pair-ore",
+      "exactQuoteMint": "oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp",
+      "legacyUnsubmittedBackIndex": 214,
+      "owningLedger": "generation-ledger-final.json",
+      "ledgerAndAcceptanceWriter": "crypto_pair_research",
+      "acceptedFrontJobId": "349dff04-2521-4f93-8a6a-11a887a70773",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/ore-front.png",
+      "acceptedFrontSha256": "099a51740e704d92c73c52d489f9e509fb7d71c1c0134b247d3583b80bb4646a",
+      "exactSourceMediaId": "5eaec00c-d159-40cd-9f37-32ee9ae8dd18",
+      "exactSourcePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-final-references/ore-ca2410840b70.png",
+      "exactSourceSha256": "ca2410840b700b528578744e4cac65741b93e6361445927a0633323e9efc8e45",
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified ORE identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the exact thick white ring with opposite short diagonal tabs at lower-left and upper-right on the black disk in Image1. Preserve the circular opening, tab angles and silhouette.\nMATCHED MATERIAL LANGUAGE: Obsidian ceramic and satin silver from Image2; use the ring-and-opposite-tab geometry as quiet surrounding contour relief.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "5eaec00c-d159-40cd-9f37-32ee9ae8dd18"
+          },
+          {
+            "role": "image",
+            "value": "349dff04-2521-4f93-8a6a-11a887a70773"
+          }
+        ]
+      }
+    },
+    {
+      "index": 611,
+      "quoteKey": "skr",
+      "designKey": "pair-skr",
+      "exactQuoteMint": "SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3",
+      "legacyUnsubmittedBackIndex": 216,
+      "owningLedger": "generation-ledger-final.json",
+      "ledgerAndAcceptanceWriter": "crypto_pair_research",
+      "acceptedFrontJobId": "baeb20be-b223-41b6-a035-f85683186188",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/skr-front.png",
+      "acceptedFrontSha256": "4a50b714645f0cde57bddf1801b34f7aff2aecc5e23905f81e10ed9ccc8c3af4",
+      "exactSourceMediaId": "fafb60d1-5795-4f6f-827a-96a7335ba6ea",
+      "exactSourcePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-final-references/skr-14d4f9e9944c.png",
+      "exactSourceSha256": "14d4f9e9944ccd89005d6fbf15974c72c06327ab8204433d74f18675110467c6",
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified Seeker identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the exact white split-S source glyph on the black disk in Image1: two offset curved sections, straight rectangular terminals and its distinctive separated negative spaces.\nMATCHED MATERIAL LANGUAGE: Black ceramic, soft carbon texture and satin silver from Image2; use flowing split-curve relief that echoes the exact source geometry.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "fafb60d1-5795-4f6f-827a-96a7335ba6ea"
+          },
+          {
+            "role": "image",
+            "value": "baeb20be-b223-41b6-a035-f85683186188"
+          }
+        ]
+      }
+    }
+  ],
+  "batches": [
+    {
+      "batchId": "crypto11-flash-backs-001",
+      "indices": [
+        601,
+        602
+      ],
+      "quoteKeys": [
+        "tao",
+        "peaq"
+      ],
+      "quotedCredits": 1.0,
+      "requestFile": "batches/crypto11-flash-backs-001-request.json",
+      "receiptFile": "batches/crypto11-flash-backs-001-receipt.json",
+      "statusFile": "batches/crypto11-flash-backs-001-status.json",
+      "proofFile": "batches/crypto11-flash-backs-001-proof.png",
+      "requestSha256": "6d703a2431c2a231adb9868559047dde1bb5d133796ca15859714635f346df53",
+      "payload": {
+        "requests": [
+          {
+            "index": 601,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified Bittensor identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the exact black tau silhouette in Image1: its long broad upper stroke, the characteristic left end and the curved tapered descending stem, including the white negative field. Keep its distinctive proportions as a crisp black inlay.\nMATCHED MATERIAL LANGUAGE: Black ceramic and satin palladium from Image2, with fine parallel contour tracks following the exact tau curves in the surrounding field.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "cf709461-5bba-4aec-8406-de2d5c60bc7f"
+                },
+                {
+                  "role": "image",
+                  "value": "15b50ea2-fdd3-407a-85f2-fe739a77bd7e"
+                }
+              ]
+            }
+          },
+          {
+            "index": 602,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified peaq identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the exact purple open-link glyph in Image1, preserving its two joined looping curves, open terminals, diagonal flow and the source purple color. The large hero is the precise purple source mark rather than a generic infinity sign.\nMATCHED MATERIAL LANGUAGE: Deep jade enamel, dark stone ceramic and fine satin silver edge fittings from Image2. Place the exact purple source glyph clearly against a quiet compatible field; purple remains the hero identity color.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "6a51578d-bd44-4436-8c8b-79044cbe3b54"
+                },
+                {
+                  "role": "image",
+                  "value": "23410be1-545f-471e-9e87-067f7a2989d6"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchId": "crypto11-flash-backs-002",
+      "indices": [
+        603,
+        604
+      ],
+      "quoteKeys": [
+        "mon",
+        "pump"
+      ],
+      "quotedCredits": 1.0,
+      "requestFile": "batches/crypto11-flash-backs-002-request.json",
+      "receiptFile": "batches/crypto11-flash-backs-002-receipt.json",
+      "statusFile": "batches/crypto11-flash-backs-002-status.json",
+      "proofFile": "batches/crypto11-flash-backs-002-proof.png",
+      "requestSha256": "16a51a38038f67dcc369ef6287c28bd93e50282a875350c9a463c3d826363870",
+      "payload": {
+        "requests": [
+          {
+            "index": 603,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified Monad identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the exact tilted hollow rounded-diamond mark in Image1, preserving its white silhouette, purple field, rounded inner opening and precise tilt.\nMATCHED MATERIAL LANGUAGE: Violet optical enamel, dark plum ceramic and satin palladium from Image2, with offset rounded-diamond contour relief in the surrounding field.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "a896fbce-db3b-4db4-ae6a-b0ec28dcbd60"
+                },
+                {
+                  "role": "image",
+                  "value": "d4a996bf-2b28-4b31-a9b6-95ba707afa18"
+                }
+              ]
+            }
+          },
+          {
+            "index": 604,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified Pump identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the exact green-and-white capsule on the navy disk in Image1: green half at lower left, white half at upper right, diagonal orientation, dark green outline and source highlight.\nMATCHED MATERIAL LANGUAGE: Navy ceramic, mint-green enamel and cool palladium from Image2, with restrained diagonal capsule-contour rail relief.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "1bc1874b-26e3-4b8f-818c-5dce386f6319"
+                },
+                {
+                  "role": "image",
+                  "value": "2476f7d1-b25b-4878-adbd-afb59263028e"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchId": "crypto11-flash-backs-003",
+      "indices": [
+        605,
+        606
+      ],
+      "quoteKeys": [
+        "alch",
+        "pumpcade"
+      ],
+      "quotedCredits": 1.0,
+      "requestFile": "batches/crypto11-flash-backs-003-request.json",
+      "receiptFile": "batches/crypto11-flash-backs-003-receipt.json",
+      "statusFile": "batches/crypto11-flash-backs-003-status.json",
+      "proofFile": "batches/crypto11-flash-backs-003-proof.png",
+      "requestSha256": "ef8fa82a54be8678afb9e84b2f2eb50703a5383d1fc18aa94350041d3fc0cbd6",
+      "payload": {
+        "requests": [
+          {
+            "index": 605,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified Alchemist AI identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the exact red and yellow/gold pixel A in Image1, preserving its stepped pixel silhouette, internal golden highlights and detached glowing square pixels on black.\nMATCHED MATERIAL LANGUAGE: Near-black ceramic, warm gold metal and tiny source-red/gold pixel enamel details from Image2. Keep the A as the authentic pixel art, with precise square edges.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "39c391ba-feeb-456b-8a8b-cec25c2c6e0e"
+                },
+                {
+                  "role": "image",
+                  "value": "98b9b952-e006-4504-a656-c79ac833e864"
+                }
+              ]
+            }
+          },
+          {
+            "index": 606,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified Pumpcade identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the complete gold arcade medallion in Image1: exact joystick, speech-bubble icon, authentic PUMPCADE lettering along its top and bottom arcs and the existing star marks. Preserve the original complete logo as supplied.\nMATCHED MATERIAL LANGUAGE: Dark red lacquer and warm gold metal from Image2; use compact joystick-gate geometry in the continuous surrounding field. The existing logo lettering is the only lettering.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "49c62066-9b68-48ef-a110-846ea0fab7bc"
+                },
+                {
+                  "role": "image",
+                  "value": "d7686101-5f28-4858-8c39-5c0c726a230d"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchId": "crypto11-flash-backs-004",
+      "indices": [
+        607,
+        608
+      ],
+      "quoteKeys": [
+        "codec",
+        "ape"
+      ],
+      "quotedCredits": 1.0,
+      "requestFile": "batches/crypto11-flash-backs-004-request.json",
+      "receiptFile": "batches/crypto11-flash-backs-004-receipt.json",
+      "statusFile": "batches/crypto11-flash-backs-004-status.json",
+      "proofFile": "batches/crypto11-flash-backs-004-proof.png",
+      "requestSha256": "c5033f7c3a33580488d0376e4dba952cd864307ff63319e58ef40dd88b8164a4",
+      "payload": {
+        "requests": [
+          {
+            "index": 607,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified CODEC identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the complete white segmented CODEC wordmark in Image1. Preserve its exact square terminals, letter proportions and intentional black gaps.\nMATCHED MATERIAL LANGUAGE: Matte black ceramic, brushed silver and source-derived square-step contour details from Image2. Keep the full authentic wordmark intact as the sole lettering.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "762d3608-7b4c-4846-a3bc-80ec601cb1db"
+                },
+                {
+                  "role": "image",
+                  "value": "12d5f3d1-54cb-4eb9-b04d-afb15aecae58"
+                }
+              ]
+            }
+          },
+          {
+            "index": 608,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified APE exact quote identity identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the precise white walking gorilla in left-facing profile on its vivid blue disk in Image1. Preserve the gorilla full body, limbs, head, orientation and white negative-space divisions exactly.\nMATCHED MATERIAL LANGUAGE: Vivid cobalt enamel, dark blue ceramic and satin silver from Image2, with perimeter flow following the supplied walking profile. The actual source walking gorilla is the sole hero identity.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "4fe9a66e-f07c-4a66-a606-cb390672494a"
+                },
+                {
+                  "role": "image",
+                  "value": "2748331d-99d5-48a5-8c6a-8397aba4342f"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchId": "crypto11-flash-backs-005",
+      "indices": [
+        609,
+        610
+      ],
+      "quoteKeys": [
+        "link",
+        "ore"
+      ],
+      "quotedCredits": 1.0,
+      "requestFile": "batches/crypto11-flash-backs-005-request.json",
+      "receiptFile": "batches/crypto11-flash-backs-005-receipt.json",
+      "statusFile": "batches/crypto11-flash-backs-005-status.json",
+      "proofFile": "batches/crypto11-flash-backs-005-proof.png",
+      "requestSha256": "64f199c1e61878394cd1396c15e3ebb775b79bbf6a03fe2199632a9683d2ad9f",
+      "payload": {
+        "requests": [
+          {
+            "index": 609,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified Chainlink identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the precise white hollow hexagonal ring on the blue disk in Image1, including its six equal sides, blue inner opening and exact ring thickness.\nMATCHED MATERIAL LANGUAGE: Cobalt enamel and satin silver from Image2, with the same six-sided angle rhythm carried subtly into the uninterrupted surrounding material.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "7785acec-1928-4b56-abb8-d4f53135c4d8"
+                },
+                {
+                  "role": "image",
+                  "value": "5951ab14-9944-4d64-970f-15be34c6ee96"
+                }
+              ]
+            }
+          },
+          {
+            "index": 610,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified ORE identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the exact thick white ring with opposite short diagonal tabs at lower-left and upper-right on the black disk in Image1. Preserve the circular opening, tab angles and silhouette.\nMATCHED MATERIAL LANGUAGE: Obsidian ceramic and satin silver from Image2; use the ring-and-opposite-tab geometry as quiet surrounding contour relief.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "5eaec00c-d159-40cd-9f37-32ee9ae8dd18"
+                },
+                {
+                  "role": "image",
+                  "value": "349dff04-2521-4f93-8a6a-11a887a70773"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchId": "crypto11-flash-backs-006",
+      "indices": [
+        611
+      ],
+      "quoteKeys": [
+        "skr"
+      ],
+      "quotedCredits": 0.5,
+      "requestFile": "batches/crypto11-flash-backs-006-request.json",
+      "receiptFile": "batches/crypto11-flash-backs-006-receipt.json",
+      "statusFile": "batches/crypto11-flash-backs-006-status.json",
+      "proofFile": "batches/crypto11-flash-backs-006-proof.png",
+      "requestSha256": "1a39338f29008c6649a95944fafe30a09b743418e64c38fc3957eaef979162e7",
+      "payload": {
+        "requests": [
+          {
+            "index": 611,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified Seeker identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the exact white split-S source glyph on the black disk in Image1: two offset curved sections, straight rectangular terminals and its distinctive separated negative spaces.\nMATCHED MATERIAL LANGUAGE: Black ceramic, soft carbon texture and satin silver from Image2; use flowing split-curve relief that echoes the exact source geometry.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "fafb60d1-5795-4f6f-827a-96a7335ba6ea"
+                },
+                {
+                  "role": "image",
+                  "value": "baeb20be-b223-41b6-a035-f85683186188"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "status": "prepared-frozen-unsubmitted"
+}

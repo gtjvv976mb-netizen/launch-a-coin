@@ -1,0 +1,45 @@
+{
+  "context": "Create unique pictorial meme card artwork with exact identities and matching cropped material references.",
+  "requests": [
+    {
+      "index": 503,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "ae24adf0-291b-45dd-a31e-b5855a0f03eb"
+          },
+          {
+            "role": "image",
+            "value": "78d8d6f8-81cb-4c78-b498-1676f519d7cf"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact cream pixel terminal with its small authentic AI-company emblem arrangement on the dark screen. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact terminal and authentic screen arrangement in a stepped monitor-chassis relief field, with blank dark screen-like negative spaces around it. The unique outer frame follows this character: Pixel-terminal hardware rim: cream stepped monitor bevels, sparse rectangular screen-socket relief and exact-source emblem microinlays only at safe corners. Matching materials: Cream ceramic, black screen glass, satin dark metal and source pale-gold pixels. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    },
+    {
+      "index": 509,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "03b5908b-31f5-43dd-ab4a-cf5974c62b4c"
+          },
+          {
+            "role": "image",
+            "value": "e116ea7f-86fe-4346-8a5f-63d91f978de7"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact muscular human body forming the bicycle frame between two wheels, with original head, saddle and handlebars; not a normal cyclist. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact absurd human-body bicycle hero with a spoke/rim halo and asymmetrical chain-path frame, without a laurel medal. The unique outer frame follows this character: Bicycle-mechanic perimeter: bronze tube rails, spoke-laced wheel arcs at corners, fine chain-link engraving and narrow dark tire-like inset strips. Matching materials: Warm bronze tubing, dark rubber-like ceramic, steel spoke lines and neutral ivory panels. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    }
+  ]
+}

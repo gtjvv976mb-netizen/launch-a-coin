@@ -1,0 +1,17 @@
+{
+  "reviewedAt": "2026-10-30T04:22:02.915433+00:00",
+  "quoteKey": "tao",
+  "verdict": "accept-explicit-source-only-derivative",
+  "actualAsset": "output/higgsfield/pair-identities-2026-10-30/tailoring-v2/tao-source-composition/tao-reverse-exact-source-composition.png",
+  "sha256": "ba133beb9ab1b7635eeeed24e147097bbe2c8abf06aa0c1353c9b47209ae60de",
+  "checks": {
+    "exactTauGeometry": true,
+    "uniformSourceSilhouetteScaling": true,
+    "matchingIvoryBlackSilverMaterials": true,
+    "continuousWordlessReverse": true,
+    "raw816RemainsRejected": true,
+    "newPaidJobs": 0
+  },
+  "proof": "output/higgsfield/pair-identities-2026-10-30/tailoring-v2/tao-source-composition/front-reverse-proof.jpg",
+  "notes": "The actual derivative uses the pinned original alpha silhouette, preserving broad upper stroke, upright curved stem and foot. The mistaken raw816 glyph is wholly covered. This is a deterministic exact-source composition using existing Higgsfield frame/material, not an accepted raw816 provider output."
+}

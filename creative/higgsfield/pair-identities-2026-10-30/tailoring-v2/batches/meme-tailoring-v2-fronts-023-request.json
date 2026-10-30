@@ -1,0 +1,45 @@
+{
+  "context": "Create distinct source-derived meme card frames with consistent empty creator fields.",
+  "requests": [
+    {
+      "index": 445,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "1bfffe64-cd4a-4541-9813-710a65687caa"
+          },
+          {
+            "role": "image",
+            "value": "bd8cf9b4-d206-4fbe-9f13-26e9457cfc3e"
+          }
+        ],
+        "prompt": "EDIT IMAGE 1, the gray layout wireframe. Preserve the exact rounded outer outline and FOUR EMPTY ivory rectangles at their EXACT positions and sizes. Do not add, split, move, shorten, cover or fill any rectangle. The huge middle creator-art rectangle MUST remain entirely blank. Replace ONLY the gray perimeter rails and gaps OUTSIDE all four empty rectangles with a premium thin trading-card frame. IMAGE 2 supplies abstract identity inspiration ONLY through these shapes and materials: Swept aerodynamic black rails derived from the emblem's two curved strokes, with sharp white negative-space cuts and a slanted lower joint. MATERIALS: Black piano lacquer, white enamel and brushed silver. DO NOT DRAW ANY WHOLE CHARACTER, HUMAN, ANIMAL, HEAD, FACE, EYES, BODY, PORTRAIT OR COMPLETE IDENTITY PICTURE ANYWHERE ON THIS FRONT. This front is a customizable frame only. Use source shapes as ABSTRACT perimeter contours, not pictures or miniature corner mascots. No images inside any of the four surfaces. Name, type and description panels must stay uniformly light ivory, untextured and clean for live dark text. No new or split panels, footer slots, words, numbers, labels, serials, full logos, laurel wreath, royal medal, generic star, crown, marble lattice, scene, perspective, thickness, case or slab. Crisp refined HD physical-material detail, smooth rounded thin edges, neutral even light and straight front view. Preserve IMAGE1 geometry while replacing its gray material only."
+      }
+    },
+    {
+      "index": 446,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "1bfffe64-cd4a-4541-9813-710a65687caa"
+          },
+          {
+            "role": "image",
+            "value": "7c6eebbe-41db-4b11-b4f4-05434669dc9f"
+          }
+        ],
+        "prompt": "EDIT IMAGE 1, the gray layout wireframe. Preserve the exact rounded outer outline and FOUR EMPTY ivory rectangles at their EXACT positions and sizes. Do not add, split, move, shorten, cover or fill any rectangle. The huge middle creator-art rectangle MUST remain entirely blank. Replace ONLY the gray perimeter rails and gaps OUTSIDE all four empty rectangles with a premium thin trading-card frame. IMAGE 2 supplies abstract identity inspiration ONLY through these shapes and materials: Twin-ribbon split frame: two broad cyan slanted rails with source-matched softened torn ends, open diagonal channel and offset asymmetry. MATERIALS: Cyan translucent enamel, pale blue ceramic and narrow silver edges. DO NOT DRAW ANY WHOLE CHARACTER, HUMAN, ANIMAL, HEAD, FACE, EYES, BODY, PORTRAIT OR COMPLETE IDENTITY PICTURE ANYWHERE ON THIS FRONT. This front is a customizable frame only. Use source shapes as ABSTRACT perimeter contours, not pictures or miniature corner mascots. No images inside any of the four surfaces. Name, type and description panels must stay uniformly light ivory, untextured and clean for live dark text. No new or split panels, footer slots, words, numbers, labels, serials, full logos, laurel wreath, royal medal, generic star, crown, marble lattice, scene, perspective, thickness, case or slab. Crisp refined HD physical-material detail, smooth rounded thin edges, neutral even light and straight front view. Preserve IMAGE1 geometry while replacing its gray material only."
+      }
+    }
+  ]
+}

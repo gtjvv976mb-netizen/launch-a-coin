@@ -1,0 +1,31 @@
+{
+  "derivedFrom": "batches/tailoring-v2-backs-material-remaining28-group-5-status-4-1793332338563.json",
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 551,
+        "job_id": "f90ada82-e01c-4835-8feb-dff4ec573bb1",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_035142_f90ada82-e01c-4835-8feb-dff4ec573bb1.png"
+      },
+      {
+        "index": 552,
+        "job_id": "b7694fea-642b-4780-8231-d805cef1ea8c",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_035143_b7694fea-642b-4780-8231-d805cef1ea8c.png"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "completed": 4,
+      "failed": 0,
+      "active": 0,
+      "errors": 0
+    },
+    "all_terminal": true
+  }
+}

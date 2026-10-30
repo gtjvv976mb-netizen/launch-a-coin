@@ -33,11 +33,11 @@ describe("quote-native simulation units", () => {
     }
   });
 
-  test("custom stock, meme and collector quotes never acquire an invented SOL or USD conversion", () => {
+  test("custom stock, meme, collector and crypto quotes never acquire an invented SOL or USD conversion", () => {
     for (const asset of PAIR_ASSETS) {
       const metrics = quoteMetrics(initialQuoteReserves(asset.key), asset.key);
       expect(metrics.mcapQuote).toBeGreaterThan(0);
-      if (asset.kind === "stock" || asset.kind === "meme" || asset.kind === "collector") {
+      if (asset.kind === "stock" || asset.kind === "meme" || asset.kind === "collector" || asset.kind === "crypto") {
         expect(metrics.mcapUsd).toBeNull();
         expect(metrics.priceSol).toBeNull();
         expect(metrics.valuationMode).toBe("quote-native");

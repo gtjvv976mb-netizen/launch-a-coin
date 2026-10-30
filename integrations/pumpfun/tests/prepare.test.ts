@@ -9,6 +9,8 @@ import { getAssociatedTokenAddressSync, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID 
 import { Keypair, PublicKey, type AccountInfo } from "@solana/web3.js";
 import fixture from "./fixtures/mainnet-pair-accounts-2026-10-28.json";
 import art from "../src/design-assets.json";
+import finalIdentitySnapshot from "../../../creative/higgsfield/pair-identities-2026-10-30/research/expansion-final-identities-and-metadata.json";
+import finalRawSnapshot from "../../../creative/higgsfield/pair-identities-2026-10-30/research/expansion-final-public-account-snapshots.json";
 import { CARD_DESIGNS } from "../../../app/src/lib/carddex/designs";
 import { defaultQuoteForDesign } from "../../../app/src/lib/carddex/pairs";
 import {
@@ -62,6 +64,27 @@ function reader(options: {
 }
 
 describe("unsigned official Pump custom-pair preparer", () => {
+  test("eight exact crypto additions preserve fresh mint bytes and reject substituted units or owning programs",async()=>{
+    const source=finalRawSnapshot.snapshots[0];
+    for(const snapshot of finalIdentitySnapshot.assets){
+      const index=source.keys.indexOf(snapshot.mint);
+      expect(index).toBeGreaterThanOrEqual(0);
+      const sourceAccount=source.value[index];
+      if(!sourceAccount)throw new Error("Missing exact public mint fixture: "+snapshot.key);
+      expect(fixture.accounts[snapshot.mint as keyof typeof fixture.accounts]).toEqual(sourceAccount);
+      const quote=PAIR_ASSETS.find(asset=>asset.key===snapshot.key)!;
+      const request=input("obsidian-archive",quote.key);
+      const plan=await preparePumpLaunchPlan(request,{connection:reader().connection,now});
+      expect(plan.binding.quote).toMatchObject({key:snapshot.key,kind:"crypto",mint:snapshot.mint,decimals:snapshot.admission.decimals,tokenProgram:snapshot.admission.tokenProgram});
+      expect(plan.createInstruction.accounts[16].address).toBe(snapshot.mint);
+      expect(plan.createInstruction.accounts[18].address).toBe(snapshot.admission.tokenProgram);
+      expect(plan.nft.quoteMint).toBe(snapshot.mint);
+      const changedDecimals=reader({mutate(accounts){accounts.get(snapshot.mint)!.data[44]=snapshot.admission.decimals+1;}});
+      await expect(preparePumpLaunchPlan(request,{connection:changedDecimals.connection})).rejects.toThrow("decimals or token program");
+      const changedProgram=reader({mutate(accounts){accounts.get(snapshot.mint)!.owner=snapshot.admission.tokenProgram===TOKEN_2022_PROGRAM_ID.toBase58()?TOKEN_PROGRAM_ID:TOKEN_2022_PROGRAM_ID;}});
+      await expect(preparePumpLaunchPlan(request,{connection:changedProgram.connection})).rejects.toThrow();
+    }
+  });
   test("TSLA plan carries the exact quote, all four positional accounts, payer and new-mint signers", async () => {
     const rpc = reader();
     const request = input();
@@ -108,8 +131,8 @@ describe("unsigned official Pump custom-pair preparer", () => {
     expect("transaction" in plan).toBe(false);
   });
 
-  test("all 37 catalog assets use exact reviewed mints/programs; SOL has no extra quote accounts", async () => {
-    expect(PAIR_ASSETS).toHaveLength(37);
+  test("all admitted catalog assets use exact reviewed mints/programs; SOL has no extra quote accounts", async () => {
+    expect(PAIR_ASSETS.length).toBeGreaterThanOrEqual(51);
     for (const asset of PAIR_ASSETS) {
       const plan = await preparePumpLaunchPlan(input("obsidian-archive", asset.key), { connection: reader().connection, now });
       expect(plan.binding.quote.mint).toBe(asset.mint);
@@ -123,8 +146,8 @@ describe("unsigned official Pump custom-pair preparer", () => {
     }
   });
 
-  test("all 48 current designs use the app's immutable design/pair policy", async () => {
-    expect(Object.keys(art)).toHaveLength(48);
+  test("all active designs use the app's immutable design/pair policy", async () => {
+    expect(Object.keys(art).length).toBeGreaterThanOrEqual(CARD_DESIGNS.length);
     for (const design of CARD_DESIGNS) {
       const plan = await preparePumpLaunchPlan(input(design.key, defaultQuoteForDesign(design.key).key), { connection: reader().connection, now });
       expect(plan.binding.card.designKey).toBe(design.key);

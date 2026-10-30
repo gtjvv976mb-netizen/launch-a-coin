@@ -1,0 +1,10 @@
+{
+  "executor": "root",
+  "indices": [
+    603,
+    604
+  ],
+  "maximumQuotedCredits": 1,
+  "status": "reserved-before-one-write",
+  "automaticUnknownRetry": false
+}

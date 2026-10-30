@@ -2,11 +2,11 @@ import { useEffect, useId, useRef, useState, type Ref } from "react";
 import { CARD_DESIGNS, DEFAULT_CARD_DESIGN, getCardDesign, isCardDesignKey } from "../../lib/carddex/designs";
 import {
   PAIR_ASSETS, PAIR_ASSETS_SOURCE, allowedQuotesForDesign, boundQuoteForDesign,
-  getPairAsset, getTradingPair, matchingDesignsForQuote, preferredDesignForQuote, type PairAsset, type PairAssetKey,
+  getPairAsset, getTradingPair, matchingDesignsForQuote, preferredDesignForQuote, pairListingNotice, type PairAsset, type PairAssetKey,
 } from "../../lib/carddex/pairs";
 import "../../carddex-pairs.css";
 
-export const pairKindLabel = (asset: Readonly<PairAsset>) => ({ native: "Native quote", stable: "Stablecoin quote", stock: "Tokenized stock quote", meme: "Memecoin quote", collector: "Collector token quote" })[asset.kind];
+export const pairKindLabel = (asset: Readonly<PairAsset>) => ({ native: "Native quote", stable: "Stablecoin quote", stock: "Tokenized stock quote", meme: "Memecoin quote", collector: "Collector token quote", crypto: "Crypto quote" })[asset.kind];
 
 export function PairBadge({ quoteAssetKey, ticker = "YOUR TOKEN", compact = false }: {
   quoteAssetKey: string; ticker?: string; compact?: boolean;
@@ -24,6 +24,7 @@ export function QuoteAssetDetails({ quoteAssetKey, live = false }: { quoteAssetK
   const asset = getPairAsset(quoteAssetKey);
   return <div className="cdx-pair-details">
     <p>{asset.name}{asset.issuer ? <> · <span>Issuer: {asset.issuer}</span></> : null}</p>
+    {pairListingNotice(asset) ? <p className="cdx-pair-details__qualification">{pairListingNotice(asset)}</p> : null}
     {asset.kind === "stock" ? <p className="cdx-pair-details__qualification">The quote is a tokenized-stock asset with its own issuer terms; your creator token is not company shares.</p> : null}
     <details>
       <summary>Asset details &amp; terms <span aria-hidden>⌄</span></summary>
@@ -34,7 +35,7 @@ export function QuoteAssetDetails({ quoteAssetKey, live = false }: { quoteAssetK
         <div className="cdx-pair-details__links">
           {asset.issuerTerms ? <a href={asset.issuerTerms} target="_blank" rel="noreferrer">Issuer terms ↗</a> : null}
           {asset.listingProviderTerms ? <a href={asset.listingProviderTerms} target="_blank" rel="noreferrer">{asset.listingProvider ?? "Listing"} terms ↗</a> : null}
-          <a href={PAIR_ASSETS_SOURCE} target="_blank" rel="noreferrer">Pump.fun pairs ↗</a>
+          <a href={PAIR_ASSETS_SOURCE} target="_blank" rel="noreferrer">{asset.listingStatus==="direct-onchain"?"Pump pair rules":"Pump.fun pairs"} ↗</a>
         </div>
         <p>Mint reviewed {asset.verifiedAt}. {live ? "The exact mainnet mint is rechecked before wallet review." : "Local demo; no on-chain launch."}</p>
       </div>
@@ -55,10 +56,10 @@ export function QuoteAssetPicker({ value, designKey, ticker, onChange, onPending
   const asset = getPairAsset(value);
   const bound = boundQuoteForDesign(designKey);
   const recommendedDesigns = matchingDesignsForQuote(asset.key);
-  const matchingDesigns = !bound && (asset.kind === "stock" || asset.kind === "meme" || asset.kind === "collector")
+  const matchingDesigns = !bound && (asset.kind === "stock" || asset.kind === "meme" || asset.kind === "collector" || asset.kind === "crypto" || asset.kind === "native" || asset.kind === "stable")
     ? recommendedDesigns.filter(design => design.key !== designKey)
     : [];
-  const matchingFamily = asset.kind === "stock" ? "stock" : asset.kind === "collector" ? "collector" : "meme";
+  const matchingFamily = asset.kind === "stock" ? "stock" : asset.kind === "collector" ? "collector" : ["native","stable","crypto"].includes(asset.kind) ? "crypto" : "meme";
   const preferredMatchingDesign = preferredDesignForQuote(asset.key);
   const defaultMatchingDesign = matchingDesigns.find(design => design.key === preferredMatchingDesign)?.key
     ?? matchingDesigns[0]?.key ?? DEFAULT_CARD_DESIGN;
@@ -124,9 +125,10 @@ export function QuoteAssetPicker({ value, designKey, ticker, onChange, onPending
   </div> : null;
   const pairControls = <>
     <div className="cdx-pair-picker__head"><label htmlFor={id}>Quote asset</label><span>{pairKindLabel(asset)}</span></div>
+    {viewport && pairListingNotice(asset) ? <p className="cdx-pair-details__qualification">{pairListingNotice(asset)}</p> : null}
     <select ref={quoteSelectRef} id={id} className="mdx-input" value={asset.key} disabled={disabled} onChange={e => choose(e.target.value as PairAssetKey)} aria-describedby={`${id}-help`}>
-      {([ ["native", "Native"], ["stable", "Stablecoin"], ["stock", "Tokenized stocks"], ["meme", "Memecoins"], ["collector", "Collector tokens"] ] as const).map(([kind,label]) =>
-        <optgroup key={kind} label={label}>{PAIR_ASSETS.filter(a => a.kind === kind).map(a => <option key={a.key} value={a.key}>{a.symbol} · {a.name}</option>)}</optgroup>
+      {([ ["native", "Native"], ["stable", "Stablecoin"], ["crypto", "Crypto"], ["stock", "Tokenized stocks"], ["meme", "Memecoins"], ["collector", "Collector tokens"] ] as const).map(([kind,label]) =>
+        <optgroup key={kind} label={label}>{PAIR_ASSETS.filter(a => a.kind === kind).map(a => <option key={a.key} value={a.key}>{a.symbol} · {a.name}{a.listingStatus==="direct-onchain"?" · On-chain enabled":""}</option>)}</optgroup>
       )}
     </select>
     <div id={`${id}-help`} className="cdx-pair-picker__hint">
@@ -145,7 +147,7 @@ export function QuoteAssetPicker({ value, designKey, ticker, onChange, onPending
     </div> : pane === "pair" ? <>
       {!matchingOpen ? pairControls : null}
       {matchingCardDesigns}
-    </> : pane === "mint" ? <div className="cdx-pair-details__body"><p><strong>{asset.name}</strong>{asset.issuer ? ` · ${asset.issuer}` : ""}</p><span>{asset.kind === "native" ? "Wrapped SOL mint" : "Quote asset mint"}</span><a className="cdx-pair-mint" href={`https://solscan.io/token/${asset.mint}`} target="_blank" rel="noreferrer">{asset.mint}</a><p>Reviewed {asset.verifiedAt}. {live ? "The exact mainnet mint is checked again before wallet review." : "Demo only; no on-chain launch."}</p></div> : <div className="cdx-pair-details__body"><p>{asset.kind === "stock" ? "This quote is a tokenized-stock asset with its own issuer terms. Your creator token is not company shares." : "This asset funds the optional initial buy. SOL is also needed for network and account costs."}</p><div className="cdx-pair-details__links">{asset.issuerTerms ? <a href={asset.issuerTerms} target="_blank" rel="noreferrer">Issuer terms</a> : null}{asset.listingProviderTerms ? <a href={asset.listingProviderTerms} target="_blank" rel="noreferrer">{asset.listingProvider ?? "Listing"} terms</a> : null}<a href={PAIR_ASSETS_SOURCE} target="_blank" rel="noreferrer">Pump.fun pairs</a></div></div>}
+    </> : pane === "mint" ? <div className="cdx-pair-details__body"><p><strong>{asset.name}</strong>{asset.issuer ? ` · ${asset.issuer}` : ""}</p>{pairListingNotice(asset)?<p>{pairListingNotice(asset)}</p>:null}<span>{asset.kind === "native" ? "Wrapped SOL mint" : "Quote asset mint"}</span><a className="cdx-pair-mint" href={`https://solscan.io/token/${asset.mint}`} target="_blank" rel="noreferrer">{asset.mint}</a><p>Reviewed {asset.verifiedAt}. {live ? "The exact mainnet mint is checked again before wallet review." : "Demo only; no on-chain launch."}</p></div> : <div className="cdx-pair-details__body">{pairListingNotice(asset)?<p>{pairListingNotice(asset)}</p>:null}<p>{asset.kind === "stock" ? "This quote is a tokenized-stock asset with its own issuer terms. Your creator token is not company shares." : "This asset funds the optional initial buy. SOL is also needed for network and account costs."}</p><div className="cdx-pair-details__links">{asset.issuerTerms ? <a href={asset.issuerTerms} target="_blank" rel="noreferrer">Issuer terms</a> : null}{asset.listingProviderTerms ? <a href={asset.listingProviderTerms} target="_blank" rel="noreferrer">{asset.listingProvider ?? "Listing"} terms</a> : null}<a href={PAIR_ASSETS_SOURCE} target="_blank" rel="noreferrer">{asset.listingStatus==="direct-onchain"?"Pump pair rules":"Pump.fun pairs"}</a></div></div>}
   </div>;
   return <div className={`cdx-pair-picker ${compact ? "cdx-pair-picker--compact" : ""}`}>
     {pairControls}

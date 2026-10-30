@@ -1,4 +1,4 @@
-/** Deterministic PNG compatibility copies of the 48 verified Higgsfield card backs.
+/** Deterministic PNG compatibility copies of all reviewed Higgsfield card backs.
  * Run from app/: bun scripts/prepare-token-backs.ts. Requires Python/Pillow.
  * Preserves the browser's full-image object-fit:fill at 63:88, then clips the same
  * rounded card silhouette. No generated artwork, credit spend or source changes.
@@ -7,7 +7,6 @@ import {readFile,writeFile} from "node:fs/promises";
 import {createHash} from "node:crypto";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
-import {CARD_DESIGNS} from "../src/lib/carddex/designs";
 import {CANONICAL_CARD_LAYOUT} from "../src/lib/carddex/card-template";
 import reviewedDesigns from "../../integrations/pumpfun/src/design-assets.json";
 
@@ -16,15 +15,16 @@ const publicRoot=path.join(appRoot,"public");
 const conversionVersion="launchacard-token-back-png-v1";
 const width=630,height=880;
 const sha256=(bytes:Uint8Array)=>createHash("sha256").update(bytes).digest("hex");
-if(CARD_DESIGNS.length!==48)throw new Error("Review the complete 48-design set before converting token backs.");
+const reviewedKeys=Object.keys(reviewedDesigns);
+if(!reviewedKeys.length || new Set(reviewedKeys).size!==reviewedKeys.length)throw new Error("Review a nonempty unique source design manifest before converting token backs.");
 const inputs=[];
-for(const design of CARD_DESIGNS){
-  if(!/^[a-z0-9-]+$/.test(design.key))throw new Error("Invalid design key.");
-  const source=reviewedDesigns[design.key as keyof typeof reviewedDesigns]?.back;
-  if(!source||source.path!==`/assets/carddex/higgsfield/${design.key}-back.webp`)throw new Error(`Missing reviewed Higgsfield back: ${design.key}`);
+for(const key of reviewedKeys){
+  if(!/^[a-z0-9-]+$/.test(key))throw new Error("Invalid design key.");
+  const source=reviewedDesigns[key as keyof typeof reviewedDesigns]?.back;
+  if(!source||source.path!==`/assets/carddex/higgsfield/${key}-back.webp`|| !/^[a-f0-9]{64}$/.test(source.sha256))throw new Error(`Missing reviewed Higgsfield back: ${key}`);
   const sourceFile=path.join(publicRoot,source.path.slice(1));
-  if(sha256(await readFile(sourceFile))!==source.sha256)throw new Error(`Original Higgsfield back differs from its reviewed hash: ${design.key}`);
-  inputs.push({designKey:design.key,sourceFile,sourceSha256:source.sha256});
+  if(sha256(await readFile(sourceFile))!==source.sha256)throw new Error(`Original Higgsfield back differs from its reviewed hash: ${key}`);
+  inputs.push({designKey:key,sourceFile,sourceSha256:source.sha256});
 }
 const command=Bun.spawn(["python3","-c",String.raw`
 from pathlib import Path
@@ -73,7 +73,7 @@ command.stdin.end();
 const output=await new Response(command.stdout).text();
 if(await command.exited!==0)throw new Error("Token-back conversion failed; the trusted manifest was not replaced.");
 const manifest=JSON.parse(output) as Record<string,{path:string;sha256:string;sourceSha256:string;width:number;height:number;conversionVersion:string}>;
-if(Object.keys(manifest).length!==48)throw new Error("Token-back conversion did not produce all 48 designs.");
+if(Object.keys(manifest).sort().join()!==reviewedKeys.sort().join())throw new Error("Token-back conversion did not produce every reviewed design.");
 let bytes=0;
 for(const item of inputs){
   const asset=manifest[item.designKey];

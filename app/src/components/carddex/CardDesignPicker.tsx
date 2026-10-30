@@ -3,6 +3,7 @@ import { CARD_DESIGNS, type CardDesign } from "../../lib/carddex/designs";
 
 import { PAIR_ASSETS, boundQuoteForDesign, defaultQuoteForDesign, getPairAsset, recommendedMemeQuoteForDesign, type PairAssetKey } from "../../lib/carddex/pairs";
 import { MEME_PAIR_PRESETS } from "../../lib/carddex/design-pairings";
+import { cardMatchesCollection } from "../../lib/carddex/design-collections";
 import { Modal } from "../mintdex/ui";
 import type { CardData } from "../mintdex/MintCard";
 import { CanonicalCardFace } from "./CanonicalCardFace";
@@ -14,6 +15,7 @@ const DESIGN_GROUPS = [
   ["all", "All designs"],
   ["stocks", "Stock pairs"],
   ["memes", "Meme & collector pairs"],
+  ["crypto", "Crypto pairs"],
   ["classic", "Trading card classics"],
   ["premium", "Premium collection"],
   ["limited", "Limited editions"],
@@ -23,9 +25,7 @@ const memePairKeys = new Set<string>(MEME_PAIR_PRESETS.map(preset => preset.quot
 const memePairAssets = PAIR_ASSETS.filter(asset => memePairKeys.has(asset.key));
 
 function inGroup(design: CardDesign, group: DesignGroup) {
-  return group === "all" || (group === "stocks"
-    ? boundQuoteForDesign(design.key)?.kind === "stock"
-    : group === "memes" ? !!recommendedMemeQuoteForDesign(design.key) : design.category === group);
+  return cardMatchesCollection(design,group);
 }
 
 export function CardDesignPicker({
@@ -79,7 +79,7 @@ export function CardDesignPicker({
   }, [open, value, designs, capacity.count]);
   const browse = () => {
     if (disabled) return;
-    setGroup(boundQuoteForDesign(value)?.kind === "stock" ? "stocks" : recommendedMemeQuoteForDesign(value, quoteKey)?.key === quoteKey ? "memes" : "all");
+    setGroup(boundQuoteForDesign(value)?.kind === "stock" ? "stocks" : recommendedMemeQuoteForDesign(value, quoteKey)?.key === quoteKey ? "memes" : CARD_DESIGNS.find(design=>design.key===value)?.category==="crypto" ? "crypto" : "all");
     setMemePairFilter("all");
     setOpen(true);
   };
@@ -122,6 +122,8 @@ export function CardDesignPicker({
             ["classic", "Trading card classics"],
             ["premium", "Premium collection"],
             ["stocks", "Tokenized-stock paired finishes"],
+            ["memes", "Meme & collector pairs"],
+            ["crypto", "Crypto pairs"],
             ["limited", "Limited editions"],
           ] as const
         ).map(([key, label]) => (

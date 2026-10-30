@@ -1,0 +1,44 @@
+{
+  "requests": [
+    {
+      "index": 504,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "f3ae9c63-0dc0-4a2f-8387-d496cc7465f9"
+          },
+          {
+            "role": "image",
+            "value": "eef0ae5d-a2ea-4772-b50a-ad69450e61a3"
+          }
+        ],
+        "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: alon. Exact gray-haired illustrated person with yellow/black cap, white sunglasses and specific source face; omit incidental slogans.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact illustrated source character framed by asymmetric cap-brim and sunglasses-derived planes on its source cyan field.\nMATCHED MATERIALS: Yellow enamel, matte black ceramic, white lens-like glass and cool gray metal. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+      }
+    },
+    {
+      "index": 505,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "https://images.pump.fun/coin-image/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump?placeholder=none&src=https%3A%2F%2Fedge.uxento.io%2Fimage%2FCx83EqERns2VuiKrkwHegTuECVqZebsNhJ3dCU8CucWG&variant=600x600"
+          },
+          {
+            "role": "image",
+            "value": "880d8a29-4fb3-417f-a144-9c4b01af7cad"
+          }
+        ],
+        "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: The Black Bull. Exact dark human-faced horned minotaur reference: preserve the human facial planes, horns and dark source silhouette.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact human-faced minotaur in a quiet dark relief field; its actual horn curves shape the outer frame and human face remains source-faithful.\nMATCHED MATERIALS: Blackened bronze, dark basalt-like ceramic and restrained cool polished highlights. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials. The identity is specifically a human male face on the front of a four-legged black bull body with long horns, exactly as the600px supplied source. Keep the human facial anatomy and expression; actual body/horn pose is essential."
+      }
+    }
+  ]
+}

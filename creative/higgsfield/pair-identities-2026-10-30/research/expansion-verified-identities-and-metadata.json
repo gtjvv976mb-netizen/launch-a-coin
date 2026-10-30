@@ -1,0 +1,494 @@
+{
+  "fetchedAt": "2026-10-29T23:09:38.153Z",
+  "scope": "Read-only source research; not installed in launch registry",
+  "officialList": "https://pump.fun/docs/custom-pairs",
+  "snapshotSlots": [
+    463060744
+  ],
+  "quoteControlCount": 225,
+  "assets": [
+    {
+      "key": "cashcat",
+      "symbol": "CASHCAT",
+      "name": "Cash Cat",
+      "mint": "CashcatZMRn4Jv8sPQZUSsbTLi2PcPe1ssqbHcnaJqSS",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "Cash Cat",
+        "symbol": "CASHCAT",
+        "uri": "https://arweave.net/XpdhCcelgYs8JW9f-dCTuaTV3R-Y6W5Q_Snp7KrHcG4",
+        "source": "95jifQzKuCAqAAZDyx5Vyej4Ns9piRb3Mezkwqdy4icG"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 8,
+        "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "initialVirtualQuoteReserves": "3515027050314",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "neet",
+      "symbol": "neet",
+      "name": "NotInEmploymentEducationTraining",
+      "mint": "Ce2gx9KGXJ6C9Mp5b5x1sn9Mg87JwEbrQby4Zqo3pump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "NotInEmploymentEducationTraining",
+        "symbol": "neet",
+        "uri": "https://ipfs.io/ipfs/QmbCcWuqA9Abn6xSeP63s4T3pnvq9EhCdWD5XBQkNJuhaq",
+        "source": "GQqLakMQBp32m2HpScU4LE5T2S8hUCBQmzYLJ8eqomES"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "initialVirtualQuoteReserves": "126287862587",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "otc",
+      "symbol": "OTC",
+      "name": "OTC",
+      "mint": "MukLDtJ8Cx9DxLbeyLRSWPSposTMWuwHANbuaudpump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "OTC",
+        "symbol": "OTC",
+        "uri": "https://meta.uxento.io/data/7d415553-cb24-436b-8bc6-64c52acf459c",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "471146097365",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "fone",
+      "symbol": "fone",
+      "name": "apeonfone",
+      "mint": "CTPoyCwkjMvoJwU4xvZZqoD8tiYk6yDchySiN5gGpump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "apeonfone",
+        "symbol": "fone",
+        "uri": "https://meta.uxento.io/data/2b0b460c-0f29-429c-9aab-760a69e56717",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "1953306822588",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "buttcoin",
+      "symbol": "Buttcoin",
+      "name": "Buttcoin",
+      "mint": "Cm6fNnMk7NfzStP9CZpsQA2v3jjzbcYGAxdJySmHpump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "Buttcoin",
+        "symbol": "Buttcoin",
+        "uri": "https://ipfs.io/ipfs/bafkreiadbhqbyub6ioqwdino7wyu7tddq552bprluzxjkhgwjuqa4cw64i",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "701985004406",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "triplet",
+      "symbol": "TripleT",
+      "name": "Tung Tung Tung Sahur",
+      "mint": "J8PSdNP3QewKq2Z1JJJFDMaqF7KcaiJhR7gbr5KZpump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "Tung Tung Tung Sahur",
+        "symbol": "TripleT",
+        "uri": "https://ipfs.io/ipfs/bafkreiaslb262zda3wuhendylo4q537quh2557xyjg7avviidacyptw53y",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "930037847730",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "cupsey",
+      "symbol": "Cupsey",
+      "name": "Cupsey",
+      "mint": "6NwarBvDkXhByqVp2Qkq5i9XbtA2B3Bwe8SWGu9vpump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "Cupsey",
+        "symbol": "Cupsey",
+        "uri": "https://ipfs.io/ipfs/QmU2nARXShdosCYJVcQjnDFBsR5YBne7wkNT1axdmsZnm5",
+        "source": "ETzT61bosjaCp8icGqq4uhRqSqYNqbUnH8GqYa3B9tzS"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "initialVirtualQuoteReserves": "982231596270",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "alon",
+      "symbol": "ALON",
+      "name": "alon",
+      "mint": "8XtRWb4uAAJFMP4QQhoYYCWR6XXb7ybcCdiqPwz9s5WS",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "alon",
+        "symbol": "ALON",
+        "uri": "https://cf-ipfs.com/ipfs/QmU2vT4iz7kA5ZYwdR7wkoVtPU34HjVjA6CGQdhAiGLc2D",
+        "source": "DN7sBBn5CZHTmFZT8wxnujfEFi3A9jGVWBo6ZwYCSvsh"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "initialVirtualQuoteReserves": "1032338523398",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "jimothy",
+      "symbol": "Jimothy",
+      "name": "Jimothy The Raccoon",
+      "mint": "Ge87EtsjwRQbHaqQmKRno69RFTwh9bfSsm99XNxTpump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "Jimothy The Raccoon",
+        "symbol": "Jimothy",
+        "uri": "https://metadata.j7tracker.io/metadata/1Ybareueot.json",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "1944737338006",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "lmao",
+      "symbol": "LMAO!",
+      "name": "LMAO!",
+      "mint": "H74CYmXgMkYHYuSRsZt6RJb4NYp2u72Vw8BS5huApump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "LMAO!",
+        "symbol": "LMAO!",
+        "uri": "https://ipfs.io/ipfs/bafkreifilh3qbor7axmzvp2ziofvaocz6nu7dxhzbqvcoonrr3c6gpbfnq",
+        "source": "Fd31TyoYBrSe4tspWRCeqUTLgY3aMQRajv3pYNyjK1Bn"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "initialVirtualQuoteReserves": "1919472507138",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "bobo",
+      "symbol": "BOBO",
+      "name": "Bobo",
+      "mint": "4nV5gNwwP68zUDat26ySChREqVaQaLudfJBkSgEzpump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "Bobo",
+        "symbol": "BOBO",
+        "uri": "https://ipfs.io/ipfs/QmaSCwdsQpFynivk1cP3haMxrA8wZwN74VBY3T5fMbkiQa",
+        "source": "4uCS2Gws3H9nvCjpqMEoqCDV5hkcm7JtNAAVpoqn8Z1g"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "initialVirtualQuoteReserves": "582474962807",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "tokabu",
+      "symbol": "Tokabu",
+      "name": "The Spirit of Gambling",
+      "mint": "H8xQ6poBjB9DTPMDTKWzWPrnxu4bDEhybxiouF8Ppump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "The Spirit of Gambling",
+        "symbol": "Tokabu",
+        "uri": "https://ipfs.io/ipfs/bafkreidraw34ccvcxkwljxmzpmtkoy37zpwiadtikpxfkktzkhho4wwrhu",
+        "source": "9V2tWR69zwMG2zfyDCJoSzCdcLejQGmiiu65HeaZQhrY"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "initialVirtualQuoteReserves": "2241902934959",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "manifest",
+      "symbol": "MANIFEST",
+      "name": "Manifesting",
+      "mint": "BCdwQBAn8dYB5YjTsoB6TdHAWokxv28k2oZUodERpump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "Manifesting",
+        "symbol": "MANIFEST",
+        "uri": "https://ipfs.io/ipfs/bafkreidddxq673pzk6hxgfffwboyerrqfnky23luy2onxz45ep5mdhvl3y",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "562135364630",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "baton",
+      "symbol": "baton",
+      "name": "baton",
+      "mint": "Hg5Ja55T5wESq4vyFoiVCMeHXtGyVA69X2UHq8hgpump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "baton",
+        "symbol": "baton",
+        "uri": "https://m.rapidlaunch.io/m/LRzt7gxgX",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "677053411087",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "claw",
+      "symbol": "CLAW",
+      "name": "clawpump.tech",
+      "mint": "739dnZEG4yaBWFsY8L8ZwrfhGG6dhtCSercW8Umspump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "clawpump.tech",
+        "symbol": "CLAW",
+        "uri": "https://ipfs.io/ipfs/QmaJHpfAJL6dbCexGBAkgHvwvN11MhZZAv4Ud3uyBgAyVv",
+        "source": "B2ZUczpNxBPe9PnphqPBegJ5TKmDM5dhDDCkpkuuQW2V"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "initialVirtualQuoteReserves": "370254634267",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "67",
+      "symbol": "67",
+      "name": "The Official 67 Coin",
+      "mint": "9AvytnUKsLxPxFHFqS6VLxaxt5p6BhYNr53SD2Chpump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "The Official 67 Coin",
+        "symbol": "67",
+        "uri": "https://ipfs.io/ipfs/bafkreigurrlg47m72is6mpm3dcppq4mgybyzsxpgwseqfsqrueiiqxk4pa",
+        "source": "DpL2ejJkoQYbX3vcSuR5SMdKSPQAPH6e7HTSMXzYk7bp"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "initialVirtualQuoteReserves": "2152890383976",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "zauth",
+      "symbol": "ZAUTH",
+      "name": "zauthx402",
+      "mint": "DNhQZ1CE9qZ2FNrVhsCXwQJ2vZG8ufZkcYakTS5Jpump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "zauthx402",
+        "symbol": "ZAUTH",
+        "uri": "https://ipfs.io/ipfs/bafkreid6lwehwirbjutdvccl3vuf5o5r7fdo2mokjamtxurjeo3kzv6zva",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "1829871704850",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "kins",
+      "symbol": "KINS",
+      "name": "Kintara",
+      "mint": "Tqj8yFmagrg7oorpQkVGYR52r96RFTamvWfth9bpump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "Kintara",
+        "symbol": "KINS",
+        "uri": "https://ipfs.io/ipfs/bafkreidr2p6px6af45fqfspwlbd37jvupcoviau6it7ngg47aycg2mh6qy",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "9419784896073",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "percolator",
+      "symbol": "Percolator",
+      "name": "Percolator",
+      "mint": "8PzFWyLpCVEmbZmVJcaRTU5r69XKJx1rd7YGpWvnpump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "Percolator",
+        "symbol": "Percolator",
+        "uri": "https://ipfs.io/ipfs/bafkreider2uqxzmksmpgyg2h6zwhesaehblaihllgv7eiwmgazn5ot5li4",
+        "source": "4oBmBbbZa7pJhJxyWKAZFRwQ1igPwtTAasBEuxodencu"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "initialVirtualQuoteReserves": "1819598824538",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "jotchua",
+      "symbol": "Jotchua",
+      "name": "Jotchua",
+      "mint": "BcHEaaTCvycPwwsJ9yQTXdHP9X2gCLkznDbZ8VySpump",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "Jotchua",
+        "symbol": "Jotchua",
+        "uri": "https://meta.uxento.io/data/977d8de8-1c11-48e1-b87c-8a8a8a77ce4d",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "2440813100352",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    },
+    {
+      "key": "zcat",
+      "symbol": "ZCAT",
+      "name": "Anonymous Cat",
+      "mint": "HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR",
+      "existingRegistry": false,
+      "accountSlot": 463060744,
+      "metadata": {
+        "name": "Anonymous Cat",
+        "symbol": "ZCAT",
+        "uri": "https://gateway.irys.xyz/GNy6d9dhhEuxFBqKb8Egm5beiRML4fDUS6zuKQuTs7Ys",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 9,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "85063995074987",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      }
+    }
+  ]
+}

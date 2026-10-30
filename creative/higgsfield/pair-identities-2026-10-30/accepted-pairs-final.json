@@ -1,0 +1,1251 @@
+{
+  "updatedAt": "2026-10-30T03:22:07.261260+00:00",
+  "scope": "Only actual inspected final8 complete pairs for canonical import; partial faces are not activatable.",
+  "acceptedPairCount": 8,
+  "acceptedFaceCount": 16,
+  "acceptedPairs": [
+    {
+      "quoteKey": "pump",
+      "designKey": "pair-pump",
+      "exactQuoteMint": "pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn",
+      "front": {
+        "quoteKey": "pump",
+        "designKey": "pair-pump",
+        "exactQuoteMint": "pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn",
+        "face": "front",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/pump-front.png",
+        "sha256": "5d54eca5d7ac588c3e3da3664819c5e33f518d77db272d87f211dc0e30be2b37",
+        "jobId": "2476f7d1-b25b-4878-adbd-afb59263028e",
+        "index": 201,
+        "dimensions": [
+          1360,
+          2048
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1360,
+          2048
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-001-proof.png"
+      },
+      "back": {
+        "quoteKey": "pump",
+        "designKey": "pair-pump",
+        "exactQuoteMint": "pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn",
+        "front": {
+          "quoteKey": "pump",
+          "designKey": "pair-pump",
+          "exactQuoteMint": "pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn",
+          "face": "front",
+          "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/pump-front.png",
+          "sha256": "5d54eca5d7ac588c3e3da3664819c5e33f518d77db272d87f211dc0e30be2b37",
+          "jobId": "2476f7d1-b25b-4878-adbd-afb59263028e",
+          "index": 201,
+          "dimensions": [
+            1360,
+            2048
+          ],
+          "format": "PNG",
+          "cropApplied": false,
+          "foregroundBoundsCandidate": [
+            0,
+            0,
+            1360,
+            2048
+          ],
+          "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+          "visualStatus": "accepted-after-actual-source-QA",
+          "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-001-proof.png"
+        },
+        "face": "back",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/pump-back-604.png",
+        "sha256": "7ef5841f071c96ca1b1e6f19e3125c880be49d057b5f1b68deaa7f3b6280923e",
+        "jobId": "5c492c4c-7d6d-40a0-a5c4-dd6dd38a6694",
+        "index": 604,
+        "dimensions": [
+          1664,
+          2496
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1664,
+          2496
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/crypto11-flash-backs-002-proof.png"
+      }
+    },
+    {
+      "quoteKey": "alch",
+      "designKey": "pair-alch",
+      "exactQuoteMint": "HNg5PYJmtqcmzXrv6S9zP1CDKk5BgDuyFBxbvNApump",
+      "front": {
+        "quoteKey": "alch",
+        "designKey": "pair-alch",
+        "exactQuoteMint": "HNg5PYJmtqcmzXrv6S9zP1CDKk5BgDuyFBxbvNApump",
+        "face": "front",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/alch-front.png",
+        "sha256": "1718bdff9d2720463bae163d963bdf7b37aa7c83b5a8aaa4442901490f66b272",
+        "jobId": "98b9b952-e006-4504-a656-c79ac833e864",
+        "index": 203,
+        "dimensions": [
+          1360,
+          2048
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1360,
+          2048
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-001-proof.png"
+      },
+      "back": {
+        "quoteKey": "alch",
+        "designKey": "pair-alch",
+        "exactQuoteMint": "HNg5PYJmtqcmzXrv6S9zP1CDKk5BgDuyFBxbvNApump",
+        "front": {
+          "quoteKey": "alch",
+          "designKey": "pair-alch",
+          "exactQuoteMint": "HNg5PYJmtqcmzXrv6S9zP1CDKk5BgDuyFBxbvNApump",
+          "face": "front",
+          "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/alch-front.png",
+          "sha256": "1718bdff9d2720463bae163d963bdf7b37aa7c83b5a8aaa4442901490f66b272",
+          "jobId": "98b9b952-e006-4504-a656-c79ac833e864",
+          "index": 203,
+          "dimensions": [
+            1360,
+            2048
+          ],
+          "format": "PNG",
+          "cropApplied": false,
+          "foregroundBoundsCandidate": [
+            0,
+            0,
+            1360,
+            2048
+          ],
+          "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+          "visualStatus": "accepted-after-actual-source-QA",
+          "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-001-proof.png"
+        },
+        "face": "back",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/alch-back-605.png",
+        "sha256": "04e50ea63ea5caefb270a260306074e2401f0df226306130bd1f9267ebca55dc",
+        "jobId": "a5bfa6f5-9278-4619-a499-ba1a6a365fdb",
+        "index": 605,
+        "dimensions": [
+          1664,
+          2496
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1664,
+          2496
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/crypto11-flash-backs-003-proof.png"
+      }
+    },
+    {
+      "quoteKey": "pumpcade",
+      "designKey": "pair-pumpcade",
+      "exactQuoteMint": "Eg2ymQ2aQqjMcibnmTt8erC6Tvk9PVpJZCxvVPJz2agu",
+      "front": {
+        "quoteKey": "pumpcade",
+        "designKey": "pair-pumpcade",
+        "exactQuoteMint": "Eg2ymQ2aQqjMcibnmTt8erC6Tvk9PVpJZCxvVPJz2agu",
+        "face": "front",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/pumpcade-front.png",
+        "sha256": "ee5f6fb30daa2556b8bfe7b9e3a2f7b7708771169e0762189812353d9aabcf21",
+        "jobId": "d7686101-5f28-4858-8c39-5c0c726a230d",
+        "index": 205,
+        "dimensions": [
+          1360,
+          2048
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1360,
+          2048
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-002-proof.png"
+      },
+      "back": {
+        "quoteKey": "pumpcade",
+        "designKey": "pair-pumpcade",
+        "exactQuoteMint": "Eg2ymQ2aQqjMcibnmTt8erC6Tvk9PVpJZCxvVPJz2agu",
+        "front": {
+          "quoteKey": "pumpcade",
+          "designKey": "pair-pumpcade",
+          "exactQuoteMint": "Eg2ymQ2aQqjMcibnmTt8erC6Tvk9PVpJZCxvVPJz2agu",
+          "face": "front",
+          "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/pumpcade-front.png",
+          "sha256": "ee5f6fb30daa2556b8bfe7b9e3a2f7b7708771169e0762189812353d9aabcf21",
+          "jobId": "d7686101-5f28-4858-8c39-5c0c726a230d",
+          "index": 205,
+          "dimensions": [
+            1360,
+            2048
+          ],
+          "format": "PNG",
+          "cropApplied": false,
+          "foregroundBoundsCandidate": [
+            0,
+            0,
+            1360,
+            2048
+          ],
+          "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+          "visualStatus": "accepted-after-actual-source-QA",
+          "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-002-proof.png"
+        },
+        "face": "back",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/pumpcade-back-606.png",
+        "sha256": "3ace12fc23fab90868481d76cf1a98e9c3cf579c2577bc74d404aaa036432df8",
+        "jobId": "5916a1a9-4dd0-43e4-8359-242c97598fe8",
+        "index": 606,
+        "dimensions": [
+          1664,
+          2496
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1664,
+          2496
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/crypto11-flash-backs-003-proof.png"
+      }
+    },
+    {
+      "quoteKey": "codec",
+      "designKey": "pair-codec",
+      "exactQuoteMint": "69LjZUUzxj3Cb3Fxeo1X4QpYEQTboApkhXTysPpbpump",
+      "front": {
+        "quoteKey": "codec",
+        "designKey": "pair-codec",
+        "exactQuoteMint": "69LjZUUzxj3Cb3Fxeo1X4QpYEQTboApkhXTysPpbpump",
+        "face": "front",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/codec-front.png",
+        "sha256": "9d5e3cbe52ca569a284342dc08b521df659752db6da1ffd33df71305afdc174e",
+        "jobId": "12d5f3d1-54cb-4eb9-b04d-afb15aecae58",
+        "index": 207,
+        "dimensions": [
+          1360,
+          2048
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1360,
+          2048
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-002-proof.png"
+      },
+      "back": {
+        "quoteKey": "codec",
+        "designKey": "pair-codec",
+        "exactQuoteMint": "69LjZUUzxj3Cb3Fxeo1X4QpYEQTboApkhXTysPpbpump",
+        "front": {
+          "quoteKey": "codec",
+          "designKey": "pair-codec",
+          "exactQuoteMint": "69LjZUUzxj3Cb3Fxeo1X4QpYEQTboApkhXTysPpbpump",
+          "face": "front",
+          "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/codec-front.png",
+          "sha256": "9d5e3cbe52ca569a284342dc08b521df659752db6da1ffd33df71305afdc174e",
+          "jobId": "12d5f3d1-54cb-4eb9-b04d-afb15aecae58",
+          "index": 207,
+          "dimensions": [
+            1360,
+            2048
+          ],
+          "format": "PNG",
+          "cropApplied": false,
+          "foregroundBoundsCandidate": [
+            0,
+            0,
+            1360,
+            2048
+          ],
+          "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+          "visualStatus": "accepted-after-actual-source-QA",
+          "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-002-proof.png"
+        },
+        "face": "back",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/codec-back-607.png",
+        "sha256": "51dca96918b8c348c15d71718ee8c2b218c348cd071b44781e629a58329747f5",
+        "jobId": "8256b5c7-9a42-4c82-9ef8-31db3f242395",
+        "index": 607,
+        "dimensions": [
+          1664,
+          2496
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1664,
+          2496
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/crypto11-flash-backs-004-proof.png"
+      }
+    },
+    {
+      "quoteKey": "ape",
+      "designKey": "pair-ape",
+      "exactQuoteMint": "C1MHyoTJpRTeS9AQCyspNVu2EWAYCZwmJ1jNkEArFP1f",
+      "front": {
+        "quoteKey": "ape",
+        "designKey": "pair-ape",
+        "exactQuoteMint": "C1MHyoTJpRTeS9AQCyspNVu2EWAYCZwmJ1jNkEArFP1f",
+        "face": "front",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/ape-front.png",
+        "sha256": "7ec4de5974baaa004899d9d6137c3f90184ddf5fa4e6d36db3e57a28ae082893",
+        "jobId": "2748331d-99d5-48a5-8c6a-8397aba4342f",
+        "index": 209,
+        "dimensions": [
+          1360,
+          2048
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1360,
+          2048
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-003-proof.png"
+      },
+      "back": {
+        "quoteKey": "ape",
+        "designKey": "pair-ape",
+        "exactQuoteMint": "C1MHyoTJpRTeS9AQCyspNVu2EWAYCZwmJ1jNkEArFP1f",
+        "front": {
+          "quoteKey": "ape",
+          "designKey": "pair-ape",
+          "exactQuoteMint": "C1MHyoTJpRTeS9AQCyspNVu2EWAYCZwmJ1jNkEArFP1f",
+          "face": "front",
+          "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/ape-front.png",
+          "sha256": "7ec4de5974baaa004899d9d6137c3f90184ddf5fa4e6d36db3e57a28ae082893",
+          "jobId": "2748331d-99d5-48a5-8c6a-8397aba4342f",
+          "index": 209,
+          "dimensions": [
+            1360,
+            2048
+          ],
+          "format": "PNG",
+          "cropApplied": false,
+          "foregroundBoundsCandidate": [
+            0,
+            0,
+            1360,
+            2048
+          ],
+          "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+          "visualStatus": "accepted-after-actual-source-QA",
+          "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-003-proof.png"
+        },
+        "face": "back",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/ape-back-608.png",
+        "sha256": "cc0260ac29833e63414152b9e9022ed991863b95aeae7c485ba7dbf693d4461e",
+        "jobId": "6028e7f6-1ebf-4877-b8db-9d131373ba2a",
+        "index": 608,
+        "dimensions": [
+          1664,
+          2496
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1664,
+          2496
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/crypto11-flash-backs-004-proof.png"
+      }
+    },
+    {
+      "quoteKey": "link",
+      "designKey": "pair-link",
+      "exactQuoteMint": "LinkhB3afbBKb2EQQu7s7umdZceV3wcvAUJhQAfQ23L",
+      "front": {
+        "quoteKey": "link",
+        "designKey": "pair-link",
+        "exactQuoteMint": "LinkhB3afbBKb2EQQu7s7umdZceV3wcvAUJhQAfQ23L",
+        "face": "front",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/link-front.png",
+        "sha256": "7854525aa3c42f51218301cc78988c958e369378b6af971a50d24c66053e276d",
+        "jobId": "5951ab14-9944-4d64-970f-15be34c6ee96",
+        "index": 211,
+        "dimensions": [
+          1360,
+          2048
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1360,
+          2048
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-003-proof.png"
+      },
+      "back": {
+        "quoteKey": "link",
+        "designKey": "pair-link",
+        "exactQuoteMint": "LinkhB3afbBKb2EQQu7s7umdZceV3wcvAUJhQAfQ23L",
+        "front": {
+          "quoteKey": "link",
+          "designKey": "pair-link",
+          "exactQuoteMint": "LinkhB3afbBKb2EQQu7s7umdZceV3wcvAUJhQAfQ23L",
+          "face": "front",
+          "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/link-front.png",
+          "sha256": "7854525aa3c42f51218301cc78988c958e369378b6af971a50d24c66053e276d",
+          "jobId": "5951ab14-9944-4d64-970f-15be34c6ee96",
+          "index": 211,
+          "dimensions": [
+            1360,
+            2048
+          ],
+          "format": "PNG",
+          "cropApplied": false,
+          "foregroundBoundsCandidate": [
+            0,
+            0,
+            1360,
+            2048
+          ],
+          "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+          "visualStatus": "accepted-after-actual-source-QA",
+          "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-003-proof.png"
+        },
+        "face": "back",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/link-back-609.png",
+        "sha256": "99dacc43435b5aa8b9ca4483a53c9743ff2a69d2f7f008953c47614f01a52350",
+        "jobId": "e2e735da-c4b6-4cfc-85d3-545a0e81b85d",
+        "index": 609,
+        "dimensions": [
+          1664,
+          2496
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1664,
+          2496
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/crypto11-flash-backs-005-proof.png"
+      }
+    },
+    {
+      "quoteKey": "ore",
+      "designKey": "pair-ore",
+      "exactQuoteMint": "oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp",
+      "front": {
+        "quoteKey": "ore",
+        "designKey": "pair-ore",
+        "exactQuoteMint": "oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp",
+        "face": "front",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/ore-front.png",
+        "sha256": "099a51740e704d92c73c52d489f9e509fb7d71c1c0134b247d3583b80bb4646a",
+        "jobId": "349dff04-2521-4f93-8a6a-11a887a70773",
+        "index": 213,
+        "dimensions": [
+          1360,
+          2048
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1360,
+          2048
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-004-proof.png"
+      },
+      "back": {
+        "quoteKey": "ore",
+        "designKey": "pair-ore",
+        "exactQuoteMint": "oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp",
+        "front": {
+          "quoteKey": "ore",
+          "designKey": "pair-ore",
+          "exactQuoteMint": "oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp",
+          "face": "front",
+          "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/ore-front.png",
+          "sha256": "099a51740e704d92c73c52d489f9e509fb7d71c1c0134b247d3583b80bb4646a",
+          "jobId": "349dff04-2521-4f93-8a6a-11a887a70773",
+          "index": 213,
+          "dimensions": [
+            1360,
+            2048
+          ],
+          "format": "PNG",
+          "cropApplied": false,
+          "foregroundBoundsCandidate": [
+            0,
+            0,
+            1360,
+            2048
+          ],
+          "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+          "visualStatus": "accepted-after-actual-source-QA",
+          "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-004-proof.png"
+        },
+        "face": "back",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/ore-back-610.png",
+        "sha256": "6b7f2968f79f017843ebcd2e7cd4f06757eca05732c2d6eaab75080f25b9fd8f",
+        "jobId": "2a6f8f92-d637-4cf3-9296-b9bdf716f690",
+        "index": 610,
+        "dimensions": [
+          1664,
+          2496
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1664,
+          2496
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/crypto11-flash-backs-005-proof.png"
+      }
+    },
+    {
+      "quoteKey": "skr",
+      "designKey": "pair-skr",
+      "exactQuoteMint": "SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3",
+      "front": {
+        "quoteKey": "skr",
+        "designKey": "pair-skr",
+        "exactQuoteMint": "SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3",
+        "face": "front",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/skr-front.png",
+        "sha256": "4a50b714645f0cde57bddf1801b34f7aff2aecc5e23905f81e10ed9ccc8c3af4",
+        "jobId": "baeb20be-b223-41b6-a035-f85683186188",
+        "index": 215,
+        "dimensions": [
+          1360,
+          2048
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1360,
+          2048
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-004-proof.png"
+      },
+      "back": {
+        "quoteKey": "skr",
+        "designKey": "pair-skr",
+        "exactQuoteMint": "SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3",
+        "front": {
+          "quoteKey": "skr",
+          "designKey": "pair-skr",
+          "exactQuoteMint": "SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3",
+          "face": "front",
+          "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/skr-front.png",
+          "sha256": "4a50b714645f0cde57bddf1801b34f7aff2aecc5e23905f81e10ed9ccc8c3af4",
+          "jobId": "baeb20be-b223-41b6-a035-f85683186188",
+          "index": 215,
+          "dimensions": [
+            1360,
+            2048
+          ],
+          "format": "PNG",
+          "cropApplied": false,
+          "foregroundBoundsCandidate": [
+            0,
+            0,
+            1360,
+            2048
+          ],
+          "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+          "visualStatus": "accepted-after-actual-source-QA",
+          "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-004-proof.png"
+        },
+        "face": "back",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/skr-back-611.png",
+        "sha256": "a04b2aff0defe33a4c596c0897885a7e26e014300825c6b41a2cd06c34cf8ea2",
+        "jobId": "7a8b78a8-50ad-4bed-a465-e1e26e68b6a7",
+        "index": 611,
+        "dimensions": [
+          1664,
+          2496
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1664,
+          2496
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/crypto11-flash-backs-006-proof.png"
+      }
+    }
+  ],
+  "acceptedFaces": [
+    {
+      "quoteKey": "pump",
+      "designKey": "pair-pump",
+      "exactQuoteMint": "pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn",
+      "face": "front",
+      "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/pump-front.png",
+      "sha256": "5d54eca5d7ac588c3e3da3664819c5e33f518d77db272d87f211dc0e30be2b37",
+      "jobId": "2476f7d1-b25b-4878-adbd-afb59263028e",
+      "index": 201,
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "format": "PNG",
+      "cropApplied": false,
+      "foregroundBoundsCandidate": [
+        0,
+        0,
+        1360,
+        2048
+      ],
+      "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+      "visualStatus": "accepted-after-actual-source-QA",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-001-proof.png"
+    },
+    {
+      "quoteKey": "pump",
+      "designKey": "pair-pump",
+      "exactQuoteMint": "pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn",
+      "front": {
+        "quoteKey": "pump",
+        "designKey": "pair-pump",
+        "exactQuoteMint": "pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn",
+        "face": "front",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/pump-front.png",
+        "sha256": "5d54eca5d7ac588c3e3da3664819c5e33f518d77db272d87f211dc0e30be2b37",
+        "jobId": "2476f7d1-b25b-4878-adbd-afb59263028e",
+        "index": 201,
+        "dimensions": [
+          1360,
+          2048
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1360,
+          2048
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-001-proof.png"
+      },
+      "face": "back",
+      "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/pump-back-604.png",
+      "sha256": "7ef5841f071c96ca1b1e6f19e3125c880be49d057b5f1b68deaa7f3b6280923e",
+      "jobId": "5c492c4c-7d6d-40a0-a5c4-dd6dd38a6694",
+      "index": 604,
+      "dimensions": [
+        1664,
+        2496
+      ],
+      "format": "PNG",
+      "cropApplied": false,
+      "foregroundBoundsCandidate": [
+        0,
+        0,
+        1664,
+        2496
+      ],
+      "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+      "visualStatus": "accepted-after-actual-source-QA",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/crypto11-flash-backs-002-proof.png"
+    },
+    {
+      "quoteKey": "alch",
+      "designKey": "pair-alch",
+      "exactQuoteMint": "HNg5PYJmtqcmzXrv6S9zP1CDKk5BgDuyFBxbvNApump",
+      "face": "front",
+      "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/alch-front.png",
+      "sha256": "1718bdff9d2720463bae163d963bdf7b37aa7c83b5a8aaa4442901490f66b272",
+      "jobId": "98b9b952-e006-4504-a656-c79ac833e864",
+      "index": 203,
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "format": "PNG",
+      "cropApplied": false,
+      "foregroundBoundsCandidate": [
+        0,
+        0,
+        1360,
+        2048
+      ],
+      "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+      "visualStatus": "accepted-after-actual-source-QA",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-001-proof.png"
+    },
+    {
+      "quoteKey": "alch",
+      "designKey": "pair-alch",
+      "exactQuoteMint": "HNg5PYJmtqcmzXrv6S9zP1CDKk5BgDuyFBxbvNApump",
+      "front": {
+        "quoteKey": "alch",
+        "designKey": "pair-alch",
+        "exactQuoteMint": "HNg5PYJmtqcmzXrv6S9zP1CDKk5BgDuyFBxbvNApump",
+        "face": "front",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/alch-front.png",
+        "sha256": "1718bdff9d2720463bae163d963bdf7b37aa7c83b5a8aaa4442901490f66b272",
+        "jobId": "98b9b952-e006-4504-a656-c79ac833e864",
+        "index": 203,
+        "dimensions": [
+          1360,
+          2048
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1360,
+          2048
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-001-proof.png"
+      },
+      "face": "back",
+      "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/alch-back-605.png",
+      "sha256": "04e50ea63ea5caefb270a260306074e2401f0df226306130bd1f9267ebca55dc",
+      "jobId": "a5bfa6f5-9278-4619-a499-ba1a6a365fdb",
+      "index": 605,
+      "dimensions": [
+        1664,
+        2496
+      ],
+      "format": "PNG",
+      "cropApplied": false,
+      "foregroundBoundsCandidate": [
+        0,
+        0,
+        1664,
+        2496
+      ],
+      "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+      "visualStatus": "accepted-after-actual-source-QA",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/crypto11-flash-backs-003-proof.png"
+    },
+    {
+      "quoteKey": "pumpcade",
+      "designKey": "pair-pumpcade",
+      "exactQuoteMint": "Eg2ymQ2aQqjMcibnmTt8erC6Tvk9PVpJZCxvVPJz2agu",
+      "face": "front",
+      "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/pumpcade-front.png",
+      "sha256": "ee5f6fb30daa2556b8bfe7b9e3a2f7b7708771169e0762189812353d9aabcf21",
+      "jobId": "d7686101-5f28-4858-8c39-5c0c726a230d",
+      "index": 205,
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "format": "PNG",
+      "cropApplied": false,
+      "foregroundBoundsCandidate": [
+        0,
+        0,
+        1360,
+        2048
+      ],
+      "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+      "visualStatus": "accepted-after-actual-source-QA",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-002-proof.png"
+    },
+    {
+      "quoteKey": "pumpcade",
+      "designKey": "pair-pumpcade",
+      "exactQuoteMint": "Eg2ymQ2aQqjMcibnmTt8erC6Tvk9PVpJZCxvVPJz2agu",
+      "front": {
+        "quoteKey": "pumpcade",
+        "designKey": "pair-pumpcade",
+        "exactQuoteMint": "Eg2ymQ2aQqjMcibnmTt8erC6Tvk9PVpJZCxvVPJz2agu",
+        "face": "front",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/pumpcade-front.png",
+        "sha256": "ee5f6fb30daa2556b8bfe7b9e3a2f7b7708771169e0762189812353d9aabcf21",
+        "jobId": "d7686101-5f28-4858-8c39-5c0c726a230d",
+        "index": 205,
+        "dimensions": [
+          1360,
+          2048
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1360,
+          2048
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-002-proof.png"
+      },
+      "face": "back",
+      "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/pumpcade-back-606.png",
+      "sha256": "3ace12fc23fab90868481d76cf1a98e9c3cf579c2577bc74d404aaa036432df8",
+      "jobId": "5916a1a9-4dd0-43e4-8359-242c97598fe8",
+      "index": 606,
+      "dimensions": [
+        1664,
+        2496
+      ],
+      "format": "PNG",
+      "cropApplied": false,
+      "foregroundBoundsCandidate": [
+        0,
+        0,
+        1664,
+        2496
+      ],
+      "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+      "visualStatus": "accepted-after-actual-source-QA",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/crypto11-flash-backs-003-proof.png"
+    },
+    {
+      "quoteKey": "codec",
+      "designKey": "pair-codec",
+      "exactQuoteMint": "69LjZUUzxj3Cb3Fxeo1X4QpYEQTboApkhXTysPpbpump",
+      "face": "front",
+      "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/codec-front.png",
+      "sha256": "9d5e3cbe52ca569a284342dc08b521df659752db6da1ffd33df71305afdc174e",
+      "jobId": "12d5f3d1-54cb-4eb9-b04d-afb15aecae58",
+      "index": 207,
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "format": "PNG",
+      "cropApplied": false,
+      "foregroundBoundsCandidate": [
+        0,
+        0,
+        1360,
+        2048
+      ],
+      "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+      "visualStatus": "accepted-after-actual-source-QA",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-002-proof.png"
+    },
+    {
+      "quoteKey": "codec",
+      "designKey": "pair-codec",
+      "exactQuoteMint": "69LjZUUzxj3Cb3Fxeo1X4QpYEQTboApkhXTysPpbpump",
+      "front": {
+        "quoteKey": "codec",
+        "designKey": "pair-codec",
+        "exactQuoteMint": "69LjZUUzxj3Cb3Fxeo1X4QpYEQTboApkhXTysPpbpump",
+        "face": "front",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/codec-front.png",
+        "sha256": "9d5e3cbe52ca569a284342dc08b521df659752db6da1ffd33df71305afdc174e",
+        "jobId": "12d5f3d1-54cb-4eb9-b04d-afb15aecae58",
+        "index": 207,
+        "dimensions": [
+          1360,
+          2048
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1360,
+          2048
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-002-proof.png"
+      },
+      "face": "back",
+      "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/codec-back-607.png",
+      "sha256": "51dca96918b8c348c15d71718ee8c2b218c348cd071b44781e629a58329747f5",
+      "jobId": "8256b5c7-9a42-4c82-9ef8-31db3f242395",
+      "index": 607,
+      "dimensions": [
+        1664,
+        2496
+      ],
+      "format": "PNG",
+      "cropApplied": false,
+      "foregroundBoundsCandidate": [
+        0,
+        0,
+        1664,
+        2496
+      ],
+      "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+      "visualStatus": "accepted-after-actual-source-QA",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/crypto11-flash-backs-004-proof.png"
+    },
+    {
+      "quoteKey": "ape",
+      "designKey": "pair-ape",
+      "exactQuoteMint": "C1MHyoTJpRTeS9AQCyspNVu2EWAYCZwmJ1jNkEArFP1f",
+      "face": "front",
+      "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/ape-front.png",
+      "sha256": "7ec4de5974baaa004899d9d6137c3f90184ddf5fa4e6d36db3e57a28ae082893",
+      "jobId": "2748331d-99d5-48a5-8c6a-8397aba4342f",
+      "index": 209,
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "format": "PNG",
+      "cropApplied": false,
+      "foregroundBoundsCandidate": [
+        0,
+        0,
+        1360,
+        2048
+      ],
+      "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+      "visualStatus": "accepted-after-actual-source-QA",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-003-proof.png"
+    },
+    {
+      "quoteKey": "ape",
+      "designKey": "pair-ape",
+      "exactQuoteMint": "C1MHyoTJpRTeS9AQCyspNVu2EWAYCZwmJ1jNkEArFP1f",
+      "front": {
+        "quoteKey": "ape",
+        "designKey": "pair-ape",
+        "exactQuoteMint": "C1MHyoTJpRTeS9AQCyspNVu2EWAYCZwmJ1jNkEArFP1f",
+        "face": "front",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/ape-front.png",
+        "sha256": "7ec4de5974baaa004899d9d6137c3f90184ddf5fa4e6d36db3e57a28ae082893",
+        "jobId": "2748331d-99d5-48a5-8c6a-8397aba4342f",
+        "index": 209,
+        "dimensions": [
+          1360,
+          2048
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1360,
+          2048
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-003-proof.png"
+      },
+      "face": "back",
+      "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/ape-back-608.png",
+      "sha256": "cc0260ac29833e63414152b9e9022ed991863b95aeae7c485ba7dbf693d4461e",
+      "jobId": "6028e7f6-1ebf-4877-b8db-9d131373ba2a",
+      "index": 608,
+      "dimensions": [
+        1664,
+        2496
+      ],
+      "format": "PNG",
+      "cropApplied": false,
+      "foregroundBoundsCandidate": [
+        0,
+        0,
+        1664,
+        2496
+      ],
+      "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+      "visualStatus": "accepted-after-actual-source-QA",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/crypto11-flash-backs-004-proof.png"
+    },
+    {
+      "quoteKey": "link",
+      "designKey": "pair-link",
+      "exactQuoteMint": "LinkhB3afbBKb2EQQu7s7umdZceV3wcvAUJhQAfQ23L",
+      "face": "front",
+      "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/link-front.png",
+      "sha256": "7854525aa3c42f51218301cc78988c958e369378b6af971a50d24c66053e276d",
+      "jobId": "5951ab14-9944-4d64-970f-15be34c6ee96",
+      "index": 211,
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "format": "PNG",
+      "cropApplied": false,
+      "foregroundBoundsCandidate": [
+        0,
+        0,
+        1360,
+        2048
+      ],
+      "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+      "visualStatus": "accepted-after-actual-source-QA",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-003-proof.png"
+    },
+    {
+      "quoteKey": "link",
+      "designKey": "pair-link",
+      "exactQuoteMint": "LinkhB3afbBKb2EQQu7s7umdZceV3wcvAUJhQAfQ23L",
+      "front": {
+        "quoteKey": "link",
+        "designKey": "pair-link",
+        "exactQuoteMint": "LinkhB3afbBKb2EQQu7s7umdZceV3wcvAUJhQAfQ23L",
+        "face": "front",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/link-front.png",
+        "sha256": "7854525aa3c42f51218301cc78988c958e369378b6af971a50d24c66053e276d",
+        "jobId": "5951ab14-9944-4d64-970f-15be34c6ee96",
+        "index": 211,
+        "dimensions": [
+          1360,
+          2048
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1360,
+          2048
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-003-proof.png"
+      },
+      "face": "back",
+      "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/link-back-609.png",
+      "sha256": "99dacc43435b5aa8b9ca4483a53c9743ff2a69d2f7f008953c47614f01a52350",
+      "jobId": "e2e735da-c4b6-4cfc-85d3-545a0e81b85d",
+      "index": 609,
+      "dimensions": [
+        1664,
+        2496
+      ],
+      "format": "PNG",
+      "cropApplied": false,
+      "foregroundBoundsCandidate": [
+        0,
+        0,
+        1664,
+        2496
+      ],
+      "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+      "visualStatus": "accepted-after-actual-source-QA",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/crypto11-flash-backs-005-proof.png"
+    },
+    {
+      "quoteKey": "ore",
+      "designKey": "pair-ore",
+      "exactQuoteMint": "oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp",
+      "face": "front",
+      "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/ore-front.png",
+      "sha256": "099a51740e704d92c73c52d489f9e509fb7d71c1c0134b247d3583b80bb4646a",
+      "jobId": "349dff04-2521-4f93-8a6a-11a887a70773",
+      "index": 213,
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "format": "PNG",
+      "cropApplied": false,
+      "foregroundBoundsCandidate": [
+        0,
+        0,
+        1360,
+        2048
+      ],
+      "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+      "visualStatus": "accepted-after-actual-source-QA",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-004-proof.png"
+    },
+    {
+      "quoteKey": "ore",
+      "designKey": "pair-ore",
+      "exactQuoteMint": "oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp",
+      "front": {
+        "quoteKey": "ore",
+        "designKey": "pair-ore",
+        "exactQuoteMint": "oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp",
+        "face": "front",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/ore-front.png",
+        "sha256": "099a51740e704d92c73c52d489f9e509fb7d71c1c0134b247d3583b80bb4646a",
+        "jobId": "349dff04-2521-4f93-8a6a-11a887a70773",
+        "index": 213,
+        "dimensions": [
+          1360,
+          2048
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1360,
+          2048
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-004-proof.png"
+      },
+      "face": "back",
+      "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/ore-back-610.png",
+      "sha256": "6b7f2968f79f017843ebcd2e7cd4f06757eca05732c2d6eaab75080f25b9fd8f",
+      "jobId": "2a6f8f92-d637-4cf3-9296-b9bdf716f690",
+      "index": 610,
+      "dimensions": [
+        1664,
+        2496
+      ],
+      "format": "PNG",
+      "cropApplied": false,
+      "foregroundBoundsCandidate": [
+        0,
+        0,
+        1664,
+        2496
+      ],
+      "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+      "visualStatus": "accepted-after-actual-source-QA",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/crypto11-flash-backs-005-proof.png"
+    },
+    {
+      "quoteKey": "skr",
+      "designKey": "pair-skr",
+      "exactQuoteMint": "SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3",
+      "face": "front",
+      "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/skr-front.png",
+      "sha256": "4a50b714645f0cde57bddf1801b34f7aff2aecc5e23905f81e10ed9ccc8c3af4",
+      "jobId": "baeb20be-b223-41b6-a035-f85683186188",
+      "index": 215,
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "format": "PNG",
+      "cropApplied": false,
+      "foregroundBoundsCandidate": [
+        0,
+        0,
+        1360,
+        2048
+      ],
+      "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+      "visualStatus": "accepted-after-actual-source-QA",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-004-proof.png"
+    },
+    {
+      "quoteKey": "skr",
+      "designKey": "pair-skr",
+      "exactQuoteMint": "SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3",
+      "front": {
+        "quoteKey": "skr",
+        "designKey": "pair-skr",
+        "exactQuoteMint": "SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3",
+        "face": "front",
+        "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/skr-front.png",
+        "sha256": "4a50b714645f0cde57bddf1801b34f7aff2aecc5e23905f81e10ed9ccc8c3af4",
+        "jobId": "baeb20be-b223-41b6-a035-f85683186188",
+        "index": 215,
+        "dimensions": [
+          1360,
+          2048
+        ],
+        "format": "PNG",
+        "cropApplied": false,
+        "foregroundBoundsCandidate": [
+          0,
+          0,
+          1360,
+          2048
+        ],
+        "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+        "visualStatus": "accepted-after-actual-source-QA",
+        "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/final8-root-fronts-004-proof.png"
+      },
+      "face": "back",
+      "sourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/skr-back-611.png",
+      "sha256": "a04b2aff0defe33a4c596c0897885a7e26e014300825c6b41a2cd06c34cf8ea2",
+      "jobId": "7a8b78a8-50ad-4bed-a465-e1e26e68b6a7",
+      "index": 611,
+      "dimensions": [
+        1664,
+        2496
+      ],
+      "format": "PNG",
+      "cropApplied": false,
+      "foregroundBoundsCandidate": [
+        0,
+        0,
+        1664,
+        2496
+      ],
+      "boundsNote": "Master retained uncropped. Canonical builder owns measured content mapping and final rounded normalization.",
+      "visualStatus": "accepted-after-actual-source-QA",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/crypto11-flash-backs-006-proof.png"
+    }
+  ],
+  "ledger": "generation-ledger-final.json"
+}

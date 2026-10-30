@@ -125,8 +125,8 @@ function mockRpc() {
 }
 
 describe("mainnet wallet preparation, independent confirmation and separate NFT recovery", () => {
-  test("actual SDK plans pass the independent browser verifier for all 37 quotes and separate Core NFT issuance", async () => {
-    expect(PAIR_ASSETS).toHaveLength(37);
+  test("actual SDK plans pass the independent browser verifier for all admitted quotes and separate Core NFT issuance", async () => {
+    expect(PAIR_ASSETS.length).toBeGreaterThanOrEqual(51);
     for (const quote of PAIR_ASSETS) {
       const input = defaultInput(); input.quoteKey = quote.key;
       input.card = { ...input.card, designKey: "obsidian-archive", frontSha256: art["obsidian-archive"].front.sha256, backSha256: art["obsidian-archive"].back.sha256 };
@@ -165,7 +165,7 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
   });
 
   for (const {design: designKey, quote: quoteKey} of MEME_PAIR_PRESETS) test(`${designKey}/${quoteKey} themed preset preserves exact identity through actual SDK token and NFT plans`, async () => {
-    const input = defaultInput(), design = art[designKey];
+    const input = defaultInput(), design = art[designKey as keyof typeof art];
     input.quoteKey = quoteKey;
     input.card = {...input.card, designKey, frontSha256:design.front.sha256, backSha256:design.back.sha256};
     const quote=PAIR_ASSETS.find(asset=>asset.key===quoteKey)!,rpc=mockRpc();
@@ -250,7 +250,7 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
 
   for (const quoteKey of ["pengu", "giga", "spx", "trump", "useless", "chillguy",...moreMemeQuotes]) test(`${quoteKey} initial buy retains exact atoms when it fits and explicitly rejects oversized metadata`, async () => {
     const preset = MEME_PAIR_PRESETS.find(preset => preset.quote === quoteKey)!;
-    const input = defaultInput(), design = art[preset.design], rpc = mockRpc();
+    const input = defaultInput(), design = art[preset.design as keyof typeof art], rpc = mockRpc();
     input.quoteKey = quoteKey;
     input.card = {...input.card, designKey: preset.design, frontSha256: design.front.sha256, backSha256: design.back.sha256};
     input.initialBuyQuoteBaseUnits = "1234567";

@@ -1,0 +1,52 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "jobs[4]:\n  - index: 61\n    job_id: 0757b9ff-0235-4348-bde5-4af722f13f62\n    status: completed\n    type: image\n    model: gpt_image_2_5\n    result_url: \"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_014148_0757b9ff-0235-4348-bde5-4af722f13f62.png\"\n  - index: 63\n    job_id: 9bd05d75-9e98-41a2-b340-a5ea8504cc68\n    status: completed\n    type: image\n    model: gpt_image_2_5\n    result_url: \"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_014149_9bd05d75-9e98-41a2-b340-a5ea8504cc68.png\"\n  - index: 65\n    job_id: 2a9238d6-9399-4290-b565-254d2cb5fa30\n    status: in_progress\n    type: image\n    model: gpt_image_2_5\n  - index: 67\n    job_id: 09a2a48a-823d-46b7-9e0e-828a6d539687\n    status: in_progress\n    type: image\n    model: gpt_image_2_5\nsummary:\n  total: 4\n  completed: 2\n  failed: 0\n  active: 2\n  errors: 0\nall_terminal: false\npoll_after_seconds: 10\n\nWork is still pending. Wait poll_after_seconds, then call jobs_wait again in this turn. Do not ask the user to say 'continue' just because the polling window ended. Respect cancellation and host execution limits."
+    }
+  ],
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 61,
+        "job_id": "0757b9ff-0235-4348-bde5-4af722f13f62",
+        "status": "completed",
+        "type": "image",
+        "model": "gpt_image_2_5",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_014148_0757b9ff-0235-4348-bde5-4af722f13f62.png"
+      },
+      {
+        "index": 63,
+        "job_id": "9bd05d75-9e98-41a2-b340-a5ea8504cc68",
+        "status": "completed",
+        "type": "image",
+        "model": "gpt_image_2_5",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_014149_9bd05d75-9e98-41a2-b340-a5ea8504cc68.png"
+      },
+      {
+        "index": 65,
+        "job_id": "2a9238d6-9399-4290-b565-254d2cb5fa30",
+        "status": "in_progress",
+        "type": "image",
+        "model": "gpt_image_2_5"
+      },
+      {
+        "index": 67,
+        "job_id": "09a2a48a-823d-46b7-9e0e-828a6d539687",
+        "status": "in_progress",
+        "type": "image",
+        "model": "gpt_image_2_5"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "completed": 2,
+      "failed": 0,
+      "active": 2,
+      "errors": 0
+    },
+    "all_terminal": false,
+    "poll_after_seconds": 10
+  },
+  "isError": false
+}

@@ -1,0 +1,2962 @@
+{
+  "resolvedAt": "2026-10-29T22:52:06.349477+00:00",
+  "scope": "Research-only51 exact identities:37 current registry +14 admitted crypto candidates. Candidate original reference images may be downloaded under8MiB and validated for generation reference intake; no app registry modification, generation or visual-approval claim.",
+  "sources": [
+    "https://pump.fun/docs/custom-pairs",
+    "https://github.com/pump-fun/pump-public-docs/blob/main/docs/instructions/COIN_CREATION.md"
+  ],
+  "assets": [
+    {
+      "key": "sol",
+      "symbol": "SOL",
+      "name": "Solana",
+      "mint": "So11111111111111111111111111111111111111112",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Wrapped SOL",
+        "symbol": "SOL",
+        "uri": "",
+        "source": "6dM4TqWyWJsbx7obrdLcviBkTafD5E8av61zfU6jq57X"
+      },
+      "metadataUri": null,
+      "imageUri": null,
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "no on-chain metadata URI",
+      "primaryBrandReference": "https://github.com/solana-labs/token-list/tree/main/assets/mainnet/So11111111111111111111111111111111111111112",
+      "primaryBrandImageUri": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png",
+      "primaryBrandVectorUri": "https://solana.com/src/img/branding/solanaLogoMark.svg",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/sol-943c48e760ec.png",
+        "sha256": "943c48e760ec717f55363835067d501ff4bd6825a29732a18955e141ba536602",
+        "bytes": 32126,
+        "width": 512,
+        "height": 512,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png",
+        "downloadUri": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png",
+        "resolvedUri": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png",
+        "attempts": [
+          {
+            "uri": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only"
+      },
+      "primaryBrandImageSource": "Supplementary Solana Labs exact-mint registry asset; official project image rate-limited; pending visual inspection",
+      "primaryBrandOriginalImageUri": "https://solana.com/src/img/branding/solanaLogoMark.png"
+    },
+    {
+      "key": "usdc",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "USD Coin",
+        "symbol": "USDC",
+        "uri": "",
+        "source": "5x38Kp4hvdomTCnCrAny4UtMUt5rQBdB6px2K1Ui45Wq"
+      },
+      "metadataUri": null,
+      "imageUri": null,
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "no on-chain metadata URI",
+      "referenceIntake": {
+        "key": "usdc",
+        "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "sourceUri": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
+        "sourceKind": "Solana Labs token-list exact mint asset directory; additional reference candidate, not asserted issuer approval",
+        "visualInspection": "pending",
+        "status": "downloaded-pending-visual-inspection",
+        "path": "references/usdc-token-list-6d14601d0b11.png",
+        "sha256": "6d14601d0b1109046e366592b8c0f256ffb075f69180b65dddd97ae665d49f9e",
+        "bytes": 9276,
+        "width": 181,
+        "height": 181,
+        "format": "PNG",
+        "mode": "RGBA",
+        "contentType": "image/png",
+        "referenceSourceUri": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
+        "downloadUri": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
+        "downloadPurpose": "Exact-mint supplementary source reference intake only; no generation"
+      }
+    },
+    {
+      "key": "gmex",
+      "symbol": "GMEX",
+      "name": "GameStop xStock",
+      "mint": "Xsf9mBktVB9BSU5kf4nHxPq5hCBJ2j2ui3ecFGxPRGc",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Gamestop xStock",
+        "symbol": "GMEx",
+        "uri": "https://xstocks-metadata.backed.fi/tokens/Solana/GMEx/metadata.json",
+        "source": "Token2022 inline metadata"
+      },
+      "metadataUri": "https://xstocks-metadata.backed.fi/tokens/Solana/GMEx/metadata.json",
+      "imageUri": "https://xstocks-metadata.backed.fi/logos/tokens/GMEx.png",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "URI resolved in earlier30October2026 fetch of same exact on-chain metadata URI; repeated-request error retained",
+      "metadataError": "<urlopen error _ssl.c:1063: The handshake operation timed out>",
+      "earlierResolutionSource": "https://xstocks-metadata.backed.fi/tokens/Solana/GMEx/metadata.json",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/gmex-709f953a1655.png",
+        "sha256": "709f953a165589700393b799bc93fe5ff7faae9b2247194a609db8631830ed45",
+        "bytes": 14493,
+        "width": 400,
+        "height": 400,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://xstocks-metadata.backed.fi/logos/tokens/GMEx.png",
+        "downloadUri": "https://xstocks-metadata.backed.fi/logos/tokens/GMEx.png",
+        "resolvedUri": "https://xstocks-metadata.backed.fi/logos/tokens/GMEx.png",
+        "attempts": [
+          {
+            "uri": "https://xstocks-metadata.backed.fi/logos/tokens/GMEx.png",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "tslax",
+      "symbol": "TSLAX",
+      "name": "Tesla xStock",
+      "mint": "XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Tesla xStock",
+        "symbol": "TSLAx",
+        "uri": "https://xstocks-metadata.backed.fi/tokens/Solana/TSLAx/metadata.json",
+        "source": "Token2022 inline metadata"
+      },
+      "metadataUri": "https://xstocks-metadata.backed.fi/tokens/Solana/TSLAx/metadata.json",
+      "imageUri": "https://xstocks-metadata.backed.fi/logos/tokens/TSLAx.png",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "URI resolved from exact on-chain metadata; image not downloaded",
+      "metadataResolvedUri": "https://xstocks-metadata.backed.fi/tokens/Solana/TSLAx/metadata.json",
+      "metadataHttpStatus": 200,
+      "metadataName": "Tesla xStock",
+      "metadataSymbol": "TSLAx",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/tslax-42cb949ac9a7.png",
+        "sha256": "42cb949ac9a7e6385df10a59bcd47576260c6a78bf54df0eea962343644d7fd8",
+        "bytes": 16972,
+        "width": 400,
+        "height": 400,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://xstocks-metadata.backed.fi/logos/tokens/TSLAx.png",
+        "downloadUri": "https://xstocks-metadata.backed.fi/logos/tokens/TSLAx.png",
+        "resolvedUri": "https://xstocks-metadata.backed.fi/logos/tokens/TSLAx.png",
+        "attempts": [
+          {
+            "uri": "https://xstocks-metadata.backed.fi/logos/tokens/TSLAx.png",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "nvdax",
+      "symbol": "NVDAX",
+      "name": "NVIDIA xStock",
+      "mint": "Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "NVIDIA xStock",
+        "symbol": "NVDAx",
+        "uri": "https://xstocks-metadata.backed.fi/tokens/Solana/NVDAx/metadata.json",
+        "source": "Token2022 inline metadata"
+      },
+      "metadataUri": "https://xstocks-metadata.backed.fi/tokens/Solana/NVDAx/metadata.json",
+      "imageUri": "https://xstocks-metadata.backed.fi/logos/tokens/NVDAx.png",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "URI resolved from exact on-chain metadata; image not downloaded",
+      "metadataResolvedUri": "https://xstocks-metadata.backed.fi/tokens/Solana/NVDAx/metadata.json",
+      "metadataHttpStatus": 200,
+      "metadataName": "NVIDIA xStock",
+      "metadataSymbol": "NVDAx",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/nvdax-6b639eff0158.png",
+        "sha256": "6b639eff0158850c474d378ed8580375c396dda494cfff9040e6b1735b8ef623",
+        "bytes": 23218,
+        "width": 400,
+        "height": 400,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://xstocks-metadata.backed.fi/logos/tokens/NVDAx.png",
+        "downloadUri": "https://xstocks-metadata.backed.fi/logos/tokens/NVDAx.png",
+        "resolvedUri": "https://xstocks-metadata.backed.fi/logos/tokens/NVDAx.png",
+        "attempts": [
+          {
+            "uri": "https://xstocks-metadata.backed.fi/logos/tokens/NVDAx.png",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "aaplx",
+      "symbol": "AAPLX",
+      "name": "Apple xStock",
+      "mint": "XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Apple xStock",
+        "symbol": "AAPLx",
+        "uri": "https://xstocks-metadata.backed.fi/tokens/Solana/AAPLx/metadata.json",
+        "source": "Token2022 inline metadata"
+      },
+      "metadataUri": "https://xstocks-metadata.backed.fi/tokens/Solana/AAPLx/metadata.json",
+      "imageUri": "https://xstocks-metadata.backed.fi/logos/tokens/AAPLx.png",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "URI resolved from exact on-chain metadata; image not downloaded",
+      "metadataResolvedUri": "https://xstocks-metadata.backed.fi/tokens/Solana/AAPLx/metadata.json",
+      "metadataHttpStatus": 200,
+      "metadataName": "Apple xStock",
+      "metadataSymbol": "AAPLx",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/aaplx-930db1995149.png",
+        "sha256": "930db19951493787ee286650222311b5158317bdb811205b450cfb412ab89295",
+        "bytes": 14540,
+        "width": 400,
+        "height": 400,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://xstocks-metadata.backed.fi/logos/tokens/AAPLx.png",
+        "downloadUri": "https://xstocks-metadata.backed.fi/logos/tokens/AAPLx.png",
+        "resolvedUri": "https://xstocks-metadata.backed.fi/logos/tokens/AAPLx.png",
+        "attempts": [
+          {
+            "uri": "https://xstocks-metadata.backed.fi/logos/tokens/AAPLx.png",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "mstrx",
+      "symbol": "MSTRX",
+      "name": "Strategy xStock",
+      "mint": "XsP7xzNPvEHS1m6qfanPUGjNmdnmsLKEoNAnHjdxxyZ",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "MicroStrategy xStock",
+        "symbol": "MSTRx",
+        "uri": "https://xstocks-metadata.backed.fi/tokens/Solana/MSTRx/metadata.json",
+        "source": "Token2022 inline metadata"
+      },
+      "metadataUri": "https://xstocks-metadata.backed.fi/tokens/Solana/MSTRx/metadata.json",
+      "imageUri": "https://xstocks-metadata.backed.fi/logos/tokens/MSTRx.png",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "URI resolved from exact on-chain metadata; image not downloaded",
+      "metadataResolvedUri": "https://xstocks-metadata.backed.fi/tokens/Solana/MSTRx/metadata.json",
+      "metadataHttpStatus": 200,
+      "metadataName": "MicroStrategy xStock",
+      "metadataSymbol": "MSTRx",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/mstrx-1456e378930a.png",
+        "sha256": "1456e378930a91691694252aef4c77d0b56eb296802a9b1396a4a92629a449a8",
+        "bytes": 17461,
+        "width": 400,
+        "height": 400,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://xstocks-metadata.backed.fi/logos/tokens/MSTRx.png",
+        "downloadUri": "https://xstocks-metadata.backed.fi/logos/tokens/MSTRx.png",
+        "resolvedUri": "https://xstocks-metadata.backed.fi/logos/tokens/MSTRx.png",
+        "attempts": [
+          {
+            "uri": "https://xstocks-metadata.backed.fi/logos/tokens/MSTRx.png",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "coinx",
+      "symbol": "COINX",
+      "name": "Coinbase xStock",
+      "mint": "Xs7ZdzSHLU9ftNJsii5fCeJhoRWSC32SQGzGQtePxNu",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Coinbase xStock",
+        "symbol": "COINx",
+        "uri": "https://xstocks-metadata.backed.fi/tokens/Solana/COINx/metadata.json",
+        "source": "Token2022 inline metadata"
+      },
+      "metadataUri": "https://xstocks-metadata.backed.fi/tokens/Solana/COINx/metadata.json",
+      "imageUri": "https://xstocks-metadata.backed.fi/logos/tokens/COINx.png",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "URI resolved in earlier30October2026 fetch of same exact on-chain metadata URI; repeated-request error retained",
+      "metadataError": "<urlopen error timed out>",
+      "earlierResolutionSource": "https://xstocks-metadata.backed.fi/tokens/Solana/COINx/metadata.json",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/coinx-7b028dd20902.png",
+        "sha256": "7b028dd209022659803a269eb4a35f61995249e9e2c17635ffe2db41eefce6d6",
+        "bytes": 18120,
+        "width": 400,
+        "height": 400,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://xstocks-metadata.backed.fi/logos/tokens/COINx.png",
+        "downloadUri": "https://xstocks-metadata.backed.fi/logos/tokens/COINx.png",
+        "resolvedUri": "https://xstocks-metadata.backed.fi/logos/tokens/COINx.png",
+        "attempts": [
+          {
+            "uri": "https://xstocks-metadata.backed.fi/logos/tokens/COINx.png",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "amc",
+      "symbol": "AMC",
+      "name": "AMC Entertainment tokenized equity",
+      "mint": "AMC1qwR9KhiyrQBRPrxnfo4JfMeMZqEBvt5tgTytNNoc",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "AMC Entertainment - Backpack Securities",
+        "symbol": "AMC",
+        "uri": "https://metadata.backpack.exchange/stocks/amc.us.json",
+        "source": "Token2022 inline metadata"
+      },
+      "metadataUri": "https://metadata.backpack.exchange/stocks/amc.us.json",
+      "imageUri": "https://d1io3yog0oux5.cloudfront.net/_60e2e3fc636ec8d3e29e66a1fec50310/amctheatres/files/theme/images/favicons/apple-touch-icon.png",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Observed primary/officialPump imageURL; visualinspectionpending",
+      "metadataResolvedUri": "https://metadata.backpack.exchange/stocks/amc.us.json",
+      "metadataHttpStatus": 200,
+      "metadataName": "AMC Entertainment - Backpack Securities",
+      "metadataSymbol": "AMC",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceCaution": "On-chain metadata image is generic Backpack Securities mark, not AMC company mascot/logo. Use primary AMC identity source as an additional visual reference.",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/amc-d865497a68ea.png",
+        "sha256": "d865497a68eae9d46d07498e5e4880550b77b63dd0dad2ba407b2b35e07a1352",
+        "bytes": 3258,
+        "width": 180,
+        "height": 180,
+        "mode": "P",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://d1io3yog0oux5.cloudfront.net/_60e2e3fc636ec8d3e29e66a1fec50310/amctheatres/files/theme/images/favicons/apple-touch-icon.png",
+        "downloadUri": "https://d1io3yog0oux5.cloudfront.net/_60e2e3fc636ec8d3e29e66a1fec50310/amctheatres/files/theme/images/favicons/apple-touch-icon.png",
+        "resolvedUri": "https://d1io3yog0oux5.cloudfront.net/_60e2e3fc636ec8d3e29e66a1fec50310/amctheatres/files/theme/images/favicons/apple-touch-icon.png",
+        "attempts": [
+          {
+            "uri": "https://d1io3yog0oux5.cloudfront.net/_60e2e3fc636ec8d3e29e66a1fec50310/amctheatres/files/theme/images/favicons/apple-touch-icon.png",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only"
+      },
+      "originalQuoteImageUri": "https://metadata.backpack.exchange/stock-images/backpack_securities.png",
+      "primaryBrandImageUri": "https://d1io3yog0oux5.cloudfront.net/_60e2e3fc636ec8d3e29e66a1fec50310/amctheatres/files/theme/images/favicons/apple-touch-icon.png",
+      "primaryBrandReference": "https://investor.amctheatres.com",
+      "primaryBrandImageSource": "Observed primaryAMCIRhomepage180px brandicon; use instead ofgenericBackpack tokenmetadata mark",
+      "previousReferenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/amc-a0e7483f0f5b.png",
+        "sha256": "a0e7483f0f5b8a283b556400d55f1eedd08f612640deadfcae532e7f00670764",
+        "bytes": 107927,
+        "width": 512,
+        "height": 512,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://metadata.backpack.exchange/stock-images/backpack_securities.png",
+        "downloadUri": "https://metadata.backpack.exchange/stock-images/backpack_securities.png",
+        "resolvedUri": "https://metadata.backpack.exchange/stock-images/backpack_securities.png",
+        "attempts": [
+          {
+            "uri": "https://metadata.backpack.exchange/stock-images/backpack_securities.png",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "doge",
+      "symbol": "DOGE",
+      "name": "Dogecoin (Sunrise Solana representation)",
+      "mint": "DoGEV7LASBkQbibMc5k5vKnTZoMg423GpJ5QtJEGfm7R",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Dogecoin",
+        "symbol": "DOGE",
+        "uri": "https://arweave.net/vkpUTtURQ2woUodsx2SpMx5GvtJt3770oFkz1P2az3o",
+        "source": "GLTxHqfwkGbKQNwm54V2SxaBa6zcab2ST434TLCRHfrE"
+      },
+      "metadataUri": "https://arweave.net/vkpUTtURQ2woUodsx2SpMx5GvtJt3770oFkz1P2az3o",
+      "imageUri": "https://dogecoin.com/assets/images/doge.svg",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "URI resolved in earlier30October2026 fetch of same exact on-chain metadata URI; repeated-request error retained",
+      "metadataError": "<urlopen error timed out>",
+      "earlierResolutionSource": "https://arweave.net/vkpUTtURQ2woUodsx2SpMx5GvtJt3770oFkz1P2az3o",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/doge-06183873aff4.svg",
+        "sha256": "06183873aff470d47f6af2f05d5058d6458796cf106d391c7492c370ae907375",
+        "bytes": 156829,
+        "width": 1875.0,
+        "height": 1875.0,
+        "mode": "vector",
+        "format": "SVG",
+        "frames": 1,
+        "contentType": "image/svg+xml",
+        "referenceSourceUri": "https://dogecoin.com/assets/images/doge.svg",
+        "downloadUri": "https://dogecoin.com/assets/images/doge.svg",
+        "resolvedUri": "https://dogecoin.com/assets/images/doge.svg",
+        "attempts": [
+          {
+            "uri": "https://dogecoin.com/assets/images/doge.svg",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+        "deterministicPngExport": {
+          "path": "references/doge-06183873aff4-reference-1024.png",
+          "sha256": "061554d437f361f04e8f2d82d066888a33c6b7ce1533e9c6507fc36ac8437eb4",
+          "bytes": 127774,
+          "width": 1024,
+          "height": 1024,
+          "transform": "Installed ResvgWASM rasterization of validated original SVG; original retained; no new artwork"
+        }
+      },
+      "primaryBrandImageUri": "https://dogecoin.com/assets/images/doge.svg",
+      "primaryBrandReference": "https://dogecoin.com/",
+      "primaryBrandImageSource": "Supplementary primary Dogecoin homepage mascot image; preserve originalquoteimageURI separately",
+      "originalQuoteImageUri": "https://arweave.net/ygw21WEL7f1phnN2lLWqv4LERCdMFuVd8AflgWo1sfE"
+    },
+    {
+      "key": "fartcoin",
+      "symbol": "Fartcoin",
+      "name": "Fartcoin",
+      "mint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Fartcoin",
+        "symbol": "Fartcoin",
+        "uri": "https://ipfs.io/ipfs/QmYfe8zVGHA1heej47AkBX3Nnetg2h2kqj5yymz1xyKeHb",
+        "source": "9XQ1xyaxP4ALeRbzj9Rm9KByCuwcLjf5yJ4nbyKLxG5u"
+      },
+      "metadataUri": "https://ipfs.io/ipfs/QmYfe8zVGHA1heej47AkBX3Nnetg2h2kqj5yymz1xyKeHb",
+      "imageUri": "https://ipfs.io/ipfs/QmQr3Fz4h1etNsF7oLGMRHiCzhB5y9a7GjyodnF7zLHK1g",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "pumpPageReference": "https://pump.fun/coin/9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+      "pumpImageReference": "https://images.pump.fun/coin-image/9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump?ipfs=QmQr3Fz4h1etNsF7oLGMRHiCzhB5y9a7GjyodnF7zLHK1g&placeholder=none&src=https%3A%2F%2Fipfs.io%2Fipfs%2FQmQr3Fz4h1etNsF7oLGMRHiCzhB5y9a7GjyodnF7zLHK1g&variant=80x80",
+      "pumpImageOriginalUri": "https://ipfs.io/ipfs/QmQr3Fz4h1etNsF7oLGMRHiCzhB5y9a7GjyodnF7zLHK1g",
+      "pumpImageVisualInspection": "pending",
+      "pumpImageObservedVia": "Official Pump coin page image link47; browser research30October2026",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/QmYfe8zVGHA1heej47AkBX3Nnetg2h2kqj5yymz1xyKeHb",
+          "status": 200,
+          "contentSha256": "c1ad56edb61a789d1ffd7b06c3b3fc460109e1ee9cd9e2c990c89ec0a37f71a6",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/QmYfe8zVGHA1heej47AkBX3Nnetg2h2kqj5yymz1xyKeHb",
+      "metadataName": "Fartcoin ",
+      "metadataSymbol": "Fartcoin ",
+      "projectWebsite": null,
+      "projectTwitter": "https://www.infinitebackrooms.com/dreams/conversation-1721540624-scenario-terminal-of-truths-txt",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/fartcoin-e602c2e486b5.png",
+        "sha256": "e602c2e486b57c836e10235bf006465c05cb6226ef9a74f85cc00b572a98179e",
+        "bytes": 11310,
+        "width": 868,
+        "height": 245,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://ipfs.io/ipfs/QmQr3Fz4h1etNsF7oLGMRHiCzhB5y9a7GjyodnF7zLHK1g",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/QmQr3Fz4h1etNsF7oLGMRHiCzhB5y9a7GjyodnF7zLHK1g",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/QmQr3Fz4h1etNsF7oLGMRHiCzhB5y9a7GjyodnF7zLHK1g",
+        "attempts": [
+          {
+            "uri": "https://ipfs.io/ipfs/QmQr3Fz4h1etNsF7oLGMRHiCzhB5y9a7GjyodnF7zLHK1g",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmQr3Fz4h1etNsF7oLGMRHiCzhB5y9a7GjyodnF7zLHK1g",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "pnut",
+      "symbol": "Pnut",
+      "name": "Peanut the Squirrel",
+      "mint": "2qEHjDLDLbuBgRYvsxhc5D6uDWAivNFZGan56P1tpump",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Peanut the Squirrel",
+        "symbol": "Pnut",
+        "uri": "https://ipfs.io/ipfs/QmSkEeAv71gDaLjcwnvVMmDnNsFrhHxrFSFX2Tg4upVe48",
+        "source": "9dUa9SeDsikxXtCYtXTNviTUKdatFbj38xg8EhujpDsQ"
+      },
+      "metadataUri": "https://ipfs.io/ipfs/QmSkEeAv71gDaLjcwnvVMmDnNsFrhHxrFSFX2Tg4upVe48",
+      "imageUri": "https://ipfs.io/ipfs/QmNdTtJauw39u4DzGyTaZ35rRx4VgAxqb91wE89zjyHWd2",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/QmSkEeAv71gDaLjcwnvVMmDnNsFrhHxrFSFX2Tg4upVe48",
+          "status": 200,
+          "contentSha256": "66482f914a2aee0ca858c8134c464d8b4ac84559e22a9191402b12a36891590b",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/QmSkEeAv71gDaLjcwnvVMmDnNsFrhHxrFSFX2Tg4upVe48",
+      "metadataName": "Peanut the Squirrel ",
+      "metadataSymbol": "Pnut ",
+      "projectWebsite": "https://www.change.org/p/return-p-nut-the-beloved-squirrel-to-his-rightful-home?fbclid=PAZXh0bgNhZW0CMTEAAaY5fhbirfmm3r9IKhUH_DM6ONraf0BqQwn0aeGC0-CliWxqrljBQ8rXI-w_aem_ntFZBEK60MKAtA8LG3oh6w",
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/pnut-7b8c1825d78c.jpg",
+        "sha256": "7b8c1825d78c5e17a13b780cfe4f14e504e398bc0b294c44a19c11f59eaff95d",
+        "bytes": 98956,
+        "width": 1011,
+        "height": 1024,
+        "mode": "RGB",
+        "format": "JPEG",
+        "frames": 1,
+        "contentType": "image/jpeg",
+        "referenceSourceUri": "https://ipfs.io/ipfs/QmNdTtJauw39u4DzGyTaZ35rRx4VgAxqb91wE89zjyHWd2",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/QmNdTtJauw39u4DzGyTaZ35rRx4VgAxqb91wE89zjyHWd2",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/QmNdTtJauw39u4DzGyTaZ35rRx4VgAxqb91wE89zjyHWd2",
+        "attempts": [
+          {
+            "uri": "https://ipfs.io/ipfs/QmNdTtJauw39u4DzGyTaZ35rRx4VgAxqb91wE89zjyHWd2",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmNdTtJauw39u4DzGyTaZ35rRx4VgAxqb91wE89zjyHWd2",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "moodeng",
+      "symbol": "MOODENG",
+      "name": "Moo Deng",
+      "mint": "ED5nyyWEzpPPiWimP8vYm7sD7TD3LAt3Q3gRTWHzPJBY",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Moo Deng",
+        "symbol": "MOODENG",
+        "uri": "https://ipfs.io/ipfs/QmWVzSC1ZTFiBYFiZZ6QivGUZ9awPJwqZECSFL1UD4gitC",
+        "source": "4Q7aoDr7zBsaBB7emx9vvugE71xsPUsc8MvKHtRfhgY1"
+      },
+      "metadataUri": "https://ipfs.io/ipfs/QmWVzSC1ZTFiBYFiZZ6QivGUZ9awPJwqZECSFL1UD4gitC",
+      "imageUri": "https://ipfs.io/ipfs/Qmf1g7dJZNDJHRQru7E7ENwDjcvu7swMUB6x9ZqPXr4RV2",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/QmWVzSC1ZTFiBYFiZZ6QivGUZ9awPJwqZECSFL1UD4gitC",
+          "error": "<urlopen error timed out>"
+        },
+        {
+          "uri": "https://gateway.pinata.cloud/ipfs/QmWVzSC1ZTFiBYFiZZ6QivGUZ9awPJwqZECSFL1UD4gitC",
+          "status": 200,
+          "contentSha256": "e22281755901dd6a2eedb53612fb8ed320a3612e650dd89123d19ccbf84c2183",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://gateway.pinata.cloud/ipfs/QmWVzSC1ZTFiBYFiZZ6QivGUZ9awPJwqZECSFL1UD4gitC",
+      "metadataName": "Moo Deng",
+      "metadataSymbol": "MOODENG",
+      "projectWebsite": "https://x.com/i/communities/1833493731305263473",
+      "projectTwitter": "https://x.com/MooDengSOL",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/moodeng-7f4f147ab9ea.png",
+        "sha256": "7f4f147ab9ea04dde92da1189d18a822b0d728dffe3367604bf6d1cdf487c680",
+        "bytes": 321319,
+        "width": 500,
+        "height": 500,
+        "mode": "RGB",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://ipfs.io/ipfs/Qmf1g7dJZNDJHRQru7E7ENwDjcvu7swMUB6x9ZqPXr4RV2",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/Qmf1g7dJZNDJHRQru7E7ENwDjcvu7swMUB6x9ZqPXr4RV2",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/Qmf1g7dJZNDJHRQru7E7ENwDjcvu7swMUB6x9ZqPXr4RV2",
+        "attempts": [
+          {
+            "uri": "https://ipfs.io/ipfs/Qmf1g7dJZNDJHRQru7E7ENwDjcvu7swMUB6x9ZqPXr4RV2",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/Qmf1g7dJZNDJHRQru7E7ENwDjcvu7swMUB6x9ZqPXr4RV2",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "troll",
+      "symbol": "TROLL",
+      "name": "TROLL",
+      "mint": "5UUH9RTDiSpq6HKS6bp4NdU9PNJpXRXuiw6ShBTBhgH2",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "TROLL",
+        "symbol": "TROLL",
+        "uri": "https://cf-ipfs.com/ipfs/QmSEFmDCYb7Asro2VirBVjecp253iNnGwjgVZHdHxm9Rm5",
+        "source": "AkzsXWv9A4fnHSFhkcgjY4V2SEv9k5W8bNcnAtxVfYgD"
+      },
+      "metadataUri": "https://cf-ipfs.com/ipfs/QmSEFmDCYb7Asro2VirBVjecp253iNnGwjgVZHdHxm9Rm5",
+      "imageUri": "https://cf-ipfs.com/ipfs/QmWV8QgmH1gSw41yapzsFwkC8yPbzoSreAcJbzqfvo2sVq",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/QmSEFmDCYb7Asro2VirBVjecp253iNnGwjgVZHdHxm9Rm5",
+          "status": 200,
+          "contentSha256": "3f421b8f3ca93b9ab5c97ab78a7aa67360af4ab283b976b77140a19a5d292604",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/QmSEFmDCYb7Asro2VirBVjecp253iNnGwjgVZHdHxm9Rm5",
+      "metadataName": "TROLL",
+      "metadataSymbol": "TROLL",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/troll-5e3348ca8d09.png",
+        "sha256": "5e3348ca8d09765d9e5ec24b0135bcf204239b4674a518b35d4bf38e087c3a51",
+        "bytes": 82578,
+        "width": 347,
+        "height": 288,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://cf-ipfs.com/ipfs/QmWV8QgmH1gSw41yapzsFwkC8yPbzoSreAcJbzqfvo2sVq",
+        "downloadUri": "https://gateway.pinata.cloud/ipfs/QmWV8QgmH1gSw41yapzsFwkC8yPbzoSreAcJbzqfvo2sVq",
+        "resolvedUri": "https://gateway.pinata.cloud/ipfs/QmWV8QgmH1gSw41yapzsFwkC8yPbzoSreAcJbzqfvo2sVq",
+        "attempts": [
+          {
+            "uri": "https://cf-ipfs.com/ipfs/QmWV8QgmH1gSw41yapzsFwkC8yPbzoSreAcJbzqfvo2sVq",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmWV8QgmH1gSw41yapzsFwkC8yPbzoSreAcJbzqfvo2sVq",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://gateway.pinata.cloud/ipfs/QmWV8QgmH1gSw41yapzsFwkC8yPbzoSreAcJbzqfvo2sVq",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "bonk",
+      "symbol": "BONK",
+      "name": "Bonk",
+      "mint": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Bonk",
+        "symbol": "Bonk",
+        "uri": "https://arweave.net/QPC6FYdUn-3V8ytFNuoCS85S2tHAuiDblh6u3CIZLsw",
+        "source": "FDZZbyY9XGpL3CNKUZxLk3wFTTQYL3TkDiDzqxrizcPN"
+      },
+      "metadataUri": "https://arweave.net/QPC6FYdUn-3V8ytFNuoCS85S2tHAuiDblh6u3CIZLsw",
+      "imageUri": "https://arweave.net/hQiPZOsRZXGXBJd_82PhVdlM_hACsT_q6wqwf5cSY7I",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error timed out>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://arweave.net/QPC6FYdUn-3V8ytFNuoCS85S2tHAuiDblh6u3CIZLsw",
+          "status": 200,
+          "contentSha256": "a410ee81f25584cd48002a0b6bd5a88edc9af31a2269a9e4b7fb1762bb647941",
+          "contentType": "application/json"
+        }
+      ],
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/bonk-498ca3589dbe.jpg",
+        "sha256": "498ca3589dbe075f0cfed24f7e7a31ba868079ad98e3e25813893eaa99092c31",
+        "bytes": 48373,
+        "width": 640,
+        "height": 640,
+        "mode": "RGB",
+        "format": "JPEG",
+        "frames": 1,
+        "contentType": "image/jpeg",
+        "referenceSourceUri": "https://arweave.net/hQiPZOsRZXGXBJd_82PhVdlM_hACsT_q6wqwf5cSY7I",
+        "downloadUri": "https://arweave.net/hQiPZOsRZXGXBJd_82PhVdlM_hACsT_q6wqwf5cSY7I",
+        "resolvedUri": "https://quei6zhlcfsxdfyes577gy7bkxmuz7qqakyt72xlbkyh7fysmoza.arweave.net/hQiPZOsRZXGXBJd_82PhVdlM_hACsT_q6wqwf5cSY7I",
+        "attempts": [
+          {
+            "uri": "https://arweave.net/hQiPZOsRZXGXBJd_82PhVdlM_hACsT_q6wqwf5cSY7I",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only"
+      },
+      "metadataResolvedUri": "https://idylufmhksp63vptfnctn2qcjphffwwryc5cbw4wd2xnyiqzf3ga.arweave.net/QPC6FYdUn-3V8ytFNuoCS85S2tHAuiDblh6u3CIZLsw",
+      "metadataName": "Bonk",
+      "metadataSymbol": "Bonk",
+      "projectWebsite": null,
+      "projectTwitter": null
+    },
+    {
+      "key": "wif",
+      "symbol": "WIF",
+      "name": "dogwifhat",
+      "mint": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "dogwifhat",
+        "symbol": "$WIF",
+        "uri": "https://bafkreihwqhounu3cdwgvk2gc2dqcinpntlccbo3xcy4xuerd24yndldl5q.ipfs.nftstorage.link",
+        "source": "C1BpuaMytZAbSCFf9WM2gm6fAm54Yh1gh32ieptrp12B"
+      },
+      "metadataUri": "https://bafkreihwqhounu3cdwgvk2gc2dqcinpntlccbo3xcy4xuerd24yndldl5q.ipfs.nftstorage.link",
+      "imageUri": "https://bafkreibk3covs5ltyqxa272uodhculbr6kea6betidfwy3ajsav2vjzyum.ipfs.nftstorage.link",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/bafkreihwqhounu3cdwgvk2gc2dqcinpntlccbo3xcy4xuerd24yndldl5q",
+          "status": 200,
+          "contentSha256": "f681dd46d3621d8d5568c2d0e02435ed9ac420bb7716397a1223d730d1ac6bec",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/bafkreihwqhounu3cdwgvk2gc2dqcinpntlccbo3xcy4xuerd24yndldl5q",
+      "metadataName": "dogwifhat",
+      "metadataSymbol": "$WIF",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/wif-2ad89d597573.jpg",
+        "sha256": "2ad89d597573c42e0d7f5470ce2a2c31f2880f049340cb6c6c09902baaa738a3",
+        "bytes": 105701,
+        "width": 1125,
+        "height": 1117,
+        "mode": "RGB",
+        "format": "JPEG",
+        "frames": 1,
+        "contentType": "image/jpeg",
+        "referenceSourceUri": "https://bafkreibk3covs5ltyqxa272uodhculbr6kea6betidfwy3ajsav2vjzyum.ipfs.nftstorage.link",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/bafkreibk3covs5ltyqxa272uodhculbr6kea6betidfwy3ajsav2vjzyum",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/bafkreibk3covs5ltyqxa272uodhculbr6kea6betidfwy3ajsav2vjzyum",
+        "attempts": [
+          {
+            "uri": "https://bafkreibk3covs5ltyqxa272uodhculbr6kea6betidfwy3ajsav2vjzyum.ipfs.nftstorage.link",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/bafkreibk3covs5ltyqxa272uodhculbr6kea6betidfwy3ajsav2vjzyum",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "cards",
+      "symbol": "CARDS",
+      "name": "Collector Crypt",
+      "mint": "CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Collector Crypt",
+        "symbol": "CARDS",
+        "uri": "https://gateway.irys.xyz/AQqBpb3bHCptRUX2vpW4JHqTLhTeDimPsYfe9LkRxbfA",
+        "source": "HbniJMJffiLgi9uGFc9YA77uppQfKDviRNsyapgg1bMw"
+      },
+      "metadataUri": "https://gateway.irys.xyz/AQqBpb3bHCptRUX2vpW4JHqTLhTeDimPsYfe9LkRxbfA",
+      "imageUri": "https://collectorcrypt.com/logo.svg",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Image URI observed from primaryproject/officialPump page; visual inspectionpending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://gateway.irys.xyz/AQqBpb3bHCptRUX2vpW4JHqTLhTeDimPsYfe9LkRxbfA",
+          "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+        },
+        {
+          "uri": "https://arweave.net/AQqBpb3bHCptRUX2vpW4JHqTLhTeDimPsYfe9LkRxbfA",
+          "error": "<urlopen error timed out>"
+        }
+      ],
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/cards-241bcf8ee4f8.svg",
+        "sha256": "241bcf8ee4f8d978d58ddf53666fb34ce229bcd002a58c64052ff81ea2cbadff",
+        "bytes": 553,
+        "width": 18.0,
+        "height": 25.0,
+        "mode": "vector",
+        "format": "SVG",
+        "frames": 1,
+        "contentType": "image/svg+xml",
+        "referenceSourceUri": "https://collectorcrypt.com/logo.svg",
+        "downloadUri": "https://collectorcrypt.com/logo.svg",
+        "resolvedUri": "https://collectorcrypt.com/logo.svg",
+        "attempts": [
+          {
+            "uri": "https://collectorcrypt.com/logo.svg",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+        "deterministicPngExport": {
+          "path": "references/cards-241bcf8ee4f8-reference-1024.png",
+          "sha256": "afea6c6a36e6f7dc741ca3524f93067a5fc1606f9006be8befddc95c488a0653",
+          "bytes": 33834,
+          "width": 1024,
+          "height": 1422,
+          "transform": "Installed ResvgWASM rasterization of validated original SVG; original retained; no new artwork"
+        }
+      },
+      "primaryBrandImageUri": "https://collectorcrypt.com/logo.svg",
+      "primaryBrandReference": "https://collectorcrypt.com",
+      "primaryBrandImageSource": "Primary Collector Crypt homepage icon link observed in fetchedHTML; exactCARDSmint alreadyverified"
+    },
+    {
+      "key": "sv151",
+      "symbol": "SV151",
+      "name": "Scarlet & Violet 151",
+      "mint": "SV151D5pjygAKA8aJJcKzm4wFnRX5G92Fye94jQJk7g",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Scarlet & Violet 151",
+        "symbol": "SV151",
+        "uri": "https://gateway.irys.xyz/LdHkmwgCT82QrVjpbmuEPI9MomJCuSdutW44gWQCL1c",
+        "source": "APqui2Tpe35B9LNfogGQ49pTmKh1LBayELtcyzSsK4Qq"
+      },
+      "metadataUri": "https://gateway.irys.xyz/LdHkmwgCT82QrVjpbmuEPI9MomJCuSdutW44gWQCL1c",
+      "imageUri": "https://token-media.defined.fi/1399811149_SV151D5pjygAKA8aJJcKzm4wFnRX5G92Fye94jQJk7g_large_5eb9ee365df0.png",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Observed primary/officialPump imageURL; visualinspectionpending",
+      "metadataResolvedUri": "https://fxi6jgyiajh43efnlduw424ehshuzitcik4so3vvny4iczacf5lq.legacy.datasprite-cdn.com/LdHkmwgCT82QrVjpbmuEPI9MomJCuSdutW44gWQCL1c/",
+      "metadataHttpStatus": 200,
+      "metadataName": "Scarlet & Violet 151",
+      "metadataSymbol": "SV151",
+      "projectWebsite": "https://dassetsol.xyz/",
+      "projectTwitter": "https://x.com/dAssetSOL",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/sv151-3ffeea5b7f58.png",
+        "sha256": "3ffeea5b7f5811556c21135b742efc665f38a83a6a54b58f7cb3a3f14ffdd3e3",
+        "bytes": 27478,
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://token-media.defined.fi/1399811149_SV151D5pjygAKA8aJJcKzm4wFnRX5G92Fye94jQJk7g_large_5eb9ee365df0.png",
+        "downloadUri": "https://token-media.defined.fi/1399811149_SV151D5pjygAKA8aJJcKzm4wFnRX5G92Fye94jQJk7g_large_5eb9ee365df0.png",
+        "resolvedUri": "https://token-media.defined.fi/1399811149_SV151D5pjygAKA8aJJcKzm4wFnRX5G92Fye94jQJk7g_large_5eb9ee365df0.png",
+        "attempts": [
+          {
+            "uri": "https://token-media.defined.fi/1399811149_SV151D5pjygAKA8aJJcKzm4wFnRX5G92Fye94jQJk7g_large_5eb9ee365df0.png",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only"
+      },
+      "originalQuoteImageUri": "https://gateway.irys.xyz/5pdegGE27gHM8Kf3WNuxTL11pJUZZz8ewh9yQYBWSgbq",
+      "primaryBrandImageUri": "https://token-media.defined.fi/1399811149_SV151D5pjygAKA8aJJcKzm4wFnRX5G92Fye94jQJk7g_large_5eb9ee365df0.png",
+      "primaryBrandReference": "https://pump.fun/coin/SV151D5pjygAKA8aJJcKzm4wFnRX5G92Fye94jQJk7g",
+      "primaryBrandImageSource": "Observed exactimage reference link27 on officialPump exactmintpage; alternate originaltokenmetadataimage retained",
+      "previousReferenceIntake": {
+        "status": "download-failed",
+        "visualInspection": "pending",
+        "referenceSourceUri": "https://gateway.irys.xyz/5pdegGE27gHM8Kf3WNuxTL11pJUZZz8ewh9yQYBWSgbq",
+        "attempts": [
+          {
+            "uri": "https://gateway.irys.xyz/5pdegGE27gHM8Kf3WNuxTL11pJUZZz8ewh9yQYBWSgbq",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://arweave.net/5pdegGE27gHM8Kf3WNuxTL11pJUZZz8ewh9yQYBWSgbq",
+            "error": "<urlopen error timed out>"
+          }
+        ]
+      }
+    },
+    {
+      "key": "toad",
+      "symbol": "TOAD",
+      "name": "The Toad Pepe",
+      "mint": "A13oRB9FFaiUjfi6LdCg6p9ka1u8SfGkUFs4SKvPpump",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "The Toad Pepe",
+        "symbol": "TOAD",
+        "uri": "https://ipfs.io/ipfs/bafkreifxw72yzkc2hjoktvce2kbtxh672ak2eqv47wvdrdnuchabpdb5za",
+        "source": "Token2022 inline metadata"
+      },
+      "metadataUri": "https://ipfs.io/ipfs/bafkreifxw72yzkc2hjoktvce2kbtxh672ak2eqv47wvdrdnuchabpdb5za",
+      "imageUri": "https://ipfs.io/ipfs/bafybeieqj4yflnjsrld7flroapyq6pixzi4qyifiotnqddq7edoa2hn4sq",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/bafkreifxw72yzkc2hjoktvce2kbtxh672ak2eqv47wvdrdnuchabpdb5za",
+          "error": "<urlopen error timed out>"
+        },
+        {
+          "uri": "https://gateway.pinata.cloud/ipfs/bafkreifxw72yzkc2hjoktvce2kbtxh672ak2eqv47wvdrdnuchabpdb5za",
+          "status": 200,
+          "contentSha256": "b7b7f58ca85a3a5ca9d444d2833b9fdfd015a242bcfdaa388db411c0178c3dc8",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://gateway.pinata.cloud/ipfs/bafkreifxw72yzkc2hjoktvce2kbtxh672ak2eqv47wvdrdnuchabpdb5za",
+      "metadataName": "The Toad Pepe",
+      "metadataSymbol": "TOAD",
+      "projectWebsite": "https://elreinoinfantil.fandom.com/wiki/El_Sapo_Pepe",
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/toad-80464cc13949.png",
+        "sha256": "80464cc13949e033e0a305371f57908d1ffcd5dbcc410157285605ff890368b8",
+        "bytes": 906717,
+        "width": 988,
+        "height": 990,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://ipfs.io/ipfs/bafybeieqj4yflnjsrld7flroapyq6pixzi4qyifiotnqddq7edoa2hn4sq",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/bafybeieqj4yflnjsrld7flroapyq6pixzi4qyifiotnqddq7edoa2hn4sq",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/bafybeieqj4yflnjsrld7flroapyq6pixzi4qyifiotnqddq7edoa2hn4sq",
+        "attempts": [
+          {
+            "uri": "https://ipfs.io/ipfs/bafybeieqj4yflnjsrld7flroapyq6pixzi4qyifiotnqddq7edoa2hn4sq",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/bafybeieqj4yflnjsrld7flroapyq6pixzi4qyifiotnqddq7edoa2hn4sq",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "pengu",
+      "symbol": "PENGU",
+      "name": "Pudgy Penguins",
+      "mint": "2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Pudgy Penguins",
+        "symbol": "PENGU",
+        "uri": "https://arweave.net/nFo9Nwcam4ek0SwtKQchYD47T9dkTpGqL62CgcXSjZE",
+        "source": "7dW4mRtQNmzD1xXanuEmDL88HTfbpG6VWDUuYZMbKgss"
+      },
+      "metadataUri": "https://arweave.net/nFo9Nwcam4ek0SwtKQchYD47T9dkTpGqL62CgcXSjZE",
+      "imageUri": "https://arweave.net/BW67hICaKGd2_wamSB0IQq-x7Xwtmr2oJj1WnWGJRHU",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "URI resolved from exact on-chain metadata; image not downloaded",
+      "metadataResolvedUri": "https://trnd2nyhdknypjgrfqwssbzbma7dwt6xmrhjdkrpvwbidrosrwiq.arweave.net/nFo9Nwcam4ek0SwtKQchYD47T9dkTpGqL62CgcXSjZE",
+      "metadataHttpStatus": 200,
+      "metadataName": "Pudgy Penguins",
+      "metadataSymbol": "PENGU",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/pengu-0b6260425d58.png",
+        "sha256": "0b6260425d584ee3d198f8e84a452b202fbe8ca3500fee1ffc03f46f880ce73c",
+        "bytes": 138027,
+        "width": 2700,
+        "height": 2700,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": null,
+        "referenceSourceUri": "https://arweave.net/BW67hICaKGd2_wamSB0IQq-x7Xwtmr2oJj1WnWGJRHU",
+        "downloadUri": "https://arweave.net/BW67hICaKGd2_wamSB0IQq-x7Xwtmr2oJj1WnWGJRHU",
+        "resolvedUri": "https://avxlxbeatiugo5x7a2teqhiiikx3d3l4fwnl3kbghvlj2ymjir2q.arweave.net/BW67hICaKGd2_wamSB0IQq-x7Xwtmr2oJj1WnWGJRHU",
+        "attempts": [
+          {
+            "uri": "https://arweave.net/BW67hICaKGd2_wamSB0IQq-x7Xwtmr2oJj1WnWGJRHU",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "giga",
+      "symbol": "GIGA",
+      "name": "GIGACHAD",
+      "mint": "63LfDmNb3MQ8mw9MtZ2To9bEA2M71kZUUGq5tiJxcqj9",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "GIGACHAD",
+        "symbol": "GIGA",
+        "uri": "https://bafkreiehz3jw7547ryrb5mr54rbnqmcjsqblkcoz46v7aejszqricvnbsa.ipfs.nftstorage.link",
+        "source": "GJBpCMu5WdZVWt5PwDMJV15WG96a47AYDUnf632Qq5UY"
+      },
+      "metadataUri": "https://bafkreiehz3jw7547ryrb5mr54rbnqmcjsqblkcoz46v7aejszqricvnbsa.ipfs.nftstorage.link",
+      "imageUri": "https://bafybeifiyvpbr3kd6wepax4qxdlxbjrpz2de4lqsuwwuihirvaal6kqwba.ipfs.nftstorage.link",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/bafkreiehz3jw7547ryrb5mr54rbnqmcjsqblkcoz46v7aejszqricvnbsa",
+          "status": 200,
+          "contentSha256": "87ced36ff79f8e221eb23de442d830499402b509d9e7abf01132cc228155a190",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/bafkreiehz3jw7547ryrb5mr54rbnqmcjsqblkcoz46v7aejszqricvnbsa",
+      "metadataName": "GIGACHAD",
+      "metadataSymbol": "GIGA",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/giga-61b9c55c37cd.png",
+        "sha256": "61b9c55c37cdac38a6961000e43274f2dade4e257ed5eee22d74f5578fea47ae",
+        "bytes": 496971,
+        "width": 1008,
+        "height": 1022,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://bafybeifiyvpbr3kd6wepax4qxdlxbjrpz2de4lqsuwwuihirvaal6kqwba.ipfs.nftstorage.link",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/bafybeifiyvpbr3kd6wepax4qxdlxbjrpz2de4lqsuwwuihirvaal6kqwba",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/bafybeifiyvpbr3kd6wepax4qxdlxbjrpz2de4lqsuwwuihirvaal6kqwba",
+        "attempts": [
+          {
+            "uri": "https://bafybeifiyvpbr3kd6wepax4qxdlxbjrpz2de4lqsuwwuihirvaal6kqwba.ipfs.nftstorage.link",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/bafybeifiyvpbr3kd6wepax4qxdlxbjrpz2de4lqsuwwuihirvaal6kqwba",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "spx",
+      "symbol": "SPX",
+      "name": "SPX6900 (Wormhole Solana representation)",
+      "mint": "J3NKxxXZcnNiMjKw9hYb2K4LUxgwB6t1FtPtQVsv3KFr",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "SPX6900 (Wormhole)",
+        "symbol": "SPX",
+        "uri": "",
+        "source": "HSuKSY47FT7BfgeSQKw7yo2rABs1RmtsLwPTAXQVSuxe"
+      },
+      "metadataUri": null,
+      "imageUri": "https://www.spx6900.com/spxlogo-sm.png",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Image URI observed from primaryproject/officialPump page; visual inspectionpending",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/spx-0e35c0c102cc.png",
+        "sha256": "0e35c0c102cc6017569373e077a8c9646711f51c693a6a2d0d49ffb9ab31b126",
+        "bytes": 17662,
+        "width": 280,
+        "height": 280,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://www.spx6900.com/spxlogo-sm.png",
+        "downloadUri": "https://www.spx6900.com/spxlogo-sm.png",
+        "resolvedUri": "https://www.spx6900.com/spxlogo-sm.png",
+        "attempts": [
+          {
+            "uri": "https://www.spx6900.com/spxlogo-sm.png",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only"
+      },
+      "primaryBrandImageUri": "https://www.spx6900.com/spxlogo-sm.png",
+      "primaryBrandReference": "https://www.spx6900.com/",
+      "primaryBrandImageSource": "Primary SPX6900 homepage logo image link observed; parentmustvisuallycompare against exactquoteidentity"
+    },
+    {
+      "key": "trump",
+      "symbol": "TRUMP",
+      "name": "OFFICIAL TRUMP",
+      "mint": "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "OFFICIAL TRUMP",
+        "symbol": "TRUMP",
+        "uri": "https://arweave.net/cSCP0h2n1crjeSWE9KF-XtLciJalDNFs7Vf-Sm0NNY0",
+        "source": "H7efTb73LpehuDBaPqZ81Gc585PDf1bCbtQnVb8JpgB8"
+      },
+      "metadataUri": "https://arweave.net/cSCP0h2n1crjeSWE9KF-XtLciJalDNFs7Vf-Sm0NNY0",
+      "imageUri": "https://arweave.net/VQrPjACwnQRmxdKBTqNwPiyo65x7LAT773t8Kd7YBzw",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "URI resolved from exact on-chain metadata; image not downloaded",
+      "metadataResolvedUri": "https://oeqi7uq5u7k4vy3zewcpjil6l3jnzcewuugnc3hnk77eu3ingwgq.arweave.net/cSCP0h2n1crjeSWE9KF-XtLciJalDNFs7Vf-Sm0NNY0",
+      "metadataHttpStatus": 200,
+      "metadataName": "OFFICIAL TRUMP",
+      "metadataSymbol": "TRUMP",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/trump-9b6c706e030b.jpg",
+        "sha256": "9b6c706e030b969e89ed1bcbcf0ee655200069ffa7bdf842936a0b36e34a254f",
+        "bytes": 1526550,
+        "width": 2811,
+        "height": 2817,
+        "mode": "RGB",
+        "format": "JPEG",
+        "frames": 1,
+        "contentType": null,
+        "referenceSourceUri": "https://arweave.net/VQrPjACwnQRmxdKBTqNwPiyo65x7LAT773t8Kd7YBzw",
+        "downloadUri": "https://arweave.net/VQrPjACwnQRmxdKBTqNwPiyo65x7LAT773t8Kd7YBzw",
+        "resolvedUri": "https://kufm7daawcoqizwf2kau5i3qhywkr244pmwaj67ppn6ctxwya46a.arweave.net/VQrPjACwnQRmxdKBTqNwPiyo65x7LAT773t8Kd7YBzw",
+        "attempts": [
+          {
+            "uri": "https://arweave.net/VQrPjACwnQRmxdKBTqNwPiyo65x7LAT773t8Kd7YBzw",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "useless",
+      "symbol": "USELESS",
+      "name": "USELESS COIN",
+      "mint": "Dz9mQ9NzkBcCsuGPFJ3r1bS4wgqKMHBPiVuniW8Mbonk",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "USELESS COIN",
+        "symbol": "USELESS",
+        "uri": "https://ipfs.io/ipfs/bafkreibwvvvj5rpan4rpb7v3lx7mfve5qfn7lrfsqdrqehpmoyg5fyclsy",
+        "source": "BHMfPXBpZZnG62EsgUxQHrcEoraFyBmGeJpY8Qxbfqic"
+      },
+      "metadataUri": "https://ipfs.io/ipfs/bafkreibwvvvj5rpan4rpb7v3lx7mfve5qfn7lrfsqdrqehpmoyg5fyclsy",
+      "imageUri": "https://ipfs.io/ipfs/bafkreihsdoqkmpr5ryebaduoutyhj3nxco6wdp4s4743l2qrae4sz4hqrm",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/bafkreibwvvvj5rpan4rpb7v3lx7mfve5qfn7lrfsqdrqehpmoyg5fyclsy",
+          "status": 200,
+          "contentSha256": "36ad6a9ec5e06f22f0febb5dfec2d49d815bf5c4b280e3021dec760dd2e04b96",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/bafkreibwvvvj5rpan4rpb7v3lx7mfve5qfn7lrfsqdrqehpmoyg5fyclsy",
+      "metadataName": "USELESS COIN",
+      "metadataSymbol": "USELESS",
+      "projectWebsite": null,
+      "projectTwitter": "https://x.com/theunipcs/status/1921208257399382410",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/useless-f21ba0a63e3d.png",
+        "sha256": "f21ba0a63e3d8e08100e8ea4f074edb713bd61bf92e7f9b5ea1101392cf0f08b",
+        "bytes": 12003,
+        "width": 224,
+        "height": 224,
+        "mode": "RGB",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://ipfs.io/ipfs/bafkreihsdoqkmpr5ryebaduoutyhj3nxco6wdp4s4743l2qrae4sz4hqrm",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/bafkreihsdoqkmpr5ryebaduoutyhj3nxco6wdp4s4743l2qrae4sz4hqrm",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/bafkreihsdoqkmpr5ryebaduoutyhj3nxco6wdp4s4743l2qrae4sz4hqrm",
+        "attempts": [
+          {
+            "uri": "https://ipfs.io/ipfs/bafkreihsdoqkmpr5ryebaduoutyhj3nxco6wdp4s4743l2qrae4sz4hqrm",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/bafkreihsdoqkmpr5ryebaduoutyhj3nxco6wdp4s4743l2qrae4sz4hqrm",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "chillguy",
+      "symbol": "CHILLGUY",
+      "name": "Just a chill guy",
+      "mint": "Df6yfrKC8kZE3KNkrHERKzAetSxbrWeniQfyJY4Jpump",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Just a chill guy",
+        "symbol": "CHILLGUY",
+        "uri": "https://ipfs.io/ipfs/Qmckb3nWWHyoJKtX3FeagfmDZXNVqiXM4nKkYsTnygm2Ah",
+        "source": "2uK2wjMtppP6CMWaGtme4Gmn9mBrJG9GqRrrNBkPomEu"
+      },
+      "metadataUri": "https://ipfs.io/ipfs/Qmckb3nWWHyoJKtX3FeagfmDZXNVqiXM4nKkYsTnygm2Ah",
+      "imageUri": "https://ipfs.io/ipfs/QmaFy59TMnLb4jGgL6LpquyXSxTRXKR4mEfSobUSsPoR46",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/Qmckb3nWWHyoJKtX3FeagfmDZXNVqiXM4nKkYsTnygm2Ah",
+          "status": 200,
+          "contentSha256": "f20f8232d5225856ed2c23d8b93b797d848e7eaf80a7562964c53463660d048a",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/Qmckb3nWWHyoJKtX3FeagfmDZXNVqiXM4nKkYsTnygm2Ah",
+      "metadataName": "Just a chill guy",
+      "metadataSymbol": "CHILLGUY",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/chillguy-441a9eb33c81.jpg",
+        "sha256": "441a9eb33c819daf6a56bcdb79a38718f9365c6d3e4c523d6ddcd0153f6c8590",
+        "bytes": 56820,
+        "width": 989,
+        "height": 1086,
+        "mode": "RGB",
+        "format": "JPEG",
+        "frames": 1,
+        "contentType": "image/jpeg",
+        "referenceSourceUri": "https://ipfs.io/ipfs/QmaFy59TMnLb4jGgL6LpquyXSxTRXKR4mEfSobUSsPoR46",
+        "downloadUri": "https://gateway.pinata.cloud/ipfs/QmaFy59TMnLb4jGgL6LpquyXSxTRXKR4mEfSobUSsPoR46",
+        "resolvedUri": "https://gateway.pinata.cloud/ipfs/QmaFy59TMnLb4jGgL6LpquyXSxTRXKR4mEfSobUSsPoR46",
+        "attempts": [
+          {
+            "uri": "https://ipfs.io/ipfs/QmaFy59TMnLb4jGgL6LpquyXSxTRXKR4mEfSobUSsPoR46",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmaFy59TMnLb4jGgL6LpquyXSxTRXKR4mEfSobUSsPoR46",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://gateway.pinata.cloud/ipfs/QmaFy59TMnLb4jGgL6LpquyXSxTRXKR4mEfSobUSsPoR46",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "goat",
+      "symbol": "GOAT",
+      "name": "Goatseus Maximus",
+      "mint": "CzLSujWBLFsSjncfkh59rUFqvafWcY5tzedWJSuypump",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Goatseus Maximus",
+        "symbol": "GOAT",
+        "uri": "https://ipfs.io/ipfs/QmcGmF4tQxsQKdF3s1mSqYyg1vNqAXou32tbWztnsnEzth",
+        "source": "5XupC6FAqqFECx4vTpfGLcF9aTKNdBRFGg18GM8w1DoB"
+      },
+      "metadataUri": "https://ipfs.io/ipfs/QmcGmF4tQxsQKdF3s1mSqYyg1vNqAXou32tbWztnsnEzth",
+      "imageUri": "https://ipfs.io/ipfs/QmapAq9WtNrtyaDtjZPAHHNYmpSZAQU6HywwvfSWq4dQVV",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/QmcGmF4tQxsQKdF3s1mSqYyg1vNqAXou32tbWztnsnEzth",
+          "status": 200,
+          "contentSha256": "6a1a3b913b5913ade0c522732f75a6ed148efe8b87e909fb7d6f2eb7df1ec47c",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/QmcGmF4tQxsQKdF3s1mSqYyg1vNqAXou32tbWztnsnEzth",
+      "metadataName": "Goatseus Maximus",
+      "metadataSymbol": "GOAT",
+      "projectWebsite": "https://x.com/andyayrey?s=21",
+      "projectTwitter": "https://x.com/truth_terminal/status/1844470764583424360?s=46",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/goat-4015c971963a.jpg",
+        "sha256": "4015c971963a7fab912269e3bac1710e0e805f847b0fc9d05937bc231f7d66fc",
+        "bytes": 5659,
+        "width": 222,
+        "height": 222,
+        "mode": "RGB",
+        "format": "JPEG",
+        "frames": 1,
+        "contentType": "image/jpeg",
+        "referenceSourceUri": "https://ipfs.io/ipfs/QmapAq9WtNrtyaDtjZPAHHNYmpSZAQU6HywwvfSWq4dQVV",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/QmapAq9WtNrtyaDtjZPAHHNYmpSZAQU6HywwvfSWq4dQVV",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/QmapAq9WtNrtyaDtjZPAHHNYmpSZAQU6HywwvfSWq4dQVV",
+        "attempts": [
+          {
+            "uri": "https://ipfs.io/ipfs/QmapAq9WtNrtyaDtjZPAHHNYmpSZAQU6HywwvfSWq4dQVV",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmapAq9WtNrtyaDtjZPAHHNYmpSZAQU6HywwvfSWq4dQVV",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "zerebro",
+      "symbol": "ZEREBRO",
+      "name": "zerebro",
+      "mint": "8x5VqbHA8D7NkD52uNuS5nnt3PwA8pLD34ymskeSo2Wn",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "zerebro",
+        "symbol": "ZEREBRO",
+        "uri": "https://ipfs.io/ipfs/Qmaqr4jU97zckiTbRm7A1vV4354PXYLZrHE75CwMJH1Vsa",
+        "source": "GedjbsLxG7iw4i7LBz4o1dchEpXm4GcR2ZdxyyNqSsb8"
+      },
+      "metadataUri": "https://ipfs.io/ipfs/Qmaqr4jU97zckiTbRm7A1vV4354PXYLZrHE75CwMJH1Vsa",
+      "imageUri": "https://ipfs.io/ipfs/QmZ1HDSibY2LdEmC1tPHK36ApGCQACJENqsbPsT2nc29AD",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/Qmaqr4jU97zckiTbRm7A1vV4354PXYLZrHE75CwMJH1Vsa",
+          "status": 200,
+          "contentSha256": "1606da5e18210c6c940997ecffde017ada6c09e897224c6a5f8905186e2bd9fa",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/Qmaqr4jU97zckiTbRm7A1vV4354PXYLZrHE75CwMJH1Vsa",
+      "metadataName": "zerebro",
+      "metadataSymbol": "ZEREBRO",
+      "projectWebsite": "https://zerebro.org",
+      "projectTwitter": "https://x.com/0xzerebro",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/zerebro-a8216adfc8b0.png",
+        "sha256": "a8216adfc8b0828f2493bb280192f02ca677e91cd738122bbc7465c4d96bad44",
+        "bytes": 1400674,
+        "width": 2056,
+        "height": 1978,
+        "mode": "RGB",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://ipfs.io/ipfs/QmZ1HDSibY2LdEmC1tPHK36ApGCQACJENqsbPsT2nc29AD",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/QmZ1HDSibY2LdEmC1tPHK36ApGCQACJENqsbPsT2nc29AD",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/QmZ1HDSibY2LdEmC1tPHK36ApGCQACJENqsbPsT2nc29AD",
+        "attempts": [
+          {
+            "uri": "https://ipfs.io/ipfs/QmZ1HDSibY2LdEmC1tPHK36ApGCQACJENqsbPsT2nc29AD",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmZ1HDSibY2LdEmC1tPHK36ApGCQACJENqsbPsT2nc29AD",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "act",
+      "symbol": "ACT",
+      "name": "Act I : The AI Prophecy",
+      "mint": "GJAFwWjJ3vnTsrQVabjBVK2TYB1YtRCQXRDfDgUnpump",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Act I : The AI Prophecy",
+        "symbol": "ACT",
+        "uri": "https://ipfs.io/ipfs/QmapPN3ZaZTKQ7XYmEDjh75j2V83dcBoNg8FTQrZGEGcAE",
+        "source": "E5VVztqVTZ9ToBG1pkjNjrq9aidihAbQiGSmf13BHcwP"
+      },
+      "metadataUri": "https://ipfs.io/ipfs/QmapPN3ZaZTKQ7XYmEDjh75j2V83dcBoNg8FTQrZGEGcAE",
+      "imageUri": "https://ipfs.io/ipfs/QmUfrHNLqia7NmqgbzHYGF4rtX75nEwukPFFU1YscKKquL",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/QmapPN3ZaZTKQ7XYmEDjh75j2V83dcBoNg8FTQrZGEGcAE",
+          "status": 200,
+          "contentSha256": "7a6750c3ad0f36cc6f335f8b262427b5b7f6f61053d917ddc537c6f1ae6e8872",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/QmapPN3ZaZTKQ7XYmEDjh75j2V83dcBoNg8FTQrZGEGcAE",
+      "metadataName": "Act I : The AI Prophecy",
+      "metadataSymbol": "ACT",
+      "projectWebsite": "https://cyborgism.wiki/hypha/act_i",
+      "projectTwitter": "https://x.com/repligate/status/1841064405980913705",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/act-90309845b93a.jpg",
+        "sha256": "90309845b93ad860b2c755810b13d3fd376d9b9fe026d6de50103677af95b521",
+        "bytes": 30659,
+        "width": 400,
+        "height": 400,
+        "mode": "RGB",
+        "format": "JPEG",
+        "frames": 1,
+        "contentType": "image/jpeg",
+        "referenceSourceUri": "https://ipfs.io/ipfs/QmUfrHNLqia7NmqgbzHYGF4rtX75nEwukPFFU1YscKKquL",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/QmUfrHNLqia7NmqgbzHYGF4rtX75nEwukPFFU1YscKKquL",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/QmUfrHNLqia7NmqgbzHYGF4rtX75nEwukPFFU1YscKKquL",
+        "attempts": [
+          {
+            "uri": "https://ipfs.io/ipfs/QmUfrHNLqia7NmqgbzHYGF4rtX75nEwukPFFU1YscKKquL",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmUfrHNLqia7NmqgbzHYGF4rtX75nEwukPFFU1YscKKquL",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "pippin",
+      "symbol": "pippin",
+      "name": "Pippin",
+      "mint": "Dfh5DzRgSvvCFDoYc2ciTkMrbDfRKybA4SoFbPmApump",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Pippin",
+        "symbol": "pippin",
+        "uri": "https://ipfs.io/ipfs/QmWbM38Bhhcj4vQZpSyesRSotgoqicNjfaNoMmuDGtWZ2o",
+        "source": "FEYma4Y5Yn4HE2Sht2ZDhMZDE6wiMmsjKM6tHcKrLsW"
+      },
+      "metadataUri": "https://ipfs.io/ipfs/QmWbM38Bhhcj4vQZpSyesRSotgoqicNjfaNoMmuDGtWZ2o",
+      "imageUri": "https://ipfs.io/ipfs/QmdcvSSBg7gWD4tvfXv3PuLtAiPyDZ5Z9w4LQVeRJKL3Lz",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/QmWbM38Bhhcj4vQZpSyesRSotgoqicNjfaNoMmuDGtWZ2o",
+          "status": 200,
+          "contentSha256": "83cc05c3c469612ddacd47e6a1753bffe62c6b6b8d389d8de0f33119c117f8ae",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/QmWbM38Bhhcj4vQZpSyesRSotgoqicNjfaNoMmuDGtWZ2o",
+      "metadataName": "Pippin",
+      "metadataSymbol": "pippin",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/pippin-03111311888d.png",
+        "sha256": "03111311888d880dbe6aeb77d507487cbd6c0c0a29c4587932c0c41bc77f663e",
+        "bytes": 5200,
+        "width": 250,
+        "height": 250,
+        "mode": "RGB",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://ipfs.io/ipfs/QmdcvSSBg7gWD4tvfXv3PuLtAiPyDZ5Z9w4LQVeRJKL3Lz",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/QmdcvSSBg7gWD4tvfXv3PuLtAiPyDZ5Z9w4LQVeRJKL3Lz",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/QmdcvSSBg7gWD4tvfXv3PuLtAiPyDZ5Z9w4LQVeRJKL3Lz",
+        "attempts": [
+          {
+            "uri": "https://ipfs.io/ipfs/QmdcvSSBg7gWD4tvfXv3PuLtAiPyDZ5Z9w4LQVeRJKL3Lz",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmdcvSSBg7gWD4tvfXv3PuLtAiPyDZ5Z9w4LQVeRJKL3Lz",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "vine",
+      "symbol": "VINE",
+      "name": "Vine Coin",
+      "mint": "6AJcP7wuLwmRYLBNbi825wgguaPsWzPBEHcHndpRpump",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Vine Coin",
+        "symbol": "VINE",
+        "uri": "https://ipfs.io/ipfs/QmYTnHwVqLHCYL1xrwGQLY8e1YHdXVMimkLuYeHZNNyUiX",
+        "source": "895AYR4LWKnR9hF2QGjHUVSBSZ6p6tfd1ujeCMsuo5uC"
+      },
+      "metadataUri": "https://ipfs.io/ipfs/QmYTnHwVqLHCYL1xrwGQLY8e1YHdXVMimkLuYeHZNNyUiX",
+      "imageUri": "https://ipfs.io/ipfs/QmRtFJu3ZospaS4EAk17iNXZGAJp7gMxzvsZckZxbqZa5r",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/QmYTnHwVqLHCYL1xrwGQLY8e1YHdXVMimkLuYeHZNNyUiX",
+          "status": 200,
+          "contentSha256": "f7f70f792e7ed33fabf1c1934ea67b2363481a2534fe24c8d37c7ac3f1625471",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/QmYTnHwVqLHCYL1xrwGQLY8e1YHdXVMimkLuYeHZNNyUiX",
+      "metadataName": "Vine Coin",
+      "metadataSymbol": "VINE",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/vine-f8bc16ff3c5f.png",
+        "sha256": "f8bc16ff3c5f681c05af4d77e8450678b2d6a9376e8a48c5f213cf665835f2fd",
+        "bytes": 107772,
+        "width": 3398,
+        "height": 3398,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://ipfs.io/ipfs/QmRtFJu3ZospaS4EAk17iNXZGAJp7gMxzvsZckZxbqZa5r",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/QmRtFJu3ZospaS4EAk17iNXZGAJp7gMxzvsZckZxbqZa5r",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/QmRtFJu3ZospaS4EAk17iNXZGAJp7gMxzvsZckZxbqZa5r",
+        "attempts": [
+          {
+            "uri": "https://ipfs.io/ipfs/QmRtFJu3ZospaS4EAk17iNXZGAJp7gMxzvsZckZxbqZa5r",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmRtFJu3ZospaS4EAk17iNXZGAJp7gMxzvsZckZxbqZa5r",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "aura",
+      "symbol": "aura",
+      "name": "aura",
+      "mint": "DtR4D9FtVoTX2569gaL837ZgrB6wNjj6tkmnX9Rdk9B2",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "aura",
+        "symbol": "aura",
+        "uri": "https://cf-ipfs.com/ipfs/QmciaE8qRSBMFPPFPjFkHCFTVFGfNXWGzc619Kt8ncb88g",
+        "source": "Bwt6zY3gpsCnPMx8QZdqDuXb7dNshYPQnq1kJhtqqKe"
+      },
+      "metadataUri": "https://cf-ipfs.com/ipfs/QmciaE8qRSBMFPPFPjFkHCFTVFGfNXWGzc619Kt8ncb88g",
+      "imageUri": "https://cf-ipfs.com/ipfs/QmSBgFtpXnxLMeyU1Czs1PW5Zv7nFjy8ZXe5ZDhA8fyyPD",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/QmciaE8qRSBMFPPFPjFkHCFTVFGfNXWGzc619Kt8ncb88g",
+          "status": 200,
+          "contentSha256": "9df86213b07171386afcfb8298290ae48ae5e3232a404f0d77b97af28e8a7ff2",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/QmciaE8qRSBMFPPFPjFkHCFTVFGfNXWGzc619Kt8ncb88g",
+      "metadataName": "aura",
+      "metadataSymbol": "aura",
+      "projectWebsite": "https://auraonsol.com/",
+      "projectTwitter": "https://x.com/auracoinsolana",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/aura-e4e149c6b5fb.png",
+        "sha256": "e4e149c6b5fb8846395c0cdb14869b58db256439d3d533e11d83aecd80b99921",
+        "bytes": 437907,
+        "width": 700,
+        "height": 700,
+        "mode": "RGB",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://cf-ipfs.com/ipfs/QmSBgFtpXnxLMeyU1Czs1PW5Zv7nFjy8ZXe5ZDhA8fyyPD",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/QmSBgFtpXnxLMeyU1Czs1PW5Zv7nFjy8ZXe5ZDhA8fyyPD",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/QmSBgFtpXnxLMeyU1Czs1PW5Zv7nFjy8ZXe5ZDhA8fyyPD",
+        "attempts": [
+          {
+            "uri": "https://cf-ipfs.com/ipfs/QmSBgFtpXnxLMeyU1Czs1PW5Zv7nFjy8ZXe5ZDhA8fyyPD",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmSBgFtpXnxLMeyU1Czs1PW5Zv7nFjy8ZXe5ZDhA8fyyPD",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "michi",
+      "symbol": "MICHI",
+      "name": "michi",
+      "mint": "AywAYdNJnSLSXwKWYxDciPjqGRnwp4iZdQptuuQTpump",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "michi",
+        "symbol": "MICHI",
+        "uri": "https://ipfs.io/ipfs/Qmf84hA9DenVxvYfjXKVFWAqpPdTYoFiHQGtL7xdvCwRY2",
+        "source": "41qygENCb25o86HGfRBTNA1NkWFzpyCKLrbEZ9j12Kbw"
+      },
+      "metadataUri": "https://ipfs.io/ipfs/Qmf84hA9DenVxvYfjXKVFWAqpPdTYoFiHQGtL7xdvCwRY2",
+      "imageUri": "https://ipfs.io/ipfs/QmNzwuJnJrtyp77CdwGJH9dS3SauuiA6yFn7ZDTBon2RtN",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/Qmf84hA9DenVxvYfjXKVFWAqpPdTYoFiHQGtL7xdvCwRY2",
+          "status": 200,
+          "contentSha256": "5842362101e06a4bfe2ab4600b07ce7dcfcab68dfe5c7bf509a80d32ecb288a7",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/Qmf84hA9DenVxvYfjXKVFWAqpPdTYoFiHQGtL7xdvCwRY2",
+      "metadataName": "michi",
+      "metadataSymbol": "MICHI",
+      "projectWebsite": "https://michi.meme/",
+      "projectTwitter": "https://x.com/michionsolana",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/michi-30964336613b.png",
+        "sha256": "30964336613b7ab042c3cef1fefd4ce76f4dc6db42e9edefe680d3428483ec2d",
+        "bytes": 96299,
+        "width": 256,
+        "height": 256,
+        "mode": "RGB",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://ipfs.io/ipfs/QmNzwuJnJrtyp77CdwGJH9dS3SauuiA6yFn7ZDTBon2RtN",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/QmNzwuJnJrtyp77CdwGJH9dS3SauuiA6yFn7ZDTBon2RtN",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/QmNzwuJnJrtyp77CdwGJH9dS3SauuiA6yFn7ZDTBon2RtN",
+        "attempts": [
+          {
+            "uri": "https://ipfs.io/ipfs/QmNzwuJnJrtyp77CdwGJH9dS3SauuiA6yFn7ZDTBon2RtN",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmNzwuJnJrtyp77CdwGJH9dS3SauuiA6yFn7ZDTBon2RtN",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "cate",
+      "symbol": "CATE",
+      "name": "Catecoin",
+      "mint": "Ai66LHZG9MCzg1WKdawwqduVAXpNDUuV8M3uyq5ppump",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Catecoin",
+        "symbol": "CATE",
+        "uri": "https://m.rapidlaunch.io/m/Tsg4I9WHC",
+        "source": "Token2022 inline metadata"
+      },
+      "metadataUri": "https://m.rapidlaunch.io/m/Tsg4I9WHC",
+      "imageUri": "https://m.rapidlaunch.io/images/Tsg4I9WHC.jpg",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "URI resolved from exact on-chain metadata; image not downloaded",
+      "metadataResolvedUri": "https://m.rapidlaunch.io/m/Tsg4I9WHC",
+      "metadataHttpStatus": 200,
+      "metadataName": "Catecoin",
+      "metadataSymbol": "CATE",
+      "projectWebsite": "https://www.instagram.com/stories/kabosumama/3949880202595208008/",
+      "projectTwitter": "https://x.com/thedevrrrrrrr/status/2081414045689852002",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/cate-a4c0d4c03864.jpg",
+        "sha256": "a4c0d4c0386424603b8e84a8037b5054e07bb1e2f14df867385f9e3ac26f32e1",
+        "bytes": 12827,
+        "width": 256,
+        "height": 256,
+        "mode": "RGB",
+        "format": "JPEG",
+        "frames": 1,
+        "contentType": "image/jpeg",
+        "referenceSourceUri": "https://m.rapidlaunch.io/images/Tsg4I9WHC.jpg",
+        "downloadUri": "https://m.rapidlaunch.io/images/Tsg4I9WHC.jpg",
+        "resolvedUri": "https://m.rapidlaunch.io/images/Tsg4I9WHC.jpg",
+        "attempts": [
+          {
+            "uri": "https://m.rapidlaunch.io/images/Tsg4I9WHC.jpg",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "ansem",
+      "symbol": "ANSEM",
+      "name": "The Black Bull",
+      "mint": "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "The Black Bull",
+        "symbol": "ANSEM",
+        "uri": "https://meta.uxento.io/data/7f4c8448-c38e-4c34-aa37-a28cff9806d0",
+        "source": "Token2022 inline metadata"
+      },
+      "metadataUri": "https://meta.uxento.io/data/7f4c8448-c38e-4c34-aa37-a28cff9806d0",
+      "imageUri": "https://edge.uxento.io/image/Cx83EqERns2VuiKrkwHegTuECVqZebsNhJ3dCU8CucWG",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Image URI observed from primaryproject/officialPump page; visual inspectionpending",
+      "metadataError": "<urlopen error timed out>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://meta.uxento.io/data/7f4c8448-c38e-4c34-aa37-a28cff9806d0",
+          "error": "<urlopen error timed out>"
+        }
+      ],
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/ansem-08e509fc6baf.jpg",
+        "sha256": "08e509fc6baf9ea26889e17faa093721d73e5d7cc4b36cb571afa6e5d4766e35",
+        "bytes": 1296,
+        "width": 80,
+        "height": 80,
+        "mode": "RGB",
+        "format": "JPEG",
+        "frames": 1,
+        "contentType": "image/jpeg",
+        "referenceSourceUri": "https://edge.uxento.io/image/Cx83EqERns2VuiKrkwHegTuECVqZebsNhJ3dCU8CucWG",
+        "downloadUri": "https://images.pump.fun/coin-image/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump?placeholder=none&src=https%3A%2F%2Fedge.uxento.io%2Fimage%2FCx83EqERns2VuiKrkwHegTuECVqZebsNhJ3dCU8CucWG&variant=80x80",
+        "resolvedUri": "https://images.pump.fun/coin-image/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump?placeholder=none&src=https%3A%2F%2Fedge.uxento.io%2Fimage%2FCx83EqERns2VuiKrkwHegTuECVqZebsNhJ3dCU8CucWG&variant=80x80",
+        "attempts": [
+          {
+            "uri": "https://edge.uxento.io/image/Cx83EqERns2VuiKrkwHegTuECVqZebsNhJ3dCU8CucWG",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://images.pump.fun/coin-image/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump?placeholder=none&src=https%3A%2F%2Fedge.uxento.io%2Fimage%2FCx83EqERns2VuiKrkwHegTuECVqZebsNhJ3dCU8CucWG&variant=80x80",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only"
+      },
+      "primaryBrandImageUri": "https://edge.uxento.io/image/Cx83EqERns2VuiKrkwHegTuECVqZebsNhJ3dCU8CucWG",
+      "primaryBrandReference": "https://pump.fun/coin/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump",
+      "primaryBrandImageSource": "Exact original imageURI decoded from officialPumpcoinpageimage source",
+      "additionalImageSourceUris": [
+        "https://images.pump.fun/coin-image/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump?placeholder=none&src=https%3A%2F%2Fedge.uxento.io%2Fimage%2FCx83EqERns2VuiKrkwHegTuECVqZebsNhJ3dCU8CucWG&variant=80x80"
+      ],
+      "proxyReferenceNote": "Exact80px officialPumpimageURL observed on exactmintpage; lowresolution fallback only, not originalhighdefinitionart"
+    },
+    {
+      "key": "bert",
+      "symbol": "Bert",
+      "name": "Bertram The Pomeranian",
+      "mint": "HgBRWfYxEfvPhtqkaeymCQtHCrKE46qQ43pKe8HCpump",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Bertram The Pomeranian",
+        "symbol": "Bert",
+        "uri": "https://ipfs.io/ipfs/QmNxxaTGgX3sTZV6jTgKyy5a33iFpQMjoWmcFUFfhohw5C",
+        "source": "FDQdWegkTkHsr2G4gYmhK7tzwBMCcjTSD4rBxf7FRPfd"
+      },
+      "metadataUri": "https://ipfs.io/ipfs/QmNxxaTGgX3sTZV6jTgKyy5a33iFpQMjoWmcFUFfhohw5C",
+      "imageUri": "https://ipfs.io/ipfs/Qma4nWagupvZyYG5gRz6WcbCAM8fpzQcSoJWT7ryY82YSg",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/QmNxxaTGgX3sTZV6jTgKyy5a33iFpQMjoWmcFUFfhohw5C",
+          "error": "<urlopen error timed out>"
+        },
+        {
+          "uri": "https://gateway.pinata.cloud/ipfs/QmNxxaTGgX3sTZV6jTgKyy5a33iFpQMjoWmcFUFfhohw5C",
+          "status": 200,
+          "contentSha256": "142b5ee2028781277fc417bc91b97b4f181bbf1d4f5130a98e26b1bc27f98262",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://gateway.pinata.cloud/ipfs/QmNxxaTGgX3sTZV6jTgKyy5a33iFpQMjoWmcFUFfhohw5C",
+      "metadataName": "Bertram The Pomeranian",
+      "metadataSymbol": "Bert",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/bert-f670e4bb1e68.png",
+        "sha256": "f670e4bb1e6878f8b17c4cb0c706dea41b7f55b0a30d26ca94ec917c1df59e11",
+        "bytes": 1623652,
+        "width": 1080,
+        "height": 1080,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://ipfs.io/ipfs/Qma4nWagupvZyYG5gRz6WcbCAM8fpzQcSoJWT7ryY82YSg",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/Qma4nWagupvZyYG5gRz6WcbCAM8fpzQcSoJWT7ryY82YSg",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/Qma4nWagupvZyYG5gRz6WcbCAM8fpzQcSoJWT7ryY82YSg",
+        "attempts": [
+          {
+            "uri": "https://ipfs.io/ipfs/Qma4nWagupvZyYG5gRz6WcbCAM8fpzQcSoJWT7ryY82YSg",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/Qma4nWagupvZyYG5gRz6WcbCAM8fpzQcSoJWT7ryY82YSg",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "chillhouse",
+      "symbol": "CHILLHOUSE",
+      "name": "Chill House",
+      "mint": "GkyPYa7NnCFbduLknCfBfP7p8564X1VZhwZYJ6CZpump",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Chill House",
+        "symbol": "CHILLHOUSE",
+        "uri": "https://ipfs.io/ipfs/QmcnReE9QBZv5tSXHPY6tnZUhsGQFopDCrBTFSvHajei88",
+        "source": "AxucGwm7FYt5xJ21K2CG9giSC9CQWyG8qSfZ6HqQxuUx"
+      },
+      "metadataUri": "https://ipfs.io/ipfs/QmcnReE9QBZv5tSXHPY6tnZUhsGQFopDCrBTFSvHajei88",
+      "imageUri": "https://ipfs.io/ipfs/QmU5D2LBjkriYD4wqL5cEVwv1x1xqj2LCQAPKC79cVGd34",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/QmcnReE9QBZv5tSXHPY6tnZUhsGQFopDCrBTFSvHajei88",
+          "status": 200,
+          "contentSha256": "0bbafcb24d4b78be631eabaaa5769fff384b5ceb4990ca934092559c643b7a60",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/QmcnReE9QBZv5tSXHPY6tnZUhsGQFopDCrBTFSvHajei88",
+      "metadataName": "Chill House",
+      "metadataSymbol": "CHILLHOUSE",
+      "projectWebsite": null,
+      "projectTwitter": "https://x.com/0xracist/status/1915879249594224989?s=46",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/chillhouse-d61002d28888.jpg",
+        "sha256": "d61002d28888129b2440553c3211e6625c6e5e4483c20d70e4594362d58d8c65",
+        "bytes": 73494,
+        "width": 354,
+        "height": 417,
+        "mode": "RGB",
+        "format": "JPEG",
+        "frames": 1,
+        "contentType": "image/jpeg",
+        "referenceSourceUri": "https://ipfs.io/ipfs/QmU5D2LBjkriYD4wqL5cEVwv1x1xqj2LCQAPKC79cVGd34",
+        "downloadUri": "https://gateway.pinata.cloud/ipfs/QmU5D2LBjkriYD4wqL5cEVwv1x1xqj2LCQAPKC79cVGd34",
+        "resolvedUri": "https://gateway.pinata.cloud/ipfs/QmU5D2LBjkriYD4wqL5cEVwv1x1xqj2LCQAPKC79cVGd34",
+        "attempts": [
+          {
+            "uri": "https://ipfs.io/ipfs/QmU5D2LBjkriYD4wqL5cEVwv1x1xqj2LCQAPKC79cVGd34",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmU5D2LBjkriYD4wqL5cEVwv1x1xqj2LCQAPKC79cVGd34",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://gateway.pinata.cloud/ipfs/QmU5D2LBjkriYD4wqL5cEVwv1x1xqj2LCQAPKC79cVGd34",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "usduc",
+      "symbol": "USDUC",
+      "name": "unstable coin",
+      "mint": "CB9dDufT3ZuQXqqSfa1c5kY935TEreyBw9XJXxHKpump",
+      "existingRegistry": true,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "unstable coin",
+        "symbol": "USDUC",
+        "uri": "https://ipfs.io/ipfs/QmVSQeV9hXpEmamqGRZne83qoNr4KgaKLsgPFu6teDcRPM",
+        "source": "8AZNBAioNMRv9cM1zmwXfVfVLyT7rT4HacxK4tNfqb5P"
+      },
+      "metadataUri": "https://ipfs.io/ipfs/QmVSQeV9hXpEmamqGRZne83qoNr4KgaKLsgPFu6teDcRPM",
+      "imageUri": "https://ipfs.io/ipfs/QmQw4DQjdWp3G8TuMCykG8SVSwtFwkxvTyxEWNMuAVYU4q",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/QmVSQeV9hXpEmamqGRZne83qoNr4KgaKLsgPFu6teDcRPM",
+          "status": 200,
+          "contentSha256": "5e91dba9d8dd9164b0cb8c64bd42b7a6c71e296c095cdbac52da0c3364d2783e",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/QmVSQeV9hXpEmamqGRZne83qoNr4KgaKLsgPFu6teDcRPM",
+      "metadataName": "unstable coin",
+      "metadataSymbol": "USDUC",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/usduc-bd7806798bd1.png",
+        "sha256": "bd7806798bd10ddd4fe954dbdc8ccda24b0d8d2554a0457f9193fa54636ebc61",
+        "bytes": 50546,
+        "width": 1000,
+        "height": 1000,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://ipfs.io/ipfs/QmQw4DQjdWp3G8TuMCykG8SVSwtFwkxvTyxEWNMuAVYU4q",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/QmQw4DQjdWp3G8TuMCykG8SVSwtFwkxvTyxEWNMuAVYU4q",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/QmQw4DQjdWp3G8TuMCykG8SVSwtFwkxvTyxEWNMuAVYU4q",
+        "attempts": [
+          {
+            "uri": "https://ipfs.io/ipfs/QmQw4DQjdWp3G8TuMCykG8SVSwtFwkxvTyxEWNMuAVYU4q",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmQw4DQjdWp3G8TuMCykG8SVSwtFwkxvTyxEWNMuAVYU4q",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "wbtc",
+      "symbol": "WBTC",
+      "name": "Wrapped BTC (Wormhole Solana representation)",
+      "mint": "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh",
+      "existingRegistry": false,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Wrapped BTC (Wormhole)",
+        "symbol": "WBTC",
+        "uri": "",
+        "source": "3gn71W4d26qqnVrL4FdEjRY6cEQBxS2LHX5SndNjaBcn"
+      },
+      "metadataUri": null,
+      "imageUri": null,
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "no on-chain metadata URI",
+      "referenceIntake": {
+        "key": "wbtc",
+        "mint": "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh",
+        "sourceUri": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh/logo.png",
+        "sourceKind": "Solana Labs token-list exact mint asset directory; additional reference candidate, not asserted issuer approval",
+        "visualInspection": "pending",
+        "status": "downloaded-pending-visual-inspection",
+        "path": "references/wbtc-token-list-4b2b394a8a1a.png",
+        "sha256": "4b2b394a8a1a3e370969a74e9d2cc0cd04f336f40ce726f682609eb0577bf3ad",
+        "bytes": 9820,
+        "width": 120,
+        "height": 120,
+        "format": "PNG",
+        "mode": "RGBA",
+        "contentType": "image/png",
+        "referenceSourceUri": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh/logo.png",
+        "downloadUri": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh/logo.png",
+        "downloadPurpose": "Exact-mint supplementary source reference intake only; no generation"
+      }
+    },
+    {
+      "key": "eth",
+      "symbol": "ETH",
+      "name": "Ether (Wormhole Solana representation)",
+      "mint": "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",
+      "existingRegistry": false,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Wrapped Ether (Wormhole)",
+        "symbol": "WETH",
+        "uri": "",
+        "source": "DqqUY2u3jZ3ay8aNUbtTu63NPBVtyGsVVUEr45WP1i2h"
+      },
+      "metadataUri": null,
+      "imageUri": null,
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "no on-chain metadata URI",
+      "primaryBrandReference": "https://ethereum.org/assets/",
+      "primaryBrandImageUri": "https://ethereum.org/_next/static/media/eth-diamond-black.31u_5ih2w7osr.png",
+      "primaryBrandImageSource": "Observed official Ethereum brand image link69; decoded source of Next image URL",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/eth-836339466e52.png",
+        "sha256": "836339466e52821ec7c7b2088e30a87af27b23f5557d00178e7052a711857352",
+        "bytes": 9703,
+        "width": 800,
+        "height": 1303,
+        "mode": "P",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://ethereum.org/_next/static/media/eth-diamond-black.31u_5ih2w7osr.png",
+        "downloadUri": "https://ethereum.org/_next/static/media/eth-diamond-black.31u_5ih2w7osr.png",
+        "resolvedUri": "https://ethereum.org/_next/static/media/eth-diamond-black.31u_5ih2w7osr.png",
+        "attempts": [
+          {
+            "uri": "https://ethereum.org/_next/static/media/eth-diamond-black.31u_5ih2w7osr.png",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "hype",
+      "symbol": "HYPE",
+      "name": "Hyperliquid (Sunrise Solana representation)",
+      "mint": "98sMhvDwXj1RQi5c5Mndm3vPe9cBqPrbLaufMXFNMh5g",
+      "existingRegistry": false,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "HYPE",
+        "symbol": "HYPE",
+        "uri": "https://arweave.net/nhnR5WErzQVpPTy4jZsFGwlISmvnmp5j9eioV4pP_C4",
+        "source": "HykPn6qP5Awm954kdhD3kN8u8E3M8P6VnM1PqMFDqhMR"
+      },
+      "metadataUri": "https://arweave.net/nhnR5WErzQVpPTy4jZsFGwlISmvnmp5j9eioV4pP_C4",
+      "imageUri": "https://arweave.net/QBRdRop8wI4PpScSRTKyibv-fQuYBua-WOvC7tuJyJo",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "URI resolved from exact on-chain metadata; image not downloaded",
+      "metadataResolvedUri": "https://tym5dzlbfpgqk2j5hs4i3gyfdmeuqstl46nj4y7v5cufpcsp7qxa.arweave.net/nhnR5WErzQVpPTy4jZsFGwlISmvnmp5j9eioV4pP_C4",
+      "metadataHttpStatus": 200,
+      "metadataName": "HYPE",
+      "metadataSymbol": "HYPE",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/hype-4d210e44f273.png",
+        "sha256": "4d210e44f273db8d4089cd44c86e24c057969495c8ba32d1331c30badd91102e",
+        "bytes": 11031,
+        "width": 576,
+        "height": 576,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://arweave.net/QBRdRop8wI4PpScSRTKyibv-fQuYBua-WOvC7tuJyJo",
+        "downloadUri": "https://arweave.net/QBRdRop8wI4PpScSRTKyibv-fQuYBua-WOvC7tuJyJo",
+        "resolvedUri": "https://iakf2rukptai4d5fe4jekmvsrg5747iltadonpsy5pbo5w4jzcna.arweave.net/QBRdRop8wI4PpScSRTKyibv-fQuYBua-WOvC7tuJyJo",
+        "attempts": [
+          {
+            "uri": "https://arweave.net/QBRdRop8wI4PpScSRTKyibv-fQuYBua-WOvC7tuJyJo",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "zec",
+      "symbol": "ZEC",
+      "name": "Zcash (NEAR Omni Bridge Solana representation)",
+      "mint": "A7bdiYdS5GjqGFtxf17ppRHtDKPkkRqbKtR27dxvQXaS",
+      "existingRegistry": false,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Zcash",
+        "symbol": "ZEC",
+        "uri": "https://arweave.net/cEDMVkvUHsXSckakyWWCQlMnG-SlWlXyFEGnLqCamug",
+        "source": "5mRY96MiFac9DBToh16j5dgq6kiJCPqhPXPzpoNNtxmw"
+      },
+      "metadataUri": "https://arweave.net/cEDMVkvUHsXSckakyWWCQlMnG-SlWlXyFEGnLqCamug",
+      "imageUri": "https://arweave.net/QSYqnmB7NYlB7n1R6rz935Y07dlRK0tIuKe2mof5Sho",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "URI resolved from exact on-chain metadata; image not downloaded",
+      "metadataResolvedUri": "https://obamyvsl2qpmlutsi2smszmcijjsog7euvnfl4quigts5ie2tlua.arweave.net/cEDMVkvUHsXSckakyWWCQlMnG-SlWlXyFEGnLqCamug",
+      "metadataHttpStatus": 200,
+      "metadataName": "Zcash",
+      "metadataSymbol": "ZEC",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/zec-c202292c3633.svg",
+        "sha256": "c202292c36336b109523fff68c5e8de3a659ca2dbea6a7d1e9fdead80c0e1a90",
+        "bytes": 1400,
+        "width": 2500.0,
+        "height": 2500.0,
+        "mode": "vector",
+        "format": "SVG",
+        "frames": 1,
+        "contentType": "image/svg+xml",
+        "referenceSourceUri": "https://arweave.net/QSYqnmB7NYlB7n1R6rz935Y07dlRK0tIuKe2mof5Sho",
+        "downloadUri": "https://arweave.net/QSYqnmB7NYlB7n1R6rz935Y07dlRK0tIuKe2mof5Sho",
+        "resolvedUri": "https://ietcvhtapm2ysqpopvi6vph536ldj3ozkevuwsfyu63jvb7zjina.arweave.net/QSYqnmB7NYlB7n1R6rz935Y07dlRK0tIuKe2mof5Sho",
+        "attempts": [
+          {
+            "uri": "https://arweave.net/QSYqnmB7NYlB7n1R6rz935Y07dlRK0tIuKe2mof5Sho",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+        "deterministicPngExport": {
+          "path": "references/zec-c202292c3633-reference-1024.png",
+          "sha256": "578393d3915d6a0f88f70454ce2ebc79c466747dfda9d035f1cdea69fe5eb507",
+          "bytes": 140296,
+          "width": 1024,
+          "height": 1024,
+          "transform": "Installed ResvgWASM rasterization of validated original SVG; original retained; no new artwork"
+        }
+      }
+    },
+    {
+      "key": "near",
+      "symbol": "NEAR",
+      "name": "NEAR Protocol (Omni Bridge Solana representation)",
+      "mint": "3ZLekZYq2qkZiSpnSvabjit34tUkjSwD1JFuW9as9wBG",
+      "existingRegistry": false,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "NEAR",
+        "symbol": "NEAR",
+        "uri": "https://bafkreiczg4odtqv3mzbycvdvexssfy3f72xjrqwnr2tpactpfgdcm6rgnu.ipfs.w3s.link",
+        "source": "9Sw7YfjM1HYo5MHTnh18aoaTWxPmStY6HuPttYYRTQ6X"
+      },
+      "metadataUri": "https://bafkreiczg4odtqv3mzbycvdvexssfy3f72xjrqwnr2tpactpfgdcm6rgnu.ipfs.w3s.link",
+      "imageUri": "https://bafkreiekxdv4uxm7ctijvj7wql6bto3cokws6xvfdbg7ylrvt2vtimnqri.ipfs.w3s.link",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/bafkreiczg4odtqv3mzbycvdvexssfy3f72xjrqwnr2tpactpfgdcm6rgnu",
+          "status": 200,
+          "contentSha256": "59371c39c2bb664381547525e522e365feae98c2cd8ea6f00a6f2986267a266d",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/bafkreiczg4odtqv3mzbycvdvexssfy3f72xjrqwnr2tpactpfgdcm6rgnu",
+      "metadataName": "NEAR",
+      "metadataSymbol": "NEAR",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/near-8ab8ebca5d9f.svg",
+        "sha256": "8ab8ebca5d9f14d09aa7f682fc19bb6272ad2f5ea5184dfc2e359eab3431b08a",
+        "bytes": 610,
+        "width": 288.0,
+        "height": 288.0,
+        "mode": "vector",
+        "format": "SVG",
+        "frames": 1,
+        "contentType": "image/svg+xml",
+        "referenceSourceUri": "https://bafkreiekxdv4uxm7ctijvj7wql6bto3cokws6xvfdbg7ylrvt2vtimnqri.ipfs.w3s.link",
+        "downloadUri": "https://ipfs.filebase.io/ipfs/bafkreiekxdv4uxm7ctijvj7wql6bto3cokws6xvfdbg7ylrvt2vtimnqri",
+        "resolvedUri": "https://ipfs.filebase.io/ipfs/bafkreiekxdv4uxm7ctijvj7wql6bto3cokws6xvfdbg7ylrvt2vtimnqri",
+        "attempts": [
+          {
+            "uri": "https://bafkreiekxdv4uxm7ctijvj7wql6bto3cokws6xvfdbg7ylrvt2vtimnqri.ipfs.w3s.link",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/bafkreiekxdv4uxm7ctijvj7wql6bto3cokws6xvfdbg7ylrvt2vtimnqri",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+        "deterministicPngExport": {
+          "path": "references/near-8ab8ebca5d9f-reference-1024.png",
+          "sha256": "14130cd7a93eca90a39b54aa51bd0c5969d555fba5a4c509fdcfcb996594aa89",
+          "bytes": 20721,
+          "width": 1024,
+          "height": 1024,
+          "transform": "Installed ResvgWASM rasterization of validated original SVG; original retained; no new artwork"
+        }
+      }
+    },
+    {
+      "key": "xrp",
+      "symbol": "XRP",
+      "name": "Ripple (Hex Trust wrapped XRP)",
+      "mint": "6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2",
+      "existingRegistry": false,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Wrapped XRP",
+        "symbol": "wXRP",
+        "uri": "https://ipfs.io/ipfs/bafkreig6wrikw4oj4j4j3aws2jaaf2vztpmcuixfe2rgjfp4ua5qlwkpz4",
+        "source": "8LbUEfv1t2j3BP5fBnAAjhzUmuNfxvU1Pg2MHqekKpvB"
+      },
+      "metadataUri": "https://ipfs.io/ipfs/bafkreig6wrikw4oj4j4j3aws2jaaf2vztpmcuixfe2rgjfp4ua5qlwkpz4",
+      "imageUri": "https://cdn.prod.website-files.com/61a0a50381fdccb6c37927e5/692521b55b7c02a5da964dc3_wXRP-token-logo.svg",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://ipfs.filebase.io/ipfs/bafkreig6wrikw4oj4j4j3aws2jaaf2vztpmcuixfe2rgjfp4ua5qlwkpz4",
+          "status": 200,
+          "contentSha256": "deb450ab71c9e2789d82d2d24002eab99bd82a22e526a26495fca03b05d94fcf",
+          "contentType": "application/json"
+        }
+      ],
+      "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/bafkreig6wrikw4oj4j4j3aws2jaaf2vztpmcuixfe2rgjfp4ua5qlwkpz4",
+      "metadataName": "Wrapped XRP",
+      "metadataSymbol": "wXRP",
+      "projectWebsite": "https://www.hextrust.com/services/wrapping/wxrp",
+      "projectTwitter": "https://x.com/Hex_Trust",
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/xrp-40c7dd792c5f.svg",
+        "sha256": "40c7dd792c5f5d6e61c224cb2a343e1954b79b172509522a967ddd83ee86b1b2",
+        "bytes": 2941,
+        "width": 32.0,
+        "height": 32.0,
+        "mode": "vector",
+        "format": "SVG",
+        "frames": 1,
+        "contentType": "image/svg+xml",
+        "referenceSourceUri": "https://cdn.prod.website-files.com/61a0a50381fdccb6c37927e5/692521b55b7c02a5da964dc3_wXRP-token-logo.svg",
+        "downloadUri": "https://cdn.prod.website-files.com/61a0a50381fdccb6c37927e5/692521b55b7c02a5da964dc3_wXRP-token-logo.svg",
+        "resolvedUri": "https://cdn.prod.website-files.com/61a0a50381fdccb6c37927e5/692521b55b7c02a5da964dc3_wXRP-token-logo.svg",
+        "attempts": [
+          {
+            "uri": "https://cdn.prod.website-files.com/61a0a50381fdccb6c37927e5/692521b55b7c02a5da964dc3_wXRP-token-logo.svg",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+        "deterministicPngExport": {
+          "path": "references/xrp-40c7dd792c5f-reference-1024.png",
+          "sha256": "cac5b0723886031843a0d2d019c99570baa1a516cfb54523212d6e37f7a948e7",
+          "bytes": 73603,
+          "width": 1024,
+          "height": 1024,
+          "transform": "Installed ResvgWASM rasterization of validated original SVG; original retained; no new artwork"
+        }
+      }
+    },
+    {
+      "key": "xmr",
+      "symbol": "XMR",
+      "name": "Monero (wXMR Solana representation)",
+      "mint": "WXMRyRZhsa19ety5erZhHg4N3xj3EVN92u94422teJp",
+      "existingRegistry": false,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Monero",
+        "symbol": "XMR",
+        "uri": "https://wxmr.io/xmr.json",
+        "source": "6k36i9b3Nirhor61F4ikwT98QshewanCeoFC58iFDRud"
+      },
+      "metadataUri": "https://wxmr.io/xmr.json",
+      "imageUri": "https://wxmr.io/xmr.png",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "URI resolved from exact on-chain metadata; image not downloaded",
+      "metadataResolvedUri": "https://wxmr.io/xmr.json",
+      "metadataHttpStatus": 200,
+      "metadataName": "Monero",
+      "metadataSymbol": "XMR",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/xmr-26f020ea2c78.png",
+        "sha256": "26f020ea2c781d70407768ab3e4439b6f57f56c6596a3771ef7355a7bc555438",
+        "bytes": 70362,
+        "width": 2000,
+        "height": 2000,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://wxmr.io/xmr.png",
+        "downloadUri": "https://wxmr.io/xmr.png",
+        "resolvedUri": "https://wxmr.io/xmr.png",
+        "attempts": [
+          {
+            "uri": "https://wxmr.io/xmr.png",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for approved future Higgsfield artwork only"
+      }
+    },
+    {
+      "key": "sui",
+      "symbol": "SUI",
+      "name": "Sui (Sunrise Solana representation)",
+      "mint": "suifhC9gU1VbJAPYPTBkHJyyyStKGLLYPVDTmPoqbvA",
+      "existingRegistry": false,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Sui",
+        "symbol": "SUI",
+        "uri": "https://arweave.net/ugWhl0bBAdNvSXzrZxe1Fw7GrmVklWz7Jnn6RE5qlAA",
+        "source": "28yQR6D8SYz7BQ1gMkZZvLFkGEZq5PtMujgP6LnjXuio"
+      },
+      "metadataUri": "https://arweave.net/ugWhl0bBAdNvSXzrZxe1Fw7GrmVklWz7Jnn6RE5qlAA",
+      "imageUri": "https://docs.sui.io/img/logo.svg",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Observed primary/officialPump imageURL; visualinspectionpending",
+      "metadataError": "<urlopen error timed out>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://arweave.net/ugWhl0bBAdNvSXzrZxe1Fw7GrmVklWz7Jnn6RE5qlAA",
+          "error": "<urlopen error timed out>"
+        },
+        {
+          "uri": "https://gateway.irys.xyz/ugWhl0bBAdNvSXzrZxe1Fw7GrmVklWz7Jnn6RE5qlAA",
+          "error": "HTTP Error 404: Not Found"
+        },
+        {
+          "uri": "https://arweave.net/ugWhl0bBAdNvSXzrZxe1Fw7GrmVklWz7Jnn6RE5qlAA",
+          "status": 200,
+          "contentSha256": "ef47176b3487ac3034a3e92f5a169ea74be761314adb655838b081543dc3b22c",
+          "contentType": "application/json"
+        }
+      ],
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/sui-5351dc0dbefb.svg",
+        "sha256": "5351dc0dbefbdb2d21f2d18b6e21ba7b393f8db6fd7fe072ecfa35917e79db5d",
+        "bytes": 1567,
+        "width": 400.0,
+        "height": 400.0,
+        "mode": "vector",
+        "format": "SVG",
+        "frames": 1,
+        "contentType": "image/svg+xml",
+        "referenceSourceUri": "https://docs.sui.io/img/logo.svg",
+        "downloadUri": "https://docs.sui.io/img/logo.svg",
+        "resolvedUri": "https://docs.sui.io/img/logo.svg",
+        "attempts": [
+          {
+            "uri": "https://docs.sui.io/img/logo.svg",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+        "deterministicPngExport": {
+          "path": "references/sui-5351dc0dbefb-reference-1024.png",
+          "sha256": "25cd9c0454c52fd8ff5ddad4b43b5d269d0635aaab6bfab68e96b02eea42779f",
+          "bytes": 23422,
+          "width": 1024,
+          "height": 1024,
+          "transform": "Installed ResvgWASM rasterization of validated original SVG; original retained; no new artwork"
+        }
+      },
+      "metadataResolvedUri": "https://xic2df2gyea5g32jptvwof5vc4hmnltfmskwz6zgph5eittksqaa.arweave.net/ugWhl0bBAdNvSXzrZxe1Fw7GrmVklWz7Jnn6RE5qlAA",
+      "metadataName": "Sui",
+      "metadataSymbol": "SUI",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "originalQuoteImageUri": "https://arweave.net/B8MRbgRcrHoMXBhOKV9Jem5awh74XTY7gPLnLXHZj0s",
+      "primaryBrandImageUri": "https://docs.sui.io/img/logo.svg",
+      "primaryBrandReference": "https://docs.sui.io/",
+      "primaryBrandImageSource": "Observed wordlessimageasset in primarySui docs homepageHTML; supplementary underlyingprojectidentity",
+      "previousReferenceIntake": {
+        "status": "download-failed",
+        "visualInspection": "pending",
+        "referenceSourceUri": "https://arweave.net/B8MRbgRcrHoMXBhOKV9Jem5awh74XTY7gPLnLXHZj0s",
+        "attempts": [
+          {
+            "uri": "https://arweave.net/B8MRbgRcrHoMXBhOKV9Jem5awh74XTY7gPLnLXHZj0s",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://gateway.irys.xyz/B8MRbgRcrHoMXBhOKV9Jem5awh74XTY7gPLnLXHZj0s",
+            "error": "HTTP Error 404: Not Found"
+          }
+        ]
+      }
+    },
+    {
+      "key": "arb",
+      "symbol": "ARB",
+      "name": "Arbitrum (Sunrise Solana representation)",
+      "mint": "ARBzQTYDCW2KnVEjs1Mc81LekB1ibVFZKbSVmorkoT9d",
+      "existingRegistry": false,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Arbitrum",
+        "symbol": "ARB",
+        "uri": "https://arweave.net/jSxN6Nez2jdSSdh_k5K6YPm6TT-J-Q5bz8DylmCJvB4",
+        "source": "B7C7u4iNQB4xwBXwdXqW2UDcEdHdejPLaziB7Lht7JPV"
+      },
+      "metadataUri": "https://arweave.net/jSxN6Nez2jdSSdh_k5K6YPm6TT-J-Q5bz8DylmCJvB4",
+      "imageUri": "https://arweave.net/j-fCD9twgXHSwwFZrvlqe1mSu5pDdjL9Vs07npmwZMw",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "URI resolved from exact on-chain metadata; image not downloaded",
+      "metadataResolvedUri": "https://ruwe32gxwpndousj3b7zhev2md43utj7rh4q4w6pydzjmyejxqpa.arweave.net/jSxN6Nez2jdSSdh_k5K6YPm6TT-J-Q5bz8DylmCJvB4",
+      "metadataHttpStatus": 200,
+      "metadataName": "Arbitrum",
+      "metadataSymbol": "ARB",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/arb-e5d53dd5c7f9.svg",
+        "sha256": "e5d53dd5c7f98a985a48e4b0eea98cd78d7a0f147b4c7a18f3ba7e24b303680c",
+        "bytes": 2401,
+        "width": 741.07,
+        "height": 788.07,
+        "mode": "vector",
+        "format": "SVG",
+        "frames": 1,
+        "contentType": "image/svg+xml",
+        "referenceSourceUri": "https://arweave.net/j-fCD9twgXHSwwFZrvlqe1mSu5pDdjL9Vs07npmwZMw",
+        "downloadUri": "https://arweave.net/j-fCD9twgXHSwwFZrvlqe1mSu5pDdjL9Vs07npmwZMw",
+        "resolvedUri": "https://r7t4ed63ocaxduwdafm256lkpnmzfo42in3df7kwzu5z5gnqmtga.arweave.net/j-fCD9twgXHSwwFZrvlqe1mSu5pDdjL9Vs07npmwZMw",
+        "attempts": [
+          {
+            "uri": "https://arweave.net/j-fCD9twgXHSwwFZrvlqe1mSu5pDdjL9Vs07npmwZMw",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+        "deterministicPngExport": {
+          "path": "references/arb-e5d53dd5c7f9-reference-1024.png",
+          "sha256": "3d95eba1394ab5a300b548d869be8eb7e99eea884658f743d4c8c28af18be362",
+          "bytes": 37919,
+          "width": 1024,
+          "height": 1089,
+          "transform": "Installed ResvgWASM rasterization of validated original SVG; original retained; no new artwork"
+        }
+      }
+    },
+    {
+      "key": "aave",
+      "symbol": "AAVE",
+      "name": "Aave (Sunrise Solana representation)",
+      "mint": "AavE1kKKnesPw4MuRJmJ9jZs9QzEE8CPxQ3ViczUDfc1",
+      "existingRegistry": false,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Aave",
+        "symbol": "AAVE",
+        "uri": "https://arweave.net/jMct-GEVpLhytqATrpbrqHJhuM1eZV71tsmHKYlsGJo",
+        "source": "3wM7L8M7ZgVoL1ePZ9cTDhLefpy8sk1duJvUHodSyTAt"
+      },
+      "metadataUri": "https://arweave.net/jMct-GEVpLhytqATrpbrqHJhuM1eZV71tsmHKYlsGJo",
+      "imageUri": "https://arweave.net/a1RHlEizdwipsW3liDLWqzg5omSZvBc5wiFGa7O0Y6I",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "URI resolved from exact on-chain metadata; image not downloaded",
+      "metadataResolvedUri": "https://rtds36dbcwslq4vwuaj25fxlvbzgdognlzsv55nwzgdstclmdcna.arweave.net/jMct-GEVpLhytqATrpbrqHJhuM1eZV71tsmHKYlsGJo",
+      "metadataHttpStatus": 200,
+      "metadataName": "Aave",
+      "metadataSymbol": "AAVE",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/aave-67d7f746f9d5.svg",
+        "sha256": "67d7f746f9d525c0f7b2221e5d445632877e7535cc20ca997ee869a76f1eb5e2",
+        "bytes": 1055,
+        "width": 254.0,
+        "height": 254.0,
+        "mode": "vector",
+        "format": "SVG",
+        "frames": 1,
+        "contentType": "image/svg+xml",
+        "referenceSourceUri": "https://arweave.net/a1RHlEizdwipsW3liDLWqzg5omSZvBc5wiFGa7O0Y6I",
+        "downloadUri": "https://arweave.net/a1RHlEizdwipsW3liDLWqzg5omSZvBc5wiFGa7O0Y6I",
+        "resolvedUri": "https://nnkepfciwn3qrknrnxsyqmwwvm4dtitetg6booocefdgxm5umora.arweave.net/a1RHlEizdwipsW3liDLWqzg5omSZvBc5wiFGa7O0Y6I",
+        "attempts": [
+          {
+            "uri": "https://arweave.net/a1RHlEizdwipsW3liDLWqzg5omSZvBc5wiFGa7O0Y6I",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+        "deterministicPngExport": {
+          "path": "references/aave-67d7f746f9d5-reference-1024.png",
+          "sha256": "ce045f064866654d763a809893430b34eada8df4ae65dd2e0a32221ff080085c",
+          "bytes": 32067,
+          "width": 1024,
+          "height": 1024,
+          "transform": "Installed ResvgWASM rasterization of validated original SVG; original retained; no new artwork"
+        }
+      }
+    },
+    {
+      "key": "uni",
+      "symbol": "UNI",
+      "name": "Uniswap (Sunrise Solana representation)",
+      "mint": "uniHfuPhEQSrtpzXpJZDCSq53yaejKKpNhFUiKoHKHV",
+      "existingRegistry": false,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Uniswap",
+        "symbol": "UNI",
+        "uri": "https://arweave.net/-vfSO-U536TxjCC2AkooG4tvaBUp24358ALeigp4_U0",
+        "source": "8px1GezZmezYxjQEPFqrVPndDxdptKXmRJFokiG9RdDQ"
+      },
+      "metadataUri": "https://arweave.net/-vfSO-U536TxjCC2AkooG4tvaBUp24358ALeigp4_U0",
+      "imageUri": "https://arweave.net/jzfz6jBoNu4QSUsmZGfQ2s98wgmxLoXR7lOINp5ZPtY",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "URI resolved from exact on-chain metadata; image not downloaded",
+      "metadataResolvedUri": "https://7l35eo7fhhp2j4mmec3aesridofw62avfhny36pqalpiucty7vgq.arweave.net/-vfSO-U536TxjCC2AkooG4tvaBUp24358ALeigp4_U0",
+      "metadataHttpStatus": 200,
+      "metadataName": "Uniswap",
+      "metadataSymbol": "UNI",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/uni-507d05487e46.svg",
+        "sha256": "507d05487e466a3c08ac8d6f1d3c61fb5504fd2c613763c10ea6a8f8a9f75142",
+        "bytes": 8263,
+        "width": 60.0,
+        "height": 60.0,
+        "mode": "vector",
+        "format": "SVG",
+        "frames": 1,
+        "contentType": "image/svg+xml",
+        "referenceSourceUri": "https://arweave.net/jzfz6jBoNu4QSUsmZGfQ2s98wgmxLoXR7lOINp5ZPtY",
+        "downloadUri": "https://arweave.net/jzfz6jBoNu4QSUsmZGfQ2s98wgmxLoXR7lOINp5ZPtY",
+        "resolvedUri": "https://r437h2rqna3o4ecjjmtgiz6q3lhxzqqjwexilupokoednhszh3la.arweave.net/jzfz6jBoNu4QSUsmZGfQ2s98wgmxLoXR7lOINp5ZPtY",
+        "attempts": [
+          {
+            "uri": "https://arweave.net/jzfz6jBoNu4QSUsmZGfQ2s98wgmxLoXR7lOINp5ZPtY",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+        "deterministicPngExport": {
+          "path": "references/uni-507d05487e46-reference-1024.png",
+          "sha256": "690cc0becea35011c5a39a8a63bd6ca07655ddf70fc84392c0a6c6db4e5da73e",
+          "bytes": 49374,
+          "width": 1024,
+          "height": 1024,
+          "transform": "Installed ResvgWASM rasterization of validated original SVG; original retained; no new artwork"
+        }
+      }
+    },
+    {
+      "key": "tao",
+      "symbol": "TAO",
+      "name": "Bittensor (Sunrise Solana representation)",
+      "mint": "taoC6xyv2v8tDLcev4uaGUgV4vdQsWJrGft2kcBRrBY",
+      "existingRegistry": false,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Bittensor",
+        "symbol": "TAO",
+        "uri": "https://gateway.irys.xyz/EcYkqqMV3ZSRRUvd3Jvv1BQJksDraH64LnAfNq5UeU2e",
+        "source": "GPs5DdHDnyiEU1zRAnxT1rJvKWa6mPVNv19pnrFPWxCB"
+      },
+      "metadataUri": "https://gateway.irys.xyz/EcYkqqMV3ZSRRUvd3Jvv1BQJksDraH64LnAfNq5UeU2e",
+      "imageUri": null,
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Primary Bittensor homepage header logo extracted byte-for-byte as SVG; deterministic PNG reference export; visual inspection pending",
+      "metadataError": "<urlopen error [Errno 8] nodename nor servname provided, or not known>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://gateway.irys.xyz/EcYkqqMV3ZSRRUvd3Jvv1BQJksDraH64LnAfNq5UeU2e",
+          "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+        },
+        {
+          "uri": "https://arweave.net/EcYkqqMV3ZSRRUvd3Jvv1BQJksDraH64LnAfNq5UeU2e",
+          "error": "HTTP Error 404: Not Found"
+        },
+        {
+          "uri": "https://gateway.irys.xyz/EcYkqqMV3ZSRRUvd3Jvv1BQJksDraH64LnAfNq5UeU2e",
+          "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+        },
+        {
+          "uri": "https://arweave.net/EcYkqqMV3ZSRRUvd3Jvv1BQJksDraH64LnAfNq5UeU2e",
+          "error": "<urlopen error timed out>"
+        },
+        {
+          "uri": "https://gateway.irys.xyz/EcYkqqMV3ZSRRUvd3Jvv1BQJksDraH64LnAfNq5UeU2e",
+          "error": "<urlopen error _ssl.c:1063: The handshake operation timed out>"
+        },
+        {
+          "uri": "https://arweave.net/EcYkqqMV3ZSRRUvd3Jvv1BQJksDraH64LnAfNq5UeU2e",
+          "error": "HTTP Error 404: Not Found"
+        }
+      ],
+      "referenceIntake": {
+        "key": "tao",
+        "mint": "taoC6xyv2v8tDLcev4uaGUgV4vdQsWJrGft2kcBRrBY",
+        "sourceUri": "https://www.bittensor.com",
+        "sourceSelector": "Header_tao_logo home-link firstinlineSVG",
+        "sourceHtmlSha256": "b1b082c87345dee6513c83ad79080546a0e33201ba908a379a3ecfb47107b017",
+        "sourceContext": "ss=\"layout_main_container__azbLo\"><div class=\"layout_container__pQpTd\"><div class=\"Header_header_wrapper__wdgil\"><div class=\"Header_container__3ik1i\"><div class=\"Header_tao_logo__zDFf2\"><a href=\"/\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"none\" viewBox=\"0 0 21 23\"><path fill=\"currentColor\" d=\"M12.53 17.783v-9.08a4.144 4.",
+        "visualInspection": "pending",
+        "status": "downloaded-pending-visual-inspection",
+        "path": "references/tao-primary-inline-432636a22810.svg",
+        "sha256": "432636a22810a0814d22434a764f7194d2df2289bdabb1232cb7d3fde0f37631",
+        "bytes": 383,
+        "format": "SVG",
+        "mode": "vector",
+        "width": 24,
+        "height": 24,
+        "referenceSourceUri": "https://www.bittensor.com",
+        "downloadPurpose": "Exact primaryBittensor headerlogoSVG extraction for plannedgenerationreferenceintake; no newart",
+        "deterministicPngExport": {
+          "path": "references/tao-primary-inline-432636a22810-reference-1024.png",
+          "sha256": "14822972f8b7c066c75e620168f5e1bad9beb368932c5e543b14b6c9c96852a5",
+          "bytes": 15404,
+          "width": 1024,
+          "height": 1024,
+          "transform": "ResvgWASM rasterization ofexactinlineSVGfromprimaryBittensorhomepage; originalretained; no newart"
+        }
+      },
+      "previousReferenceIntake": {
+        "status": "pending-reference-uri",
+        "visualInspection": "pending"
+      },
+      "primaryBrandReference": "https://www.bittensor.com",
+      "primaryBrandInlineSvgProof": "research/tao-primary-inline-reference.json"
+    },
+    {
+      "key": "peaq",
+      "symbol": "PEAQ",
+      "name": "peaq (Sunrise Solana representation)",
+      "mint": "PEAQjk7SRS6rXHVFFmpRr7zrC4g5ZuEebpwTxvaLr3b",
+      "existingRegistry": false,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "peaq",
+        "symbol": "PEAQ",
+        "uri": "https://arweave.net/F_46BCDds95WugfWaZ0o9bE_uiF3ipXSH2YB_ggxZqg",
+        "source": "HdqDvrNHrXoAyUreV9zw5ssKJ6qMYR1fvHuExDtyLebM"
+      },
+      "metadataUri": "https://arweave.net/F_46BCDds95WugfWaZ0o9bE_uiF3ipXSH2YB_ggxZqg",
+      "imageUri": "https://arweave.net/GRDbV2NikfCG0oCaG9nZ-uSs_MbCCCVTQQGF6L6wdLA",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+      "metadataError": "<urlopen error timed out>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://arweave.net/F_46BCDds95WugfWaZ0o9bE_uiF3ipXSH2YB_ggxZqg",
+          "status": 200,
+          "contentSha256": "e439143cad59419f0180e719d4e35da4058ccd670e68afdd3d9f0530536476a8",
+          "contentType": "application/json"
+        }
+      ],
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/peaq-c1f813eb9e81.png",
+        "sha256": "c1f813eb9e810b97f9c30267942e12cb49f01bf023c00f160547e4e7a0487282",
+        "bytes": 22208,
+        "width": 512,
+        "height": 512,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/png",
+        "referenceSourceUri": "https://arweave.net/GRDbV2NikfCG0oCaG9nZ-uSs_MbCCCVTQQGF6L6wdLA",
+        "downloadUri": "https://arweave.net/GRDbV2NikfCG0oCaG9nZ-uSs_MbCCCVTQQGF6L6wdLA",
+        "resolvedUri": "https://deinwv3dmki7bbwsqcnbxwoz7lskz7ggyiecku2bagc6rpvqosya.arweave.net/GRDbV2NikfCG0oCaG9nZ-uSs_MbCCCVTQQGF6L6wdLA",
+        "attempts": [
+          {
+            "uri": "https://arweave.net/GRDbV2NikfCG0oCaG9nZ-uSs_MbCCCVTQQGF6L6wdLA",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only"
+      },
+      "metadataResolvedUri": "https://c77dubba3wz54vv2a7lgthji6wyt7orbo6fjluq7mya74cbrm2ua.arweave.net/F_46BCDds95WugfWaZ0o9bE_uiF3ipXSH2YB_ggxZqg",
+      "metadataName": "peaq",
+      "metadataSymbol": "PEAQ",
+      "projectWebsite": "https://www.peaq.xyz",
+      "projectTwitter": "https://x.com/peaq"
+    },
+    {
+      "key": "mon",
+      "symbol": "MON",
+      "name": "Monad (Sunrise Solana representation)",
+      "mint": "CrAr4RRJMBVwRsZtT62pEhfA9H5utymC2mVx8e7FreP2",
+      "existingRegistry": false,
+      "identitySource": "https://pump.fun/docs/custom-pairs",
+      "onchainMetadata": {
+        "name": "Monad",
+        "symbol": "MON",
+        "uri": "https://arweave.net/IAbcBB5H_sk_ebLdxVIdQC1zpXJe8N-gCngajv_uGho",
+        "source": "A7pM7czMCviXnZymwJQME7c4z8hgC895u3sE1A6G5Y7F"
+      },
+      "metadataUri": "https://arweave.net/IAbcBB5H_sk_ebLdxVIdQC1zpXJe8N-gCngajv_uGho",
+      "imageUri": "https://www.monad.xyz/favicon.ico",
+      "imageBytesDownloaded": true,
+      "visualInspection": "pending",
+      "imageStatus": "Observed primary/officialPump imageURL; visualinspectionpending",
+      "metadataError": "<urlopen error timed out>",
+      "equivalentMetadataAttempts": [
+        {
+          "uri": "https://arweave.net/IAbcBB5H_sk_ebLdxVIdQC1zpXJe8N-gCngajv_uGho",
+          "error": "<urlopen error timed out>"
+        },
+        {
+          "uri": "https://gateway.irys.xyz/IAbcBB5H_sk_ebLdxVIdQC1zpXJe8N-gCngajv_uGho",
+          "error": "HTTP Error 404: Not Found"
+        },
+        {
+          "uri": "https://arweave.net/IAbcBB5H_sk_ebLdxVIdQC1zpXJe8N-gCngajv_uGho",
+          "status": 200,
+          "contentSha256": "e93a0f3dabfa40cc21b6e20d2a71ae6906c9cdf88f83594def63364da8f21a37",
+          "contentType": "application/json"
+        }
+      ],
+      "referenceIntake": {
+        "status": "downloaded-pending-visual-inspection",
+        "visualInspection": "pending",
+        "path": "references/mon-3625ee5cdc35.png",
+        "sha256": "3625ee5cdc357de28f1a28decbaa84a1985ba2b8039bed798d7ff695cd72162c",
+        "bytes": 13406,
+        "width": 256,
+        "height": 256,
+        "mode": "RGBA",
+        "format": "PNG",
+        "frames": 1,
+        "contentType": "image/x-icon",
+        "referenceSourceUri": "https://www.monad.xyz/favicon.ico",
+        "downloadUri": "https://www.monad.xyz/favicon.ico",
+        "resolvedUri": "https://monad.xyz/favicon.ico",
+        "attempts": [
+          {
+            "uri": "https://www.monad.xyz/favicon.ico",
+            "httpStatus": 200
+          }
+        ],
+        "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only"
+      },
+      "metadataResolvedUri": "https://eadnyba6i77msp3zwlo4kuq5iawxhjlsl3yn7iakpani577odina.arweave.net/IAbcBB5H_sk_ebLdxVIdQC1zpXJe8N-gCngajv_uGho",
+      "metadataName": "Monad",
+      "metadataSymbol": "MON",
+      "projectWebsite": null,
+      "projectTwitter": null,
+      "originalQuoteImageUri": "https://imagedelivery.net/cBNDGgkrsEA-b_ixIp9SkQ/I_t8rg_V_400x400.jpg/public",
+      "primaryBrandImageUri": "https://www.monad.xyz/favicon.ico",
+      "primaryBrandReference": "https://www.monad.xyz/",
+      "primaryBrandImageSource": "Observed256px favicon link in primaryMonad homepage; supplementary underlyingprojectidentity",
+      "previousReferenceIntake": {
+        "status": "download-failed",
+        "visualInspection": "pending",
+        "referenceSourceUri": "https://imagedelivery.net/cBNDGgkrsEA-b_ixIp9SkQ/I_t8rg_V_400x400.jpg/public",
+        "attempts": [
+          {
+            "uri": "https://imagedelivery.net/cBNDGgkrsEA-b_ixIp9SkQ/I_t8rg_V_400x400.jpg/public",
+            "error": "<urlopen error _ssl.c:1063: The handshake operation timed out>"
+          }
+        ]
+      }
+    }
+  ],
+  "intakeUpdatedAt": "2026-10-29T23:07:04.455489+00:00",
+  "intakeSummary": {
+    "identities": 51,
+    "downloadedCandidates": 51,
+    "visualInspection": "pending for all51; root will inspect contact sheets",
+    "generationSubmitted": false,
+    "creditsSpent": 0,
+    "maximumOriginalBytes": 1623652,
+    "referenceSourcePolicy": "Exact mint metadata, official Pump exact mint image links, primary project/company source, or supplementary exact-mint Solana Labs token-list source; original sources and failures retained"
+  }
+}

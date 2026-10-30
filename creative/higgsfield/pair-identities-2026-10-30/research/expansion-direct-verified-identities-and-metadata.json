@@ -1,0 +1,456 @@
+{
+  "fetchedAt": "2026-10-29T23:15:09.520Z",
+  "scope": "17 additional direct QuoteControl-enabled meme identities; not claimed listed in the dated public table; no app integration or generation.",
+  "quoteControlCount": 225,
+  "snapshotSlots": [
+    463062245,
+    463062248,
+    463062251,
+    463062294
+  ],
+  "rawEvidenceArtifact": "expansion-census-public-account-snapshots.json",
+  "assets": [
+    {
+      "key": "gork",
+      "symbol": "gork",
+      "name": "@gork",
+      "mint": "76EDL5qNcte2ZH29quTaFzagXjWAEY83CATEjyA6pump",
+      "existingRegistry": false,
+      "accountSlot": 463062248,
+      "metadata": {
+        "name": "@gork",
+        "symbol": "gork",
+        "uri": "https://ipfs.io/ipfs/QmaoQXBBJAECVdhtWkua8VSgxYVb2iHqmqicEGxx6SsfEE",
+        "source": "2L74bHBXaSxipNDxyUN7GdvP1NVzfJYRXKtVujrYC76w"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "initialVirtualQuoteReserves": "2359859133568",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    },
+    {
+      "key": "stonk",
+      "symbol": "STONK",
+      "name": "STONK",
+      "mint": "6GmAFSYs4gk3FDao5FzzySQpPZaWsa4rUJHacpMpUNgx",
+      "existingRegistry": false,
+      "accountSlot": 463062248,
+      "metadata": {
+        "name": "STONK",
+        "symbol": "STONK",
+        "uri": "https://gateway.irys.xyz/7HzAyVbL19x2RsKPwFD2NdESBDS1ZhawFojcVLvsFr5N",
+        "source": "6nravufQrcyTLoC4SFNNHKXafdoojeSPtnUVHX5zP6i3"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 9,
+        "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "initialVirtualQuoteReserves": "25028636520185",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    },
+    {
+      "key": "solangeles",
+      "symbol": "SOLANGELES",
+      "name": "SolAngeles",
+      "mint": "8wxkvAfEns76yBzu4MnbV7VnXWjg3iDPA9uwAQ6cpump",
+      "existingRegistry": false,
+      "accountSlot": 463062248,
+      "metadata": {
+        "name": "SolAngeles",
+        "symbol": "SOLANGELES",
+        "uri": "https://ipfs.io/ipfs/bafkreidosphhp5rwwrabqalsak657tvulrfe7c7q3f2sa43k4bnaalkvoy",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "7178954312946",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    },
+    {
+      "key": "paid",
+      "symbol": "PAID",
+      "name": "Paid",
+      "mint": "98kfF7rmsg1QDUEoCqNE7g7M1FdrTt92TEp2CLzypump",
+      "existingRegistry": false,
+      "accountSlot": 463062248,
+      "metadata": {
+        "name": "Paid",
+        "symbol": "PAID",
+        "uri": "https://meta.uxento.io/data/c48499de-2095-400c-a00c-49ec8fb55d43",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "1013997456887",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    },
+    {
+      "key": "pepe",
+      "symbol": "PEPE",
+      "name": "Pepe",
+      "mint": "PEPEqnuuCDbBC89p1u9vpnP1KQ2oj1xTcQBsjt9X55m",
+      "existingRegistry": false,
+      "accountSlot": 463062248,
+      "metadata": {
+        "name": "Pepe",
+        "symbol": "PEPE",
+        "uri": "https://arweave.net/cX-umVcYZWLzq-k0agAZIxR6ewprbK7Nag-ZeJh1T48",
+        "source": "BWj5HAujBLcKf4RbxMeMUYPnkUC9eGVvsRvSTsnc7ERH"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 4,
+        "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "initialVirtualQuoteReserves": "7309881371766",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    },
+    {
+      "key": "jeanphil",
+      "symbol": "JEANPHIL",
+      "name": "Jean Phil",
+      "mint": "GTBxUiw6wJdmmkCGZgRHLyYxqu1vG4KtRpeox6yDpump",
+      "existingRegistry": false,
+      "accountSlot": 463062248,
+      "metadata": {
+        "name": "Jean Phil",
+        "symbol": "JEANPHIL",
+        "uri": "https://ipfs.io/ipfs/QmZ5DoDK7cuNdH2WtoLzNqZD1daDjsnyEqTZzzYgR9hA3S",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "1059986103785",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    },
+    {
+      "key": "pill",
+      "symbol": "pill",
+      "name": "pill",
+      "mint": "DvdmEnztCmXwBnAbedD48XVGZJSxq31zNvnyftXdpump",
+      "existingRegistry": false,
+      "accountSlot": 463062248,
+      "metadata": {
+        "name": "pill",
+        "symbol": "pill",
+        "uri": "https://metadata.j7tracker.io/m/kWdud9h3TW",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "4050609605408",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    },
+    {
+      "key": "biketyson",
+      "symbol": "biketyson",
+      "name": "BIKE TYSON",
+      "mint": "CbyTNf7UPzvewHh4Zp6umogM2RWahhmGRJWLJnPwpump",
+      "existingRegistry": false,
+      "accountSlot": 463062251,
+      "metadata": {
+        "name": "BIKE TYSON",
+        "symbol": "biketyson",
+        "uri": "https://ipfs.io/ipfs/QmZ7fqTkyQYYUbmDWWbjSKi9gHUuGjMoedEcYWYxk9SnRG",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "12617587218371",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    },
+    {
+      "key": "npc",
+      "symbol": "NPC",
+      "name": "NPCs",
+      "mint": "7GUnr7krtQhJwd6ASY2VUprd9t4c64zcgCsjdmZepump",
+      "existingRegistry": false,
+      "accountSlot": 463062251,
+      "metadata": {
+        "name": "NPCs",
+        "symbol": "NPC",
+        "uri": "https://ipfs.io/ipfs/bafkreihwlxdsrfcwxamshxuhewzxss36vcdojzgusls4cyea6dcfdzsd54",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "203249908531357",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    },
+    {
+      "key": "wojak",
+      "symbol": "WOJAK",
+      "name": "Wojak",
+      "mint": "8J69rbLTzWWgUJziFY8jeu5tDwEPBwUz4pKBMr5rpump",
+      "existingRegistry": false,
+      "accountSlot": 463062251,
+      "metadata": {
+        "name": "Wojak",
+        "symbol": "WOJAK",
+        "uri": "https://ipfs.io/ipfs/bafkreiao635lt4rorxyp2dfwm3aareaoxlz3j4wxlixpme6jzptdrpfowq",
+        "source": "Bn6PTx7quysbTK3D2QjHssa4EPbRTVnri4w9HDsU3BTR"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "initialVirtualQuoteReserves": "2402922597777",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    },
+    {
+      "key": "eacc",
+      "symbol": "e/acc",
+      "name": "Effective Accelerationism",
+      "mint": "CbcyNo7m1amFWqEQm2m4PLv1UNvpcL3C1Ujm6AkzpKoU",
+      "existingRegistry": false,
+      "accountSlot": 463062251,
+      "metadata": {
+        "name": "Effective Accelerationism",
+        "symbol": "e/acc",
+        "uri": "https://md.violasnipe.com/m/30iwhqpthqd8o",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "6868296189265",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    },
+    {
+      "key": "hodl",
+      "symbol": "HODL",
+      "name": "HODL",
+      "mint": "Hh3oTaqDCKKfdBgsQEvxp9sUwyNf8x9qmKqEMLBWpump",
+      "existingRegistry": false,
+      "accountSlot": 463062251,
+      "metadata": {
+        "name": "HODL",
+        "symbol": "HODL",
+        "uri": "https://ipfs.io/ipfs/QmPUBy3M4tapG7Fy6geTPVKngZ2VeZK7NKqaDKXvieobWX",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "2375830344122",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    },
+    {
+      "key": "agency",
+      "symbol": "Agency",
+      "name": "Agency",
+      "mint": "7VertkgF9KLhxxJXHX6uaWuoYZTP9LdGj2bWmVXVpump",
+      "existingRegistry": false,
+      "accountSlot": 463062251,
+      "metadata": {
+        "name": "Agency",
+        "symbol": "Agency",
+        "uri": "https://ipfs.io/ipfs/bafkreidcpk2xxohordxmijysr75ygfaqkey6r2lnh5u2pprhvuvwfkpg54",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "7353656338269",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    },
+    {
+      "key": "claudia",
+      "symbol": "CLAUDIA",
+      "name": "CLAUDIA",
+      "mint": "H7TuvDxEKygh27zGfGcjKG8JGWgrbyKpPtvJEpGosfas",
+      "existingRegistry": false,
+      "accountSlot": 463062251,
+      "metadata": {
+        "name": "CLAUDIA",
+        "symbol": "CLAUDIA",
+        "uri": "https://www.agencypad.fun/media/H7TuvDxEKygh27zGfGcjKG8JGWgrbyKpPtvJEpGosfas/metadata.json",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "181585827090848",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    },
+    {
+      "key": "shib",
+      "symbol": "SHIB",
+      "name": "SHIBA INU",
+      "mint": "shib5gSoVKPjwkXrxRk7SbQFzb2R9rQB3TgQWYX4RwW",
+      "existingRegistry": false,
+      "accountSlot": 463062251,
+      "metadata": {
+        "name": "SHIBA INU",
+        "symbol": "SHIB",
+        "uri": "https://arweave.net/c_dEgjwkJsXzAp22_8dGscjKPhRnx9w8dtd36iFcj30",
+        "source": "3gwgNXJVsUE4oX9t37AdL28XnjqqsMYYdM6ZNyZ6XLou"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 4,
+        "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "initialVirtualQuoteReserves": "6668280145667",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    },
+    {
+      "key": "swordcat",
+      "symbol": "swordcat",
+      "name": "cat wif sword",
+      "mint": "5tCju6YNxHq5zrA6tGndr6F7TK42mpUFmeE31cSFpump",
+      "existingRegistry": false,
+      "accountSlot": 463062251,
+      "metadata": {
+        "name": "cat wif sword",
+        "symbol": "swordcat",
+        "uri": "https://pump.mypinata.cloud/ipfs/bafkreialiv3ygojrcbq4iohyfoyfranlhw4esovc6xfqijlav77w4xyoau",
+        "source": "Token2022 inline metadata"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+        "initialVirtualQuoteReserves": "2152950816114",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    },
+    {
+      "key": "plague",
+      "symbol": "PLAGUE",
+      "name": "Yersinia pestis",
+      "mint": "CscZaq5twomhUkvCY8Jdd1tge32L4Yj9FbkFFEZQpump",
+      "existingRegistry": false,
+      "accountSlot": 463062251,
+      "metadata": {
+        "name": "Yersinia pestis",
+        "symbol": "PLAGUE",
+        "uri": "https://cf-ipfs.com/ipfs/Qmd9LXRWARei1XsnAH4tkHYRf2EvJ3LSkTvGGK9z6XPKap",
+        "source": "74GTuZbbDA1sMtrenz5bhDizucnmSeafraXdZhb6Dhc2"
+      },
+      "admission": {
+        "source": "quoteControl",
+        "decimals": 6,
+        "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "initialVirtualQuoteReserves": "130567121689312",
+        "initialized": true,
+        "paused": false,
+        "defaultFrozen": false
+      },
+      "kind": "meme",
+      "publishedListingStatus": "Not found in checked dated public Pump custom-pairs table; direct current official QuoteControl-enabled identity.",
+      "source": "Exact QuoteControl account decoded from official Pump program; mint/metadata independently fetched using public RPC and resolved through official SDK."
+    }
+  ]
+}

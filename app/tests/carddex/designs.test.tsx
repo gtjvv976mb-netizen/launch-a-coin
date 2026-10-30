@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { renderToStaticMarkup } from "react-dom/server";
-import { CARD_DESIGNS, DEFAULT_CARD_DESIGN, getCardDesign, isCardDesignKey } from "../../src/lib/carddex/designs";
+import { CARD_DESIGNS, LEGACY_CARD_DESIGNS, DEFAULT_CARD_DESIGN, getCardDesign, isCardDesignKey } from "../../src/lib/carddex/designs";
 import { cardBackTheme, cardDesign, cardLight, designedCard, MintCardFace, type CardData } from "../../src/components/mintdex/MintCard";
 import { BackFace } from "../../src/components/mintdex/card3d/backface";
 import { existsSync } from "node:fs";
@@ -68,8 +68,8 @@ describe("permanent creator-selected card designs", () => {
     }
   });
   test("every catalog choice has a distinct identity and a premium finish", () => {
-    expect(CARD_DESIGNS).toHaveLength(48);
-    expect(new Set(CARD_DESIGNS.map((design) => design.key)).size).toBe(48);
+    expect(LEGACY_CARD_DESIGNS).toHaveLength(48);
+    expect(new Set(CARD_DESIGNS.map((design) => design.key)).size).toBe(CARD_DESIGNS.length);
     expect(CARD_DESIGNS.filter((design) => design.category === "limited")).toHaveLength(20);
     for (const design of CARD_DESIGNS) {
       expect(isCardDesignKey(design.key)).toBe(true);
@@ -92,7 +92,7 @@ describe("permanent creator-selected card designs", () => {
     }
   });
 
-  test("all 48 fronts retain token identity without owner/number plates and reverses stay wordless", () => {
+  test("all fronts retain token identity without owner/number plates and reverses have no added live labels", () => {
     for (const design of CARD_DESIGNS) {
       const card = { ...TOKEN, cardTemplate: design.key };
       const front = renderToStaticMarkup(<MintCardFace card={card} />);

@@ -1,0 +1,45 @@
+{
+  "context": "Create distinct meme card reverses matching their verified source identities and new frame materials.",
+  "requests": [
+    {
+      "index": 513,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "3f000bd3-6a44-4c03-8609-e7f32d90a52c"
+          },
+          {
+            "role": "image",
+            "value": "c91787db-d355-4a9f-ae7c-d53d00fea87c"
+          }
+        ],
+        "prompt": "Create one matching premium BACK CARD SKIN. IMAGE 1 is the exact asset identity: Collector Crypt exact folded geometric C: orange upper form, cyan middle and blue lower form. Preserve that exact source expression, pose, silhouette, proportions, intrinsic lettering and recognizable visual features. IMAGE 2 is ONLY the matching accepted front material and perimeter reference. The reverse uses one uninterrupted full-card designed field, with the identity artwork occupying that field rather than blank content rectangles. COMPOSITION: Exact C emblem sits in a precise folded-plane relief field, with offset rectangular ribbon joints and a clear open negative-space channel. MATCHED MATERIALS: Orange/cyan/blue enamel, brushed platinum and dark recessed seams. Carry the specific front frame geometry and materials continuously around this reverse. Use coherent restrained microbevels and sharp high-definition print detail. Only intrinsic exact logo lettering visibly belonging to Image1 may remain; all other surfaces are pictorial or material. Keep a thin flat trading-card print, the complete smooth rounded63:88 outline, directly front-on, neutral even lighting, every detail inside the silhouette. The whole reverse is finished artwork, with no reserved creator fields or empty label plates. Match this specific identity rather than a generic royal award design."
+      }
+    },
+    {
+      "index": 514,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "59b28d0d-a0a5-474a-a8a0-342f7ad59628"
+          },
+          {
+            "role": "image",
+            "value": "a51ac435-d5bc-4b45-a875-1270dad84130"
+          }
+        ],
+        "prompt": "Create one matching premium BACK CARD SKIN. IMAGE 1 is the exact asset identity: Exact low-resolution gray seated cat photograph on white; preserve source proportions without pretending recovered detail. Preserve that exact source expression, pose, silhouette, proportions, intrinsic lettering and recognizable visual features. IMAGE 2 is ONLY the matching accepted front material and perimeter reference. The reverse uses one uninterrupted full-card designed field, with the identity artwork occupying that field rather than blank content rectangles. COMPOSITION: Exact source cat crop on a spacious pearl field with one asymmetric seated-profile relief contour joining the perimeter. MATCHED MATERIALS: Palladium, pearl-gray ceramic and soft white enamel. Carry the specific front frame geometry and materials continuously around this reverse. Use coherent restrained microbevels and sharp high-definition print detail. Only intrinsic exact logo lettering visibly belonging to Image1 may remain; all other surfaces are pictorial or material. Keep a thin flat trading-card print, the complete smooth rounded63:88 outline, directly front-on, neutral even lighting, every detail inside the silhouette. The whole reverse is finished artwork, with no reserved creator fields or empty label plates. Match this specific identity rather than a generic royal award design."
+      }
+    }
+  ]
+}

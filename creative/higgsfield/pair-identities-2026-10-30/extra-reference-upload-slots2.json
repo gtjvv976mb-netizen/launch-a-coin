@@ -1,0 +1,104 @@
+{
+  "rawReceiptIgnoredPath": "output/higgsfield/pair-identities-2026-10-30/upload-receipts/extra-reference-upload-slots2.json",
+  "uploads": [
+    {
+      "media_id": "7c6eebbe-41db-4b11-b4f4-05434669dc9f",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/7c6eebbe-41db-4b11-b4f4-05434669dc9f.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    },
+    {
+      "media_id": "7ba5f850-1f00-4762-bdd1-df977adf3065",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/7ba5f850-1f00-4762-bdd1-df977adf3065.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    },
+    {
+      "media_id": "28956d45-d076-4290-86ee-f10e98438f66",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/28956d45-d076-4290-86ee-f10e98438f66.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    },
+    {
+      "media_id": "9ade0f73-283b-4293-a3b4-0a871a4d318e",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/9ade0f73-283b-4293-a3b4-0a871a4d318e.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    },
+    {
+      "media_id": "825b22ff-4b06-48b8-bfd6-32856b24bbb7",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/825b22ff-4b06-48b8-bfd6-32856b24bbb7.jpg",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/jpeg"
+    },
+    {
+      "media_id": "03b5908b-31f5-43dd-ab4a-cf5974c62b4c",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/03b5908b-31f5-43dd-ab4a-cf5974c62b4c.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    },
+    {
+      "media_id": "3444235a-ffe2-4ae4-9d6f-f5e6deb4a3d2",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/3444235a-ffe2-4ae4-9d6f-f5e6deb4a3d2.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    },
+    {
+      "media_id": "aae07117-1542-42d0-b229-1ec0d9e6773d",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/aae07117-1542-42d0-b229-1ec0d9e6773d.webp",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/webp"
+    },
+    {
+      "media_id": "d711adf3-77d9-425e-9e00-ee20ea2ddda5",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/d711adf3-77d9-425e-9e00-ee20ea2ddda5.jpg",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/jpeg"
+    },
+    {
+      "media_id": "ae24adf0-291b-45dd-a31e-b5855a0f03eb",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/ae24adf0-291b-45dd-a31e-b5855a0f03eb.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    },
+    {
+      "media_id": "dc5931c0-8620-49f3-b8c2-0ce8d0dd1a9b",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/dc5931c0-8620-49f3-b8c2-0ce8d0dd1a9b.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    },
+    {
+      "media_id": "dd0ae0dd-3e57-49b6-964a-9b651e9d62fc",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/dd0ae0dd-3e57-49b6-964a-9b651e9d62fc.png",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/png"
+    },
+    {
+      "media_id": "8887d206-92a7-4193-a759-ecf76d9bf92b",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/8887d206-92a7-4193-a759-ecf76d9bf92b.webp",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/webp"
+    },
+    {
+      "media_id": "702af55c-3303-4d2e-802b-b9647200eb57",
+      "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/702af55c-3303-4d2e-802b-b9647200eb57.jpg",
+      "expires_in_seconds": 86400,
+      "method": "PUT",
+      "content_type": "image/jpeg"
+    }
+  ],
+  "note": "PresignedwriteURLs/instructionsretainedonlyinignoredoutput;allmatchingbytesuploadedandconfirmed."
+}

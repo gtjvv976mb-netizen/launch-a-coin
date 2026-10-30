@@ -1,0 +1,2572 @@
+{
+  "preparedDate": "2026-10-30",
+  "status": "21 additional published/admitted meme briefs with downloaded, hash-pinned and visually inspected exact source references; no generation or app integration",
+  "officialList": "https://pump.fun/docs/custom-pairs",
+  "accountSlot": 463060744,
+  "designCount": 21,
+  "imageCount": 42,
+  "entries": [
+    {
+      "quoteKey": "cashcat",
+      "proposedDesignKey": "pair-cashcat",
+      "name": "Cash Cat Signature",
+      "exactIdentity": "Cash Cat",
+      "symbol": "CASHCAT",
+      "kind": "meme",
+      "exactQuoteMint": "CashcatZMRn4Jv8sPQZUSsbTLi2PcPe1ssqbHcnaJqSS",
+      "recognizableIdentityMotif": "The exact gray seated cat photograph on a white field, preserving its particular face, posture and silhouette. Original is50px; do not invent additional features.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#26282A",
+          "#B8BFC2",
+          "#F0EFE8"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use silver-gray ceramic, brushed palladium and pearl-white material. Integrate only small source-faithful identity details in the outer perimeter, outside all shared creator-content apertures.",
+      "reverseHero": "The exact gray seated cat photograph on a white field, preserving its particular face, posture and silhouette. Original is50px; do not invent additional features. Make this exact identity the reverse hero with silver-gray ceramic, brushed palladium and pearl-white material, matching its front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "cashcat",
+        "symbol": "CASHCAT",
+        "name": "Cash Cat",
+        "mint": "CashcatZMRn4Jv8sPQZUSsbTLi2PcPe1ssqbHcnaJqSS",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "Cash Cat",
+          "symbol": "CASHCAT",
+          "uri": "https://arweave.net/XpdhCcelgYs8JW9f-dCTuaTV3R-Y6W5Q_Snp7KrHcG4",
+          "source": "95jifQzKuCAqAAZDyx5Vyej4Ns9piRb3Mezkwqdy4icG"
+        },
+        "metadataUri": "https://arweave.net/XpdhCcelgYs8JW9f-dCTuaTV3R-Y6W5Q_Snp7KrHcG4",
+        "imageUri": "https://arweave.net/EYeMKzGcxt4Wnm7E6T7D86_x1ktu56a4d9o-FKUJf-c",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+        "pumpPageReference": "https://pump.fun/coin/CashcatZMRn4Jv8sPQZUSsbTLi2PcPe1ssqbHcnaJqSS",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://arweave.net/XpdhCcelgYs8JW9f-dCTuaTV3R-Y6W5Q_Snp7KrHcG4",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://gateway.irys.xyz/XpdhCcelgYs8JW9f-dCTuaTV3R-Y6W5Q_Snp7KrHcG4",
+            "error": "<urlopen error _ssl.c:1063: The handshake operation timed out>"
+          },
+          {
+            "uri": "https://arweave.net/XpdhCcelgYs8JW9f-dCTuaTV3R-Y6W5Q_Snp7KrHcG4",
+            "status": 200,
+            "contentSha256": "c1e865af53f3606fde2557bcd09facb8d44df43aecebceb42028ac85ec65912e",
+            "contentType": "application/json"
+          }
+        ],
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/cashcat-9ea26bf56766.jpg",
+          "sha256": "9ea26bf5676658af38db7cec329e29059ff50e0a128979f3bb6ca8588efa30d1",
+          "bytes": 1615,
+          "width": 50,
+          "height": 50,
+          "mode": "RGB",
+          "format": "JPEG",
+          "frames": 1,
+          "contentType": "image/jpeg",
+          "referenceSourceUri": "https://arweave.net/EYeMKzGcxt4Wnm7E6T7D86_x1ktu56a4d9o-FKUJf-c",
+          "downloadUri": "https://arweave.net/EYeMKzGcxt4Wnm7E6T7D86_x1ktu56a4d9o-FKUJf-c",
+          "resolvedUri": "https://cgdyykzrttdn4fu6n3cospwd6ox7dvsln3t2nodx3i7bjjijp7tq.arweave.net/EYeMKzGcxt4Wnm7E6T7D86_x1ktu56a4d9o-FKUJf-c",
+          "attempts": [
+            {
+              "uri": "https://arweave.net/EYeMKzGcxt4Wnm7E6T7D86_x1ktu56a4d9o-FKUJf-c",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        },
+        "metadataResolvedUri": "https://l2lwccohuwaywpbfn5p7tuetxgsnlxi7tduw4uh5fhu6zkwhobxa.arweave.net/XpdhCcelgYs8JW9f-dCTuaTV3R-Y6W5Q_Snp7KrHcG4",
+        "metadataName": "Cash Cat",
+        "metadataSymbol": "CASHCAT",
+        "projectWebsite": null,
+        "projectTwitter": null,
+        "referenceSuitability": "Small exact original reference. Preserve recognizable source features; do not claim originalHD detail. Root quality review required."
+      },
+      "onChainIdentityEvidence": {
+        "key": "cashcat",
+        "symbol": "CASHCAT",
+        "name": "Cash Cat",
+        "mint": "CashcatZMRn4Jv8sPQZUSsbTLi2PcPe1ssqbHcnaJqSS",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "Cash Cat",
+          "symbol": "CASHCAT",
+          "uri": "https://arweave.net/XpdhCcelgYs8JW9f-dCTuaTV3R-Y6W5Q_Snp7KrHcG4",
+          "source": "95jifQzKuCAqAAZDyx5Vyej4Ns9piRb3Mezkwqdy4icG"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 8,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "3515027050314",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/cashcat-9ea26bf56766.jpg",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "neet",
+      "proposedDesignKey": "pair-neet",
+      "name": "NotInEmploymentEducationTraining Signature",
+      "exactIdentity": "NotInEmploymentEducationTraining",
+      "symbol": "neet",
+      "kind": "meme",
+      "exactQuoteMint": "Ce2gx9KGXJ6C9Mp5b5x1sn9Mg87JwEbrQby4Zqo3pump",
+      "recognizableIdentityMotif": "The exact monochrome bespectacled face inside a circular coin border; retain face proportions and the distinctive glasses.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#141414",
+          "#B8BAB8",
+          "#E5E4DF"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use black ceramic, brushed silver and precise circular relief. Integrate small exact identity details from the supplied neet reference into the outer perimeter only, never covering the creator art, name, pair or details surfaces.",
+      "reverseHero": "The exact neet identity from the supplied source image as the dominant reverse hero. The exact monochrome bespectacled face inside a circular coin border; retain face proportions and the distinctive glasses. Surround it with black ceramic, brushed silver and precise circular relief, consistent with the front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "neet",
+        "symbol": "neet",
+        "name": "NotInEmploymentEducationTraining",
+        "mint": "Ce2gx9KGXJ6C9Mp5b5x1sn9Mg87JwEbrQby4Zqo3pump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "NotInEmploymentEducationTraining",
+          "symbol": "neet",
+          "uri": "https://ipfs.io/ipfs/QmbCcWuqA9Abn6xSeP63s4T3pnvq9EhCdWD5XBQkNJuhaq",
+          "source": "GQqLakMQBp32m2HpScU4LE5T2S8hUCBQmzYLJ8eqomES"
+        },
+        "metadataUri": "https://ipfs.io/ipfs/QmbCcWuqA9Abn6xSeP63s4T3pnvq9EhCdWD5XBQkNJuhaq",
+        "imageUri": "https://ipfs.io/ipfs/QmXVKWN3i56vyh4Xot9sTb3XsCu92ihypcArFJLujuwzoS",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+        "pumpPageReference": "https://pump.fun/coin/Ce2gx9KGXJ6C9Mp5b5x1sn9Mg87JwEbrQby4Zqo3pump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmbCcWuqA9Abn6xSeP63s4T3pnvq9EhCdWD5XBQkNJuhaq",
+            "status": 200,
+            "contentSha256": "590f6dd165f54c6dfee5958a98d9252de96e647d8a178c8c453e313f46c4e0c6",
+            "contentType": "application/json"
+          }
+        ],
+        "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/QmbCcWuqA9Abn6xSeP63s4T3pnvq9EhCdWD5XBQkNJuhaq",
+        "metadataName": "NotInEmploymentEducationTraining",
+        "metadataSymbol": "neet",
+        "projectWebsite": null,
+        "projectTwitter": null,
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/neet-ecf26a24ef46.jpg",
+          "sha256": "ecf26a24ef46c13f1869de46306a0968cd6f7fae2d7d5e80a7863808f9899b7e",
+          "bytes": 107692,
+          "width": 1024,
+          "height": 1024,
+          "mode": "RGB",
+          "format": "JPEG",
+          "frames": 1,
+          "contentType": "image/jpeg",
+          "referenceSourceUri": "https://ipfs.io/ipfs/QmXVKWN3i56vyh4Xot9sTb3XsCu92ihypcArFJLujuwzoS",
+          "downloadUri": "https://ipfs.filebase.io/ipfs/QmXVKWN3i56vyh4Xot9sTb3XsCu92ihypcArFJLujuwzoS",
+          "resolvedUri": "https://ipfs.filebase.io/ipfs/QmXVKWN3i56vyh4Xot9sTb3XsCu92ihypcArFJLujuwzoS",
+          "attempts": [
+            {
+              "uri": "https://ipfs.io/ipfs/QmXVKWN3i56vyh4Xot9sTb3XsCu92ihypcArFJLujuwzoS",
+              "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+            },
+            {
+              "uri": "https://ipfs.filebase.io/ipfs/QmXVKWN3i56vyh4Xot9sTb3XsCu92ihypcArFJLujuwzoS",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        }
+      },
+      "onChainIdentityEvidence": {
+        "key": "neet",
+        "symbol": "neet",
+        "name": "NotInEmploymentEducationTraining",
+        "mint": "Ce2gx9KGXJ6C9Mp5b5x1sn9Mg87JwEbrQby4Zqo3pump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "NotInEmploymentEducationTraining",
+          "symbol": "neet",
+          "uri": "https://ipfs.io/ipfs/QmbCcWuqA9Abn6xSeP63s4T3pnvq9EhCdWD5XBQkNJuhaq",
+          "source": "GQqLakMQBp32m2HpScU4LE5T2S8hUCBQmzYLJ8eqomES"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "126287862587",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/neet-ecf26a24ef46.jpg",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "otc",
+      "proposedDesignKey": "pair-otc",
+      "name": "OTC Signature",
+      "exactIdentity": "OTC",
+      "symbol": "OTC",
+      "kind": "meme",
+      "exactQuoteMint": "MukLDtJ8Cx9DxLbeyLRSWPSposTMWuwHANbuaudpump",
+      "recognizableIdentityMotif": "The exact cream pixel-art desktop computer with black screen, green horizontal terminal bars, gray keys and one red key; preserve its actual screen geometry.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#111914",
+          "#71B883",
+          "#E1D7BF"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use ivory ceramic, terminal-green enamel and dark polished metal. Integrate only small source-faithful identity details in the outer perimeter, outside all shared creator-content apertures.",
+      "reverseHero": "The exact cream pixel-art desktop computer with black screen, green horizontal terminal bars, gray keys and one red key; preserve its actual screen geometry. Make this exact identity the reverse hero with ivory ceramic, terminal-green enamel and dark polished metal, matching its front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "otc",
+        "symbol": "OTC",
+        "name": "OTC",
+        "mint": "MukLDtJ8Cx9DxLbeyLRSWPSposTMWuwHANbuaudpump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "OTC",
+          "symbol": "OTC",
+          "uri": "https://meta.uxento.io/data/7d415553-cb24-436b-8bc6-64c52acf459c",
+          "source": "Token2022 inline metadata"
+        },
+        "metadataUri": "https://meta.uxento.io/data/7d415553-cb24-436b-8bc6-64c52acf459c",
+        "imageUri": null,
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Primary exact-mint Pump page fallback image URI observed; on-chain metadata resolution failure retained",
+        "pumpPageReference": "https://pump.fun/coin/MukLDtJ8Cx9DxLbeyLRSWPSposTMWuwHANbuaudpump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://meta.uxento.io/data/7d415553-cb24-436b-8bc6-64c52acf459c",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://meta.uxento.io/data/7d415553-cb24-436b-8bc6-64c52acf459c",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://meta.uxento.io/data/7d415553-cb24-436b-8bc6-64c52acf459c",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://meta.uxento.io/data/7d415553-cb24-436b-8bc6-64c52acf459c",
+            "error": "<urlopen error timed out>"
+          }
+        ],
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/otc-d6bd73eeed43.jpg",
+          "sha256": "d6bd73eeed43ac1ae0fa6ebe2008e18614366c06bf0eca6f7f7ac4a88ec31518",
+          "bytes": 9298,
+          "width": 400,
+          "height": 400,
+          "mode": "RGB",
+          "format": "JPEG",
+          "frames": 1,
+          "contentType": "image/jpeg",
+          "referenceSourceUri": "https://ipfs.io/ipfs/QmP1qukvUAheQpqCccr4qsrWrytkJiGCxzgYMcaAWGGGCw",
+          "downloadUri": "https://ipfs.filebase.io/ipfs/QmP1qukvUAheQpqCccr4qsrWrytkJiGCxzgYMcaAWGGGCw",
+          "resolvedUri": "https://ipfs.filebase.io/ipfs/QmP1qukvUAheQpqCccr4qsrWrytkJiGCxzgYMcaAWGGGCw",
+          "attempts": [
+            {
+              "uri": "https://ipfs.io/ipfs/QmP1qukvUAheQpqCccr4qsrWrytkJiGCxzgYMcaAWGGGCw",
+              "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+            },
+            {
+              "uri": "https://ipfs.filebase.io/ipfs/QmP1qukvUAheQpqCccr4qsrWrytkJiGCxzgYMcaAWGGGCw",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        },
+        "pumpImageOriginalUri": "https://ipfs.io/ipfs/QmP1qukvUAheQpqCccr4qsrWrytkJiGCxzgYMcaAWGGGCw",
+        "pumpImageObservedVia": "Official Pump exact-mint page image link47, sourceCID andsourceURLobserved30October2026; primarymintmetadatahostnotreachable.",
+        "additionalImageSourceUris": [
+          "https://desperate-moccasin-minnow.myfilebase.com/ipfs/QmP1qukvUAheQpqCccr4qsrWrytkJiGCxzgYMcaAWGGGCw"
+        ]
+      },
+      "onChainIdentityEvidence": {
+        "key": "otc",
+        "symbol": "OTC",
+        "name": "OTC",
+        "mint": "MukLDtJ8Cx9DxLbeyLRSWPSposTMWuwHANbuaudpump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "OTC",
+          "symbol": "OTC",
+          "uri": "https://meta.uxento.io/data/7d415553-cb24-436b-8bc6-64c52acf459c",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "471146097365",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/otc-d6bd73eeed43.jpg",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "fone",
+      "proposedDesignKey": "pair-fone",
+      "name": "apeonfone Signature",
+      "exactIdentity": "apeonfone",
+      "symbol": "fone",
+      "kind": "meme",
+      "exactQuoteMint": "CTPoyCwkjMvoJwU4xvZZqoD8tiYk6yDchySiN5gGpump",
+      "recognizableIdentityMotif": "The exact brown young monkey seated and looking down at the black smartphone held in both hands, preserving the face, pose and phone silhouette.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#33271C",
+          "#B28B5B",
+          "#EADFC8"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use warm brown ceramic, satin bronze and cream pearl. Integrate only small source-faithful identity details in the outer perimeter, outside all shared creator-content apertures.",
+      "reverseHero": "The exact brown young monkey seated and looking down at the black smartphone held in both hands, preserving the face, pose and phone silhouette. Make this exact identity the reverse hero with warm brown ceramic, satin bronze and cream pearl, matching its front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "fone",
+        "symbol": "fone",
+        "name": "apeonfone",
+        "mint": "CTPoyCwkjMvoJwU4xvZZqoD8tiYk6yDchySiN5gGpump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "apeonfone",
+          "symbol": "fone",
+          "uri": "https://meta.uxento.io/data/2b0b460c-0f29-429c-9aab-760a69e56717",
+          "source": "Token2022 inline metadata"
+        },
+        "metadataUri": "https://meta.uxento.io/data/2b0b460c-0f29-429c-9aab-760a69e56717",
+        "imageUri": "https://www.apeonfone.com/images/apeonfone.jpg",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Primary project exact-mint homepage image observed; original mintmetadata host failure retained.",
+        "pumpPageReference": "https://pump.fun/coin/CTPoyCwkjMvoJwU4xvZZqoD8tiYk6yDchySiN5gGpump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://meta.uxento.io/data/2b0b460c-0f29-429c-9aab-760a69e56717",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://meta.uxento.io/data/2b0b460c-0f29-429c-9aab-760a69e56717",
+            "error": "<urlopen error timed out>"
+          }
+        ],
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/fone-08061211879a.jpg",
+          "sha256": "08061211879aad673eb5dfc27f6378d555623d84de22e40941484c1a94c4f145",
+          "bytes": 579502,
+          "width": 800,
+          "height": 800,
+          "mode": "RGB",
+          "format": "JPEG",
+          "frames": 1,
+          "contentType": "image/jpeg",
+          "referenceSourceUri": "https://www.apeonfone.com/images/apeonfone.jpg",
+          "downloadUri": "https://www.apeonfone.com/images/apeonfone.jpg",
+          "resolvedUri": "https://www.apeonfone.com/images/apeonfone.jpg",
+          "attempts": [
+            {
+              "uri": "https://www.apeonfone.com/images/apeonfone.jpg",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        },
+        "imageSourceKind": "primary-project-homepage-og-image",
+        "imageSourcePrimaryPage": "https://www.apeonfone.com/",
+        "primaryProjectPageProof": {
+          "path": "research/expansion-fallback-fone-site.html",
+          "sha256": "779a5850f4352c84d3053c1731b03ccc0b5c84526571e8c9186cf60e5f8ea8d4",
+          "exactMintPresentInHtml": true,
+          "observedOgImage": "https://www.apeonfone.com/images/apeonfone.jpg",
+          "sourceDiscovery": "Primary exchange listing announcement points to project site; project HTML contains the exact quote mint and this og:image."
+        }
+      },
+      "onChainIdentityEvidence": {
+        "key": "fone",
+        "symbol": "fone",
+        "name": "apeonfone",
+        "mint": "CTPoyCwkjMvoJwU4xvZZqoD8tiYk6yDchySiN5gGpump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "apeonfone",
+          "symbol": "fone",
+          "uri": "https://meta.uxento.io/data/2b0b460c-0f29-429c-9aab-760a69e56717",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "1953306822588",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/fone-08061211879a.jpg",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "buttcoin",
+      "proposedDesignKey": "pair-buttcoin",
+      "name": "Buttcoin Signature",
+      "exactIdentity": "Buttcoin",
+      "symbol": "Buttcoin",
+      "kind": "meme",
+      "exactQuoteMint": "Cm6fNnMk7NfzStP9CZpsQA2v3jjzbcYGAxdJySmHpump",
+      "recognizableIdentityMotif": "The exact orange circular emblem with its white butt-shaped negative-space outline; preserve the silhouette and avoid a substitute Bitcoin glyph.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#30251A",
+          "#FFA13B",
+          "#FFF5E6"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use orange vitreous enamel, ivory ceramic and satin gold. Integrate small exact identity details from the supplied Buttcoin reference into the outer perimeter only, never covering the creator art, name, pair or details surfaces.",
+      "reverseHero": "The exact Buttcoin identity from the supplied source image as the dominant reverse hero. The exact orange circular emblem with its white butt-shaped negative-space outline; preserve the silhouette and avoid a substitute Bitcoin glyph. Surround it with orange vitreous enamel, ivory ceramic and satin gold, consistent with the front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "buttcoin",
+        "symbol": "Buttcoin",
+        "name": "Buttcoin",
+        "mint": "Cm6fNnMk7NfzStP9CZpsQA2v3jjzbcYGAxdJySmHpump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "Buttcoin",
+          "symbol": "Buttcoin",
+          "uri": "https://ipfs.io/ipfs/bafkreiadbhqbyub6ioqwdino7wyu7tddq552bprluzxjkhgwjuqa4cw64i",
+          "source": "Token2022 inline metadata"
+        },
+        "metadataUri": "https://ipfs.io/ipfs/bafkreiadbhqbyub6ioqwdino7wyu7tddq552bprluzxjkhgwjuqa4cw64i",
+        "imageUri": "https://ipfs.io/ipfs/bafkreiftg7kl6h2aflu3i6je2vdsdnrtbxiyuxr6n6pk6txpkigbz7cmvq",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+        "pumpPageReference": "https://pump.fun/coin/Cm6fNnMk7NfzStP9CZpsQA2v3jjzbcYGAxdJySmHpump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/bafkreiadbhqbyub6ioqwdino7wyu7tddq552bprluzxjkhgwjuqa4cw64i",
+            "status": 200,
+            "contentSha256": "0309e01c503e43a161a1aefdb14fcc63877ba0be2ba66e951cd64d200e0adee2",
+            "contentType": "application/json"
+          }
+        ],
+        "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/bafkreiadbhqbyub6ioqwdino7wyu7tddq552bprluzxjkhgwjuqa4cw64i",
+        "metadataName": "Buttcoin",
+        "metadataSymbol": "Buttcoin",
+        "projectWebsite": "https://web.archive.org/web/20110608015104/http://buttcoin.org/",
+        "projectTwitter": "https://x.com/i/communities/2009440403682914712",
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/buttcoin-b337d4bf1f40.jpg",
+          "sha256": "b337d4bf1f402ae9b47924d54721b6330dd18a5e3e6f9eaf4eef520c1cfc4cac",
+          "bytes": 23097,
+          "width": 400,
+          "height": 400,
+          "mode": "RGB",
+          "format": "JPEG",
+          "frames": 1,
+          "contentType": "image/jpeg",
+          "referenceSourceUri": "https://ipfs.io/ipfs/bafkreiftg7kl6h2aflu3i6je2vdsdnrtbxiyuxr6n6pk6txpkigbz7cmvq",
+          "downloadUri": "https://ipfs.filebase.io/ipfs/bafkreiftg7kl6h2aflu3i6je2vdsdnrtbxiyuxr6n6pk6txpkigbz7cmvq",
+          "resolvedUri": "https://ipfs.filebase.io/ipfs/bafkreiftg7kl6h2aflu3i6je2vdsdnrtbxiyuxr6n6pk6txpkigbz7cmvq",
+          "attempts": [
+            {
+              "uri": "https://ipfs.io/ipfs/bafkreiftg7kl6h2aflu3i6je2vdsdnrtbxiyuxr6n6pk6txpkigbz7cmvq",
+              "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+            },
+            {
+              "uri": "https://ipfs.filebase.io/ipfs/bafkreiftg7kl6h2aflu3i6je2vdsdnrtbxiyuxr6n6pk6txpkigbz7cmvq",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        }
+      },
+      "onChainIdentityEvidence": {
+        "key": "buttcoin",
+        "symbol": "Buttcoin",
+        "name": "Buttcoin",
+        "mint": "Cm6fNnMk7NfzStP9CZpsQA2v3jjzbcYGAxdJySmHpump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "Buttcoin",
+          "symbol": "Buttcoin",
+          "uri": "https://ipfs.io/ipfs/bafkreiadbhqbyub6ioqwdino7wyu7tddq552bprluzxjkhgwjuqa4cw64i",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "701985004406",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/buttcoin-b337d4bf1f40.jpg",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "triplet",
+      "proposedDesignKey": "pair-triplet",
+      "name": "Tung Tung Tung Sahur Signature",
+      "exactIdentity": "Tung Tung Tung Sahur",
+      "symbol": "TripleT",
+      "kind": "meme",
+      "exactQuoteMint": "J8PSdNP3QewKq2Z1JJJFDMaqF7KcaiJhR7gbr5KZpump",
+      "recognizableIdentityMotif": "The exact long wooden humanoid with oversized eyes, smiling face and bat from the supplied Tung Tung Tung Sahur image. Use only the character, with no street scene or shop signage.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#352217",
+          "#BD773B",
+          "#F0D1A2"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use honey-brown woodgrain enamel, copper and warm gold. Integrate small exact identity details from the supplied TripleT reference into the outer perimeter only, never covering the creator art, name, pair or details surfaces.",
+      "reverseHero": "The exact TripleT identity from the supplied source image as the dominant reverse hero. The exact long wooden humanoid with oversized eyes, smiling face and bat from the supplied Tung Tung Tung Sahur image. Surround it with honey-brown woodgrain enamel, copper and warm gold, consistent with the front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "triplet",
+        "symbol": "TripleT",
+        "name": "Tung Tung Tung Sahur",
+        "mint": "J8PSdNP3QewKq2Z1JJJFDMaqF7KcaiJhR7gbr5KZpump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "Tung Tung Tung Sahur",
+          "symbol": "TripleT",
+          "uri": "https://ipfs.io/ipfs/bafkreiaslb262zda3wuhendylo4q537quh2557xyjg7avviidacyptw53y",
+          "source": "Token2022 inline metadata"
+        },
+        "metadataUri": "https://ipfs.io/ipfs/bafkreiaslb262zda3wuhendylo4q537quh2557xyjg7avviidacyptw53y",
+        "imageUri": "https://ipfs.io/ipfs/bafkreicawa6mpcpotae2va2b5ru43kssdaxoaiildlovfrhaxh7dd67t4e",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+        "pumpPageReference": "https://pump.fun/coin/J8PSdNP3QewKq2Z1JJJFDMaqF7KcaiJhR7gbr5KZpump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/bafkreiaslb262zda3wuhendylo4q537quh2557xyjg7avviidacyptw53y",
+            "status": 200,
+            "contentSha256": "125875ed6460dda87234785bb90eeff0a1f5defef849be0ad508180587ceddde",
+            "contentType": "application/json"
+          }
+        ],
+        "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/bafkreiaslb262zda3wuhendylo4q537quh2557xyjg7avviidacyptw53y",
+        "metadataName": "Tung Tung Tung Sahur",
+        "metadataSymbol": "TripleT",
+        "projectWebsite": "https://www.tiktok.com/search?q=triple%20t&t=1771921358673",
+        "projectTwitter": "https://x.com/i/communities/2026209182526149110",
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/triplet-40b03cc789ee.jpg",
+          "sha256": "40b03cc789ee9809aa8341ec69cdaa52182ee0210b1add52c4e0b9fe31fbf3e1",
+          "bytes": 85001,
+          "width": 720,
+          "height": 720,
+          "mode": "RGB",
+          "format": "JPEG",
+          "frames": 1,
+          "contentType": "image/jpeg",
+          "referenceSourceUri": "https://ipfs.io/ipfs/bafkreicawa6mpcpotae2va2b5ru43kssdaxoaiildlovfrhaxh7dd67t4e",
+          "downloadUri": "https://ipfs.filebase.io/ipfs/bafkreicawa6mpcpotae2va2b5ru43kssdaxoaiildlovfrhaxh7dd67t4e",
+          "resolvedUri": "https://ipfs.filebase.io/ipfs/bafkreicawa6mpcpotae2va2b5ru43kssdaxoaiildlovfrhaxh7dd67t4e",
+          "attempts": [
+            {
+              "uri": "https://ipfs.io/ipfs/bafkreicawa6mpcpotae2va2b5ru43kssdaxoaiildlovfrhaxh7dd67t4e",
+              "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+            },
+            {
+              "uri": "https://ipfs.filebase.io/ipfs/bafkreicawa6mpcpotae2va2b5ru43kssdaxoaiildlovfrhaxh7dd67t4e",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        }
+      },
+      "onChainIdentityEvidence": {
+        "key": "triplet",
+        "symbol": "TripleT",
+        "name": "Tung Tung Tung Sahur",
+        "mint": "J8PSdNP3QewKq2Z1JJJFDMaqF7KcaiJhR7gbr5KZpump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "Tung Tung Tung Sahur",
+          "symbol": "TripleT",
+          "uri": "https://ipfs.io/ipfs/bafkreiaslb262zda3wuhendylo4q537quh2557xyjg7avviidacyptw53y",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "930037847730",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/triplet-40b03cc789ee.jpg",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "cupsey",
+      "proposedDesignKey": "pair-cupsey",
+      "name": "Cupsey Signature",
+      "exactIdentity": "Cupsey",
+      "symbol": "Cupsey",
+      "kind": "meme",
+      "exactQuoteMint": "6NwarBvDkXhByqVp2Qkq5i9XbtA2B3Bwe8SWGu9vpump",
+      "recognizableIdentityMotif": "The exact round cream character, oval black eyes, tiny curved smile, pink cheeks and raised green hand.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#183B2C",
+          "#53B282",
+          "#F0EAD5"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use cream porcelain, green enamel and restrained rose metal. Integrate small exact identity details from the supplied Cupsey reference into the outer perimeter only, never covering the creator art, name, pair or details surfaces.",
+      "reverseHero": "The exact Cupsey identity from the supplied source image as the dominant reverse hero. The exact round cream character, oval black eyes, tiny curved smile, pink cheeks and raised green hand. Surround it with cream porcelain, green enamel and restrained rose metal, consistent with the front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "cupsey",
+        "symbol": "Cupsey",
+        "name": "Cupsey",
+        "mint": "6NwarBvDkXhByqVp2Qkq5i9XbtA2B3Bwe8SWGu9vpump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "Cupsey",
+          "symbol": "Cupsey",
+          "uri": "https://ipfs.io/ipfs/QmU2nARXShdosCYJVcQjnDFBsR5YBne7wkNT1axdmsZnm5",
+          "source": "ETzT61bosjaCp8icGqq4uhRqSqYNqbUnH8GqYa3B9tzS"
+        },
+        "metadataUri": "https://ipfs.io/ipfs/QmU2nARXShdosCYJVcQjnDFBsR5YBne7wkNT1axdmsZnm5",
+        "imageUri": "https://ipfs.io/ipfs/QmPXxffmpwSqdVFckNvmdxQSPBige24vjgMD32v5GF3Luo",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+        "pumpPageReference": "https://pump.fun/coin/6NwarBvDkXhByqVp2Qkq5i9XbtA2B3Bwe8SWGu9vpump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmU2nARXShdosCYJVcQjnDFBsR5YBne7wkNT1axdmsZnm5",
+            "status": 200,
+            "contentSha256": "41a01cfa9e20cb0332cf68a5c6fd3da061c83e435d35e0535be080e4e0ae6e0f",
+            "contentType": "application/json"
+          }
+        ],
+        "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/QmU2nARXShdosCYJVcQjnDFBsR5YBne7wkNT1axdmsZnm5",
+        "metadataName": "Cupsey",
+        "metadataSymbol": "Cupsey",
+        "projectWebsite": "https://cupsey.xyz/",
+        "projectTwitter": "https://x.com/CupseyToken",
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/cupsey-63b8c11aa5ab.png",
+          "sha256": "63b8c11aa5ab3ce3ce2e4e16836ea1d320db9485c9ef634fd949bdef251fcd9d",
+          "bytes": 3798535,
+          "width": 1840,
+          "height": 1840,
+          "mode": "RGBA",
+          "format": "PNG",
+          "frames": 1,
+          "contentType": "image/png",
+          "referenceSourceUri": "https://ipfs.io/ipfs/QmPXxffmpwSqdVFckNvmdxQSPBige24vjgMD32v5GF3Luo",
+          "downloadUri": "https://ipfs.filebase.io/ipfs/QmPXxffmpwSqdVFckNvmdxQSPBige24vjgMD32v5GF3Luo",
+          "resolvedUri": "https://ipfs.filebase.io/ipfs/QmPXxffmpwSqdVFckNvmdxQSPBige24vjgMD32v5GF3Luo",
+          "attempts": [
+            {
+              "uri": "https://ipfs.io/ipfs/QmPXxffmpwSqdVFckNvmdxQSPBige24vjgMD32v5GF3Luo",
+              "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+            },
+            {
+              "uri": "https://ipfs.filebase.io/ipfs/QmPXxffmpwSqdVFckNvmdxQSPBige24vjgMD32v5GF3Luo",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        }
+      },
+      "onChainIdentityEvidence": {
+        "key": "cupsey",
+        "symbol": "Cupsey",
+        "name": "Cupsey",
+        "mint": "6NwarBvDkXhByqVp2Qkq5i9XbtA2B3Bwe8SWGu9vpump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "Cupsey",
+          "symbol": "Cupsey",
+          "uri": "https://ipfs.io/ipfs/QmU2nARXShdosCYJVcQjnDFBsR5YBne7wkNT1axdmsZnm5",
+          "source": "ETzT61bosjaCp8icGqq4uhRqSqYNqbUnH8GqYa3B9tzS"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "982231596270",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/cupsey-63b8c11aa5ab.png",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "alon",
+      "proposedDesignKey": "pair-alon",
+      "name": "alon Signature",
+      "exactIdentity": "alon",
+      "symbol": "ALON",
+      "kind": "meme",
+      "exactQuoteMint": "8XtRWb4uAAJFMP4QQhoYYCWR6XXb7ybcCdiqPwz9s5WS",
+      "recognizableIdentityMotif": "The exact gray-haired illustrated character wearing the yellow-and-black cap and white sunglasses. Preserve its face, pose, cap and clothing colors; omit incidental cap/shirt slogans.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#193E46",
+          "#E4C548",
+          "#F6E8C9"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use turquoise enamel, yellow lacquer and pale titanium. Integrate small exact identity details from the supplied ALON reference into the outer perimeter only, never covering the creator art, name, pair or details surfaces.",
+      "reverseHero": "The exact ALON identity from the supplied source image as the dominant reverse hero. The exact gray-haired illustrated character wearing the yellow-and-black cap and white sunglasses; preserve its actual expression and source clothing details. Surround it with turquoise enamel, yellow lacquer and pale titanium, consistent with the front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "alon",
+        "symbol": "ALON",
+        "name": "alon",
+        "mint": "8XtRWb4uAAJFMP4QQhoYYCWR6XXb7ybcCdiqPwz9s5WS",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "alon",
+          "symbol": "ALON",
+          "uri": "https://cf-ipfs.com/ipfs/QmU2vT4iz7kA5ZYwdR7wkoVtPU34HjVjA6CGQdhAiGLc2D",
+          "source": "DN7sBBn5CZHTmFZT8wxnujfEFi3A9jGVWBo6ZwYCSvsh"
+        },
+        "metadataUri": "https://cf-ipfs.com/ipfs/QmU2vT4iz7kA5ZYwdR7wkoVtPU34HjVjA6CGQdhAiGLc2D",
+        "imageUri": "https://cf-ipfs.com/ipfs/QmavnBN2FbwW8o43KYBEQSnjYyGrRZKXbEN6N598dkFCLz",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+        "pumpPageReference": "https://pump.fun/coin/8XtRWb4uAAJFMP4QQhoYYCWR6XXb7ybcCdiqPwz9s5WS",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmU2vT4iz7kA5ZYwdR7wkoVtPU34HjVjA6CGQdhAiGLc2D",
+            "status": 200,
+            "contentSha256": "235ac7f5a02ba09c6d3f1ad3074e7074d994106829f33663e5a5ebea8286ad41",
+            "contentType": "application/json"
+          }
+        ],
+        "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/QmU2vT4iz7kA5ZYwdR7wkoVtPU34HjVjA6CGQdhAiGLc2D",
+        "metadataName": "alon",
+        "metadataSymbol": "ALON",
+        "projectWebsite": null,
+        "projectTwitter": "https://twitter.com/a1lon9",
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/alon-acd2f66dbbb5.jpg",
+          "sha256": "acd2f66dbbb56320e629220d36c480735a563d3829763062cf12f1276ed0aea0",
+          "bytes": 135882,
+          "width": 640,
+          "height": 640,
+          "mode": "RGB",
+          "format": "JPEG",
+          "frames": 1,
+          "contentType": "image/jpeg",
+          "referenceSourceUri": "https://cf-ipfs.com/ipfs/QmavnBN2FbwW8o43KYBEQSnjYyGrRZKXbEN6N598dkFCLz",
+          "downloadUri": "https://ipfs.filebase.io/ipfs/QmavnBN2FbwW8o43KYBEQSnjYyGrRZKXbEN6N598dkFCLz",
+          "resolvedUri": "https://ipfs.filebase.io/ipfs/QmavnBN2FbwW8o43KYBEQSnjYyGrRZKXbEN6N598dkFCLz",
+          "attempts": [
+            {
+              "uri": "https://cf-ipfs.com/ipfs/QmavnBN2FbwW8o43KYBEQSnjYyGrRZKXbEN6N598dkFCLz",
+              "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+            },
+            {
+              "uri": "https://ipfs.filebase.io/ipfs/QmavnBN2FbwW8o43KYBEQSnjYyGrRZKXbEN6N598dkFCLz",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        }
+      },
+      "onChainIdentityEvidence": {
+        "key": "alon",
+        "symbol": "ALON",
+        "name": "alon",
+        "mint": "8XtRWb4uAAJFMP4QQhoYYCWR6XXb7ybcCdiqPwz9s5WS",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "alon",
+          "symbol": "ALON",
+          "uri": "https://cf-ipfs.com/ipfs/QmU2vT4iz7kA5ZYwdR7wkoVtPU34HjVjA6CGQdhAiGLc2D",
+          "source": "DN7sBBn5CZHTmFZT8wxnujfEFi3A9jGVWBo6ZwYCSvsh"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "1032338523398",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/alon-acd2f66dbbb5.jpg",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "jimothy",
+      "proposedDesignKey": "pair-jimothy",
+      "name": "Jimothy The Raccoon Signature",
+      "exactIdentity": "Jimothy The Raccoon",
+      "symbol": "Jimothy",
+      "kind": "meme",
+      "exactQuoteMint": "Ge87EtsjwRQbHaqQmKRno69RFTwh9bfSsm99XNxTpump",
+      "recognizableIdentityMotif": "The exact small raccoon side-profile photograph outlined by warm sunlight, preserving its arched posture and long tail. Original primary Pump fallback is80px.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#24282A",
+          "#C2AA7A",
+          "#E1D9C5"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use charcoal ceramic, warm gold edge-light and pale silver. Integrate only small source-faithful identity details in the outer perimeter, outside all shared creator-content apertures.",
+      "reverseHero": "The exact small raccoon side-profile photograph outlined by warm sunlight, preserving its arched posture and long tail. Original primary Pump fallback is80px. Make this exact identity the reverse hero with charcoal ceramic, warm gold edge-light and pale silver, matching its front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "jimothy",
+        "symbol": "Jimothy",
+        "name": "Jimothy The Raccoon",
+        "mint": "Ge87EtsjwRQbHaqQmKRno69RFTwh9bfSsm99XNxTpump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "Jimothy The Raccoon",
+          "symbol": "Jimothy",
+          "uri": "https://metadata.j7tracker.io/metadata/1Ybareueot.json",
+          "source": "Token2022 inline metadata"
+        },
+        "metadataUri": "https://metadata.j7tracker.io/metadata/1Ybareueot.json",
+        "imageUri": null,
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Primary exact-mint Pump page fallback image URI observed; on-chain metadata resolution failure retained",
+        "pumpPageReference": "https://pump.fun/coin/Ge87EtsjwRQbHaqQmKRno69RFTwh9bfSsm99XNxTpump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://metadata.j7tracker.io/metadata/1Ybareueot.json",
+            "error": "<urlopen error _ssl.c:1063: The handshake operation timed out>"
+          },
+          {
+            "uri": "https://metadata.j7tracker.io/metadata/1Ybareueot.json",
+            "error": "HTTP Error 404: Not Found"
+          },
+          {
+            "uri": "https://metadata.j7tracker.io/metadata/1Ybareueot.json",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://metadata.j7tracker.io/metadata/1Ybareueot.json",
+            "error": "HTTP Error 404: Not Found"
+          }
+        ],
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/jimothy-d8e5e31f43da.jpg",
+          "sha256": "d8e5e31f43da271d7e06fdb56276073b81874f33e1c6408ce94567ce04efd588",
+          "bytes": 2216,
+          "width": 80,
+          "height": 80,
+          "mode": "RGB",
+          "format": "JPEG",
+          "frames": 1,
+          "contentType": "image/jpeg",
+          "referenceSourceUri": "https://axiomtrading-v2.axiom-cdn.io/A3NqdmPtu9Qa6nRqcZWJ969ePUWNA1Fb4SgmQ7Ldpump.webp",
+          "downloadUri": "https://images.pump.fun/coin-image/Ge87EtsjwRQbHaqQmKRno69RFTwh9bfSsm99XNxTpump?placeholder=none&src=https%3A%2F%2Faxiomtrading-v2.axiom-cdn.io%2FA3NqdmPtu9Qa6nRqcZWJ969ePUWNA1Fb4SgmQ7Ldpump.webp&variant=80x80",
+          "resolvedUri": "https://images.pump.fun/coin-image/Ge87EtsjwRQbHaqQmKRno69RFTwh9bfSsm99XNxTpump?placeholder=none&src=https%3A%2F%2Faxiomtrading-v2.axiom-cdn.io%2FA3NqdmPtu9Qa6nRqcZWJ969ePUWNA1Fb4SgmQ7Ldpump.webp&variant=80x80",
+          "attempts": [
+            {
+              "uri": "https://axiomtrading-v2.axiom-cdn.io/A3NqdmPtu9Qa6nRqcZWJ969ePUWNA1Fb4SgmQ7Ldpump.webp",
+              "error": "<urlopen error timed out>"
+            },
+            {
+              "uri": "https://images.pump.fun/coin-image/Ge87EtsjwRQbHaqQmKRno69RFTwh9bfSsm99XNxTpump?placeholder=none&src=https%3A%2F%2Faxiomtrading-v2.axiom-cdn.io%2FA3NqdmPtu9Qa6nRqcZWJ969ePUWNA1Fb4SgmQ7Ldpump.webp&variant=80x80",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        },
+        "pumpImageOriginalUri": "https://axiomtrading-v2.axiom-cdn.io/A3NqdmPtu9Qa6nRqcZWJ969ePUWNA1Fb4SgmQ7Ldpump.webp",
+        "pumpImageObservedVia": "Official Pump exact-mint page image link27 explicitly selectedthisCDNsource; sourcefilenamecontainsanotheridentifier, soretainPump-pageassociationandinspectbeforeuse.",
+        "additionalImageSourceUris": [
+          "https://images.pump.fun/coin-image/Ge87EtsjwRQbHaqQmKRno69RFTwh9bfSsm99XNxTpump?placeholder=none&src=https%3A%2F%2Faxiomtrading-v2.axiom-cdn.io%2FA3NqdmPtu9Qa6nRqcZWJ969ePUWNA1Fb4SgmQ7Ldpump.webp&variant=80x80"
+        ],
+        "referenceSuitability": "Small exact original reference. Preserve recognizable source features; do not claim originalHD detail. Root quality review required."
+      },
+      "onChainIdentityEvidence": {
+        "key": "jimothy",
+        "symbol": "Jimothy",
+        "name": "Jimothy The Raccoon",
+        "mint": "Ge87EtsjwRQbHaqQmKRno69RFTwh9bfSsm99XNxTpump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "Jimothy The Raccoon",
+          "symbol": "Jimothy",
+          "uri": "https://metadata.j7tracker.io/metadata/1Ybareueot.json",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "1944737338006",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/jimothy-d8e5e31f43da.jpg",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "lmao",
+      "proposedDesignKey": "pair-lmao",
+      "name": "LMAO! Signature",
+      "exactIdentity": "LMAO!",
+      "symbol": "LMAO!",
+      "kind": "meme",
+      "exactQuoteMint": "H74CYmXgMkYHYuSRsZt6RJb4NYp2u72Vw8BS5huApump",
+      "recognizableIdentityMotif": "The exact stretched laughing yellow face with closed angled eyes, white side forms, cyan cheeks and open orange mouth.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#45361B",
+          "#F0C13C",
+          "#9DE1E6"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use golden-yellow enamel, cyan opal and warm satin metal. Integrate small exact identity details from the supplied LMAO! reference into the outer perimeter only, never covering the creator art, name, pair or details surfaces.",
+      "reverseHero": "The exact LMAO! identity from the supplied source image as the dominant reverse hero. The exact stretched laughing yellow face with closed angled eyes, white side forms, cyan cheeks and open orange mouth. Surround it with golden-yellow enamel, cyan opal and warm satin metal, consistent with the front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "lmao",
+        "symbol": "LMAO!",
+        "name": "LMAO!",
+        "mint": "H74CYmXgMkYHYuSRsZt6RJb4NYp2u72Vw8BS5huApump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "LMAO!",
+          "symbol": "LMAO!",
+          "uri": "https://ipfs.io/ipfs/bafkreifilh3qbor7axmzvp2ziofvaocz6nu7dxhzbqvcoonrr3c6gpbfnq",
+          "source": "Fd31TyoYBrSe4tspWRCeqUTLgY3aMQRajv3pYNyjK1Bn"
+        },
+        "metadataUri": "https://ipfs.io/ipfs/bafkreifilh3qbor7axmzvp2ziofvaocz6nu7dxhzbqvcoonrr3c6gpbfnq",
+        "imageUri": "https://ipfs.io/ipfs/bafkreic2k6vq5rorto4kll3gtpux6yfllmioipbrt3uebwaovghmjajr5m",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+        "pumpPageReference": "https://pump.fun/coin/H74CYmXgMkYHYuSRsZt6RJb4NYp2u72Vw8BS5huApump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/bafkreifilh3qbor7axmzvp2ziofvaocz6nu7dxhzbqvcoonrr3c6gpbfnq",
+            "status": 200,
+            "contentSha256": "a859f700ba3f05d99abf59438b503859f369f1dcf90c2a2739b18ec5e33c256c",
+            "contentType": "application/json"
+          }
+        ],
+        "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/bafkreifilh3qbor7axmzvp2ziofvaocz6nu7dxhzbqvcoonrr3c6gpbfnq",
+        "metadataName": "LMAO!",
+        "metadataSymbol": "LMAO!",
+        "projectWebsite": null,
+        "projectTwitter": null,
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/lmao-5a57ab0ec5d1.jpg",
+          "sha256": "5a57ab0ec5d19bb8a5af669be97f60ab5b10e43c319ee840d80ea98ec48131eb",
+          "bytes": 82879,
+          "width": 1152,
+          "height": 1152,
+          "mode": "RGB",
+          "format": "JPEG",
+          "frames": 1,
+          "contentType": "image/jpeg",
+          "referenceSourceUri": "https://ipfs.io/ipfs/bafkreic2k6vq5rorto4kll3gtpux6yfllmioipbrt3uebwaovghmjajr5m",
+          "downloadUri": "https://ipfs.filebase.io/ipfs/bafkreic2k6vq5rorto4kll3gtpux6yfllmioipbrt3uebwaovghmjajr5m",
+          "resolvedUri": "https://ipfs.filebase.io/ipfs/bafkreic2k6vq5rorto4kll3gtpux6yfllmioipbrt3uebwaovghmjajr5m",
+          "attempts": [
+            {
+              "uri": "https://ipfs.io/ipfs/bafkreic2k6vq5rorto4kll3gtpux6yfllmioipbrt3uebwaovghmjajr5m",
+              "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+            },
+            {
+              "uri": "https://ipfs.filebase.io/ipfs/bafkreic2k6vq5rorto4kll3gtpux6yfllmioipbrt3uebwaovghmjajr5m",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        }
+      },
+      "onChainIdentityEvidence": {
+        "key": "lmao",
+        "symbol": "LMAO!",
+        "name": "LMAO!",
+        "mint": "H74CYmXgMkYHYuSRsZt6RJb4NYp2u72Vw8BS5huApump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "LMAO!",
+          "symbol": "LMAO!",
+          "uri": "https://ipfs.io/ipfs/bafkreifilh3qbor7axmzvp2ziofvaocz6nu7dxhzbqvcoonrr3c6gpbfnq",
+          "source": "Fd31TyoYBrSe4tspWRCeqUTLgY3aMQRajv3pYNyjK1Bn"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "1919472507138",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/lmao-5a57ab0ec5d1.jpg",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "bobo",
+      "proposedDesignKey": "pair-bobo",
+      "name": "Bobo Signature",
+      "exactIdentity": "Bobo",
+      "symbol": "BOBO",
+      "kind": "meme",
+      "exactQuoteMint": "4nV5gNwwP68zUDat26ySChREqVaQaLudfJBkSgEzpump",
+      "recognizableIdentityMotif": "The exact brown bear with the skeptical narrowed expression and hand raised at its mouth on the crimson field.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#5A3426",
+          "#B20C30",
+          "#DEBE8A"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use crimson enamel, chocolate ceramic and bronze-gold fittings. Integrate small exact identity details from the supplied BOBO reference into the outer perimeter only, never covering the creator art, name, pair or details surfaces.",
+      "reverseHero": "The exact BOBO identity from the supplied source image as the dominant reverse hero. The exact brown bear with the skeptical narrowed expression and hand raised at its mouth on the crimson field. Surround it with crimson enamel, chocolate ceramic and bronze-gold fittings, consistent with the front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "bobo",
+        "symbol": "BOBO",
+        "name": "Bobo",
+        "mint": "4nV5gNwwP68zUDat26ySChREqVaQaLudfJBkSgEzpump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "Bobo",
+          "symbol": "BOBO",
+          "uri": "https://ipfs.io/ipfs/QmaSCwdsQpFynivk1cP3haMxrA8wZwN74VBY3T5fMbkiQa",
+          "source": "4uCS2Gws3H9nvCjpqMEoqCDV5hkcm7JtNAAVpoqn8Z1g"
+        },
+        "metadataUri": "https://ipfs.io/ipfs/QmaSCwdsQpFynivk1cP3haMxrA8wZwN74VBY3T5fMbkiQa",
+        "imageUri": "https://ipfs.io/ipfs/QmcDbbGg13L1ERkM6Xb77qw6XRhxE3NraQqorQEibih4qn",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+        "pumpPageReference": "https://pump.fun/coin/4nV5gNwwP68zUDat26ySChREqVaQaLudfJBkSgEzpump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmaSCwdsQpFynivk1cP3haMxrA8wZwN74VBY3T5fMbkiQa",
+            "status": 200,
+            "contentSha256": "bb3a0da77b755a1ace14fb0f81d200175bef04aee3f3b33a8f70065b83093255",
+            "contentType": "application/json"
+          }
+        ],
+        "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/QmaSCwdsQpFynivk1cP3haMxrA8wZwN74VBY3T5fMbkiQa",
+        "metadataName": "Bobo",
+        "metadataSymbol": "BOBO",
+        "projectWebsite": "https://bobothebear.io",
+        "projectTwitter": "https://x.com/bobocouncil",
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/bobo-064db424e413.png",
+          "sha256": "064db424e413117370c2a4f4149773644859360cbc0b3dbe4ed0cc807de573ed",
+          "bytes": 102898,
+          "width": 1000,
+          "height": 1000,
+          "mode": "RGBA",
+          "format": "PNG",
+          "frames": 1,
+          "contentType": "image/png",
+          "referenceSourceUri": "https://ipfs.io/ipfs/QmcDbbGg13L1ERkM6Xb77qw6XRhxE3NraQqorQEibih4qn",
+          "downloadUri": "https://ipfs.filebase.io/ipfs/QmcDbbGg13L1ERkM6Xb77qw6XRhxE3NraQqorQEibih4qn",
+          "resolvedUri": "https://ipfs.filebase.io/ipfs/QmcDbbGg13L1ERkM6Xb77qw6XRhxE3NraQqorQEibih4qn",
+          "attempts": [
+            {
+              "uri": "https://ipfs.io/ipfs/QmcDbbGg13L1ERkM6Xb77qw6XRhxE3NraQqorQEibih4qn",
+              "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+            },
+            {
+              "uri": "https://ipfs.filebase.io/ipfs/QmcDbbGg13L1ERkM6Xb77qw6XRhxE3NraQqorQEibih4qn",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        }
+      },
+      "onChainIdentityEvidence": {
+        "key": "bobo",
+        "symbol": "BOBO",
+        "name": "Bobo",
+        "mint": "4nV5gNwwP68zUDat26ySChREqVaQaLudfJBkSgEzpump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "Bobo",
+          "symbol": "BOBO",
+          "uri": "https://ipfs.io/ipfs/QmaSCwdsQpFynivk1cP3haMxrA8wZwN74VBY3T5fMbkiQa",
+          "source": "4uCS2Gws3H9nvCjpqMEoqCDV5hkcm7JtNAAVpoqn8Z1g"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "582474962807",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/bobo-064db424e413.png",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "tokabu",
+      "proposedDesignKey": "pair-tokabu",
+      "name": "The Spirit of Gambling Signature",
+      "exactIdentity": "The Spirit of Gambling",
+      "symbol": "Tokabu",
+      "kind": "meme",
+      "exactQuoteMint": "H8xQ6poBjB9DTPMDTKWzWPrnxu4bDEhybxiouF8Ppump",
+      "recognizableIdentityMotif": "The exact cyan long-nosed cartoon character in its raised-leg pose, with the yellow source field; preserve the head shape and linework.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#144349",
+          "#FFE52D",
+          "#38C9C8"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use cyan enamel, lemon-yellow lacquer and dark polished metal. Integrate small exact identity details from the supplied Tokabu reference into the outer perimeter only, never covering the creator art, name, pair or details surfaces.",
+      "reverseHero": "The exact Tokabu identity from the supplied source image as the dominant reverse hero. The exact cyan long-nosed cartoon character in its raised-leg pose, with the yellow source field; preserve the head shape and linework. Surround it with cyan enamel, lemon-yellow lacquer and dark polished metal, consistent with the front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "tokabu",
+        "symbol": "Tokabu",
+        "name": "The Spirit of Gambling",
+        "mint": "H8xQ6poBjB9DTPMDTKWzWPrnxu4bDEhybxiouF8Ppump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "The Spirit of Gambling",
+          "symbol": "Tokabu",
+          "uri": "https://ipfs.io/ipfs/bafkreidraw34ccvcxkwljxmzpmtkoy37zpwiadtikpxfkktzkhho4wwrhu",
+          "source": "9V2tWR69zwMG2zfyDCJoSzCdcLejQGmiiu65HeaZQhrY"
+        },
+        "metadataUri": "https://ipfs.io/ipfs/bafkreidraw34ccvcxkwljxmzpmtkoy37zpwiadtikpxfkktzkhho4wwrhu",
+        "imageUri": "https://ipfs.io/ipfs/bafkreicrdi3icewusvj5ff53uwnlzng53dmkk3llrmdbn35eb2ozamnhpq",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+        "pumpPageReference": "https://pump.fun/coin/H8xQ6poBjB9DTPMDTKWzWPrnxu4bDEhybxiouF8Ppump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/bafkreidraw34ccvcxkwljxmzpmtkoy37zpwiadtikpxfkktzkhho4wwrhu",
+            "status": 200,
+            "contentSha256": "7105b7c10aa2baacb4dd997b26a7637fcbec800e6853ee552a7951ceee5ad13d",
+            "contentType": "application/json"
+          }
+        ],
+        "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/bafkreidraw34ccvcxkwljxmzpmtkoy37zpwiadtikpxfkktzkhho4wwrhu",
+        "metadataName": "The Spirit of Gambling",
+        "metadataSymbol": "Tokabu",
+        "projectWebsite": "https://x.com/TokabuTheSpirit",
+        "projectTwitter": "https://x.com/TokabuTheSpirit",
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/tokabu-511a368112d4.jpg",
+          "sha256": "511a368112d49553d297bba59abcb4ddd8d8a56d6b8b0616efa40e9d9031a77c",
+          "bytes": 30246,
+          "width": 800,
+          "height": 800,
+          "mode": "RGB",
+          "format": "JPEG",
+          "frames": 1,
+          "contentType": "image/jpeg",
+          "referenceSourceUri": "https://ipfs.io/ipfs/bafkreicrdi3icewusvj5ff53uwnlzng53dmkk3llrmdbn35eb2ozamnhpq",
+          "downloadUri": "https://ipfs.filebase.io/ipfs/bafkreicrdi3icewusvj5ff53uwnlzng53dmkk3llrmdbn35eb2ozamnhpq",
+          "resolvedUri": "https://ipfs.filebase.io/ipfs/bafkreicrdi3icewusvj5ff53uwnlzng53dmkk3llrmdbn35eb2ozamnhpq",
+          "attempts": [
+            {
+              "uri": "https://ipfs.io/ipfs/bafkreicrdi3icewusvj5ff53uwnlzng53dmkk3llrmdbn35eb2ozamnhpq",
+              "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+            },
+            {
+              "uri": "https://ipfs.filebase.io/ipfs/bafkreicrdi3icewusvj5ff53uwnlzng53dmkk3llrmdbn35eb2ozamnhpq",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        }
+      },
+      "onChainIdentityEvidence": {
+        "key": "tokabu",
+        "symbol": "Tokabu",
+        "name": "The Spirit of Gambling",
+        "mint": "H8xQ6poBjB9DTPMDTKWzWPrnxu4bDEhybxiouF8Ppump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "The Spirit of Gambling",
+          "symbol": "Tokabu",
+          "uri": "https://ipfs.io/ipfs/bafkreidraw34ccvcxkwljxmzpmtkoy37zpwiadtikpxfkktzkhho4wwrhu",
+          "source": "9V2tWR69zwMG2zfyDCJoSzCdcLejQGmiiu65HeaZQhrY"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "2241902934959",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/tokabu-511a368112d4.jpg",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "manifest",
+      "proposedDesignKey": "pair-manifest",
+      "name": "Manifesting Signature",
+      "exactIdentity": "Manifesting",
+      "symbol": "MANIFEST",
+      "kind": "meme",
+      "exactQuoteMint": "BCdwQBAn8dYB5YjTsoB6TdHAWokxv28k2oZUodERpump",
+      "recognizableIdentityMotif": "The exact black standing human silhouette with both arms extended on the white source field. Preserve the actual source outline; the source dictionary text is not the hero.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#242321",
+          "#CBBF9F",
+          "#F8F6EE"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use ivory ceramic, black enamel and fine champagne-metal fittings. Integrate small exact identity details from the supplied MANIFEST reference into the outer perimeter only, never covering the creator art, name, pair or details surfaces.",
+      "reverseHero": "The exact MANIFEST identity from the supplied source image as the dominant reverse hero. The exact black standing human silhouette with both arms extended on the white source field. Preserve the actual source outline; the source dictionary text is not the hero. Surround it with ivory ceramic, black enamel and fine champagne-metal fittings, consistent with the front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "manifest",
+        "symbol": "MANIFEST",
+        "name": "Manifesting",
+        "mint": "BCdwQBAn8dYB5YjTsoB6TdHAWokxv28k2oZUodERpump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "Manifesting",
+          "symbol": "MANIFEST",
+          "uri": "https://ipfs.io/ipfs/bafkreidddxq673pzk6hxgfffwboyerrqfnky23luy2onxz45ep5mdhvl3y",
+          "source": "Token2022 inline metadata"
+        },
+        "metadataUri": "https://ipfs.io/ipfs/bafkreidddxq673pzk6hxgfffwboyerrqfnky23luy2onxz45ep5mdhvl3y",
+        "imageUri": "https://ipfs.io/ipfs/bafybeiemtmaqq2y7onn2lstwe53ofrlnvlhw5ika3uynqtqqzp3aqngy4a",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+        "pumpPageReference": "https://pump.fun/coin/BCdwQBAn8dYB5YjTsoB6TdHAWokxv28k2oZUodERpump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/bafkreidddxq673pzk6hxgfffwboyerrqfnky23luy2onxz45ep5mdhvl3y",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://gateway.pinata.cloud/ipfs/bafkreidddxq673pzk6hxgfffwboyerrqfnky23luy2onxz45ep5mdhvl3y",
+            "status": 200,
+            "contentSha256": "631de1efedf9578f7314a5b05d8246302b558d6d74c69cdbe79d23fac19eabde",
+            "contentType": "application/json"
+          }
+        ],
+        "metadataResolvedUri": "https://gateway.pinata.cloud/ipfs/bafkreidddxq673pzk6hxgfffwboyerrqfnky23luy2onxz45ep5mdhvl3y",
+        "metadataName": "Manifesting",
+        "metadataSymbol": "MANIFEST",
+        "projectWebsite": null,
+        "projectTwitter": "https://x.com/ManifestingXs",
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/manifest-3310d44487d0.png",
+          "sha256": "3310d44487d03234792ab4ad10f162a16249a666f6c62eb046eca06e5101e911",
+          "bytes": 338979,
+          "width": 2522,
+          "height": 834,
+          "mode": "RGBA",
+          "format": "PNG",
+          "frames": 1,
+          "contentType": "image/png",
+          "referenceSourceUri": "https://ipfs.io/ipfs/bafybeiemtmaqq2y7onn2lstwe53ofrlnvlhw5ika3uynqtqqzp3aqngy4a",
+          "downloadUri": "https://ipfs.filebase.io/ipfs/bafybeiemtmaqq2y7onn2lstwe53ofrlnvlhw5ika3uynqtqqzp3aqngy4a",
+          "resolvedUri": "https://ipfs.filebase.io/ipfs/bafybeiemtmaqq2y7onn2lstwe53ofrlnvlhw5ika3uynqtqqzp3aqngy4a",
+          "attempts": [
+            {
+              "uri": "https://ipfs.io/ipfs/bafybeiemtmaqq2y7onn2lstwe53ofrlnvlhw5ika3uynqtqqzp3aqngy4a",
+              "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+            },
+            {
+              "uri": "https://ipfs.filebase.io/ipfs/bafybeiemtmaqq2y7onn2lstwe53ofrlnvlhw5ika3uynqtqqzp3aqngy4a",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        }
+      },
+      "onChainIdentityEvidence": {
+        "key": "manifest",
+        "symbol": "MANIFEST",
+        "name": "Manifesting",
+        "mint": "BCdwQBAn8dYB5YjTsoB6TdHAWokxv28k2oZUodERpump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "Manifesting",
+          "symbol": "MANIFEST",
+          "uri": "https://ipfs.io/ipfs/bafkreidddxq673pzk6hxgfffwboyerrqfnky23luy2onxz45ep5mdhvl3y",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "562135364630",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/manifest-3310d44487d0.png",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "baton",
+      "proposedDesignKey": "pair-baton",
+      "name": "baton Signature",
+      "exactIdentity": "baton",
+      "symbol": "baton",
+      "kind": "meme",
+      "exactQuoteMint": "Hg5Ja55T5wESq4vyFoiVCMeHXtGyVA69X2UHq8hgpump",
+      "recognizableIdentityMotif": "The exact small tan dog holding the white baton with a green handle and wearing its green collar; retain its specific face.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#254636",
+          "#CEAC74",
+          "#F2EADB"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use ivory ceramic, vivid green enamel and honey-gold fittings. Integrate small exact identity details from the supplied baton reference into the outer perimeter only, never covering the creator art, name, pair or details surfaces.",
+      "reverseHero": "The exact baton identity from the supplied source image as the dominant reverse hero. The exact small tan dog holding the white baton with a green handle and wearing its green collar; retain its specific face. Surround it with ivory ceramic, vivid green enamel and honey-gold fittings, consistent with the front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "baton",
+        "symbol": "baton",
+        "name": "baton",
+        "mint": "Hg5Ja55T5wESq4vyFoiVCMeHXtGyVA69X2UHq8hgpump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "baton",
+          "symbol": "baton",
+          "uri": "https://m.rapidlaunch.io/m/LRzt7gxgX",
+          "source": "Token2022 inline metadata"
+        },
+        "metadataUri": "https://m.rapidlaunch.io/m/LRzt7gxgX",
+        "imageUri": "https://axiomtrading.sfo3.cdn.digitaloceanspaces.com/41UrTGwAokUi5y9qXvHtG82fYsHgCnQE7oFtLhYRwYMP.webp",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+        "pumpPageReference": "https://pump.fun/coin/Hg5Ja55T5wESq4vyFoiVCMeHXtGyVA69X2UHq8hgpump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://m.rapidlaunch.io/m/LRzt7gxgX",
+            "status": 200,
+            "contentSha256": "b0cc19c66ab0e98ada7202e6fc17db593ec093054c552c0348f2b46ce9b1b923",
+            "contentType": "application/json"
+          }
+        ],
+        "metadataResolvedUri": "https://m.rapidlaunch.io/m/LRzt7gxgX",
+        "metadataName": "baton",
+        "metadataSymbol": "baton",
+        "projectWebsite": "https://x.com/connortrenches/status/2097774013242052853",
+        "projectTwitter": "https://x.com/connortrenches/status/2097774013242052853",
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/baton-45d46d18d4a6.webp",
+          "sha256": "45d46d18d4a65c0765cde6732043d7a9457c8550fc347de90a07088c2ace674d",
+          "bytes": 3796,
+          "width": 200,
+          "height": 200,
+          "mode": "RGB",
+          "format": "WEBP",
+          "frames": 1,
+          "contentType": "image/webp",
+          "referenceSourceUri": "https://axiomtrading.sfo3.cdn.digitaloceanspaces.com/41UrTGwAokUi5y9qXvHtG82fYsHgCnQE7oFtLhYRwYMP.webp",
+          "downloadUri": "https://axiomtrading.sfo3.cdn.digitaloceanspaces.com/41UrTGwAokUi5y9qXvHtG82fYsHgCnQE7oFtLhYRwYMP.webp",
+          "resolvedUri": "https://axiomtrading.sfo3.cdn.digitaloceanspaces.com/41UrTGwAokUi5y9qXvHtG82fYsHgCnQE7oFtLhYRwYMP.webp",
+          "attempts": [
+            {
+              "uri": "https://axiomtrading.sfo3.cdn.digitaloceanspaces.com/41UrTGwAokUi5y9qXvHtG82fYsHgCnQE7oFtLhYRwYMP.webp",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        }
+      },
+      "onChainIdentityEvidence": {
+        "key": "baton",
+        "symbol": "baton",
+        "name": "baton",
+        "mint": "Hg5Ja55T5wESq4vyFoiVCMeHXtGyVA69X2UHq8hgpump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "baton",
+          "symbol": "baton",
+          "uri": "https://m.rapidlaunch.io/m/LRzt7gxgX",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "677053411087",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/baton-45d46d18d4a6.webp",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "claw",
+      "proposedDesignKey": "pair-claw",
+      "name": "clawpump.tech Signature",
+      "exactIdentity": "clawpump.tech",
+      "symbol": "CLAW",
+      "kind": "meme",
+      "exactQuoteMint": "739dnZEG4yaBWFsY8L8ZwrfhGG6dhtCSercW8Umspump",
+      "recognizableIdentityMotif": "The exact green lobster-claw emblem with its white highlight shapes and small geometric base.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#153C2A",
+          "#35CA86",
+          "#F0F3E9"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use emerald enamel, pale ceramic and brushed platinum. Integrate small exact identity details from the supplied CLAW reference into the outer perimeter only, never covering the creator art, name, pair or details surfaces.",
+      "reverseHero": "The exact CLAW identity from the supplied source image as the dominant reverse hero. The exact green lobster-claw emblem with its white highlight shapes and small geometric base. Surround it with emerald enamel, pale ceramic and brushed platinum, consistent with the front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "claw",
+        "symbol": "CLAW",
+        "name": "clawpump.tech",
+        "mint": "739dnZEG4yaBWFsY8L8ZwrfhGG6dhtCSercW8Umspump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "clawpump.tech",
+          "symbol": "CLAW",
+          "uri": "https://ipfs.io/ipfs/QmaJHpfAJL6dbCexGBAkgHvwvN11MhZZAv4Ud3uyBgAyVv",
+          "source": "B2ZUczpNxBPe9PnphqPBegJ5TKmDM5dhDDCkpkuuQW2V"
+        },
+        "metadataUri": "https://ipfs.io/ipfs/QmaJHpfAJL6dbCexGBAkgHvwvN11MhZZAv4Ud3uyBgAyVv",
+        "imageUri": "https://ipfs.io/ipfs/QmfN6XKWnb2bJizSoaZwNqwpDLT5iZRgkitCvDjNkkDo8g",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+        "pumpPageReference": "https://pump.fun/coin/739dnZEG4yaBWFsY8L8ZwrfhGG6dhtCSercW8Umspump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/QmaJHpfAJL6dbCexGBAkgHvwvN11MhZZAv4Ud3uyBgAyVv",
+            "status": 200,
+            "contentSha256": "810b56cc102d030bdcd670b9817f9108f06bd573708929a4116f50aed73fef26",
+            "contentType": "application/json"
+          }
+        ],
+        "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/QmaJHpfAJL6dbCexGBAkgHvwvN11MhZZAv4Ud3uyBgAyVv",
+        "metadataName": "clawpump.tech",
+        "metadataSymbol": "CLAW",
+        "projectWebsite": "https://www.clawpump.tech/",
+        "projectTwitter": "https://x.com/clawpumptech",
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/claw-f5546a3e2e71.png",
+          "sha256": "f5546a3e2e7108433c33b78ee0186af963991f8cb5d4049b8674fd957103ea2c",
+          "bytes": 2192869,
+          "width": 1536,
+          "height": 1024,
+          "mode": "RGBA",
+          "format": "PNG",
+          "frames": 1,
+          "contentType": "image/png",
+          "referenceSourceUri": "https://ipfs.io/ipfs/QmfN6XKWnb2bJizSoaZwNqwpDLT5iZRgkitCvDjNkkDo8g",
+          "downloadUri": "https://gateway.pinata.cloud/ipfs/QmfN6XKWnb2bJizSoaZwNqwpDLT5iZRgkitCvDjNkkDo8g",
+          "resolvedUri": "https://gateway.pinata.cloud/ipfs/QmfN6XKWnb2bJizSoaZwNqwpDLT5iZRgkitCvDjNkkDo8g",
+          "attempts": [
+            {
+              "uri": "https://ipfs.io/ipfs/QmfN6XKWnb2bJizSoaZwNqwpDLT5iZRgkitCvDjNkkDo8g",
+              "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+            },
+            {
+              "uri": "https://ipfs.filebase.io/ipfs/QmfN6XKWnb2bJizSoaZwNqwpDLT5iZRgkitCvDjNkkDo8g",
+              "error": "<urlopen error timed out>"
+            },
+            {
+              "uri": "https://gateway.pinata.cloud/ipfs/QmfN6XKWnb2bJizSoaZwNqwpDLT5iZRgkitCvDjNkkDo8g",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        }
+      },
+      "onChainIdentityEvidence": {
+        "key": "claw",
+        "symbol": "CLAW",
+        "name": "clawpump.tech",
+        "mint": "739dnZEG4yaBWFsY8L8ZwrfhGG6dhtCSercW8Umspump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "clawpump.tech",
+          "symbol": "CLAW",
+          "uri": "https://ipfs.io/ipfs/QmaJHpfAJL6dbCexGBAkgHvwvN11MhZZAv4Ud3uyBgAyVv",
+          "source": "B2ZUczpNxBPe9PnphqPBegJ5TKmDM5dhDDCkpkuuQW2V"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "370254634267",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/claw-f5546a3e2e71.png",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "67",
+      "proposedDesignKey": "pair-67",
+      "name": "The Official 67 Coin Signature",
+      "exactIdentity": "The Official 67 Coin",
+      "symbol": "67",
+      "kind": "meme",
+      "exactQuoteMint": "9AvytnUKsLxPxFHFqS6VLxaxt5p6BhYNr53SD2Chpump",
+      "recognizableIdentityMotif": "The exact open-mouthed blond boy portrait from the supplied67 token image, with its source expression and crop; do not invent a replacement person.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#252726",
+          "#B9B9A8",
+          "#E6DFCF"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use smoked silver, warm pale ceramic and restrained gold. Integrate small exact identity details from the supplied 67 reference into the outer perimeter only, never covering the creator art, name, pair or details surfaces.",
+      "reverseHero": "The exact 67 identity from the supplied source image as the dominant reverse hero. The exact open-mouthed blond boy portrait from the supplied67 token image, with its source expression and crop; do not invent a replacement person. Surround it with smoked silver, warm pale ceramic and restrained gold, consistent with the front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "67",
+        "symbol": "67",
+        "name": "The Official 67 Coin",
+        "mint": "9AvytnUKsLxPxFHFqS6VLxaxt5p6BhYNr53SD2Chpump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "The Official 67 Coin",
+          "symbol": "67",
+          "uri": "https://ipfs.io/ipfs/bafkreigurrlg47m72is6mpm3dcppq4mgybyzsxpgwseqfsqrueiiqxk4pa",
+          "source": "DpL2ejJkoQYbX3vcSuR5SMdKSPQAPH6e7HTSMXzYk7bp"
+        },
+        "metadataUri": "https://ipfs.io/ipfs/bafkreigurrlg47m72is6mpm3dcppq4mgybyzsxpgwseqfsqrueiiqxk4pa",
+        "imageUri": "https://ipfs.io/ipfs/bafkreiaa4ouicip23xlhq74k6ot6j6exi6skwdziaya5mvzlw3jj5ams3q",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+        "pumpPageReference": "https://pump.fun/coin/9AvytnUKsLxPxFHFqS6VLxaxt5p6BhYNr53SD2Chpump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/bafkreigurrlg47m72is6mpm3dcppq4mgybyzsxpgwseqfsqrueiiqxk4pa",
+            "status": 200,
+            "contentSha256": "d48c566e7d9fd225e63d9b189ef87186c071995de6b48902ca11a110885d5c78",
+            "contentType": "application/json"
+          }
+        ],
+        "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/bafkreigurrlg47m72is6mpm3dcppq4mgybyzsxpgwseqfsqrueiiqxk4pa",
+        "metadataName": "The Official 67 Coin",
+        "metadataSymbol": "67",
+        "projectWebsite": null,
+        "projectTwitter": "https://x.com/i/communities/1964847225126748559",
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/67-00e3a88121fa.jpg",
+          "sha256": "00e3a88121faddd6787f8af3a7e4f89747a4ab0f280601d6572bb6d29e8192dc",
+          "bytes": 57114,
+          "width": 800,
+          "height": 450,
+          "mode": "RGB",
+          "format": "JPEG",
+          "frames": 1,
+          "contentType": "image/jpeg",
+          "referenceSourceUri": "https://ipfs.io/ipfs/bafkreiaa4ouicip23xlhq74k6ot6j6exi6skwdziaya5mvzlw3jj5ams3q",
+          "downloadUri": "https://ipfs.filebase.io/ipfs/bafkreiaa4ouicip23xlhq74k6ot6j6exi6skwdziaya5mvzlw3jj5ams3q",
+          "resolvedUri": "https://ipfs.filebase.io/ipfs/bafkreiaa4ouicip23xlhq74k6ot6j6exi6skwdziaya5mvzlw3jj5ams3q",
+          "attempts": [
+            {
+              "uri": "https://ipfs.io/ipfs/bafkreiaa4ouicip23xlhq74k6ot6j6exi6skwdziaya5mvzlw3jj5ams3q",
+              "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+            },
+            {
+              "uri": "https://ipfs.filebase.io/ipfs/bafkreiaa4ouicip23xlhq74k6ot6j6exi6skwdziaya5mvzlw3jj5ams3q",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        }
+      },
+      "onChainIdentityEvidence": {
+        "key": "67",
+        "symbol": "67",
+        "name": "The Official 67 Coin",
+        "mint": "9AvytnUKsLxPxFHFqS6VLxaxt5p6BhYNr53SD2Chpump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "The Official 67 Coin",
+          "symbol": "67",
+          "uri": "https://ipfs.io/ipfs/bafkreigurrlg47m72is6mpm3dcppq4mgybyzsxpgwseqfsqrueiiqxk4pa",
+          "source": "DpL2ejJkoQYbX3vcSuR5SMdKSPQAPH6e7HTSMXzYk7bp"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "2152890383976",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/67-00e3a88121fa.jpg",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "zauth",
+      "proposedDesignKey": "pair-zauth",
+      "name": "zauthx402 Signature",
+      "exactIdentity": "zauthx402",
+      "symbol": "ZAUTH",
+      "kind": "meme",
+      "exactQuoteMint": "DNhQZ1CE9qZ2FNrVhsCXwQJ2vZG8ufZkcYakTS5Jpump",
+      "recognizableIdentityMotif": "The exact white square-dot Z matrix on a black field; preserve the grid pattern, dot count and arrangement rather than replacing it with a normal Z.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#171719",
+          "#CDCED0",
+          "#F5F5EF"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use black ceramic, precise square-cut ivory enamel and polished chrome. Integrate small exact identity details from the supplied ZAUTH reference into the outer perimeter only, never covering the creator art, name, pair or details surfaces.",
+      "reverseHero": "The exact ZAUTH identity from the supplied source image as the dominant reverse hero. The exact white square-dot Z matrix on a black field; preserve the grid pattern, dot count and arrangement rather than replacing it with a normal Z. Surround it with black ceramic, precise square-cut ivory enamel and polished chrome, consistent with the front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "zauth",
+        "symbol": "ZAUTH",
+        "name": "zauthx402",
+        "mint": "DNhQZ1CE9qZ2FNrVhsCXwQJ2vZG8ufZkcYakTS5Jpump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "zauthx402",
+          "symbol": "ZAUTH",
+          "uri": "https://ipfs.io/ipfs/bafkreid6lwehwirbjutdvccl3vuf5o5r7fdo2mokjamtxurjeo3kzv6zva",
+          "source": "Token2022 inline metadata"
+        },
+        "metadataUri": "https://ipfs.io/ipfs/bafkreid6lwehwirbjutdvccl3vuf5o5r7fdo2mokjamtxurjeo3kzv6zva",
+        "imageUri": "https://ipfs.io/ipfs/bafkreib23vtffeavvpg4uelnkzyhafga66kd7i3lrjw2ork6abxyptnkg4",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+        "pumpPageReference": "https://pump.fun/coin/DNhQZ1CE9qZ2FNrVhsCXwQJ2vZG8ufZkcYakTS5Jpump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/bafkreid6lwehwirbjutdvccl3vuf5o5r7fdo2mokjamtxurjeo3kzv6zva",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://gateway.pinata.cloud/ipfs/bafkreid6lwehwirbjutdvccl3vuf5o5r7fdo2mokjamtxurjeo3kzv6zva",
+            "status": 200,
+            "contentSha256": "7e5d887b22214d263a884bdd685ebbb1f946ed31ca48193bd22923b6acd7d9a8",
+            "contentType": "application/json"
+          }
+        ],
+        "metadataResolvedUri": "https://gateway.pinata.cloud/ipfs/bafkreid6lwehwirbjutdvccl3vuf5o5r7fdo2mokjamtxurjeo3kzv6zva",
+        "metadataName": "zauthx402",
+        "metadataSymbol": "ZAUTH",
+        "projectWebsite": "https://zauthx402.com",
+        "projectTwitter": "https://x.com/zauthx402",
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/zauth-3add66529015.png",
+          "sha256": "3add66529015abcdca116d56707014c0f7943fa36b8a6da7455e006f87cdaa37",
+          "bytes": 203627,
+          "width": 1024,
+          "height": 1024,
+          "mode": "RGBA",
+          "format": "PNG",
+          "frames": 1,
+          "contentType": "image/png",
+          "referenceSourceUri": "https://ipfs.io/ipfs/bafkreib23vtffeavvpg4uelnkzyhafga66kd7i3lrjw2ork6abxyptnkg4",
+          "downloadUri": "https://ipfs.filebase.io/ipfs/bafkreib23vtffeavvpg4uelnkzyhafga66kd7i3lrjw2ork6abxyptnkg4",
+          "resolvedUri": "https://ipfs.filebase.io/ipfs/bafkreib23vtffeavvpg4uelnkzyhafga66kd7i3lrjw2ork6abxyptnkg4",
+          "attempts": [
+            {
+              "uri": "https://ipfs.io/ipfs/bafkreib23vtffeavvpg4uelnkzyhafga66kd7i3lrjw2ork6abxyptnkg4",
+              "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+            },
+            {
+              "uri": "https://ipfs.filebase.io/ipfs/bafkreib23vtffeavvpg4uelnkzyhafga66kd7i3lrjw2ork6abxyptnkg4",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        }
+      },
+      "onChainIdentityEvidence": {
+        "key": "zauth",
+        "symbol": "ZAUTH",
+        "name": "zauthx402",
+        "mint": "DNhQZ1CE9qZ2FNrVhsCXwQJ2vZG8ufZkcYakTS5Jpump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "zauthx402",
+          "symbol": "ZAUTH",
+          "uri": "https://ipfs.io/ipfs/bafkreid6lwehwirbjutdvccl3vuf5o5r7fdo2mokjamtxurjeo3kzv6zva",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "1829871704850",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/zauth-3add66529015.png",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "kins",
+      "proposedDesignKey": "pair-kins",
+      "name": "Kintara Signature",
+      "exactIdentity": "Kintara",
+      "symbol": "KINS",
+      "kind": "meme",
+      "exactQuoteMint": "Tqj8yFmagrg7oorpQkVGYR52r96RFTamvWfth9bpump",
+      "recognizableIdentityMotif": "The exact tan low-poly cube face with two vertical rectangular black eyes on the blue source field; preserve proportions and expression.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#302A23",
+          "#C6A984",
+          "#82D1F7"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use sand-colored ceramic, sky-blue enamel and satin warm metal. Integrate small exact identity details from the supplied KINS reference into the outer perimeter only, never covering the creator art, name, pair or details surfaces.",
+      "reverseHero": "The exact KINS identity from the supplied source image as the dominant reverse hero. The exact tan low-poly cube face with two vertical rectangular black eyes on the blue source field; preserve proportions and expression. Surround it with sand-colored ceramic, sky-blue enamel and satin warm metal, consistent with the front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "kins",
+        "symbol": "KINS",
+        "name": "Kintara",
+        "mint": "Tqj8yFmagrg7oorpQkVGYR52r96RFTamvWfth9bpump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "Kintara",
+          "symbol": "KINS",
+          "uri": "https://ipfs.io/ipfs/bafkreidr2p6px6af45fqfspwlbd37jvupcoviau6it7ngg47aycg2mh6qy",
+          "source": "Token2022 inline metadata"
+        },
+        "metadataUri": "https://ipfs.io/ipfs/bafkreidr2p6px6af45fqfspwlbd37jvupcoviau6it7ngg47aycg2mh6qy",
+        "imageUri": "https://ipfs.io/ipfs/bafybeicincod6gebb2wkef7mtlibmz6scduj25lxjlk75qv3o4mpxwdfau",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+        "pumpPageReference": "https://pump.fun/coin/Tqj8yFmagrg7oorpQkVGYR52r96RFTamvWfth9bpump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/bafkreidr2p6px6af45fqfspwlbd37jvupcoviau6it7ngg47aycg2mh6qy",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://gateway.pinata.cloud/ipfs/bafkreidr2p6px6af45fqfspwlbd37jvupcoviau6it7ngg47aycg2mh6qy",
+            "status": 200,
+            "contentSha256": "71d3fcfbf805e74b02c9f65847bfa6b4789d54029e44fed31b9f06046d30fe86",
+            "contentType": "application/json"
+          }
+        ],
+        "metadataResolvedUri": "https://gateway.pinata.cloud/ipfs/bafkreidr2p6px6af45fqfspwlbd37jvupcoviau6it7ngg47aycg2mh6qy",
+        "metadataName": "Kintara",
+        "metadataSymbol": "KINS",
+        "projectWebsite": "https://kintara.gg/",
+        "projectTwitter": "https://x.com/PlayKintara/status/2057876357221114027",
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/kins-fd8bdc66f477.png",
+          "sha256": "fd8bdc66f477c09106bfb61e4f3745607d668e961413c863c9bf2118f6358643",
+          "bytes": 1080893,
+          "width": 600,
+          "height": 600,
+          "mode": "RGB",
+          "format": "PNG",
+          "frames": 1,
+          "contentType": "image/png",
+          "referenceSourceUri": "https://ipfs.io/ipfs/bafybeicincod6gebb2wkef7mtlibmz6scduj25lxjlk75qv3o4mpxwdfau",
+          "downloadUri": "https://ipfs.filebase.io/ipfs/bafybeicincod6gebb2wkef7mtlibmz6scduj25lxjlk75qv3o4mpxwdfau",
+          "resolvedUri": "https://ipfs.filebase.io/ipfs/bafybeicincod6gebb2wkef7mtlibmz6scduj25lxjlk75qv3o4mpxwdfau",
+          "attempts": [
+            {
+              "uri": "https://ipfs.io/ipfs/bafybeicincod6gebb2wkef7mtlibmz6scduj25lxjlk75qv3o4mpxwdfau",
+              "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+            },
+            {
+              "uri": "https://ipfs.filebase.io/ipfs/bafybeicincod6gebb2wkef7mtlibmz6scduj25lxjlk75qv3o4mpxwdfau",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        }
+      },
+      "onChainIdentityEvidence": {
+        "key": "kins",
+        "symbol": "KINS",
+        "name": "Kintara",
+        "mint": "Tqj8yFmagrg7oorpQkVGYR52r96RFTamvWfth9bpump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "Kintara",
+          "symbol": "KINS",
+          "uri": "https://ipfs.io/ipfs/bafkreidr2p6px6af45fqfspwlbd37jvupcoviau6it7ngg47aycg2mh6qy",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "9419784896073",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/kins-fd8bdc66f477.png",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "percolator",
+      "proposedDesignKey": "pair-percolator",
+      "name": "Percolator Signature",
+      "exactIdentity": "Percolator",
+      "symbol": "Percolator",
+      "kind": "meme",
+      "exactQuoteMint": "8PzFWyLpCVEmbZmVJcaRTU5r69XKJx1rd7YGpWvnpump",
+      "recognizableIdentityMotif": "The exact Percolator gradient wordmark on black, preserving its authentic lettering, spacing and violet-to-teal treatment under the owner\u2019s scoped exact-logo-lettering approval.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#111417",
+          "#816EE8",
+          "#19BEA6"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use black ceramic, violet-to-teal enamel and satin platinum. Integrate small exact identity details from the supplied Percolator reference into the outer perimeter only, never covering the creator art, name, pair or details surfaces.",
+      "reverseHero": "The exact Percolator identity from the supplied source image as the dominant reverse hero. The exact Percolator gradient wordmark on black, preserving its authentic lettering, spacing and violet-to-teal treatment under the owner\u2019s scoped exact-logo-lettering approval. Surround it with black ceramic, violet-to-teal enamel and satin platinum, consistent with the front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "percolator",
+        "symbol": "Percolator",
+        "name": "Percolator",
+        "mint": "8PzFWyLpCVEmbZmVJcaRTU5r69XKJx1rd7YGpWvnpump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "Percolator",
+          "symbol": "Percolator",
+          "uri": "https://ipfs.io/ipfs/bafkreider2uqxzmksmpgyg2h6zwhesaehblaihllgv7eiwmgazn5ot5li4",
+          "source": "4oBmBbbZa7pJhJxyWKAZFRwQ1igPwtTAasBEuxodencu"
+        },
+        "metadataUri": "https://ipfs.io/ipfs/bafkreider2uqxzmksmpgyg2h6zwhesaehblaihllgv7eiwmgazn5ot5li4",
+        "imageUri": "https://ipfs.io/ipfs/bafkreih5dhwat3y3azcoe5d4c2ct2l6rpkuexrthn6jaufrojusc7nh4pm",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact on-chain metadata CID resolved through a content-equivalent public gateway; visual inspection pending",
+        "pumpPageReference": "https://pump.fun/coin/8PzFWyLpCVEmbZmVJcaRTU5r69XKJx1rd7YGpWvnpump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://ipfs.filebase.io/ipfs/bafkreider2uqxzmksmpgyg2h6zwhesaehblaihllgv7eiwmgazn5ot5li4",
+            "status": 200,
+            "contentSha256": "648ea90be58a931e6c1b47f66c7248043856041d6b357e445986065bd74fab47",
+            "contentType": "application/json"
+          }
+        ],
+        "metadataResolvedUri": "https://ipfs.filebase.io/ipfs/bafkreider2uqxzmksmpgyg2h6zwhesaehblaihllgv7eiwmgazn5ot5li4",
+        "metadataName": "Percolator",
+        "metadataSymbol": "Percolator",
+        "projectWebsite": "https://github.com/aeyakovenko/percolator",
+        "projectTwitter": "https://x.com/FabianoSolana/status/1980187433242378362",
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/percolator-fd19ec09ef1b.jpg",
+          "sha256": "fd19ec09ef1b0644e2747c16853d2fd17aa84bc6676f920a162e4d242fb4fc7b",
+          "bytes": 8223,
+          "width": 512,
+          "height": 512,
+          "mode": "RGB",
+          "format": "JPEG",
+          "frames": 1,
+          "contentType": "image/jpeg",
+          "referenceSourceUri": "https://ipfs.io/ipfs/bafkreih5dhwat3y3azcoe5d4c2ct2l6rpkuexrthn6jaufrojusc7nh4pm",
+          "downloadUri": "https://ipfs.filebase.io/ipfs/bafkreih5dhwat3y3azcoe5d4c2ct2l6rpkuexrthn6jaufrojusc7nh4pm",
+          "resolvedUri": "https://ipfs.filebase.io/ipfs/bafkreih5dhwat3y3azcoe5d4c2ct2l6rpkuexrthn6jaufrojusc7nh4pm",
+          "attempts": [
+            {
+              "uri": "https://ipfs.io/ipfs/bafkreih5dhwat3y3azcoe5d4c2ct2l6rpkuexrthn6jaufrojusc7nh4pm",
+              "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+            },
+            {
+              "uri": "https://ipfs.filebase.io/ipfs/bafkreih5dhwat3y3azcoe5d4c2ct2l6rpkuexrthn6jaufrojusc7nh4pm",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        }
+      },
+      "onChainIdentityEvidence": {
+        "key": "percolator",
+        "symbol": "Percolator",
+        "name": "Percolator",
+        "mint": "8PzFWyLpCVEmbZmVJcaRTU5r69XKJx1rd7YGpWvnpump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "Percolator",
+          "symbol": "Percolator",
+          "uri": "https://ipfs.io/ipfs/bafkreider2uqxzmksmpgyg2h6zwhesaehblaihllgv7eiwmgazn5ot5li4",
+          "source": "4oBmBbbZa7pJhJxyWKAZFRwQ1igPwtTAasBEuxodencu"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "1819598824538",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/percolator-fd19ec09ef1b.jpg",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "jotchua",
+      "proposedDesignKey": "pair-jotchua",
+      "name": "Jotchua Signature",
+      "exactIdentity": "Jotchua",
+      "symbol": "Jotchua",
+      "kind": "meme",
+      "exactQuoteMint": "BcHEaaTCvycPwwsJ9yQTXdHP9X2gCLkznDbZ8VySpump",
+      "recognizableIdentityMotif": "The exact cream-colored small dog portrait with large dark eyes and rounded head in the source photograph. Original primary Pump fallback is64px.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#342A22",
+          "#C9B18E",
+          "#EFE4D1"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use warm ivory ceramic, pale gold and sand enamel. Integrate only small source-faithful identity details in the outer perimeter, outside all shared creator-content apertures.",
+      "reverseHero": "The exact cream-colored small dog portrait with large dark eyes and rounded head in the source photograph. Original primary Pump fallback is64px. Make this exact identity the reverse hero with warm ivory ceramic, pale gold and sand enamel, matching its front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "jotchua",
+        "symbol": "Jotchua",
+        "name": "Jotchua",
+        "mint": "BcHEaaTCvycPwwsJ9yQTXdHP9X2gCLkznDbZ8VySpump",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "Jotchua",
+          "symbol": "Jotchua",
+          "uri": "https://meta.uxento.io/data/977d8de8-1c11-48e1-b87c-8a8a8a77ce4d",
+          "source": "Token2022 inline metadata"
+        },
+        "metadataUri": "https://meta.uxento.io/data/977d8de8-1c11-48e1-b87c-8a8a8a77ce4d",
+        "imageUri": null,
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Primary exact-mint Pump page fallback image URI observed; on-chain metadata resolution failure retained",
+        "pumpPageReference": "https://pump.fun/coin/BcHEaaTCvycPwwsJ9yQTXdHP9X2gCLkznDbZ8VySpump",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://meta.uxento.io/data/977d8de8-1c11-48e1-b87c-8a8a8a77ce4d",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://meta.uxento.io/data/977d8de8-1c11-48e1-b87c-8a8a8a77ce4d",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://meta.uxento.io/data/977d8de8-1c11-48e1-b87c-8a8a8a77ce4d",
+            "error": "<urlopen error timed out>"
+          },
+          {
+            "uri": "https://meta.uxento.io/data/977d8de8-1c11-48e1-b87c-8a8a8a77ce4d",
+            "error": "<urlopen error timed out>"
+          }
+        ],
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/jotchua-c3c31b4fd97d.jpg",
+          "sha256": "c3c31b4fd97dbe0de6125bf367fbcc7d0f5fe9886c3228411fedb7fb5a2c08e1",
+          "bytes": 1938,
+          "width": 64,
+          "height": 64,
+          "mode": "RGB",
+          "format": "JPEG",
+          "frames": 1,
+          "contentType": "image/jpeg",
+          "referenceSourceUri": "https://images.pump.fun/coin-image/BcHEaaTCvycPwwsJ9yQTXdHP9X2gCLkznDbZ8VySpump?placeholder=none&variant=64x64",
+          "downloadUri": "https://images.pump.fun/coin-image/BcHEaaTCvycPwwsJ9yQTXdHP9X2gCLkznDbZ8VySpump?placeholder=none&variant=64x64",
+          "resolvedUri": "https://images.pump.fun/coin-image/BcHEaaTCvycPwwsJ9yQTXdHP9X2gCLkznDbZ8VySpump?placeholder=none&variant=64x64",
+          "attempts": [
+            {
+              "uri": "https://images.pump.fun/coin-image/BcHEaaTCvycPwwsJ9yQTXdHP9X2gCLkznDbZ8VySpump?placeholder=none&variant=64x64",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        },
+        "pumpImageOriginalUri": "https://images.pump.fun/coin-image/BcHEaaTCvycPwwsJ9yQTXdHP9X2gCLkznDbZ8VySpump?placeholder=none&variant=64x64",
+        "pumpImageObservedVia": "Official Pump exact-mint page image link27 observed30October2026; only64pxfallbacksourceknown,sourcequalityrequiresinspection.",
+        "referenceSuitability": "Small exact original reference. Preserve recognizable source features; do not claim originalHD detail. Root quality review required."
+      },
+      "onChainIdentityEvidence": {
+        "key": "jotchua",
+        "symbol": "Jotchua",
+        "name": "Jotchua",
+        "mint": "BcHEaaTCvycPwwsJ9yQTXdHP9X2gCLkznDbZ8VySpump",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "Jotchua",
+          "symbol": "Jotchua",
+          "uri": "https://meta.uxento.io/data/977d8de8-1c11-48e1-b87c-8a8a8a77ce4d",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "2440813100352",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/jotchua-c3c31b4fd97d.jpg",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    },
+    {
+      "quoteKey": "zcat",
+      "proposedDesignKey": "pair-zcat",
+      "name": "Anonymous Cat Signature",
+      "exactIdentity": "Anonymous Cat",
+      "symbol": "ZCAT",
+      "kind": "meme",
+      "exactQuoteMint": "HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR",
+      "recognizableIdentityMotif": "The exact cat wearing a folded brown paper bag with eye holes, visible eyes/nose and pale paws, copied from the actual primary launchpad portrait crop.",
+      "palette": {
+        "proposedMaterialColors": [
+          "#352B20",
+          "#BEA16C",
+          "#F0E4CE"
+        ],
+        "identityColorRule": "Preserve exact source identity colors. These three values select surrounding base/metal/paper materials, not a recoloring of the mascot."
+      },
+      "frontBorderTheme": "Use folded-paper-colored enamel, warm copper-gold and cream ceramic. Integrate only small source-faithful identity details in the outer perimeter, outside all shared creator-content apertures.",
+      "reverseHero": "The exact cat wearing a folded brown paper bag with eye holes, visible eyes/nose and pale paws, copied from the actual primary launchpad portrait crop. Make this exact identity the reverse hero with folded-paper-colored enamel, warm copper-gold and cream ceramic, matching its front; no unrelated generic motif.",
+      "sourceReferences": {
+        "key": "zcat",
+        "symbol": "ZCAT",
+        "name": "Anonymous Cat",
+        "mint": "HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR",
+        "existingRegistry": false,
+        "identitySource": "https://pump.fun/docs/custom-pairs",
+        "onchainMetadata": {
+          "name": "Anonymous Cat",
+          "symbol": "ZCAT",
+          "uri": "https://gateway.irys.xyz/GNy6d9dhhEuxFBqKb8Egm5beiRML4fDUS6zuKQuTs7Ys",
+          "source": "Token2022 inline metadata"
+        },
+        "metadataUri": "https://gateway.irys.xyz/GNy6d9dhhEuxFBqKb8Egm5beiRML4fDUS6zuKQuTs7Ys",
+        "imageUri": "https://www.stonkfun.xyz/api/og/token/HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR",
+        "imageBytesDownloaded": true,
+        "visualInspection": "inspected-original-reference",
+        "imageStatus": "Exact-mint primarylaunchpadOGsource observed; originalmintmetadatahostfailure retained. Isolateactualtoken-imageportionforidentityreferenceaftervisualinspection; do notcopylaunchpadUI/text.",
+        "pumpPageReference": "https://pump.fun/coin/HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR",
+        "equivalentMetadataAttempts": [
+          {
+            "uri": "https://gateway.irys.xyz/GNy6d9dhhEuxFBqKb8Egm5beiRML4fDUS6zuKQuTs7Ys",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://arweave.net/GNy6d9dhhEuxFBqKb8Egm5beiRML4fDUS6zuKQuTs7Ys",
+            "error": "HTTP Error 404: Not Found"
+          },
+          {
+            "uri": "https://gateway.irys.xyz/GNy6d9dhhEuxFBqKb8Egm5beiRML4fDUS6zuKQuTs7Ys",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://arweave.net/GNy6d9dhhEuxFBqKb8Egm5beiRML4fDUS6zuKQuTs7Ys",
+            "error": "HTTP Error 404: Not Found"
+          },
+          {
+            "uri": "https://gateway.irys.xyz/GNy6d9dhhEuxFBqKb8Egm5beiRML4fDUS6zuKQuTs7Ys",
+            "error": "<urlopen error [Errno 8] nodename nor servname provided, or not known>"
+          },
+          {
+            "uri": "https://arweave.net/GNy6d9dhhEuxFBqKb8Egm5beiRML4fDUS6zuKQuTs7Ys",
+            "error": "HTTP Error 404: Not Found"
+          }
+        ],
+        "referenceIntake": {
+          "status": "downloaded-pending-visual-inspection",
+          "visualInspection": "inspected-original-reference",
+          "path": "expansion-references/zcat-9c83e6d3e88a.png",
+          "sha256": "9c83e6d3e88a6e06d269af80018976d67f64d33b39be679ffab59f7a3ca1c269",
+          "bytes": 77537,
+          "width": 1200,
+          "height": 630,
+          "mode": "RGBA",
+          "format": "PNG",
+          "frames": 1,
+          "contentType": "image/png",
+          "referenceSourceUri": "https://www.stonkfun.xyz/api/og/token/HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR",
+          "downloadUri": "https://www.stonkfun.xyz/api/og/token/HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR",
+          "resolvedUri": "https://www.stonkfun.xyz/api/og/token/HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR",
+          "attempts": [
+            {
+              "uri": "https://www.stonkfun.xyz/api/og/token/HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR",
+              "httpStatus": 200
+            }
+          ],
+          "downloadPurpose": "Original exact-identity image reference intake for planned future Higgsfield artwork only",
+          "deterministicIdentityCrop": {
+            "path": "expansion-references/zcat-og-identity-crop.png",
+            "sha256": "4a42113222fe75b160e2f14b9bd495d8b6c3b97943740cc2e3f777d9c351629d",
+            "width": 113,
+            "height": 113,
+            "cropBox": [
+              63,
+              69,
+              176,
+              182
+            ],
+            "transform": "Pixel crop of actual token portrait from primary exact-mint StonkFun OG image; no resizing, retouching, new imagery or typography. Full primary original retained.",
+            "parentSha256": "9c83e6d3e88a6e06d269af80018976d67f64d33b39be679ffab59f7a3ca1c269"
+          },
+          "visualInspectionDate": "2026-10-30",
+          "inspectionScope": "Identity image only; no generated card artwork accepted."
+        },
+        "imageSourceKind": "primary-launchpad-exact-mint-og-image",
+        "primaryLaunchpadReference": "https://www.stonkfun.xyz/token/HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR",
+        "primaryLaunchpadPageProof": {
+          "path": "research/expansion-fallback-zcat-stonkfun.html",
+          "sha256": "2118d11436f4fc9127b371ad18ec7f58a320ba189cb9e867b78b84d7049d1a94",
+          "exactMintPresentInHtml": true,
+          "nextDataIdentity": {
+            "mint": "HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR",
+            "symbol": "ZCAT",
+            "name": "Anonymous Cat",
+            "quoteSymbol": "ZEC"
+          },
+          "observedOgImage": "https://www.stonkfun.xyz/api/og/token/HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR"
+        },
+        "referenceSuitability": "The actual mascot portrait is113px cropped from primary launchpad OG image; full1200x630original is a proof, not an HD standalone token image."
+      },
+      "onChainIdentityEvidence": {
+        "key": "zcat",
+        "symbol": "ZCAT",
+        "name": "Anonymous Cat",
+        "mint": "HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR",
+        "existingRegistry": false,
+        "accountSlot": 463060744,
+        "metadata": {
+          "name": "Anonymous Cat",
+          "symbol": "ZCAT",
+          "uri": "https://gateway.irys.xyz/GNy6d9dhhEuxFBqKb8Egm5beiRML4fDUS6zuKQuTs7Ys",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 9,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "85063995074987",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        }
+      },
+      "constructionReference": {
+        "front": "app/public/assets/carddex/render/doge.png",
+        "back": "app/public/assets/carddex/token-backs/doge.png",
+        "purpose": "Approved current shared print and thin rounded construction only; never copy Doge identity."
+      },
+      "visualReferenceReview": {
+        "status": "inspected-original-reference",
+        "proof": "research/expansion-reference-proof-index.json",
+        "scope": "Actual source identity only; root must review generated card artwork separately."
+      },
+      "generationGate": "Full-resolution exact identity reference must be pinned and supplied to Higgsfield alongside the approved construction reference. Source-matched logo lettering is approved; no extra theme labels, numbers, serials or platform lettering. Never infer a mascot from its name.",
+      "generationReferencePath": "expansion-references/zcat-og-identity-crop.png",
+      "incidentalTextRule": "Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels."
+    }
+  ],
+  "downloadedReferenceCount": 21,
+  "visuallyInspectedReferenceCount": 21
+}

@@ -1,0 +1,56 @@
+{
+  "requests": [
+    {
+      "index": 62,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: aura (aura). The exact aura token-image identity with its source silhouette and proportions preserved. Reproduce the actual supplied Image 2 logo/mascot with its distinctive features and exact authentic lettering, never a generic substitute. Match the completed front Image 1 materials and source-faithful palette. No extra labels, ticker names, platform marks, numbers or footer boxes.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips or divided front-label remnants anywhere on the back. Do not copy the front name/ticker/description panel shapes. The ENTIRE reverse, including the top band, must form one continuous finished identity composition in the matching native metal/ceramic/lacquer material. Only authentic lettering contained in the exact source logo is allowed.\n\nEXACT SOURCE ANCHOR: The real supplied AURA identity is the reclining gray cat photograph. Preserve this actual cat pose and face; do not invent an aura orb, halo or abstract energy identity.\n\nFINAL EXACT-IDENTITY CHECK: The central reverse hero MUST be the actual supplied Image2 identity of aura. Never copy the Doge portrait or any unrelated mascot from construction Image3. Image3 controls physical manufacture only. The entire visible identity must match the source Image2, including its exact logo geometry or actual face/pose. A generic substitute or inherited construction mascot is a failed output.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "0757b9ff-0235-4348-bde5-4af722f13f62"
+          },
+          {
+            "role": "image",
+            "value": "5231e766-c911-44f0-9e90-3bd0b62428e6"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ]
+      }
+    },
+    {
+      "index": 64,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: michi (MICHI). The exact michi portrait/character, rather than Spark\u2019s mineral ornament. Reproduce the actual supplied Image 2 logo/mascot with its distinctive features and exact authentic lettering, never a generic substitute. Match the completed front Image 1 materials and source-faithful palette. No extra labels, ticker names, platform marks, numbers or footer boxes.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips or divided front-label remnants anywhere on the back. Do not copy the front name/ticker/description panel shapes. The ENTIRE reverse, including the top band, must form one continuous finished identity composition in the matching native metal/ceramic/lacquer material. Only authentic lettering contained in the exact source logo is allowed.\n\nFINAL EXACT-IDENTITY CHECK: The central reverse hero MUST be the actual supplied Image2 identity of michi. Never copy the Doge portrait or any unrelated mascot from construction Image3. Image3 controls physical manufacture only. The entire visible identity must match the source Image2, including its exact logo geometry or actual face/pose. A generic substitute or inherited construction mascot is a failed output.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "9bd05d75-9e98-41a2-b340-a5ea8504cc68"
+          },
+          {
+            "role": "image",
+            "value": "351e0111-b997-4c82-8a8a-f4e9fc9ef546"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ]
+      }
+    }
+  ]
+}

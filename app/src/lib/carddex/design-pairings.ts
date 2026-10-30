@@ -1,12 +1,18 @@
+import { ACTIVE_PAIR_DESIGNS } from "./pair-designs";
+
 /** Exact design/quote policy; assets and live admission are resolved separately. */
-export const DESIGN_QUOTE_KEYS = Object.freeze({
+export const LEGACY_DESIGN_QUOTE_KEYS = Object.freeze({
   "stock-gme": "gmex", "stock-tsla": "tslax", "stock-nvda": "nvdax",
   "stock-aapl": "aaplx", "stock-mstr": "mstrx", "stock-coin": "coinx",
   gamestop: "gmex", amc: "amc", coinbase: "coinx", strategy: "mstrx",
   doge: "doge", bonk: "bonk", wif: "wif",
 } as const);
+export const DESIGN_QUOTE_KEYS:Readonly<Record<string,string>>=Object.freeze({
+  ...LEGACY_DESIGN_QUOTE_KEYS,
+  ...Object.fromEntries(ACTIVE_PAIR_DESIGNS.map(design=>[design.key,design.quoteKey])),
+});
 
-export const PREFERRED_PAIR_DESIGNS: Readonly<Record<string,string>> = Object.freeze({
+const LEGACY_PREFERRED_PAIR_DESIGNS: Readonly<Record<string,string>> = Object.freeze({
   gmex: "stock-gme", tslax: "stock-tsla", nvdax: "stock-nvda",
   aaplx: "stock-aapl", mstrx: "stock-mstr", coinx: "stock-coin",
   amc: "amc", doge: "doge", bonk: "bonk", wif: "wif",
@@ -18,12 +24,16 @@ export const PREFERRED_PAIR_DESIGNS: Readonly<Record<string,string>> = Object.fr
   vine: "magic-etched", aura: "nova", michi: "spark", cate: "ronin",
   ansem: "sovereign", bert: "legend", chillhouse: "abyssal", usduc: "surge",
 });
+export const PREFERRED_PAIR_DESIGNS:Readonly<Record<string,string>>=Object.freeze({
+  ...LEGACY_PREFERRED_PAIR_DESIGNS,
+  ...Object.fromEntries(ACTIVE_PAIR_DESIGNS.map(design=>[design.quoteKey,design.key])),
+});
 
 /**
  * Explicit chooser presets, not new restrictions on existing design identities.
  * Historical neutral cards keep their stored SOL, stock or other quote unchanged.
  */
-export const MEME_PAIR_PRESETS = Object.freeze([
+export const LEGACY_MEME_PAIR_PRESETS = Object.freeze([
   {design:"obsidian-archive",quote:"cards"},
   {design:"pokemon-classic",quote:"sv151"},
   {design:"pokemon-full-art",quote:"sv151"},
@@ -56,3 +66,9 @@ export const MEME_PAIR_PRESETS = Object.freeze([
   {design:"abyssal",quote:"chillhouse"},
   {design:"surge",quote:"usduc"},
 ] as const);
+
+/** New exact identities replace chooser recommendations, never historical saved designs or quotes. */
+export const MEME_PAIR_PRESETS:readonly {design:string;quote:string}[]=Object.freeze([
+  ...LEGACY_MEME_PAIR_PRESETS.filter(preset=>!ACTIVE_PAIR_DESIGNS.some(design=>design.quoteKey===preset.quote)),
+  ...ACTIVE_PAIR_DESIGNS.filter(design=>design.category==="memes").map(design=>({design:design.key,quote:design.quoteKey})),
+]);

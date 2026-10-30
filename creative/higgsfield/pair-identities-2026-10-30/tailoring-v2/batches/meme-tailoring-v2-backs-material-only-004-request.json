@@ -1,0 +1,45 @@
+{
+  "context": "Create unique pictorial meme card artwork with exact identities and matching cropped material references.",
+  "requests": [
+    {
+      "index": 537,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "28956d45-d076-4290-86ee-f10e98438f66"
+          },
+          {
+            "role": "image",
+            "value": "b5b3b7c0-8639-4894-b0b6-00b8e090ab4d"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact white angular open P-and-money monogram on black with doubled line and curved bowl. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact source monogram sits in an open doubled-outline relief field whose negative-space channels continue to the card edge. The unique outer frame follows this character: Double-outline perimeter: open white paired rails, angular P-stem corner turns and one broad curved bowl-like side return. Matching materials: Black ceramic, raised white enamel and fine polished palladium. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    },
+    {
+      "index": 538,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "c845a541-652d-4e9a-afb4-b5a9dfcb460e"
+          },
+          {
+            "role": "image",
+            "value": "76247f2b-5e4d-4df9-8254-78e3043fe49c"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact blue/white Pudgy Penguin mark, black outline, white belly and orange beak. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact source penguin crop on a smooth blue field surrounded by layered flipper-curve relief and a rounded white-belly contour. The unique outer frame follows this character: Friendly broad flipper-curve rail geometry, white-belly arch relief and a tiny orange beak-shaped join at a corner; no sharp royal ornament. Matching materials: Blue and warm-white enamel, clean platinum edges, small orange glass accents. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    }
+  ]
+}

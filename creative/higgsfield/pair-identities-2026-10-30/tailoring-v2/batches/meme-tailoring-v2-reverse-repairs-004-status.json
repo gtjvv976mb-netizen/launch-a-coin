@@ -1,0 +1,31 @@
+{
+  "derivedFrom": "batches/tailoring-v2-reverse-repairs-group-2-status-4-1793330999110.json",
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 807,
+        "job_id": "9ac1cb8c-d776-4bf0-a29b-ff374cc35195",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_032923_9ac1cb8c-d776-4bf0-a29b-ff374cc35195.png"
+      },
+      {
+        "index": 808,
+        "job_id": "20086d97-8bac-402e-b7a7-835ad9a09808",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_032923_20086d97-8bac-402e-b7a7-835ad9a09808.png"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "completed": 4,
+      "failed": 0,
+      "active": 0,
+      "errors": 0
+    },
+    "all_terminal": true
+  }
+}

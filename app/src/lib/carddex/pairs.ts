@@ -1,8 +1,9 @@
 import verifiedAssets from "./pair-assets.json";
 import { CARD_DESIGNS, isCardDesignKey } from "./designs";
 import { DESIGN_QUOTE_KEYS, MEME_PAIR_PRESETS, PREFERRED_PAIR_DESIGNS } from "./design-pairings";
+import { activePairDesignForQuote } from "./pair-designs";
 
-export const PAIR_ASSET_KEYS = ["sol", "usdc", "gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc", "doge", "fartcoin", "pnut", "moodeng", "troll", "bonk", "wif", "cards", "sv151", "toad", "pengu", "giga", "spx", "trump", "useless", "chillguy", "goat", "zerebro", "act", "pippin", "vine", "aura", "michi", "cate", "ansem", "bert", "chillhouse", "usduc"] as const;
+export const PAIR_ASSET_KEYS = ["sol", "usdc", "gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc", "doge", "fartcoin", "pnut", "moodeng", "troll", "bonk", "wif", "cards", "sv151", "toad", "pengu", "giga", "spx", "trump", "useless", "chillguy", "goat", "zerebro", "act", "pippin", "vine", "aura", "michi", "cate", "ansem", "bert", "chillhouse", "usduc", "wbtc", "eth", "hype", "zec", "near", "xrp", "xmr", "sui", "arb", "aave", "uni", "tao", "peaq", "mon", "cashcat", "neet", "otc", "fone", "buttcoin", "triplet", "cupsey", "alon", "jimothy", "lmao", "bobo", "tokabu", "manifest", "baton", "claw", "67", "zauth", "kins", "percolator", "jotchua", "zcat", "gork", "stonk", "solangeles", "paid", "pepe", "jeanphil", "pill", "biketyson", "npc", "wojak", "eacc", "hodl", "agency", "claudia", "shib", "swordcat", "plague", "pump", "alch", "pumpcade", "codec", "ape", "link", "ore", "skr"] as const;
 export type PairAssetKey = typeof PAIR_ASSET_KEYS[number];
 export type PairAsset = {
   key: PairAssetKey;
@@ -11,7 +12,7 @@ export type PairAsset = {
   mint: string;
   decimals: number;
   tokenProgram: string;
-  kind: "native" | "stable" | "stock" | "meme" | "collector";
+  kind: "native" | "stable" | "stock" | "meme" | "collector" | "crypto";
   issuer: string | null;
   issuerTerms: string | null;
   listingProvider?: string;
@@ -20,6 +21,9 @@ export type PairAsset = {
   verifiedAt: string;
   verificationSlot: number;
   admission: string;
+  /** Exact current program admission is distinct from inclusion in Pump's dated public table. */
+  listingStatus?: "direct-onchain";
+  listingNotice?: string;
   /** Reviewed on-chain snapshot for the local demo. Production resolves fresh account state. */
   initialVirtualQuoteReserves: string;
 };
@@ -27,7 +31,11 @@ export type PairAsset = {
 export const PAIR_ASSETS: readonly Readonly<PairAsset>[] = Object.freeze(verifiedAssets.map(asset => Object.freeze(asset as PairAsset)));
 const BY_KEY = new Map<string, Readonly<PairAsset>>(PAIR_ASSETS.map(asset => [asset.key, asset]));
 export const PAIR_ASSETS_SOURCE = "https://pump.fun/docs/custom-pairs";
-export const PAIR_ASSETS_VERIFIED_AT = "2026-10-29";
+export const PAIR_ASSETS_VERIFIED_AT = "2026-10-30";
+export const DIRECT_PAIR_NOTICE = "Direct QuoteControl-enabled; not found in the checked dated public table.";
+export function pairListingNotice(asset:Readonly<PairAsset>):string|null {
+  return asset.listingStatus==="direct-onchain" ? DIRECT_PAIR_NOTICE : null;
+}
 
 export function isPairAssetKey(value: unknown): value is PairAssetKey {
   return typeof value === "string" && BY_KEY.has(value);
@@ -40,7 +48,7 @@ export function getPairAsset(key?: string | null): Readonly<PairAsset> {
   return asset;
 }
 
-const DESIGN_QUOTES: Readonly<Record<string, PairAssetKey>> = DESIGN_QUOTE_KEYS;
+const DESIGN_QUOTES = DESIGN_QUOTE_KEYS as Readonly<Record<string, PairAssetKey>>;
 
 export function boundQuoteForDesign(designKey?: string): Readonly<PairAsset> | null {
   const key = designKey ? DESIGN_QUOTES[designKey] : undefined;
@@ -82,6 +90,8 @@ export function recommendedMemeQuoteForDesign(designKey: string, preferredQuoteK
 
 /** Matches both permanent bindings and explicitly selectable themed presets. */
 export function matchingDesignsForQuote(key: string) {
+  const exact=activePairDesignForQuote(key);
+  if(exact) return CARD_DESIGNS.filter(design=>design.key===exact.key);
   const presets = new Set(MEME_PAIR_PRESETS.filter(preset => preset.quote === key).map(preset => String(preset.design)));
   return CARD_DESIGNS.filter(design => boundQuoteForDesign(design.key)?.key === key || presets.has(design.key));
 }

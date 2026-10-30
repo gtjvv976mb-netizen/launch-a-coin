@@ -1,0 +1,153 @@
+{
+  "completedAt": "2026-10-29T23:49:05.570697+00:00",
+  "submittedJobs": 8,
+  "completedJobs": 8,
+  "quotedCredits": 22,
+  "actualItemizedDebitReturned": false,
+  "galleryCalls": 1,
+  "galleryAllFound": true,
+  "galleryReceipt": "pilot/gallery-receipt.json",
+  "masters": [
+    {
+      "quoteKey": "sol",
+      "index": 1,
+      "jobId": "9ace56db-43f6-4dce-a6f5-a0b837dccd9c",
+      "status": "completed",
+      "sourceUrl": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_234023_9ace56db-43f6-4dce-a6f5-a0b837dccd9c.png",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/sol-front.png",
+      "bytes": 3206188,
+      "sha256": "5065991660f946e4d32ebff7ef9edaeb7b7397eab43eb5d79cd7abe0f27a1efe",
+      "format": "PNG",
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "mode": "RGB",
+      "verifiedAt": "2026-10-29T23:41:07.864162+00:00"
+    },
+    {
+      "quoteKey": "sol",
+      "index": 2,
+      "jobId": "f097e8e0-c5b1-4981-ab2a-0e78289b21cd",
+      "status": "completed",
+      "sourceUrl": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_234316_f097e8e0-c5b1-4981-ab2a-0e78289b21cd.png",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/sol-back.png",
+      "bytes": 3788223,
+      "sha256": "01051ea724032127849c56dff56b7811dd8c8749c31d3d573f92ef7e8219e4c3",
+      "format": "PNG",
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "mode": "RGB",
+      "verifiedAt": "2026-10-29T23:44:55.808929+00:00"
+    },
+    {
+      "quoteKey": "tslax",
+      "index": 7,
+      "jobId": "f6748955-4ab4-4c95-be9c-374b38876fe6",
+      "status": "completed",
+      "sourceUrl": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_234024_f6748955-4ab4-4c95-be9c-374b38876fe6.png",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tslax-front.png",
+      "bytes": 3356480,
+      "sha256": "c3a8a63fe25491fdefa8363989cb93bd044a594321d1ee14e5701d6e043526d9",
+      "format": "PNG",
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "mode": "RGB",
+      "verifiedAt": "2026-10-29T23:41:07.950535+00:00"
+    },
+    {
+      "quoteKey": "tslax",
+      "index": 8,
+      "jobId": "746a3309-340b-4d7c-9c25-e015d1e2a277",
+      "status": "completed",
+      "sourceUrl": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_234316_746a3309-340b-4d7c-9c25-e015d1e2a277.png",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tslax-back.png",
+      "bytes": 5775036,
+      "sha256": "c1fec17bdee54f2d22ec7efc165260876978f6730a70c57047d587765134d126",
+      "format": "PNG",
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "mode": "RGB",
+      "verifiedAt": "2026-10-29T23:44:56.199180+00:00"
+    },
+    {
+      "quoteKey": "doge",
+      "index": 19,
+      "jobId": "8a8d61de-cf7e-495f-b695-648085e15329",
+      "status": "completed",
+      "sourceUrl": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_234023_8a8d61de-cf7e-495f-b695-648085e15329.png",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/doge-front.png",
+      "bytes": 3762192,
+      "sha256": "6be7f5c017fa5ba8cc93ac1a26d0ad2b92d2140e31acdc6c58003642cd844d5d",
+      "format": "PNG",
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "mode": "RGB",
+      "verifiedAt": "2026-10-29T23:41:08.047827+00:00"
+    },
+    {
+      "quoteKey": "doge",
+      "index": 20,
+      "jobId": "26c141f5-990e-4c38-bc15-dba56525278e",
+      "status": "completed",
+      "sourceUrl": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_234316_26c141f5-990e-4c38-bc15-dba56525278e.png",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/doge-back.png",
+      "bytes": 6124148,
+      "sha256": "79ae0c989f1bde99b07fd4e1194b7f274526e58c01314d09ea7f71ba7d3ecd05",
+      "format": "PNG",
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "mode": "RGB",
+      "verifiedAt": "2026-10-29T23:44:57.077376+00:00"
+    },
+    {
+      "quoteKey": "pnut",
+      "index": 23,
+      "jobId": "6e2c5962-982a-477a-be47-885f473a449f",
+      "status": "completed",
+      "sourceUrl": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_234023_6e2c5962-982a-477a-be47-885f473a449f.png",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/pnut-front.png",
+      "bytes": 3318255,
+      "sha256": "b49ca1ebff9111fefa8ac57b6f733839973ba48523cbc4bd2a5ae230478cdfab",
+      "format": "PNG",
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "mode": "RGB",
+      "verifiedAt": "2026-10-29T23:41:07.939363+00:00"
+    },
+    {
+      "quoteKey": "pnut",
+      "index": 24,
+      "jobId": "4cee6014-6a25-4aab-a9ff-603100b969b7",
+      "status": "completed",
+      "sourceUrl": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261029_234316_4cee6014-6a25-4aab-a9ff-603100b969b7.png",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/pnut-back.png",
+      "bytes": 5871839,
+      "sha256": "c37dd7628eec8bcd384bdec82bbc58b121be95b7d050ec4874f4240606352ecb",
+      "format": "PNG",
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "mode": "RGB",
+      "verifiedAt": "2026-10-29T23:44:56.210293+00:00"
+    }
+  ],
+  "proof": {
+    "path": "creative/higgsfield/pair-identities-2026-10-30/pilot/contact-proof.png",
+    "sha256": "7c10204b38f82ed7fd141799fa18bbb4cb1e30930fccff648c91e547f68a976b"
+  },
+  "remainingGenerationState": "Awaiting root pilot review; no further paid jobs authorized for automatic execution."
+}

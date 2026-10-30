@@ -1,0 +1,9 @@
+{
+  "status": "quarantined-no-retry",
+  "indices": [
+    94,
+    96
+  ],
+  "maximumQuotedCredits": 5.5,
+  "returnedKnownJobs": []
+}

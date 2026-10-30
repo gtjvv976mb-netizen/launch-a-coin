@@ -1,0 +1,565 @@
+{
+  "planId": "final8-backs-root-only",
+  "createdAt": "2026-10-30T01:59:30.395145+00:00",
+  "paidExecutor": "root-only",
+  "ledgerAndAcceptanceWriter": "crypto_pair_research",
+  "maximumImagesPerCall": 2,
+  "maximumKnownInFlightJobs": 4,
+  "providerAutomaticProjectCreation": false,
+  "folderId": null,
+  "startingKnownJobs": 8,
+  "startingQuotedCredits": 22,
+  "maximumFinalSubmissions": 16,
+  "maximumFinalQuotedCredits": 44,
+  "imageCount": 8,
+  "quotedPlanCredits": 22,
+  "worstCaseFinalJobsAfterPlan": 16,
+  "worstCaseFinalQuotedCreditsAfterPlan": 44,
+  "allEightFrontsActuallyAccepted": true,
+  "instructions": [
+    "Root is sole paid writer. Submit exact immutable2-image payloads, max4 known jobs globally in flight.",
+    "Each first reference is the actual accepted front job ID; exact confirmed source is second, back construction third.",
+    "Persist every full actual receipt immediately; no duplicate retry after an unknown outcome.",
+    "No quality correction reserve remains in final8 cap; explicitly reallocate unused main quality reserve before any additional job."
+  ],
+  "requests": [
+    {
+      "index": 202,
+      "quoteKey": "pump",
+      "acceptedFrontJobId": "2476f7d1-b25b-4878-adbd-afb59263028e",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/pump-front.png",
+      "acceptedFrontSha256": "5d54eca5d7ac588c3e3da3664819c5e33f518d77db272d87f211dc0e30be2b37",
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: Pump (PUMP), exact Solana quote mint pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn.\nACTUAL SOURCE AND MATERIAL CHECK: The large hero is the exact green-and-white diagonal capsule on its deep navy disk. White half at upper-right, mint lower-left, dark green outline, source shine. Do not change orientation or color halves, do not replace with a generic pill or alternate pump icon. Match the actual front\u2019s navy ceramic, mint enamel and cool palladium; retain colored identity rather than turning capsule monochrome gold.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "2476f7d1-b25b-4878-adbd-afb59263028e"
+          },
+          {
+            "role": "image",
+            "value": "1bc1874b-26e3-4b8f-818c-5dce386f6319"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ]
+      }
+    },
+    {
+      "index": 204,
+      "quoteKey": "alch",
+      "acceptedFrontJobId": "98b9b952-e006-4504-a656-c79ac833e864",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/alch-front.png",
+      "acceptedFrontSha256": "1718bdff9d2720463bae163d963bdf7b37aa7c83b5a8aaa4442901490f66b272",
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: Alchemist AI (ALCH), exact Solana quote mint HNg5PYJmtqcmzXrv6S9zP1CDKk5BgDuyFBxbvNApump.\nACTUAL SOURCE AND MATERIAL CHECK: The large hero must retain the source red pixelated A, precise gold/yellow highlights and tiny square light pixels on nearly black. Preserve the native pixel geometry as a premium enamel mosaic with crisp square cuts, not a smooth alphabet A, wizard, flask, pentagram or unrelated logo. Match black ceramic, ruby and gold from the actual front. No extra alphabet letters or words.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "98b9b952-e006-4504-a656-c79ac833e864"
+          },
+          {
+            "role": "image",
+            "value": "39c391ba-feeb-456b-8a8b-cec25c2c6e0e"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ]
+      }
+    },
+    {
+      "index": 206,
+      "quoteKey": "pumpcade",
+      "acceptedFrontJobId": "d7686101-5f28-4858-8c39-5c0c726a230d",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/pumpcade-front.png",
+      "acceptedFrontSha256": "ee5f6fb30daa2556b8bfe7b9e3a2f7b7708771169e0762189812353d9aabcf21",
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: PUMPCADE (PUMPCADE), exact Solana quote mint Eg2ymQ2aQqjMcibnmTt8erC6Tvk9PVpJZCxvVPJz2agu.\nACTUAL SOURCE AND MATERIAL CHECK: The large central gold/yellow medallion must reproduce the exact authentic PUMPCADE name arcs top and bottom, stars, joystick and speech bubble from Image2. Do not invent an arcade mascot or game character. Exact on-reference PUMPCADE lettering is approved only as part of this medallion; no extra slogan/title. Match oxblood lacquer, amber enamel and gold from the front. No empty label panels.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "d7686101-5f28-4858-8c39-5c0c726a230d"
+          },
+          {
+            "role": "image",
+            "value": "49c62066-9b68-48ef-a110-846ea0fab7bc"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ]
+      }
+    },
+    {
+      "index": 208,
+      "quoteKey": "codec",
+      "acceptedFrontJobId": "12d5f3d1-54cb-4eb9-b04d-afb15aecae58",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/codec-front.png",
+      "acceptedFrontSha256": "9d5e3cbe52ca569a284342dc08b521df659752db6da1ffd33df71305afdc174e",
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: Codec Flow (CODEC), exact Solana quote mint 69LjZUUzxj3Cb3Fxeo1X4QpYEQTboApkhXTysPpbpump.\nACTUAL SOURCE AND MATERIAL CHECK: The large centered white CODEC wordmark must preserve Image2 exact segmented pixel/block letters, square cuts, gaps, width ratios and left-to-right order. No invented C glyph, barcode, QR or generic circuit symbol. Keep pure white on a graphite/black continuous field with restrained platinum geometry matching the front. Exact CODEC source lettering is approved; no other words.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "12d5f3d1-54cb-4eb9-b04d-afb15aecae58"
+          },
+          {
+            "role": "image",
+            "value": "762d3608-7b4c-4846-a3bc-80ec601cb1db"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ]
+      }
+    },
+    {
+      "index": 210,
+      "quoteKey": "ape",
+      "acceptedFrontJobId": "2748331d-99d5-48a5-8c6a-8397aba4342f",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/ape-front.png",
+      "acceptedFrontSha256": "7ec4de5974baaa004899d9d6137c3f90184ddf5fa4e6d36db3e57a28ae082893",
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: ApeCoin (Solana quote) (APE), exact Solana quote mint C1MHyoTJpRTeS9AQCyspNVu2EWAYCZwmJ1jNkEArFP1f.\nACTUAL SOURCE AND MATERIAL CHECK: Use precisely the supplied white whole-body walking gorilla in left-facing profile on vivid blue disk. Same posture, bent limbs, white silhouette and source proportions. Do not use the familiar ApeCoin skull, ape head, BAYC portrait, cartoon monkey, tail or any inferred Ethereum/canonical/bridge emblem. Match sapphire/cobalt ceramic and palladium from actual front. The source has no letters; add none.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "2748331d-99d5-48a5-8c6a-8397aba4342f"
+          },
+          {
+            "role": "image",
+            "value": "4fe9a66e-f07c-4a66-a606-cb390672494a"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ]
+      }
+    },
+    {
+      "index": 212,
+      "quoteKey": "link",
+      "acceptedFrontJobId": "5951ab14-9944-4d64-970f-15be34c6ee96",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/link-front.png",
+      "acceptedFrontSha256": "7854525aa3c42f51218301cc78988c958e369378b6af971a50d24c66053e276d",
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: Chainlink Token (Solana) (LINK), exact Solana quote mint LinkhB3afbBKb2EQQu7s7umdZceV3wcvAUJhQAfQ23L.\nACTUAL SOURCE AND MATERIAL CHECK: A large unmistakable exact white hollow hexagon on its source blue disk, with six straight sides, correct ring thickness and blue inner hexagon negative space. No connected-chain rings, L/C monogram, generic network nodes or extra LINK words. Preserve the source geometry and white/blue identity, matching cobalt ceramic, white enamel and platinum front materials.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "5951ab14-9944-4d64-970f-15be34c6ee96"
+          },
+          {
+            "role": "image",
+            "value": "7785acec-1928-4b56-abb8-d4f53135c4d8"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ]
+      }
+    },
+    {
+      "index": 214,
+      "quoteKey": "ore",
+      "acceptedFrontJobId": "349dff04-2521-4f93-8a6a-11a887a70773",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/ore-front.png",
+      "acceptedFrontSha256": "099a51740e704d92c73c52d489f9e509fb7d71c1c0134b247d3583b80bb4646a",
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: ORE (ORE), exact Solana quote mint oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp.\nACTUAL SOURCE AND MATERIAL CHECK: A large exact white thick ring with only the two authentic short diagonal tabs at upper-right and lower-left on black disk. Preserve ring thickness and empty center geometry. No invented ore nugget, pickaxe, Bitcoin glyph, extra ORE words or fake mining mascot. Match black ceramic, restrained graphite mineral texture, titanium and white enamel from front. Continuous completed reverse, no empty labels.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "349dff04-2521-4f93-8a6a-11a887a70773"
+          },
+          {
+            "role": "image",
+            "value": "5eaec00c-d159-40cd-9f37-32ee9ae8dd18"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ]
+      }
+    },
+    {
+      "index": 216,
+      "quoteKey": "skr",
+      "acceptedFrontJobId": "baeb20be-b223-41b6-a035-f85683186188",
+      "acceptedFrontSourcePath": "output/higgsfield/pair-identities-2026-10-30/originals/skr-front.png",
+      "acceptedFrontSha256": "4a50b714645f0cde57bddf1801b34f7aff2aecc5e23905f81e10ed9ccc8c3af4",
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: Seeker (SKR), exact Solana quote mint SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3.\nACTUAL SOURCE AND MATERIAL CHECK: A large exact white split-S insignia on black disk. Preserve the original two offset curved sections, their actual broad white strokes, flat rectangular terminals and black negative-space breaks. Do not smooth it into an ordinary S or add a generic letter, phone, compass, Solana three bars or SKR words. Match black ceramic, white porcelain enamel and polished palladium front materials.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "baeb20be-b223-41b6-a035-f85683186188"
+          },
+          {
+            "role": "image",
+            "value": "fafb60d1-5795-4f6f-827a-96a7335ba6ea"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ]
+      }
+    }
+  ],
+  "batches": [
+    {
+      "batchId": "final8-root-backs-001",
+      "indices": [
+        202,
+        204
+      ],
+      "quoteKeys": [
+        "pump",
+        "alch"
+      ],
+      "quotedCredits": 5.5,
+      "requestFile": "batches/final8-root-backs-001-request.json",
+      "receiptFile": "batches/final8-root-backs-001-receipt.json",
+      "statusFile": "batches/final8-root-backs-001-status.json",
+      "proofFile": "batches/final8-root-backs-001-proof.png",
+      "requestSha256": "be81abd955ff58b56a9a7e68d655e4d509b2ef48498c671baa8cbccaae450fb2",
+      "payload": {
+        "requests": [
+          {
+            "index": 202,
+            "params": {
+              "model": "gpt_image_2_5",
+              "variant": "flare",
+              "quality": "high",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: Pump (PUMP), exact Solana quote mint pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn.\nACTUAL SOURCE AND MATERIAL CHECK: The large hero is the exact green-and-white diagonal capsule on its deep navy disk. White half at upper-right, mint lower-left, dark green outline, source shine. Do not change orientation or color halves, do not replace with a generic pill or alternate pump icon. Match the actual front\u2019s navy ceramic, mint enamel and cool palladium; retain colored identity rather than turning capsule monochrome gold.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "2476f7d1-b25b-4878-adbd-afb59263028e"
+                },
+                {
+                  "role": "image",
+                  "value": "1bc1874b-26e3-4b8f-818c-5dce386f6319"
+                },
+                {
+                  "role": "image",
+                  "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+                }
+              ]
+            }
+          },
+          {
+            "index": 204,
+            "params": {
+              "model": "gpt_image_2_5",
+              "variant": "flare",
+              "quality": "high",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: Alchemist AI (ALCH), exact Solana quote mint HNg5PYJmtqcmzXrv6S9zP1CDKk5BgDuyFBxbvNApump.\nACTUAL SOURCE AND MATERIAL CHECK: The large hero must retain the source red pixelated A, precise gold/yellow highlights and tiny square light pixels on nearly black. Preserve the native pixel geometry as a premium enamel mosaic with crisp square cuts, not a smooth alphabet A, wizard, flask, pentagram or unrelated logo. Match black ceramic, ruby and gold from the actual front. No extra alphabet letters or words.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "98b9b952-e006-4504-a656-c79ac833e864"
+                },
+                {
+                  "role": "image",
+                  "value": "39c391ba-feeb-456b-8a8b-cec25c2c6e0e"
+                },
+                {
+                  "role": "image",
+                  "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchId": "final8-root-backs-002",
+      "indices": [
+        206,
+        208
+      ],
+      "quoteKeys": [
+        "pumpcade",
+        "codec"
+      ],
+      "quotedCredits": 5.5,
+      "requestFile": "batches/final8-root-backs-002-request.json",
+      "receiptFile": "batches/final8-root-backs-002-receipt.json",
+      "statusFile": "batches/final8-root-backs-002-status.json",
+      "proofFile": "batches/final8-root-backs-002-proof.png",
+      "requestSha256": "0e536dde1a20082ddaf101b3949cb47c14d3a2cb425d67f80c481334d23a569c",
+      "payload": {
+        "requests": [
+          {
+            "index": 206,
+            "params": {
+              "model": "gpt_image_2_5",
+              "variant": "flare",
+              "quality": "high",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: PUMPCADE (PUMPCADE), exact Solana quote mint Eg2ymQ2aQqjMcibnmTt8erC6Tvk9PVpJZCxvVPJz2agu.\nACTUAL SOURCE AND MATERIAL CHECK: The large central gold/yellow medallion must reproduce the exact authentic PUMPCADE name arcs top and bottom, stars, joystick and speech bubble from Image2. Do not invent an arcade mascot or game character. Exact on-reference PUMPCADE lettering is approved only as part of this medallion; no extra slogan/title. Match oxblood lacquer, amber enamel and gold from the front. No empty label panels.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "d7686101-5f28-4858-8c39-5c0c726a230d"
+                },
+                {
+                  "role": "image",
+                  "value": "49c62066-9b68-48ef-a110-846ea0fab7bc"
+                },
+                {
+                  "role": "image",
+                  "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+                }
+              ]
+            }
+          },
+          {
+            "index": 208,
+            "params": {
+              "model": "gpt_image_2_5",
+              "variant": "flare",
+              "quality": "high",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: Codec Flow (CODEC), exact Solana quote mint 69LjZUUzxj3Cb3Fxeo1X4QpYEQTboApkhXTysPpbpump.\nACTUAL SOURCE AND MATERIAL CHECK: The large centered white CODEC wordmark must preserve Image2 exact segmented pixel/block letters, square cuts, gaps, width ratios and left-to-right order. No invented C glyph, barcode, QR or generic circuit symbol. Keep pure white on a graphite/black continuous field with restrained platinum geometry matching the front. Exact CODEC source lettering is approved; no other words.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "12d5f3d1-54cb-4eb9-b04d-afb15aecae58"
+                },
+                {
+                  "role": "image",
+                  "value": "762d3608-7b4c-4846-a3bc-80ec601cb1db"
+                },
+                {
+                  "role": "image",
+                  "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchId": "final8-root-backs-003",
+      "indices": [
+        210,
+        212
+      ],
+      "quoteKeys": [
+        "ape",
+        "link"
+      ],
+      "quotedCredits": 5.5,
+      "requestFile": "batches/final8-root-backs-003-request.json",
+      "receiptFile": "batches/final8-root-backs-003-receipt.json",
+      "statusFile": "batches/final8-root-backs-003-status.json",
+      "proofFile": "batches/final8-root-backs-003-proof.png",
+      "requestSha256": "bed4500278cb4bb9f0bdb1915f0a8c2f1a417453221e77a2183fb528c5877169",
+      "payload": {
+        "requests": [
+          {
+            "index": 210,
+            "params": {
+              "model": "gpt_image_2_5",
+              "variant": "flare",
+              "quality": "high",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: ApeCoin (Solana quote) (APE), exact Solana quote mint C1MHyoTJpRTeS9AQCyspNVu2EWAYCZwmJ1jNkEArFP1f.\nACTUAL SOURCE AND MATERIAL CHECK: Use precisely the supplied white whole-body walking gorilla in left-facing profile on vivid blue disk. Same posture, bent limbs, white silhouette and source proportions. Do not use the familiar ApeCoin skull, ape head, BAYC portrait, cartoon monkey, tail or any inferred Ethereum/canonical/bridge emblem. Match sapphire/cobalt ceramic and palladium from actual front. The source has no letters; add none.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "2748331d-99d5-48a5-8c6a-8397aba4342f"
+                },
+                {
+                  "role": "image",
+                  "value": "4fe9a66e-f07c-4a66-a606-cb390672494a"
+                },
+                {
+                  "role": "image",
+                  "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+                }
+              ]
+            }
+          },
+          {
+            "index": 212,
+            "params": {
+              "model": "gpt_image_2_5",
+              "variant": "flare",
+              "quality": "high",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: Chainlink Token (Solana) (LINK), exact Solana quote mint LinkhB3afbBKb2EQQu7s7umdZceV3wcvAUJhQAfQ23L.\nACTUAL SOURCE AND MATERIAL CHECK: A large unmistakable exact white hollow hexagon on its source blue disk, with six straight sides, correct ring thickness and blue inner hexagon negative space. No connected-chain rings, L/C monogram, generic network nodes or extra LINK words. Preserve the source geometry and white/blue identity, matching cobalt ceramic, white enamel and platinum front materials.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "5951ab14-9944-4d64-970f-15be34c6ee96"
+                },
+                {
+                  "role": "image",
+                  "value": "7785acec-1928-4b56-abb8-d4f53135c4d8"
+                },
+                {
+                  "role": "image",
+                  "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchId": "final8-root-backs-004",
+      "indices": [
+        214,
+        216
+      ],
+      "quoteKeys": [
+        "ore",
+        "skr"
+      ],
+      "quotedCredits": 5.5,
+      "requestFile": "batches/final8-root-backs-004-request.json",
+      "receiptFile": "batches/final8-root-backs-004-receipt.json",
+      "statusFile": "batches/final8-root-backs-004-status.json",
+      "proofFile": "batches/final8-root-backs-004-proof.png",
+      "requestSha256": "9df748d23e326bad44a186cd3c31e49544714af5ec40f67999f44e26531a7393",
+      "payload": {
+        "requests": [
+          {
+            "index": 214,
+            "params": {
+              "model": "gpt_image_2_5",
+              "variant": "flare",
+              "quality": "high",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: ORE (ORE), exact Solana quote mint oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp.\nACTUAL SOURCE AND MATERIAL CHECK: A large exact white thick ring with only the two authentic short diagonal tabs at upper-right and lower-left on black disk. Preserve ring thickness and empty center geometry. No invented ore nugget, pickaxe, Bitcoin glyph, extra ORE words or fake mining mascot. Match black ceramic, restrained graphite mineral texture, titanium and white enamel from front. Continuous completed reverse, no empty labels.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "349dff04-2521-4f93-8a6a-11a887a70773"
+                },
+                {
+                  "role": "image",
+                  "value": "5eaec00c-d159-40cd-9f37-32ee9ae8dd18"
+                },
+                {
+                  "role": "image",
+                  "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+                }
+              ]
+            }
+          },
+          {
+            "index": 216,
+            "params": {
+              "model": "gpt_image_2_5",
+              "variant": "flare",
+              "quality": "high",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: Seeker (SKR), exact Solana quote mint SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3.\nACTUAL SOURCE AND MATERIAL CHECK: A large exact white split-S insignia on black disk. Preserve the original two offset curved sections, their actual broad white strokes, flat rectangular terminals and black negative-space breaks. Do not smooth it into an ordinary S or add a generic letter, phone, compass, Solana three bars or SKR words. Match black ceramic, white porcelain enamel and polished palladium front materials.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "baeb20be-b223-41b6-a035-f85683186188"
+                },
+                {
+                  "role": "image",
+                  "value": "fafb60d1-5795-4f6f-827a-96a7335ba6ea"
+                },
+                {
+                  "role": "image",
+                  "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "status": "held-superseded-by-root-unique-design-flash-pilot",
+  "paidSubmissionAuthorized": false,
+  "rootHoldAt": "2026-10-30T02:27:23.238303+00:00",
+  "holdReason": "Root explicitly stopped all unsubmitted GPT reverse jobs while evaluating a2K Seedream5Flash uniqueness pilot. Preserve this old payload/provenance only; no future submission from this plan without explicit root reauthorization."
+}

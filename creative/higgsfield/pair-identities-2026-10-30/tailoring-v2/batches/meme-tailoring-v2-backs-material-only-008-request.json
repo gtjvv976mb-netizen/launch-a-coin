@@ -1,0 +1,45 @@
+{
+  "context": "Create unique pictorial meme card artwork with exact identities and matching cropped material references.",
+  "requests": [
+    {
+      "index": 545,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "bd8cf9b4-d206-4fbe-9f13-26e9457cfc3e"
+          },
+          {
+            "role": "image",
+            "value": "ab2feb8a-30e4-407e-a2d4-42b9746b3b66"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact SPX6900 black swoosh emblem and authentic italic lettering; this is the meme identity, not the S&P500 index. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact source emblem embedded in a swept black/white ribbon field whose broad arcs connect to the card edges. The unique outer frame follows this character: Swept aerodynamic black rails derived from the emblem's two curved strokes, with sharp white negative-space cuts and a slanted lower joint. Matching materials: Black piano lacquer, white enamel and brushed silver. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    },
+    {
+      "index": 546,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "7c6eebbe-41db-4b11-b4f4-05434669dc9f"
+          },
+          {
+            "role": "image",
+            "value": "f4fcb1a3-97af-4126-8b17-fc0846885d99"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact two separated slanted cyan strips with soft torn-looking ends and diagonal negative space. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact separated strips become the hero and continue into a split diagonal relief field, preserving their original gap and silhouette. The unique outer frame follows this character: Twin-ribbon split frame: two broad cyan slanted rails with source-matched softened torn ends, open diagonal channel and offset asymmetry. Matching materials: Cyan translucent enamel, pale blue ceramic and narrow silver edges. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    }
+  ]
+}

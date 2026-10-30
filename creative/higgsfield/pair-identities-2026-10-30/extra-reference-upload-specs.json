@@ -1,0 +1,240 @@
+[
+  {
+    "key": "cashcat",
+    "filename": "cashcat-exact-9ea26bf56766.jpg",
+    "content_type": "image/jpeg",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/cashcat-9ea26bf56766.jpg",
+    "sha256": "9ea26bf5676658af38db7cec329e29059ff50e0a128979f3bb6ca8588efa30d1"
+  },
+  {
+    "key": "neet",
+    "filename": "neet-exact-ecf26a24ef46.jpg",
+    "content_type": "image/jpeg",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/neet-ecf26a24ef46.jpg",
+    "sha256": "ecf26a24ef46c13f1869de46306a0968cd6f7fae2d7d5e80a7863808f9899b7e"
+  },
+  {
+    "key": "otc",
+    "filename": "otc-exact-d6bd73eeed43.jpg",
+    "content_type": "image/jpeg",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/otc-d6bd73eeed43.jpg",
+    "sha256": "d6bd73eeed43ac1ae0fa6ebe2008e18614366c06bf0eca6f7f7ac4a88ec31518"
+  },
+  {
+    "key": "triplet",
+    "filename": "triplet-exact-40b03cc789ee.jpg",
+    "content_type": "image/jpeg",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/triplet-40b03cc789ee.jpg",
+    "sha256": "40b03cc789ee9809aa8341ec69cdaa52182ee0210b1add52c4e0b9fe31fbf3e1"
+  },
+  {
+    "key": "cupsey",
+    "filename": "cupsey-exact-63b8c11aa5ab.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/cupsey-63b8c11aa5ab.png",
+    "sha256": "63b8c11aa5ab3ce3ce2e4e16836ea1d320db9485c9ef634fd949bdef251fcd9d"
+  },
+  {
+    "key": "alon",
+    "filename": "alon-exact-acd2f66dbbb5.jpg",
+    "content_type": "image/jpeg",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/alon-acd2f66dbbb5.jpg",
+    "sha256": "acd2f66dbbb56320e629220d36c480735a563d3829763062cf12f1276ed0aea0"
+  },
+  {
+    "key": "jimothy",
+    "filename": "jimothy-exact-d8e5e31f43da.jpg",
+    "content_type": "image/jpeg",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/jimothy-d8e5e31f43da.jpg",
+    "sha256": "d8e5e31f43da271d7e06fdb56276073b81874f33e1c6408ce94567ce04efd588"
+  },
+  {
+    "key": "lmao",
+    "filename": "lmao-exact-5a57ab0ec5d1.jpg",
+    "content_type": "image/jpeg",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/lmao-5a57ab0ec5d1.jpg",
+    "sha256": "5a57ab0ec5d19bb8a5af669be97f60ab5b10e43c319ee840d80ea98ec48131eb"
+  },
+  {
+    "key": "bobo",
+    "filename": "bobo-exact-064db424e413.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/bobo-064db424e413.png",
+    "sha256": "064db424e413117370c2a4f4149773644859360cbc0b3dbe4ed0cc807de573ed"
+  },
+  {
+    "key": "tokabu",
+    "filename": "tokabu-exact-511a368112d4.jpg",
+    "content_type": "image/jpeg",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/tokabu-511a368112d4.jpg",
+    "sha256": "511a368112d49553d297bba59abcb4ddd8d8a56d6b8b0616efa40e9d9031a77c"
+  },
+  {
+    "key": "manifest",
+    "filename": "manifest-exact-3310d44487d0.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/manifest-3310d44487d0.png",
+    "sha256": "3310d44487d03234792ab4ad10f162a16249a666f6c62eb046eca06e5101e911"
+  },
+  {
+    "key": "baton",
+    "filename": "baton-exact-45d46d18d4a6.webp",
+    "content_type": "image/webp",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/baton-45d46d18d4a6.webp",
+    "sha256": "45d46d18d4a65c0765cde6732043d7a9457c8550fc347de90a07088c2ace674d"
+  },
+  {
+    "key": "claw",
+    "filename": "claw-exact-f5546a3e2e71.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/claw-f5546a3e2e71.png",
+    "sha256": "f5546a3e2e7108433c33b78ee0186af963991f8cb5d4049b8674fd957103ea2c"
+  },
+  {
+    "key": "67",
+    "filename": "67-exact-00e3a88121fa.jpg",
+    "content_type": "image/jpeg",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/67-00e3a88121fa.jpg",
+    "sha256": "00e3a88121faddd6787f8af3a7e4f89747a4ab0f280601d6572bb6d29e8192dc"
+  },
+  {
+    "key": "zauth",
+    "filename": "zauth-exact-3add66529015.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/zauth-3add66529015.png",
+    "sha256": "3add66529015abcdca116d56707014c0f7943fa36b8a6da7455e006f87cdaa37"
+  },
+  {
+    "key": "kins",
+    "filename": "kins-exact-fd8bdc66f477.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/kins-fd8bdc66f477.png",
+    "sha256": "fd8bdc66f477c09106bfb61e4f3745607d668e961413c863c9bf2118f6358643"
+  },
+  {
+    "key": "percolator",
+    "filename": "percolator-exact-fd19ec09ef1b.jpg",
+    "content_type": "image/jpeg",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/percolator-fd19ec09ef1b.jpg",
+    "sha256": "fd19ec09ef1b0644e2747c16853d2fd17aa84bc6676f920a162e4d242fb4fc7b"
+  },
+  {
+    "key": "jotchua",
+    "filename": "jotchua-exact-c3c31b4fd97d.jpg",
+    "content_type": "image/jpeg",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/jotchua-c3c31b4fd97d.jpg",
+    "sha256": "c3c31b4fd97dbe0de6125bf367fbcc7d0f5fe9886c3228411fedb7fb5a2c08e1"
+  },
+  {
+    "key": "zcat",
+    "filename": "zcat-exact-4a42113222fe.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/zcat-og-identity-crop.png",
+    "sha256": "4a42113222fe75b160e2f14b9bd495d8b6c3b97943740cc2e3f777d9c351629d"
+  },
+  {
+    "key": "gork",
+    "filename": "gork-exact-6a12439aa65a.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/gork-6a12439aa65a.png",
+    "sha256": "6a12439aa65ac28a725ab79417ea0b2c29c361437b69362adcf79dedf4919ed0"
+  },
+  {
+    "key": "stonk",
+    "filename": "stonk-exact-443b13e4df95.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/stonk-primary-7417b870b953-reference-1024.png",
+    "sha256": "443b13e4df95b72b0157c699d7e23c0aa70d12ae92be2d5d050902fa2b2c641f"
+  },
+  {
+    "key": "solangeles",
+    "filename": "solangeles-exact-552769df67a1.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/solangeles-552769df67a1.png",
+    "sha256": "552769df67a12692b0b3a8fd688250c9e0c6982aebcca303f1a25a2a49137c99"
+  },
+  {
+    "key": "paid",
+    "filename": "paid-exact-6cd02ff39f23.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/paid-primary-7fe42e316e42-reference-1024.png",
+    "sha256": "6cd02ff39f2370882c1c8ae3b51b0729531a32c06a448d36e504fb59670e7783"
+  },
+  {
+    "key": "jeanphil",
+    "filename": "jeanphil-exact-a9c0b8129358.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/jeanphil-a9c0b8129358.png",
+    "sha256": "a9c0b812935828df9b076db8b1a086b804559e01881d45cc6da9771be473cb90"
+  },
+  {
+    "key": "pill",
+    "filename": "pill-exact-b90d439fa4d9.jpg",
+    "content_type": "image/jpeg",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/pill-primary-b90d439fa4d9.jpg",
+    "sha256": "b90d439fa4d997aa93494da615c0fa19a1b4a3e178ca41237ae626e40ab4b470"
+  },
+  {
+    "key": "biketyson",
+    "filename": "biketyson-exact-c18f3b75f0d1.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/biketyson-c18f3b75f0d1.png",
+    "sha256": "c18f3b75f0d1e1f3b97aed507773a2c99b8ab68675caf13fd53483c8abf20aaa"
+  },
+  {
+    "key": "npc",
+    "filename": "npc-exact-fcdab23761ce.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/npc-fcdab23761ce.png",
+    "sha256": "fcdab23761ce3ff03c264e62d122cf8152dfbe69c3297c56502a787df6d447d5"
+  },
+  {
+    "key": "eacc",
+    "filename": "eacc-exact-4f83e5b63bcd.webp",
+    "content_type": "image/webp",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/eacc-4f83e5b63bcd.webp",
+    "sha256": "4f83e5b63bcd4a89dd943d0c95e099240c2570a9aa7fb9b47c088bdeee68c961"
+  },
+  {
+    "key": "hodl",
+    "filename": "hodl-exact-56f9bf8d2d0a.jpg",
+    "content_type": "image/jpeg",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/hodl-56f9bf8d2d0a.jpg",
+    "sha256": "56f9bf8d2d0a74f79709e5cc022c095774067151d3347b363789e66b78d70422"
+  },
+  {
+    "key": "agency",
+    "filename": "agency-exact-2e998f3b122d.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/agency-2e998f3b122d.png",
+    "sha256": "2e998f3b122d30a9ba9a1935d2c9bb70826dc235e9e3b2a5bd7b2f9c12a64b73"
+  },
+  {
+    "key": "claudia",
+    "filename": "claudia-exact-74686a62f4c5.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/claudia-74686a62f4c5.png",
+    "sha256": "74686a62f4c5124281123f9c5123edbd1835fef3f45637fc6bb93aceda422eb9"
+  },
+  {
+    "key": "shib",
+    "filename": "shib-exact-acaa2de69742.png",
+    "content_type": "image/png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/shib-primary-emblem-crop-1024.png",
+    "sha256": "acaa2de69742d2ca1af0d441ff3c6be4cefb7b613adc353d548cf558b38440c6"
+  },
+  {
+    "key": "swordcat",
+    "filename": "swordcat-exact-9b3a8b914ce0.webp",
+    "content_type": "image/webp",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/swordcat-9b3a8b914ce0.webp",
+    "sha256": "9b3a8b914ce061645a9eaeb9228ce1bcedb5342bcd38f3ad74f7645c646cfda2"
+  },
+  {
+    "key": "plague",
+    "filename": "plague-exact-68bb5af167cd.jpg",
+    "content_type": "image/jpeg",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/plague-68bb5af167cd.jpg",
+    "sha256": "68bb5af167cd23f12dab24c013648cf5e00dbcb4de1a2c3d25bb4da9b8441304"
+  }
+]

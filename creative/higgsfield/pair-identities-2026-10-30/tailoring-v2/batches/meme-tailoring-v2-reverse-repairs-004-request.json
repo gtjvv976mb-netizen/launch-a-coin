@@ -1,0 +1,37 @@
+{
+  "context": "Remove invented labels and carried empty plates while preserving the exact accepted meme identity artwork.",
+  "requests": [
+    {
+      "index": 807,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "b261dbf9-5900-4335-9edd-ec6076f13a22"
+          }
+        ],
+        "prompt": "Edit this exact completed REVERSE image. Remove the small engraved characters centered on the bottom rim. Replace them with the same uninterrupted warm metal finish as the adjacent rim. Preserve the actual tilted dog portrait and every fur detail exactly. Keep the outer card outline, matched material palette, thin physical construction, smooth rounded edges and all other existing artwork unchanged. This is a targeted cleanup only. The repaired area must blend seamlessly with its neighbors. The whole reverse is finished pictorial artwork: add no new lettering, numbers, labels, emblems or empty plates."
+      }
+    },
+    {
+      "index": 808,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "b184d793-55a4-4f71-914e-128ed5c8e8ea"
+          }
+        ],
+        "prompt": "Edit this exact completed REVERSE image. Remove the isolated EMPTY cyan header plate and its inner horizontal rectangular outline. Extend the blue/cyan background continuously upward to the outer orange rim. Preserve the exact central orange-and-blue folded C emblem and its material details. Keep the outer card outline, matched material palette, thin physical construction, smooth rounded edges and all other existing artwork unchanged. This is a targeted cleanup only. The repaired area must blend seamlessly with its neighbors. The whole reverse is finished pictorial artwork: add no new lettering, numbers, labels, emblems or empty plates."
+      }
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "derivedFrom": "original51-backs-final-four-root-status.json",
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 90,
+        "job_id": "12d33119-92c1-4179-9e3d-7a6cf9f63b4b",
+        "status": "completed",
+        "type": "image",
+        "model": "gpt_image_2_5",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_020710_12d33119-92c1-4179-9e3d-7a6cf9f63b4b.png"
+      },
+      {
+        "index": 92,
+        "job_id": "5f8d5ffb-43da-40fb-a0b8-36128106dbac",
+        "status": "completed",
+        "type": "image",
+        "model": "gpt_image_2_5",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_020710_5f8d5ffb-43da-40fb-a0b8-36128106dbac.png"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "completed": 4,
+      "failed": 0,
+      "active": 0,
+      "errors": 0
+    },
+    "all_terminal": true
+  }
+}

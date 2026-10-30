@@ -1,0 +1,31 @@
+{
+  "derivedFrom": "batches/tailoring-v2-fronts-group-11-status-4-1793328888996.json",
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 441,
+        "job_id": "8b81e63d-3c3c-41eb-a287-10cf8e24b799",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_025410_8b81e63d-3c3c-41eb-a287-10cf8e24b799.png"
+      },
+      {
+        "index": 442,
+        "job_id": "3525eb98-78df-459a-9c09-a23e15ebba17",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_025410_3525eb98-78df-459a-9c09-a23e15ebba17.png"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "completed": 4,
+      "failed": 0,
+      "active": 0,
+      "errors": 0
+    },
+    "all_terminal": true
+  }
+}

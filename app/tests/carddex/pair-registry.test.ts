@@ -1,6 +1,15 @@
 import { describe, expect, test } from "bun:test";
 import appAssets from "../../src/lib/carddex/pair-assets.json";
 import adapterCatalog from "../../../reports/pump-pair-assets-2026-10-28.json";
+import legacyAssets from "./fixtures/legacy-pair-assets-2026-10-29.json";
+import cryptoSnapshot from "../../../creative/higgsfield/pair-identities-2026-10-30/research/verified-identities-and-metadata.json";
+import expansionSnapshot from "../../../creative/higgsfield/pair-identities-2026-10-30/research/expansion-verified-identities-and-metadata.json";
+import directSnapshot from "../../../creative/higgsfield/pair-identities-2026-10-30/research/expansion-direct-verified-identities-and-metadata.json";
+import previous72 from "./fixtures/legacy-pair-assets-72-2026-10-30.json";
+import previous89 from "./fixtures/legacy-pair-assets-89-2026-10-30.json";
+import previousDesigns89 from "./fixtures/legacy-pair-designs-89-2026-10-30.json";
+import stagedDesigns from "../../src/lib/carddex/pair-designs.json";
+import finalSnapshot from "../../../creative/higgsfield/pair-identities-2026-10-30/research/expansion-final-identities-and-metadata.json";
 
 type RegistryAsset = {
   key: string; symbol: string; mint: string; decimals: number;
@@ -12,8 +21,71 @@ const identity = (asset: RegistryAsset) => ({
 });
 
 describe("browser and official-SDK quote registries", () => {
+  test("eight exact platform/community/crypto identities preserve the previous89 without inventing issuer or Ethereum identity",()=>{
+    expect(appAssets.slice(0,89)).toEqual(previous89);
+    // Owner-approved v2 copy follows the actual new materials; all identity,
+    // structural and binding fields remain identical to the original registry.
+    const structuralDesign=({description,...design}:{description:string;[key:string]:unknown})=>design;
+    expect(stagedDesigns.slice(0,89).map(structuralDesign)).toEqual(previousDesigns89.map(structuralDesign));
+    expect(finalSnapshot.assets).toHaveLength(8);
+    const publicKeys=["pump","alch","pumpcade","codec","ore","skr"];
+    for(const snapshot of finalSnapshot.assets){
+      const app=appAssets.find(asset=>asset.key===snapshot.key)!;
+      const adapter=adapterCatalog.assets.find(asset=>asset.key===snapshot.key)!;
+      expect(app).toMatchObject({key:snapshot.key,symbol:snapshot.symbol,mint:snapshot.mint,kind:"crypto",decimals:snapshot.admission.decimals,tokenProgram:snapshot.admission.tokenProgram,initialVirtualQuoteReserves:snapshot.admission.initialVirtualQuoteReserves,admission:"quoteControl",verificationSlot:snapshot.accountSlot});
+      expect(adapter).toMatchObject({mint:app.mint,kind:"crypto",decimals:app.decimals,tokenProgram:app.tokenProgram,mintVerificationSlot:snapshot.accountSlot,admissionVerificationSlot:snapshot.accountSlot});
+      expect(stagedDesigns.find(design=>design.quoteKey===snapshot.key)).toMatchObject({key:`pair-${snapshot.key}`,category:"crypto",quoteMint:snapshot.mint});
+      expect(app.issuerTerms).toBeNull();
+      if(publicKeys.includes(snapshot.key)){
+        expect(app.sourceUrls).toContain("https://pump.fun/docs/custom-pairs");
+        expect(app).not.toHaveProperty("listingStatus");
+      }else{
+        expect(app.listingStatus).toBe("direct-onchain");
+        expect(app.sourceUrls).not.toContain("https://pump.fun/docs/custom-pairs");
+        expect(app.issuer).toBeNull();expect(app).not.toHaveProperty("listingProvider");
+      }
+    }
+    expect(appAssets.find(asset=>asset.key==="ape")).toMatchObject({name:"ApeCoin (Solana quote)",mint:"C1MHyoTJpRTeS9AQCyspNVu2EWAYCZwmJ1jNkEArFP1f",decimals:9});
+    expect(appAssets.find(asset=>asset.key==="link")).toMatchObject({name:"Chainlink Token (Solana)",mint:"LinkhB3afbBKb2EQQu7s7umdZceV3wcvAUJhQAfQ23L",decimals:9});
+    expect(appAssets.find(asset=>asset.key==="pump")?.issuer).toBe("Golden Fields Partners, Ltd.");
+    expect(appAssets.find(asset=>asset.key==="ore")?.decimals).toBe(11);
+  });
+  test("direct-onchain additions preserve the previous72 and never claim public-table inclusion or a guessed issuer",()=>{
+    expect(appAssets.slice(0,72)).toEqual(previous72);
+    expect(directSnapshot.assets).toHaveLength(17);
+    for(const snapshot of directSnapshot.assets){
+      const app=appAssets.find(asset=>asset.key===snapshot.key)!;
+      const adapter=adapterCatalog.assets.find(asset=>asset.key===snapshot.key)!;
+      expect(app).toMatchObject({key:snapshot.key,symbol:snapshot.symbol,mint:snapshot.mint,kind:"meme",decimals:snapshot.admission.decimals,tokenProgram:snapshot.admission.tokenProgram,initialVirtualQuoteReserves:snapshot.admission.initialVirtualQuoteReserves,admission:"quoteControl",verificationSlot:snapshot.accountSlot,listingStatus:"direct-onchain",listingNotice:"Direct QuoteControl-enabled; not found in the checked dated public table."});
+      expect(adapter).toMatchObject({mint:app.mint,decimals:app.decimals,tokenProgram:app.tokenProgram,mintVerificationSlot:snapshot.accountSlot,admissionVerificationSlot:snapshot.accountSlot,listingStatus:app.listingStatus,listingNotice:app.listingNotice});
+      expect(app.issuer).toBeNull();expect(app.issuerTerms).toBeNull();
+      expect(app).not.toHaveProperty("listingProvider");expect(app).not.toHaveProperty("listingProviderTerms");
+      expect(app.sourceUrls).toContain(`https://solscan.io/token/${app.mint}`);
+    }
+    for(const key of ["pepe","shib"]){
+      const asset=appAssets.find(asset=>asset.key===key)!;
+      expect(asset.decimals).toBe(4);expect(asset.name).toContain("Solana quote");
+    }
+  });
+  test("the original37 quote objects remain byte-for-byte compatible while reviewed crypto quotes append",()=>{
+    expect(appAssets.slice(0,37)).toEqual(legacyAssets);
+    const crypto=cryptoSnapshot.assets.filter(asset=>!asset.existingRegistry);
+    expect(crypto).toHaveLength(14);
+    for(const snapshot of crypto){
+      const app=appAssets.find(asset=>asset.key===snapshot.key)!;
+      const adapter=adapterCatalog.assets.find(asset=>asset.key===snapshot.key)!;
+      expect(app).toMatchObject({key:snapshot.key,symbol:snapshot.symbol,mint:snapshot.mint,kind:"crypto",decimals:snapshot.admission.decimals,tokenProgram:snapshot.admission.tokenProgram,initialVirtualQuoteReserves:snapshot.admission.initialVirtualQuoteReserves,admission:"quoteControl",verificationSlot:snapshot.accountSlot});
+      expect(adapter).toMatchObject({mint:snapshot.mint,decimals:app.decimals,tokenProgram:app.tokenProgram,mintVerificationSlot:snapshot.accountSlot,admissionVerificationSlot:snapshot.accountSlot});
+      expect(app.listingProvider).toBeTruthy();expect(app.listingProviderTerms).toStartWith("https://");
+      expect(app.sourceUrls).toContain("https://pump.fun/docs/custom-pairs");
+    }
+    expect(appAssets.find(asset=>asset.key==="wbtc")).toMatchObject({symbol:"WBTC",name:"Wrapped BTC (Wormhole Solana representation)",mint:"3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh",decimals:8,listingProvider:"Wormhole Portal"});
+    expect(appAssets.find(asset=>asset.key==="eth")?.name).toContain("Wormhole Solana representation");
+    expect(appAssets.find(asset=>asset.key==="xmr")?.decimals).toBe(12);
+    expect(appAssets.some(asset=>asset.key==="etc")).toBe(false);
+  });
   test("every reviewed asset has the same exact identity in both registries", () => {
-    expect(appAssets).toHaveLength(37);
+    expect(appAssets.length).toBeGreaterThanOrEqual(89);
     expect(adapterCatalog.assets).toHaveLength(appAssets.length);
     expect(new Set(appAssets.map(asset => asset.key)).size).toBe(appAssets.length);
     expect(new Set(adapterCatalog.assets.map(asset => asset.key)).size).toBe(adapterCatalog.assets.length);
@@ -25,7 +97,19 @@ describe("browser and official-SDK quote registries", () => {
       expect(identity(adapterAsset!)).toEqual(identity(asset));
     }
   });
-  test("published collector quotes carry exact public identity provenance while unlisted candidates stay excluded", () => {
+  test("the21 extra meme identities use their decoded exact mint units and direct admission",()=>{
+    expect(expansionSnapshot.assets).toHaveLength(21);
+    for(const snapshot of expansionSnapshot.assets){
+      const app=appAssets.find(asset=>asset.key===snapshot.key)!;
+      const adapter=adapterCatalog.assets.find(asset=>asset.key===snapshot.key)!;
+      expect(app).toMatchObject({key:snapshot.key,symbol:snapshot.symbol,mint:snapshot.mint,kind:"meme",decimals:snapshot.admission.decimals,tokenProgram:snapshot.admission.tokenProgram,initialVirtualQuoteReserves:snapshot.admission.initialVirtualQuoteReserves,admission:"quoteControl",verificationSlot:snapshot.accountSlot});
+      expect(adapter).toMatchObject({mint:app.mint,decimals:app.decimals,tokenProgram:app.tokenProgram,mintVerificationSlot:snapshot.accountSlot,admissionVerificationSlot:snapshot.accountSlot});
+      expect(app.issuer).toBeNull();expect(app.issuerTerms).toBeNull();
+      expect(app.sourceUrls).toContain("https://pump.fun/docs/custom-pairs");
+    }
+    expect(appAssets.find(asset=>asset.key==="cashcat")).toMatchObject({name:"Cash Cat (Sunrise Solana representation)",listingProvider:"Sunrise (Wormhole Labs)",listingProviderTerms:"https://sunrise.xyz/terms-of-service"});
+  });
+  test("published collector quotes carry exact public identity provenance while ambiguous unreviewed candidates stay excluded", () => {
     const expected = [
       {key:"cards",symbol:"CARDS",name:"Collector Crypt",mint:"CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp",decimals:6,kind:"collector"},
       {key:"sv151",symbol:"SV151",name:"Scarlet & Violet 151",mint:"SV151D5pjygAKA8aJJcKzm4wFnRX5G92Fye94jQJk7g",decimals:6,kind:"collector"},
@@ -36,8 +120,8 @@ describe("browser and official-SDK quote registries", () => {
       expect(BigInt(asset.initialVirtualQuoteReserves)).toBeGreaterThan(0n);
       expect(asset.sourceUrls!.length).toBeGreaterThan(0);
     }
-    expect(appAssets.some(asset => String(asset.key) === "pepe")).toBe(false);
-    expect(appAssets.some(asset => asset.mint === "PEPEqnuuCDbBC89p1u9vpnP1KQ2oj1xTcQBsjt9X55m")).toBe(false);
+    expect(appAssets.find(asset => asset.key === "pepe")?.listingStatus).toBe("direct-onchain");
+    expect(appAssets.find(asset => asset.key === "pepe")?.mint).toBe("PEPEqnuuCDbBC89p1u9vpnP1KQ2oj1xTcQBsjt9X55m");
     expect(appAssets.some(asset => asset.mint === "D42TjMjz5H7toPu5md5KBXreZkCSdZMEfLQwmBhJXvb1")).toBe(false);
   });
   test("the jade frog preset uses exact supported TOAD rather than the unlisted PEPE mint", () => {

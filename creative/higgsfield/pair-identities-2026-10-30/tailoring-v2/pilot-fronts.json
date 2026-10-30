@@ -1,0 +1,41 @@
+{
+  "purpose": "Two parent-requested Seedream5Flash quality pilots. This file authorizes no spending.",
+  "pilots": [
+    {
+      "quoteKey": "pepe",
+      "designKey": "pair-pepe",
+      "exactQuoteMint": "PEPEqnuuCDbBC89p1u9vpnP1KQ2oj1xTcQBsjt9X55m",
+      "face": "front",
+      "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/pepe-ec537de040a7.png",
+      "referenceSha256": "ec537de040a73db93b37350b1e6ec11f9d51f663c121ddc9fed6ad9b9f803eac",
+      "layoutGuide": {
+        "path": "creative/higgsfield/pair-identities-2026-10-30/tailoring-v2/canonical-front-wireframe.png",
+        "sha256": "5b2b09139fbbd46b6fcba19bd63c5dd6c35f6ef9f329c57edcf2c81e34081608",
+        "dimensions": [
+          1260,
+          1760
+        ]
+      },
+      "prompt": "Create one premium, high-definition, flat FRONT CARD SKIN. This is a thin rounded trading card, not a thick slab, case, product photograph, mockup or 3D scene. The exact classic green Pepe head/upper-body line image at the admitted PEPE mint, including its eyes, mouth and red lip shape. The original metadata image is64px; preserve its actual expression. The identity reference controls exact subject features; never substitute a related mascot. PEPE: moss-green enamel with source-specific half-lidded eye arcs, red mouth-curve inlays and rough black etched contour rhythm. In the narrow outside perimeter only, introduce an abstract low waterline ripple and tiny lily-pad-shaped relief as a frog-inspired design interpretation, not a claim about a depicted source habitat. Avoid a symmetrical royal medal. Use asymmetrical flowing contours and crisp satin-metal microbevels. The separate gray wireframe is a GEOMETRY-ONLY guide: exactly preserve its outer rounded card outline and all four blank panels in the same positions and sizes. The large creator-art window must remain entirely empty. Name, type and description panels must remain uniformly light ivory for dark live text; no texture, imagery, lettering or ornament inside these content areas. All new identity artwork belongs only to the narrow surrounding frame, rail, corners and gaps. No added words, labels, numbers, serials or footer slots. No generic laurel wreath, royal four-point stars, medallion oval, marble lattice, crown or borrowed Doge ornament. Ignore wireframe gray colors; build this identity\u2019s own materials. Render directly front-on, full card visible, sharp rounded alpha-ready edges, even neutral lighting, no border-clipping. The shared panel positions are the only common template: art direction must be unique to this exact identity.",
+      "status": "prepared for parent quality pilot only; no submission/spend"
+    },
+    {
+      "quoteKey": "fone",
+      "designKey": "pair-fone",
+      "exactQuoteMint": "CTPoyCwkjMvoJwU4xvZZqoD8tiYk6yDchySiN5gGpump",
+      "face": "front",
+      "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/fone-08061211879a.jpg",
+      "referenceSha256": "08061211879aad673eb5dfc27f6378d555623d84de22e40941484c1a94c4f145",
+      "layoutGuide": {
+        "path": "creative/higgsfield/pair-identities-2026-10-30/tailoring-v2/canonical-front-wireframe.png",
+        "sha256": "5b2b09139fbbd46b6fcba19bd63c5dd6c35f6ef9f329c57edcf2c81e34081608",
+        "dimensions": [
+          1260,
+          1760
+        ]
+      },
+      "prompt": "Create one premium, high-definition, flat FRONT CARD SKIN. This is a thin rounded trading card, not a thick slab, case, product photograph, mockup or 3D scene. The exact brown young monkey seated and looking down at the black smartphone held in both hands, preserving the face, pose and phone silhouette. The identity reference controls exact subject features; never substitute a related mascot. FONE: a refined dark-phone-glass frame with warm bronze slim bevels, tiny rounded side-button details and source-faithful fur-grain relief in the narrow rails. The precise black smartphone from the source sets the perimeter geometry. Place small exact seated-monkey-and-phone reliefs only in the outer corners, with no large central mascot. Use quiet glass reflections, not a jungle scene or invented phone UI. The separate gray wireframe is a GEOMETRY-ONLY guide: exactly preserve its outer rounded card outline and all four blank panels in the same positions and sizes. The large creator-art window must remain entirely empty. Name, type and description panels must remain uniformly light ivory for dark live text; no texture, imagery, lettering or ornament inside these content areas. All new identity artwork belongs only to the narrow surrounding frame, rail, corners and gaps. No added words, labels, numbers, serials or footer slots. No generic laurel wreath, royal four-point stars, medallion oval, marble lattice, crown or borrowed Doge ornament. Ignore wireframe gray colors; build this identity\u2019s own materials. Render directly front-on, full card visible, sharp rounded alpha-ready edges, even neutral lighting, no border-clipping. The shared panel positions are the only common template: art direction must be unique to this exact identity.",
+      "status": "prepared for parent quality pilot only; no submission/spend"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "requests": [
+    {
+      "index": 206,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: PUMPCADE (PUMPCADE), exact Solana quote mint Eg2ymQ2aQqjMcibnmTt8erC6Tvk9PVpJZCxvVPJz2agu.\nACTUAL SOURCE AND MATERIAL CHECK: The large central gold/yellow medallion must reproduce the exact authentic PUMPCADE name arcs top and bottom, stars, joystick and speech bubble from Image2. Do not invent an arcade mascot or game character. Exact on-reference PUMPCADE lettering is approved only as part of this medallion; no extra slogan/title. Match oxblood lacquer, amber enamel and gold from the front. No empty label panels.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "d7686101-5f28-4858-8c39-5c0c726a230d"
+          },
+          {
+            "role": "image",
+            "value": "49c62066-9b68-48ef-a110-846ea0fab7bc"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ]
+      }
+    },
+    {
+      "index": 208,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: Codec Flow (CODEC), exact Solana quote mint 69LjZUUzxj3Cb3Fxeo1X4QpYEQTboApkhXTysPpbpump.\nACTUAL SOURCE AND MATERIAL CHECK: The large centered white CODEC wordmark must preserve Image2 exact segmented pixel/block letters, square cuts, gaps, width ratios and left-to-right order. No invented C glyph, barcode, QR or generic circuit symbol. Keep pure white on a graphite/black continuous field with restrained platinum geometry matching the front. Exact CODEC source lettering is approved; no other words.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips, ZERO divided front-label remnants anywhere on this back. Do not reproduce any front name/ticker/description paper-panel shapes. The ENTIRE reverse including its top band must be a single continuous finished native ceramic/enamel/metal identity composition. The large central hero is the actual Image2 source identity only; never the inherited Doge portrait from Image3. Image3 controls manufacture only. Preserve the same exact front edge construction and distinct material palette, no thickness, case, extra tokens, market data or empty slots. Authentic lettering is permitted only when contained in the real Image2 source logo. No invented words, ticker or serial.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "12d5f3d1-54cb-4eb9-b04d-afb15aecae58"
+          },
+          {
+            "role": "image",
+            "value": "762d3608-7b4c-4846-a3bc-80ec601cb1db"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ]
+      }
+    }
+  ]
+}

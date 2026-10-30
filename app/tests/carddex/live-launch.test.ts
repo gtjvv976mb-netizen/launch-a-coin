@@ -1,3 +1,4 @@
+import { ACTIVE_PAIR_DESIGNS } from "../../src/lib/carddex/pair-designs";
 import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
 import { Database } from "bun:sqlite";
 import { readFileSync, readdirSync } from "node:fs";
@@ -120,11 +121,13 @@ async function input(overrides: Partial<{cardTemplate: string; quoteAssetKey: st
 }
 describe("isolated real-launch server lifecycle", () => {
   const stockPairs = {"stock-gme": "gmex", "stock-tsla": "tslax", "stock-nvda": "nvdax", "stock-aapl": "aaplx", "stock-mstr": "mstrx", "stock-coin": "coinx", gamestop: "gmex", amc: "amc", coinbase: "coinx", strategy: "mstrx"};
-  const designPairs = [...Object.entries(stockPairs), ...MEME_PAIR_PRESETS.map(({design, quote}) => [design, quote] as const)];
+  const designPairs = [...Object.entries(stockPairs), ...MEME_PAIR_PRESETS.map(({design, quote}) => [design, quote] as const), ...ACTIVE_PAIR_DESIGNS.filter(design=>design.category!=="memes").map(design=>[design.key,design.quoteKey] as const)];
   for (const [cardTemplate, quoteKey] of designPairs) test(`${cardTemplate}/${quoteKey} preserves its exact quote through metadata, NFT preparation and saved reads`, async () => {
     const quote = getPairAsset(quoteKey);
     const original = await input({cardTemplate, quoteAssetKey: quote.key, quoteMint: quote.mint});
-    await expect(service.prepareLiveLaunch(creator, {...original, quoteMint: getPairAsset("usdc").mint})).rejects.toThrow("quote mint does not match");
+    const differentMint = getPairAsset(quote.key === "usdc" ? "sol" : "usdc").mint;
+    expect(differentMint).not.toBe(quote.mint);
+    await expect(service.prepareLiveLaunch(creator, {...original, quoteMint: differentMint})).rejects.toThrow("quote mint does not match");
     expect(prepareCalls).toBe(0);
     const prepared = await service.prepareLiveLaunch(creator, original);
     expect(tokenInputs).toHaveLength(1);

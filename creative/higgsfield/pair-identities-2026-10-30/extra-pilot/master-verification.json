@@ -1,0 +1,121 @@
+{
+  "pilotCount": 8,
+  "quotedCredits": 22.0,
+  "allCompletedAndHashValid": true,
+  "checks": [
+    {
+      "key": "fone",
+      "face": "front",
+      "jobId": "be371209-7132-4b2c-87df-08ff69e2d42c",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/fone-front.png",
+      "sha256": "bd938b00880eeb4741c7d564483cde5c0db7ab1072ad3cd6b28ae3dc873b9b7a",
+      "matchesLedger": true,
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "bytes": 4124458,
+      "complete": true
+    },
+    {
+      "key": "fone",
+      "face": "back",
+      "jobId": "09b2dd67-3423-4e99-a478-d96f3497effc",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/fone-back.png",
+      "sha256": "6edf48658a84043714b78ced3137365aa98909d907dd1c2402745a45010f87ef",
+      "matchesLedger": true,
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "bytes": 6265590,
+      "complete": true
+    },
+    {
+      "key": "buttcoin",
+      "face": "front",
+      "jobId": "3f1e6417-fee2-4cf1-b001-ba07c1d1500a",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/buttcoin-front.png",
+      "sha256": "52b04596a6fe1ab10fa78640a16590b057e02e890332cad5bbfe960f84efed58",
+      "matchesLedger": true,
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "bytes": 3610100,
+      "complete": true
+    },
+    {
+      "key": "buttcoin",
+      "face": "back",
+      "jobId": "0b8fa157-3ae7-44ba-960e-10a4c6639466",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/buttcoin-back.png",
+      "sha256": "1d8f452e9bdda01443118b8a73daf9d06b5db75308edad7ba29fab64387e680e",
+      "matchesLedger": true,
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "bytes": 4448742,
+      "complete": true
+    },
+    {
+      "key": "pepe",
+      "face": "front",
+      "jobId": "33e1986c-bb90-4a4d-838b-3744e588258a",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/pepe-front.png",
+      "sha256": "1e5cf698d2fd0add976ba96832c1db407c837de80b86d621ec62ec82a739fea9",
+      "matchesLedger": true,
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "bytes": 3899445,
+      "complete": true
+    },
+    {
+      "key": "pepe",
+      "face": "back",
+      "jobId": "efe9828b-8aca-4032-b762-122d5fb3ea40",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/pepe-back.png",
+      "sha256": "a7138876ac41feefb76959d8dd8b225d84691104debf8303746f02639126cfaa",
+      "matchesLedger": true,
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "bytes": 5713566,
+      "complete": true
+    },
+    {
+      "key": "wojak",
+      "face": "front",
+      "jobId": "120e0c63-26f4-469d-9eab-a09b83c257df",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/wojak-front.png",
+      "sha256": "ef1afd3eac461e137ca8df9139611d23017b20d93664d05cf09a83c17de30d5a",
+      "matchesLedger": true,
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "bytes": 3551767,
+      "complete": true
+    },
+    {
+      "key": "wojak",
+      "face": "back",
+      "jobId": "c2c6de70-0f3b-4302-98fc-b679e6e446e8",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/wojak-back.png",
+      "sha256": "027ad96aa058cf23a0c8c0b53e5aabaa23bd512e96f4c0b099da8049adcf35d5",
+      "matchesLedger": true,
+      "dimensions": [
+        1360,
+        2048
+      ],
+      "bytes": 6065326,
+      "complete": true
+    }
+  ],
+  "visualProof": "output/higgsfield/pair-identities-2026-10-30/extra-pilot-front-back-proof.jpg",
+  "integrationStatus": "Not installed; root visual approval pending; Buttcoin back requires topcartouche correction."
+}

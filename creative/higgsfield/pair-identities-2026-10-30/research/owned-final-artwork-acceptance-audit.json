@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-30T04:36:42.442408+00:00",
+  "scope": "Owned accepted artwork records and local immutable files only; no provider, wallet, public deployment or transaction calls.",
+  "manifests": [
+    {
+      "path": "accepted-pairs-tailoring-v2.json",
+      "completePairs": 62,
+      "facesHashVerified": 124,
+      "sourceOnlyCompositions": 5,
+      "status": "pass"
+    },
+    {
+      "path": "accepted-pairs-final.json",
+      "completePairs": 8,
+      "facesHashVerified": 16,
+      "sourceOnlyCompositions": 0,
+      "status": "pass"
+    }
+  ]
+}

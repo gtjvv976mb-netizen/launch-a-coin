@@ -15,9 +15,8 @@ const mint="So11111111111111111111111111111111111111112";
 const card=(key:string):CardData=>({name:"Silver & Scarlet <Test>",ticker:"TEST",image:"",lore:"A creator’s actual story, printed in the permanent shared template.",cardTemplate:key,quoteAssetKey:defaultQuoteForDesign(key).key,mcapUsd:null,holders:0,dexNo:0,level:1});
 const data=imageDataUri(new Uint8Array([1,2,3]),"image/png");
 describe("trusted creator card composition",()=>{
- test("all 48 reviewed source images and 83 admitted finish variants have pinned flattened skins",async()=>{
-  expect(new Set(Object.values(renderAssets).map(asset=>asset.designKey)).size).toBe(48);
-  expect(Object.keys(renderAssets)).toHaveLength(83);
+ test("every reviewed source and admitted finish has a pinned flattened skin",async()=>{
+  expect(new Set(Object.values(renderAssets).map(asset=>asset.designKey)).size).toBe(CARD_DESIGNS.length);
   const expectedKeys=CARD_DESIGNS.flatMap(design=>[...new Set(allowedQuotesForDesign(design.key).map(quote=>quote.kind==="stock"?"stock":"plain"))].map(kind=>design.key+(kind==="stock"?"--stock":""))).sort();
   expect(Object.keys(renderAssets).sort()).toEqual(expectedKeys);
   expect(CREATOR_CARD_RENDERER_VERSION).toBe(CARD_RENDERER_VERSION);

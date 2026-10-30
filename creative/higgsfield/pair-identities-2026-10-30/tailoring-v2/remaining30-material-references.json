@@ -1,0 +1,336 @@
+{
+  "purpose": "Only actual matching Higgsfield front rail crops; no content apertures or invented art.",
+  "transform": "left/right native rail crops at x.015..095/.905..985 y.13..92, resized side-by-side512x1024",
+  "entries": [
+    {
+      "quoteKey": "agency",
+      "sha256": "8bc09e7923df3cf4d8e14455f10a8719d7c448a9355e0595e1a70ebaa3258ac2",
+      "sourceFrontSha256": "e2cf964c889241345849c8293b2d19aac372821a9478ffb62928219a919c50a9",
+      "mediaId": "78d8d6f8-81cb-4c78-b498-1676f519d7cf",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "biketyson",
+      "sha256": "76419f676a8dbaa2d0bc2ba4d2974b3353592c6be2a3a9cb0c01b8cb5375a7ea",
+      "sourceFrontSha256": "98a9c0174aac5634133257a00b2a834cc5d1b5bdc654fa5428c118357193fb42",
+      "mediaId": "e116ea7f-86fe-4346-8a5f-63d91f978de7",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "manifest",
+      "sha256": "5bf736a184b8b32dc51ab621e5a6f0300f258589368b496168c095300c548f6c",
+      "sourceFrontSha256": "55c35f666cb7dfacc1eafdd83c2841bac1fd021d3412b2dcd878a2e0e43a7d0c",
+      "mediaId": "e0884309-3082-4092-b96e-c5214eed3e88",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "moodeng",
+      "sha256": "48dd9afce2d5d89861e0dd2adaa79605e368eafc61247f1bbc8a8526f5be814c",
+      "sourceFrontSha256": "ed35014e50ea890d6655cb3ea8ce3903f9af4f7cad2c5e8bd4ad193dd4fbf873",
+      "mediaId": "35eaaa1f-e332-4048-bdd3-ac3cb76043ee",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "npc",
+      "sha256": "7e96fdb4e1e816ef69f468ff7f8ec8d23feb1347d009457013e6870bca79960a",
+      "sourceFrontSha256": "348bf43ea75baab4e06b6292aadf1f0e435f70b61515fc1b831f88101b4ea69b",
+      "mediaId": "8ea82903-8f5a-4ef2-8545-38a61ddba853",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "otc",
+      "sha256": "7804e2a0c896e8e72f6a11cc2c8c174ad5eaa4435e106f9dac24d1b56b3d5398",
+      "sourceFrontSha256": "8d993d2771ef0f648144b86221cff0f70b3ef05d8ff0a38ca3c8a547e30dd2db",
+      "mediaId": "1ab930cb-80a4-4c00-aa68-13260fcf5bdb",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "paid",
+      "sha256": "dddc2ace2bcf8a3bba5b9b779d04ed35d907d0e8f5a5a91ecb581e3ca47634fb",
+      "sourceFrontSha256": "f18931f16c5ba8bd3d156ede225b87780b3b9d392b383657f0e91370c5ecd096",
+      "mediaId": "b5b3b7c0-8639-4894-b0b6-00b8e090ab4d",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "pengu",
+      "sha256": "b6b9264a1a74482ac9f3acf81ce6f7ea67005f2cf666ef9f1dd3a8ac434ebc4c",
+      "sourceFrontSha256": "d8b66b802085dd9f824be816ceebba0167c0f7534cd61bf452193f8a93ef3033",
+      "mediaId": "76247f2b-5e4d-4df9-8254-78e3043fe49c",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "percolator",
+      "sha256": "dd09b178b17764cc246217785bda840af88f6fcd2609a235cc8466fa5d623669",
+      "sourceFrontSha256": "dcb5c23c12e18f20d8e32bc5f989109bc262f8713d013eeeb06fb2ba2d2872e9",
+      "mediaId": "fdf3c097-173a-445e-947c-2fe3a71288c9",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "pill",
+      "sha256": "cc23de1413221a286e5a29f2d172fee349553d8d8cedb0524f1e4e40ff57dc84",
+      "sourceFrontSha256": "c59f1e0ef5b5cbb3d5ed307def1ab514802816e59453f4299ec1a87dd32107f7",
+      "mediaId": "5274a1a2-af67-457a-a304-bbec297ba63b",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "pippin",
+      "sha256": "14044626b3e337fb3369363439188c25a98e29e411ae8e9f0eb917533ee1fa40",
+      "sourceFrontSha256": "71120758421b98f77432f6763084905badb37af3eca3d492e2c9226f78f89354",
+      "mediaId": "e7be1067-26d3-4091-8cf4-3288eb92521b",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "plague",
+      "sha256": "d885f5a5f5d49d1a1287047fc224a8eb105a9ad669791e0af0940f148fcc34cc",
+      "sourceFrontSha256": "b7f8735266a0bbfe44697934adff25fb110420712ce86ac722cb6824a9109364",
+      "mediaId": "85fb9994-6878-48f1-9ecb-af992cd3b337",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "shib",
+      "sha256": "116b397a9c66fbf1a957c8cd7af2ef323ec39b6ce16808c32cb6eef4669cd7b8",
+      "sourceFrontSha256": "bf08e3c5b6b6c46f56b143cab8002416b6e16c47ffebf4422ea355abd64d58db",
+      "mediaId": "f985e880-1ed5-40f9-865f-a55bd3d015f3",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "solangeles",
+      "sha256": "d5d9019b5985de140595eff544b2f283e398da6307212e367d36dfb86fa0b1c1",
+      "sourceFrontSha256": "73021d9ae20ca92d674d45e13226724c62498ccea3e3d5a034c85da78a77beb1",
+      "mediaId": "11a59f58-7c78-4f64-a388-82c3925041ce",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "spx",
+      "sha256": "da653e73a28489871ee2e76563e81b7b5de9b6e39f3c7c3c604690b99052ac39",
+      "sourceFrontSha256": "37cc00ee89f10451fcf142bae65106d6d44a89273440f9f98d2ecf319d67fb04",
+      "mediaId": "ab2feb8a-30e4-407e-a2d4-42b9746b3b66",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "stonk",
+      "sha256": "af28a6166dd8055164c26a12a0c6fa3f391cb61d3b11fd47a392da454ab405e6",
+      "sourceFrontSha256": "31bfa6bb4fbd955809808691bf9a42e84718bc3e264ea2010cb9770c4e8dc357",
+      "mediaId": "f4fcb1a3-97af-4126-8b17-fc0846885d99",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "sv151",
+      "sha256": "35b4dc59bb1bdf23348f0c548270a55519c1e52db73dcf9c7e1ef24f9b531343",
+      "sourceFrontSha256": "542713dabf2eeb19be7d0d63ece42d43f4687b0248fbba2a24f5d66f4af7d807",
+      "mediaId": "7f81457d-e9e9-4ccb-a69c-beb699e65ec1",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "swordcat",
+      "sha256": "d1bf403718542c4525a858983e74bf9ba5aea699cd391be6336c8b6fba250586",
+      "sourceFrontSha256": "734d148cb54f3cfaa22efe28492f6119e81b4533dc96406465c07688b93d269d",
+      "mediaId": "f88a0fa2-bfdb-43a6-9ec3-f2098ff81227",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "toad",
+      "sha256": "87033df46b74b4c552695f120c9a5cb0f0b60276742efc939a8ca18a9b61b588",
+      "sourceFrontSha256": "0cc924c96bdb9e35c66fcb07c086fe1a7d20ad013cbb6ca267f6c54bd0d4814d",
+      "mediaId": "b7b80385-c405-419a-a193-0a356824a78c",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "tokabu",
+      "sha256": "79752347b10756dbcf5c045fb2a6d5a635532a9dc1ec06470724055e3879c05c",
+      "sourceFrontSha256": "cb18aa3d971cf20be36f0bd7ba134b983e91459c9b8068734b5dbfeb936bdb7b",
+      "mediaId": "8965f216-9264-4813-9228-b935d283bcb2",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "triplet",
+      "sha256": "51c5310c3c03c257557813e4db0692d17ef00c8b2066fc9855a984e59836352b",
+      "sourceFrontSha256": "73b19819548761a7cfecbc01c885f8f5ce59799491f98330eb5d9a155e483382",
+      "mediaId": "d8289cfe-2508-4583-a0f4-1db097f416c5",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "troll",
+      "sha256": "5d1b335ff492f17b82372ff6e45d1f21977b398dc122404b94c9dda65b4742ed",
+      "sourceFrontSha256": "5239b7bd63a472862d52245c87ffa1742a3419605b22dba719057721051a89fd",
+      "mediaId": "4a1324fa-6d54-4d95-a1d6-5160fa9ea0a8",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "trump",
+      "sha256": "28c69567244eae53c816890e5780e46f9e82f38f03f423aa4bdae9ebf5b405f0",
+      "sourceFrontSha256": "e06a00cd49250ee99e8bc447184531c4ac17e76ef75a79fd49ed7bb7225f31b4",
+      "mediaId": "e3cd2347-fa77-42bb-aeb1-827f17264e15",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "usduc",
+      "sha256": "eb844a84ee1925668cb314db11155a695c92f0aaced426a263ba38e3f9055c60",
+      "sourceFrontSha256": "9c4ac06906372724431a26048384cedaf584d932b4196deddba0f384f65d30ac",
+      "mediaId": "4205b79d-6928-4516-90d4-790b6d9d10c0",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "useless",
+      "sha256": "c19c1b9dbcfad8c626bee4703afadd6215fab93f0aa58a4bfb82abbb5ece6534",
+      "sourceFrontSha256": "07d4f5e28c5dae1c6753bf642a40a3cdf903b6068dab90842034246de56dc783",
+      "mediaId": "5918ae5f-8663-4f90-a16e-6eaf1e358a1f",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "vine",
+      "sha256": "d0f4233a446d99dfdbb2551ae7ae3843d16c7256411e23c74c7934ababb64563",
+      "sourceFrontSha256": "e2261175ce1eb105079358fd58e580efcbe06cb9910857ece63801ce16ee7048",
+      "mediaId": "7b9afe56-ed87-4793-af7c-da913c80a32e",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "wojak",
+      "sha256": "2b9692583a69dca1fd3510e8d826423b1b59fac550848510a94d92bdea8f6c20",
+      "sourceFrontSha256": "5dbd37ee5e927f12f7f78958d877812a8a1223242e04914048695bb492b33297",
+      "mediaId": "16a49ff5-9239-4c87-8ce0-8b9f8ac5ddd9",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "zauth",
+      "sha256": "0e28fcc329263ffeae5f7804b4fa650c4983397d607ecb88a8a1736df1d66ccd",
+      "sourceFrontSha256": "629e792aff523e439927a2a7b049d729c445338d01e85860a72d8fb5ea5efd37",
+      "mediaId": "99de1049-0492-46dc-809d-ca77755fd410",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "zcat",
+      "sha256": "0eec0cbbbbd08e8fcb73d7ee2437cf35f3f3477f9d0641f8d543a25f3ae14d59",
+      "sourceFrontSha256": "8849df36ffaed6a060c408fe70b316444771e746525026bb072b74e56ac70a8a",
+      "mediaId": "12a2dc09-13f4-4e4a-8962-10b82027a803",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    },
+    {
+      "quoteKey": "zerebro",
+      "sha256": "bf30b79156c7773047e9803cfc94b8e5640e320ac259dcc1b3b0fd009db49bed",
+      "sourceFrontSha256": "d5fc08f86ae8162c7c04bff634710c5e50c9a720e829344632b5c0d49d255c1f",
+      "mediaId": "14a12692-7d54-43d7-b358-84609f23d1b7",
+      "putStatus": 200,
+      "dimensions": [
+        512,
+        1024
+      ]
+    }
+  ]
+}

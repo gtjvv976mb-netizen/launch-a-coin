@@ -1,0 +1,26 @@
+{
+  "reviewedAt": "2026-10-30T03:54:15.530194+00:00",
+  "reviewer": "extra_pair_art",
+  "scope": "Actual native existing Higgsfield back186 compared with new front409 canonical populated proof and exact source. No generated image editing or provider call.",
+  "verdict": "identity-and-wordless-pass-material-compatible-with-noted-ornament-difference",
+  "frontPath": "output/higgsfield/pair-identities-2026-10-30/tailoring-v2/source-paper-assessment/pair-biketyson-populated.png",
+  "frontNativePath": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/biketyson-front-409.png",
+  "backPath": "output/higgsfield/pair-identities-2026-10-30/originals/biketyson-back-revision186.png",
+  "backJobId": "5bfa9609-facc-45ae-b97f-c29009f15fad",
+  "backIndex": 186,
+  "backSha256": "e16e72dc40d53bcbf30ebee70619497cde676344f7bf493e4015621114c11135",
+  "sourcePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/biketyson-c18f3b75f0d1.png",
+  "sourceSha256": "c18f3b75f0d1e1f3b97aed507773a2c99b8ab68675caf13fd53483c8abf20aaa",
+  "proofPath": "output/higgsfield/pair-identities-2026-10-30/tailoring-v2/biketyson409-front186-back-reuse-diagnostic.png",
+  "identity": "Exact recognizable muscular human body forming the bicycle frame, source head/tattoo and handlebar/saddle arrangement; not a normal cyclist.",
+  "wordless": true,
+  "coherentSharedMaterials": [
+    "Warm copper/bronze",
+    "Dark rubber-like tire rails",
+    "Fine wheel spokes",
+    "Metal chain detail"
+  ],
+  "difference": "Back186 is brighter gold and retains laurel/diamond ornament; front409 uses clean industrial copper tube/spoke/chain rails. Compatible materials, different ornament grammar; not claimed a newly generated matched v2 reverse.",
+  "reuseCondition": "Parent may accept explicit mixed-version provenance with original186 job/hash and no rebilling; avoid claiming509 produced an image. Crypto peer owns v2 acceptance.",
+  "automaticFallback": false
+}

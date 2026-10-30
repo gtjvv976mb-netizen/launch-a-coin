@@ -1,0 +1,34 @@
+[
+  {
+    "index": 192,
+    "key": "mstrx",
+    "face": "front",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/mstrx-front.png"
+  },
+  {
+    "index": 76,
+    "key": "wbtc",
+    "face": "back",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/wbtc-back.png"
+  },
+  {
+    "index": 78,
+    "key": "eth",
+    "face": "back",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/eth-back.png"
+  },
+  {
+    "index": 15,
+    "key": "coinx",
+    "face": "front",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/coinx-front.png"
+  }
+]

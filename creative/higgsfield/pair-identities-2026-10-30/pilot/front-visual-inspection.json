@@ -1,0 +1,17 @@
+{
+  "reviewedAt": "2026-10-29T23:42:11.834Z",
+  "reviewer": "higgsfield_access_probe",
+  "scope": "Read-only visual inspection of all four actual 1360x2048 PNG front masters; parent review remains required before backs.",
+  "observations": [
+    "All four have light name, narrow ticker/pair and continuous description writing surfaces; large creator-art apertures are empty.",
+    "Materials are distinct: SOL violet/mint/palladium geometry, TSLAX red/titanium, DOGE gold/black reliefs, PNUT copper/walnut with hat-wearing squirrel motifs.",
+    "No generated labels, extra footer slots, cases, slabs or obvious protruding ornaments are visible.",
+    "Generated frames fill the 2:3 canvas; precise reconciliation with the 63:88 canonical print grid and source-logo fidelity remains an integration/review check, not a measured pass."
+  ],
+  "generationState": {
+    "paidSubmissions": 4,
+    "quotedSubmittedCredits": 11,
+    "backSubmissions": 0
+  },
+  "awaiting": "Parent front visual inspection before any back submission"
+}

@@ -1,0 +1,45 @@
+{
+  "context": "Create distinct source-derived meme card frames with consistent empty creator fields.",
+  "requests": [
+    {
+      "index": 447,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "1bfffe64-cd4a-4541-9813-710a65687caa"
+          },
+          {
+            "role": "image",
+            "value": "e8196e8b-62b6-42ea-95c6-57d21390b96d"
+          }
+        ],
+        "prompt": "EDIT IMAGE 1, the gray layout wireframe. Preserve the exact rounded outer outline and FOUR EMPTY ivory rectangles at their EXACT positions and sizes. Do not add, split, move, shorten, cover or fill any rectangle. The huge middle creator-art rectangle MUST remain entirely blank. Replace ONLY the gray perimeter rails and gaps OUTSIDE all four empty rectangles with a premium thin trading-card frame. IMAGE 2 supplies abstract identity inspiration ONLY through these shapes and materials: Scarlet/violet angular foil rails with pack-fold-like creases, interrupted holographic panels and faceted enamel joints; preserve shared apertures. MATERIALS: Scarlet and violet pearlescent foil, warm gold microbevels and black shallow recesses. DO NOT DRAW ANY WHOLE CHARACTER, HUMAN, ANIMAL, HEAD, FACE, EYES, BODY, PORTRAIT OR COMPLETE IDENTITY PICTURE ANYWHERE ON THIS FRONT. This front is a customizable frame only. Use source shapes as ABSTRACT perimeter contours, not pictures or miniature corner mascots. No images inside any of the four surfaces. Name, type and description panels must stay uniformly light ivory, untextured and clean for live dark text. No new or split panels, footer slots, words, numbers, labels, serials, full logos, laurel wreath, royal medal, generic star, crown, marble lattice, scene, perspective, thickness, case or slab. Crisp refined HD physical-material detail, smooth rounded thin edges, neutral even light and straight front view. Preserve IMAGE1 geometry while replacing its gray material only."
+      }
+    },
+    {
+      "index": 448,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "1bfffe64-cd4a-4541-9813-710a65687caa"
+          },
+          {
+            "role": "image",
+            "value": "8887d206-92a7-4193-a759-ecf76d9bf92b"
+          }
+        ],
+        "prompt": "EDIT IMAGE 1, the gray layout wireframe. Preserve the exact rounded outer outline and FOUR EMPTY ivory rectangles at their EXACT positions and sizes. Do not add, split, move, shorten, cover or fill any rectangle. The huge middle creator-art rectangle MUST remain entirely blank. Replace ONLY the gray perimeter rails and gaps OUTSIDE all four empty rectangles with a premium thin trading-card frame. IMAGE 2 supplies abstract identity inspiration ONLY through these shapes and materials: Sword-and-armor frame: a slim blade-like long rail, riveted silver-armor panel joints and controlled warm-gold light channels echoing the source sword. MATERIALS: Brushed silver armor relief, ginger enamel accents, dark steel and luminous gold glass. DO NOT DRAW ANY WHOLE CHARACTER, HUMAN, ANIMAL, HEAD, FACE, EYES, BODY, PORTRAIT OR COMPLETE IDENTITY PICTURE ANYWHERE ON THIS FRONT. This front is a customizable frame only. Use source shapes as ABSTRACT perimeter contours, not pictures or miniature corner mascots. No images inside any of the four surfaces. Name, type and description panels must stay uniformly light ivory, untextured and clean for live dark text. No new or split panels, footer slots, words, numbers, labels, serials, full logos, laurel wreath, royal medal, generic star, crown, marble lattice, scene, perspective, thickness, case or slab. Crisp refined HD physical-material detail, smooth rounded thin edges, neutral even light and straight front view. Preserve IMAGE1 geometry while replacing its gray material only."
+      }
+    }
+  ]
+}

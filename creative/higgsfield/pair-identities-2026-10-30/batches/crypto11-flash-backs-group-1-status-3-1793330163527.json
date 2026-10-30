@@ -1,0 +1,52 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "jobs[4]:\n  - index: 601\n    job_id: 1aa75e0e-6082-4942-b628-8c41abb54dfd\n    status: completed\n    type: image\n    model: seedream_5_0_flash\n    result_url: \"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_031535_1aa75e0e-6082-4942-b628-8c41abb54dfd.png\"\n  - index: 602\n    job_id: bb6e7f04-4b29-4cd5-a343-8702174adcc2\n    status: completed\n    type: image\n    model: seedream_5_0_flash\n    result_url: \"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_031536_bb6e7f04-4b29-4cd5-a343-8702174adcc2.png\"\n  - index: 603\n    job_id: 9f6e9e39-1e7b-4221-aac0-8b38027ceb45\n    status: in_progress\n    type: image\n    model: seedream_5_0_flash\n  - index: 604\n    job_id: 5c492c4c-7d6d-40a0-a5c4-dd6dd38a6694\n    status: in_progress\n    type: image\n    model: seedream_5_0_flash\nsummary:\n  total: 4\n  completed: 2\n  failed: 0\n  active: 2\n  errors: 0\nall_terminal: false\npoll_after_seconds: 10\n\nWork is still pending. Wait poll_after_seconds, then call jobs_wait again in this turn. Do not ask the user to say 'continue' just because the polling window ended. Respect cancellation and host execution limits."
+    }
+  ],
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 601,
+        "job_id": "1aa75e0e-6082-4942-b628-8c41abb54dfd",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_031535_1aa75e0e-6082-4942-b628-8c41abb54dfd.png"
+      },
+      {
+        "index": 602,
+        "job_id": "bb6e7f04-4b29-4cd5-a343-8702174adcc2",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_031536_bb6e7f04-4b29-4cd5-a343-8702174adcc2.png"
+      },
+      {
+        "index": 603,
+        "job_id": "9f6e9e39-1e7b-4221-aac0-8b38027ceb45",
+        "status": "in_progress",
+        "type": "image",
+        "model": "seedream_5_0_flash"
+      },
+      {
+        "index": 604,
+        "job_id": "5c492c4c-7d6d-40a0-a5c4-dd6dd38a6694",
+        "status": "in_progress",
+        "type": "image",
+        "model": "seedream_5_0_flash"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "completed": 2,
+      "failed": 0,
+      "active": 2,
+      "errors": 0
+    },
+    "all_terminal": false,
+    "poll_after_seconds": 10
+  },
+  "isError": false
+}

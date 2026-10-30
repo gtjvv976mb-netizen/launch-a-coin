@@ -1,0 +1,151 @@
+{
+  "reviewedAt": "2026-10-30T02:49:17.720308+00:00",
+  "reviewer": "extra_pair_art",
+  "method": "Personally inspected all10 actual generated source/output proof boards using view_image, against exact pinned identity inputs; peer independent source QA supports first15 and flagged defects.",
+  "accepted": [
+    {
+      "index": 50,
+      "quoteKey": "chillguy",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-001-proof.png",
+      "jobId": "fe921fc9-7218-4e1d-b365-f5531a480e0f"
+    },
+    {
+      "index": 52,
+      "quoteKey": "goat",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-001-proof.png",
+      "jobId": "416f81ad-f9f3-4369-a5a1-7cc58cc42df0"
+    },
+    {
+      "index": 54,
+      "quoteKey": "zerebro",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-002-proof.png",
+      "jobId": "0f295bce-f334-4067-968c-de1048077313"
+    },
+    {
+      "index": 56,
+      "quoteKey": "act",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-002-proof.png",
+      "jobId": "19f7aac8-382a-4fd2-b248-984ff8cf0e3d"
+    },
+    {
+      "index": 58,
+      "quoteKey": "pippin",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-003-proof.png",
+      "jobId": "c5b1c205-d9bd-4ab1-b514-46ef7b5540fe"
+    },
+    {
+      "index": 60,
+      "quoteKey": "vine",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-003-proof.png",
+      "jobId": "bb8236a6-07a5-43dd-aad5-28af42249013"
+    },
+    {
+      "index": 62,
+      "quoteKey": "aura",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-004-proof.png",
+      "jobId": "6cb3a5c0-ea7c-4b9f-bd1c-be44b6bc9e56"
+    },
+    {
+      "index": 66,
+      "quoteKey": "cate",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-005-proof.png",
+      "jobId": "a15697f7-840c-4522-85c9-bf5903920d93"
+    },
+    {
+      "index": 70,
+      "quoteKey": "bert",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-006-proof.png",
+      "jobId": "e5804bc7-c372-461c-9851-5d0ad23e93f7"
+    },
+    {
+      "index": 72,
+      "quoteKey": "chillhouse",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-006-proof.png",
+      "jobId": "4f53302f-fbaf-4899-88c9-a671a6255406"
+    },
+    {
+      "index": 74,
+      "quoteKey": "usduc",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-007-proof.png",
+      "jobId": "edf3239c-281d-4080-80e7-102b52084f02"
+    },
+    {
+      "index": 80,
+      "quoteKey": "hype",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-007-proof.png",
+      "jobId": "2ac9e6a4-bf0f-4d41-bbcf-fd0bee1219be"
+    },
+    {
+      "index": 82,
+      "quoteKey": "zec",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-008-proof.png",
+      "jobId": "0131bd9a-7379-46fe-af13-31fd280e2772"
+    },
+    {
+      "index": 84,
+      "quoteKey": "near",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-008-proof.png",
+      "jobId": "d4efba66-c6a3-4ce0-9cb2-ed062e2047c7"
+    },
+    {
+      "index": 86,
+      "quoteKey": "xrp",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-009-proof.png",
+      "jobId": "538cb150-bae3-4dc3-ad58-d9fdb4fed632"
+    },
+    {
+      "index": 88,
+      "quoteKey": "xmr",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-009-proof.png",
+      "jobId": "28ca3161-18d1-4922-af90-89b6bd85358c"
+    },
+    {
+      "index": 90,
+      "quoteKey": "sui",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-010-proof.png",
+      "jobId": "12d33119-92c1-4179-9e3d-7a6cf9f63b4b"
+    },
+    {
+      "index": 92,
+      "quoteKey": "arb",
+      "face": "back",
+      "proof": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-root-backs-010-proof.png",
+      "jobId": "5f8d5ffb-43da-40fb-a0b8-36128106dbac"
+    }
+  ],
+  "rejectedOrHeld": [
+    {
+      "index": 64,
+      "key": "michi",
+      "reason": "Generated kitten lacks the defining raised paw visible high beside the head in exact source."
+    },
+    {
+      "index": 67,
+      "key": "ansem",
+      "reason": "Perimeter uses a natural bull, while native and improved source show a human-faced black bull body."
+    },
+    {
+      "index": 68,
+      "key": "ansem",
+      "reason": "Central natural bull muzzle replaces the exact human-faced minotaur identity."
+    }
+  ],
+  "scope": "Identity/continuous-reverse/template/material quality; future custom-frame v2 direction is separately tracked and does not erase these actual job receipts."
+}

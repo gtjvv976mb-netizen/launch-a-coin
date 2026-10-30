@@ -1,0 +1,18 @@
+[
+  {
+    "index": 66,
+    "key": "cate",
+    "face": "back",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/cate-back.png"
+  },
+  {
+    "index": 68,
+    "key": "ansem",
+    "face": "back",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/ansem-back.png"
+  }
+]

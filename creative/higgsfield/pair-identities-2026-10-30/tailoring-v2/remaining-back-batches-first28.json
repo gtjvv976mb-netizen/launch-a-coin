@@ -1,0 +1,1754 @@
+{
+  "createdAt": "2026-10-30T03:04:16.114553+00:00",
+  "status": "SUPERSEDED UN\u00adSUBMITTED. Root explicitly selected ROOT-ELIGIBLE-BACKS-1-PLAN.json as the sole executable source; never submit this file or its requestfiles.",
+  "paidExecutor": "root-only",
+  "ledgerOwner": "crypto_pair_research",
+  "maximumImagesPerCall": 2,
+  "maximumKnownInFlightJobs": 4,
+  "model": "seedream_5_0_flash",
+  "resolution": "2k",
+  "creditsPerImage": 0.5,
+  "imageCount": 28,
+  "quotedCredits": 14,
+  "indicesRule": "Stable matching backindex = frontindex+100.503/509 remain unsubmitted pending source remediation.",
+  "batches": [
+    {
+      "batchKey": "meme-tailoring-v2-backs-first28-001",
+      "indices": [
+        501,
+        502
+      ],
+      "quoteKeys": [
+        "67",
+        "act"
+      ],
+      "requests": [
+        {
+          "index": 501,
+          "requestId": "tailoring-v2-67-back",
+          "quoteKey": "67",
+          "designKey": "pair-67",
+          "exactQuoteMint": "9AvytnUKsLxPxFHFqS6VLxaxt5p6BhYNr53SD2Chpump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/67-00e3a88121fa.jpg",
+          "referenceSha256": "00e3a88121faddd6787f8af3a7e4f89747a4ab0f280601d6572bb6d29e8192dc",
+          "sourceMediaId": "ed0f493f-cb80-41d8-9a70-2ead067f2f48",
+          "matchingAcceptedFrontIndex": 401,
+          "matchingAcceptedFrontJobId": "41c48d46-0703-4346-beda-e1386f3e81fb",
+          "matchingAcceptedFrontSha256": "751bb33abc7a2992306155bd0add349a053cc86533ca36801051f44f9783b721",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "ed0f493f-cb80-41d8-9a70-2ead067f2f48"
+              },
+              {
+                "role": "image",
+                "value": "41c48d46-0703-4346-beda-e1386f3e81fb"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: The Official 67 Coin. Exact open-mouthed blond boy portrait and supplied expression/crop; preserve actual person.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source portrait within an asymmetric carved hair/cheek contour field with subtle source-crowd texture kept abstract and low contrast.\nMATCHED MATERIALS: Warm pale-gold hair-toned metal, neutral ivory and source cyan/black accent planes. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        },
+        {
+          "index": 502,
+          "requestId": "tailoring-v2-act-back",
+          "quoteKey": "act",
+          "designKey": "pair-act",
+          "exactQuoteMint": "GJAFwWjJ3vnTsrQVabjBVK2TYB1YtRCQXRDfDgUnpump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/references/act-90309845b93a.jpg",
+          "referenceSha256": "90309845b93ad860b2c755810b13d3fd376d9b9fe026d6de50103677af95b521",
+          "sourceMediaId": "3c46d325-fa59-4d86-a49b-7acc788d7ccc",
+          "matchingAcceptedFrontIndex": 402,
+          "matchingAcceptedFrontJobId": "3a1fb7e5-9da4-439f-9eb6-50f273d60aa2",
+          "matchingAcceptedFrontSha256": "746a58b3299defcc02eb2f36e1ea6b6bd56d6ae373120882c905b0ae7b66daf9",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "3c46d325-fa59-4d86-a49b-7acc788d7ccc"
+              },
+              {
+                "role": "image",
+                "value": "3a1fb7e5-9da4-439f-9eb6-50f273d60aa2"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Act I : The AI Prophecy. Exact purple anime-eye crop with luminous iris, dark lashes and angular hair strands.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact eye/iris crop inside an asymmetric optical-glass relief field; iris facets and hair-direction lines continue into the perimeter.\nMATCHED MATERIALS: Violet optical glass, dark aubergine ceramic, pearlescent pink highlights and fine silver. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials. Preserve the actual violet anime eye crop and lash/iris orientation from the source."
+          }
+        }
+      ],
+      "requestFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-001-request.json",
+      "requestSha256": "9a407cf3e280e1d3ebe96c77301edcb8ca7e617cfa6fa9479ddfe4507383dab6",
+      "receiptFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-001-receipt.json",
+      "statusFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-001-status.json",
+      "quotedCredits": 1,
+      "payload": {
+        "requests": [
+          {
+            "index": 501,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "ed0f493f-cb80-41d8-9a70-2ead067f2f48"
+                },
+                {
+                  "role": "image",
+                  "value": "41c48d46-0703-4346-beda-e1386f3e81fb"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: The Official 67 Coin. Exact open-mouthed blond boy portrait and supplied expression/crop; preserve actual person.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source portrait within an asymmetric carved hair/cheek contour field with subtle source-crowd texture kept abstract and low contrast.\nMATCHED MATERIALS: Warm pale-gold hair-toned metal, neutral ivory and source cyan/black accent planes. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          },
+          {
+            "index": 502,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "3c46d325-fa59-4d86-a49b-7acc788d7ccc"
+                },
+                {
+                  "role": "image",
+                  "value": "3a1fb7e5-9da4-439f-9eb6-50f273d60aa2"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Act I : The AI Prophecy. Exact purple anime-eye crop with luminous iris, dark lashes and angular hair strands.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact eye/iris crop inside an asymmetric optical-glass relief field; iris facets and hair-direction lines continue into the perimeter.\nMATCHED MATERIALS: Violet optical glass, dark aubergine ceramic, pearlescent pink highlights and fine silver. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials. Preserve the actual violet anime eye crop and lash/iris orientation from the source."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchKey": "meme-tailoring-v2-backs-first28-002",
+      "indices": [
+        504,
+        505
+      ],
+      "quoteKeys": [
+        "alon",
+        "ansem"
+      ],
+      "requests": [
+        {
+          "index": 504,
+          "requestId": "tailoring-v2-alon-back",
+          "quoteKey": "alon",
+          "designKey": "pair-alon",
+          "exactQuoteMint": "8XtRWb4uAAJFMP4QQhoYYCWR6XXb7ybcCdiqPwz9s5WS",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/alon-acd2f66dbbb5.jpg",
+          "referenceSha256": "acd2f66dbbb56320e629220d36c480735a563d3829763062cf12f1276ed0aea0",
+          "sourceMediaId": "f3ae9c63-0dc0-4a2f-8387-d496cc7465f9",
+          "matchingAcceptedFrontIndex": 404,
+          "matchingAcceptedFrontJobId": "eef0ae5d-a2ea-4772-b50a-ad69450e61a3",
+          "matchingAcceptedFrontSha256": "7eb784794f8e0484a2c85c339b9e7f94fa8b72b52805dd76749a80db560f61b7",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "f3ae9c63-0dc0-4a2f-8387-d496cc7465f9"
+              },
+              {
+                "role": "image",
+                "value": "eef0ae5d-a2ea-4772-b50a-ad69450e61a3"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: alon. Exact gray-haired illustrated person with yellow/black cap, white sunglasses and specific source face; omit incidental slogans.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact illustrated source character framed by asymmetric cap-brim and sunglasses-derived planes on its source cyan field.\nMATCHED MATERIALS: Yellow enamel, matte black ceramic, white lens-like glass and cool gray metal. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        },
+        {
+          "index": 505,
+          "requestId": "tailoring-v2-ansem-back",
+          "quoteKey": "ansem",
+          "designKey": "pair-ansem",
+          "exactQuoteMint": "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/references/ansem-d330339eb3aef602-higher-pump-reference.jpg",
+          "referenceSha256": "d330339eb3aef602ad7d0e9d92dbb4610745c24fb5291579d5d9e070f5f2c2ed",
+          "sourceMediaId": "https://images.pump.fun/coin-image/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump?placeholder=none&src=https%3A%2F%2Fedge.uxento.io%2Fimage%2FCx83EqERns2VuiKrkwHegTuECVqZebsNhJ3dCU8CucWG&variant=600x600",
+          "matchingAcceptedFrontIndex": 405,
+          "matchingAcceptedFrontJobId": "880d8a29-4fb3-417f-a144-9c4b01af7cad",
+          "matchingAcceptedFrontSha256": "9decccf4fafa16528b9f184217cf32fc600326df6ca33e4263fc7f7bb9cea26a",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "https://images.pump.fun/coin-image/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump?placeholder=none&src=https%3A%2F%2Fedge.uxento.io%2Fimage%2FCx83EqERns2VuiKrkwHegTuECVqZebsNhJ3dCU8CucWG&variant=600x600"
+              },
+              {
+                "role": "image",
+                "value": "880d8a29-4fb3-417f-a144-9c4b01af7cad"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: The Black Bull. Exact dark human-faced horned minotaur reference: preserve the human facial planes, horns and dark source silhouette.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact human-faced minotaur in a quiet dark relief field; its actual horn curves shape the outer frame and human face remains source-faithful.\nMATCHED MATERIALS: Blackened bronze, dark basalt-like ceramic and restrained cool polished highlights. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials. The identity is specifically a human male face on the front of a four-legged black bull body with long horns, exactly as the600px supplied source. Keep the human facial anatomy and expression; actual body/horn pose is essential."
+          }
+        }
+      ],
+      "requestFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-002-request.json",
+      "requestSha256": "5c64ea46e87120eb56f4d83c95be9bc13dd9c6a7ec324ddc11b4fb40a7f71478",
+      "receiptFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-002-receipt.json",
+      "statusFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-002-status.json",
+      "quotedCredits": 1,
+      "payload": {
+        "requests": [
+          {
+            "index": 504,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "f3ae9c63-0dc0-4a2f-8387-d496cc7465f9"
+                },
+                {
+                  "role": "image",
+                  "value": "eef0ae5d-a2ea-4772-b50a-ad69450e61a3"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: alon. Exact gray-haired illustrated person with yellow/black cap, white sunglasses and specific source face; omit incidental slogans.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact illustrated source character framed by asymmetric cap-brim and sunglasses-derived planes on its source cyan field.\nMATCHED MATERIALS: Yellow enamel, matte black ceramic, white lens-like glass and cool gray metal. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          },
+          {
+            "index": 505,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "https://images.pump.fun/coin-image/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump?placeholder=none&src=https%3A%2F%2Fedge.uxento.io%2Fimage%2FCx83EqERns2VuiKrkwHegTuECVqZebsNhJ3dCU8CucWG&variant=600x600"
+                },
+                {
+                  "role": "image",
+                  "value": "880d8a29-4fb3-417f-a144-9c4b01af7cad"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: The Black Bull. Exact dark human-faced horned minotaur reference: preserve the human facial planes, horns and dark source silhouette.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact human-faced minotaur in a quiet dark relief field; its actual horn curves shape the outer frame and human face remains source-faithful.\nMATCHED MATERIALS: Blackened bronze, dark basalt-like ceramic and restrained cool polished highlights. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials. The identity is specifically a human male face on the front of a four-legged black bull body with long horns, exactly as the600px supplied source. Keep the human facial anatomy and expression; actual body/horn pose is essential."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchKey": "meme-tailoring-v2-backs-first28-003",
+      "indices": [
+        506,
+        507
+      ],
+      "quoteKeys": [
+        "aura",
+        "baton"
+      ],
+      "requests": [
+        {
+          "index": 506,
+          "requestId": "tailoring-v2-aura-back",
+          "quoteKey": "aura",
+          "designKey": "pair-aura",
+          "exactQuoteMint": "DtR4D9FtVoTX2569gaL837ZgrB6wNjj6tkmnX9Rdk9B2",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/references/aura-e4e149c6b5fb.png",
+          "referenceSha256": "e4e149c6b5fb8846395c0cdb14869b58db256439d3d533e11d83aecd80b99921",
+          "sourceMediaId": "5231e766-c911-44f0-9e90-3bd0b62428e6",
+          "matchingAcceptedFrontIndex": 406,
+          "matchingAcceptedFrontJobId": "abeb9f4e-d14a-4c45-b278-a2f5cb5174ad",
+          "matchingAcceptedFrontSha256": "8ef4cc53a79e10e81a6b399c0194ac538d268d60ce3079eaf9a7da1313d9b9b0",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "5231e766-c911-44f0-9e90-3bd0b62428e6"
+              },
+              {
+                "role": "image",
+                "value": "abeb9f4e-d14a-4c45-b278-a2f5cb5174ad"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: aura. Exact soft gray sleeping-cat/double-exposure photograph with its source pose and translucent reflection bands.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Keep the exact source sleeping-cat crop and double exposure as an ethereal layered photographic relief, with horizontal reflection planes dissolving into the frame.\nMATCHED MATERIALS: Frosted smoke glass, pale silver, muted lilac/rose reflections from the image. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        },
+        {
+          "index": 507,
+          "requestId": "tailoring-v2-baton-back",
+          "quoteKey": "baton",
+          "designKey": "pair-baton",
+          "exactQuoteMint": "Hg5Ja55T5wESq4vyFoiVCMeHXtGyVA69X2UHq8hgpump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/baton-45d46d18d4a6.webp",
+          "referenceSha256": "45d46d18d4a65c0765cde6732043d7a9457c8550fc347de90a07088c2ace674d",
+          "sourceMediaId": "56bb881f-7452-407b-bd72-f44d23cc1719",
+          "matchingAcceptedFrontIndex": 407,
+          "matchingAcceptedFrontJobId": "361b0db1-6355-4c09-9c7a-a92c3fd72ec4",
+          "matchingAcceptedFrontSha256": "f6fdf626aec68fa8a00bfc32aaa63f540f0996bc24164cdf5fa4f20aae58423d",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "56bb881f-7452-407b-bd72-f44d23cc1719"
+              },
+              {
+                "role": "image",
+                "value": "361b0db1-6355-4c09-9c7a-a92c3fd72ec4"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: baton. Exact small tan dog holding white baton with green handle and wearing green collar.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source dog/baton composition within an open diagonal baton-rail field, with green grip bands echoing into the perimeter.\nMATCHED MATERIALS: Warm tan enamel, polished white ceramic, emerald grip-like inlays and satin brass. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        }
+      ],
+      "requestFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-003-request.json",
+      "requestSha256": "d18288bc79fe2a1f856057174c9cc54f58b934913b7c535ddff8d60fcfb9a1fc",
+      "receiptFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-003-receipt.json",
+      "statusFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-003-status.json",
+      "quotedCredits": 1,
+      "payload": {
+        "requests": [
+          {
+            "index": 506,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "5231e766-c911-44f0-9e90-3bd0b62428e6"
+                },
+                {
+                  "role": "image",
+                  "value": "abeb9f4e-d14a-4c45-b278-a2f5cb5174ad"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: aura. Exact soft gray sleeping-cat/double-exposure photograph with its source pose and translucent reflection bands.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Keep the exact source sleeping-cat crop and double exposure as an ethereal layered photographic relief, with horizontal reflection planes dissolving into the frame.\nMATCHED MATERIALS: Frosted smoke glass, pale silver, muted lilac/rose reflections from the image. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          },
+          {
+            "index": 507,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "56bb881f-7452-407b-bd72-f44d23cc1719"
+                },
+                {
+                  "role": "image",
+                  "value": "361b0db1-6355-4c09-9c7a-a92c3fd72ec4"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: baton. Exact small tan dog holding white baton with green handle and wearing green collar.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source dog/baton composition within an open diagonal baton-rail field, with green grip bands echoing into the perimeter.\nMATCHED MATERIALS: Warm tan enamel, polished white ceramic, emerald grip-like inlays and satin brass. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchKey": "meme-tailoring-v2-backs-first28-004",
+      "indices": [
+        508,
+        510
+      ],
+      "quoteKeys": [
+        "bert",
+        "bobo"
+      ],
+      "requests": [
+        {
+          "index": 508,
+          "requestId": "tailoring-v2-bert-back",
+          "quoteKey": "bert",
+          "designKey": "pair-bert",
+          "exactQuoteMint": "HgBRWfYxEfvPhtqkaeymCQtHCrKE46qQ43pKe8HCpump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/references/bert-f670e4bb1e68.png",
+          "referenceSha256": "f670e4bb1e6878f8b17c4cb0c706dea41b7f55b0a30d26ca94ec917c1df59e11",
+          "sourceMediaId": "e40f4b16-44e1-40c2-a0fe-9e62d674b4b8",
+          "matchingAcceptedFrontIndex": 408,
+          "matchingAcceptedFrontJobId": "1bc18784-c784-4d70-bb72-cb54c6cbc398",
+          "matchingAcceptedFrontSha256": "e3558b796e2e56843b79584ae5aa7523928c0bd11527ecb69eaa0c471c9057f0",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "e40f4b16-44e1-40c2-a0fe-9e62d674b4b8"
+              },
+              {
+                "role": "image",
+                "value": "1bc18784-c784-4d70-bb72-cb54c6cbc398"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Bertram The Pomeranian. Exact fluffy brown Pomeranian, head tilt, small white chest patch and specific source face.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact tilted dog portrait on a quiet warm field with source-derived dappled background relief and flowing fur-like outer contours.\nMATCHED MATERIALS: Copper-brown enamel, warm cream ceramic, subtle amber/olive light accents and satin brass. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        },
+        {
+          "index": 510,
+          "requestId": "tailoring-v2-bobo-back",
+          "quoteKey": "bobo",
+          "designKey": "pair-bobo",
+          "exactQuoteMint": "4nV5gNwwP68zUDat26ySChREqVaQaLudfJBkSgEzpump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/bobo-064db424e413.png",
+          "referenceSha256": "064db424e413117370c2a4f4149773644859360cbc0b3dbe4ed0cc807de573ed",
+          "sourceMediaId": "7e2a83d7-d89e-4a7c-807e-82c0170fc943",
+          "matchingAcceptedFrontIndex": 410,
+          "matchingAcceptedFrontJobId": "54bebbd2-91d1-4aaa-9beb-822341815507",
+          "matchingAcceptedFrontSha256": "56675885ea18789bc19789cd1fbc9b96e07abd9949a936d4b85bb2cd9a3e88d0",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "7e2a83d7-d89e-4a7c-807e-82c0170fc943"
+              },
+              {
+                "role": "image",
+                "value": "54bebbd2-91d1-4aaa-9beb-822341815507"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Bobo. Exact brown skeptical bear with narrowed eyes and the source hand raised at its mouth, on crimson.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact bear/hand expression in a crimson negative-space field with asymmetric brow and ear contours shaping the frame.\nMATCHED MATERIALS: Dark brown enamel, deep crimson lacquer, black etching and restrained copper. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        }
+      ],
+      "requestFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-004-request.json",
+      "requestSha256": "ed96b3a947e12db37279b32a09aaabae3beb774b7e1cd15cb0b0bfb7d6e26033",
+      "receiptFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-004-receipt.json",
+      "statusFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-004-status.json",
+      "quotedCredits": 1,
+      "payload": {
+        "requests": [
+          {
+            "index": 508,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e40f4b16-44e1-40c2-a0fe-9e62d674b4b8"
+                },
+                {
+                  "role": "image",
+                  "value": "1bc18784-c784-4d70-bb72-cb54c6cbc398"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Bertram The Pomeranian. Exact fluffy brown Pomeranian, head tilt, small white chest patch and specific source face.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact tilted dog portrait on a quiet warm field with source-derived dappled background relief and flowing fur-like outer contours.\nMATCHED MATERIALS: Copper-brown enamel, warm cream ceramic, subtle amber/olive light accents and satin brass. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          },
+          {
+            "index": 510,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "7e2a83d7-d89e-4a7c-807e-82c0170fc943"
+                },
+                {
+                  "role": "image",
+                  "value": "54bebbd2-91d1-4aaa-9beb-822341815507"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Bobo. Exact brown skeptical bear with narrowed eyes and the source hand raised at its mouth, on crimson.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact bear/hand expression in a crimson negative-space field with asymmetric brow and ear contours shaping the frame.\nMATCHED MATERIALS: Dark brown enamel, deep crimson lacquer, black etching and restrained copper. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchKey": "meme-tailoring-v2-backs-first28-005",
+      "indices": [
+        511,
+        512
+      ],
+      "quoteKeys": [
+        "bonk",
+        "buttcoin"
+      ],
+      "requests": [
+        {
+          "index": 511,
+          "requestId": "tailoring-v2-bonk-back",
+          "quoteKey": "bonk",
+          "designKey": "pair-bonk",
+          "exactQuoteMint": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/references/bonk-498ca3589dbe.jpg",
+          "referenceSha256": "498ca3589dbe075f0cfed24f7e7a31ba868079ad98e3e25813893eaa99092c31",
+          "sourceMediaId": "7bf49aff-428f-48b8-ba27-e2eebd6f5119",
+          "matchingAcceptedFrontIndex": 411,
+          "matchingAcceptedFrontJobId": "5bcb6517-91e8-4245-b4cf-4060240e72db",
+          "matchingAcceptedFrontSha256": "e600405eada5183ae4458e2f5278b557431325dfea76d675a7337d30577ff35c",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "7bf49aff-428f-48b8-ba27-e2eebd6f5119"
+              },
+              {
+                "role": "image",
+                "value": "5bcb6517-91e8-4245-b4cf-4060240e72db"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Bonk. Exact orange/white dog, yellow disc and three red impact strokes.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact dog/disc/impact strokes in an energetic radial impact-cut field that connects directly into the outer frame.\nMATCHED MATERIALS: Orange/yellow enamel, red glass inlays, black ceramic and narrow satin-gold bevels. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        },
+        {
+          "index": 512,
+          "requestId": "tailoring-v2-buttcoin-back",
+          "quoteKey": "buttcoin",
+          "designKey": "pair-buttcoin",
+          "exactQuoteMint": "Cm6fNnMk7NfzStP9CZpsQA2v3jjzbcYGAxdJySmHpump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/buttcoin-b337d4bf1f40.jpg",
+          "referenceSha256": "b337d4bf1f402ae9b47924d54721b6330dd18a5e3e6f9eaf4eef520c1cfc4cac",
+          "sourceMediaId": "4160954a-73ec-4ec9-a9de-6be20f29c94b",
+          "matchingAcceptedFrontIndex": 412,
+          "matchingAcceptedFrontJobId": "018fb446-9358-47c2-ac40-c0b9f3a89c2e",
+          "matchingAcceptedFrontSha256": "4d94518c3cd11d6f45fc826853e4a0d23961035738eed364daef9a002b73760e",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "4160954a-73ec-4ec9-a9de-6be20f29c94b"
+              },
+              {
+                "role": "image",
+                "value": "018fb446-9358-47c2-ac40-c0b9f3a89c2e"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Buttcoin. Exact orange circular mark with its white butt-shaped negative-space contour.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source symbol expanded into a sculptural orange/white negative-space composition that connects directly to the perimeter.\nMATCHED MATERIALS: Tangerine enamel, warm-white ceramic and fine champagne-metal edges. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        }
+      ],
+      "requestFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-005-request.json",
+      "requestSha256": "82e7b40ee63596ffea7eaab807dfe5ec547b71fe4f15168598d637d9c04fd231",
+      "receiptFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-005-receipt.json",
+      "statusFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-005-status.json",
+      "quotedCredits": 1,
+      "payload": {
+        "requests": [
+          {
+            "index": 511,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "7bf49aff-428f-48b8-ba27-e2eebd6f5119"
+                },
+                {
+                  "role": "image",
+                  "value": "5bcb6517-91e8-4245-b4cf-4060240e72db"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Bonk. Exact orange/white dog, yellow disc and three red impact strokes.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact dog/disc/impact strokes in an energetic radial impact-cut field that connects directly into the outer frame.\nMATCHED MATERIALS: Orange/yellow enamel, red glass inlays, black ceramic and narrow satin-gold bevels. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          },
+          {
+            "index": 512,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "4160954a-73ec-4ec9-a9de-6be20f29c94b"
+                },
+                {
+                  "role": "image",
+                  "value": "018fb446-9358-47c2-ac40-c0b9f3a89c2e"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Buttcoin. Exact orange circular mark with its white butt-shaped negative-space contour.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source symbol expanded into a sculptural orange/white negative-space composition that connects directly to the perimeter.\nMATCHED MATERIALS: Tangerine enamel, warm-white ceramic and fine champagne-metal edges. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchKey": "meme-tailoring-v2-backs-first28-006",
+      "indices": [
+        513,
+        514
+      ],
+      "quoteKeys": [
+        "cards",
+        "cashcat"
+      ],
+      "requests": [
+        {
+          "index": 513,
+          "requestId": "tailoring-v2-cards-back",
+          "quoteKey": "cards",
+          "designKey": "pair-cards",
+          "exactQuoteMint": "CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/references/cards-241bcf8ee4f8-reference-1024.png",
+          "referenceSha256": "afea6c6a36e6f7dc741ca3524f93067a5fc1606f9006be8befddc95c488a0653",
+          "sourceMediaId": "3f000bd3-6a44-4c03-8609-e7f32d90a52c",
+          "matchingAcceptedFrontIndex": 413,
+          "matchingAcceptedFrontJobId": "c91787db-d355-4a9f-ae7c-d53d00fea87c",
+          "matchingAcceptedFrontSha256": "ca747b4f9e08c1b89004b760d941b5fa47df92941a999fde34085446b593141f",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "3f000bd3-6a44-4c03-8609-e7f32d90a52c"
+              },
+              {
+                "role": "image",
+                "value": "c91787db-d355-4a9f-ae7c-d53d00fea87c"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Collector Crypt. Collector Crypt exact folded geometric C: orange upper form, cyan middle and blue lower form.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact C emblem sits in a precise folded-plane relief field, with offset rectangular ribbon joints and a clear open negative-space channel.\nMATCHED MATERIALS: Orange/cyan/blue enamel, brushed platinum and dark recessed seams. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        },
+        {
+          "index": 514,
+          "requestId": "tailoring-v2-cashcat-back",
+          "quoteKey": "cashcat",
+          "designKey": "pair-cashcat",
+          "exactQuoteMint": "CashcatZMRn4Jv8sPQZUSsbTLi2PcPe1ssqbHcnaJqSS",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/cashcat-9ea26bf56766.jpg",
+          "referenceSha256": "9ea26bf5676658af38db7cec329e29059ff50e0a128979f3bb6ca8588efa30d1",
+          "sourceMediaId": "59b28d0d-a0a5-474a-a8a0-342f7ad59628",
+          "matchingAcceptedFrontIndex": 414,
+          "matchingAcceptedFrontJobId": "a51ac435-d5bc-4b45-a875-1270dad84130",
+          "matchingAcceptedFrontSha256": "2b7be3155c22d7c6f1b772bffaaad38e713a6bb49ae5dda7f2822574b84aabbc",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "59b28d0d-a0a5-474a-a8a0-342f7ad59628"
+              },
+              {
+                "role": "image",
+                "value": "a51ac435-d5bc-4b45-a875-1270dad84130"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Cash Cat. Exact low-resolution gray seated cat photograph on white; preserve source proportions without pretending recovered detail.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source cat crop on a spacious pearl field with one asymmetric seated-profile relief contour joining the perimeter.\nMATCHED MATERIALS: Palladium, pearl-gray ceramic and soft white enamel. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        }
+      ],
+      "requestFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-006-request.json",
+      "requestSha256": "25890577cbfb1751dc07ebfade401fa856dd94687a62b139b5c624a28c8193d2",
+      "receiptFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-006-receipt.json",
+      "statusFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-006-status.json",
+      "quotedCredits": 1,
+      "payload": {
+        "requests": [
+          {
+            "index": 513,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "3f000bd3-6a44-4c03-8609-e7f32d90a52c"
+                },
+                {
+                  "role": "image",
+                  "value": "c91787db-d355-4a9f-ae7c-d53d00fea87c"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Collector Crypt. Collector Crypt exact folded geometric C: orange upper form, cyan middle and blue lower form.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact C emblem sits in a precise folded-plane relief field, with offset rectangular ribbon joints and a clear open negative-space channel.\nMATCHED MATERIALS: Orange/cyan/blue enamel, brushed platinum and dark recessed seams. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          },
+          {
+            "index": 514,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "59b28d0d-a0a5-474a-a8a0-342f7ad59628"
+                },
+                {
+                  "role": "image",
+                  "value": "a51ac435-d5bc-4b45-a875-1270dad84130"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Cash Cat. Exact low-resolution gray seated cat photograph on white; preserve source proportions without pretending recovered detail.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source cat crop on a spacious pearl field with one asymmetric seated-profile relief contour joining the perimeter.\nMATCHED MATERIALS: Palladium, pearl-gray ceramic and soft white enamel. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchKey": "meme-tailoring-v2-backs-first28-007",
+      "indices": [
+        515,
+        516
+      ],
+      "quoteKeys": [
+        "cate",
+        "chillguy"
+      ],
+      "requests": [
+        {
+          "index": 515,
+          "requestId": "tailoring-v2-cate-back",
+          "quoteKey": "cate",
+          "designKey": "pair-cate",
+          "exactQuoteMint": "Ai66LHZG9MCzg1WKdawwqduVAXpNDUuV8M3uyq5ppump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/references/cate-a4c0d4c03864.jpg",
+          "referenceSha256": "a4c0d4c0386424603b8e84a8037b5054e07bb1e2f14df867385f9e3ac26f32e1",
+          "sourceMediaId": "d7871238-a6a1-4246-9bc2-49dd11c2db59",
+          "matchingAcceptedFrontIndex": 415,
+          "matchingAcceptedFrontJobId": "49716aba-dc77-48aa-b26f-5f086bddf35b",
+          "matchingAcceptedFrontSha256": "bed8d69fb61d53bc1fde9ccffad92fcc347e1caacdf7ab568d2d49f66f29b717",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "d7871238-a6a1-4246-9bc2-49dd11c2db59"
+              },
+              {
+                "role": "image",
+                "value": "49716aba-dc77-48aa-b26f-5f086bddf35b"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Catecoin. Exact golden open C emblem containing the specific cat portrait and source curved negative space.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source C-and-cat composition in a large open-C relief, with the gap extending into one card edge rather than closing into a medal.\nMATCHED MATERIALS: Satin yellow gold, warm ivory enamel and dark fine linework. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        },
+        {
+          "index": 516,
+          "requestId": "tailoring-v2-chillguy-back",
+          "quoteKey": "chillguy",
+          "designKey": "pair-chillguy",
+          "exactQuoteMint": "Df6yfrKC8kZE3KNkrHERKzAetSxbrWeniQfyJY4Jpump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/references/chillguy-441a9eb33c81.jpg",
+          "referenceSha256": "441a9eb33c819daf6a56bcdb79a38718f9365c6d3e4c523d6ddcd0153f6c8590",
+          "sourceMediaId": "46690e07-b25b-459c-bb6e-de3d6f530780",
+          "matchingAcceptedFrontIndex": 416,
+          "matchingAcceptedFrontJobId": "53cf79c5-84b6-4edd-91e0-1a2edced462f",
+          "matchingAcceptedFrontSha256": "a0861b23c4bacac50893996cb2072062f48e4741e35cd57a5fd1d556bc6a5a26",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "46690e07-b25b-459c-bb6e-de3d6f530780"
+              },
+              {
+                "role": "image",
+                "value": "53cf79c5-84b6-4edd-91e0-1a2edced462f"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Just a chill guy. Exact tan long-nosed dog character, calm face, gray sweater, pale blue jeans and red/white shoes.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source character and calm posture in a quiet flat sage field with clothing-seam relief continuing into the perimeter.\nMATCHED MATERIALS: Soft gray knit relief, pale denim enamel, warm tan ceramic and small burgundy accents. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        }
+      ],
+      "requestFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-007-request.json",
+      "requestSha256": "b788470dbac112e25333b0c99629ad225ac03fd8d87b3bd846ab77f13cb1c14f",
+      "receiptFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-007-receipt.json",
+      "statusFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-007-status.json",
+      "quotedCredits": 1,
+      "payload": {
+        "requests": [
+          {
+            "index": 515,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "d7871238-a6a1-4246-9bc2-49dd11c2db59"
+                },
+                {
+                  "role": "image",
+                  "value": "49716aba-dc77-48aa-b26f-5f086bddf35b"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Catecoin. Exact golden open C emblem containing the specific cat portrait and source curved negative space.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source C-and-cat composition in a large open-C relief, with the gap extending into one card edge rather than closing into a medal.\nMATCHED MATERIALS: Satin yellow gold, warm ivory enamel and dark fine linework. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          },
+          {
+            "index": 516,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "46690e07-b25b-459c-bb6e-de3d6f530780"
+                },
+                {
+                  "role": "image",
+                  "value": "53cf79c5-84b6-4edd-91e0-1a2edced462f"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Just a chill guy. Exact tan long-nosed dog character, calm face, gray sweater, pale blue jeans and red/white shoes.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source character and calm posture in a quiet flat sage field with clothing-seam relief continuing into the perimeter.\nMATCHED MATERIALS: Soft gray knit relief, pale denim enamel, warm tan ceramic and small burgundy accents. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchKey": "meme-tailoring-v2-backs-first28-008",
+      "indices": [
+        517,
+        518
+      ],
+      "quoteKeys": [
+        "chillhouse",
+        "claudia"
+      ],
+      "requests": [
+        {
+          "index": 517,
+          "requestId": "tailoring-v2-chillhouse-back",
+          "quoteKey": "chillhouse",
+          "designKey": "pair-chillhouse",
+          "exactQuoteMint": "GkyPYa7NnCFbduLknCfBfP7p8564X1VZhwZYJ6CZpump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/references/chillhouse-d61002d28888.jpg",
+          "referenceSha256": "d61002d28888129b2440553c3211e6625c6e5e4483c20d70e4594362d58d8c65",
+          "sourceMediaId": "f7dee5a5-a5c1-4f26-9d08-1e9692a27e31",
+          "matchingAcceptedFrontIndex": 417,
+          "matchingAcceptedFrontJobId": "9af89d08-1e91-4141-8269-67c4154a348e",
+          "matchingAcceptedFrontSha256": "1163786f08c73b564e79a4bacf3a0e8050eeb01a426154d6f088683bb2c87346",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "f7dee5a5-a5c1-4f26-9d08-1e9692a27e31"
+              },
+              {
+                "role": "image",
+                "value": "9af89d08-1e91-4141-8269-67c4154a348e"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Chill House. Exact house-headed calm character: cream walls, red pitched roof/chimney, window eyes, gray sweater and pale jeans.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact house-headed character in a quiet sage field; a deconstructed roof/eave/window-sill perimeter echoes only the source house geometry.\nMATCHED MATERIALS: Warm cream ceramic, terracotta-red enamel, gray knit relief and pale blue denim tone. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        },
+        {
+          "index": 518,
+          "requestId": "tailoring-v2-claudia-back",
+          "quoteKey": "claudia",
+          "designKey": "pair-claudia",
+          "exactQuoteMint": "H7TuvDxEKygh27zGfGcjKG8JGWgrbyKpPtvJEpGosfas",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/claudia-74686a62f4c5.png",
+          "referenceSha256": "74686a62f4c5124281123f9c5123edbd1835fef3f45637fc6bb93aceda422eb9",
+          "sourceMediaId": "dc5931c0-8620-49f3-b8c2-0ce8d0dd1a9b",
+          "matchingAcceptedFrontIndex": 418,
+          "matchingAcceptedFrontJobId": "53710b18-1112-4a84-bbac-4a9be09885bd",
+          "matchingAcceptedFrontSha256": "81c47b011de7607126ad3b976765ea4c3697f5cc901e6d7015d73fcd281eb6a7",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "dc5931c0-8620-49f3-b8c2-0ce8d0dd1a9b"
+              },
+              {
+                "role": "image",
+                "value": "53710b18-1112-4a84-bbac-4a9be09885bd"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: CLAUDIA. Exact woman's source portrait, short black bob/copper-red fringe, green jacket and blue background.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source portrait within an asymmetric bob/fringe/jacket-contour relief field, with blue negative space and no medal circle.\nMATCHED MATERIALS: Black lacquer, copper enamel, deep green ceramic and restrained source-blue recesses. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        }
+      ],
+      "requestFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-008-request.json",
+      "requestSha256": "acc56c9866104f51469b4c7bc63cfe19131eb645a33a305caf5e48c22f4b08a6",
+      "receiptFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-008-receipt.json",
+      "statusFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-008-status.json",
+      "quotedCredits": 1,
+      "payload": {
+        "requests": [
+          {
+            "index": 517,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "f7dee5a5-a5c1-4f26-9d08-1e9692a27e31"
+                },
+                {
+                  "role": "image",
+                  "value": "9af89d08-1e91-4141-8269-67c4154a348e"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Chill House. Exact house-headed calm character: cream walls, red pitched roof/chimney, window eyes, gray sweater and pale jeans.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact house-headed character in a quiet sage field; a deconstructed roof/eave/window-sill perimeter echoes only the source house geometry.\nMATCHED MATERIALS: Warm cream ceramic, terracotta-red enamel, gray knit relief and pale blue denim tone. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          },
+          {
+            "index": 518,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "dc5931c0-8620-49f3-b8c2-0ce8d0dd1a9b"
+                },
+                {
+                  "role": "image",
+                  "value": "53710b18-1112-4a84-bbac-4a9be09885bd"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: CLAUDIA. Exact woman's source portrait, short black bob/copper-red fringe, green jacket and blue background.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source portrait within an asymmetric bob/fringe/jacket-contour relief field, with blue negative space and no medal circle.\nMATCHED MATERIALS: Black lacquer, copper enamel, deep green ceramic and restrained source-blue recesses. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchKey": "meme-tailoring-v2-backs-first28-009",
+      "indices": [
+        519,
+        520
+      ],
+      "quoteKeys": [
+        "claw",
+        "cupsey"
+      ],
+      "requests": [
+        {
+          "index": 519,
+          "requestId": "tailoring-v2-claw-back",
+          "quoteKey": "claw",
+          "designKey": "pair-claw",
+          "exactQuoteMint": "739dnZEG4yaBWFsY8L8ZwrfhGG6dhtCSercW8Umspump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/claw-f5546a3e2e71.png",
+          "referenceSha256": "f5546a3e2e7108433c33b78ee0186af963991f8cb5d4049b8674fd957103ea2c",
+          "sourceMediaId": "5c198473-3700-47c0-80a6-2e81325e11ea",
+          "matchingAcceptedFrontIndex": 419,
+          "matchingAcceptedFrontJobId": "2304d499-3fc8-4abc-bc65-8ceaa5584f2f",
+          "matchingAcceptedFrontSha256": "de66a94c1b62000b969e9ad588d8b819be22a1ccc31a2aaf96d709cb054f9528",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "5c198473-3700-47c0-80a6-2e81325e11ea"
+              },
+              {
+                "role": "image",
+                "value": "2304d499-3fc8-4abc-bc65-8ceaa5584f2f"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: clawpump.tech. Exact green lobster-claw emblem with white highlights and small geometric base.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source claw floats within broad opposing pincer-curve relief channels that open toward opposite edges.\nMATCHED MATERIALS: Emerald enamel, white glass highlight, dark green ceramic and brushed silver. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        },
+        {
+          "index": 520,
+          "requestId": "tailoring-v2-cupsey-back",
+          "quoteKey": "cupsey",
+          "designKey": "pair-cupsey",
+          "exactQuoteMint": "6NwarBvDkXhByqVp2Qkq5i9XbtA2B3Bwe8SWGu9vpump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/cupsey-63b8c11aa5ab.png",
+          "referenceSha256": "63b8c11aa5ab3ce3ce2e4e16836ea1d320db9485c9ef634fd949bdef251fcd9d",
+          "sourceMediaId": "be4766d7-a415-44cd-989a-d4de19d7ec41",
+          "matchingAcceptedFrontIndex": 420,
+          "matchingAcceptedFrontJobId": "e8d2b55b-b3bb-4211-841b-b83e3d310635",
+          "matchingAcceptedFrontSha256": "25d66bd8bd378a65bdfdf5eafc1796fea6ee2dbfd3d12a7be0529b54fac086f6",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "be4766d7-a415-44cd-989a-d4de19d7ec41"
+              },
+              {
+                "role": "image",
+                "value": "e8d2b55b-b3bb-4211-841b-b83e3d310635"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Cupsey. Exact round cream character, oval dark eyes, tiny curved smile, pink cheeks and raised green hand.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact cheerful source character in a smooth cream/green relief field with rounded hand/cheek contour accents extending into the rim.\nMATCHED MATERIALS: Pearl cream ceramic, smooth green enamel, soft pink glass and narrow champagne metal. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        }
+      ],
+      "requestFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-009-request.json",
+      "requestSha256": "17e8af4390f1af79ff49b22333bafeef6c7a942c3ea9a339d0142230895eb852",
+      "receiptFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-009-receipt.json",
+      "statusFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-009-status.json",
+      "quotedCredits": 1,
+      "payload": {
+        "requests": [
+          {
+            "index": 519,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "5c198473-3700-47c0-80a6-2e81325e11ea"
+                },
+                {
+                  "role": "image",
+                  "value": "2304d499-3fc8-4abc-bc65-8ceaa5584f2f"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: clawpump.tech. Exact green lobster-claw emblem with white highlights and small geometric base.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source claw floats within broad opposing pincer-curve relief channels that open toward opposite edges.\nMATCHED MATERIALS: Emerald enamel, white glass highlight, dark green ceramic and brushed silver. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          },
+          {
+            "index": 520,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "be4766d7-a415-44cd-989a-d4de19d7ec41"
+                },
+                {
+                  "role": "image",
+                  "value": "e8d2b55b-b3bb-4211-841b-b83e3d310635"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Cupsey. Exact round cream character, oval dark eyes, tiny curved smile, pink cheeks and raised green hand.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact cheerful source character in a smooth cream/green relief field with rounded hand/cheek contour accents extending into the rim.\nMATCHED MATERIALS: Pearl cream ceramic, smooth green enamel, soft pink glass and narrow champagne metal. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchKey": "meme-tailoring-v2-backs-first28-010",
+      "indices": [
+        521,
+        522
+      ],
+      "quoteKeys": [
+        "fartcoin",
+        "giga"
+      ],
+      "requests": [
+        {
+          "index": 521,
+          "requestId": "tailoring-v2-fartcoin-back",
+          "quoteKey": "fartcoin",
+          "designKey": "pair-fartcoin",
+          "exactQuoteMint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/references/fartcoin-authentic-ascii-wordmark-crop.png",
+          "referenceSha256": "f0363e39ab49b1ff341f5ad764879540fc89836e762265f9c822c98e8f8a5ffd",
+          "sourceMediaId": "10f242db-3361-4ef3-a27d-a4c7d8a7d9ae",
+          "matchingAcceptedFrontIndex": 421,
+          "matchingAcceptedFrontJobId": "b6ff04cc-d6a2-491e-86a1-45b30a0c2eb5",
+          "matchingAcceptedFrontSha256": "0fbc20e9eaa949025ac5a09fee8dfde1cdaf848507c2460521635fa249a9f851",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "10f242db-3361-4ef3-a27d-a4c7d8a7d9ae"
+              },
+              {
+                "role": "image",
+                "value": "b6ff04cc-d6a2-491e-86a1-45b30a0c2eb5"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Fartcoin. Authentic approved monospaced FARTCOIN ASCII wordmark crop; no inferred flame or fart mascot.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: The authentic ASCII wordmark spans a quiet terminal-like field, with asymmetric scanline channels that terminate into the perimeter instead of a medal.\nMATCHED MATERIALS: Black ceramic, satin palladium, restrained phosphor-green edge enamel. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        },
+        {
+          "index": 522,
+          "requestId": "tailoring-v2-giga-back",
+          "quoteKey": "giga",
+          "designKey": "pair-giga",
+          "exactQuoteMint": "63LfDmNb3MQ8mw9MtZ2To9bEA2M71kZUUGq5tiJxcqj9",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/references/giga-61b9c55c37cd.png",
+          "referenceSha256": "61b9c55c37cdac38a6961000e43274f2dade4e257ed5eee22d74f5578fea47ae",
+          "sourceMediaId": "f0fbe431-1d85-471d-8f8b-5ac5c9aca69e",
+          "matchingAcceptedFrontIndex": 422,
+          "matchingAcceptedFrontJobId": "4b139432-58a0-4bcd-b8dd-871e0f8f5288",
+          "matchingAcceptedFrontSha256": "52fce53c2b32aabfa214283ebade022999721ab47f28f45ffcb85d93a680ce9b",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "f0fbe431-1d85-471d-8f8b-5ac5c9aca69e"
+              },
+              {
+                "role": "image",
+                "value": "4b139432-58a0-4bcd-b8dd-871e0f8f5288"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: GIGACHAD. Exact monochrome male portrait with sculpted jaw, beard and shoulder silhouette; do not substitute a different person.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source portrait in a dramatic sculptural graphite field with angular jaw/shoulder planes continuing into the perimeter.\nMATCHED MATERIALS: Matte graphite, brushed dark titanium and restrained silver highlights. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        }
+      ],
+      "requestFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-010-request.json",
+      "requestSha256": "3092bdc1239854742bd791815b8a7376b84e0b94e01ce7d577b5260215b41790",
+      "receiptFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-010-receipt.json",
+      "statusFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-010-status.json",
+      "quotedCredits": 1,
+      "payload": {
+        "requests": [
+          {
+            "index": 521,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "10f242db-3361-4ef3-a27d-a4c7d8a7d9ae"
+                },
+                {
+                  "role": "image",
+                  "value": "b6ff04cc-d6a2-491e-86a1-45b30a0c2eb5"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Fartcoin. Authentic approved monospaced FARTCOIN ASCII wordmark crop; no inferred flame or fart mascot.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: The authentic ASCII wordmark spans a quiet terminal-like field, with asymmetric scanline channels that terminate into the perimeter instead of a medal.\nMATCHED MATERIALS: Black ceramic, satin palladium, restrained phosphor-green edge enamel. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          },
+          {
+            "index": 522,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "f0fbe431-1d85-471d-8f8b-5ac5c9aca69e"
+                },
+                {
+                  "role": "image",
+                  "value": "4b139432-58a0-4bcd-b8dd-871e0f8f5288"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: GIGACHAD. Exact monochrome male portrait with sculpted jaw, beard and shoulder silhouette; do not substitute a different person.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source portrait in a dramatic sculptural graphite field with angular jaw/shoulder planes continuing into the perimeter.\nMATCHED MATERIALS: Matte graphite, brushed dark titanium and restrained silver highlights. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchKey": "meme-tailoring-v2-backs-first28-011",
+      "indices": [
+        523,
+        524
+      ],
+      "quoteKeys": [
+        "goat",
+        "gork"
+      ],
+      "requests": [
+        {
+          "index": 523,
+          "requestId": "tailoring-v2-goat-back",
+          "quoteKey": "goat",
+          "designKey": "pair-goat",
+          "exactQuoteMint": "CzLSujWBLFsSjncfkh59rUFqvafWcY5tzedWJSuypump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/references/goat-4015c971963a.jpg",
+          "referenceSha256": "4015c971963a7fab912269e3bac1710e0e805f847b0fc9d05937bc231f7d66fc",
+          "sourceMediaId": "a8baec22-01d3-41ad-9315-37db8715740f",
+          "matchingAcceptedFrontIndex": 423,
+          "matchingAcceptedFrontJobId": "9404d425-d7b7-4ab4-af3a-e165eb7cfdda",
+          "matchingAcceptedFrontSha256": "eafa7f2c7b0f8d71d9401db597b5715512a2e3b90354c3a48edc33c364d98d05",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "a8baec22-01d3-41ad-9315-37db8715740f"
+              },
+              {
+                "role": "image",
+                "value": "9404d425-d7b7-4ab4-af3a-e165eb7cfdda"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Goatseus Maximus. Exact mint-green ASCII cat-like terminal drawing on black, including authentic source geometry; not an animal goat.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: The exact ASCII source arrangement is the hero, surrounded by sparse source-derived terminal-line geometry rather than a mascot sculpture.\nMATCHED MATERIALS: Near-black glass, pale mint phosphor enamel and satin dark metal. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        },
+        {
+          "index": 524,
+          "requestId": "tailoring-v2-gork-back",
+          "quoteKey": "gork",
+          "designKey": "pair-gork",
+          "exactQuoteMint": "76EDL5qNcte2ZH29quTaFzagXjWAEY83CATEjyA6pump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/gork-6a12439aa65a.png",
+          "referenceSha256": "6a12439aa65ac28a725ab79417ea0b2c29c361437b69362adcf79dedf4919ed0",
+          "sourceMediaId": "624050de-7c3b-4b61-9aad-508c13d4ab31",
+          "matchingAcceptedFrontIndex": 424,
+          "matchingAcceptedFrontJobId": "6ed7860f-6c1c-416c-8bd2-3d49ecdae22d",
+          "matchingAcceptedFrontSha256": "5541c4faee254383f75bcfd81d89a16cc7f80de0da6a55c02b023f8847409b21",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "624050de-7c3b-4b61-9aad-508c13d4ab31"
+              },
+              {
+                "role": "image",
+                "value": "6ed7860f-6c1c-416c-8bd2-3d49ecdae22d"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: @gork. Exact gray default-avatar profile silhouette and authentic scoped handle from the source; not a green AI mascot.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source avatar silhouette in an asymmetric profile-card composition with offset circular segments and quiet rectangular interface-like recesses without new text.\nMATCHED MATERIALS: Graphite ceramic, slate enamel, pale gray metal and dark glass. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        }
+      ],
+      "requestFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-011-request.json",
+      "requestSha256": "0d883073bda0c5390ed579127ac2086dad38cd4363fff852ec95a7adb0a3562c",
+      "receiptFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-011-receipt.json",
+      "statusFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-011-status.json",
+      "quotedCredits": 1,
+      "payload": {
+        "requests": [
+          {
+            "index": 523,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "a8baec22-01d3-41ad-9315-37db8715740f"
+                },
+                {
+                  "role": "image",
+                  "value": "9404d425-d7b7-4ab4-af3a-e165eb7cfdda"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Goatseus Maximus. Exact mint-green ASCII cat-like terminal drawing on black, including authentic source geometry; not an animal goat.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: The exact ASCII source arrangement is the hero, surrounded by sparse source-derived terminal-line geometry rather than a mascot sculpture.\nMATCHED MATERIALS: Near-black glass, pale mint phosphor enamel and satin dark metal. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          },
+          {
+            "index": 524,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "624050de-7c3b-4b61-9aad-508c13d4ab31"
+                },
+                {
+                  "role": "image",
+                  "value": "6ed7860f-6c1c-416c-8bd2-3d49ecdae22d"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: @gork. Exact gray default-avatar profile silhouette and authentic scoped handle from the source; not a green AI mascot.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source avatar silhouette in an asymmetric profile-card composition with offset circular segments and quiet rectangular interface-like recesses without new text.\nMATCHED MATERIALS: Graphite ceramic, slate enamel, pale gray metal and dark glass. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchKey": "meme-tailoring-v2-backs-first28-012",
+      "indices": [
+        525,
+        526
+      ],
+      "quoteKeys": [
+        "hodl",
+        "jeanphil"
+      ],
+      "requests": [
+        {
+          "index": 525,
+          "requestId": "tailoring-v2-hodl-back",
+          "quoteKey": "hodl",
+          "designKey": "pair-hodl",
+          "exactQuoteMint": "Hh3oTaqDCKKfdBgsQEvxp9sUwyNf8x9qmKqEMLBWpump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/hodl-56f9bf8d2d0a.jpg",
+          "referenceSha256": "56f9bf8d2d0a74f79709e5cc022c095774067151d3347b363789e66b78d70422",
+          "sourceMediaId": "d711adf3-77d9-425e-9e00-ee20ea2ddda5",
+          "matchingAcceptedFrontIndex": 425,
+          "matchingAcceptedFrontJobId": "571a0aa6-e054-4265-8bc0-ce53a8a35333",
+          "matchingAcceptedFrontSha256": "2b8de7226cecaadc82c9b9e208eca390a790519b058c25af2694b67a69a3812a",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "d711adf3-77d9-425e-9e00-ee20ea2ddda5"
+              },
+              {
+                "role": "image",
+                "value": "571a0aa6-e054-4265-8bc0-ce53a8a35333"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: HODL. Exact black-and-white dark-haired male portrait, original expression, crop and head angle; do not identify or replace him.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source portrait in an offset monochrome photographic-relief field, with hair/crop contours and fine grain tied into the perimeter.\nMATCHED MATERIALS: Brushed silver, matte charcoal, photographic warm-white and black enamel. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        },
+        {
+          "index": 526,
+          "requestId": "tailoring-v2-jeanphil-back",
+          "quoteKey": "jeanphil",
+          "designKey": "pair-jeanphil",
+          "exactQuoteMint": "GTBxUiw6wJdmmkCGZgRHLyYxqu1vG4KtRpeox6yDpump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/jeanphil-a9c0b8129358.png",
+          "referenceSha256": "a9c0b812935828df9b076db8b1a086b804559e01881d45cc6da9771be473cb90",
+          "sourceMediaId": "9ade0f73-283b-4293-a3b4-0a871a4d318e",
+          "matchingAcceptedFrontIndex": 426,
+          "matchingAcceptedFrontJobId": "ed3f1618-4444-4ffe-8de5-0de26b1b176e",
+          "matchingAcceptedFrontSha256": "8f034d641b4fa910adce12f46cc7d5bf47c71ce8c63e905d24f513fb45b1e05a",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "9ade0f73-283b-4293-a3b4-0a871a4d318e"
+              },
+              {
+                "role": "image",
+                "value": "ed3f1618-4444-4ffe-8de5-0de26b1b176e"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Jean Phil. Exact male portrait with long straight blond bob haircut, thin mustache, head angle and source clothing.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact portrait within a sculptural blunt-bob hair-contour field with parallel etched strands connecting to the rim.\nMATCHED MATERIALS: Honey-gold satin metal, warm blond enamel and source gray/blue neutral recesses. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        }
+      ],
+      "requestFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-012-request.json",
+      "requestSha256": "8ce5bdda3813a39667165610e1d7b315a29c7f1c1754f3254bcba4ead3515daa",
+      "receiptFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-012-receipt.json",
+      "statusFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-012-status.json",
+      "quotedCredits": 1,
+      "payload": {
+        "requests": [
+          {
+            "index": 525,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "d711adf3-77d9-425e-9e00-ee20ea2ddda5"
+                },
+                {
+                  "role": "image",
+                  "value": "571a0aa6-e054-4265-8bc0-ce53a8a35333"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: HODL. Exact black-and-white dark-haired male portrait, original expression, crop and head angle; do not identify or replace him.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source portrait in an offset monochrome photographic-relief field, with hair/crop contours and fine grain tied into the perimeter.\nMATCHED MATERIALS: Brushed silver, matte charcoal, photographic warm-white and black enamel. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          },
+          {
+            "index": 526,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "9ade0f73-283b-4293-a3b4-0a871a4d318e"
+                },
+                {
+                  "role": "image",
+                  "value": "ed3f1618-4444-4ffe-8de5-0de26b1b176e"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Jean Phil. Exact male portrait with long straight blond bob haircut, thin mustache, head angle and source clothing.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact portrait within a sculptural blunt-bob hair-contour field with parallel etched strands connecting to the rim.\nMATCHED MATERIALS: Honey-gold satin metal, warm blond enamel and source gray/blue neutral recesses. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchKey": "meme-tailoring-v2-backs-first28-013",
+      "indices": [
+        527,
+        528
+      ],
+      "quoteKeys": [
+        "jimothy",
+        "jotchua"
+      ],
+      "requests": [
+        {
+          "index": 527,
+          "requestId": "tailoring-v2-jimothy-back",
+          "quoteKey": "jimothy",
+          "designKey": "pair-jimothy",
+          "exactQuoteMint": "Ge87EtsjwRQbHaqQmKRno69RFTwh9bfSsm99XNxTpump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/jimothy-d8e5e31f43da.jpg",
+          "referenceSha256": "d8e5e31f43da271d7e06fdb56276073b81874f33e1c6408ce94567ce04efd588",
+          "sourceMediaId": "4f47e63c-ce8a-4c9d-b8a9-9c6927ebc351",
+          "matchingAcceptedFrontIndex": 427,
+          "matchingAcceptedFrontJobId": "43d3b5a2-e992-436c-8e1a-8a5699793cf4",
+          "matchingAcceptedFrontSha256": "c17dda8091f1752ae05acc79a6beacb2b65e386ece3e3cb7a23f64354f972573",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "4f47e63c-ce8a-4c9d-b8a9-9c6927ebc351"
+              },
+              {
+                "role": "image",
+                "value": "43d3b5a2-e992-436c-8e1a-8a5699793cf4"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Jimothy The Raccoon. Exact small raccoon side profile with arched posture, long tail and warm sunlight outline; not a generic bear.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact raccoon profile retains its source silhouette and long tail, surrounded by an asymmetric warm-light contour that flows into the frame.\nMATCHED MATERIALS: Charcoal ceramic, warm amber glass and satin bronze. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        },
+        {
+          "index": 528,
+          "requestId": "tailoring-v2-jotchua-back",
+          "quoteKey": "jotchua",
+          "designKey": "pair-jotchua",
+          "exactQuoteMint": "BcHEaaTCvycPwwsJ9yQTXdHP9X2gCLkznDbZ8VySpump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/jotchua-c3c31b4fd97d.jpg",
+          "referenceSha256": "c3c31b4fd97dbe0de6125bf367fbcc7d0f5fe9886c3228411fedb7fb5a2c08e1",
+          "sourceMediaId": "246ae920-69f0-469a-a6bc-9e8c5752f7b1",
+          "matchingAcceptedFrontIndex": 428,
+          "matchingAcceptedFrontJobId": "86fd9102-c061-4bad-b4b3-33356970384e",
+          "matchingAcceptedFrontSha256": "813b94a39ddb9aaedfedf9be36bad10a9cf48f8805839229ca19fbd8a9cd8dcb",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "246ae920-69f0-469a-a6bc-9e8c5752f7b1"
+              },
+              {
+                "role": "image",
+                "value": "86fd9102-c061-4bad-b4b3-33356970384e"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Jotchua. Exact tiny cream dog portrait with large dark eyes and rounded head; preserve source crop without invented fine details.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source dog crop in a spacious cream photographic-relief field with rounded head/ear contours continuing into the perimeter.\nMATCHED MATERIALS: Warm cream ceramic, light champagne metal and quiet black glass accents. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        }
+      ],
+      "requestFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-013-request.json",
+      "requestSha256": "356fd1b9f75b848d69e5742d6bc83dbf828eed889ec8e65c7537efeadd69191b",
+      "receiptFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-013-receipt.json",
+      "statusFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-013-status.json",
+      "quotedCredits": 1,
+      "payload": {
+        "requests": [
+          {
+            "index": 527,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "4f47e63c-ce8a-4c9d-b8a9-9c6927ebc351"
+                },
+                {
+                  "role": "image",
+                  "value": "43d3b5a2-e992-436c-8e1a-8a5699793cf4"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Jimothy The Raccoon. Exact small raccoon side profile with arched posture, long tail and warm sunlight outline; not a generic bear.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact raccoon profile retains its source silhouette and long tail, surrounded by an asymmetric warm-light contour that flows into the frame.\nMATCHED MATERIALS: Charcoal ceramic, warm amber glass and satin bronze. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          },
+          {
+            "index": 528,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "246ae920-69f0-469a-a6bc-9e8c5752f7b1"
+                },
+                {
+                  "role": "image",
+                  "value": "86fd9102-c061-4bad-b4b3-33356970384e"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Jotchua. Exact tiny cream dog portrait with large dark eyes and rounded head; preserve source crop without invented fine details.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source dog crop in a spacious cream photographic-relief field with rounded head/ear contours continuing into the perimeter.\nMATCHED MATERIALS: Warm cream ceramic, light champagne metal and quiet black glass accents. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "batchKey": "meme-tailoring-v2-backs-first28-014",
+      "indices": [
+        529,
+        530
+      ],
+      "quoteKeys": [
+        "kins",
+        "lmao"
+      ],
+      "requests": [
+        {
+          "index": 529,
+          "requestId": "tailoring-v2-kins-back",
+          "quoteKey": "kins",
+          "designKey": "pair-kins",
+          "exactQuoteMint": "Tqj8yFmagrg7oorpQkVGYR52r96RFTamvWfth9bpump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/kins-fd8bdc66f477.png",
+          "referenceSha256": "fd8bdc66f477c09106bfb61e4f3745607d668e961413c863c9bf2118f6358643",
+          "sourceMediaId": "4d38b80d-d45a-4ae4-b23f-5c2a8b790883",
+          "matchingAcceptedFrontIndex": 429,
+          "matchingAcceptedFrontJobId": "fe97971b-0094-4b62-8706-e3e51629cb40",
+          "matchingAcceptedFrontSha256": "c31b42fa9f2a8e79d1947c298de5b4a69697a8bb25fd4790bca842e721a2a8d2",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "4d38b80d-d45a-4ae4-b23f-5c2a8b790883"
+              },
+              {
+                "role": "image",
+                "value": "fe97971b-0094-4b62-8706-e3e51629cb40"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Kintara. Exact tan low-poly cube face, two vertical black rectangular eyes and blue source field.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact cube face in a sparse low-poly folded-plane composition with blue gaps and asymmetrical stepped box edges.\nMATCHED MATERIALS: Tan ceramic, matte black enamel and clean sky-blue glass accents. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        },
+        {
+          "index": 530,
+          "requestId": "tailoring-v2-lmao-back",
+          "quoteKey": "lmao",
+          "designKey": "pair-lmao",
+          "exactQuoteMint": "H74CYmXgMkYHYuSRsZt6RJb4NYp2u72Vw8BS5huApump",
+          "face": "back",
+          "referencePath": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/lmao-5a57ab0ec5d1.jpg",
+          "referenceSha256": "5a57ab0ec5d19bb8a5af669be97f60ab5b10e43c319ee840d80ea98ec48131eb",
+          "sourceMediaId": "f3805729-89f9-4e59-980c-bf02c416c962",
+          "matchingAcceptedFrontIndex": 430,
+          "matchingAcceptedFrontJobId": "302bef9e-15ed-47a4-bf37-8063e9fe5f02",
+          "matchingAcceptedFrontSha256": "054a72ca98cc071938a31fd4bf2a447c4164201184a25720d87869304a3f8c30",
+          "params": {
+            "model": "seedream_5_0_flash",
+            "resolution": "2k",
+            "aspect_ratio": "2:3",
+            "count": 1,
+            "medias": [
+              {
+                "role": "image",
+                "value": "f3805729-89f9-4e59-980c-bf02c416c962"
+              },
+              {
+                "role": "image",
+                "value": "302bef9e-15ed-47a4-bf37-8063e9fe5f02"
+              }
+            ],
+            "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: LMAO!. Exact stretched yellow laughing face, angled closed eyes, white side forms, cyan cheeks and orange open mouth.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source laughing face fills an energetic stretched enamel field, with eye/tear/mouth shapes integrated asymmetrically into the outer rim.\nMATCHED MATERIALS: Yellow enamel, cyan glass, glossy orange and warm-white ceramic with fine gold edges. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+          }
+        }
+      ],
+      "requestFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-014-request.json",
+      "requestSha256": "39070e55aef343562822e4f8bd3cc80bf8803ad05663b5470d374bd782259c77",
+      "receiptFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-014-receipt.json",
+      "statusFile": "tailoring-v2/batches/meme-tailoring-v2-backs-first28-014-status.json",
+      "quotedCredits": 1,
+      "payload": {
+        "requests": [
+          {
+            "index": 529,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "4d38b80d-d45a-4ae4-b23f-5c2a8b790883"
+                },
+                {
+                  "role": "image",
+                  "value": "fe97971b-0094-4b62-8706-e3e51629cb40"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: Kintara. Exact tan low-poly cube face, two vertical black rectangular eyes and blue source field.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact cube face in a sparse low-poly folded-plane composition with blue gaps and asymmetrical stepped box edges.\nMATCHED MATERIALS: Tan ceramic, matte black enamel and clean sky-blue glass accents. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          },
+          {
+            "index": 530,
+            "params": {
+              "model": "seedream_5_0_flash",
+              "resolution": "2k",
+              "aspect_ratio": "2:3",
+              "count": 1,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "f3805729-89f9-4e59-980c-bf02c416c962"
+                },
+                {
+                  "role": "image",
+                  "value": "302bef9e-15ed-47a4-bf37-8063e9fe5f02"
+                }
+              ],
+              "prompt": "CREATE ONE FULL FINISHED CARD REVERSE, directly front-on, portrait2:3 at2K. Image1 is the exact real asset identity and controls actual face, pose, silhouette, emblem geometry and colors. Image2 is the actual newly accepted front of this same design and controls its matching materials and thin rounded frame. This is a flat thin printed trading card, full rounded outline visible in even neutral light.\nEXACT IDENTITY: LMAO!. Exact stretched yellow laughing face, angled closed eyes, white side forms, cyan cheeks and orange open mouth.\nUNIQUE CONTINUOUS REVERSE COMPOSITION: Exact source laughing face fills an energetic stretched enamel field, with eye/tear/mouth shapes integrated asymmetrically into the outer rim.\nMATCHED MATERIALS: Yellow enamel, cyan glass, glossy orange and warm-white ceramic with fine gold edges. Carry the new front\u2019s actual rail construction, edge finish and material palette into this single coherent reverse. Make the exact Image1 identity unmistakable within a source-specific finished composition that joins naturally to the perimeter.\nThe reverse is a SINGLE UNINTERRUPTED FINISHED ART FIELD from its upper edge to its lower edge. Do not reproduce any empty rectangles, writing surfaces, name/type/description boxes or front-layout panels from Image2. The surface contains the actual identity, its own source-derived material relief and matching outer frame only. Preserve authentic intrinsic logo lettering when it is part of Image1; add no other words, labels, numbers or serials."
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "paidSubmissionAuthorized": false,
+  "supersededBy": "tailoring-v2/ROOT-ELIGIBLE-BACKS-1-PLAN.json"
+}

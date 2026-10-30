@@ -1,0 +1,56 @@
+{
+  "requests": [
+    {
+      "index": 193,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Edit the supplied TRUMP FRONT card print in Image1. Image2 is the authoritative shared content grid and Image3 is the exact source portrait/fist identity. Keep its thin smooth rounded63:88 silhouette, deep red enamel/navy/gold border finish, light blank name/type/details and completely empty large central creator-art aperture. ONE PRECISE CORRECTION: Remove ALL invented standalone T letters from the four perimeter corners/rails. A standalone T monogram is not the actual supplied source identity and must not appear. Replace only those letter pixels with continuous matching navy/red/gold native ornamental material; retain the actual small source-derived portrait cameos. Do not replace T with other letters, captions or symbols. No words, numbers, FIGHT, TRUMP, platform names, serials or new labels anywhere on this decorative front. Preserve every clear content surface and the entire original fixed grid. Flat orthographic thin rounded print, portrait2:3 high2K. No slab, case, thickness, perspective, pedestal, protrusions or clipped corners.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "d8a30bd1-7e77-479c-b253-88ab3e558aed"
+          },
+          {
+            "role": "image",
+            "value": "22e58a58-0eca-4a2d-889f-c28a8b121ea0"
+          },
+          {
+            "role": "image",
+            "value": "715be790-1116-4db9-8c26-20d2bc91aece"
+          }
+        ]
+      }
+    },
+    {
+      "index": 48,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: USELESS COIN (USELESS). The exact token-image identity rather than Wildtype\u2019s unrelated creature-collector crest. Reproduce the actual supplied Image 2 logo/mascot with its distinctive features and exact authentic lettering, never a generic substitute. Match the completed front Image 1 materials and source-faithful palette. No extra labels, ticker names, platform marks, numbers or footer boxes.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips or divided front-label remnants anywhere on the back. Do not copy the front name/ticker/description panel shapes. The ENTIRE reverse, including the top band, must form one continuous finished identity composition in the matching native metal/ceramic/lacquer material. Only authentic lettering contained in the exact source logo is allowed.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "19c7b351-b4fa-49c9-bb6b-43c4fb461350"
+          },
+          {
+            "role": "image",
+            "value": "b38a43c8-1989-4e2a-a9ae-8b1f19d49b30"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ]
+      }
+    }
+  ]
+}
