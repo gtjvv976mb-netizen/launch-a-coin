@@ -62,7 +62,7 @@ describe("reviewed exact pair-identity designs",()=>{
     expect(isPairDesignInstalled(design,{...install,reverse:{...install.reverse!,sourceSha256:"f".repeat(64)}})).toBe(false);
     expect(isPairDesignInstalled(design,{...install,atlas:{...install.atlas!,rendererVersion:"stale"}})).toBe(false);
   });
-  test("installed exact identities bind only their own pair, and are their pair's card except SOL's and USDC's",()=>{
+  test("installed exact identities bind only their own pair; in the release step none is its pair's card",()=>{
     for(const design of ACTIVE_PAIR_DESIGNS){
       const asset=getPairAsset(design.quoteKey);
       expect(defaultQuoteForDesign(design.key)).toBe(asset);
@@ -72,12 +72,10 @@ describe("reviewed exact pair-identity designs",()=>{
       if(asset.key==="sol"||asset.key==="usdc"){
         expect(designForPair(asset.key)).toBe(asset.key==="sol"?"one-piece":"duel-masters");
         expect(pairForDesign(design.key)).toBeNull();
-      }else if(isHeldPairDesign(design.key)){
-        expect(designForPair(asset.key)).toBe((HELD_PAIR_DESIGNS[design.key] ?? null) as never);
-        expect(pairForDesign(design.key)).toBeNull();
       }else{
-        expect(designForPair(asset.key)).toBe(design.key);
-        expect(pairForDesign(design.key)).toBe(asset);
+        // Release step: new launches get production's map, so no identity design is its pair's card here.
+        expect(designForPair(asset.key)).not.toBe(design.key);
+        expect(pairForDesign(design.key)).toBeNull();
       }
       expect(resolveLaunchQuote(design.key,{quoteAssetKey:asset.key,quoteMint:asset.mint})).toBe(asset);
       const other=getPairAsset(asset.key==="sol"?"usdc":"sol");

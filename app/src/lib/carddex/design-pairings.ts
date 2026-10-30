@@ -71,19 +71,30 @@ export const PAIR_IDENTITY_DESIGNS: Readonly<Partial<Record<PairAssetKey, CardDe
 });
 
 /**
- * The pair picks the card (owner, 30 October 2026): every offered pair has exactly one design, and a new launch always
- * takes its pair's design. This map is the one source of truth for that (pairs.ts designForPair and pairForDesign read
- * it): the identity rule above with the content holds applied (pair-designs.ts HELD_PAIR_DESIGNS), so a held identity's
- * pair launches with the design the hold names, or is not offered when it names none. A pair missing here is not
- * offered for new launches. Designs no pair names here are not offered either; coins that already have one keep it.
+ * The full release's map (claude/pair-identities): the identity rule above with the content holds applied
+ * (pair-designs.ts HELD_PAIR_DESIGNS), so a held identity's pair launches with the design the hold names, or is not
+ * offered when it names none. This release step does not offer it (PAIR_DESIGNS below).
  */
-export const PAIR_DESIGNS: Readonly<Partial<Record<PairAssetKey, CardDesignKey>>> = Object.freeze(Object.fromEntries(
+export const IDENTITY_RELEASE_PAIR_DESIGNS: Readonly<Partial<Record<PairAssetKey, CardDesignKey>>> = Object.freeze(Object.fromEntries(
   Object.entries(PAIR_IDENTITY_DESIGNS).flatMap(([pair, design]) => {
     if (!Object.hasOwn(HELD_PAIR_DESIGNS, design!)) return [[pair, design]];
     const live = HELD_PAIR_DESIGNS[design!];
     return live ? [[pair, live as CardDesignKey]] : [];
   }),
 ));
+
+/**
+ * The pair picks the card (owner, 30 October 2026): every offered pair has exactly one design, and a new launch always
+ * takes its pair's design. This map is the one source of truth for that (pairs.ts designForPair and pairForDesign read
+ * it). A pair missing here is not offered for new launches; designs no pair names here are not offered either, and
+ * coins that already have one keep it.
+ *
+ * Release step (rollback target, 30 October 2026): new launches get exactly what production offers today, its 37 pairs
+ * with their production designs, while the code and registries of the full release stay, so this build reads and
+ * renders every pair-* design, quote key and demo balance the full release can create. The full release sets this to
+ * IDENTITY_RELEASE_PAIR_DESIGNS.
+ */
+export const PAIR_DESIGNS: Readonly<Partial<Record<PairAssetKey, CardDesignKey>>> = PAIR_DESIGNS_2026_10_30;
 
 /**
  * Historical: the design and pair combinations the earlier separate chooser offered (before 30 October 2026). Coins

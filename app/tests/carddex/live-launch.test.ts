@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { ed25519 } from "@noble/curves/ed25519";
 import { base58Encode } from "../../../chain/sdk/src/bytes";
-import { DIRECT_PAIR_HELD, NOT_OFFERED_PAIR, OFFERED_PAIRS, TRANSFER_FEE_PAIR, UNPAIRED_DESIGN, boundQuoteForDesign, designForPair, getPairAsset, mainnetPairHold } from "../../src/lib/carddex/pairs";
+import { DIRECT_PAIR_HELD, NOT_OFFERED_PAIR, OFFERED_PAIRS, TRANSFER_FEE_PAIR, UNPAIRED_DESIGN, boundQuoteForDesign, chargesTransferFee, designForPair, getPairAsset, mainnetPairHold } from "../../src/lib/carddex/pairs";
 import { MEME_PAIR_PRESETS } from "../../src/lib/carddex/design-pairings";
 import renderAssets from "../../src/lib/carddex/render-assets.json";
 import tokenBackAssets from "../../src/lib/carddex/token-back-assets.json";
@@ -242,9 +242,9 @@ describe("isolated real-launch server lifecycle", () => {
   // Designs that pairs offered until the identity designs (spark, doge...) are unpaired now, and so are the held
   // identities (content holds: pair-sv151, pair-tslax...); another pair's design is refused by name; AAVE, UNI and the
   // held-out pairs (67, AGENCY...) are not offered at all.
-  const refusedNew: [string, string, string][] = [["pair-doge", "sol", "The SOL pair comes with its own card"], ["pokemon-classic", "cards", "The CARDS pair comes with its own card"], ["stock-tsla", "gmex", "The GMEX pair comes with its own card"],
+  const refusedNew: [string, string, string][] = [["doge", "sol", "The SOL pair comes with its own card"], ["pokemon-classic", "cards", "The CARDS pair comes with its own card"], ["stock-tsla", "gmex", "The GMEX pair comes with its own card"],
     ["pokemon-classic", "sol", "The SOL pair comes with its own card"],
-    ["spark", "sol", UNPAIRED_DESIGN], ["doge", "doge", UNPAIRED_DESIGN], ["pair-sv151", "sv151", UNPAIRED_DESIGN], ["pair-tslax", "tslax", UNPAIRED_DESIGN], ["pair-ansem", "ansem", UNPAIRED_DESIGN],
+    ["kraken", "sol", UNPAIRED_DESIGN], ["pair-doge", "doge", UNPAIRED_DESIGN], ["pair-sv151", "sv151", UNPAIRED_DESIGN], ["pair-tslax", "tslax", UNPAIRED_DESIGN], ["pair-ansem", "ansem", UNPAIRED_DESIGN],
     ["pair-sol", "sol", UNPAIRED_DESIGN], ["pair-usdc", "usdc", UNPAIRED_DESIGN],
     ["pokemon-full-art", "sv151", UNPAIRED_DESIGN], ["gamestop", "gmex", UNPAIRED_DESIGN], ["coinbase", "coinx", UNPAIRED_DESIGN], ["strategy", "mstrx", UNPAIRED_DESIGN], ["shib", "sol", UNPAIRED_DESIGN],
     ["one-piece", "aave", NOT_OFFERED_PAIR], ["one-piece", "uni", NOT_OFFERED_PAIR], ["pair-67", "67", NOT_OFFERED_PAIR], ["pair-agency", "agency", NOT_OFFERED_PAIR]];
@@ -256,15 +256,16 @@ describe("isolated real-launch server lifecycle", () => {
     expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 0});
   });
   test("a design-only request (an older client) launches with that design's own pair; an unpaired design alone is refused", async () => {
-    const doge = getPairAsset("doge"), original = await input({cardTemplate: "pair-doge", quoteAssetKey: doge.key, quoteMint: doge.mint});
+    // Release step: DOGE launches with production's design, "doge".
+    const doge = getPairAsset("doge"), original = await input({cardTemplate: "doge", quoteAssetKey: doge.key, quoteMint: doge.mint});
     const {quoteAssetKey: _key, quoteMint: _mint, ...designOnly} = original;
     const prepared = await service.prepareLiveLaunch(creator, designOnly);
-    expect(prepared.intent).toMatchObject({cardTemplate: "pair-doge", quoteAssetKey: "doge", quoteMint: doge.mint});
-    expect(tokenInputs[0]).toMatchObject({quoteKey: "doge", card: {designKey: "pair-doge"}});
+    expect(prepared.intent).toMatchObject({cardTemplate: "doge", quoteAssetKey: "doge", quoteMint: doge.mint});
+    expect(tokenInputs[0]).toMatchObject({quoteKey: "doge", card: {designKey: "doge"}});
     // The same launch sent as all three fields is the same request, not a second one.
     expect((await service.prepareLiveLaunch(creator, original)).intent.id).toBe(prepared.intent.id);
     await expect(service.prepareLiveLaunch(creator, {...designOnly, cardTemplate: "gamestop", idempotencyKey: "another-request", tokenMint: otherWallet})).rejects.toThrow(UNPAIRED_DESIGN);
-    await expect(service.prepareLiveLaunch(creator, {...designOnly, cardTemplate: "doge", idempotencyKey: "another-request", tokenMint: otherWallet})).rejects.toThrow(UNPAIRED_DESIGN);
+    await expect(service.prepareLiveLaunch(creator, {...designOnly, cardTemplate: "pair-doge", idempotencyKey: "another-request", tokenMint: otherWallet})).rejects.toThrow(UNPAIRED_DESIGN);
   });
   test("a pair that is not offered (AAVE, UNI; the held-out 67, AGENCY, ALON, HODL...) is refused before any artwork, metadata, plan or row", async () => {
     for (const key of ["aave", "uni", "67", "agency", "alon", "hodl", "jeanphil", "claudia", "biketyson", "neet"]) {
@@ -281,23 +282,32 @@ describe("isolated real-launch server lifecycle", () => {
     await expect(composeLiveAssets(creator, {...fields, cardTemplate: "one-piece"}, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(NOT_OFFERED_PAIR);
     expect(storagePuts).toBe(puts);
   });
+  // Release step: ZCAT (a transfer-fee pair) is not offered at all, so it is refused as a pair that is not offered.
   test("a transfer-fee pair (ZCAT) is refused for mainnet before any upload, coin image, size check, plan or row", async () => {
     const zcat = getPairAsset("zcat"), original = {...await input(), cardTemplate: "pair-zcat", quoteAssetKey: zcat.key, quoteMint: zcat.mint}, puts = storagePuts;
     const {cardTemplate: _design, ...pairOnly} = original;
-    for (const request of [original, pairOnly]) await expect(service.prepareLiveLaunch(creator, request)).rejects.toThrow(TRANSFER_FEE_PAIR);
+    expect(chargesTransferFee("zcat")).toBe(true);
+    for (const request of [original, pairOnly]) await expect(service.prepareLiveLaunch(creator, request)).rejects.toThrow(NOT_OFFERED_PAIR);
     expect(prepareCalls).toBe(0); expect(tokenMediaCalls).toBe(0); expect(storagePuts).toBe(puts);
     expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 0});
     const {composeLiveAssets} = await import("../../src/lib/carddex/live/composition.server");
     const fields = {tokenMint: mint, name: "Launch Fixture", symbol: "FIX", description: "", quoteAssetKey: zcat.key, quoteMint: zcat.mint};
-    await expect(composeLiveAssets(creator, fields, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(TRANSFER_FEE_PAIR);
-    await expect(service.checkLiveLaunchSize(creator, {name: "Launch Fixture", symbol: "FIX", quoteAssetKey: "zcat", initialBuyQuoteBaseUnits: "1"})).rejects.toThrow(TRANSFER_FEE_PAIR);
+    await expect(composeLiveAssets(creator, fields, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(NOT_OFFERED_PAIR);
+    await expect(service.checkLiveLaunchSize(creator, {name: "Launch Fixture", symbol: "FIX", quoteAssetKey: "zcat", initialBuyQuoteBaseUnits: "1"})).rejects.toThrow(NOT_OFFERED_PAIR);
     for (const key of ["aave", "67", "agency"]) await expect(service.checkLiveLaunchSize(creator, {name: "Launch Fixture", symbol: "FIX", quoteAssetKey: key, initialBuyQuoteBaseUnits: "1"})).rejects.toThrow(NOT_OFFERED_PAIR);
     expect(storagePuts).toBe(puts);
   });
   test("a direct pair the owner has not confirmed is refused for mainnet before any upload, coin image, size check, plan or row", async () => {
     const {composeLiveAssets} = await import("../../src/lib/carddex/live/composition.server");
     const direct = OFFERED_PAIRS.filter(asset => mainnetPairHold(asset.key) && asset.key !== "zcat");
-    expect(direct.map(asset => asset.key)).toEqual(["gork", "stonk", "paid", "pepe", "pill", "npc", "wojak", "eacc", "shib", "swordcat", "plague", "ape", "link"]);
+    // Release step: production offers no direct pair, so none is offered here; each is refused as not offered.
+    expect(direct).toEqual([]);
+    expect(mainnetPairHold("pepe")).toBe(DIRECT_PAIR_HELD.replace(" Pick another pair.", ""));
+    for (const key of ["pepe", "link"]) {
+      const quote = getPairAsset(key), original = {...await input(), cardTemplate: `pair-${key}`, quoteAssetKey: quote.key, quoteMint: quote.mint}, puts = storagePuts;
+      await expect(service.prepareLiveLaunch(creator, original)).rejects.toThrow(NOT_OFFERED_PAIR);
+      expect(prepareCalls).toBe(0); expect(storagePuts).toBe(puts);
+    }
     for (const quote of direct) {
       const original = {...await input(), cardTemplate: designForPair(quote.key)!, quoteAssetKey: quote.key, quoteMint: quote.mint}, puts = storagePuts;
       const {cardTemplate: _design, ...pairOnly} = original;
@@ -311,11 +321,11 @@ describe("isolated real-launch server lifecycle", () => {
   });
   test("a card composition is refused for a design that is not its pair's own, before anything is uploaded", async () => {
     const {composeLiveAssets} = await import("../../src/lib/carddex/live/composition.server");
-    const fields = {tokenMint: mint, name: "Launch Fixture", symbol: "FIX", description: "", cardTemplate: "pair-doge", quoteAssetKey: "sol", quoteMint: getPairAsset("sol").mint};
+    const fields = {tokenMint: mint, name: "Launch Fixture", symbol: "FIX", description: "", cardTemplate: "doge", quoteAssetKey: "sol", quoteMint: getPairAsset("sol").mint};
     const puts = storagePuts;
     await expect(composeLiveAssets(creator, fields, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow("The SOL pair comes with its own card");
     await expect(composeLiveAssets(creator, {...fields, cardTemplate: "kraken"}, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(UNPAIRED_DESIGN);
-    await expect(composeLiveAssets(creator, {...fields, cardTemplate: "spark"}, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(UNPAIRED_DESIGN);
+    await expect(composeLiveAssets(creator, {...fields, cardTemplate: "pokemon-full-art"}, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(UNPAIRED_DESIGN);
     expect(storagePuts).toBe(puts);
   });
   // Saved before the pair picked the card: every earlier chooser preset (six are their pair's design again under the

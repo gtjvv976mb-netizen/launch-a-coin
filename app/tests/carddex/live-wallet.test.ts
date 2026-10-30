@@ -55,7 +55,7 @@ describe("creator-wallet transaction commitments", () => {
     // included: saved launches never re-check the offer).
     const held = Object.keys(HELD_PAIR_DESIGNS).map(key => [key, key.slice(5)] as const);
     const pairs = [...Object.entries(stockPairs), ...MEME_PAIR_PRESETS.map(({design, quote}) => [design, quote] as const), ...OFFERED_PAIRS.map(asset => [designForPair(asset.key)!, asset.key] as const), ...held, ...PAIR_ASSETS.map(asset=>["pokemon-classic",asset.key] as const)];
-    expect(pairs).toHaveLength(10 + 31 + 86 + 23 + 97);
+    expect(pairs).toHaveLength(10 + 31 + 37 + 23 + 97);
     for (const [design, quoteKey] of pairs) {
       const token = fixture(design, quoteKey), nft = nftFixture(design, quoteKey);
       const wire=validateLivePlan(token.plan, token.expected);

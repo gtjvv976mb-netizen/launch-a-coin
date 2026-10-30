@@ -61,7 +61,7 @@ describe("the creator's print reads on every offered identity design", () => {
     const inkL = lum(...ink);
     let lowest = Infinity;
     const offered = OFFERED_PAIRS.map(pair => designForPair(pair.key)!).filter(key => key.startsWith("pair-"));
-    expect(offered).toHaveLength(70);
+    expect(offered).toHaveLength(0); // release step: production's pairs offer no identity design
     for (const key of offered) {
       const atlas = (renderAssets as Record<string, { previewPath: string }>)[key + (CARD_DESIGNS.find(d => d.key === key)!.category === "stocks" ? "--stock" : "")]!;
       const png = readFileSync(file(atlas.previewPath));
