@@ -52,7 +52,8 @@ describe("phone and tablet copies of every card face (the srcsets ask for them)"
 });
 
 describe("the creator's print reads on every offered identity design", () => {
-  beforeAll(async () => { await initWasm(await readFile("node_modules/@resvg/resvg-wasm/index_bg.wasm")); });
+  // One wasm instance per test process: another suite (creator-print) may have started it already.
+  beforeAll(async () => { try { await initWasm(await readFile("node_modules/@resvg/resvg-wasm/index_bg.wasm")); } catch (error) { if (!String(error).includes("Already initialized")) throw error; } });
   const ink = [0x30, 0x25, 0x1a] as const;
   const channel = (v: number) => { const c = v / 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
   const lum = (r: number, g: number, b: number) => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
