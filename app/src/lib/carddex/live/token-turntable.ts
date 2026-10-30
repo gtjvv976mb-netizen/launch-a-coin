@@ -11,7 +11,7 @@ export const TOKEN_ANIMATION_CARD_HEIGHT = TOKEN_ANIMATION_SIZE * .76;
 export const TOKEN_ANIMATION_BACKGROUND = Object.freeze([245, 239, 226] as const);
 
 export type TokenCardPixels = { pixels: Uint8Array; width: number; height: number };
-/** The finished GIF would pass the public image limit. Not reached in QA, even by random-noise artwork on all 48 designs. */
+/** The finished GIF would pass the public image limit. Not reached in QA, even by random-noise artwork on every design (measured with the 48 earlier designs; scripts/measure-token-gifs.ts covers every offered one). */
 export class TokenAnimationTooLarge extends Error {
   constructor() { super("The complete token animation exceeds the public image size limit."); this.name = "TokenAnimationTooLarge"; }
 }

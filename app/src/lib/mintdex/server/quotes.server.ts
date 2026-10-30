@@ -1,4 +1,4 @@
-import { PAIR_ASSETS, getPairAsset, resolveNewLaunchPair } from "../../carddex/pairs";
+import { OFFERED_PAIRS, getPairAsset, resolveNewLaunchPair } from "../../carddex/pairs";
 import { demoQuoteStartBalance } from "../../carddex/quote-simulation";
 import type { QuoteIdentity } from "../types";
 import { UserError, all, db, one, stmt } from "./db.server";
@@ -21,11 +21,14 @@ export function newLaunchPair(input: { cardTemplate?: string; quoteAssetKey?: st
   catch (error) { throw new UserError(error instanceof Error ? error.message : "Pick a supported pair."); }
 }
 
-/** One-time local test funds only. SOL remains in users.balance; each SPL quote has its own ledger. */
+/**
+ * One-time local test funds only. SOL remains in users.balance; each SPL quote has its own ledger. Offered pairs only;
+ * a user made before a pair was offered gets its funds on the next read (existing balances are never touched).
+ */
 export async function ensureDemoQuoteWallet(userId: string) {
   const existing = await one<{ n: number }>("SELECT COUNT(*) AS n FROM quote_balances WHERE user_id = ?", userId);
-  if ((existing?.n ?? 0) >= PAIR_ASSETS.length - 1) return;
-  await db().batch(PAIR_ASSETS.filter(asset => asset.key !== "sol").map(asset => stmt(
+  if ((existing?.n ?? 0) >= OFFERED_PAIRS.length - 1) return;
+  await db().batch(OFFERED_PAIRS.filter(asset => asset.key !== "sol").map(asset => stmt(
     "INSERT OR IGNORE INTO quote_balances (user_id, quote_asset_key, balance) SELECT id, ?, ? FROM users WHERE id = ?",
     asset.key, demoQuoteStartBalance(asset.key), userId,
   )));

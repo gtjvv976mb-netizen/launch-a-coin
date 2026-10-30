@@ -3,7 +3,7 @@
 // royalties.
 import type { D1PreparedStatement } from "@cloudflare/workers-types";
 import { getCardDesign } from "../../carddex/designs";
-import { pairForDesign } from "../../carddex/pairs";
+import { designForPair, getPairAsset } from "../../carddex/pairs";
 import { demoQuoteStartBalance, initialQuoteReserves, quoteMetrics } from "../../carddex/quote-simulation";
 import { LAMPORTS } from "../constants";
 import { INITIAL_RESERVES, quoteBuy, quoteSell, type Reserves } from "../curve";
@@ -24,15 +24,16 @@ const SEED_COINS = [
   ["skrimp", "Skrimp", "SKRIMP", "Cyber shrimp with pink plasma claws."],
   ["pebl", "Pebl", "PEBL", "A tiny rock golem guarding one shiny gem."],
 ] as const;
-// Each seed coin's design, and so its pair (the pair picks the card): SV151, FARTCOIN, VINE, TOAD, SOL, USDC, DOGE,
-// CATE, CARDS and ACT. The collectible layouts come before the material variations.
-const DEMO_DESIGNS = ["pokemon-classic", "ember", "magic-etched", "pepe", "one-piece", "duel-masters", "doge", "ronin", "obsidian-archive", "yugioh-spell"];
+// Each seed coin's pair, and so its design (the pair picks the card). A fresh database seeds these; one already seeded
+// (production's included) keeps its stored coins and their designs.
+const DEMO_PAIRS = ["sv151", "fartcoin", "vine", "toad", "sol", "usdc", "doge", "cate", "cards", "act"];
 
-/** A seed coin's design and the pair it belongs to; a design with no pair cannot seed a coin. */
+/** A seed coin's pair and its design; a pair that is not offered cannot seed a coin. */
 export function seedCoinPair(index: number) {
-  const design = getCardDesign(DEMO_DESIGNS[index]!);
-  const pair = pairForDesign(design.key);
-  if (!pair || design.key !== DEMO_DESIGNS[index]) throw new Error(`Seed coin ${index} needs a paired design.`);
+  const key = designForPair(DEMO_PAIRS[index]);
+  if (!key) throw new Error(`Seed coin ${index} needs an offered pair.`);
+  const design = getCardDesign(key), pair = getPairAsset(DEMO_PAIRS[index]);
+  if (design.key !== key) throw new Error(`Seed coin ${index} needs a paired design.`);
   return { design, pair };
 }
 

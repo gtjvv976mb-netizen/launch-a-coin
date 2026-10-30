@@ -39,7 +39,7 @@ const { CARD_DESIGNS, DEFAULT_CARD_DESIGN, getCardDesign } = await import("../..
 const { MEME_PAIR_PRESETS } = await import("../../src/lib/carddex/design-pairings");
 const { INITIAL_RESERVES, quoteBuy, quoteSell } = await import("../../src/lib/mintdex/curve");
 const { LAUNCH_FEE, LAMPORTS } = await import("../../src/lib/mintdex/constants");
-const { PAIR_ASSETS, defaultQuoteForDesign, designForPair, getPairAsset, getTradingPair, pairForDesign, UNPAIRED_DESIGN } = await import("../../src/lib/carddex/pairs");
+const { OFFERED_PAIRS, PAIR_ASSETS, defaultQuoteForDesign, designForPair, getPairAsset, getTradingPair, pairForDesign, NOT_OFFERED_PAIR, UNPAIRED_DESIGN } = await import("../../src/lib/carddex/pairs");
 const { demoQuoteStartBalance, initialQuoteReserves, maxInitialBuyQuoteAtoms, quoteUnit } = await import("../../src/lib/carddex/quote-simulation");
 const migrations = resolve(import.meta.dir, "../../migrations");
 
@@ -114,12 +114,14 @@ describe("CardDex fixed creator cards and token trading", () => {
       expect(item?.coin.stockTicker).toBe(asset.referenceTicker);
       expect(item?.coin.tokenPair).toBe(getTradingPair(`S${String(index).padStart(2, "0")}`, asset.key));
     }
-    const stock = stockDesigns[0];
+    // A stock design new coins can launch with (the earlier stock designs are kept by stored coins only).
+    const stock = stockDesigns.find((design) => pairForDesign(design.key))!;
+    expect(stock.key).toBe("pair-gmex");
     const base = { name: "Stock Reference", ticker: "SPOOF", image: "/api/img/art/qa-token.png", lore: "Reference artwork only.", devBuy: 0, cardTemplate: stock.key };
     const before = (sqlite.query("SELECT balance FROM users WHERE id = ?").get(user.id) as { balance: number }).balance;
     await expect(service.launchCoin(user, { ...base, stockTicker: "FAKE" })).rejects.toThrow("stock reference must match");
     await expect(service.launchCoin(user, { ...base, tokenPair: "FAKE / SOL" })).rejects.toThrow("reference pair must match");
-    const ordinary = CARD_DESIGNS.find((design) => !design.stock)!;
+    const ordinary = CARD_DESIGNS.find((design) => !design.stock && pairForDesign(design.key))!;
     await expect(service.launchCoin(user, { ...base, cardTemplate: ordinary.key, stockTicker: stock.stock!.ticker })).rejects.toThrow("stock reference must match");
     expect((sqlite.query("SELECT balance FROM users WHERE id = ?").get(user.id) as { balance: number }).balance).toBe(before);
     expect(sqlite.query("SELECT COUNT(*) AS n FROM coins WHERE ticker = 'SPOOF'").get()).toEqual({ n: 0 });
@@ -134,13 +136,14 @@ describe("CardDex fixed creator cards and token trading", () => {
     const input = { name: "Neutral Stock Quote", ticker: "NEUTRAL", image: "/api/img/art/qa-token.png", lore: "The actual quote defines this association.", devBuy: 0, quoteAssetKey: asset.key, quoteMint: asset.mint, stockTicker: "TSLA", tokenPair: "NEUTRAL / TSLAX" };
     // The pair picks the card: another design with this pair is refused before anything is written.
     const before = writeCalls;
-    await expect(service.launchCoin(user, {...input, cardTemplate: "spark"})).rejects.toThrow("comes with its own card");
+    await expect(service.launchCoin(user, {...input, cardTemplate: "pair-doge"})).rejects.toThrow("comes with its own card");
+    await expect(service.launchCoin(user, {...input, cardTemplate: "stock-tsla"})).rejects.toThrow(UNPAIRED_DESIGN);
     expect(writeCalls).toBe(before);
     const {id} = await service.launchCoin(user, input);
     const page = (await service.getCoinPage(id, "qa-session"))!;
     expect(row(id).quote_mint).toBe(asset.mint);
-    expect(row(id).card_template).toBe("stock-tsla");
-    expect(page.coin).toMatchObject({cardTemplate: "stock-tsla", stockTicker: "TSLA", tokenPair: "NEUTRAL / TSLAX", tradingPair: "NEUTRAL / TSLAX"});
+    expect(row(id).card_template).toBe("pair-tslax");
+    expect(page.coin).toMatchObject({cardTemplate: "pair-tslax", stockTicker: "TSLA", tokenPair: "NEUTRAL / TSLAX", tradingPair: "NEUTRAL / TSLAX"});
     expect((await service.getPortfolio("qa-session"))?.deeds.find(item => item.coin.id === id)?.coin.stockTicker).toBe("TSLA");
     await expect(service.launchCoin(user, {...input, ticker: "WRONG", stockTicker: "GME", tokenPair: "WRONG / TSLAX"})).rejects.toThrow("stock reference must match");
     await expect(service.launchCoin(user, {...input, ticker: "OLDPAIR", tokenPair: "TSLA / SOL"})).rejects.toThrow("reference pair must match");
@@ -177,7 +180,7 @@ describe("CardDex fixed creator cards and token trading", () => {
     expect((await service.getPortfolio("qa-session"))?.deeds.find(item => item.coin.id === "legacy-stock-sol")?.coin).toMatchObject({stockTicker: null, tokenPair: null});
   });
 
-  for (const asset of PAIR_ASSETS) test(`${asset.symbol} quote atoms stay separate through launch, edit, buy, sell and portfolio`, async () => {
+  for (const asset of OFFERED_PAIRS) test(`${asset.symbol} quote atoms stay separate through launch, edit, buy, sell and portfolio`, async () => {
     await service.getMe(user);
     const initial = initialQuoteReserves(asset.key);
     const amount = Math.floor(initial.vSol / 30);
@@ -219,13 +222,15 @@ describe("CardDex fixed creator cards and token trading", () => {
       expect(sqlite.query("SELECT amount FROM protocol_quote_fees WHERE quote_asset_key = ?").get(asset.key)).toEqual({ amount: String(allFees) });
     }
     expect(Number((sqlite.query("SELECT value FROM meta WHERE key = 'protocol_fees'").get() as { value: string }).value)).toBe(LAUNCH_FEE + (asset.key === "sol" ? allFees : 0));
-    for (const other of PAIR_ASSETS.filter(other => other.key !== "sol" && other.key !== asset.key)) {
+    for (const other of OFFERED_PAIRS.filter(other => other.key !== "sol" && other.key !== asset.key)) {
       expect(sqlite.query("SELECT balance FROM quote_balances WHERE user_id = ? AND quote_asset_key = ?").get(user.id, other.key)).toEqual({ balance: demoQuoteStartBalance(other.key) });
     }
+    // Pairs not offered yet (AAVE, UNI) get no test funds.
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM quote_balances WHERE user_id = ? AND quote_asset_key IN ('aave', 'uni')").get(user.id)).toEqual({ n: 0 });
     const portfolio = (await service.getPortfolio("qa-session"))!;
     expect(portfolio.holdings[0].coin.quoteAssetKey).toBe(asset.key);
     expect(portfolio.totals.holdingsValueByQuote[asset.key]).toBe(portfolio.holdings[0].valueQuote);
-    if (asset.kind === "stock" || asset.kind === "meme" || asset.kind === "collector") {
+    if (asset.kind === "stock" || asset.kind === "meme" || asset.kind === "collector" || asset.kind === "crypto") {
       expect(page.coin.mcapUsd).toBeNull();
       expect(page.coin.priceSol).toBeNull();
       expect(bought.sol).toBeNull();
@@ -240,7 +245,7 @@ describe("CardDex fixed creator cards and token trading", () => {
 
   test("each meme and collector pair launches its own design and keeps the creator's token and quote through trades and collection reads", async () => {
     await service.getMe(user);
-    for (const [index, asset] of PAIR_ASSETS.filter(asset => asset.kind === "meme" || asset.kind === "collector").entries()) {
+    for (const [index, asset] of OFFERED_PAIRS.filter(asset => asset.kind === "meme" || asset.kind === "collector").entries()) {
       const preset = {design: designForPair(asset.key)!, quote: asset.key}, amount = Math.floor(initialQuoteReserves(asset.key).vSol / 30);
       const ticker = `P${index}`, identity = {quoteAssetKey: asset.key, quoteMint: asset.mint};
       const {id} = await service.launchCoin(user, {name: "Own Collector Token", ticker, image: "/api/img/art/qa-token.png", lore: "A themed finish with the creator's own token.", cardTemplate: preset.design, devBuy: amount, ...identity});
@@ -284,10 +289,18 @@ describe("CardDex fixed creator cards and token trading", () => {
     await expect(service.launchCoin(user, { ...base, quoteAssetKey: "unsupported" })).rejects.toThrow("supported pump.fun quote");
     await expect(service.launchCoin(user, { ...base, quoteAssetKey: "usdc", quoteMint: PAIR_ASSETS[0].mint })).rejects.toThrow("quote mint");
     // The pair picks the card: a design that is not the pair's own, or has no pair, is refused in plain words.
-    await expect(service.launchCoin(user, { ...base, cardTemplate: "stock-tsla", quoteAssetKey: "sol" })).rejects.toThrow("The SOL pair comes with its own card");
-    await expect(service.launchCoin(user, { ...base, cardTemplate: "spark", quoteAssetKey: "sol" })).rejects.toThrow("comes with its own card");
+    await expect(service.launchCoin(user, { ...base, cardTemplate: "pair-tslax", quoteAssetKey: "sol" })).rejects.toThrow("The SOL pair comes with its own card");
+    await expect(service.launchCoin(user, { ...base, cardTemplate: "stock-tsla", quoteAssetKey: "sol" })).rejects.toThrow(UNPAIRED_DESIGN);
+    await expect(service.launchCoin(user, { ...base, cardTemplate: "spark", quoteAssetKey: "sol" })).rejects.toThrow(UNPAIRED_DESIGN);
     await expect(service.launchCoin(user, { ...base, cardTemplate: "pokemon-full-art", quoteAssetKey: "sv151" })).rejects.toThrow(UNPAIRED_DESIGN);
-    await expect(service.launchCoin(user, { ...base, cardTemplate: "pokemon-classic", quoteAssetKey: "cards" })).rejects.toThrow("The CARDS pair comes with its own card");
+    await expect(service.launchCoin(user, { ...base, cardTemplate: "pokemon-classic", quoteAssetKey: "cards" })).rejects.toThrow(UNPAIRED_DESIGN);
+    await expect(service.launchCoin(user, { ...base, cardTemplate: "pair-sv151", quoteAssetKey: "cards" })).rejects.toThrow("The CARDS pair comes with its own card");
+    await expect(service.launchCoin(user, { ...base, cardTemplate: "pair-sol", quoteAssetKey: "sol" })).rejects.toThrow(UNPAIRED_DESIGN);
+    // A pair with no finished card is not offered (AAVE, UNI), whatever design the request names.
+    for (const key of ["aave", "uni"]) {
+      await expect(service.launchCoin(user, { ...base, quoteAssetKey: key })).rejects.toThrow(NOT_OFFERED_PAIR);
+      await expect(service.launchCoin(user, { ...base, quoteAssetKey: key, quoteMint: getPairAsset(key).mint, cardTemplate: "one-piece" })).rejects.toThrow(NOT_OFFERED_PAIR);
+    }
     await expect(service.launchCoin(user, { ...base, cardTemplate: "gamestop" })).rejects.toThrow(UNPAIRED_DESIGN);
     await expect(service.launchCoin(user, { ...base, cardTemplate: "gamestop", quoteAssetKey: "gmex" })).rejects.toThrow(UNPAIRED_DESIGN);
     await expect(service.launchCoin(user, { ...base, devBuy: Number.MAX_SAFE_INTEGER + 1 })).rejects.toThrow("safe initial-buy");
@@ -307,7 +320,7 @@ describe("CardDex fixed creator cards and token trading", () => {
   test("65 BONK round trips preserve exact analytics past MAX_SAFE_INTEGER without blocking sells", async () => {
     const asset = PAIR_ASSETS.find(asset => asset.key === "bonk")!;
     const identity = { quoteAssetKey: asset.key, quoteMint: asset.mint };
-    const { id } = await service.launchCoin(user, { name: "Busy BONK", ticker: "BUSY", image: "/api/img/art/qa-token.png", lore: "Exact quote analytics.", cardTemplate: "bonk", devBuy: 0, ...identity });
+    const { id } = await service.launchCoin(user, { name: "Busy BONK", ticker: "BUSY", image: "/api/img/art/qa-token.png", lore: "Exact quote analytics.", cardTemplate: "pair-bonk", devBuy: 0, ...identity });
     let reserves = initialQuoteReserves(asset.key);
     const amount = maxInitialBuyQuoteAtoms(asset.key);
     let volume = 0n, fees = 0n, spent = 0n, firstBuy = 0n;
@@ -359,7 +372,7 @@ describe("CardDex fixed creator cards and token trading", () => {
   test("quote and native fee ledgers add exact text totals beyond signed 64-bit integers", async () => {
     const asset = PAIR_ASSETS.find(asset => asset.key === "bonk")!;
     const identity = { quoteAssetKey: asset.key, quoteMint: asset.mint };
-    const { id } = await service.launchCoin(user, { name: "Fee Precision", ticker: "FEE", image: "/api/img/art/qa-token.png", lore: "Exact accumulated fees.", cardTemplate: "bonk", devBuy: 0, ...identity });
+    const { id } = await service.launchCoin(user, { name: "Fee Precision", ticker: "FEE", image: "/api/img/art/qa-token.png", lore: "Exact accumulated fees.", cardTemplate: "pair-bonk", devBuy: 0, ...identity });
     const prior = 184_467_440_737_095_516_179n;
     sqlite.query("INSERT INTO protocol_quote_fees (quote_asset_key, amount) VALUES ('bonk', ?)").run(prior.toString());
     const amount = maxInitialBuyQuoteAtoms("bonk");
@@ -528,6 +541,8 @@ describe("CardDex fixed creator cards and token trading", () => {
     await localD1.batch(seed.buildSeed() as unknown as Prepared[]);
     const coins = await service.allCoins();
     expect(coins).toHaveLength(10);
+    // A fresh database seeds each coin on its pair with that pair's design (identity designs; SOL and USDC keep theirs).
+    expect(coins.map(coin => `${coin.quoteAssetKey}:${coin.cardTemplate}`).sort()).toEqual(["act:pair-act", "cards:pair-cards", "cate:pair-cate", "doge:pair-doge", "fartcoin:pair-fartcoin", "sol:one-piece", "sv151:pair-sv151", "toad:pair-toad", "usdc:duel-masters", "vine:pair-vine"]);
     for (const coin of coins) {
       expect(coin.cardTemplate).toBeTruthy();
       // The pair picks the card: every seed coin trades against its design's own pair.
