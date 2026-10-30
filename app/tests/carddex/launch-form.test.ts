@@ -4,7 +4,7 @@ import { ORDERED_PAIRS, PAIR_GROUPS, filterPairs, gridStep, groupAlias, isPairGr
 import { PAIR_DESIGNS_2026_10_30 } from "../../src/lib/carddex/design-pairings";
 import { walletNoticeItems, walletNoticePreview, WALLET_NOTICE_COPY } from "../../src/components/carddex/live/wallet-notice";
 import { CARD_DESIGNS } from "../../src/lib/carddex/designs";
-import { OFFERED_PAIRS, designForPair, getPairAsset, pairForDesign } from "../../src/lib/carddex/pairs";
+import { OFFERED_PAIRS, designForPair, getPairAsset, isOfferedPair, pairForDesign } from "../../src/lib/carddex/pairs";
 
 // The one-page Launch form (routes/launch.tsx): the pair it opens on and the card it shows (the pair picks the card),
 // the pair HUD's groups, search and arrow keys, the quick initial-buy amounts, and where focus goes when something is
@@ -60,7 +60,11 @@ describe("the Launch form derives its card from the pair", () => {
       if (pair) expect(pairFromSearch({ design: design.key })).toEqual({ pair: pair.key, notice: "" });
     }
     // Links from before the identity designs keep their pair: design "pepe" was TOAD's card, "doge" DOGE's.
-    for (const [pair, design] of Object.entries(PAIR_DESIGNS_2026_10_30)) expect(pairFromSearch({ design })).toEqual({ pair, notice: "" });
+    // A pair not offered now (ANSEM and SPX wait for the owner) opens on SOL and says so.
+    const cardGone = "That card is unavailable. SOL selected.";
+    for (const [pair, design] of Object.entries(PAIR_DESIGNS_2026_10_30)) expect(pairFromSearch({ design })).toEqual(isOfferedPair(pair) ? { pair, notice: "" } : { pair: "sol", notice: cardGone });
+    expect(pairFromSearch({ design: "sovereign" })).toEqual({ pair: "sol", notice: cardGone });
+    expect(pairFromSearch({ design: "celestial" })).toEqual({ pair: "sol", notice: cardGone });
     expect(pairFromSearch({ design: "pepe" })).toEqual({ pair: "toad", notice: "" });
     expect(pairFromSearch({ design: "doge" })).toEqual({ pair: "doge", notice: "" });
     expect(pairFromSearch({ design: "stock-tsla" })).toEqual({ pair: "tslax", notice: "" });
@@ -69,7 +73,8 @@ describe("the Launch form derives its card from the pair", () => {
     expect(pairFromSearch({ design: "pair-usdc" })).toEqual({ pair: "usdc", notice: "" });
     expect(pairFromSearch({ design: "gamestop" })).toEqual({ pair: "gmex", notice: "" });
     expect(pairFromSearch({ design: "pokemon-full-art" })).toEqual({ pair: "sol", notice: "" });
-    expect(pairFromSearch({ design: "nope" })).toEqual({ pair: "sol", notice: "" });
+    // An unknown, withheld or held design says so; a known design no pair ever had (pokemon-full-art) stays quiet.
+    for (const design of ["nope", "pair-aave", "pair-uni", "pair-67", "pair-ansem", "pair-spx"]) expect(pairFromSearch({ design })).toEqual({ pair: "sol", notice: cardGone });
     for (const quote of ["aave", "uni", "popcat"]) expect(pairFromSearch({ quote })).toEqual({ pair: "sol", notice: "That pair is unavailable. SOL selected." });
   });
   test("a kept draft brings back its pair only, if it is still offered (an older draft's separate design is not used)", () => {
@@ -84,21 +89,21 @@ describe("the Launch form derives its card from the pair", () => {
 
 describe("the pair HUD", () => {
   test("All holds every offered pair once: SOL and USDC, the stocks, memes, other crypto, then collector tokens", () => {
-    expect(ORDERED_PAIRS).toHaveLength(95);
-    expect(new Set(ORDERED_PAIRS.map(pair => pair.key)).size).toBe(95);
+    expect(ORDERED_PAIRS).toHaveLength(92);
+    expect(new Set(ORDERED_PAIRS.map(pair => pair.key)).size).toBe(92);
     expect(ORDERED_PAIRS.map(pair => pair.key).sort()).toEqual(OFFERED_PAIRS.map(pair => pair.key).sort());
     expect(ORDERED_PAIRS.slice(0, 4).map(pair => pair.key)).toEqual(["sol", "usdc", "gmex", "tslax"]);
     expect(ORDERED_PAIRS.findIndex(pair => pair.key === "tslax")).toBe(3);
-    expect(ORDERED_PAIRS.some(pair => pair.key === "aave" || pair.key === "uni")).toBe(false);
+    expect(ORDERED_PAIRS.some(pair => ["aave", "uni", "67", "ansem", "spx"].includes(pair.key))).toBe(false);
     expect(PAIR_GROUPS.map(group => group.name)).toEqual(["All", "Memes", "Stocks", "Crypto", "Collector"]);
     expect(pairsInGroup("crypto").slice(0, 2).map(pair => pair.key)).toEqual(["sol", "usdc"]);
     expect(pairsInGroup("crypto")).toHaveLength(22);
     expect(pairsInGroup("collector").map(pair => pair.key)).toEqual(["cards", "sv151"]);
     expect(pairsInGroup("stocks").map(pair => pair.key)).toEqual(["gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc"]);
-    expect(pairsInGroup("memes")).toHaveLength(64);
+    expect(pairsInGroup("memes")).toHaveLength(61);
     expect(pairsInGroup("memes").every(pair => pairGroupOf(pair) === "memes" && pair.kind === "meme")).toBe(true);
     const sizes = PAIR_GROUPS.filter(group => group.key !== "all").map(group => pairsInGroup(group.key).length);
-    expect(sizes.reduce((a, b) => a + b, 0)).toBe(95);
+    expect(sizes.reduce((a, b) => a + b, 0)).toBe(92);
     // Old links named the base group (SOL and USDC): it is part of Crypto now.
     expect(groupAlias("base")).toBe("crypto");
     expect(groupAlias("memes")).toBe("memes");
@@ -117,8 +122,10 @@ describe("the pair HUD", () => {
     expect(filterPairs("all", "pepe").map(pair => pair.key)).toEqual(["pepe", "toad"]);
     expect(filterPairs("all", "ape")[0]!.key).toBe("ape");
     expect(filterPairs("all", "aave")).toEqual([]);
+    expect(filterPairs("all", "spx")).toEqual([]);
+    expect(filterPairs("all", "ansem")).toEqual([]);
   });
-  test("ranked search: typing any offered pair's symbol puts it first, 93 or more within 4 characters", () => {
+  test("ranked search: typing any offered pair's symbol puts it first, 90 or more within 4 characters", () => {
     let quick = 0;
     for (const pair of ORDERED_PAIRS) {
       expect(filterPairs("all", pair.symbol)[0]!.key).toBe(pair.key);
@@ -127,8 +134,8 @@ describe("the pair HUD", () => {
         if (filterPairs("all", symbol.slice(0, n))[0]?.key === pair.key) { if (n <= 4) quick++; break; }
       }
     }
-    expect(quick).toBeGreaterThanOrEqual(93);
-    for (const [query, key] of [["pepe", "pepe"], ["ape", "ape"], ["mon", "mon"], ["near", "near"], ["pump", "pump"], ["sola", "solangeles"], ["e/a", "eacc"], ["67", "67"], ["link", "link"], ["wbtc", "wbtc"]]) {
+    expect(quick).toBeGreaterThanOrEqual(90);
+    for (const [query, key] of [["pepe", "pepe"], ["ape", "ape"], ["mon", "mon"], ["near", "near"], ["pump", "pump"], ["sola", "solangeles"], ["e/a", "eacc"], ["link", "link"], ["wbtc", "wbtc"]]) {
       expect(filterPairs("all", query!)[0]!.key).toBe(key!);
     }
   });

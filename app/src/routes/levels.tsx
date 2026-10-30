@@ -92,6 +92,8 @@ function Designs() {
   const linked = isCardDesignKey(key) ? getCardDesign(key) : isOfferedPair(search.quote) ? getCardDesign(designForPair(search.quote)!) : null;
   const design = linked ?? shown[0]?.design ?? PAIRED[0]!.design;
   const pair = pairForDesign(design.key);
+  // pair-sol and pair-usdc: identity designs no coin can carry (SOL keeps One Piece, USDC Duel Masters).
+  const unofferedIdentity = !pair && design.key.startsWith("pair-");
   // The sample card's quote: the design's pair; a design no pair has shows the quote coins made with it read as.
   const quote = pair ?? defaultQuoteForDesign(design.key);
   const index = shown.findIndex((d) => d.design.key === design.key);
@@ -236,13 +238,13 @@ function Designs() {
                   <DesignMini design={design} />
                   <span>
                     {collectionName}
-                    <span className="text-slate"> · {pair ? `${pair.symbol} pair` : "Existing coins only"}</span>
+                    <span className="text-slate"> · {pair ? `${pair.symbol} pair` : unofferedIdentity ? "Not offered" : "Existing coins only"}</span>
                   </span>
                 </span>
                 {primary ? <span className="cdx-cf-cap__go">{primary}</span> : null}
               </div>
               {/* Phones: the designs as one strip of chips (MintDex's .mdx-strip): each chip is the design's swatch and its
-                  pair's symbol (the full name is in its label, the caption and the plinth), so 95 chips stay short. */}
+                  pair's symbol (the full name is in its label, the caption and the plinth), so 92 chips stay short. */}
               <div
                 ref={stripRef}
                 role="group"
@@ -317,7 +319,7 @@ function Designs() {
                     <strong>{pair.symbol}</strong> <span>{shortPairName(pair)}</span>
                   </>
                 ) : (
-                  <span>Existing coins only. No pair offers this design.</span>
+                  <span>{unofferedIdentity ? "Not offered. Its pair launches with another card." : "Existing coins only. No pair offers this design."}</span>
                 )}
               </p>
             </div>

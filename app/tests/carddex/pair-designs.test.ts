@@ -1,5 +1,5 @@
 import {describe,expect,test} from "bun:test";
-import {ACTIVE_PAIR_DESIGNS,STAGED_PAIR_DESIGNS,WITHHELD_PAIR_DESIGNS,isPairDesignInstalled,type PairDesignInstallation} from "../../src/lib/carddex/pair-designs";
+import {ACTIVE_PAIR_DESIGNS,HELD_PAIR_DESIGNS,STAGED_PAIR_DESIGNS,WITHHELD_PAIR_DESIGNS,isPairDesignInstalled,type PairDesignInstallation} from "../../src/lib/carddex/pair-designs";
 import {installedPairDesignKeys} from "../../src/lib/carddex/pair-designs-installed";
 import {CARD_DESIGNS,LEGACY_CARD_DESIGNS,isCardDesignKey} from "../../src/lib/carddex/designs";
 import {MEME_PAIR_PRESETS} from "../../src/lib/carddex/design-pairings";
@@ -7,11 +7,14 @@ import {getPairAsset,allowedQuotesForDesign,defaultQuoteForDesign,designForPair,
 import {CARD_RENDERER_VERSION} from "../../src/lib/carddex/card-template";
 
 describe("reviewed exact pair-identity designs",()=>{
-  test("the active designs are exactly the installed ones: every staged design but the two without finished art",()=>{
+  test("the active designs are exactly the installed ones: every staged design but the two without finished art and the three held for review",()=>{
     expect(WITHHELD_PAIR_DESIGNS).toEqual(["pair-aave","pair-uni"]);
-    expect(ACTIVE_PAIR_DESIGNS).toHaveLength(95);
+    expect(HELD_PAIR_DESIGNS).toEqual(["pair-67","pair-ansem","pair-spx"]);
+    expect(ACTIVE_PAIR_DESIGNS).toHaveLength(92);
     // A missing or mismatched asset or hash fails here (the gates), not on the page: the manifests stay off the client.
-    expect(ACTIVE_PAIR_DESIGNS.map(d=>d.key)).toEqual(installedPairDesignKeys());
+    // Held designs stay installed (so one deleted key offers them again) but are not active.
+    expect(ACTIVE_PAIR_DESIGNS.map(d=>d.key)).toEqual(installedPairDesignKeys().filter(key=>!HELD_PAIR_DESIGNS.includes(key as `pair-${string}`)));
+    for(const key of HELD_PAIR_DESIGNS){expect(installedPairDesignKeys()).toContain(key);expect(isCardDesignKey(key)).toBe(false);expect(designForPair(key.slice(5))).toBeNull();}
     expect(STAGED_PAIR_DESIGNS.filter(d=>!installedPairDesignKeys().includes(d.key)).map(d=>d.key)).toEqual([...WITHHELD_PAIR_DESIGNS]);
   });
   test("the original48 identities remain valid and staged artwork never creates a placeholder option",()=>{

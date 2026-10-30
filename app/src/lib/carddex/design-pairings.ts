@@ -26,7 +26,8 @@ export const DESIGN_QUOTE_KEYS: Readonly<Record<string, PairAssetKey>> = Object.
  * The pair picks the card (owner, 30 October 2026): every offered pair has exactly one design, and a new launch always
  * takes its pair's design. This map is the one source of truth for that (pairs.ts designForPair and pairForDesign read
  * it). SOL keeps One Piece and USDC keeps Duel Masters (the owner's choice); every other pair takes its own identity
- * design. A pair missing here (AAVE and UNI: no finished card yet) is not offered for new launches. Designs no pair
+ * design. A pair missing here is not offered for new launches: AAVE and UNI have no finished card yet, and 67, ANSEM
+ * and SPX wait for the owner's review of their art (pair-designs.ts HELD_PAIR_DESIGNS). Designs no pair
  * names here are not offered either; coins that already have one keep it.
  */
 export const PAIR_DESIGNS: Readonly<Partial<Record<PairAssetKey, CardDesignKey>>> = Object.freeze({
@@ -34,16 +35,16 @@ export const PAIR_DESIGNS: Readonly<Partial<Record<PairAssetKey, CardDesignKey>>
   aaplx: "pair-aaplx", mstrx: "pair-mstrx", coinx: "pair-coinx", amc: "pair-amc", doge: "pair-doge",
   fartcoin: "pair-fartcoin", pnut: "pair-pnut", moodeng: "pair-moodeng", troll: "pair-troll",
   bonk: "pair-bonk", wif: "pair-wif", cards: "pair-cards", sv151: "pair-sv151", toad: "pair-toad",
-  pengu: "pair-pengu", giga: "pair-giga", spx: "pair-spx", trump: "pair-trump", useless: "pair-useless",
+  pengu: "pair-pengu", giga: "pair-giga", trump: "pair-trump", useless: "pair-useless",
   chillguy: "pair-chillguy", goat: "pair-goat", zerebro: "pair-zerebro", act: "pair-act",
   pippin: "pair-pippin", vine: "pair-vine", aura: "pair-aura", michi: "pair-michi", cate: "pair-cate",
-  ansem: "pair-ansem", bert: "pair-bert", chillhouse: "pair-chillhouse", usduc: "pair-usduc",
+  bert: "pair-bert", chillhouse: "pair-chillhouse", usduc: "pair-usduc",
   wbtc: "pair-wbtc", eth: "pair-eth", hype: "pair-hype", zec: "pair-zec", near: "pair-near", xrp: "pair-xrp",
   xmr: "pair-xmr", sui: "pair-sui", arb: "pair-arb", tao: "pair-tao", peaq: "pair-peaq", mon: "pair-mon",
   cashcat: "pair-cashcat", neet: "pair-neet", otc: "pair-otc", fone: "pair-fone", buttcoin: "pair-buttcoin",
   triplet: "pair-triplet", cupsey: "pair-cupsey", alon: "pair-alon", jimothy: "pair-jimothy",
   lmao: "pair-lmao", bobo: "pair-bobo", tokabu: "pair-tokabu", manifest: "pair-manifest", baton: "pair-baton",
-  claw: "pair-claw", "67": "pair-67", zauth: "pair-zauth", kins: "pair-kins", percolator: "pair-percolator",
+  claw: "pair-claw", zauth: "pair-zauth", kins: "pair-kins", percolator: "pair-percolator",
   jotchua: "pair-jotchua", zcat: "pair-zcat", gork: "pair-gork", stonk: "pair-stonk",
   solangeles: "pair-solangeles", paid: "pair-paid", pepe: "pair-pepe", jeanphil: "pair-jeanphil",
   pill: "pair-pill", biketyson: "pair-biketyson", npc: "pair-npc", wojak: "pair-wojak", eacc: "pair-eacc",

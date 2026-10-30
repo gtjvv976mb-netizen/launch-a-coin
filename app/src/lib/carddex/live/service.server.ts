@@ -2,7 +2,7 @@ import * as sdk from "../../../../../integrations/pumpfun/src/live";
 import type { LiveLaunchInput, WalletTransactionPlan } from "../../../../../integrations/pumpfun/src/live";
 import reviewedDesigns from "../../../../../integrations/pumpfun/src/design-assets.json";
 import { getCardDesign } from "../designs";
-import { getPairAsset, isPairAssetKey } from "../pairs";
+import { NOT_OFFERED_PAIR, TRANSFER_FEE_PAIR, chargesTransferFee, getPairAsset, isOfferedPair, isPairAssetKey } from "../pairs";
 import * as runtime from "../../bindings.server";
 import { clearGuard, db, guard, one, q, readBatch, stmt, UserError } from "../../mintdex/server/db.server";
 import { fetchPublicBytes, metadataShaFromUri, metadataUriPlaceholder, previewLaunchAssets, publishLaunchAssets, putPublicAsset, putPublicJson, validateOwnedAsset, verifyPublicJson } from "./assets.server";
@@ -222,7 +222,9 @@ async function preparePayload(wallet: string, raw: LivePrepareRequest): Promise<
 export async function checkLiveLaunchSize(wallet: string, raw: {name: string; symbol: string; quoteAssetKey: string; initialBuyQuoteBaseUnits: string}) {
   requireLiveConfig("launch"); walletBytes(wallet);
   const {name, symbol} = normalizeLiveIdentity(raw);
-  if (!isPairAssetKey(raw.quoteAssetKey)) throw new UserError("Choose a supported pump.fun quote asset.");
+  // Offered pairs only (new launches are the only callers): AAVE and UNI, or a held pair, are answered as at Launch.
+  if (!isOfferedPair(raw.quoteAssetKey)) throw new UserError(isPairAssetKey(raw.quoteAssetKey) ? NOT_OFFERED_PAIR : "Choose a supported pump.fun quote asset.");
+  if (chargesTransferFee(raw.quoteAssetKey)) throw new UserError(TRANSFER_FEE_PAIR);
   if (!/^(0|[1-9][0-9]{0,19})$/.test(raw.initialBuyQuoteBaseUnits)) throw new UserError("Review the initial-buy atoms before preparing a real launch.");
   const size = await chain(() => sdk.measureTokenTransaction({creator: wallet, name, symbol, quoteKey: raw.quoteAssetKey as LiveLaunchInput["quoteKey"], tokenMetadataUri: metadataUriPlaceholder()}, {connection: connection()}));
   const buy = BigInt(raw.initialBuyQuoteBaseUnits) > 0n, bytes = buy ? size.buyBytes : size.createBytes;

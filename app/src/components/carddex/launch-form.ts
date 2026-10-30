@@ -15,7 +15,8 @@ const EARLIER_DESIGN_PAIR = new Map<string, string>(Object.entries(PAIR_DESIGNS_
  * The pair a Launch address opens on: ?quote= names it (an offered pair only). An older ?design= link opens on that
  * design's pair: today's, else the pair it had before the identity designs ("doge" DOGE, "pepe" TOAD), else its
  * permanent binding; a design with none of these, or nothing, opens on SOL without a word. A ?quote= that is unknown
- * or not offered (AAVE, UNI) opens on SOL and says so.
+ * or not offered (AAVE, UNI), a ?design= whose pair is not offered ("sovereign", ANSEM's earlier card) and an unknown
+ * or withheld ?design= ("pair-aave") open on SOL and say so.
  */
 export function pairFromSearch(search: { quote?: string; design?: string }): { pair: PairAssetKey; notice: string } {
   if (search.quote) {
@@ -26,7 +27,9 @@ export function pairFromSearch(search: { quote?: string; design?: string }): { p
   if (!design) return { pair: DEFAULT_PAIR, notice: "" };
   const candidates = [pairForDesign(design)?.key, EARLIER_DESIGN_PAIR.get(design), boundQuoteForDesign(design)?.key];
   const pair = candidates.find((key) => isOfferedPair(key));
-  return { pair: (pair as PairAssetKey | undefined) ?? DEFAULT_PAIR, notice: "" };
+  if (pair) return { pair: pair as PairAssetKey, notice: "" };
+  const unavailable = !isCardDesignKey(design) || candidates.some(Boolean);
+  return { pair: DEFAULT_PAIR, notice: unavailable ? `That card is unavailable. ${getPairAsset(DEFAULT_PAIR).symbol} selected.` : "" };
 }
 
 /**

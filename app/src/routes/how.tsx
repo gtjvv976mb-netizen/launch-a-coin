@@ -105,7 +105,7 @@ const SECTIONS: Section[] = [
         <li>The pair is what your coin is priced and bought in: SOL, USDC, a crypto, meme or collector token, or a tokenized stock.</li>
         <li>The pair picks the card. Each pair has exactly one design, so choosing the pair and the design is one choice. DOGE gets Dogecoin Signature.</li>
         <li>SOL is pump.fun's default pair and gets the One Piece design. USDC gets Duel Masters.</li>
-        <li>Crypto pairs are Solana versions of other coins; the panel names the bridge or issuer.</li>
+        <li>Crypto pairs are Solana tokens or Solana versions of other coins; a version's panel names its bridge.</li>
         <li>Some pairs are admitted on-chain but missing from pump.fun's dated public list; their panel says so.</li>
         <li>Under the pair panel: the exact mint, its issuer and when it was reviewed. The mint is checked again before wallet review.</li>
         <li>The pair funds the optional initial buy, so changing the pair clears it. SOL also pays network and account costs.</li>

@@ -1,6 +1,6 @@
 import verifiedAssets from "./pair-assets.json";
 import { isCardDesignKey, type CardDesignKey } from "./designs";
-import { DESIGN_QUOTE_KEYS, PAIR_DESIGNS } from "./design-pairings";
+import { DESIGN_QUOTE_KEYS, PAIR_DESIGNS, PAIR_DESIGNS_2026_10_30 } from "./design-pairings";
 
 export const PAIR_ASSET_KEYS = ["sol", "usdc", "gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc", "doge", "fartcoin", "pnut", "moodeng", "troll", "bonk", "wif", "cards", "sv151", "toad", "pengu", "giga", "spx", "trump", "useless", "chillguy", "goat", "zerebro", "act", "pippin", "vine", "aura", "michi", "cate", "ansem", "bert", "chillhouse", "usduc", "wbtc", "eth", "hype", "zec", "near", "xrp", "xmr", "sui", "arb", "aave", "uni", "tao", "peaq", "mon", "cashcat", "neet", "otc", "fone", "buttcoin", "triplet", "cupsey", "alon", "jimothy", "lmao", "bobo", "tokabu", "manifest", "baton", "claw", "67", "zauth", "kins", "percolator", "jotchua", "zcat", "gork", "stonk", "solangeles", "paid", "pepe", "jeanphil", "pill", "biketyson", "npc", "wojak", "eacc", "hodl", "agency", "claudia", "shib", "swordcat", "plague", "pump", "alch", "pumpcade", "codec", "ape", "link", "ore", "skr"] as const;
 export type PairAssetKey = typeof PAIR_ASSET_KEYS[number];
@@ -65,7 +65,23 @@ export const OFFERED_PAIRS: readonly Readonly<PairAsset>[] = Object.freeze(PAIR_
 export function isOfferedPair(key?: string | null): boolean {
   return !!key && isPairAssetKey(key) && !!PAIR_DESIGN[key];
 }
+/**
+ * The pairs coins can trade in, so the demo funds them: every offered pair, and every pair offered before (a coin keeps
+ * its pair, so ANSEM and SPX coins still trade while their new designs wait for the owner). Never-offered pairs (AAVE,
+ * UNI, 67) are left out.
+ */
+export const TRADED_PAIRS: readonly Readonly<PairAsset>[] = Object.freeze(PAIR_ASSETS.filter(asset => PAIR_DESIGN[asset.key] || asset.key in PAIR_DESIGNS_2026_10_30));
 export const NOT_OFFERED_PAIR = "That pair is not offered yet. Pick another pair.";
+
+/**
+ * Offered pairs whose Token-2022 mint charges a transfer fee (ZCAT: 3%, in the reviewed 30 October mainnet fixtures).
+ * The pump.fun adapter cannot price a buy with the fee and refuses them at prepare, so a mainnet launch on one is
+ * refused before anything is uploaded (live validation.server.ts requireNewLaunchPair). The demo is unaffected. The
+ * adapter's prepare tests read this list and prove it against the fixtures.
+ */
+export const TRANSFER_FEE_PAIRS: readonly PairAssetKey[] = Object.freeze(["zcat"] as PairAssetKey[]);
+export const TRANSFER_FEE_PAIR = "Mainnet launches can't use this pair yet: its mint charges a transfer fee. Pick another pair.";
+export const chargesTransferFee = (key?: string | null) => !!key && (TRANSFER_FEE_PAIRS as readonly string[]).includes(key);
 
 /** The one card design a pair launches with (null for an unknown pair or one not offered yet). */
 export function designForPair(key?: string | null): CardDesignKey | null {

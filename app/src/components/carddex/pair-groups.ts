@@ -3,7 +3,8 @@ import { OFFERED_PAIRS, type PairAsset } from "../../lib/carddex/pairs";
 /**
  * The pair groups, in one order with one set of short names, shared by Launch's pair HUD (PairHud) and the Designs
  * screen. The pair picks the card, so the groups are the pairs' own kinds: memecoins, tokenized stocks, crypto (SOL,
- * USDC and Solana versions of other coins) and collector tokens. Only offered pairs appear (pairs.ts OFFERED_PAIRS).
+ * USDC, Solana tokens and Solana versions of other coins) and collector tokens. Only offered pairs appear (pairs.ts
+ * OFFERED_PAIRS).
  * Pure helpers, no React; tested in tests/carddex/launch-form.test.ts.
  */
 export const PAIR_GROUPS = [

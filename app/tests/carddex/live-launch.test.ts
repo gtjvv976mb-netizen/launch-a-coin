@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { ed25519 } from "@noble/curves/ed25519";
 import { base58Encode } from "../../../chain/sdk/src/bytes";
-import { NOT_OFFERED_PAIR, OFFERED_PAIRS, UNPAIRED_DESIGN, boundQuoteForDesign, designForPair, getPairAsset } from "../../src/lib/carddex/pairs";
+import { NOT_OFFERED_PAIR, OFFERED_PAIRS, TRANSFER_FEE_PAIR, UNPAIRED_DESIGN, boundQuoteForDesign, chargesTransferFee, designForPair, getPairAsset } from "../../src/lib/carddex/pairs";
 import { MEME_PAIR_PRESETS } from "../../src/lib/carddex/design-pairings";
 import renderAssets from "../../src/lib/carddex/render-assets.json";
 import tokenBackAssets from "../../src/lib/carddex/token-back-assets.json";
@@ -200,8 +200,9 @@ async function savedBeforePairRule(cardTemplate: string, quoteKey: string) {
 }
 describe("isolated real-launch server lifecycle", () => {
   // The pair picks the card: every offered pair launches with its own design, sent as the pair alone (the Launch form's
-  // shape is the full three; older clients too), and keeps it through metadata, the NFT and saved reads.
-  const designPairs = OFFERED_PAIRS.map(asset => [designForPair(asset.key)!, asset.key] as const);
+  // shape is the full three; older clients too), and keeps it through metadata, the NFT and saved reads. A transfer-fee
+  // pair (ZCAT) is refused for mainnet before anything is made (its own test below).
+  const designPairs = OFFERED_PAIRS.filter(asset => !chargesTransferFee(asset.key)).map(asset => [designForPair(asset.key)!, asset.key] as const);
   for (const [cardTemplate, quoteKey] of designPairs) test(`${quoteKey} launches its own ${cardTemplate} card through metadata, NFT preparation and saved reads`, async () => {
     const quote = getPairAsset(quoteKey);
     const original = await input({cardTemplate, quoteAssetKey: quote.key, quoteMint: quote.mint});
@@ -262,8 +263,8 @@ describe("isolated real-launch server lifecycle", () => {
     await expect(service.prepareLiveLaunch(creator, {...designOnly, cardTemplate: "gamestop", idempotencyKey: "another-request", tokenMint: otherWallet})).rejects.toThrow(UNPAIRED_DESIGN);
     await expect(service.prepareLiveLaunch(creator, {...designOnly, cardTemplate: "doge", idempotencyKey: "another-request", tokenMint: otherWallet})).rejects.toThrow(UNPAIRED_DESIGN);
   });
-  test("a pair that is not offered (AAVE, UNI) is refused before any artwork, metadata, plan or row", async () => {
-    for (const key of ["aave", "uni"]) {
+  test("a pair that is not offered (AAVE, UNI; 67, ANSEM and SPX held) is refused before any artwork, metadata, plan or row", async () => {
+    for (const key of ["aave", "uni", "67", "ansem", "spx"]) {
       const quote = getPairAsset(key), original = {...await input(), quoteAssetKey: quote.key, quoteMint: quote.mint}, puts = storagePuts;
       const {cardTemplate: _design, ...pairOnly} = original;
       await expect(service.prepareLiveLaunch(creator, pairOnly)).rejects.toThrow(NOT_OFFERED_PAIR);
@@ -275,6 +276,19 @@ describe("isolated real-launch server lifecycle", () => {
     const fields = {tokenMint: mint, name: "Launch Fixture", symbol: "FIX", description: "", quoteAssetKey: aave.key, quoteMint: aave.mint};
     await expect(composeLiveAssets(creator, fields, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(NOT_OFFERED_PAIR);
     await expect(composeLiveAssets(creator, {...fields, cardTemplate: "one-piece"}, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(NOT_OFFERED_PAIR);
+    expect(storagePuts).toBe(puts);
+  });
+  test("a transfer-fee pair (ZCAT) is refused for mainnet before any upload, coin image, size check, plan or row", async () => {
+    const zcat = getPairAsset("zcat"), original = {...await input(), cardTemplate: "pair-zcat", quoteAssetKey: zcat.key, quoteMint: zcat.mint}, puts = storagePuts;
+    const {cardTemplate: _design, ...pairOnly} = original;
+    for (const request of [original, pairOnly]) await expect(service.prepareLiveLaunch(creator, request)).rejects.toThrow(TRANSFER_FEE_PAIR);
+    expect(prepareCalls).toBe(0); expect(tokenMediaCalls).toBe(0); expect(storagePuts).toBe(puts);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 0});
+    const {composeLiveAssets} = await import("../../src/lib/carddex/live/composition.server");
+    const fields = {tokenMint: mint, name: "Launch Fixture", symbol: "FIX", description: "", quoteAssetKey: zcat.key, quoteMint: zcat.mint};
+    await expect(composeLiveAssets(creator, fields, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(TRANSFER_FEE_PAIR);
+    await expect(service.checkLiveLaunchSize(creator, {name: "Launch Fixture", symbol: "FIX", quoteAssetKey: "zcat", initialBuyQuoteBaseUnits: "1"})).rejects.toThrow(TRANSFER_FEE_PAIR);
+    for (const key of ["aave", "67"]) await expect(service.checkLiveLaunchSize(creator, {name: "Launch Fixture", symbol: "FIX", quoteAssetKey: key, initialBuyQuoteBaseUnits: "1"})).rejects.toThrow(NOT_OFFERED_PAIR);
     expect(storagePuts).toBe(puts);
   });
   test("a card composition is refused for a design that is not its pair's own, before anything is uploaded", async () => {

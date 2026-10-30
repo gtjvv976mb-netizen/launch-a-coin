@@ -61,5 +61,13 @@ export const STAGED_PAIR_DESIGNS = Object.freeze(staged.map(design=>{
  * here, so the token-back, reviewed-source and atlas manifests stay out of the browser bundle.
  */
 export const WITHHELD_PAIR_DESIGNS: readonly PairDesignKey[] = Object.freeze(["pair-aave", "pair-uni"] as PairDesignKey[]);
-export const ACTIVE_PAIR_DESIGNS: readonly PairDesign[] = Object.freeze(STAGED_PAIR_DESIGNS.filter(design => !WITHHELD_PAIR_DESIGNS.includes(design.key)));
+/**
+ * Installed pair designs held back for the owner's review (fix pass, 30 October 2026), treated like the withheld ones:
+ * no design key, not on Designs, their pairs not offered. A coin's back becomes its public coin image for good, so
+ * these wait for a yes: pair-67 shows a photoreal child (a real minor's likeness), pair-ansem a photoreal man's head on
+ * a bull's body, and pair-spx's back misspells the coin ("SBP 6900"). Delivered art is untouched; deleting a key here
+ * offers its pair again with that design. No coin can carry one yet, so holding them changes no stored coin.
+ */
+export const HELD_PAIR_DESIGNS: readonly PairDesignKey[] = Object.freeze(["pair-67", "pair-ansem", "pair-spx"] as PairDesignKey[]);
+export const ACTIVE_PAIR_DESIGNS: readonly PairDesign[] = Object.freeze(STAGED_PAIR_DESIGNS.filter(design => !WITHHELD_PAIR_DESIGNS.includes(design.key) && !HELD_PAIR_DESIGNS.includes(design.key)));
 export const activePairDesignForQuote = (key: string) => ACTIVE_PAIR_DESIGNS.find(design => design.quoteKey === key) ?? null;

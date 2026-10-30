@@ -52,7 +52,7 @@ describe("creator-wallet transaction commitments", () => {
     // Every offered pair with its own card, the earlier stock and chooser combinations saved launches may carry, and a
     // neutral design on every reviewed quote (AAVE and UNI included: saved launches never re-check the offer).
     const pairs = [...Object.entries(stockPairs), ...MEME_PAIR_PRESETS.map(({design, quote}) => [design, quote] as const), ...OFFERED_PAIRS.map(asset => [designForPair(asset.key)!, asset.key] as const), ...PAIR_ASSETS.map(asset=>["pokemon-classic",asset.key] as const)];
-    expect(pairs).toHaveLength(10 + 31 + 95 + 97);
+    expect(pairs).toHaveLength(10 + 31 + 92 + 97);
     for (const [design, quoteKey] of pairs) {
       const token = fixture(design, quoteKey), nft = nftFixture(design, quoteKey);
       const wire=validateLivePlan(token.plan, token.expected);

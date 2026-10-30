@@ -1,4 +1,4 @@
-import { PAIR_ASSETS_SOURCE, getPairAsset, isDirectPair } from "../../lib/carddex/pairs";
+import { PAIR_ASSETS_SOURCE, chargesTransferFee, getPairAsset, isDirectPair } from "../../lib/carddex/pairs";
 import { Icon } from "../mintdex/ui";
 
 /**
@@ -34,5 +34,6 @@ export function QuoteAssetMeta({ quoteAssetKey, live = false, named = false }: {
     </p>
     {asset.kind === "stock" ? <p>A tokenized-stock quote does not make your coin company shares.</p> : null}
     {live ? <p>The exact mint is checked again before wallet review.</p> : null}
+    {live && chargesTransferFee(asset.key) ? <p className="cdx-pair-meta__direct">Mainnet launches can't use this pair yet: its mint charges a transfer fee.</p> : null}
   </div>;
 }

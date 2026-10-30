@@ -9,6 +9,7 @@ import { canonicalSkinSrcSet } from "../../src/components/carddex/CanonicalCardS
 import reviewedDesigns from "../../../integrations/pumpfun/src/design-assets.json";
 import { CANONICAL_CARD_LAYOUT, CARD_RENDERER_VERSION } from "../../src/lib/carddex/card-template";
 import { CARD_DESIGNS } from "../../src/lib/carddex/designs";
+import { HELD_PAIR_DESIGNS } from "../../src/lib/carddex/pair-designs";
 import { allowedQuotesForDesign, defaultQuoteForDesign } from "../../src/lib/carddex/pairs";
 import type { CardData } from "../../src/components/mintdex/MintCard";
 
@@ -18,8 +19,9 @@ const card=(key:string):CardData=>({name:"Silver & Scarlet <Test>",ticker:"TEST"
 const data=imageDataUri(new Uint8Array([1,2,3]),"image/png");
 describe("trusted creator card composition",()=>{
  test("every reviewed source and admitted finish has a pinned flattened skin",async()=>{
-  expect(new Set(Object.values(renderAssets).map(asset=>asset.designKey)).size).toBe(CARD_DESIGNS.length);
-  const expectedKeys=CARD_DESIGNS.flatMap(design=>[...new Set(allowedQuotesForDesign(design.key).map(quote=>quote.kind==="stock"?"stock":"plain"))].map(kind=>design.key+(kind==="stock"?"--stock":""))).sort();
+  // Held pair designs (pair-designs.ts) keep their pinned skins, so one deleted key offers them again.
+  expect(new Set(Object.values(renderAssets).map(asset=>asset.designKey)).size).toBe(CARD_DESIGNS.length+HELD_PAIR_DESIGNS.length);
+  const expectedKeys=[...CARD_DESIGNS.flatMap(design=>[...new Set(allowedQuotesForDesign(design.key).map(quote=>quote.kind==="stock"?"stock":"plain"))].map(kind=>design.key+(kind==="stock"?"--stock":""))),...HELD_PAIR_DESIGNS].sort();
   expect(Object.keys(renderAssets).sort()).toEqual(expectedKeys);
   expect(CREATOR_CARD_RENDERER_VERSION).toBe(CARD_RENDERER_VERSION);
   for(const [key,asset]of Object.entries(renderAssets)){

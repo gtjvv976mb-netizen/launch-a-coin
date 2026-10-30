@@ -6,6 +6,7 @@ import { BackFace } from "../../src/components/mintdex/card3d/backface";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { CARD_GENERATED_ASSETS, generatedCardAssets } from "../../src/lib/carddex/generated-assets";
+import { HELD_PAIR_DESIGNS } from "../../src/lib/carddex/pair-designs";
 import { generatedCardStyle } from "../../src/components/carddex/GeneratedCardArt";
 import { CANONICAL_CARD_LAYOUT, CANONICAL_CARD_TEMPLATE } from "../../src/lib/carddex/card-template";
 
@@ -121,7 +122,8 @@ describe("permanent creator-selected card designs", () => {
     expect(generatedCardAssets("__proto__")).toEqual({});
     expect(generatedCardAssets("missing")).toEqual({});
     for (const [key, assets] of Object.entries(CARD_GENERATED_ASSETS)) {
-      expect(isCardDesignKey(key)).toBe(true);
+      // A held pair design (pair-designs.ts) keeps its faces but is no design key until the owner approves it.
+      expect(isCardDesignKey(key) || HELD_PAIR_DESIGNS.includes(key as `pair-${string}`)).toBe(true);
       expect(assets.front).toBeTruthy();
       expect(assets.back).toBeTruthy();
       expect(assets.front320).toBeTruthy();

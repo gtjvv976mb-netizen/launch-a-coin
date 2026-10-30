@@ -12,7 +12,7 @@ import art from "../src/design-assets.json";
 import finalIdentitySnapshot from "./fixtures/codex-research-2026-10-30/expansion-final-identities-and-metadata.json";
 import finalRawSnapshot from "./fixtures/codex-research-2026-10-30/expansion-final-public-account-snapshots.json";
 import { CARD_DESIGNS } from "../../../app/src/lib/carddex/designs";
-import { OFFERED_PAIRS, defaultQuoteForDesign, designForPair } from "../../../app/src/lib/carddex/pairs";
+import { OFFERED_PAIRS, TRANSFER_FEE_PAIRS, defaultQuoteForDesign, designForPair } from "../../../app/src/lib/carddex/pairs";
 import {
   MAINNET_GENESIS_HASH, PAIR_ASSETS, preparePumpLaunchPlan,
   type PairReadConnection, type PrepareLaunchInput,
@@ -25,8 +25,10 @@ const now = () => new Date("2026-10-28T12:00:00Z");
 /**
  * Reviewed pairs whose Token-2022 mint charges a transfer fee (ZCAT: 3%, in the 30 October fixtures). This adapter's
  * pre-send check (quoteIssuerControls) refuses them, since SDK 4.1.0 prices buys without the fee; the demo is unaffected.
+ * The list is the app's (pairs.ts TRANSFER_FEE_PAIRS, which refuses them before any upload): these tests prove it
+ * against the fixtures, since every other catalog asset must prepare.
  */
-const TRANSFER_FEE_QUOTES = new Set(["zcat"]);
+const TRANSFER_FEE_QUOTES = new Set<string>(TRANSFER_FEE_PAIRS);
 const moreMemeQuotes = ["goat", "zerebro", "act", "pippin", "vine", "aura", "michi", "cate", "ansem", "bert", "chillhouse", "usduc"];
 
 function input(designKey = "stock-tsla", quoteKey = "tslax"): PrepareLaunchInput {
@@ -170,7 +172,7 @@ describe("unsigned official Pump custom-pair preparer", () => {
   });
 
   test("every offered pair prepares with its own design's reviewed art hashes (the pair picks the card)", async () => {
-    expect(OFFERED_PAIRS).toHaveLength(95);
+    expect(OFFERED_PAIRS).toHaveLength(92);
     for (const asset of OFFERED_PAIRS) {
       const designKey = designForPair(asset.key)!, request = input(designKey, asset.key);
       expect(art[designKey as keyof typeof art]).toBeDefined();
