@@ -29,7 +29,7 @@ function StatusPage({ title, body, action }: { title: string; body?: string; act
   );
 }
 
-/** An unknown page: Explore coins, or Go home. */
+/** An unknown page: Discover coins, or Go home. */
 export function PageNotFound() {
   return (
     <StatusPage

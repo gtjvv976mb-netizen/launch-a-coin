@@ -183,8 +183,8 @@ body[data-scroll-locked] .mdx-tt__charge > b {
 /* ---------------------------------------------------------------- Home layout (MintDex format)
  * The headline block, then the featured stage: at fit (1280x720 and up) the card and its caption column sit side by
  * side, a chevron on each card edge at mid-height and the dots with Pause under the caption; 1024 to 1279 puts the
- * caption under the card; phones stack card, caption, the drag line and tilt chip, the 44px chevrons with Pause
- * between them, the dots, then Launch a coin and Explore coins. */
+ * caption under the card; phones stack card, caption, Launch a coin and Discover coins (on the first screen, above the
+ * tab bar), the drag line and tilt chip, then the 44px chevrons with Pause between them and the dots. */
 .cdx-home__intro {
   position: relative;
   z-index: 2;
@@ -302,6 +302,10 @@ body[data-scroll-locked] .mdx-tt__charge > b {
   .cdx-home__side {
     width: 100%;
     margin-top: 0;
+  }
+  .cdx-home__actions--phone {
+    width: 100%;
+    margin-top: 14px;
   }
   .cdx-home__touchtools {
     display: flex;

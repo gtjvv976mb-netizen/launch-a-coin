@@ -448,8 +448,21 @@ function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
   );
 }
 
-/** The hero's two buttons: on the first screen from 1024px up, under the featured card on phones (the tab bar
- *  carries Launch and Discover there too). */
+/** A line whose word "pair" links to what a pair is (/how#pairs): one tap to the definition, no new words. */
+function PairLinked({ text }: { text: string }) {
+  const at = text.search(/\bpair\b/);
+  if (at < 0) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, at)}
+      <TextLink to="/how" hash="pairs">pair</TextLink>
+      {text.slice(at + 4)}
+    </>
+  );
+}
+
+/** The hero's two buttons: on the first screen from 1024px up; on phones right under the featured card's caption,
+ *  so they are on the first screen there too (the tab bar carries Launch and Discover as well). */
 function HeroActions({ className = "", guide = false }: { className?: string; guide?: boolean }) {
   return (
     <div className={cx("flex flex-wrap items-center gap-x-2 gap-y-3", className)}>
@@ -488,6 +501,9 @@ function LaunchedSection({ now }: { now: number }) {
   });
   const rows = launches.data ?? [];
   const shown = all ? rows : rows.slice(0, LAUNCHED_ROWS);
+  // Loaded with no launches (the demo, or before the first real one): no block at all, so the rail never says "No
+  // launches yet" over Activity rows that read "launched". A failed load still says so: there may be launches.
+  if (launches.isSuccess && !rows.length) return null;
   return (
     <section aria-labelledby={headId} className="cdx-home-launched flex flex-none flex-col gap-1">
       <SectionHead
@@ -509,17 +525,12 @@ function LaunchedSection({ now }: { now: number }) {
             {launches.isFetching ? "Trying again…" : "Try again"}
           </TextLink>
         </div>
-      ) : rows.length ? (
+      ) : (
         <ul className="cdx-home-launched__list">
           {shown.map((l) => (
             <LaunchedItem key={l.tokenMint} launch={l} now={now} />
           ))}
         </ul>
-      ) : (
-        <p className="cdx-home-launched__empty">
-          No launches yet.{" "}
-          <TextLink to="/launch">Launch a coin</TextLink>
-        </p>
       )}
     </section>
   );
@@ -891,11 +902,9 @@ function Home() {
           {/* What is real first (P0-5), then why anyone bids (P1-27). On the devnet test site the banner above
               the page already says what is real, so the hero keeps one line. */}
           <p className="cdx-home__copy mdx-home-arrival mdx-home-arrival--copy">
-            {!IS_SIM && CARD_BIDDING_SUSPENDED
-              ? "Pick a pair. Its card comes with it."
-              : WORDS.heroBid}
+            <PairLinked text={!IS_SIM && CARD_BIDDING_SUSPENDED ? "Pick a pair. Its card comes with it." : WORDS.heroBid} />
           </p>
-          {/* MintDex: Launch a coin, Explore coins and How it works on the first screen from 1024px up; phones put the
+          {/* MintDex: Launch a coin, Discover coins and How it works on the first screen from 1024px up; phones put the
               pair under the featured card (the tab bar carries Launch and Discover too). */}
           <HeroActions className="cdx-home__actions mdx-home-arrival mdx-home-arrival--actions max-lg:hidden" guide />
         </div>
@@ -1039,6 +1048,9 @@ function Home() {
                 </div>
                 {stepper("cdx-home__stepper max-lg:hidden", "start")}
               </div>
+              {/* Phones: Launch a coin and Explore right under the caption, so they are on the first screen above the
+                  tab bar; the drag line, tilt chip, chevrons, Pause and dots follow. */}
+              <HeroActions className="cdx-home__actions--phone lg:hidden" />
               {shown && target ? (
                 <div className="cdx-home__touchtools lg:hidden">
                   <p className="text-center text-[12px] leading-4 text-slate">Drag the card to rotate</p>
@@ -1104,8 +1116,6 @@ function Home() {
             </div>
           </div>
         </div>
-        {/* Phones: Launch and Explore under the featured card (the first screen keeps the card and its caption). */}
-        <HeroActions className="cdx-home__actions--phone mt-6 lg:hidden" />
       </section>
 
       {/* ------------------------------------------------ aside (plinth)

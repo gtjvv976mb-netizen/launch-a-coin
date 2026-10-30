@@ -185,8 +185,9 @@ export const SIM_TAG = IS_SIM ? "Simulated" : "";
 export const SIM_TAG_HINT = "Simulated market data in the demo, not live quotes";
 export const BOT_HINT = "Simulated trader in the demo";
 
-/** The one label for "go and look at the coins" (Home hero, not-found pages, empty states): links to /discover. */
-export const EXPLORE_COINS = "Explore coins";
+/** The one label for "go and look at the coins" (Home hero, not-found pages, empty states): links to /discover, so it
+ * uses the tab's own name. */
+export const EXPLORE_COINS = "Discover coins";
 
 /** Home and the app shell: short labels (UX pass 2026-10-11). */
 export const HOME_COPY = {
@@ -341,7 +342,7 @@ export const MARKET_COPY = {
   },
   feesTitle: "Fees and escrow",
   gone: "This card is gone",
-  explore: "Explore coins",
+  explore: EXPLORE_COINS,
 } as const;
 
 /** Discover (UX pass 2026-10-11): the design filter and one empty state per cause. */
@@ -505,7 +506,7 @@ export const PORTFOLIO_COPY = {
   signedOutTitle: "See your cards here",
   /** Chain builds; the sim build keeps MODE_COPY.portfolioSignedOut (Enter Launch a Card). */
   signedOutBody: "Connect a wallet to see your coins and cards.",
-  explore: "Explore coins",
+  explore: EXPLORE_COINS,
   tabCoins: "Coins",
   tabCards: "Cards",
   tabBids: "My bids",

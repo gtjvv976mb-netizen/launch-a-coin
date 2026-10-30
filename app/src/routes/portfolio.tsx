@@ -16,7 +16,7 @@ import { EmptyState } from "../components/mintdex/empty-state";
 import { getCardDesign } from "../lib/carddex/designs";
 import { getPairAsset } from "../lib/carddex/pairs";
 import { claimFaucet, getPortfolio } from "../lib/mintdex/api";
-import { FLOW, IS_SIM } from "../lib/mintdex/copy";
+import { EXPLORE_COINS, FLOW, IS_SIM } from "../lib/mintdex/copy";
 import { sol, tokens } from "../lib/mintdex/format";
 import { NOINDEX_PORTFOLIO, pageHead } from "../lib/mintdex/seo";
 import type { Me, PortfolioData } from "../lib/mintdex/types";
@@ -178,7 +178,7 @@ function SignedOut() {
         hero
         className="cdx-portfolio-empty"
         title="See your cards here"
-        action={<div className="flex flex-col items-center gap-3"><Button onClick={() => openEnter()}>Try the demo</Button><TextLink to="/discover">Explore coins</TextLink></div>}
+        action={<div className="flex flex-col items-center gap-3"><Button onClick={() => openEnter()}>Try the demo</Button><TextLink to="/discover">{EXPLORE_COINS}</TextLink></div>}
       />
     </PageFrame>
   );
@@ -301,7 +301,7 @@ function Collection({ me }: { me: NonNullable<Me> }) {
         ) : coins.length ? (
           <Holdings rows={coins.slice(from, from + perPage)} />
         ) : (
-          <EmptyState title="No coins yet" action={<ButtonLink to="/discover">Explore coins</ButtonLink>} />
+          <EmptyState title="No coins yet" action={<ButtonLink to="/discover">{EXPLORE_COINS}</ButtonLink>} />
         )}
       </div>
       {pages > 1 ? (
