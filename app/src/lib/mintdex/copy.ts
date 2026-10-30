@@ -417,9 +417,12 @@ export const FLOW = {
   /** Above the impact threshold (P1-9 step 5). */
   highImpact: (side: "buy" | "sell", pctText: string) =>
     `High price impact: this ${side} moves the price ${pctText}.`,
-  /** Signed-out CTAs (P1-11 step 3). On devnet the wallet is the identity. */
-  enterToTrade: IS_SIM ? "Try the demo" : "Connect a wallet to trade",
-  enterToLaunch: IS_SIM ? "Try the demo" : "Connect a wallet to launch",
+  /**
+   * Signed-out CTAs off sim (P1-11 step 3): on devnet and mainnet the wallet is the identity. The demo's signed-out
+   * buttons name their action instead ("Buy $GLORB", "Create demo coin") and the dialog they open starts the demo.
+   */
+  enterToTrade: "Connect a wallet to trade",
+  enterToLaunch: "Connect a wallet to launch",
 } as const;
 
 /**

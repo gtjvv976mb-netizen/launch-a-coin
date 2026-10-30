@@ -84,6 +84,17 @@ export function cleanAmount(raw: string, decimals = 9) {
   return `${t.slice(0, dot)}.${t.slice(dot + 1).replace(/\./g, "").slice(0, decimals)}`;
 }
 
+/**
+ * What the demo's handle field keeps of what was typed: a dash, dot or space becomes "_" ("walk-phone-1" is
+ * walk_phone_1), anything else outside letters, numbers and "_" is removed (`removed` says so, so the field can say
+ * it), and it is lowercased. HANDLE_RE and the server still decide what is allowed.
+ */
+export function cleanHandle(typed: string): { handle: string; removed: boolean } {
+  const joined = typed.replace(/[-.\s]/g, "_");
+  const handle = joined.replace(/[^a-zA-Z0-9_]/g, "").toLowerCase();
+  return { handle, removed: handle.length < joined.length };
+}
+
 /** Parse a user-typed SOL amount into lamports (NaN when invalid). */
 export function parseSol(input: string) {
   const t = input.trim().replace(/,/g, "");

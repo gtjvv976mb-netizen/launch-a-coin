@@ -15,6 +15,7 @@ import { requestWallet, useChainMe, useChainRequireMe } from "../../lib/chain/id
 import { enter, getMe } from "../../lib/mintdex/api";
 import { IS_SIM } from "../../lib/mintdex/mode";
 import { HANDLE_RE, isReservedHandle } from "../../lib/mintdex/constants";
+import { cleanHandle } from "../../lib/mintdex/format";
 import { FLOW, MODE_COPY } from "../../lib/mintdex/copy";
 import type { Me } from "../../lib/mintdex/types";
 import { setMe } from "./hooks";
@@ -125,6 +126,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/** The handle field's rule (screen readers hear it with the field; the error repeats it). */
+const HANDLE_HELP = "3 to 16 letters, numbers or underscores.";
+
 function EnterDialog({
   open,
   onOpenChange,
@@ -137,6 +141,8 @@ function EnterDialog({
   intent?: Intent;
 }) {
   const [handle, setHandle] = useState("");
+  // Anything the field removed as it was typed, said under it (as Launch's ticker field does).
+  const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const qc = useQueryClient();
@@ -152,12 +158,13 @@ function EnterDialog({
   useEffect(() => {
     if (open) {
       setHandle("");
+      setNote("");
       setError(null);
     }
   }, [open]);
 
   // A handle that cannot be used says why on the spot (Enter or the button), not only through the static help.
-  const invalidReason = clean ? "Use 3 to 16 letters, numbers or underscores." : "Pick a handle first.";
+  const invalidReason = clean ? `Use ${HANDLE_HELP}` : "Pick a handle first.";
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -187,7 +194,9 @@ function EnterDialog({
     const then = intent;
     onOpenChange(false);
     setHandle("");
-    toast("ok", FLOW.welcome(res.me?.handle ?? ""));
+    // The welcome toast only when the dialog was opened on its own: a finished action is its own confirmation (a trade
+    // says "Bought ...", a launch opens its card), and a toast there would sit over the screen's one button.
+    if (!then) toast("ok", FLOW.welcome(res.me?.handle ?? ""));
     // Finish what they started (P1-11), once the dialog has handed focus back.
     if (then) setTimeout(then.run, 0);
   }
@@ -201,10 +210,11 @@ function EnterDialog({
           {reason ? `${reason} ` : null}
           {MODE_COPY.enterGift}
         </p>
+        {/* The rule is read out with the field (the error repeats it when it fails); what typing removed is said. */}
         <Field
           label="Handle"
           htmlFor="handle"
-          help="3 to 16 letters, numbers or underscores."
+          help={<><span aria-live="polite">{note}</span>{note ? null : <span className="sr-only">{HANDLE_HELP}</span>}</>}
           error={error ?? undefined}
         >
           <Input
@@ -218,7 +228,10 @@ function EnterDialog({
             value={handle}
             maxLength={16}
             onChange={(e) => {
-              setHandle(e.target.value.replace(/[^a-zA-Z0-9_]/g, "").toLowerCase());
+              const next = cleanHandle(e.target.value);
+              setHandle(next.handle);
+              // Once something was removed the note stays until the field is emptied (typing on would hide it).
+              setNote((was) => (next.removed ? "Only letters, numbers and _." : next.handle ? was : ""));
               if (error) setError(null);
             }}
             placeholder="your_handle"

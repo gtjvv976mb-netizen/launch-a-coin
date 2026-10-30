@@ -782,7 +782,7 @@ function Launch() {
       feedback={feedback("launch")}
       successLabel="Created"
     >
-      {!me ? "Try the demo" : uploading ? "Uploading art…" : "Create demo coin"}
+      {uploading && me ? "Uploading art…" : "Create demo coin"}
     </Button>
   );
   // MintDex's ticket: the content rules, the total with "What is included" behind it, the fee line, the one primary.

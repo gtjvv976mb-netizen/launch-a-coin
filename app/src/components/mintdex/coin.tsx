@@ -1405,8 +1405,10 @@ export function useTradeTicket(page: CoinPage) {
           };
         });
 
-  // A stable label (P1-9 step 2): the reason lives in the message slot, never in the button.
-  const label = !me ? FLOW.enterToTrade : `${side === "buy" ? "Buy" : "Sell"} $${coin.ticker}`;
+  // A stable label (P1-9 step 2): the reason lives in the message slot, never in the button. In the demo it names the
+  // trade signed out too (the header's "Try the demo" only starts the demo; this starts it and trades); off sim a
+  // wallet has to connect first.
+  const label = !me && !IS_SIM ? FLOW.enterToTrade : `${side === "buy" ? "Buy" : "Sell"} $${coin.ticker}`;
   const suffix = side === "buy" ? asset.symbol : `$${coin.ticker}`;
   // The primary stays cream and enabled (Launch's rule): a press with no amount, or one that cannot fill, says why in
   // the ticket's message slot instead of greying the screen's one action out.
