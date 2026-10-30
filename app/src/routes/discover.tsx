@@ -284,8 +284,9 @@ function CoinCell({ coin, width, list, index }: { coin: CoinSummary; width: numb
           width={width}
           card={
             // The first four load at once and at high priority; the rest when they near the screen. The sizes follow
-            // the laid-out card (under half the screen on phones, 150 to 240px on the fitted desktop shelf).
-            <MintCard card={coin} compact={width < 190} priority={index < 4} sizes="(max-width: 1023px) 46vw, 240px" />
+            // the creature art, about 79% of the card (36vw of a phone's under-half-screen card, at most 240px on the
+            // fitted desktop shelf); a phone's frame still takes its smallest copy, 480w.
+            <MintCard card={coin} compact={width < 190} priority={index < 4} sizes="(max-width: 1023px) 36vw, 240px" />
           }
           caption={
             <GridCaption

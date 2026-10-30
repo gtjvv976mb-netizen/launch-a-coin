@@ -32,12 +32,20 @@ export const PHONE_GUESS: Viewport = { w: 390, h: 844 };
 const PHONE_UA = /iPhone|iPod|Android.+Mobile|Mobile.+Firefox|Windows Phone|Opera Mini|IEMobile/i;
 
 /**
+ * What a first visit is laid out for when Chromium says it is not a phone (PERF-1): a window between the common
+ * 1280x800 and 1440x900, so Discover's fitted shelf (two rows of five) needs only a small resize once measured.
+ */
+export const DESK_GUESS: Viewport = { w: 1360, h: 850 };
+
+/**
  * A first visit, no cookie yet: is this a phone? Chromium says so itself (Sec-CH-UA-Mobile, sent on every
- * request without opting in); Safari and Firefox say it in the user agent. Tablets and desktops: null.
+ * request without opting in), and its "not mobile" gets the desktop guess, so Discover's server HTML is the
+ * fitted desktop shelf rather than the phone grid it would re-lay out after hydration. Safari and Firefox say
+ * "phone" in the user agent; anything else from them (tablets and desktops): null.
  */
 export function guessViewport(mobileHint: string | undefined, userAgent: string | undefined): Viewport | null {
   if (mobileHint === "?1") return PHONE_GUESS;
-  if (mobileHint === "?0") return null;
+  if (mobileHint === "?0") return DESK_GUESS;
   return userAgent && PHONE_UA.test(userAgent) ? PHONE_GUESS : null;
 }
 
