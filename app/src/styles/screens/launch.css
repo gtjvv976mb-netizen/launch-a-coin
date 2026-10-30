@@ -305,18 +305,44 @@
     box-shadow var(--t-fast) var(--ease-room),
     transform var(--t-press) var(--ease-out);
 }
-.cdx-pair-tile__mono {
+/* A pair's logo (PairLogo): the token's own image, or its letter where it has none, in a gold-ringed circle. On an
+   image the ring is drawn over it, so the logo never covers it. */
+.cdx-pair-logo {
+  position: relative;
   display: grid;
-  width: 24px;
-  height: 24px;
   place-items: center;
+  overflow: hidden;
   border-radius: var(--radius-pill);
-  background: var(--color-sheet);
-  box-shadow: inset 0 0 0 1px rgb(var(--rgb-gold) / 0.55); /* taste-skill-ignore: mintdex.fun ring/selected mark */
   color: var(--color-neon-text);
-  font-size: 13px;
   font-weight: 700;
   line-height: 1;
+}
+.cdx-pair-logo--mono {
+  background: var(--color-sheet);
+  box-shadow: inset 0 0 0 1px rgb(var(--rgb-gold) / 0.55); /* taste-skill-ignore: mintdex.fun ring/selected mark */
+}
+.cdx-pair-logo--img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgb(var(--rgb-gold) / 0.55); /* taste-skill-ignore: mintdex.fun ring/selected mark */
+  pointer-events: none;
+}
+.cdx-pair-logo > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.cdx-pair-tile__mono {
+  width: 24px;
+  height: 24px;
+  font-size: 13px;
   transition: background-color var(--t-fast) var(--ease-room), color var(--t-fast) var(--ease-room);
 }
 .cdx-pair-tile__text { display: grid; min-width: 0; }
@@ -326,7 +352,9 @@
   background: var(--color-sheet);
   box-shadow: 0 0 0 1.5px var(--color-neon); /* taste-skill-ignore: mintdex.fun ring/selected mark (the gold rim, no glow) */
 }
-.cdx-pair-tile[aria-checked="true"] .cdx-pair-tile__mono { background: var(--color-neon); color: var(--color-neon-ink); }
+.cdx-pair-tile[aria-checked="true"] .cdx-pair-logo--mono { background: var(--color-neon); color: var(--color-neon-ink); }
+/* The chosen logo's ring turns solid gold at once, like the check. */
+.cdx-pair-tile[aria-checked="true"] .cdx-pair-logo--img::after { box-shadow: inset 0 0 0 1.5px var(--color-neon); /* taste-skill-ignore: mintdex.fun ring/selected mark */ }
 .cdx-pair-tile[aria-checked="true"] .cdx-pair-tile__name { color: var(--color-ink); }
 .cdx-pair-tile__check {
   position: absolute;
@@ -354,6 +382,8 @@
 .cdx-pair-hud__picked { display: grid; min-width: 0; gap: 2px; }
 .cdx-pair-hud__line { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; font-size: var(--text-body); line-height: 20px; }
 .cdx-pair-hud__line strong { min-width: 0; color: var(--color-ink); font-weight: 600; overflow-wrap: anywhere; }
+/* The chosen pair's logo fills the 20px line in front of TICKER/QUOTE, so the text keeps its baseline. */
+.cdx-pair-hud__logo { display: inline-grid; width: 20px; height: 20px; margin-right: 6px; vertical-align: top; font-size: 12px; }
 .cdx-pair-hud__line > span { color: var(--color-slate); }
 .cdx-pair-hud__picked .cdx-pair-meta { margin-top: 4px; }
 .cdx-pair-hud__picked .cdx-pair-notice { margin-top: 6px; }

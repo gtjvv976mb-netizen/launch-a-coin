@@ -1,3 +1,40 @@
+# 30 October pair logos on `claude/pair-identities` — not deployed
+
+**What changed.** Launch's pair picker shows each pair's own token logo in place of its letter (the owner's request: "on the launch tab, pair portion, include all the pair logos, replace the letter logo"). 84 of the 86 offered pairs have a logo; GORK and MANIFEST keep their letter. The picked line under the tiles shows the chosen pair's logo (20 px) before TICKER / QUOTE. No other surface drew a pair letter, so nothing else changed. Nothing was pushed or deployed.
+
+**Files.**
+- `app/public/assets/pairs/<key>.webp` (128 px) and `<key>-64.webp` (64 px): 168 files, 412,650 bytes, only for offered pairs (none for 67, AGENCY, ALON, HODL, JEANPHIL, CLAUDIA, BIKETYSON, NEET, SOLANGELES, AAVE or UNI). Served with `Cache-Control: public, max-age=86400, stale-while-revalidate=604800` (`_headers`, the /assets/carddex rule).
+- `app/src/lib/carddex/pair-logos.json`: one entry per full-release pair (86). A logo entry records both files (path, sha256, bytes), its source (Codex's file under `creative/higgsfield/pair-identities-2026-10-30`, its sha256, the record that verifies it, the source URL) and the derivation (mode, crop, plate, upscaled, encoder). GORK and MANIFEST are `{"logo": null, "reason"}`. The client copy keeps only `logo` and `reason` (`CLIENT_DROPPED_FIELDS` in `vite.config.ts`); read it through `pairLogo(key)` in `pair-logos.ts`.
+- `tools/carddex/make_pair_logos.py` regenerates them. It needs Codex's local reference folder (read only) and the cached chrome-headless-shell; it aborts on any sha256 that differs from Codex's record.
+- `app/src/components/carddex/PairLogo.tsx` (the image in a gold-ringed circle, lazy, 64w/128w srcset, or the letter); `PairHud.tsx` uses it on the tiles and the picked line; `screens/launch.css` draws the ring over the image and turns it solid gold (1.5 px) on the chosen tile. No new motion.
+
+**Source rule.** The token's own image from Codex's verified intake for that pair, unchanged apart from crop and size (no redrawing, no recolouring). Transparent logos are sized to a circle-safe square on a plate: cream #f3e7cf for dark logos (ETH, NEAR, TAO, SPX, ZEC, XRP, MON, PAID, PUMP, APE, LINK, ORE, SKR, SV151), chocolate #26120b for light ones (USDC, DOGE, TROLL, CARDS, WBTC, HYPE, XMR, ARB, PEAQ, CLAW, STONK, SHIB). Wide opaque images are centre-cropped (CHILLGUY, ZEREBRO, CHILLHOUSE, EACC, SWORDCAT, PLAGUE). Sources under 128 px are upscaled and flagged: FARTCOIN, CASHCAT, JIMOTHY, JOTCHUA, ZCAT, PEPE (2x nearest-neighbour) and PILL.
+- Overrides, each recorded by Codex: ANSEM and MICHI use the higher-resolution exact-mint follow-ups; FARTCOIN the square image pump.fun shows (the intake file is a wordmark); ZCAT the OG identity crop; SHIB the primary emblem crop (the intake file is the wide wordmark); JIMOTHY the recorded 80 px intake file; AMC the verified AMC Theatres icon.
+- Monograms: GORK's token image is a screenshot of a social profile (default avatar and a person's name), MANIFEST's is a wide banner with no logo to crop.
+- No offered pair's logo shows a child. Pairs that are not offered have no file, which keeps pair-67's photo out.
+
+**For the owner.**
+- TRUMP, GIGA and ANSEM logos show real adults (ANSEM: a photoreal man's face on the bull, the same reason its identity design is held).
+- AMC uses the AMC Theatres icon, not the generic Backpack Securities image the token carries on-chain.
+- The trademark review now also covers these logos: the xStock marks (Tesla, NVIDIA, Apple, Strategy, Coinbase, "GS"), AMC, Vine, Pokémon 151 and Shib.
+
+**Not in this change.** The demo removal, mainnet-only empty states and the Terms rewrite that a workflow script listed alongside this request were not built: they were not part of the owner's message and need the owner's confirmation first (the Terms slots stay as the readiness audit below left them).
+
+**Gates.** This branch: TypeScript clean; app tests 710 pass, 0 fail (702 before, plus 7 manifest and file tests and 1 render test); pump adapter 127 pass; `vite build` ok. The step: in its own section.
+
+**Browser.** Production build, fresh local D1 and R2 (port 6102), headless Chromium at 390x844 and 360x800 (touch, scale 2), 1440x900 and 1280x800.
+- 86 tiles at each size: 84 with a logo and exactly GORK "G" and MANIFEST "M"; after scrolling end to end every logo has loaded (0 broken). Contact sheets at 390 and 1440 were looked at: every logo is present and none is blank or cropped away.
+- Lazy: 6 logo requests on first load at 390, 0 at 360, 1280 and 1440 (the picker sits below the first screen there), 84 after scrolling. Phones at scale 2 load the 64 px file.
+- Tiles keep their 44 px minimum height, 24 px circle and tracks (126 px at 390, 360 and 1280; 114 px at 1440); no sideways scroll.
+- The chosen tile: a 1.5 px gold ring over the logo and the check. Arrow keys, Home and End still select, with the 2 px focus ring.
+- The picked line: the chosen pair's 20 px logo (the letter for GORK and MANIFEST), in line with the text; an 8-letter ticker at 360 stays on one 20 px line.
+- Picking SOL, USDC, TSLAX, DOGE, FARTCOIN, ETH, LINK, ZCAT, GORK and MANIFEST shows `designForPair`'s card at 390 and 1440.
+- `/assets/pairs/sol-64.webp`: 200, image/webp, with the cache rule above.
+- 0 console errors, 0 failed requests.
+- Taste inspector on /launch: no new FAIL or WARN against the before run; impeccable's detector shows no finding on the new markup.
+
+**Not verified.** The live (mainnet) panel's tiles in a browser (live launches stay off locally; it renders the same `PairHud`); real phones; the Cloudflare upload of `/assets/pairs` and its `_headers` rule in production.
+
 # 30 October readiness audit on `claude/pair-identities` — fixed, not deployed
 
 **Readiness audit.** Seven audits of 4616dae and the release step 930cd3d (pairs, mainnet, coin GIF, site, code review, visual, upgrade path) were each re-checked before any fix. Every blocker, high and medium finding is fixed or held below, except H-2 (an owner decision, Left). The release step's one commit is recreated on the new head. Evidence: the session scratchpad `ready/fix/` (`run/`, `scripts/`, `shots/`, gate logs).

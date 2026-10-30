@@ -6,7 +6,11 @@ import logos from "../../src/lib/carddex/pair-logos.json";
 import {pairLogo} from "../../src/lib/carddex/pair-logos";
 import {PAIR_IDENTITY_DESIGNS} from "../../src/lib/carddex/design-pairings";
 import {HELD_PAIR_DESIGNS} from "../../src/lib/carddex/pair-designs";
-import {OFFERED_PAIRS,PAIR_ASSET_KEYS} from "../../src/lib/carddex/pairs";
+import {OFFERED_PAIRS,PAIR_ASSET_KEYS,getPairAsset} from "../../src/lib/carddex/pairs";
+import {createElement} from "react";
+import {renderToStaticMarkup} from "react-dom/server";
+import {PairLogo} from "../../src/components/carddex/PairLogo";
+import {pairMonogram} from "../../src/components/carddex/pair-groups";
 
 /**
  * Launch's pair picker shows each pair's own logo (30 October 2026). The files come from
@@ -118,5 +122,23 @@ describe("pair logos", () => {
     expect(pairLogo("sol")).toEqual({w128: "/assets/pairs/sol.webp", w64: "/assets/pairs/sol-64.webp"});
     for (const [key, row] of withLogo) expect(pairLogo(key)).toEqual({w128: row.w128!.path, w64: row.w64!.path});
     for (const key of [...MONOGRAMS, "67", "aave", "solangeles", "nope", "", null, undefined]) expect(pairLogo(key)).toBeNull();
+  });
+
+  test("Launch's tiles draw every offered pair's logo, and the letter only for GORK and MANIFEST", () => {
+    const html = (key: string, size?: number) => renderToStaticMarkup(createElement(PairLogo, {asset: getPairAsset(key), size}));
+    for (const asset of OFFERED_PAIRS) {
+      const out = html(asset.key);
+      expect(out.startsWith('<span aria-hidden="true" class="cdx-pair-logo')).toBe(true);
+      if (MONOGRAMS.includes(asset.key)) {
+        expect(out).toBe(`<span aria-hidden="true" class="cdx-pair-logo cdx-pair-logo--mono">${pairMonogram(asset)}</span>`);
+        continue;
+      }
+      const files = pairLogo(asset.key)!;
+      expect(out).toContain(`src="${files.w64}" srcSet="${files.w64} 64w, ${files.w128} 128w" sizes="24px" width="24" height="24" alt="" loading="lazy"`);
+      expect(out).toContain('draggable="false"');
+    }
+    expect(html("gork")).toContain(">G</span>");
+    expect(html("manifest")).toContain(">M</span>");
+    expect(html("sol", 20)).toContain('sizes="20px" width="20" height="20"');
   });
 });

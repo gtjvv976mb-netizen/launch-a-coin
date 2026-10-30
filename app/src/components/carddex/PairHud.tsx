@@ -2,7 +2,8 @@ import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type Keyb
 import { getPairAsset, getTradingPair, type PairAssetKey } from "../../lib/carddex/pairs";
 import { Icon, IconButton, Tabs, TextLink } from "../mintdex/ui";
 import { QuoteAssetMeta } from "./QuoteAssetMeta";
-import { PAIR_GROUPS, filterPairs, gridStep, pairMonogram, tileName, type PairGroup } from "./pair-groups";
+import { PairLogo } from "./PairLogo";
+import { PAIR_GROUPS, filterPairs, gridStep, tileName, type PairGroup } from "./pair-groups";
 
 /** A layout effect in the browser (measured before paint), a plain one on the server (where neither runs). */
 const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
@@ -151,7 +152,7 @@ export function PairHud({ value, onChange, ticker, live = false, disabled = fals
                 className="cdx-pair-tile"
                 onClick={() => choose(pair.key)}
               >
-                <span aria-hidden className="cdx-pair-tile__mono">{pairMonogram(pair)}</span>
+                <PairLogo asset={pair} className="cdx-pair-tile__mono" />
                 <span className="cdx-pair-tile__text">
                   <span className="cdx-pair-tile__sym">{pair.symbol}</span>
                   {/* No second line that only repeats the symbol (BONK, Bonk). */}
@@ -171,7 +172,7 @@ export function PairHud({ value, onChange, ticker, live = false, disabled = fals
       </div>
       <div className="cdx-pair-hud__picked">
         <p className="cdx-pair-hud__line">
-          <strong>{getTradingPair(ticker || "TICKER", asset.key)}</strong>
+          <strong><PairLogo asset={asset} size={20} className="cdx-pair-hud__logo" />{getTradingPair(ticker || "TICKER", asset.key)}</strong>
           {balance ? <span>Balance <span className="num">{balance}</span> test {asset.symbol}</span> : live ? <span>Real assets</span> : null}
         </p>
         <QuoteAssetMeta quoteAssetKey={asset.key} live={live} />
