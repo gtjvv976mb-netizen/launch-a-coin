@@ -1,7 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { PAIR_ASSETS, PAIR_ASSET_KEYS } from "../../src/lib/carddex/pairs";
 import { quoteCap } from "../../src/lib/carddex/quote-display";
-import { demoQuoteStartBalance, formatQuoteAmount, initialQuoteReserves, isQuoteDecimal, maxInitialBuyQuoteAtoms, parseQuoteAmount, quoteAtomsToSol, quoteMetrics, quoteUnit } from "../../src/lib/carddex/quote-simulation";
+import { demoQuoteStartBalance, formatQuoteAmount, initialQuoteReserves, isQuoteDecimal, maxInitialBuyQuoteAtoms, parseQuoteAmount, quickBuyPresets, quoteAtomsToSol, quoteMetrics, quoteUnit } from "../../src/lib/carddex/quote-simulation";
+import { quoteBuy, type BuyQuote } from "../../src/lib/mintdex/curve";
+import { cleanAmount, sellShare } from "../../src/lib/mintdex/format";
+import { TOKEN_UNIT } from "../../src/lib/mintdex/constants";
 
 function decimal(atoms: bigint, unit: bigint, decimals: number) {
   return `${atoms / unit}.${String(atoms % unit).padStart(decimals, "0")}`;
@@ -91,5 +94,54 @@ describe("the initial-buy cap as Launch shows it", () => {
     expect(isQuoteDecimal("1.123456789", "doge")).toBe(false);
     expect(isQuoteDecimal("1.2.3", "doge")).toBe(false);
     expect(isQuoteDecimal("12.5", "doge")).toBe(true);
+  });
+});
+
+describe("the coin page's buy amounts are sized to the pair", () => {
+  const tokensFor = (amount: string, key: string) => (quoteBuy(initialQuoteReserves(key), parseQuoteAmount(amount, key)!) as BuyQuote).tokensOut;
+  test("SOL keeps 0.1 / 0.5 / 1 / 5", () => {
+    expect(quickBuyPresets("sol")).toEqual(["0.1", "0.5", "1", "5"]);
+  });
+  test("every pair gets four ascending amounts it can hold and afford, the second buying about what 0.5 SOL buys", () => {
+    const solTokens = tokensFor("0.5", "sol");
+    for (const key of PAIR_ASSET_KEYS) {
+      const presets = quickBuyPresets(key);
+      expect(presets).toHaveLength(4);
+      const atoms = presets.map(amount => parseQuoteAmount(amount, key));
+      for (const a of atoms) {
+        expect(a).not.toBeNull();
+        expect(a!).toBeGreaterThan(0);
+        expect(a!).toBeLessThanOrEqual(demoQuoteStartBalance(key));
+      }
+      for (let i = 1; i < atoms.length; i++) expect(atoms[i]!).toBeGreaterThan(atoms[i - 1]!);
+      const share = tokensFor(presets[1]!, key) / solTokens;
+      expect(share).toBeGreaterThanOrEqual(0.5);
+      expect(share).toBeLessThanOrEqual(2);
+    }
+    expect(quickBuyPresets("toad")).toEqual(["10000", "50000", "100000", "500000"]);
+  });
+});
+
+describe("the sell chips are true shares", () => {
+  test("25 / 50 / 75% round down to two decimals at every size; Max is the whole holding", () => {
+    expect(sellShare(19.88 * TOKEN_UNIT, 0.5)).toBe("9.94");
+    expect(sellShare(2_094_660 * TOKEN_UNIT, 0.5)).toBe("1047330");
+    expect(sellShare(0.5 * TOKEN_UNIT, 0.25)).toBe("0.12");
+    expect(sellShare(19.88 * TOKEN_UNIT, 0.75)).toBe("14.91");
+    expect(sellShare(19_880_123, 1)).toBe("19.880123");
+    expect(sellShare(0, 0.5)).toBe("");
+  });
+});
+
+describe("amount fields read a comma decimal", () => {
+  test("one comma with one or two digits after it is the decimal point; other commas are dropped", () => {
+    expect(cleanAmount("1,5")).toBe("1.5");
+    expect(cleanAmount("1,50")).toBe("1.50");
+    expect(cleanAmount("1,")).toBe("1.");
+    expect(cleanAmount("1,500")).toBe("1500");
+    expect(cleanAmount("12,345,678")).toBe("12345678");
+    expect(cleanAmount("1.5")).toBe("1.5");
+    expect(cleanAmount("1.571.6")).toBe("1.5716");
+    expect(cleanAmount("1,5", 6)).toBe("1.5");
   });
 });

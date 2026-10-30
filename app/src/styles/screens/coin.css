@@ -237,10 +237,27 @@
 .cdx-trade-ticket__msg p[data-kind="info"] { color: var(--color-ink); }
 .cdx-trade-ticket__msg .mdx-glyph { margin-top: 2px; }
 .cdx-trade-ticket__note { margin-top: -4px; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); text-align: center; }
+/* Phones: a quick amount brings the button and its note into view (coin.tsx revealSubmit), stopping 8px above the tab
+ * bar, so a trade needs no scroll and the quote rows stay in view above them. */
+@media (max-width: 1023.98px) {
+  .cdx-trade-ticket__submit,
+  .cdx-trade-ticket__note { scroll-margin-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 8px); }
+}
 
 /* ---------------------------------------------------------------- the case's control row on this page: Turn over,
  * Inspect and the 3D circle as MintDex's outline pills (card3d.css draws the buttons; this sets their row). */
 .mdx-coin .mdx-case__controls { flex-wrap: nowrap; gap: 6px; }
+/* Phones: the row may use the screen's width (16px off each edge, centred on the card, which is centred) and wraps,
+ * centred, only past that, so the tilt chip drops to a second row instead of pushing Turn over off the screen. */
+@media (max-width: 1023.98px) {
+  .mdx-coin .mdx-case__controls {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 8px;
+    width: calc(100vw - 32px);
+    margin-inline: calc(50% - 50vw + 16px);
+  }
+}
 @container mdx-case (min-width: 232px) {
   .mdx-coin .mdx-case__btn { padding: 0 11px; }
 }

@@ -208,6 +208,12 @@
     html:has(.mdx-actionbar) .mdx-toasts {
       bottom: calc(var(--tabbar-h) + var(--actionbar-h) + 16px + env(safe-area-inset-bottom));
     }
+    /* The coin page: a quick amount brings the Buy/Sell button and its note to just above the tab bar (coin.css),
+     * so toasts rise above them (the button, its note and their 8px gap: 88px) and a "Bought" toast never covers
+     * the next press. */
+    html:has(.cdx-trade-ticket__submit) .mdx-toasts {
+      bottom: calc(var(--tabbar-h) + 88px + 16px + env(safe-area-inset-bottom));
+    }
   }
   @media (min-width: 1024px) {
     .mdx-actionbar[data-phone-only] {

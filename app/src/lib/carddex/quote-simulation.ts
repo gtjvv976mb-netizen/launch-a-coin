@@ -17,6 +17,43 @@ function initialQuoteAtoms(key: string): bigint {
 export function demoQuoteStartBalance(key: string): number { return Number(initialQuoteAtoms(key) * 10n / 3n); }
 export function maxInitialBuyQuoteAtoms(key: string): number { return Number(initialQuoteAtoms(key) * 2n / 3n); }
 
+/** The coin page's buy amounts on a SOL coin; every other pair gets the same share of its own curve. */
+const SOL_QUICK_BUYS = [0.1, 0.5, 1, 5] as const;
+
+/** A positive amount written as a plain decimal (no exponent), for amounts on the 1-2-5 grid. */
+function plainDecimal(value: number, places: number): string {
+  return value.toFixed(Math.max(0, places)).replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
+}
+
+/**
+ * The four quick buy amounts for a pair, in its own units: SOL's 0.1 / 0.5 / 1 / 5 scaled by the pair's starting
+ * reserve against SOL's (so each buys about the same share of a fresh curve), each rounded to the nearest 1-2-5 step
+ * the pair's decimals can hold, then kept distinct and ascending. SOL itself returns exactly 0.1, 0.5, 1 and 5.
+ */
+export function quickBuyPresets(key: string): string[] {
+  const asset = assetOf(key);
+  const scale = (Number(asset.initialVirtualQuoteReserves) / quoteUnit(key)) /
+    (Number(assetOf("sol").initialVirtualQuoteReserves) / quoteUnit("sol"));
+  const smallest = 10 ** -asset.decimals;
+  /** The 1-2-5 steps around a value: 1, 2 and 5 times its power of ten and the next one. */
+  const steps = (exp: number) => [1, 2, 5].map((m) => m * 10 ** exp);
+  const out: Array<{ value: number; exp: number }> = [];
+  for (const base of SOL_QUICK_BUYS) {
+    const target = key === "sol" ? base : base * scale;
+    const exp = Math.floor(Math.log10(target));
+    const candidates = [...steps(exp - 1), ...steps(exp), ...steps(exp + 1)].filter((v) => v >= smallest - smallest / 1e6);
+    let pick = candidates.reduce((best, v) => (Math.abs(Math.log(v / target)) < Math.abs(Math.log(best / target)) ? v : best), candidates[0]!);
+    // Distinct and ascending: an amount that rounded onto the one before it takes the next step up.
+    const previous = out[out.length - 1]?.value;
+    if (previous !== undefined && pick <= previous * (1 + 1e-9)) {
+      const pe = Math.floor(Math.log10(previous) + 1e-9);
+      pick = [...steps(pe), ...steps(pe + 1)].find((v) => v > previous * (1 + 1e-9))!;
+    }
+    out.push({ value: pick, exp: Math.floor(Math.log10(pick) + 1e-9) });
+  }
+  return out.map(({ value, exp }) => plainDecimal(value, -exp));
+}
+
 /** Exact decimal parsing: reject excess precision and unsafe integer amounts instead of rounding money. */
 export function parseQuoteAmount(text: string, key: string): number | null {
   const asset = assetOf(key);

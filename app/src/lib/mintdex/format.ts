@@ -78,7 +78,10 @@ export function dexNo(n: number) {
  * digits after it (SOL has 9, tokens 6). "1.571.6" becomes "1.5716", "2..5" becomes "2.5".
  */
 export function cleanAmount(raw: string, decimals = 9) {
-  const t = raw.replace(/[^0-9.]/g, "");
+  // A comma decimal ("1,5", "1,50", or "1," mid-typing) is a decimal point when the text has no point and that one
+  // comma has at most two digits after it; any other comma ("1,500") is a thousands separator and is dropped.
+  const text = !raw.includes(".") && /^[^,]*,\d{0,2}$/.test(raw.trim()) ? raw.replace(",", ".") : raw;
+  const t = text.replace(/[^0-9.]/g, "");
   const dot = t.indexOf(".");
   if (dot < 0) return t;
   return `${t.slice(0, dot)}.${t.slice(dot + 1).replace(/\./g, "").slice(0, decimals)}`;
@@ -93,6 +96,17 @@ export function cleanHandle(typed: string): { handle: string; removed: boolean }
   const joined = typed.replace(/[-.\s]/g, "_");
   const handle = joined.replace(/[^a-zA-Z0-9_]/g, "").toLowerCase();
   return { handle, removed: handle.length < joined.length };
+}
+
+/**
+ * A sell chip's amount: `fraction` of a holding (token atoms) as a token amount, rounded down to two decimals at
+ * every size (50% of 19.88 is 9.94, never more than the share); the whole holding (1) is exact so it sells all of
+ * it. Empty when nothing is held.
+ */
+export function sellShare(holdingAtoms: number, fraction: number): string {
+  if (!(holdingAtoms > 0)) return "";
+  if (fraction >= 1) return String(holdingAtoms / TOKEN_UNIT);
+  return String(Math.floor((holdingAtoms * fraction) / (TOKEN_UNIT / 100)) / 100);
 }
 
 /** Parse a user-typed SOL amount into lamports (NaN when invalid). */

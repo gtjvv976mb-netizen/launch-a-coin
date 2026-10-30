@@ -139,6 +139,13 @@ describe("quick initial-buy amounts", () => {
     expect(quickBuyAmounts("sol", cap)).toEqual(["0.1", "0.5", "1", "5"]);
     expect(quickBuyAmounts("sol", 1_000_000_000)).toEqual(["0.1", "0.5", "1"]);
     expect(quickBuyAmounts("sol", 0)).toEqual([]);
+    // Other pairs offer the coin page's amounts for their own curve, still within the cap.
+    expect(quickBuyAmounts("doge")).toEqual(["100", "500", "1000", "5000"]);
+    for (const asset of PAIR_ASSETS) {
+      const cap = maxInitialBuyQuoteAtoms(asset.key);
+      expect(quickBuyAmounts(asset.key, cap).length).toBeGreaterThan(0);
+      for (const amount of quickBuyAmounts(asset.key, cap)) expect(Number(amount) * 10 ** asset.decimals).toBeLessThanOrEqual(cap);
+    }
   });
   test("an amount matches whatever way it was typed; empty and 0 are None", () => {
     expect(sameAmount("0.50", "0.5")).toBe(true);

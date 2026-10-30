@@ -54,6 +54,7 @@ import {
   atName,
   dexNo,
   cleanAmount,
+  sellShare,
   sol,
   timeAgo,
   tokens,
@@ -63,7 +64,7 @@ import {
 import { getCardDesign } from "../../lib/carddex/designs";
 import { getPairAsset } from "../../lib/carddex/pairs";
 import { marketCapText, marketCapWatch, quoteFixed, quoteNumber } from "../../lib/carddex/quote-display";
-import { formatQuoteAmount, parseQuoteAmount, quoteMetrics } from "../../lib/carddex/quote-simulation";
+import { formatQuoteAmount, parseQuoteAmount, quickBuyPresets, quoteMetrics } from "../../lib/carddex/quote-simulation";
 import type { CoinDetail, CoinPage, TradeRow } from "../../lib/mintdex/types";
 import { CardBack, CardCase, View3DButton, useView3DGestures, type Card3DHandle } from "./card3d";
 import { useClaimable } from "./cases";
@@ -1180,6 +1181,13 @@ const EMPTY = <span className="mdx-dash">{"—"}</span>;
 /** The ticket's one message slot (P1-9 step 9): generic, so wallet errors can use it on devnet. */
 type TicketMessage = { kind: "error" | "warning" | "info"; text: ReactNode; plain: string };
 
+/** A quick buy amount's chip: compact from 1,000 ("10K", "5M"), as written below that ("0.5", "200"). */
+const PRESET_COMPACT = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
+function presetLabel(amount: string): string {
+  const value = Number(amount);
+  return value >= 1000 ? PRESET_COMPACT.format(value) : amount;
+}
+
 /** The ticket's foot: what this trade is and is not, in the coin's own quote ("Test DOGE on a simulated curve."). */
 const ticketNote = (symbol: string) => IS_SIM ? `Test ${symbol}. Nothing is sent on chain.` : "";
 
@@ -1239,7 +1247,8 @@ export function useTradeTicket(page: CoinPage) {
     const t = `${quote.reason ?? "Enter an amount"}.`;
     blocker = { kind: "error", text: t, plain: t };
   } else if (short && me) {
-    const plain = asset.key === "sol" ? notEnoughSentence(me, now) : `Not enough test ${asset.symbol}. Your balance is ${fmt(walletQuote)} ${asset.symbol}.`;
+    // The balance in the short form the ticket's own label uses ("10.7M TOAD"), not every decimal.
+    const plain = asset.key === "sol" ? notEnoughSentence(me, now) : `Not enough test ${asset.symbol}. Your balance is ${quoteFixed(walletQuote, asset.key)} ${asset.symbol}.`;
     blocker = {
       kind: "error",
       plain,
@@ -1380,6 +1389,19 @@ export function useTradeTicket(page: CoinPage) {
     void doTrade();
   }
 
+  /**
+   * Phones: once a quick amount is in, the button and its note come into view just above the tab bar (scroll-margin in
+   * coin.css), at once and only as far as needed, so the trade takes no scroll and the quote rows above stay in view.
+   * The ticket does not stick over them: the fee and slippage rows are read before the press.
+   */
+  function revealSubmit() {
+    if (typeof window === "undefined" || !window.matchMedia("(max-width: 1023.98px)").matches) return;
+    requestAnimationFrame(() => {
+      const foot = formRef.current?.querySelector<HTMLElement>(".cdx-trade-ticket__note") ?? inlineRef.current;
+      foot?.scrollIntoView({ block: "nearest", behavior: "instant" as ScrollBehavior });
+    });
+  }
+
   /** Enter in the amount presses the ticket's submit, through its own blocked, pending and signed-out handling. */
   function onAmountKey(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key !== "Enter" || e.nativeEvent.isComposing) return;
@@ -1389,21 +1411,14 @@ export function useTradeTicket(page: CoinPage) {
 
   const quick =
     side === "buy"
-      ? [0.1, 0.5, 1, 5].map((v) => ({ label: String(v), aria: `${v} ${asset.symbol}`, value: String(v) }))
-      : [0.25, 0.5, 0.75, 1].map((f) => {
-          // 25/50/75% fill whole tokens (two decimals under one token); Max stays exact so it sells everything.
-          const part = (holding * f) / TOKEN_UNIT;
-          return {
-            label: f === 1 ? "Max" : `${f * 100}%`,
-            aria: f === 1 ? "All you hold" : `${f * 100}% of what you hold`,
-            value:
-              holding <= 0
-                ? ""
-                : f === 1
-                  ? String(holding / TOKEN_UNIT)
-                  : String(part >= 1 ? Math.floor(part) : Math.floor(part * 100) / 100),
-          };
-        });
+      // Sized to the pair (SOL's 0.1 / 0.5 / 1 / 5 as the same share of this pair's curve): 10K TOAD, not 0.5 TOAD.
+      ? quickBuyPresets(asset.key).map((v) => ({ label: presetLabel(v), aria: `${Number(v).toLocaleString("en-US", { maximumFractionDigits: asset.decimals })} ${asset.symbol}`, value: v }))
+      : [0.25, 0.5, 0.75, 1].map((f) => ({
+          label: f === 1 ? "Max" : `${f * 100}%`,
+          aria: f === 1 ? "All you hold" : `${f * 100}% of what you hold`,
+          // 25/50/75% are true shares, rounded down to two decimals; Max stays exact so it sells everything.
+          value: sellShare(holding, f),
+        }));
 
   // A stable label (P1-9 step 2): the reason lives in the message slot, never in the button. In the demo it names the
   // trade signed out too (the header's "Try the demo" only starts the demo; this starts it and trades); off sim a
@@ -1442,6 +1457,7 @@ export function useTradeTicket(page: CoinPage) {
     walletQuote,
     holding,
     quick,
+    revealSubmit,
     label,
     suffix,
     submit,
@@ -1544,7 +1560,7 @@ export function TradePanel({
             className="num"
             disabled={!q.value}
             aria-label={q.aria}
-            onClick={() => t.edit(q.value)}
+            onClick={() => { t.edit(q.value); t.revealSubmit(); }}
           >
             {q.label}
           </Button>
