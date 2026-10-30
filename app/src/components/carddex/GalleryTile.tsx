@@ -88,6 +88,8 @@ export const COLLECTION: Record<CardDesign["category"], string> = {
   premium: "Premium",
   limited: "Limited",
   stocks: "Stock",
+  memes: "Meme",
+  crypto: "Crypto",
 };
 
 /**

@@ -24,7 +24,7 @@
 }
 /* Below 1024px all five filters fit the width with no sideways swipe, as Launch's pair HUD filters do: the track
  * spans the column, the options share it by their length (each at least 44px wide, on the 44px track), and the
- * counts drop (the heading already says 37 designs). From 1024px the counts and the look are unchanged. */
+ * counts drop (the heading already says how many designs). From 1024px the counts and the look are unchanged. */
 @media (max-width: 1023.98px) {
   .cdx-designs .mdx-design-collections { display: flex; width: 100%; }
   .cdx-designs .mdx-design-collections .mdx-tabs__count { display: none; }
@@ -190,7 +190,7 @@
     background: var(--color-tint);
   }
 }
-/* The chip's pair, after its design's name (gold text on the chip reads at 7:1). */
+/* The chip's pair symbol, its only text: the design's full name is its label (gold text on the chip reads at 7:1). */
 .cdx-design-chip__pair {
   font-size: 12px;
   line-height: 1;

@@ -8,8 +8,8 @@ import { ButtonLink, Tabs, TextLink } from "../components/mintdex/ui";
 import { COLLECTION, DesignMini } from "../components/carddex/GalleryTile";
 import { getCardDesign, isCardDesignKey, type CardDesign } from "../lib/carddex/designs";
 import { pageHead } from "../lib/mintdex/seo";
-import { defaultQuoteForDesign, designForPair, isPairAssetKey, pairForDesign, type PairAsset } from "../lib/carddex/pairs";
-import { PAIR_GROUPS, isPairGroup, pairGroupOf, pairsInGroup, shortPairName, type PairGroup } from "../components/carddex/pair-groups";
+import { defaultQuoteForDesign, designForPair, isOfferedPair, pairForDesign, type PairAsset } from "../lib/carddex/pairs";
+import { ORDERED_PAIRS, PAIR_GROUPS, groupAlias, isPairGroup, pairGroupOf, shortPairName, type PairGroup } from "../components/carddex/pair-groups";
 import { initialQuoteReserves, quoteMetrics } from "../lib/carddex/quote-simulation";
 
 /**
@@ -33,9 +33,9 @@ function DesignStage({ card }: { card: CardData }) {
   );
 }
 
-/** Every launchable design, with its pair, in the pairs' reading order (pair-groups.ts). */
+/** Every launchable design, with its pair, in the offered pairs' reading order (pair-groups.ts). */
 type PairedDesign = { design: CardDesign; pair: Readonly<PairAsset> };
-const PAIRED: readonly PairedDesign[] = pairsInGroup("all").map((pair) => ({ pair, design: getCardDesign(designForPair(pair.key)!) }));
+const PAIRED: readonly PairedDesign[] = ORDERED_PAIRS.map((pair) => ({ pair, design: getCardDesign(designForPair(pair.key)!) }));
 const pairedIn = (group: PairGroup) => PAIRED.filter(({ pair }) => group === "all" || pairGroupOf(pair) === group);
 
 export const Route = createFileRoute("/levels")({
@@ -82,12 +82,14 @@ function Designs() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/levels" });
   const key = search.design ?? search.icon ?? search.edition;
-  // Older links used the design collections (memes, stocks, classic...): the pair groups keep memes and stocks.
-  const group: PairGroup = isPairGroup(search.collection) ? search.collection : "all";
+  // Older links used the design collections (memes, stocks, classic...): the pair groups keep memes and stocks, and
+  // the old "base" group (SOL and USDC) is now part of Crypto.
+  const collection = groupAlias(search.collection);
+  const group: PairGroup = isPairGroup(collection) ? collection : "all";
   const shown = useMemo(() => pairedIn(group), [group]);
   // A design from the link (one no pair has still opens, with no launch action), else the linked pair's design,
   // else the group's first.
-  const linked = isCardDesignKey(key) ? getCardDesign(key) : isPairAssetKey(search.quote) ? getCardDesign(designForPair(search.quote)!) : null;
+  const linked = isCardDesignKey(key) ? getCardDesign(key) : isOfferedPair(search.quote) ? getCardDesign(designForPair(search.quote)!) : null;
   const design = linked ?? shown[0]?.design ?? PAIRED[0]!.design;
   const pair = pairForDesign(design.key);
   // The sample card's quote: the design's pair; a design no pair has shows the quote coins made with it read as.
@@ -239,7 +241,8 @@ function Designs() {
                 </span>
                 {primary ? <span className="cdx-cf-cap__go">{primary}</span> : null}
               </div>
-              {/* Phones: the designs as one strip of chips (MintDex's .mdx-strip), each with its pair. */}
+              {/* Phones: the designs as one strip of chips (MintDex's .mdx-strip): each chip is the design's swatch and its
+                  pair's symbol (the full name is in its label, the caption and the plinth), so 95 chips stay short. */}
               <div
                 ref={stripRef}
                 role="group"
@@ -252,11 +255,11 @@ function Designs() {
                     type="button"
                     data-design={d.design.key}
                     aria-pressed={d.design.key === design.key}
+                    aria-label={`${d.design.name}, ${d.pair.symbol} pair`}
                     className="cdx-design-chip"
                     onClick={() => go(d)}
                   >
                     <DesignMini design={d.design} />
-                    <span className="cdx-design-chip__name">{d.design.name}</span>
                     <span className="cdx-design-chip__pair num">{d.pair.symbol}</span>
                   </button>
                 ))}
