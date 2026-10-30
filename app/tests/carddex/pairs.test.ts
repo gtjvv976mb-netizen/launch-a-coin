@@ -3,6 +3,8 @@ import { DEFAULT_PAIR, PAIR_ASSETS, PAIR_ASSET_KEYS, UNPAIRED_DESIGN, allowedQuo
 import { DESIGN_QUOTE_KEYS, MEME_PAIR_PRESETS, PAIR_DESIGNS } from "../../src/lib/carddex/design-pairings";
 import { marketCapText, quoteAtoms } from "../../src/lib/carddex/quote-display";
 import { CARD_DESIGNS, getCardDesign, isCardDesignKey } from "../../src/lib/carddex/designs";
+import { sortCoins, trendingScore } from "../../src/lib/mintdex/sort";
+import type { CoinSummary } from "../../src/lib/mintdex/types";
 
 /** The owner's table (30 October 2026): the pair picks the card, one pair, one design. */
 const EXPECTED_PAIR_DESIGNS = {
@@ -188,5 +190,33 @@ describe("stored coins and saved launches keep their reviewed quote identity", (
     expect(getPairAsset("usduc").kind).toBe("meme");
     expect(getTradingPair("OWN","usduc")).toBe("OWN / USDUC");
     expect(marketCapText({mcapUsd:null,mcapQuote:1234,quoteAssetKey:"usduc"})).toBe("1.23K USDUC");
+  });
+});
+
+describe("one fair order across pairs (Discover, Home and the server share sortCoins)", () => {
+  const reserve = (key: string) => Number(getPairAsset(key).initialVirtualQuoteReserves);
+  // SOL and USDC coins carry a USD reference; a TOAD coin does not (mcapUsd and volume24h are null for it).
+  const coin = (id: string, key: string, over: Partial<CoinSummary>) => ({
+    id, quoteAssetKey: key, mcapUsd: key === "toad" ? null : 1000, volume24h: key === "toad" ? null : 1,
+    volume24hQuote: "0", curveProgress: 0, lastTradeAt: 0, createdAt: 0, level: 1, ...over,
+  }) as unknown as CoinSummary;
+  const coins = [
+    coin("sol-quiet", "sol", { curveProgress: 0.05, volume24hQuote: "0", mcapUsd: 35_900, lastTradeAt: 5 }),
+    coin("usdc-mid", "usdc", { curveProgress: 0.2, volume24hQuote: String(Math.round(reserve("usdc") * 0.1)), mcapUsd: 23_100, lastTradeAt: 4 }),
+    coin("toad-busy", "toad", { curveProgress: 0.4, volume24hQuote: String(Math.round(reserve("toad") * 1.1)), lastTradeAt: 3 }),
+    coin("sol-busy", "sol", { curveProgress: 0.1, volume24hQuote: String(Math.round(reserve("sol") * 0.5)), mcapUsd: 4_200, lastTradeAt: 2 }),
+  ];
+  test("market cap follows bonding-curve progress, whatever the pair (no USD-priced-first block)", () => {
+    const order = sortCoins(coins, "mcap").map(c => c.id);
+    expect(order).toEqual(["toad-busy", "usdc-mid", "sol-busy", "sol-quiet"]);
+    const progress = sortCoins(coins, "mcap").map(c => c.curveProgress);
+    for (let i = 1; i < progress.length; i++) expect(progress[i]!).toBeLessThanOrEqual(progress[i - 1]!);
+  });
+  test("trending follows 24h volume against each pair's own curve, then the latest trade", () => {
+    expect(sortCoins(coins, "trending").map(c => c.id)).toEqual(["toad-busy", "sol-busy", "usdc-mid", "sol-quiet"]);
+    expect(trendingScore(coins[2]!)).toBeCloseTo(1.1, 6);
+    // No volume anywhere: the most recently traded first.
+    const quiet = coins.map(c => ({ ...c, volume24hQuote: "0" }));
+    expect(sortCoins(quiet, "trending").map(c => c.id)).toEqual(["sol-quiet", "usdc-mid", "toad-busy", "sol-busy"]);
   });
 });

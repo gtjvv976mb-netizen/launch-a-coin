@@ -26,6 +26,7 @@ import { listCoins } from "../lib/mintdex/api";
 import { getCardDesign } from "../lib/carddex/designs";
 import { marketCapText, marketCapWatch } from "../lib/carddex/quote-display";
 import { pageHead } from "../lib/mintdex/seo";
+import { sortCoins } from "../lib/mintdex/sort";
 import type { CoinSummary } from "../lib/mintdex/types";
 
 /*
@@ -107,18 +108,15 @@ function Discover() {
     }
     return [...seen].sort((a, b) => a[1].localeCompare(b[1]));
   }, [data]);
+  // One order for every sort, shared with the server and Home (lib/mintdex/sort.ts): fair across pairs.
   const coins = useMemo(
     () =>
-      data
-        .filter((c) => `${c.name} ${c.ticker}`.toLowerCase().includes(query.trim().toLowerCase().replace(/^\$/, "")))
-        .filter((c) => !design || getCardDesign(c.cardTemplate).key === design)
-        .sort((a, b) =>
-          sort === "new"
-            ? b.createdAt - a.createdAt
-            : sort === "mcap"
-              ? (b.mcapUsd ?? -1) - (a.mcapUsd ?? -1)
-              : (b.volume24h ?? -1) - (a.volume24h ?? -1),
-        ),
+      sortCoins(
+        data
+          .filter((c) => `${c.name} ${c.ticker}`.toLowerCase().includes(query.trim().toLowerCase().replace(/^\$/, "")))
+          .filter((c) => !design || getCardDesign(c.cardTemplate).key === design),
+        sort,
+      ),
     [data, query, sort, design],
   );
   const items = useMemo(() => coins.map((c) => ({ id: c.id, card: c })), [coins]);

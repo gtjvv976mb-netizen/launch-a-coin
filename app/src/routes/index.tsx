@@ -807,9 +807,10 @@ function Home() {
   const hint = hintOn !== null && hintOn === target?.id;
 
   const trending = data.trending.slice(0, TRENDING_ROWS);
-  // What the order means (the Worker ranks by 24h volume, then by the latest trade): on a quiet day every coin has
-  // zero volume and the list is simply the most recently traded.
-  const trendingBasis = trending.some((c) => (c.volume24h ?? 0) > 0)
+  // What the order means (the Worker ranks by 24h volume against each pair's own curve, then by the latest trade): on
+  // a quiet day every coin has zero volume and the list is simply the most recently traded. The volume is read in the
+  // coin's own quote, so a pair with no USD reference counts too.
+  const trendingBasis = trending.some((c) => Number(c.volume24hQuote ?? 0) > 0)
     ? HOME_COPY.trendingByVolume
     : HOME_COPY.trendingByLatest;
   // A poll that only reorders Trending must not replay the rows' entrance (delta 13.4); rows glide to their new
