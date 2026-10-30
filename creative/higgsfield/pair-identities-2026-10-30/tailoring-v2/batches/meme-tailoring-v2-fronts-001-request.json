@@ -1,0 +1,45 @@
+{
+  "context": "Create distinct source-derived meme card frames with consistent empty creator fields.",
+  "requests": [
+    {
+      "index": 401,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "1bfffe64-cd4a-4541-9813-710a65687caa"
+          },
+          {
+            "role": "image",
+            "value": "ed0f493f-cb80-41d8-9a70-2ead067f2f48"
+          }
+        ],
+        "prompt": "EDIT IMAGE 1, the gray layout wireframe. Preserve the exact rounded outer outline and FOUR EMPTY ivory rectangles at their EXACT positions and sizes. Do not add, split, move, shorten, cover or fill any rectangle. The huge middle creator-art rectangle MUST remain entirely blank. Replace ONLY the gray perimeter rails and gaps OUTSIDE all four empty rectangles with a premium thin trading-card frame. IMAGE 2 supplies abstract identity inspiration ONLY through these shapes and materials: Exclamation-expression frame: wavy blond hair-direction edge relief, open-mouth oval notches only at corners and energetic irregular portrait-contour bevels. MATERIALS: Warm pale-gold hair-toned metal, neutral ivory and source cyan/black accent planes. DO NOT DRAW ANY WHOLE CHARACTER, HUMAN, ANIMAL, HEAD, FACE, EYES, BODY, PORTRAIT OR COMPLETE IDENTITY PICTURE ANYWHERE ON THIS FRONT. This front is a customizable frame only. Use source shapes as ABSTRACT perimeter contours, not pictures or miniature corner mascots. No images inside any of the four surfaces. Name, type and description panels must stay uniformly light ivory, untextured and clean for live dark text. No new or split panels, footer slots, words, numbers, labels, serials, full logos, laurel wreath, royal medal, generic star, crown, marble lattice, scene, perspective, thickness, case or slab. Crisp refined HD physical-material detail, smooth rounded thin edges, neutral even light and straight front view. Preserve IMAGE1 geometry while replacing its gray material only."
+      }
+    },
+    {
+      "index": 402,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "1bfffe64-cd4a-4541-9813-710a65687caa"
+          },
+          {
+            "role": "image",
+            "value": "3c46d325-fa59-4d86-a49b-7acc788d7ccc"
+          }
+        ],
+        "prompt": "EDIT IMAGE 1, the gray layout wireframe. Preserve the exact rounded outer outline and FOUR EMPTY ivory rectangles at their EXACT positions and sizes. Do not add, split, move, shorten, cover or fill any rectangle. The huge middle creator-art rectangle MUST remain entirely blank. Replace ONLY the gray perimeter rails and gaps OUTSIDE all four empty rectangles with a premium thin trading-card frame. IMAGE 2 supplies abstract identity inspiration ONLY through these shapes and materials: Faceted iris-and-lash frame: purple lens segments, fine dark hair-strand rail etching and sharp eyelash-like outer cuts. MATERIALS: Violet optical glass, dark aubergine ceramic, pearlescent pink highlights and fine silver. DO NOT DRAW ANY WHOLE CHARACTER, HUMAN, ANIMAL, HEAD, FACE, EYES, BODY, PORTRAIT OR COMPLETE IDENTITY PICTURE ANYWHERE ON THIS FRONT. This front is a customizable frame only. Use source shapes as ABSTRACT perimeter contours, not pictures or miniature corner mascots. No images inside any of the four surfaces. Name, type and description panels must stay uniformly light ivory, untextured and clean for live dark text. No new or split panels, footer slots, words, numbers, labels, serials, full logos, laurel wreath, royal medal, generic star, crown, marble lattice, scene, perspective, thickness, case or slab. Crisp refined HD physical-material detail, smooth rounded thin edges, neutral even light and straight front view. Preserve IMAGE1 geometry while replacing its gray material only."
+      }
+    }
+  ]
+}

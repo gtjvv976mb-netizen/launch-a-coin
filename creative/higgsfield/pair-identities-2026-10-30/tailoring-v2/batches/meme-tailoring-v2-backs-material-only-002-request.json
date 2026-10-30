@@ -1,0 +1,45 @@
+{
+  "context": "Create unique pictorial meme card artwork with exact identities and matching cropped material references.",
+  "requests": [
+    {
+      "index": 531,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "d78849bc-a209-4531-b875-d99f754b7dc1"
+          },
+          {
+            "role": "image",
+            "value": "e0884309-3082-4092-b96e-c5214eed3e88"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact black standing human silhouette with both arms extended; dictionary prose is incidental. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact source silhouette stands within an open asymmetric architectural negative-space field whose rail angles repeat the actual arm pose. The unique outer frame follows this character: Open-arm silhouette frame: outward-flaring upper rail junctions, long tapering verticals and calm unoccupied ivory negative space. Matching materials: Matte black enamel, warm ivory porcelain and narrow champagne metal. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    },
+    {
+      "index": 533,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "b2b41c60-8070-41dc-8eb1-18987f5dc712"
+          },
+          {
+            "role": "image",
+            "value": "35eaaa1f-e332-4048-bdd3-ac3cb76043ee"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact baby hippo portrait, round wet muzzle, tiny ears and specific expression from the photo. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Keep the exact hippo face large within a softly undulating glossy field with shallow droplet caustics; perimeter follows cheek and ear contours rather than a wreath. The unique outer frame follows this character: Smooth rounded hippo-cheek corner reliefs, soft muzzle-curve rails and small water-bead-like surface relief derived from the source wet sheen. Matching materials: Deep plum vitreous enamel, pearl-gray satin metal, quiet blush highlights. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "index": 30,
+    "key": "bonk",
+    "face": "back",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/bonk-back.png"
+  },
+  {
+    "index": 32,
+    "key": "wif",
+    "face": "back",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/wif-back.png"
+  },
+  {
+    "index": 33,
+    "key": "cards",
+    "face": "front",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/cards-front.png"
+  },
+  {
+    "index": 35,
+    "key": "sv151",
+    "face": "front",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/sv151-front.png"
+  }
+]

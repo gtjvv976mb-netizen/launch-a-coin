@@ -1,0 +1,29 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Confirmed 4 uploads. Pass media_id as value in the medias array of generation tools.\n- c2b0c51f-2e9d-4938-9bcb-17cd78dc2873 (uploaded)\n- b5bc279b-19b4-4696-a679-ff06a91dcb6b (uploaded)\n- 4160954a-73ec-4ec9-a9de-6be20f29c94b (uploaded)\n- 2eaf1fad-2f99-4892-a4e4-3bc044518915 (uploaded)"
+    }
+  ],
+  "structuredContent": {
+    "results": [
+      {
+        "media_id": "c2b0c51f-2e9d-4938-9bcb-17cd78dc2873",
+        "status": "uploaded"
+      },
+      {
+        "media_id": "b5bc279b-19b4-4696-a679-ff06a91dcb6b",
+        "status": "uploaded"
+      },
+      {
+        "media_id": "4160954a-73ec-4ec9-a9de-6be20f29c94b",
+        "status": "uploaded"
+      },
+      {
+        "media_id": "2eaf1fad-2f99-4892-a4e4-3bc044518915",
+        "status": "uploaded"
+      }
+    ]
+  },
+  "isError": false
+}

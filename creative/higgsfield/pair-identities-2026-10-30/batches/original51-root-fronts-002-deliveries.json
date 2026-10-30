@@ -1,0 +1,18 @@
+[
+  {
+    "index": 57,
+    "key": "pippin",
+    "face": "front",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/pippin-front.png"
+  },
+  {
+    "index": 59,
+    "key": "vine",
+    "face": "front",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/vine-front.png"
+  }
+]

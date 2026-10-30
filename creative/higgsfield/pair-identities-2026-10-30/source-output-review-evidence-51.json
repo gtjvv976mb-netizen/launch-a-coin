@@ -1,0 +1,44 @@
+{
+  "updatedAt": "2026-10-30T02:02:32.474880+00:00",
+  "scope": "Current actual source/output QA evidence; preserves historical intake-stage pending flags rather than rewriting them retroactively.",
+  "ledgerWriter": "extra_pair_art",
+  "paidWriter": "root",
+  "knownJobs": 75,
+  "quotedKnownCredits": 206.25,
+  "unknownReservedJobs": 4,
+  "unknownReservedQuotedCredits": 11,
+  "acceptedPairCount": 22,
+  "acceptedFaceCount": 71,
+  "acceptedFrontCount": 49,
+  "acceptedBackCount": 22,
+  "actualProofs": [
+    "batches/original51-root-fronts-001-proof.png",
+    "batches/original51-root-fronts-007-proof.png",
+    "batches/original51-root-fronts-006-proof.png",
+    "batches/original51-root-fronts-012-proof.png",
+    "batches/original51-root-fronts-003-proof.png",
+    "batches/original51-root-fronts-008-proof.png",
+    "batches/original51-root-fronts-011-proof.png",
+    "batches/original51-root-fronts-005-proof.png",
+    "batches/original51-root-fronts-002-proof.png",
+    "batches/original51-root-fronts-009-proof.png",
+    "batches/original51-root-fronts-004-proof.png",
+    "batches/original51-root-fronts-010-proof.png"
+  ],
+  "reviewers": [
+    {
+      "reviewer": "extra_pair_art",
+      "evidence": "Actual generated front/source proof boards individually inspected before every acceptance; no invented labels, blank creator/ink surfaces, source-faithful identities."
+    },
+    {
+      "reviewer": "crypto_pair_research",
+      "evidence": "Read-only independent actual-source QA confirmed root-fronts001\u2013012, all23 plan fronts, including exact icon geometry and authentic source lettering."
+    },
+    {
+      "reviewer": "root",
+      "evidence": "Independent last7-front QA passed, including native TAO corner against exact white-composited tau source. PEAQ silver relief preserves exact open-link shape; back must retain primary purple source glyph."
+    }
+  ],
+  "historicalIntakeFlags": "research/reference-image-uris.json remains an intake artifact. This later evidence does not claim those flags were cleared at intake time.",
+  "pendingOutputQA": "Frozen25-back root plan is not yet reviewed or accepted; generated results must pass source/panel checks before progressive pairing."
+}

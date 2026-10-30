@@ -1,0 +1,13 @@
+{
+  "indices": [
+    816,
+    817
+  ],
+  "maximumQuotedCredits": 1,
+  "verifiedCurrentAvailable": 31,
+  "heldPriorUnknownCredits": 27.5,
+  "absoluteStartingAllocation": 596.5,
+  "purchases": false,
+  "automaticUnknownRetry": false,
+  "status": "reserved-before-one-write"
+}

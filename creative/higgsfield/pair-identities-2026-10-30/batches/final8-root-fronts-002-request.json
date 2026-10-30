@@ -1,0 +1,48 @@
+{
+  "requests": [
+    {
+      "index": 205,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create one exceptionally refined, production-ready premium collectible trading-card print. Output portrait 2:3 at high 2K quality. Orthographic front view, absolutely flat thin printed card with tiny satin bevel, smooth 63:88 rounded silhouette, precise manufacturable edges. No case, slab, pedestal, 3D thickness, protruding ornaments, words floating outside or perspective.\nREFERENCE PRIORITY: Image 1 is the CURRENT approved Launch a Card v2 FRONT and is authoritative ONLY for the shared content grid, thin print construction and collector quality. Image 2 is the EXACT real asset identity and is authoritative for recognizable emblem/mascot shape, proportions, pose and colors. Replace every existing Doge motif in Image 1 unless this is the DOGE request. Do not copy its gold/black palette into a different identity.\nSHARED FRONT GRID measured relative to the card: all live content spans x10%\u201390%. Leave a clean LIGHT warm-ivory/pearl writing surface for the name at y5.5%\u201311.5%. Leave a completely clear creator-art aperture x10%\u201390%,y15%\u201359%, with no logo, mascot, objects, illustration or live text inside it. Leave a LIGHT clean narrow ticker/pair writing strip y61.5%\u201364.9%. Leave a LIGHT continuous clean description writing surface x10%\u201390%,y67%\u201392.5%. These paper surfaces must be light enough for dark near-black printed ink. Do not make those live text surfaces dark. No footer slots, no serial, no market-cap box, no token number, no platform label. The bottom below the description must continue the native themed material to the rounded bottom edge, without extra empty boxes.\nThe asset identity belongs only in small impeccable motifs in the outer perimeter rails/corner hardware, never covering or duplicating the creator art. Material treatment, finish, foil edges and ornamental detail must clearly express this exact asset. Restrained depth, coherent studio light, meticulous micro-engraving and polished material separation. Preserve the useful blank content areas. No generated placeholder type, theme title, token data, watermark or decorative caption. Authentic letters that are part of the supplied exact logo are allowed only within that logo; no new lettering.\n\nEXACT ASSET IDENTITY: PUMPCADE (PUMPCADE). Image2 is linked to exact quote mint Eg2ymQ2aQqjMcibnmTt8erC6Tvk9PVpJZCxvVPJz2agu. Its verified source identity must remain obvious.\nACTUAL SOURCE ANCHOR: Round gold/yellow arcade medallion with dark red joystick and speech bubble; authentic PUMPCADE lettering arcs along the top and bottom with small stars. Preserve its lettering.\nBESPOKE FRONT MATERIALS: Deep oxblood-red ceramic, lustrous antique-gold rails and warm amber enamel, with precision arcade groove detailing derived only from the exact joystick medallion. Confine small source medallions to exterior corner hardware. Preserve the actual PUMPCADE arc lettering, joystick, speech bubble and stars only inside those authentic emblems. No new arcade slogans, controls across the creator window, unrelated game character or extra text.\n\nFINAL MANDATORY FRONT CHECK: The entire central creator-art window x10%\u201390%, y15%\u201359% MUST remain COMPLETELY EMPTY: a plain unobstructed neutral/dark field only. Zero mascot, zero logo, zero character, zero illustration, zero cameo, zero watermark or low-contrast identity inside that window. The supplied asset identity may appear ONLY in small exterior perimeter/corner details outside the writing surfaces and outside the creator-art window. Keep every name/ticker/description writing surface LIGHT for dark ink. A filled central hero image on this FRONT is a failed output; the central identity hero belongs to the BACK only. Remove ALL inherited Doge/dog/animal imagery from the construction reference unless the exact source itself is that animal. No invented monogram, no added theme name, ticker, serial or words. Exact logo lettering only when actually present in Image2.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "22e58a58-0eca-4a2d-889f-c28a8b121ea0"
+          },
+          {
+            "role": "image",
+            "value": "49c62066-9b68-48ef-a110-846ea0fab7bc"
+          }
+        ]
+      }
+    },
+    {
+      "index": 207,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create one exceptionally refined, production-ready premium collectible trading-card print. Output portrait 2:3 at high 2K quality. Orthographic front view, absolutely flat thin printed card with tiny satin bevel, smooth 63:88 rounded silhouette, precise manufacturable edges. No case, slab, pedestal, 3D thickness, protruding ornaments, words floating outside or perspective.\nREFERENCE PRIORITY: Image 1 is the CURRENT approved Launch a Card v2 FRONT and is authoritative ONLY for the shared content grid, thin print construction and collector quality. Image 2 is the EXACT real asset identity and is authoritative for recognizable emblem/mascot shape, proportions, pose and colors. Replace every existing Doge motif in Image 1 unless this is the DOGE request. Do not copy its gold/black palette into a different identity.\nSHARED FRONT GRID measured relative to the card: all live content spans x10%\u201390%. Leave a clean LIGHT warm-ivory/pearl writing surface for the name at y5.5%\u201311.5%. Leave a completely clear creator-art aperture x10%\u201390%,y15%\u201359%, with no logo, mascot, objects, illustration or live text inside it. Leave a LIGHT clean narrow ticker/pair writing strip y61.5%\u201364.9%. Leave a LIGHT continuous clean description writing surface x10%\u201390%,y67%\u201392.5%. These paper surfaces must be light enough for dark near-black printed ink. Do not make those live text surfaces dark. No footer slots, no serial, no market-cap box, no token number, no platform label. The bottom below the description must continue the native themed material to the rounded bottom edge, without extra empty boxes.\nThe asset identity belongs only in small impeccable motifs in the outer perimeter rails/corner hardware, never covering or duplicating the creator art. Material treatment, finish, foil edges and ornamental detail must clearly express this exact asset. Restrained depth, coherent studio light, meticulous micro-engraving and polished material separation. Preserve the useful blank content areas. No generated placeholder type, theme title, token data, watermark or decorative caption. Authentic letters that are part of the supplied exact logo are allowed only within that logo; no new lettering.\n\nEXACT ASSET IDENTITY: Codec Flow (CODEC). Image2 is linked to exact quote mint 69LjZUUzxj3Cb3Fxeo1X4QpYEQTboApkhXTysPpbpump. Its verified source identity must remain obvious.\nACTUAL SOURCE ANCHOR: White segmented pixel/block CODEC wordmark on a nearly black field. The gaps and square terminals are part of the exact identity.\nBESPOKE FRONT MATERIALS: Near-black graphite ceramic, bright polished platinum and selective segmented white enamel lines following the exact block wordmark rhythm. Keep the genuine white CODEC wordmark as small impeccable end-cap emblems outside content areas; preserve its original segmentation/gaps and square shape. No invented C glyph, QR code, barcode, circuit mascot or extra type. Thin high-contrast architectural precision with light pearl live-information surfaces.\n\nFINAL MANDATORY FRONT CHECK: The entire central creator-art window x10%\u201390%, y15%\u201359% MUST remain COMPLETELY EMPTY: a plain unobstructed neutral/dark field only. Zero mascot, zero logo, zero character, zero illustration, zero cameo, zero watermark or low-contrast identity inside that window. The supplied asset identity may appear ONLY in small exterior perimeter/corner details outside the writing surfaces and outside the creator-art window. Keep every name/ticker/description writing surface LIGHT for dark ink. A filled central hero image on this FRONT is a failed output; the central identity hero belongs to the BACK only. Remove ALL inherited Doge/dog/animal imagery from the construction reference unless the exact source itself is that animal. No invented monogram, no added theme name, ticker, serial or words. Exact logo lettering only when actually present in Image2.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "22e58a58-0eca-4a2d-889f-c28a8b121ea0"
+          },
+          {
+            "role": "image",
+            "value": "762d3608-7b4c-4846-a3bc-80ec601cb1db"
+          }
+        ]
+      }
+    }
+  ]
+}

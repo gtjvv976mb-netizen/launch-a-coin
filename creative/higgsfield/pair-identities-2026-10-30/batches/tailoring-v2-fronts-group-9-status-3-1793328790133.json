@@ -1,0 +1,51 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "jobs[4]:\n  - index: 433\n    job_id: e45a515f-629e-4158-86df-e267b3baf4f1\n    status: completed\n    type: image\n    model: seedream_5_0_flash\n    result_url: \"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_025243_e45a515f-629e-4158-86df-e267b3baf4f1.png\"\n  - index: 434\n    job_id: 622b836e-61b4-489c-8b23-81b2ed04c0e9\n    status: in_progress\n    type: image\n    model: seedream_5_0_flash\n  - index: 435\n    job_id: 89c7a1be-223c-42a9-bc93-28c6c3e14022\n    status: in_progress\n    type: image\n    model: seedream_5_0_flash\n  - index: 436\n    job_id: 17f54ea5-776b-4a62-a9fe-54c3e9d6969e\n    status: in_progress\n    type: image\n    model: seedream_5_0_flash\nsummary:\n  total: 4\n  completed: 1\n  failed: 0\n  active: 3\n  errors: 0\nall_terminal: false\npoll_after_seconds: 10\n\nWork is still pending. Wait poll_after_seconds, then call jobs_wait again in this turn. Do not ask the user to say 'continue' just because the polling window ended. Respect cancellation and host execution limits."
+    }
+  ],
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 433,
+        "job_id": "e45a515f-629e-4158-86df-e267b3baf4f1",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_025243_e45a515f-629e-4158-86df-e267b3baf4f1.png"
+      },
+      {
+        "index": 434,
+        "job_id": "622b836e-61b4-489c-8b23-81b2ed04c0e9",
+        "status": "in_progress",
+        "type": "image",
+        "model": "seedream_5_0_flash"
+      },
+      {
+        "index": 435,
+        "job_id": "89c7a1be-223c-42a9-bc93-28c6c3e14022",
+        "status": "in_progress",
+        "type": "image",
+        "model": "seedream_5_0_flash"
+      },
+      {
+        "index": 436,
+        "job_id": "17f54ea5-776b-4a62-a9fe-54c3e9d6969e",
+        "status": "in_progress",
+        "type": "image",
+        "model": "seedream_5_0_flash"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "completed": 1,
+      "failed": 0,
+      "active": 3,
+      "errors": 0
+    },
+    "all_terminal": false,
+    "poll_after_seconds": 10
+  },
+  "isError": false
+}

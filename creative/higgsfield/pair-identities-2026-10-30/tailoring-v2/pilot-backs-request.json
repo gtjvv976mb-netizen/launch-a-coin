@@ -1,0 +1,45 @@
+{
+  "context": "Create source-faithful reverses matching the distinct accepted candidate frame materials.",
+  "requests": [
+    {
+      "index": 305,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "c2b0c51f-2e9d-4938-9bcb-17cd78dc2873"
+          },
+          {
+            "role": "image",
+            "value": "ff341d2e-70d8-4c9f-861b-295a295cf800"
+          }
+        ],
+        "prompt": "CREATE A FULL CARD REVERSE. IMAGE1 is the exact meme identity. IMAGE2 is ONLY the matching front material reference. DO NOT COPY ANY EMPTY BOXES OR CONTENT PANELS from Image2. Reverse has a single uninterrupted designed field, with NO rectangles, text slots or empty labels. Create one BACK CARD SKIN. This is a premium high-definition thin rounded trading-card skin, rendered directly front-on with the complete card visible and no perspective, case, slab, cast shadow or product mockup. Use only the exact supplied identity reference; preserve its actual facial features, silhouette, expression, pose, geometry and identity colors. Do not hallucinate detail missing from a low-resolution source. No generic royal four-point stars, laurel wreath, stock medallion oval, generic marble lattice, crown or Doge ornament. The design must be recognizably tailored through its perimeter geometry, material and relief, even if the hero were covered. No theme labels, platform names, new words, numbers, serials or footer slots. Only authentic lettering that belongs to the pinned source logo may remain; omit incidental prose/slogans unless separately approved as the exact identity mark. Keep the card thin, edges smooth and rounded, with even neutral light and no clipped ornament. Exact quotes and branding do not imply affiliation or issuer endorsement. Exact classic green Pepe head/upper-body line image with half-lidded eyes and red mouth from the64px source. Identity-specific exclusions: No large front frog over creator art, new expression/costume, asserted source habitat, generic marble, laurel or star. The back wireframe gives ONLY the same thin rounded outer-card geometry. It does not prescribe a central circle, crest, star, frame language or hero position. Use the unique source-derived composition below. Match the accepted new front materials when it is supplied as a separate reference. Do not copy content apertures onto the back or borrow any old generic royal template. UNIQUE REVERSE: Exact Pepe expression in a source-line-derived green field, with eye/mouth arcs and low waterline ripple contours joining the perimeter; no royal medallion. MATCHING MATERIALS: Moss-green enamel, dark etched metal, small red enamel accents and restrained satin gold."
+      }
+    },
+    {
+      "index": 306,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "2eaf1fad-2f99-4892-a4e4-3bc044518915"
+          },
+          {
+            "role": "image",
+            "value": "8721455d-c048-45e2-b5be-cd2b70121b25"
+          }
+        ],
+        "prompt": "CREATE A FULL CARD REVERSE. IMAGE1 is the exact meme identity. IMAGE2 is ONLY the matching front material reference. DO NOT COPY ANY EMPTY BOXES OR CONTENT PANELS from Image2. Reverse has a single uninterrupted designed field, with NO rectangles, text slots or empty labels. Create one BACK CARD SKIN. This is a premium high-definition thin rounded trading-card skin, rendered directly front-on with the complete card visible and no perspective, case, slab, cast shadow or product mockup. Use only the exact supplied identity reference; preserve its actual facial features, silhouette, expression, pose, geometry and identity colors. Do not hallucinate detail missing from a low-resolution source. No generic royal four-point stars, laurel wreath, stock medallion oval, generic marble lattice, crown or Doge ornament. The design must be recognizably tailored through its perimeter geometry, material and relief, even if the hero were covered. No theme labels, platform names, new words, numbers, serials or footer slots. Only authentic lettering that belongs to the pinned source logo may remain; omit incidental prose/slogans unless separately approved as the exact identity mark. Keep the card thin, edges smooth and rounded, with even neutral light and no clipped ornament. Exact quotes and branding do not imply affiliation or issuer endorsement. Exact young brown monkey seated and looking down at a black smartphone held in both hands. Identity-specific exclusions: No jungle invention, screen UI/text, alternate monkey, new hand pose, thick phone/slab, laurel or star. The back wireframe gives ONLY the same thin rounded outer-card geometry. It does not prescribe a central circle, crest, star, frame language or hero position. Use the unique source-derived composition below. Match the accepted new front materials when it is supplied as a separate reference. Do not copy content apertures onto the back or borrow any old generic royal template. UNIQUE REVERSE: Exact monkey/phone pose in a shallow dark-glass field with slim phone-button/bevel geometry continuing around the rim. MATCHING MATERIALS: Dark reflective glass, warm bronze, soft brown enamel and pale neutral writing surfaces."
+      }
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "requests": [
+    {
+      "index": 609,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified Chainlink identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the precise white hollow hexagonal ring on the blue disk in Image1, including its six equal sides, blue inner opening and exact ring thickness.\nMATCHED MATERIAL LANGUAGE: Cobalt enamel and satin silver from Image2, with the same six-sided angle rhythm carried subtly into the uninterrupted surrounding material.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "7785acec-1928-4b56-abb8-d4f53135c4d8"
+          },
+          {
+            "role": "image",
+            "value": "5951ab14-9944-4d64-970f-15be34c6ee96"
+          }
+        ]
+      }
+    },
+    {
+      "index": 610,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create one exceptionally refined premium trading-card BACK, straight orthographic front-on print, portrait2:3 high-detail2K. Image1 is the exact verified ORE identity and is the authority for the complete hero shape, proportions, colors and authentic source lettering. Image2 is this exact design's accepted FRONT and supplies only its matching physical print outline, edge finish, fine material quality and palette.\nBACK COMPOSITION: One uninterrupted finished reverse from rounded top edge to rounded bottom edge. Place a single large, unmistakable exact Image1 identity at the center, integrated into a restrained source-specific material composition. The surrounding surface continues behind and around it as one coherent reverse. Front writing rectangles, blank label strips and information panels are absent from this finished BACK.\nPRECISE HERO: Copy the exact thick white ring with opposite short diagonal tabs at lower-left and upper-right on the black disk in Image1. Preserve the circular opening, tab angles and silhouette.\nMATCHED MATERIAL LANGUAGE: Obsidian ceramic and satin silver from Image2; use the ring-and-opposite-tab geometry as quiet surrounding contour relief.\nKeep the full exact hero geometry clean, readable and source-faithful with meticulous print edge definition. Preserve the accepted front's thin rounded card silhouette and fine rim proportions. Use controlled material detail, crisp enamel boundaries, clean foil bevels, even studio light and refined print texture. Output the complete flat card centered with its full smooth rounded perimeter visible. The source identity is the sole emblem; any lettering must already belong to that exact source. Add no invented words, captions, labels or new emblems.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "5eaec00c-d159-40cd-9f37-32ee9ae8dd18"
+          },
+          {
+            "role": "image",
+            "value": "349dff04-2521-4f93-8a6a-11a887a70773"
+          }
+        ]
+      }
+    }
+  ]
+}

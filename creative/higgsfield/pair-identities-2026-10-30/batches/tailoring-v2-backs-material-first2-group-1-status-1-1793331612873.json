@@ -1,0 +1,36 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "jobs[2]{index,job_id,status,type,model}:\n  503,c53b15e9-e6d8-4e54-b252-2712719a041a,queued,image,seedream_5_0_flash\n  509,aeb30ebc-f661-4d1d-bcca-4ebb8de8cb38,queued,image,seedream_5_0_flash\nsummary:\n  total: 2\n  completed: 0\n  failed: 0\n  active: 2\n  errors: 0\nall_terminal: false\npoll_after_seconds: 10\n\nWork is still pending. Wait poll_after_seconds, then call jobs_wait again in this turn. Do not ask the user to say 'continue' just because the polling window ended. Respect cancellation and host execution limits."
+    }
+  ],
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 503,
+        "job_id": "c53b15e9-e6d8-4e54-b252-2712719a041a",
+        "status": "queued",
+        "type": "image",
+        "model": "seedream_5_0_flash"
+      },
+      {
+        "index": 509,
+        "job_id": "aeb30ebc-f661-4d1d-bcca-4ebb8de8cb38",
+        "status": "queued",
+        "type": "image",
+        "model": "seedream_5_0_flash"
+      }
+    ],
+    "summary": {
+      "total": 2,
+      "completed": 0,
+      "failed": 0,
+      "active": 2,
+      "errors": 0
+    },
+    "all_terminal": false,
+    "poll_after_seconds": 10
+  },
+  "isError": false
+}

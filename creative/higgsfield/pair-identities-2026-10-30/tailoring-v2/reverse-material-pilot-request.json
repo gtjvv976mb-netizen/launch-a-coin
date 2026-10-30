@@ -1,0 +1,45 @@
+{
+  "context": "Test continuous wordless meme reverses using exact identity sources and material-only cropped references.",
+  "requests": [
+    {
+      "index": 532,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "351e0111-b997-4c82-8a8a-f4e9fc9ef546"
+          },
+          {
+            "role": "image",
+            "value": "317b5970-4f30-4c0b-b6af-b42293f9a992"
+          }
+        ],
+        "prompt": "A finished premium collectible card REVERSE, entirely pictorial and fully designed from top to bottom. The first reference supplies the exact subject: Exact upright pale cat with gray patches, preserved face, paw placement and proportions from the pinned photo; not another standing cat. Reproduce that actual expression, pose, silhouette and recognizable features faithfully. Keep the cat's visibly high raised paw and upright full-body pose exactly as shown. The second reference consists ONLY of material swatches cropped from its matching front, and supplies the exact surface finish and colors. Use those materials throughout a SINGLE CONTINUOUS background around the subject. COMPOSITION: Exact upright cat and source paw placement in a quiet pale field, with vertical slat relief and restrained floor-tone planes derived from the actual photo. MATCHING FRAME CHARACTER: Upright-cat contour frame: soft pale enamel side rails, gray patch-shaped corner inlays and narrow vertical ribbing derived from the visible slatted background. MATERIALS: Warm white ceramic, soft gray enamel, light brushed metal and tiny wood-tone lower accents. All interior space belongs to the subject and flowing material relief. Keep the entire perimeter smoothly rounded, thin and flat, directly front-on with even neutral lighting, sharp refined print detail. The result is pure pictorial artwork with no writing, numerals, labels, empty plates or reserved text fields anywhere."
+      }
+    },
+    {
+      "index": 534,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "6476e682-af04-48e1-bab4-285a05dae0f1"
+          },
+          {
+            "role": "image",
+            "value": "d2f49da2-c967-449f-b001-585f634d93c7"
+          }
+        ],
+        "prompt": "A finished premium collectible card REVERSE, entirely pictorial and fully designed from top to bottom. The first reference supplies the exact subject: Exact monochrome bespectacled face inside its circular border, preserving particular glasses and facial proportions. Reproduce that actual expression, pose, silhouette and recognizable features faithfully. Keep the actual source's glasses and face linework exactly. The second reference consists ONLY of material swatches cropped from its matching front, and supplies the exact surface finish and colors. Use those materials throughout a SINGLE CONTINUOUS background around the subject. COMPOSITION: Exact source face with its genuine circular outline, offset into a larger engraved glasses/brow contour field; no added ornamental circle. MATCHING FRAME CHARACTER: Engraved-spectacle perimeter: linked thin oval lens contours at corners, brow-angle rail cuts and restrained black crosshatch on ivory. MATERIALS: Black etched enamel, ivory ceramic and narrow satin palladium. All interior space belongs to the subject and flowing material relief. Keep the entire perimeter smoothly rounded, thin and flat, directly front-on with even neutral lighting, sharp refined print detail. The result is pure pictorial artwork with no writing, numerals, labels, empty plates or reserved text fields anywhere."
+      }
+    }
+  ]
+}

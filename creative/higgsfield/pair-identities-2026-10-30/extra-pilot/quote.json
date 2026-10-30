@@ -1,0 +1,15 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Cost preflight for gpt_image_2_5: 2.75 credits (2.75 exact). No job submitted."
+    }
+  ],
+  "structuredContent": {
+    "cost": {
+      "credits": 2.75,
+      "credits_exact": 2.75
+    }
+  },
+  "isError": false
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "face": "front",
+    "source": "app/public/assets/carddex/render/doge.png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/references/construction-front.png",
+    "sha256": "f178d07a349cffc4cc4dcc0f121f388d1e4687c44f8b0b6ff442340ee3f56fe1",
+    "role": "Approved current v2 geometry and construction only; not an identity source."
+  },
+  {
+    "face": "back",
+    "source": "app/public/assets/carddex/token-backs/doge.png",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/references/construction-back.png",
+    "sha256": "29e08189a1cd69fb3e29cc9274767c31187a98469543145082de46ae1d28a721",
+    "role": "Approved current v2 geometry and construction only; not an identity source."
+  }
+]

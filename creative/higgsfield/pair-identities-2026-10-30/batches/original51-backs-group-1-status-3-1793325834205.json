@@ -1,0 +1,51 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "jobs[4]:\n  - index: 50\n    job_id: fe921fc9-7218-4e1d-b365-f5531a480e0f\n    status: completed\n    type: image\n    model: gpt_image_2_5\n    result_url: \"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_020327_fe921fc9-7218-4e1d-b365-f5531a480e0f.png\"\n  - index: 52\n    job_id: 416f81ad-f9f3-4369-a5a1-7cc58cc42df0\n    status: in_progress\n    type: image\n    model: gpt_image_2_5\n  - index: 54\n    job_id: 0f295bce-f334-4067-968c-de1048077313\n    status: in_progress\n    type: image\n    model: gpt_image_2_5\n  - index: 56\n    job_id: 19f7aac8-382a-4fd2-b248-984ff8cf0e3d\n    status: in_progress\n    type: image\n    model: gpt_image_2_5\nsummary:\n  total: 4\n  completed: 1\n  failed: 0\n  active: 3\n  errors: 0\nall_terminal: false\npoll_after_seconds: 10\n\nWork is still pending. Wait poll_after_seconds, then call jobs_wait again in this turn. Do not ask the user to say 'continue' just because the polling window ended. Respect cancellation and host execution limits."
+    }
+  ],
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 50,
+        "job_id": "fe921fc9-7218-4e1d-b365-f5531a480e0f",
+        "status": "completed",
+        "type": "image",
+        "model": "gpt_image_2_5",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_020327_fe921fc9-7218-4e1d-b365-f5531a480e0f.png"
+      },
+      {
+        "index": 52,
+        "job_id": "416f81ad-f9f3-4369-a5a1-7cc58cc42df0",
+        "status": "in_progress",
+        "type": "image",
+        "model": "gpt_image_2_5"
+      },
+      {
+        "index": 54,
+        "job_id": "0f295bce-f334-4067-968c-de1048077313",
+        "status": "in_progress",
+        "type": "image",
+        "model": "gpt_image_2_5"
+      },
+      {
+        "index": 56,
+        "job_id": "19f7aac8-382a-4fd2-b248-984ff8cf0e3d",
+        "status": "in_progress",
+        "type": "image",
+        "model": "gpt_image_2_5"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "completed": 1,
+      "failed": 0,
+      "active": 3,
+      "errors": 0
+    },
+    "all_terminal": false,
+    "poll_after_seconds": 10
+  },
+  "isError": false
+}

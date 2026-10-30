@@ -1,0 +1,45 @@
+{
+  "context": "Create unique pictorial meme card artwork with exact identities and matching cropped material references.",
+  "requests": [
+    {
+      "index": 541,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "bb622f49-3243-40ed-9c80-b3945ed0ab0a"
+          },
+          {
+            "role": "image",
+            "value": "e7be1067-26d3-4091-8cf4-3288eb92521b"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact sparse round white unicorn-like line character with thin legs, pink accents and small yellow horn from the supplied drawing. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact source character on pale blue with airy source-line loops, tiny pink curls and a horn-derived angular upper join. The unique outer frame follows this character: Playful hand-line rim: very thin black looping contours, small yellow horn-triangle joins and pink tail/mane-shaped enamel curls outside the panels. Matching materials: Warm white porcelain, black ink-like enamel, pastel pink and small yellow accents. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    },
+    {
+      "index": 542,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "702af55c-3303-4d2e-802b-b9647200eb57"
+          },
+          {
+            "role": "image",
+            "value": "85fb9994-6878-48f1-9ecb-af992cd3b337"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact dark plague doctor with wide-brim top hat, beaked mask, round goggles and brown coat fittings. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact source figure in a quiet dark field framed by asymmetric beak and goggle contours with coat-seam relief joining the rim. The unique outer frame follows this character: Beak-and-goggle frame: curved beak-profile side rails, paired round smoked-glass corner lenses and dark stitched-coat seam relief. Matching materials: Blackened leather-like relief, dark bronze, smoked optical glass and restrained brown enamel. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    }
+  ]
+}

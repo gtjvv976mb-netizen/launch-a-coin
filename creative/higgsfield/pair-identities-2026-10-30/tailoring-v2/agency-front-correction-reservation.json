@@ -1,0 +1,10 @@
+{
+  "indices": [
+    701
+  ],
+  "maximumQuotedCredits": 0.5,
+  "knownQuotedCreditsBefore": 542.5,
+  "heldUnknownQuotedCredits": 27.5,
+  "status": "reserved-before-one-write",
+  "automaticUnknownRetry": false
+}

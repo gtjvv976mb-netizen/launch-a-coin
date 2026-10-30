@@ -1,0 +1,45 @@
+{
+  "context": "Create unique pictorial meme card artwork with exact identities and matching cropped material references.",
+  "requests": [
+    {
+      "index": 557,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "b5bc279b-19b4-4696-a679-ff06a91dcb6b"
+          },
+          {
+            "role": "image",
+            "value": "16a49ff5-9239-4c87-8ce0-8b9f8ac5ddd9"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact white Wojak head/shoulders with fine black wrinkles and quiet expression. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact source Wojak within a quiet paper/ink relief field, with sparse wrinkle contours flowing into one side of the frame. The unique outer frame follows this character: Hand-ink paper frame: thin irregular contour rails, source forehead/neck-line etched bends and soft folded-white paper relief without decorative filler. Matching materials: Ivory porcelain, fine charcoal etching and understated matte silver. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    },
+    {
+      "index": 558,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "b92becd5-dfef-486c-825f-8b7a4210a914"
+          },
+          {
+            "role": "image",
+            "value": "99de1049-0492-46dc-809d-ca77755fd410"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact square-dot Z matrix on black; preserve dot count and arrangement. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact dotted Z hero in a carefully spaced stepped matrix relief field that connects to the card edges without inventing random code. The unique outer frame follows this character: Pixel-matrix perimeter: crisp square-grid cutouts and stepped diagonal source-dot runs through only the narrow rails, with deliberate black gaps. Matching materials: Black glass, ivory pixel enamel and thin palladium. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    }
+  ]
+}

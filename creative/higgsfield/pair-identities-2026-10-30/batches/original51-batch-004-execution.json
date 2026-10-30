@@ -1,0 +1,25 @@
+{
+  "batchId": "original51-batch-004",
+  "requestFile": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-batch-004-request.json",
+  "soleExecutor": "ROOT",
+  "status": "reserved-for-root-only; not-yet-submitted",
+  "allowedIndices": [
+    192,
+    76,
+    78,
+    15
+  ],
+  "maximumImages": 4,
+  "maximumQuotedCredits": 11,
+  "knownOriginal51BeforeBatch": {
+    "jobs": 20,
+    "quotedCredits": 55
+  },
+  "reservedAt": "2026-10-30T00:16:44.268368+00:00",
+  "doNotExecuteBy": [
+    "extra_pair_art",
+    "higgsfield_access_probe",
+    "higgsfield_executor_v2",
+    "crypto_pair_research"
+  ]
+}

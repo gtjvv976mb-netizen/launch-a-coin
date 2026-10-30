@@ -1,0 +1,45 @@
+{
+  "context": "Create unique pictorial meme card artwork with exact identities and matching cropped material references.",
+  "requests": [
+    {
+      "index": 539,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "24a3bf04-ad7b-4fa2-811f-b48b39addf1a"
+          },
+          {
+            "role": "image",
+            "value": "fdf3c097-173a-445e-947c-2fe3a71288c9"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact gradient Percolator wordmark on black, authentic spelling and spacing only. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact authentic wordmark remains the hero across a black field, with cropped letter-counter relief repeated abstractly at edge scales. The unique outer frame follows this character: Typography-derived perimeter: smooth gradient enamel rails whose cadence follows the actual letter stems and counters, with a quiet black field. Matching materials: Violet-to-teal enamel, deep black ceramic and minimal satin silver. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    },
+    {
+      "index": 540,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "825b22ff-4b06-48b8-bfd6-32856b24bbb7"
+          },
+          {
+            "role": "image",
+            "value": "5274a1a2-af67-457a-a304-bbec297ba63b"
+          }
+        ],
+        "prompt": "Create a refined, fully pictorial collectible print. Accurately reproduce the subject from the first reference: Exact diagonal capsule icon: green half, white half and dark outline. Preserve its exact expression, pose, silhouette and intrinsic emblem geometry. The second reference provides actual matching material swatches; use its palette, fine surface finish and physical edge quality. Build a single uninterrupted finished composition: Exact capsule icon in an off-center split green/white relief composition with rounded capsule-end contours connecting to the edge. The unique outer frame follows this character: Split-capsule perimeter: alternating green/white rounded rails, one diagonal seam and dark outline channels from the source pill geometry. Matching materials: Emerald and white vitreous enamel, dark edge line and polished silver. Continue the image and material smoothly across the entire interior from top edge to bottom edge. All regions are finished pictorial artwork, with zero titles, captions, empty plates or reserved writing fields. Any intrinsic source-logo lettering stays exactly as in the first reference; introduce no other writing. Render the whole thin flat print directly front-on with smooth rounded corners, even neutral lighting, controlled material depth and sharp refined detail."
+      }
+    }
+  ]
+}

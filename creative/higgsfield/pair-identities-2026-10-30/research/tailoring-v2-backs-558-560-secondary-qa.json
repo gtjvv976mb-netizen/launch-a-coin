@@ -1,0 +1,27 @@
+{
+  "reviewedAt": "2026-10-30T04:15:32.551214+00:00",
+  "reviewer": "extra_pair_art",
+  "scope": "Read-only independent actual native source comparison; acceptance belongs to crypto_pair_research",
+  "results": [
+    {
+      "key": "zauth",
+      "index": 558,
+      "source": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/zauth-3add66529015.png",
+      "sourceSha256": "3add66529015abcdca116d56707014c0f7943fa36b8a6da7455e006f87cdaa37",
+      "actualMaster": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/zauth-back-558.png",
+      "actualSha256": "998d677c1f002b6abd26c1b2df88548ff61b66d1139e59330da206b5c1fa86aa",
+      "verdict": "reject-identity",
+      "notes": "The pinned source is a sparse white square-dot Z on black. The actual output is a dense random QR-like black/white tile matrix with a different count and arrangement; the exact emblem is lost."
+    },
+    {
+      "key": "zerebro",
+      "index": 560,
+      "source": "creative/higgsfield/pair-identities-2026-10-30/references/zerebro-a8216adfc8b0.png",
+      "sourceSha256": "a8216adfc8b0828f2493bb280192f02ca677e91cd738122bbc7465c4d96bad44",
+      "actualMaster": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/zerebro-back-560.png",
+      "actualSha256": "c061cd35910a2224ddab4fa2298694f27db2270faa8ad61ef157cd731dcf8212",
+      "verdict": "hold-extraneous-source-text",
+      "notes": "The neon seated figure is recognizable. The lower-center five-line contract-address text is copied from the source, not invented; root allows intrinsic logo lettering but excludes contract-address/prose text. Remove that text without changing the figure/material."
+    }
+  ]
+}

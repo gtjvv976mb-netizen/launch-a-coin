@@ -1,0 +1,21 @@
+{
+  "context": "Remove invented upper ornaments from the matching meme card reverse.",
+  "requests": [
+    {
+      "index": 307,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "610c8806-00c0-4ec5-89a3-c9d490b74a97"
+          }
+        ],
+        "prompt": "Edit this exact image. Remove all THREE gold objects at the TOP of the card: the small left oval object and the two right objects. Replace those upper objects completely with uninterrupted dark glass reflections matching the surrounding black field. The entire upper field must now be clean empty dark glass, without symbols, crests, leaves, stars, objects, letters or emblems. Preserve the monkey, smartphone, pose, full photographic detail, frame, bronze side rails, colors and all other existing design exactly. Do not add anything new. Keep the flat thin card reverse directly front-on, full rounded card visible."
+      }
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+[
+  {
+    "index": 85,
+    "key": "xrp",
+    "face": "front",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/xrp-front.png"
+  },
+  {
+    "index": 87,
+    "key": "xmr",
+    "face": "front",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/xmr-front.png"
+  }
+]

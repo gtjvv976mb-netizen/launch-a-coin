@@ -1,0 +1,49 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Submitted 2/2 image generations.\n- index 65: 2a9238d6-9399-4290-b565-254d2cb5fa30 (pending)\n- index 67: 09a2a48a-823d-46b7-9e0e-828a6d539687 (pending)\nWait for the complete requested set with jobs_wait, then show it together with show_generation_by_ids using the collected indexed jobs. This includes jobs submitted across separate calls. job_display accepts only one id and cannot display a group; do not pass ids or call it once per job."
+    }
+  ],
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 65,
+        "job_id": "2a9238d6-9399-4290-b565-254d2cb5fa30",
+        "status": "pending",
+        "adjustments": {
+          "medias[0].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          },
+          "medias[1].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          }
+        }
+      },
+      {
+        "index": 67,
+        "job_id": "09a2a48a-823d-46b7-9e0e-828a6d539687",
+        "status": "pending",
+        "adjustments": {
+          "medias[0].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          },
+          "medias[1].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          }
+        }
+      }
+    ],
+    "submitted_count": 2,
+    "failed_count": 0
+  },
+  "isError": false
+}

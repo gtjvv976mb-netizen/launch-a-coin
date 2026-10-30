@@ -1,0 +1,46 @@
+{
+  "scope": "Exactmint optional primarySolanaLabs token-list source intake; no app change or generation",
+  "assets": [
+    {
+      "key": "usdc",
+      "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "sourceUri": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
+      "sourceKind": "Solana Labs token-list exact mint asset directory; additional reference candidate, not asserted issuer approval",
+      "visualInspection": "pending",
+      "status": "downloaded-pending-visual-inspection",
+      "path": "references/usdc-token-list-6d14601d0b11.png",
+      "sha256": "6d14601d0b1109046e366592b8c0f256ffb075f69180b65dddd97ae665d49f9e",
+      "bytes": 9276,
+      "width": 181,
+      "height": 181,
+      "format": "PNG",
+      "mode": "RGBA",
+      "contentType": "image/png"
+    },
+    {
+      "key": "wbtc",
+      "mint": "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh",
+      "sourceUri": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh/logo.png",
+      "sourceKind": "Solana Labs token-list exact mint asset directory; additional reference candidate, not asserted issuer approval",
+      "visualInspection": "pending",
+      "status": "downloaded-pending-visual-inspection",
+      "path": "references/wbtc-token-list-4b2b394a8a1a.png",
+      "sha256": "4b2b394a8a1a3e370969a74e9d2cc0cd04f336f40ce726f682609eb0577bf3ad",
+      "bytes": 9820,
+      "width": 120,
+      "height": 120,
+      "format": "PNG",
+      "mode": "RGBA",
+      "contentType": "image/png"
+    },
+    {
+      "key": "spx",
+      "mint": "J3NKxxXZcnNiMjKw9hYb2K4LUxgwB6t1FtPtQVsv3KFr",
+      "sourceUri": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/J3NKxxXZcnNiMjKw9hYb2K4LUxgwB6t1FtPtQVsv3KFr/logo.png",
+      "sourceKind": "Solana Labs token-list exact mint asset directory; additional reference candidate, not asserted issuer approval",
+      "visualInspection": "pending",
+      "status": "pending",
+      "error": "HTTP Error 404: Not Found"
+    }
+  ]
+}

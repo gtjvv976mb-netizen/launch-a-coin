@@ -1,0 +1,23 @@
+{
+  "derivedFrom": "batches/late-corrections-816-818-status.json",
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 816,
+        "job_id": "27ad587d-0d8c-4ca6-929a-4dec10539fc3",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_035645_27ad587d-0d8c-4ca6-929a-4dec10539fc3.png"
+      }
+    ],
+    "summary": {
+      "total": 1,
+      "completed": 1,
+      "failed": 0,
+      "active": 0,
+      "errors": 0
+    },
+    "all_terminal": true
+  }
+}

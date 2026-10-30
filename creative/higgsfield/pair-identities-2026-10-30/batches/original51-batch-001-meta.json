@@ -1,0 +1,18 @@
+{
+  "batchId": "original51-batch-001",
+  "owner": "crypto_pair_research",
+  "providerBroker": "extra_pair_art",
+  "indices": [
+    180,
+    3,
+    5,
+    9
+  ],
+  "quotedCredits": 11,
+  "currentSubmissionCount": 8,
+  "countAfterSuccessfulAcceptance": 12,
+  "maximumSubmissions": 112,
+  "maximumQuotedCredits": 308,
+  "requestPath": "creative/higgsfield/pair-identities-2026-10-30/batches/original51-batch-001-request.json",
+  "status": "prepared-awaiting-global-lease"
+}

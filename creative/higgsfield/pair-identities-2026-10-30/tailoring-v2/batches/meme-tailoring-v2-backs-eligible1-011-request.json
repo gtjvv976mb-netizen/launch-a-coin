@@ -1,0 +1,45 @@
+{
+  "context": "Create distinct meme card reverses matching their verified source identities and new frame materials.",
+  "requests": [
+    {
+      "index": 523,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "a8baec22-01d3-41ad-9315-37db8715740f"
+          },
+          {
+            "role": "image",
+            "value": "9404d425-d7b7-4ab4-af3a-e165eb7cfdda"
+          }
+        ],
+        "prompt": "Create one matching premium BACK CARD SKIN. IMAGE 1 is the exact asset identity: Exact mint-green ASCII cat-like terminal drawing on black, including authentic source geometry; not an animal goat. Preserve that exact source expression, pose, silhouette, proportions, intrinsic lettering and recognizable visual features. IMAGE 2 is ONLY the matching accepted front material and perimeter reference. The reverse uses one uninterrupted full-card designed field, with the identity artwork occupying that field rather than blank content rectangles. COMPOSITION: The exact ASCII source arrangement is the hero, surrounded by sparse source-derived terminal-line geometry rather than a mascot sculpture. MATCHED MATERIALS: Near-black glass, pale mint phosphor enamel and satin dark metal. Carry the specific front frame geometry and materials continuously around this reverse. Use coherent restrained microbevels and sharp high-definition print detail. Only intrinsic exact logo lettering visibly belonging to Image1 may remain; all other surfaces are pictorial or material. Keep a thin flat trading-card print, the complete smooth rounded63:88 outline, directly front-on, neutral even lighting, every detail inside the silhouette. The whole reverse is finished artwork, with no reserved creator fields or empty label plates. Match this specific identity rather than a generic royal award design."
+      }
+    },
+    {
+      "index": 524,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "624050de-7c3b-4b61-9aad-508c13d4ab31"
+          },
+          {
+            "role": "image",
+            "value": "6ed7860f-6c1c-416c-8bd2-3d49ecdae22d"
+          }
+        ],
+        "prompt": "Create one matching premium BACK CARD SKIN. IMAGE 1 is the exact asset identity: Exact gray default-avatar profile silhouette and authentic scoped handle from the source; not a green AI mascot. Preserve that exact source expression, pose, silhouette, proportions, intrinsic lettering and recognizable visual features. IMAGE 2 is ONLY the matching accepted front material and perimeter reference. The reverse uses one uninterrupted full-card designed field, with the identity artwork occupying that field rather than blank content rectangles. COMPOSITION: Exact source avatar silhouette in an asymmetric profile-card composition with offset circular segments and quiet rectangular interface-like recesses without new text. MATCHED MATERIALS: Graphite ceramic, slate enamel, pale gray metal and dark glass. Carry the specific front frame geometry and materials continuously around this reverse. Use coherent restrained microbevels and sharp high-definition print detail. Only intrinsic exact logo lettering visibly belonging to Image1 may remain; all other surfaces are pictorial or material. Keep a thin flat trading-card print, the complete smooth rounded63:88 outline, directly front-on, neutral even lighting, every detail inside the silhouette. The whole reverse is finished artwork, with no reserved creator fields or empty label plates. Match this specific identity rather than a generic royal award design."
+      }
+    }
+  ]
+}

@@ -1,0 +1,1457 @@
+[
+  {
+    "key": "pair-sol",
+    "quoteKey": "sol",
+    "name": "Solana Signature",
+    "description": "Solana details in black ceramic and violet-to-mint enamel.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#111118",
+      "#9945FF",
+      "#E9EDF1"
+    ],
+    "finish": "holo",
+    "quoteMint": "So11111111111111111111111111111111111111112"
+  },
+  {
+    "key": "pair-usdc",
+    "quoteKey": "usdc",
+    "name": "USDC Signature",
+    "description": "USD Coin details in cobalt enamel and satin palladium.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#16336B",
+      "#2775CA",
+      "#C6D1DA"
+    ],
+    "finish": "holo",
+    "quoteMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+  },
+  {
+    "key": "pair-gmex",
+    "quoteKey": "gmex",
+    "name": "GameStop Signature",
+    "description": "GameStop xStock details in scarlet enamel and black carbon.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#171719",
+      "#D51C2B",
+      "#AEB3B8"
+    ],
+    "finish": "holo",
+    "quoteMint": "Xsf9mBktVB9BSU5kf4nHxPq5hCBJ2j2ui3ecFGxPRGc"
+  },
+  {
+    "key": "pair-tslax",
+    "quoteKey": "tslax",
+    "name": "Tesla Signature",
+    "description": "Tesla xStock details in pearl ceramic, polished titanium and red enamel.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#F1F1EC",
+      "#CC162B",
+      "#BEC3C8"
+    ],
+    "finish": "holo",
+    "quoteMint": "XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB"
+  },
+  {
+    "key": "pair-nvdax",
+    "quoteKey": "nvdax",
+    "name": "NVIDIA Signature",
+    "description": "NVIDIA xStock details in obsidian and NVIDIA-green enamel.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#101613",
+      "#76B900",
+      "#BBC2B6"
+    ],
+    "finish": "holo",
+    "quoteMint": "Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh"
+  },
+  {
+    "key": "pair-aaplx",
+    "quoteKey": "aaplx",
+    "name": "Apple Signature",
+    "description": "Apple xStock details in satin titanium and pearl ceramic.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#F1F0EC",
+      "#D4D6D4",
+      "#A7ACB0"
+    ],
+    "finish": "holo",
+    "quoteMint": "XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp"
+  },
+  {
+    "key": "pair-mstrx",
+    "quoteKey": "mstrx",
+    "name": "Strategy Signature",
+    "description": "Strategy xStock details in graphite, orange enamel and warm brushed metal.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#171514",
+      "#F58025",
+      "#EDE1CC"
+    ],
+    "finish": "holo",
+    "quoteMint": "XsP7xzNPvEHS1m6qfanPUGjNmdnmsLKEoNAnHjdxxyZ"
+  },
+  {
+    "key": "pair-coinx",
+    "quoteKey": "coinx",
+    "name": "Coinbase Signature",
+    "description": "Coinbase xStock details in blue enamel and pale palladium.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#0A1B54",
+      "#0052FF",
+      "#BEC8D3"
+    ],
+    "finish": "holo",
+    "quoteMint": "Xs7ZdzSHLU9ftNJsii5fCeJhoRWSC32SQGzGQtePxNu"
+  },
+  {
+    "key": "pair-amc",
+    "quoteKey": "amc",
+    "name": "AMC Signature",
+    "description": "AMC Entertainment tokenized equity details in red enamel and warm polished metal.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#33151A",
+      "#D71B2D",
+      "#F3E7D7"
+    ],
+    "finish": "holo",
+    "quoteMint": "AMC1qwR9KhiyrQBRPrxnfo4JfMeMZqEBvt5tgTytNNoc"
+  },
+  {
+    "key": "pair-doge",
+    "quoteKey": "doge",
+    "name": "Dogecoin Signature",
+    "description": "Dogecoin (Sunrise Solana representation) details in meteorite-black ceramic and satin gold.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#151411",
+      "#CDAF6D",
+      "#F0E8D2"
+    ],
+    "finish": "holo",
+    "quoteMint": "DoGEV7LASBkQbibMc5k5vKnTZoMg423GpJ5QtJEGfm7R"
+  },
+  {
+    "key": "pair-fartcoin",
+    "quoteKey": "fartcoin",
+    "name": "Fartcoin Signature",
+    "description": "Black terminal ceramic, satin palladium and phosphor-green circuit rails.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#F1E8C7",
+      "#B8C85B",
+      "#CBB37A"
+    ],
+    "finish": "holo",
+    "quoteMint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump"
+  },
+  {
+    "key": "pair-pnut",
+    "quoteKey": "pnut",
+    "name": "Peanut Signature",
+    "description": "Peanut the Squirrel details in walnut-brown enamel and warm metal.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#2F251A",
+      "#B4773F",
+      "#F5E9D5"
+    ],
+    "finish": "holo",
+    "quoteMint": "2qEHjDLDLbuBgRYvsxhc5D6uDWAivNFZGan56P1tpump"
+  },
+  {
+    "key": "pair-moodeng",
+    "quoteKey": "moodeng",
+    "name": "Moo Deng Signature",
+    "description": "Deep plum vitreous enamel, pearl-gray satin metal, quiet blush highlights.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#342C38",
+      "#BCA8B5",
+      "#C5CFCA"
+    ],
+    "finish": "holo",
+    "quoteMint": "ED5nyyWEzpPPiWimP8vYm7sD7TD3LAt3Q3gRTWHzPJBY"
+  },
+  {
+    "key": "pair-troll",
+    "quoteKey": "troll",
+    "name": "TROLL Signature",
+    "description": "Ivory enamel, deep black lacquer and very fine polished silver edges.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#191A1C",
+      "#E9EBE6",
+      "#F5F0DB"
+    ],
+    "finish": "holo",
+    "quoteMint": "5UUH9RTDiSpq6HKS6bp4NdU9PNJpXRXuiw6ShBTBhgH2"
+  },
+  {
+    "key": "pair-bonk",
+    "quoteKey": "bonk",
+    "name": "BONK Signature",
+    "description": "Orange/yellow enamel, red glass inlays, black ceramic and narrow satin-gold bevels.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#21202C",
+      "#F49B27",
+      "#F3E8D3"
+    ],
+    "finish": "holo",
+    "quoteMint": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"
+  },
+  {
+    "key": "pair-wif",
+    "quoteKey": "wif",
+    "name": "dogwifhat Signature",
+    "description": "dogwifhat details in knitted texture, rose metal and tobacco suede.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#3F3029",
+      "#D9B6B1",
+      "#B98577"
+    ],
+    "finish": "holo",
+    "quoteMint": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm"
+  },
+  {
+    "key": "pair-cards",
+    "quoteKey": "cards",
+    "name": "Collector Crypt Signature",
+    "description": "Orange/cyan/blue enamel, brushed platinum and dark recessed seams.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#1B1B20",
+      "#BBA7E4",
+      "#ECE9E1"
+    ],
+    "finish": "holo",
+    "quoteMint": "CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp"
+  },
+  {
+    "key": "pair-sv151",
+    "quoteKey": "sv151",
+    "name": "Scarlet & Violet 151 Signature",
+    "description": "Scarlet and violet pearlescent foil, warm gold microbevels and black shallow recesses.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#672331",
+      "#8B63B6",
+      "#F1E9D7"
+    ],
+    "finish": "holo",
+    "quoteMint": "SV151D5pjygAKA8aJJcKzm4wFnRX5G92Fye94jQJk7g"
+  },
+  {
+    "key": "pair-toad",
+    "quoteKey": "toad",
+    "name": "The Toad Pepe Signature",
+    "description": "Lime/moss enamel, dark glass eye accents and warm brushed brass.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#142C22",
+      "#6FAD55",
+      "#D2D8C8"
+    ],
+    "finish": "holo",
+    "quoteMint": "A13oRB9FFaiUjfi6LdCg6p9ka1u8SfGkUFs4SKvPpump"
+  },
+  {
+    "key": "pair-pengu",
+    "quoteKey": "pengu",
+    "name": "Pudgy Penguins Signature",
+    "description": "Blue and warm-white enamel, clean platinum edges, small orange glass accents.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#0D3D56",
+      "#7BC6E1",
+      "#D0D5CF"
+    ],
+    "finish": "holo",
+    "quoteMint": "2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv"
+  },
+  {
+    "key": "pair-giga",
+    "quoteKey": "giga",
+    "name": "GIGACHAD Signature",
+    "description": "Matte graphite, brushed dark titanium and restrained silver highlights.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#111314",
+      "#A6ADB0",
+      "#59616A"
+    ],
+    "finish": "holo",
+    "quoteMint": "63LfDmNb3MQ8mw9MtZ2To9bEA2M71kZUUGq5tiJxcqj9"
+  },
+  {
+    "key": "pair-spx",
+    "quoteKey": "spx",
+    "name": "SPX6900 Signature",
+    "description": "Black piano lacquer, white enamel and brushed silver.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#102641",
+      "#2B64B6",
+      "#EDF1E9"
+    ],
+    "finish": "holo",
+    "quoteMint": "J3NKxxXZcnNiMjKw9hYb2K4LUxgwB6t1FtPtQVsv3KFr"
+  },
+  {
+    "key": "pair-trump",
+    "quoteKey": "trump",
+    "name": "OFFICIAL TRUMP Signature",
+    "description": "Deep red enamel, black ceramic and brushed warm gold.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#581B22",
+      "#D4A65A",
+      "#172940"
+    ],
+    "finish": "holo",
+    "quoteMint": "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN"
+  },
+  {
+    "key": "pair-useless",
+    "quoteKey": "useless",
+    "name": "USELESS COIN Signature",
+    "description": "Warm yellow enamel, ivory ceramic and very narrow satin-gold joints.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#252422",
+      "#C5C3AE",
+      "#9D9A87"
+    ],
+    "finish": "holo",
+    "quoteMint": "Dz9mQ9NzkBcCsuGPFJ3r1bS4wgqKMHBPiVuniW8Mbonk"
+  },
+  {
+    "key": "pair-chillguy",
+    "quoteKey": "chillguy",
+    "name": "Chill Guy Signature",
+    "description": "Soft gray knit relief, pale denim enamel, warm tan ceramic and small burgundy accents.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#44362B",
+      "#91A5A4",
+      "#C5B695"
+    ],
+    "finish": "holo",
+    "quoteMint": "Df6yfrKC8kZE3KNkrHERKzAetSxbrWeniQfyJY4Jpump"
+  },
+  {
+    "key": "pair-goat",
+    "quoteKey": "goat",
+    "name": "Goatseus Maximus Signature",
+    "description": "Near-black terminal glass, mint phosphor lines and satin dark metal.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#28251B",
+      "#B9AF79",
+      "#544E35"
+    ],
+    "finish": "holo",
+    "quoteMint": "CzLSujWBLFsSjncfkh59rUFqvafWcY5tzedWJSuypump"
+  },
+  {
+    "key": "pair-zerebro",
+    "quoteKey": "zerebro",
+    "name": "zerebro Signature",
+    "description": "Black glass, cyan/magenta/yellow neon enamel and slim gunmetal.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#211D31",
+      "#AA88C7",
+      "#E9E3D8"
+    ],
+    "finish": "holo",
+    "quoteMint": "8x5VqbHA8D7NkD52uNuS5nnt3PwA8pLD34ymskeSo2Wn"
+  },
+  {
+    "key": "pair-act",
+    "quoteKey": "act",
+    "name": "Act I Signature",
+    "description": "Violet optical glass, dark aubergine ceramic, pearlescent pink highlights and fine silver.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#19252A",
+      "#72B8B2",
+      "#A8B6B2"
+    ],
+    "finish": "holo",
+    "quoteMint": "GJAFwWjJ3vnTsrQVabjBVK2TYB1YtRCQXRDfDgUnpump"
+  },
+  {
+    "key": "pair-pippin",
+    "quoteKey": "pippin",
+    "name": "Pippin Signature",
+    "description": "Warm white porcelain, black ink-like enamel, pastel pink and small yellow accents.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#30273D",
+      "#B99DC9",
+      "#C6D4B9"
+    ],
+    "finish": "holo",
+    "quoteMint": "Dfh5DzRgSvvCFDoYc2ciTkMrbDfRKybA4SoFbPmApump"
+  },
+  {
+    "key": "pair-vine",
+    "quoteKey": "vine",
+    "name": "Vine Coin Signature",
+    "description": "Emerald enamel, warm-white ceramic and polished silver.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#143B2C",
+      "#33B684",
+      "#C4D0C6"
+    ],
+    "finish": "holo",
+    "quoteMint": "6AJcP7wuLwmRYLBNbi825wgguaPsWzPBEHcHndpRpump"
+  },
+  {
+    "key": "pair-aura",
+    "quoteKey": "aura",
+    "name": "aura Signature",
+    "description": "Frosted smoke glass, pale silver, muted lilac/rose reflections from the image.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#2E273C",
+      "#B59ABB",
+      "#D4D1C7"
+    ],
+    "finish": "holo",
+    "quoteMint": "DtR4D9FtVoTX2569gaL837ZgrB6wNjj6tkmnX9Rdk9B2"
+  },
+  {
+    "key": "pair-michi",
+    "quoteKey": "michi",
+    "name": "michi Signature",
+    "description": "Warm white ceramic, soft gray enamel, light brushed metal and tiny wood-tone lower accents.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#342F27",
+      "#C6BA99",
+      "#A5AE9D"
+    ],
+    "finish": "holo",
+    "quoteMint": "AywAYdNJnSLSXwKWYxDciPjqGRnwp4iZdQptuuQTpump"
+  },
+  {
+    "key": "pair-cate",
+    "quoteKey": "cate",
+    "name": "Catecoin Signature",
+    "description": "Satin yellow gold, warm ivory enamel and dark fine linework.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#2A2B33",
+      "#9FAEC3",
+      "#A8AFB5"
+    ],
+    "finish": "holo",
+    "quoteMint": "Ai66LHZG9MCzg1WKdawwqduVAXpNDUuV8M3uyq5ppump"
+  },
+  {
+    "key": "pair-ansem",
+    "quoteKey": "ansem",
+    "name": "The Black Bull Signature",
+    "description": "Blackened bronze, dark basalt-like ceramic and restrained cool polished highlights.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#131517",
+      "#9D987F",
+      "#4A4E50"
+    ],
+    "finish": "holo",
+    "quoteMint": "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump"
+  },
+  {
+    "key": "pair-bert",
+    "quoteKey": "bert",
+    "name": "Bertram Signature",
+    "description": "Copper-brown enamel, warm cream ceramic, subtle amber/olive light accents and satin brass.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#382A20",
+      "#C8894E",
+      "#BEA27A"
+    ],
+    "finish": "holo",
+    "quoteMint": "HgBRWfYxEfvPhtqkaeymCQtHCrKE46qQ43pKe8HCpump"
+  },
+  {
+    "key": "pair-chillhouse",
+    "quoteKey": "chillhouse",
+    "name": "Chill House Signature",
+    "description": "Warm cream ceramic, terracotta-red enamel, gray knit relief and pale blue denim tone.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#273237",
+      "#A7B8B4",
+      "#7D9192"
+    ],
+    "finish": "holo",
+    "quoteMint": "GkyPYa7NnCFbduLknCfBfP7p8564X1VZhwZYJ6CZpump"
+  },
+  {
+    "key": "pair-usduc",
+    "quoteKey": "usduc",
+    "name": "unstable coin Signature",
+    "description": "Cobalt enamel, white ceramic and thin matte silver edges.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#352A24",
+      "#C89763",
+      "#887960"
+    ],
+    "finish": "holo",
+    "quoteMint": "CB9dDufT3ZuQXqqSfa1c5kY935TEreyBw9XJXxHKpump"
+  },
+  {
+    "key": "pair-wbtc",
+    "quoteKey": "wbtc",
+    "name": "Bitcoin Signature",
+    "description": "Bitcoin / Wrapped BTC details in burnished orange enamel, warm palladium and a precisely struck coin relief.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#211a14",
+      "#F7931A",
+      "#EDD8AC"
+    ],
+    "finish": "holo",
+    "quoteMint": "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh"
+  },
+  {
+    "key": "pair-eth",
+    "quoteKey": "eth",
+    "name": "Ethereum Signature",
+    "description": "Ethereum details in smoked quartz, faceted silver and translucent lilac enamel.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#211f35",
+      "#8A92B2",
+      "#DADDF4"
+    ],
+    "finish": "holo",
+    "quoteMint": "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs"
+  },
+  {
+    "key": "pair-hype",
+    "quoteKey": "hype",
+    "name": "Hyperliquid Signature",
+    "description": "Hyperliquid details in deep green ceramic, mint enamel and polished liquid-metal channels.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#0c302b",
+      "#97FCE4",
+      "#E5F8EF"
+    ],
+    "finish": "holo",
+    "quoteMint": "98sMhvDwXj1RQi5c5Mndm3vPe9cBqPrbLaufMXFNMh5g"
+  },
+  {
+    "key": "pair-zec",
+    "quoteKey": "zec",
+    "name": "Zcash Signature",
+    "description": "Zcash details in charcoal ceramic, saffron enamel and satin platinum.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#252320",
+      "#F4B728",
+      "#F7E5A5"
+    ],
+    "finish": "holo",
+    "quoteMint": "A7bdiYdS5GjqGFtxf17ppRHtDKPkkRqbKtR27dxvQXaS"
+  },
+  {
+    "key": "pair-near",
+    "quoteKey": "near",
+    "name": "NEAR Signature",
+    "description": "NEAR Protocol details in obsidian ceramic, pale green enamel and precise silver inlays.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#171c1b",
+      "#9AE6BC",
+      "#F0F4EC"
+    ],
+    "finish": "holo",
+    "quoteMint": "3ZLekZYq2qkZiSpnSvabjit34tUkjSwD1JFuW9as9wBG"
+  },
+  {
+    "key": "pair-xrp",
+    "quoteKey": "xrp",
+    "name": "XRP Signature",
+    "description": "XRP details in black glass, silver-white ceramic and restrained steel-blue channels.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#17232c",
+      "#E9ECEE",
+      "#6DA6C5"
+    ],
+    "finish": "holo",
+    "quoteMint": "6UpQcMAb5xMzxc7ZfPaVMgx3KqsvKZdT5U718BzD5We2"
+  },
+  {
+    "key": "pair-xmr",
+    "quoteKey": "xmr",
+    "name": "Monero Signature",
+    "description": "Monero details in graphite ceramic, orange enamel and brushed white metal.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#252b2b",
+      "#FF6600",
+      "#E5E6E2"
+    ],
+    "finish": "holo",
+    "quoteMint": "WXMRyRZhsa19ety5erZhHg4N3xj3EVN92u94422teJp"
+  },
+  {
+    "key": "pair-sui",
+    "quoteKey": "sui",
+    "name": "Sui Signature",
+    "description": "Sui details in deep blue glass, pale blue enamel and polished palladium.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#0b3047",
+      "#6FBCF0",
+      "#E5F5FE"
+    ],
+    "finish": "holo",
+    "quoteMint": "suifhC9gU1VbJAPYPTBkHJyyyStKGLLYPVDTmPoqbvA"
+  },
+  {
+    "key": "pair-arb",
+    "quoteKey": "arb",
+    "name": "Arbitrum Signature",
+    "description": "Arbitrum details in navy ceramic, ice-blue enamel and faceted titanium.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#142133",
+      "#28A0F0",
+      "#E6EBF1"
+    ],
+    "finish": "holo",
+    "quoteMint": "ARBzQTYDCW2KnVEjs1Mc81LekB1ibVFZKbSVmorkoT9d"
+  },
+  {
+    "key": "pair-aave",
+    "quoteKey": "aave",
+    "name": "Aave Signature",
+    "description": "Aave details in lavender porcelain, iridescent mint enamel and satin silver.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#392747",
+      "#B7A2E9",
+      "#9BE6D8"
+    ],
+    "finish": "holo",
+    "quoteMint": "AavE1kKKnesPw4MuRJmJ9jZs9QzEE8CPxQ3ViczUDfc1"
+  },
+  {
+    "key": "pair-uni",
+    "quoteKey": "uni",
+    "name": "Uniswap Signature",
+    "description": "Uniswap details in deep plum ceramic, vivid pink enamel and rose-palladium.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#3a1530",
+      "#FF007A",
+      "#F6DAEC"
+    ],
+    "finish": "holo",
+    "quoteMint": "uniHfuPhEQSrtpzXpJZDCSq53yaejKKpNhFUiKoHKHV"
+  },
+  {
+    "key": "pair-tao",
+    "quoteKey": "tao",
+    "name": "Bittensor Signature",
+    "description": "Bittensor details in black ceramic, ivory enamel and brushed platinum.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#151515",
+      "#ECEAE4",
+      "#919493"
+    ],
+    "finish": "holo",
+    "quoteMint": "taoC6xyv2v8tDLcev4uaGUgV4vdQsWJrGft2kcBRrBY"
+  },
+  {
+    "key": "pair-peaq",
+    "quoteKey": "peaq",
+    "name": "peaq Signature",
+    "description": "peaq details in graphite ceramic, soft green enamel and polished silver.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#192225",
+      "#BBD9CB",
+      "#DCE7E1"
+    ],
+    "finish": "holo",
+    "quoteMint": "PEAQjk7SRS6rXHVFFmpRr7zrC4g5ZuEebpwTxvaLr3b"
+  },
+  {
+    "key": "pair-mon",
+    "quoteKey": "mon",
+    "name": "Monad Signature",
+    "description": "Monad details in midnight violet ceramic, lavender enamel and luminous palladium.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#201744",
+      "#836EF9",
+      "#E3DEFF"
+    ],
+    "finish": "holo",
+    "quoteMint": "CrAr4RRJMBVwRsZtT62pEhfA9H5utymC2mVx8e7FreP2"
+  },
+  {
+    "key": "pair-cashcat",
+    "quoteKey": "cashcat",
+    "quoteMint": "CashcatZMRn4Jv8sPQZUSsbTLi2PcPe1ssqbHcnaJqSS",
+    "name": "Cash Cat Signature",
+    "description": "Palladium, pearl-gray ceramic and soft white enamel.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#26282A",
+      "#B8BFC2",
+      "#F0EFE8"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-neet",
+    "quoteKey": "neet",
+    "quoteMint": "Ce2gx9KGXJ6C9Mp5b5x1sn9Mg87JwEbrQby4Zqo3pump",
+    "name": "NotInEmploymentEducationTraining Signature",
+    "description": "Black etched enamel, ivory ceramic and narrow satin palladium.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#141414",
+      "#B8BAB8",
+      "#E5E4DF"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-otc",
+    "quoteKey": "otc",
+    "quoteMint": "MukLDtJ8Cx9DxLbeyLRSWPSposTMWuwHANbuaudpump",
+    "name": "OTC Signature",
+    "description": "Warm cream ceramic, dark screen glass, green phosphor enamel and tiny red accent.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#111914",
+      "#71B883",
+      "#E1D7BF"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-fone",
+    "quoteKey": "fone",
+    "quoteMint": "CTPoyCwkjMvoJwU4xvZZqoD8tiYk6yDchySiN5gGpump",
+    "name": "apeonfone Signature",
+    "description": "Dark phone glass, warm bronze edging and camera details.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#33271C",
+      "#B28B5B",
+      "#EADFC8"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-buttcoin",
+    "quoteKey": "buttcoin",
+    "quoteMint": "Cm6fNnMk7NfzStP9CZpsQA2v3jjzbcYGAxdJySmHpump",
+    "name": "Buttcoin Signature",
+    "description": "Tangerine enamel, warm-white ceramic and fine champagne-metal edges.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#30251A",
+      "#FFA13B",
+      "#FFF5E6"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-triplet",
+    "quoteKey": "triplet",
+    "quoteMint": "J8PSdNP3QewKq2Z1JJJFDMaqF7KcaiJhR7gbr5KZpump",
+    "name": "Tung Tung Tung Sahur Signature",
+    "description": "Warm carved wood relief, burnished copper and quiet amber light.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#352217",
+      "#BD773B",
+      "#F0D1A2"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-cupsey",
+    "quoteKey": "cupsey",
+    "quoteMint": "6NwarBvDkXhByqVp2Qkq5i9XbtA2B3Bwe8SWGu9vpump",
+    "name": "Cupsey Signature",
+    "description": "Pearl cream ceramic, smooth green enamel, soft pink glass and narrow champagne metal.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#183B2C",
+      "#53B282",
+      "#F0EAD5"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-alon",
+    "quoteKey": "alon",
+    "quoteMint": "8XtRWb4uAAJFMP4QQhoYYCWR6XXb7ybcCdiqPwz9s5WS",
+    "name": "alon Signature",
+    "description": "Yellow enamel, matte black ceramic, white lens-like glass and cool gray metal.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#193E46",
+      "#E4C548",
+      "#F6E8C9"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-jimothy",
+    "quoteKey": "jimothy",
+    "quoteMint": "Ge87EtsjwRQbHaqQmKRno69RFTwh9bfSsm99XNxTpump",
+    "name": "Jimothy The Raccoon Signature",
+    "description": "Charcoal ceramic, warm amber glass and satin bronze.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#24282A",
+      "#C2AA7A",
+      "#E1D9C5"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-lmao",
+    "quoteKey": "lmao",
+    "quoteMint": "H74CYmXgMkYHYuSRsZt6RJb4NYp2u72Vw8BS5huApump",
+    "name": "LMAO! Signature",
+    "description": "Yellow enamel, cyan glass, glossy orange and warm-white ceramic with fine gold edges.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#45361B",
+      "#F0C13C",
+      "#9DE1E6"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-bobo",
+    "quoteKey": "bobo",
+    "quoteMint": "4nV5gNwwP68zUDat26ySChREqVaQaLudfJBkSgEzpump",
+    "name": "Bobo Signature",
+    "description": "Dark brown enamel, deep crimson lacquer, black etching and restrained copper.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#5A3426",
+      "#B20C30",
+      "#DEBE8A"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-tokabu",
+    "quoteKey": "tokabu",
+    "quoteMint": "H8xQ6poBjB9DTPMDTKWzWPrnxu4bDEhybxiouF8Ppump",
+    "name": "The Spirit of Gambling Signature",
+    "description": "Cyan enamel, bright yellow ceramic and very slim blackened metal.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#144349",
+      "#FFE52D",
+      "#38C9C8"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-manifest",
+    "quoteKey": "manifest",
+    "quoteMint": "BCdwQBAn8dYB5YjTsoB6TdHAWokxv28k2oZUodERpump",
+    "name": "Manifesting Signature",
+    "description": "Matte black enamel, warm ivory porcelain and narrow champagne metal.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#242321",
+      "#CBBF9F",
+      "#F8F6EE"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-baton",
+    "quoteKey": "baton",
+    "quoteMint": "Hg5Ja55T5wESq4vyFoiVCMeHXtGyVA69X2UHq8hgpump",
+    "name": "baton Signature",
+    "description": "Warm tan enamel, polished white ceramic, emerald grip-like inlays and satin brass.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#254636",
+      "#CEAC74",
+      "#F2EADB"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-claw",
+    "quoteKey": "claw",
+    "quoteMint": "739dnZEG4yaBWFsY8L8ZwrfhGG6dhtCSercW8Umspump",
+    "name": "clawpump.tech Signature",
+    "description": "Emerald enamel, white glass highlight, dark green ceramic and brushed silver.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#153C2A",
+      "#35CA86",
+      "#F0F3E9"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-67",
+    "quoteKey": "67",
+    "quoteMint": "9AvytnUKsLxPxFHFqS6VLxaxt5p6BhYNr53SD2Chpump",
+    "name": "The Official 67 Coin Signature",
+    "description": "Warm pale-gold hair-toned metal, neutral ivory and cyan/black accent planes.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#252726",
+      "#B9B9A8",
+      "#E6DFCF"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-zauth",
+    "quoteKey": "zauth",
+    "quoteMint": "DNhQZ1CE9qZ2FNrVhsCXwQJ2vZG8ufZkcYakTS5Jpump",
+    "name": "zauthx402 Signature",
+    "description": "Black glass, ivory pixel enamel and thin palladium.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#171719",
+      "#CDCED0",
+      "#F5F5EF"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-kins",
+    "quoteKey": "kins",
+    "quoteMint": "Tqj8yFmagrg7oorpQkVGYR52r96RFTamvWfth9bpump",
+    "name": "Kintara Signature",
+    "description": "Tan ceramic, matte black enamel and clean sky-blue glass accents.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#302A23",
+      "#C6A984",
+      "#82D1F7"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-percolator",
+    "quoteKey": "percolator",
+    "quoteMint": "8PzFWyLpCVEmbZmVJcaRTU5r69XKJx1rd7YGpWvnpump",
+    "name": "Percolator Signature",
+    "description": "Violet-to-teal enamel, deep black ceramic and minimal satin silver.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#111417",
+      "#816EE8",
+      "#19BEA6"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-jotchua",
+    "quoteKey": "jotchua",
+    "quoteMint": "BcHEaaTCvycPwwsJ9yQTXdHP9X2gCLkznDbZ8VySpump",
+    "name": "Jotchua Signature",
+    "description": "Warm cream ceramic, light champagne metal and quiet black glass accents.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#342A22",
+      "#C9B18E",
+      "#EFE4D1"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-zcat",
+    "quoteKey": "zcat",
+    "quoteMint": "HcRLc9VDgjLeK154xDawfb1dmVJ98DoSqcwTHGqiDeJR",
+    "name": "Anonymous Cat Signature",
+    "description": "Fine kraft-paper relief, warm tan ceramic, dark recesses and narrow matte brass.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#352B20",
+      "#BEA16C",
+      "#F0E4CE"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-gork",
+    "quoteKey": "gork",
+    "quoteMint": "76EDL5qNcte2ZH29quTaFzagXjWAEY83CATEjyA6pump",
+    "name": "@gork Signature",
+    "description": "Graphite ceramic, slate enamel, pale gray metal and dark glass.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#17191C",
+      "#A8B2BC",
+      "#E7E9E9"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-stonk",
+    "quoteKey": "stonk",
+    "quoteMint": "6GmAFSYs4gk3FDao5FzzySQpPZaWsa4rUJHacpMpUNgx",
+    "name": "STONK Signature",
+    "description": "Cyan translucent enamel, pale blue ceramic and narrow silver edges.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#102A31",
+      "#61A7BC",
+      "#DCE9E9"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-solangeles",
+    "quoteKey": "solangeles",
+    "quoteMint": "8wxkvAfEns76yBzu4MnbV7VnXWjg3iDPA9uwAQ6cpump",
+    "name": "SolAngeles Signature",
+    "description": "Cyan/violet iridescent enamel, multicolor accents and dark polished metal.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#171C2B",
+      "#71D3C2",
+      "#D9D8E8"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-paid",
+    "quoteKey": "paid",
+    "quoteMint": "98kfF7rmsg1QDUEoCqNE7g7M1FdrTt92TEp2CLzypump",
+    "name": "Paid Signature",
+    "description": "Black ceramic, raised white enamel and fine polished palladium.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#141414",
+      "#CDD0CD",
+      "#F2F1EB"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-pepe",
+    "quoteKey": "pepe",
+    "quoteMint": "PEPEqnuuCDbBC89p1u9vpnP1KQ2oj1xTcQBsjt9X55m",
+    "name": "Pepe Signature",
+    "description": "Moss-green enamel, irregular waterline rails and etched dark-metal edges.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#1E3A27",
+      "#6F9C5F",
+      "#DFE7C9"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-jeanphil",
+    "quoteKey": "jeanphil",
+    "quoteMint": "GTBxUiw6wJdmmkCGZgRHLyYxqu1vG4KtRpeox6yDpump",
+    "name": "Jean Phil Signature",
+    "description": "Honey-gold satin metal, warm blond enamel and gray/blue neutral recesses.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#31291F",
+      "#CAA872",
+      "#EEE3CC"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-pill",
+    "quoteKey": "pill",
+    "quoteMint": "DvdmEnztCmXwBnAbedD48XVGZJSxq31zNvnyftXdpump",
+    "name": "pill Signature",
+    "description": "Emerald and white vitreous enamel, dark edge line and polished silver.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#1A342F",
+      "#41BF91",
+      "#EDF4E8"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-biketyson",
+    "quoteKey": "biketyson",
+    "quoteMint": "CbyTNf7UPzvewHh4Zp6umogM2RWahhmGRJWLJnPwpump",
+    "name": "BIKE TYSON Signature",
+    "description": "Warm bronze tubing, dark rubber-like ceramic, steel spoke lines and neutral ivory panels.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#302923",
+      "#B38E61",
+      "#D9D4C5"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-npc",
+    "quoteKey": "npc",
+    "quoteMint": "7GUnr7krtQhJwd6ASY2VUprd9t4c64zcgCsjdmZepump",
+    "name": "NPCs Signature",
+    "description": "Matte gray ceramic, black line enamel and brushed industrial silver.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#242629",
+      "#949A9B",
+      "#E2E3DC"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-wojak",
+    "quoteKey": "wojak",
+    "quoteMint": "8J69rbLTzWWgUJziFY8jeu5tDwEPBwUz4pKBMr5rpump",
+    "name": "Wojak Signature",
+    "description": "Ivory porcelain, fine charcoal etching and understated matte silver.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#151615",
+      "#B7B9B2",
+      "#F0EEE6"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-eacc",
+    "quoteKey": "eacc",
+    "quoteMint": "CbcyNo7m1amFWqEQm2m4PLv1UNvpcL3C1Ujm6AkzpKoU",
+    "name": "Effective Accelerationism Signature",
+    "description": "Effective Accelerationism details in midnight-blue ceramic, cyan luminous enamel and violet-silver foil.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#141A3C",
+      "#58D3E8",
+      "#DDEBF4"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-hodl",
+    "quoteKey": "hodl",
+    "quoteMint": "Hh3oTaqDCKKfdBgsQEvxp9sUwyNf8x9qmKqEMLBWpump",
+    "name": "HODL Signature",
+    "description": "Brushed silver, matte charcoal, photographic warm-white and black enamel.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#1E2122",
+      "#A4ABA9",
+      "#E4E3D9"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-agency",
+    "quoteKey": "agency",
+    "quoteMint": "7VertkgF9KLhxxJXHX6uaWuoYZTP9LdGj2bWmVXVpump",
+    "name": "Agency Signature",
+    "description": "Cream ceramic, black screen glass, satin dark metal and pale-gold pixels.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#171716",
+      "#DCC7A5",
+      "#F4EDDC"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-claudia",
+    "quoteKey": "claudia",
+    "quoteMint": "H7TuvDxEKygh27zGfGcjKG8JGWgrbyKpPtvJEpGosfas",
+    "name": "CLAUDIA Signature",
+    "description": "Black lacquer, copper enamel, deep green ceramic and restrained blue recesses.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#242B21",
+      "#BA7150",
+      "#E4DCCF"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-shib",
+    "quoteKey": "shib",
+    "quoteMint": "shib5gSoVKPjwkXrxRk7SbQFzb2R9rQB3TgQWYX4RwW",
+    "name": "SHIBA INU Signature",
+    "description": "Orange/red enamel, white ceramic and dark polished metal with narrow gold edges.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#4D1719",
+      "#F58A30",
+      "#F5E7D7"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-swordcat",
+    "quoteKey": "swordcat",
+    "quoteMint": "5tCju6YNxHq5zrA6tGndr6F7TK42mpUFmeE31cSFpump",
+    "name": "cat wif sword Signature",
+    "description": "Brushed silver armor relief, ginger enamel accents, dark steel and luminous gold glass.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#252A2B",
+      "#E6BC62",
+      "#EFE2C0"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-plague",
+    "quoteKey": "plague",
+    "quoteMint": "CscZaq5twomhUkvCY8Jdd1tge32L4Yj9FbkFFEZQpump",
+    "name": "Yersinia pestis Signature",
+    "description": "Blackened leather-like relief, dark bronze, smoked optical glass and restrained brown enamel.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#211F1B",
+      "#9E8056",
+      "#D0C5A9"
+    ],
+    "finish": "holo"
+  },
+  {
+    "key": "pair-pump",
+    "quoteKey": "pump",
+    "name": "Pump Signature",
+    "description": "Exact Pump capsule details in dark navy, mint enamel and polished silver.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#17202D",
+      "#64CE9B",
+      "#F3EEE4"
+    ],
+    "finish": "holo",
+    "quoteMint": "pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn"
+  },
+  {
+    "key": "pair-alch",
+    "quoteKey": "alch",
+    "name": "Alchemist AI Signature",
+    "description": "Exact Alchemist AI pixel-A details in obsidian, scarlet and satin gold.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#171006",
+      "#F3D620",
+      "#F3EEE4"
+    ],
+    "finish": "gold",
+    "quoteMint": "HNg5PYJmtqcmzXrv6S9zP1CDKk5BgDuyFBxbvNApump"
+  },
+  {
+    "key": "pair-pumpcade",
+    "quoteKey": "pumpcade",
+    "name": "PUMPCADE Signature",
+    "description": "Exact arcade-medallion details in burgundy enamel and satin gold.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#221006",
+      "#EAAE12",
+      "#F3EEE4"
+    ],
+    "finish": "gold",
+    "quoteMint": "Eg2ymQ2aQqjMcibnmTt8erC6Tvk9PVpJZCxvVPJz2agu"
+  },
+  {
+    "key": "pair-codec",
+    "quoteKey": "codec",
+    "name": "Codec Flow Signature",
+    "description": "Exact segmented CODEC mark in black ceramic and polished palladium.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#121210",
+      "#FFFFFF",
+      "#F3EEE4"
+    ],
+    "finish": "holo",
+    "quoteMint": "69LjZUUzxj3Cb3Fxeo1X4QpYEQTboApkhXTysPpbpump"
+  },
+  {
+    "key": "pair-ape",
+    "quoteKey": "ape",
+    "name": "ApeCoin (Solana quote) Signature",
+    "description": "Exact Solana APE gorilla details in cobalt enamel and polished silver.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#0057FF",
+      "#FFFFFF",
+      "#F3EEE4"
+    ],
+    "finish": "holo",
+    "quoteMint": "C1MHyoTJpRTeS9AQCyspNVu2EWAYCZwmJ1jNkEArFP1f"
+  },
+  {
+    "key": "pair-link",
+    "quoteKey": "link",
+    "name": "Chainlink Token (Solana) Signature",
+    "description": "Exact Solana LINK hexagon details in Chainlink blue enamel and polished silver.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#345DDC",
+      "#FFFFFF",
+      "#F3EEE4"
+    ],
+    "finish": "holo",
+    "quoteMint": "LinkhB3afbBKb2EQQu7s7umdZceV3wcvAUJhQAfQ23L"
+  },
+  {
+    "key": "pair-ore",
+    "quoteKey": "ore",
+    "name": "ORE Signature",
+    "description": "Exact ORE ring details in black stone and platinum.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#000000",
+      "#F5F5F5",
+      "#F3EEE4"
+    ],
+    "finish": "holo",
+    "quoteMint": "oreoU2P8bN6jkk3jbaiVxYnG1dCXcYxwhwyK9jSybcp"
+  },
+  {
+    "key": "pair-skr",
+    "quoteKey": "skr",
+    "name": "Seeker Signature",
+    "description": "Exact Seeker split-S details in obsidian and brushed silver.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#000000",
+      "#FFFFFF",
+      "#F3EEE4"
+    ],
+    "finish": "holo",
+    "quoteMint": "SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3"
+  }
+]

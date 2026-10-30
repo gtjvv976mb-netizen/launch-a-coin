@@ -1,0 +1,162 @@
+[
+  {
+    "quoteKey": "stonk",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/stonk-primary-7417b870b953-reference-1024.png",
+    "sha256": "443b13e4df95b72b0157c699d7e23c0aa70d12ae92be2d5d050902fa2b2c641f",
+    "mediaId": "7c6eebbe-41db-4b11-b4f4-05434669dc9f",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/7c6eebbe-41db-4b11-b4f4-05434669dc9f.png",
+    "putStatus": 200,
+    "status": "uploaded",
+    "error": null
+  },
+  {
+    "quoteKey": "solangeles",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/solangeles-552769df67a1.png",
+    "sha256": "552769df67a12692b0b3a8fd688250c9e0c6982aebcca303f1a25a2a49137c99",
+    "mediaId": "7ba5f850-1f00-4762-bdd1-df977adf3065",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/7ba5f850-1f00-4762-bdd1-df977adf3065.png",
+    "putStatus": 200,
+    "status": "uploaded",
+    "error": null
+  },
+  {
+    "quoteKey": "paid",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/paid-primary-7fe42e316e42-reference-1024.png",
+    "sha256": "6cd02ff39f2370882c1c8ae3b51b0729531a32c06a448d36e504fb59670e7783",
+    "mediaId": "28956d45-d076-4290-86ee-f10e98438f66",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/28956d45-d076-4290-86ee-f10e98438f66.png",
+    "putStatus": 200,
+    "status": "uploaded",
+    "error": null
+  },
+  {
+    "quoteKey": "jeanphil",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/jeanphil-a9c0b8129358.png",
+    "sha256": "a9c0b812935828df9b076db8b1a086b804559e01881d45cc6da9771be473cb90",
+    "mediaId": "9ade0f73-283b-4293-a3b4-0a871a4d318e",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/9ade0f73-283b-4293-a3b4-0a871a4d318e.png",
+    "putStatus": 200,
+    "status": "uploaded",
+    "error": null
+  },
+  {
+    "quoteKey": "pill",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/pill-primary-b90d439fa4d9.jpg",
+    "sha256": "b90d439fa4d997aa93494da615c0fa19a1b4a3e178ca41237ae626e40ab4b470",
+    "mediaId": "825b22ff-4b06-48b8-bfd6-32856b24bbb7",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/825b22ff-4b06-48b8-bfd6-32856b24bbb7.jpg",
+    "putStatus": 200,
+    "status": "uploaded",
+    "error": null
+  },
+  {
+    "quoteKey": "biketyson",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/biketyson-c18f3b75f0d1.png",
+    "sha256": "c18f3b75f0d1e1f3b97aed507773a2c99b8ab68675caf13fd53483c8abf20aaa",
+    "mediaId": "03b5908b-31f5-43dd-ab4a-cf5974c62b4c",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/03b5908b-31f5-43dd-ab4a-cf5974c62b4c.png",
+    "putStatus": 0,
+    "status": "failed",
+    "error": "curl: (28) SSL connection timeout\n"
+  },
+  {
+    "quoteKey": "npc",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/npc-fcdab23761ce.png",
+    "sha256": "fcdab23761ce3ff03c264e62d122cf8152dfbe69c3297c56502a787df6d447d5",
+    "mediaId": "3444235a-ffe2-4ae4-9d6f-f5e6deb4a3d2",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/3444235a-ffe2-4ae4-9d6f-f5e6deb4a3d2.png",
+    "putStatus": 200,
+    "status": "uploaded",
+    "error": null
+  },
+  {
+    "quoteKey": "eacc",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/eacc-4f83e5b63bcd.webp",
+    "sha256": "4f83e5b63bcd4a89dd943d0c95e099240c2570a9aa7fb9b47c088bdeee68c961",
+    "mediaId": "aae07117-1542-42d0-b229-1ec0d9e6773d",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/aae07117-1542-42d0-b229-1ec0d9e6773d.webp",
+    "putStatus": 200,
+    "status": "uploaded",
+    "error": null
+  },
+  {
+    "quoteKey": "hodl",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/hodl-56f9bf8d2d0a.jpg",
+    "sha256": "56f9bf8d2d0a74f79709e5cc022c095774067151d3347b363789e66b78d70422",
+    "mediaId": "d711adf3-77d9-425e-9e00-ee20ea2ddda5",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/d711adf3-77d9-425e-9e00-ee20ea2ddda5.jpg",
+    "putStatus": 200,
+    "status": "uploaded",
+    "error": null
+  },
+  {
+    "quoteKey": "agency",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/agency-2e998f3b122d.png",
+    "sha256": "2e998f3b122d30a9ba9a1935d2c9bb70826dc235e9e3b2a5bd7b2f9c12a64b73",
+    "mediaId": "ae24adf0-291b-45dd-a31e-b5855a0f03eb",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/ae24adf0-291b-45dd-a31e-b5855a0f03eb.png",
+    "putStatus": 200,
+    "status": "uploaded",
+    "error": null
+  },
+  {
+    "quoteKey": "claudia",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/claudia-74686a62f4c5.png",
+    "sha256": "74686a62f4c5124281123f9c5123edbd1835fef3f45637fc6bb93aceda422eb9",
+    "mediaId": "dc5931c0-8620-49f3-b8c2-0ce8d0dd1a9b",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/dc5931c0-8620-49f3-b8c2-0ce8d0dd1a9b.png",
+    "putStatus": 0,
+    "status": "failed",
+    "error": "curl: (28) SSL connection timeout\n"
+  },
+  {
+    "quoteKey": "shib",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/shib-primary-emblem-crop-1024.png",
+    "sha256": "acaa2de69742d2ca1af0d441ff3c6be4cefb7b613adc353d548cf558b38440c6",
+    "mediaId": "dd0ae0dd-3e57-49b6-964a-9b651e9d62fc",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/dd0ae0dd-3e57-49b6-964a-9b651e9d62fc.png",
+    "putStatus": 200,
+    "status": "uploaded",
+    "error": null
+  },
+  {
+    "quoteKey": "swordcat",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/swordcat-9b3a8b914ce0.webp",
+    "sha256": "9b3a8b914ce061645a9eaeb9228ce1bcedb5342bcd38f3ad74f7645c646cfda2",
+    "mediaId": "8887d206-92a7-4193-a759-ecf76d9bf92b",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/8887d206-92a7-4193-a759-ecf76d9bf92b.webp",
+    "putStatus": 200,
+    "status": "uploaded",
+    "error": null
+  },
+  {
+    "quoteKey": "plague",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/plague-68bb5af167cd.jpg",
+    "sha256": "68bb5af167cd23f12dab24c013648cf5e00dbcb4de1a2c3d25bb4da9b8441304",
+    "mediaId": "702af55c-3303-4d2e-802b-b9647200eb57",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/702af55c-3303-4d2e-802b-b9647200eb57.jpg",
+    "putStatus": 0,
+    "status": "failed",
+    "error": "curl: (28) Failed to connect to upload.higgsfield.ai port 443 after 15006 ms: Timeout was reached\n"
+  },
+  {
+    "quoteKey": "jimothy",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/jimothy-d8e5e31f43da.jpg",
+    "sha256": "d8e5e31f43da271d7e06fdb56276073b81874f33e1c6408ce94567ce04efd588",
+    "mediaId": "4f47e63c-ce8a-4c9d-b8a9-9c6927ebc351",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/4f47e63c-ce8a-4c9d-b8a9-9c6927ebc351.jpg",
+    "putStatus": 200,
+    "status": "uploaded",
+    "error": null
+  },
+  {
+    "quoteKey": "zcat",
+    "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/zcat-og-identity-crop.png",
+    "sha256": "4a42113222fe75b160e2f14b9bd495d8b6c3b97943740cc2e3f777d9c351629d",
+    "mediaId": "7d52d947-8f00-4124-9a31-5d978ee4c45e",
+    "url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/7d52d947-8f00-4124-9a31-5d978ee4c45e.png",
+    "putStatus": 200,
+    "status": "uploaded",
+    "error": null
+  }
+]

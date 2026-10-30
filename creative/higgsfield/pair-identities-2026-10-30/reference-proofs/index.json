@@ -1,0 +1,171 @@
+{
+  "purpose": "Source identity intake QA only; not new artwork or generation",
+  "loadedCount": 33,
+  "loaded": [
+    {
+      "key": "gmex",
+      "path": "references/gmex-709f953a1655.png",
+      "sheet": 1
+    },
+    {
+      "key": "tslax",
+      "path": "references/tslax-42cb949ac9a7.png",
+      "sheet": 1
+    },
+    {
+      "key": "nvdax",
+      "path": "references/nvdax-6b639eff0158.png",
+      "sheet": 1
+    },
+    {
+      "key": "aaplx",
+      "path": "references/aaplx-930db1995149.png",
+      "sheet": 1
+    },
+    {
+      "key": "mstrx",
+      "path": "references/mstrx-1456e378930a.png",
+      "sheet": 1
+    },
+    {
+      "key": "coinx",
+      "path": "references/coinx-7b028dd20902.png",
+      "sheet": 1
+    },
+    {
+      "key": "amc",
+      "path": "references/amc-a0e7483f0f5b.png",
+      "sheet": 1
+    },
+    {
+      "key": "fartcoin",
+      "path": "references/fartcoin-e602c2e486b5.png",
+      "sheet": 1
+    },
+    {
+      "key": "pnut",
+      "path": "references/pnut-7b8c1825d78c.jpg",
+      "sheet": 1
+    },
+    {
+      "key": "moodeng",
+      "path": "references/moodeng-7f4f147ab9ea.png",
+      "sheet": 2
+    },
+    {
+      "key": "troll",
+      "path": "references/troll-5e3348ca8d09.png",
+      "sheet": 2
+    },
+    {
+      "key": "bonk",
+      "path": "references/bonk-498ca3589dbe.jpg",
+      "sheet": 2
+    },
+    {
+      "key": "wif",
+      "path": "references/wif-2ad89d597573.jpg",
+      "sheet": 2
+    },
+    {
+      "key": "toad",
+      "path": "references/toad-80464cc13949.png",
+      "sheet": 2
+    },
+    {
+      "key": "pengu",
+      "path": "references/pengu-0b6260425d58.png",
+      "sheet": 2
+    },
+    {
+      "key": "giga",
+      "path": "references/giga-61b9c55c37cd.png",
+      "sheet": 2
+    },
+    {
+      "key": "useless",
+      "path": "references/useless-f21ba0a63e3d.png",
+      "sheet": 2
+    },
+    {
+      "key": "chillguy",
+      "path": "references/chillguy-441a9eb33c81.jpg",
+      "sheet": 3
+    },
+    {
+      "key": "goat",
+      "path": "references/goat-4015c971963a.jpg",
+      "sheet": 3
+    },
+    {
+      "key": "zerebro",
+      "path": "references/zerebro-a8216adfc8b0.png",
+      "sheet": 3
+    },
+    {
+      "key": "act",
+      "path": "references/act-90309845b93a.jpg",
+      "sheet": 3
+    },
+    {
+      "key": "pippin",
+      "path": "references/pippin-03111311888d.png",
+      "sheet": 3
+    },
+    {
+      "key": "vine",
+      "path": "references/vine-f8bc16ff3c5f.png",
+      "sheet": 3
+    },
+    {
+      "key": "aura",
+      "path": "references/aura-e4e149c6b5fb.png",
+      "sheet": 3
+    },
+    {
+      "key": "michi",
+      "path": "references/michi-30964336613b.png",
+      "sheet": 3
+    },
+    {
+      "key": "cate",
+      "path": "references/cate-a4c0d4c03864.jpg",
+      "sheet": 3
+    },
+    {
+      "key": "bert",
+      "path": "references/bert-f670e4bb1e68.png",
+      "sheet": 3
+    },
+    {
+      "key": "chillhouse",
+      "path": "references/chillhouse-d61002d28888.jpg",
+      "sheet": 3
+    },
+    {
+      "key": "usduc",
+      "path": "references/usduc-bd7806798bd1.png",
+      "sheet": 4
+    },
+    {
+      "key": "eth",
+      "path": "references/eth-836339466e52.png",
+      "sheet": 4
+    },
+    {
+      "key": "hype",
+      "path": "references/hype-4d210e44f273.png",
+      "sheet": 4
+    },
+    {
+      "key": "xmr",
+      "path": "references/xmr-26f020ea2c78.png",
+      "sheet": 4
+    },
+    {
+      "key": "peaq",
+      "path": "references/peaq-c1f813eb9e81.png",
+      "sheet": 5
+    }
+  ]
+}

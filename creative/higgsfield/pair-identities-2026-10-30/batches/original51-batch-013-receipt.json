@@ -1,0 +1,59 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Submitted 2/2 image generations.\n- index 194: 2129f43d-820a-4a78-bb12-6e24b22a1597 (pending)\n- index 46: 3c689fb7-8944-4d8f-bb72-7910483cf093 (pending)\nWait for the complete requested set with jobs_wait, then show it together with show_generation_by_ids using the collected indexed jobs. This includes jobs submitted across separate calls. job_display accepts only one id and cannot display a group; do not pass ids or call it once per job."
+    }
+  ],
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 194,
+        "job_id": "2129f43d-820a-4a78-bb12-6e24b22a1597",
+        "status": "pending",
+        "adjustments": {
+          "medias[0].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          },
+          "medias[1].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          },
+          "medias[2].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          }
+        }
+      },
+      {
+        "index": 46,
+        "job_id": "3c689fb7-8944-4d8f-bb72-7910483cf093",
+        "status": "pending",
+        "adjustments": {
+          "medias[0].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          },
+          "medias[1].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          },
+          "medias[2].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          }
+        }
+      }
+    ],
+    "submitted_count": 2,
+    "failed_count": 0
+  },
+  "isError": false
+}

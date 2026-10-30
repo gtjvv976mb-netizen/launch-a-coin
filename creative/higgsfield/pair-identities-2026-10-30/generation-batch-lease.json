@@ -1,0 +1,84 @@
+{
+  "owner": "extra_pair_art",
+  "scope": "original51",
+  "status": "reserved-root-front-plan",
+  "batchId": "original51-batch-014",
+  "maximumJobs": 2,
+  "createdAt": "2026-10-30T01:17:42.661247+00:00",
+  "quarantinedBatches": [
+    {
+      "owner": "extra_pair_art",
+      "status": "submission-outcome-unknown",
+      "batchId": "extra-batch-010",
+      "maximumJobs": 4,
+      "createdAt": "2026-10-30T00:08:34.158023+00:00",
+      "receiptFile": "extra-batch-010-submission.json",
+      "reason": "Tool returned no structured job receipt; preserve and recover before any paid retry."
+    },
+    {
+      "owner": "extra_pair_art",
+      "scope": "original51",
+      "status": "submission-outcome-unknown",
+      "batchId": "original51-batch-010",
+      "maximumJobs": 4,
+      "receiptFile": "batches/original51-batch-010-receipt.json",
+      "indices": [
+        38,
+        40,
+        41,
+        43
+      ],
+      "createdAt": "2026-10-30T00:57:58.526338+00:00",
+      "reason": "30-second client transport failure, no structured receipt or IDs returned. No paid retry."
+    }
+  ],
+  "jobs": [
+    {
+      "index": 49,
+      "job_id": "2872dc20-4bc8-4a71-be38-f19d2dd8f0aa",
+      "status": "completed",
+      "type": "image",
+      "model": "gpt_image_2_5",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_012048_2872dc20-4bc8-4a71-be38-f19d2dd8f0aa.png"
+    },
+    {
+      "index": 51,
+      "job_id": "4ca28b0f-87c8-4c1c-94f6-7edab7e6fdb3",
+      "status": "completed",
+      "type": "image",
+      "model": "gpt_image_2_5",
+      "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_012047_4ca28b0f-87c8-4c1c-94f6-7edab7e6fdb3.png"
+    }
+  ],
+  "activeBatches": [],
+  "maximumKnownInFlightJobs": 6,
+  "maximumImagesPerCall": 2,
+  "completedBatchLeases": [
+    {
+      "batchId": "original51-batch-013",
+      "terminalAt": "2026-10-30T01:26:36.296041+00:00"
+    },
+    {
+      "batchId": "original51-batch-014",
+      "terminalAt": "2026-10-30T01:26:36.317721+00:00"
+    }
+  ],
+  "paidWriter": "root",
+  "rootFrontPlan": {
+    "path": "ROOT-REMAINING-FRONTS-PLAN.json",
+    "sha256": "b5ce4122ce5ff54e4f7259bba807debc49c557eb67b3267009004c03ae3b5c2e",
+    "images": 23,
+    "maximumImagesPerCall": 2,
+    "maximumKnownInFlightJobs": 6,
+    "childPaidCallsPaused": true
+  },
+  "readyRootBackPlan": {
+    "path": "ROOT-REMAINING-BACKS-PLAN.json",
+    "sha256": "4c1e47157fd28c75216dccdf771fe161d1fca2e01522430f03fa7f0b42f4333b",
+    "images": 25,
+    "quotedCredits": 68.75,
+    "maximumImagesPerCall": 2,
+    "maximumKnownInFlightJobs": 4,
+    "childPaidCallsPaused": true
+  }
+}

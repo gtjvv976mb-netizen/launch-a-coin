@@ -1,0 +1,49 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Submitted 2/2 image generations.\n- index 557: f0536bf5-b7f8-4d11-8695-57e782ee3c27 (pending)\n- index 558: 9c0c084f-83d5-4de2-ad8f-c6a9b2b92959 (pending)\nWait for the complete requested set with jobs_wait, then show it together with show_generation_by_ids using the collected indexed jobs. This includes jobs submitted across separate calls. job_display accepts only one id and cannot display a group; do not pass ids or call it once per job."
+    }
+  ],
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 557,
+        "job_id": "f0536bf5-b7f8-4d11-8695-57e782ee3c27",
+        "status": "pending",
+        "adjustments": {
+          "medias[0].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "Seedream 5.0 Flash backend expects schema-key media roles"
+          },
+          "medias[1].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "Seedream 5.0 Flash backend expects schema-key media roles"
+          }
+        }
+      },
+      {
+        "index": 558,
+        "job_id": "9c0c084f-83d5-4de2-ad8f-c6a9b2b92959",
+        "status": "pending",
+        "adjustments": {
+          "medias[0].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "Seedream 5.0 Flash backend expects schema-key media roles"
+          },
+          "medias[1].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "Seedream 5.0 Flash backend expects schema-key media roles"
+          }
+        }
+      }
+    ],
+    "submitted_count": 2,
+    "failed_count": 0
+  },
+  "isError": false
+}

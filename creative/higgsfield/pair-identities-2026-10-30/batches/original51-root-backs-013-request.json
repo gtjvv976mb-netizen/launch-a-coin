@@ -1,0 +1,30 @@
+{
+  "requests": [
+    {
+      "index": 102,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: Monad (MON). The exact Monad emblem from the accepted image reference, centered as a premium enamel-and-metal relief. Surrounding material: midnight violet ceramic, lavender enamel and luminous palladium. No generic coin, orbital symbol or unrelated mascot. Reproduce the actual supplied Image 2 logo/mascot with its distinctive features and exact authentic lettering, never a generic substitute. Match the completed front Image 1 materials and source-faithful palette. No extra labels, ticker names, platform marks, numbers or footer boxes.\n\nREVERSE SAFETY RULE: ZERO name bars, ZERO cartouches, ZERO empty information panels, ZERO pale header strips or divided front-label remnants anywhere on the back. Do not copy the front name/ticker/description panel shapes. The ENTIRE reverse, including the top band, must form one continuous finished identity composition in the matching native metal/ceramic/lacquer material. Only authentic lettering contained in the exact source logo is allowed.\n\nFINAL EXACT-IDENTITY CHECK: The central reverse hero MUST be the actual supplied Image2 identity of mon. Never copy the Doge portrait or any unrelated mascot from construction Image3. Image3 controls physical manufacture only. The entire visible identity must match the source Image2, including its exact logo geometry or actual face/pose. A generic substitute or inherited construction mascot is a failed output.",
+        "medias": [
+          {
+            "role": "image",
+            "value": "d4a996bf-2b28-4b31-a9b6-95ba707afa18"
+          },
+          {
+            "role": "image",
+            "value": "a896fbce-db3b-4db4-ae6a-b0ec28dcbd60"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ]
+      }
+    }
+  ]
+}

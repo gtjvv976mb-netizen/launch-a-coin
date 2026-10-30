@@ -1,0 +1,53 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "jobs[4]:\n  - index: 809\n    job_id: bfa2363d-3d57-4ad1-aace-f46e8a48dc1c\n    status: completed\n    type: image\n    model: seedream_5_0_flash\n    result_url: \"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_033003_bfa2363d-3d57-4ad1-aace-f46e8a48dc1c.png\"\n  - index: 810\n    job_id: 69fc6ba9-e9b6-4759-8127-837513ace862\n    status: completed\n    type: image\n    model: seedream_5_0_flash\n    result_url: \"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_033003_69fc6ba9-e9b6-4759-8127-837513ace862.png\"\n  - index: 811\n    job_id: 293bbe0c-b292-4c06-8c4e-4377d73d3e85\n    status: in_progress\n    type: image\n    model: seedream_5_0_flash\n  - index: 812\n    job_id: 3fb08c7c-325e-432a-a545-999fa8bd1833\n    status: completed\n    type: image\n    model: seedream_5_0_flash\n    result_url: \"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_033008_3fb08c7c-325e-432a-a545-999fa8bd1833.png\"\nsummary:\n  total: 4\n  completed: 3\n  failed: 0\n  active: 1\n  errors: 0\nall_terminal: false\npoll_after_seconds: 10\n\nWork is still pending. Wait poll_after_seconds, then call jobs_wait again in this turn. Do not ask the user to say 'continue' just because the polling window ended. Respect cancellation and host execution limits."
+    }
+  ],
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 809,
+        "job_id": "bfa2363d-3d57-4ad1-aace-f46e8a48dc1c",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_033003_bfa2363d-3d57-4ad1-aace-f46e8a48dc1c.png"
+      },
+      {
+        "index": 810,
+        "job_id": "69fc6ba9-e9b6-4759-8127-837513ace862",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_033003_69fc6ba9-e9b6-4759-8127-837513ace862.png"
+      },
+      {
+        "index": 811,
+        "job_id": "293bbe0c-b292-4c06-8c4e-4377d73d3e85",
+        "status": "in_progress",
+        "type": "image",
+        "model": "seedream_5_0_flash"
+      },
+      {
+        "index": 812,
+        "job_id": "3fb08c7c-325e-432a-a545-999fa8bd1833",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_033008_3fb08c7c-325e-432a-a545-999fa8bd1833.png"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "completed": 3,
+      "failed": 0,
+      "active": 1,
+      "errors": 0
+    },
+    "all_terminal": false,
+    "poll_after_seconds": 10
+  },
+  "isError": false
+}

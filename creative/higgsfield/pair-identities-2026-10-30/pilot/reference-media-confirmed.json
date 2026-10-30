@@ -1,0 +1,121 @@
+{
+  "confirmedAt": "2026-10-29T23:39:48.822Z",
+  "type": "image",
+  "receipt": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Confirmed 6 uploads. Pass media_id as value in the medias array of generation tools.\n- 22e58a58-0eca-4a2d-889f-c28a8b121ea0 (uploaded)\n- 8b191aa7-1070-43c4-9622-7d5a65508019 (uploaded)\n- bedcaff6-bac9-4a28-a6d1-7c41a09edd37 (uploaded)\n- 518dfd69-20a7-48f1-9f1a-65c03de4aeb8 (uploaded)\n- 8a129201-6eb3-44ec-8330-cef7081f911e (uploaded)\n- 1206f2cf-ed18-486e-99c7-75b7d988f7a9 (uploaded)"
+      }
+    ],
+    "structuredContent": {
+      "results": [
+        {
+          "media_id": "22e58a58-0eca-4a2d-889f-c28a8b121ea0",
+          "status": "uploaded"
+        },
+        {
+          "media_id": "8b191aa7-1070-43c4-9622-7d5a65508019",
+          "status": "uploaded"
+        },
+        {
+          "media_id": "bedcaff6-bac9-4a28-a6d1-7c41a09edd37",
+          "status": "uploaded"
+        },
+        {
+          "media_id": "518dfd69-20a7-48f1-9f1a-65c03de4aeb8",
+          "status": "uploaded"
+        },
+        {
+          "media_id": "8a129201-6eb3-44ec-8330-cef7081f911e",
+          "status": "uploaded"
+        },
+        {
+          "media_id": "1206f2cf-ed18-486e-99c7-75b7d988f7a9",
+          "status": "uploaded"
+        }
+      ]
+    },
+    "isError": false
+  },
+  "keyToMediaId": {
+    "construction-front": "22e58a58-0eca-4a2d-889f-c28a8b121ea0",
+    "construction-back": "8b191aa7-1070-43c4-9622-7d5a65508019",
+    "sol": "bedcaff6-bac9-4a28-a6d1-7c41a09edd37",
+    "tslax": "518dfd69-20a7-48f1-9f1a-65c03de4aeb8",
+    "doge": "8a129201-6eb3-44ec-8330-cef7081f911e",
+    "pnut": "1206f2cf-ed18-486e-99c7-75b7d988f7a9"
+  },
+  "files": [
+    {
+      "key": "construction-front",
+      "filename": "construction-front.jpg",
+      "content_type": "image/jpeg",
+      "sha256": "23243ae456fe7b003e8a197a22433c4e723eb44d6b682217a274c98b21a84e38",
+      "media_id": "22e58a58-0eca-4a2d-889f-c28a8b121ea0",
+      "confirmation": {
+        "media_id": "22e58a58-0eca-4a2d-889f-c28a8b121ea0",
+        "status": "uploaded"
+      }
+    },
+    {
+      "key": "construction-back",
+      "filename": "construction-back.jpg",
+      "content_type": "image/jpeg",
+      "sha256": "0a24e512ba7d781a0f66321b1432478ce98f3db55b3e5ab3a6a710e0ac2c2541",
+      "media_id": "8b191aa7-1070-43c4-9622-7d5a65508019",
+      "confirmation": {
+        "media_id": "8b191aa7-1070-43c4-9622-7d5a65508019",
+        "status": "uploaded"
+      }
+    },
+    {
+      "key": "sol",
+      "filename": "sol.jpg",
+      "content_type": "image/jpeg",
+      "sha256": "74ecd47fb14a17bd1c32b673cf6012728baecf154ce22c2d72886d7d441b33bf",
+      "media_id": "bedcaff6-bac9-4a28-a6d1-7c41a09edd37",
+      "confirmation": {
+        "media_id": "bedcaff6-bac9-4a28-a6d1-7c41a09edd37",
+        "status": "uploaded"
+      }
+    },
+    {
+      "key": "tslax",
+      "filename": "tslax.jpg",
+      "content_type": "image/jpeg",
+      "sha256": "83d5bfc7089d905cf7a5303f0737fbbc9b82c7aef598f0f8c50d74f24aa07084",
+      "media_id": "518dfd69-20a7-48f1-9f1a-65c03de4aeb8",
+      "confirmation": {
+        "media_id": "518dfd69-20a7-48f1-9f1a-65c03de4aeb8",
+        "status": "uploaded"
+      }
+    },
+    {
+      "key": "doge",
+      "filename": "doge.jpg",
+      "content_type": "image/jpeg",
+      "sha256": "be4b6ef71c642718d73a27160a50deb57dc1e295d6cdbb0ced5782203925ced6",
+      "media_id": "8a129201-6eb3-44ec-8330-cef7081f911e",
+      "confirmation": {
+        "media_id": "8a129201-6eb3-44ec-8330-cef7081f911e",
+        "status": "uploaded"
+      }
+    },
+    {
+      "key": "pnut",
+      "filename": "pnut.jpg",
+      "content_type": "image/jpeg",
+      "sha256": "3dacc441d48d087a54797ece16155fd022a56a999290373090ec131b52d0beed",
+      "media_id": "1206f2cf-ed18-486e-99c7-75b7d988f7a9",
+      "confirmation": {
+        "media_id": "1206f2cf-ed18-486e-99c7-75b7d988f7a9",
+        "status": "uploaded"
+      }
+    }
+  ],
+  "putEvidence": {
+    "construction": "Root explicitly verified HTTP200 for construction-front and construction-back before confirmation.",
+    "identities": "output/higgsfield/pair-identities-2026-10-30/pilot-local-put-results.json"
+  }
+}

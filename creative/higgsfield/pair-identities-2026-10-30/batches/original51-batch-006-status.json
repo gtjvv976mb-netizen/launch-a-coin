@@ -1,0 +1,53 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "jobs[4]{index,job_id,status,type,model,result_url}:\n  18,a812d434-cb2a-469c-9e5d-0afb38f4a0c5,completed,image,gpt_image_2_5,\"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_003731_a812d434-cb2a-469c-9e5d-0afb38f4a0c5.png\"\n  22,fc4145b4-0f18-4cae-bc75-83e20df559ff,completed,image,gpt_image_2_5,\"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_003732_fc4145b4-0f18-4cae-bc75-83e20df559ff.png\"\n  25,54c3d6b1-e8ce-4526-9603-1b82362a3d01,completed,image,gpt_image_2_5,\"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_003731_54c3d6b1-e8ce-4526-9603-1b82362a3d01.png\"\n  27,664905dc-de18-4ed8-865b-3820ae6d628f,completed,image,gpt_image_2_5,\"https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_003731_664905dc-de18-4ed8-865b-3820ae6d628f.png\"\nsummary:\n  total: 4\n  completed: 4\n  failed: 0\n  active: 0\n  errors: 0\nall_terminal: true"
+    }
+  ],
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 18,
+        "job_id": "a812d434-cb2a-469c-9e5d-0afb38f4a0c5",
+        "status": "completed",
+        "type": "image",
+        "model": "gpt_image_2_5",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_003731_a812d434-cb2a-469c-9e5d-0afb38f4a0c5.png"
+      },
+      {
+        "index": 22,
+        "job_id": "fc4145b4-0f18-4cae-bc75-83e20df559ff",
+        "status": "completed",
+        "type": "image",
+        "model": "gpt_image_2_5",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_003732_fc4145b4-0f18-4cae-bc75-83e20df559ff.png"
+      },
+      {
+        "index": 25,
+        "job_id": "54c3d6b1-e8ce-4526-9603-1b82362a3d01",
+        "status": "completed",
+        "type": "image",
+        "model": "gpt_image_2_5",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_003731_54c3d6b1-e8ce-4526-9603-1b82362a3d01.png"
+      },
+      {
+        "index": 27,
+        "job_id": "664905dc-de18-4ed8-865b-3820ae6d628f",
+        "status": "completed",
+        "type": "image",
+        "model": "gpt_image_2_5",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_003731_664905dc-de18-4ed8-865b-3820ae6d628f.png"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "completed": 4,
+      "failed": 0,
+      "active": 0,
+      "errors": 0
+    },
+    "all_terminal": true
+  },
+  "isError": false
+}

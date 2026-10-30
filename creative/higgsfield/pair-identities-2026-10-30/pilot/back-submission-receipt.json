@@ -1,0 +1,106 @@
+{
+  "receivedAt": "2026-10-29T23:43:17.396Z",
+  "receipt": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Submitted 4/4 image generations.\n- index 2: f097e8e0-c5b1-4981-ab2a-0e78289b21cd (pending)\n- index 8: 746a3309-340b-4d7c-9c25-e015d1e2a277 (pending)\n- index 20: 26c141f5-990e-4c38-bc15-dba56525278e (pending)\n- index 24: 4cee6014-6a25-4aab-a9ff-603100b969b7 (pending)\nWait for the complete requested set with jobs_wait, then show it together with show_generation_by_ids using the collected indexed jobs. This includes jobs submitted across separate calls. job_display accepts only one id and cannot display a group; do not pass ids or call it once per job."
+      }
+    ],
+    "structuredContent": {
+      "jobs": [
+        {
+          "index": 2,
+          "job_id": "f097e8e0-c5b1-4981-ab2a-0e78289b21cd",
+          "status": "pending",
+          "adjustments": {
+            "medias[0].role": {
+              "requested": "image",
+              "used": "image_references",
+              "reason": "GPT Image 2.5 backend expects schema-key media roles"
+            },
+            "medias[1].role": {
+              "requested": "image",
+              "used": "image_references",
+              "reason": "GPT Image 2.5 backend expects schema-key media roles"
+            },
+            "medias[2].role": {
+              "requested": "image",
+              "used": "image_references",
+              "reason": "GPT Image 2.5 backend expects schema-key media roles"
+            }
+          }
+        },
+        {
+          "index": 8,
+          "job_id": "746a3309-340b-4d7c-9c25-e015d1e2a277",
+          "status": "pending",
+          "adjustments": {
+            "medias[0].role": {
+              "requested": "image",
+              "used": "image_references",
+              "reason": "GPT Image 2.5 backend expects schema-key media roles"
+            },
+            "medias[1].role": {
+              "requested": "image",
+              "used": "image_references",
+              "reason": "GPT Image 2.5 backend expects schema-key media roles"
+            },
+            "medias[2].role": {
+              "requested": "image",
+              "used": "image_references",
+              "reason": "GPT Image 2.5 backend expects schema-key media roles"
+            }
+          }
+        },
+        {
+          "index": 20,
+          "job_id": "26c141f5-990e-4c38-bc15-dba56525278e",
+          "status": "pending",
+          "adjustments": {
+            "medias[0].role": {
+              "requested": "image",
+              "used": "image_references",
+              "reason": "GPT Image 2.5 backend expects schema-key media roles"
+            },
+            "medias[1].role": {
+              "requested": "image",
+              "used": "image_references",
+              "reason": "GPT Image 2.5 backend expects schema-key media roles"
+            },
+            "medias[2].role": {
+              "requested": "image",
+              "used": "image_references",
+              "reason": "GPT Image 2.5 backend expects schema-key media roles"
+            }
+          }
+        },
+        {
+          "index": 24,
+          "job_id": "4cee6014-6a25-4aab-a9ff-603100b969b7",
+          "status": "pending",
+          "adjustments": {
+            "medias[0].role": {
+              "requested": "image",
+              "used": "image_references",
+              "reason": "GPT Image 2.5 backend expects schema-key media roles"
+            },
+            "medias[1].role": {
+              "requested": "image",
+              "used": "image_references",
+              "reason": "GPT Image 2.5 backend expects schema-key media roles"
+            },
+            "medias[2].role": {
+              "requested": "image",
+              "used": "image_references",
+              "reason": "GPT Image 2.5 backend expects schema-key media roles"
+            }
+          }
+        }
+      ],
+      "submitted_count": 4,
+      "failed_count": 0
+    },
+    "isError": false
+  }
+}

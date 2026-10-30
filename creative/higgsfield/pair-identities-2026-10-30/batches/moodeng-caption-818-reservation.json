@@ -1,0 +1,15 @@
+{
+  "index": 818,
+  "quoteKey": "moodeng",
+  "designKey": "pair-moodeng",
+  "face": "back",
+  "priorRejectedIndex": 533,
+  "maximumQuotedCredits": 0.5,
+  "verifiedCurrentBalanceBeforeFinal2": 31,
+  "knownFinal2CommittedCredits": 1,
+  "heldUnknownCredits": 27.5,
+  "remainingAfterThisReservation": 2,
+  "absoluteOriginalBalanceCap": 596.5,
+  "status": "reserved-before-one-write",
+  "automaticUnknownRetry": false
+}

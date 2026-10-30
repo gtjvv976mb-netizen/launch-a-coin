@@ -1,0 +1,31 @@
+{
+  "derivedFrom": "batches/original51-backs-group-2-status-5-1793325903740.json",
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 62,
+        "job_id": "6cb3a5c0-ea7c-4b9f-bd1c-be44b6bc9e56",
+        "status": "completed",
+        "type": "image",
+        "model": "gpt_image_2_5",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_020414_6cb3a5c0-ea7c-4b9f-bd1c-be44b6bc9e56.png"
+      },
+      {
+        "index": 64,
+        "job_id": "868722f7-b8a9-459c-ae5a-c0933c793704",
+        "status": "completed",
+        "type": "image",
+        "model": "gpt_image_2_5",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_020414_868722f7-b8a9-459c-ae5a-c0933c793704.png"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "completed": 4,
+      "failed": 0,
+      "active": 0,
+      "errors": 0
+    },
+    "all_terminal": true
+  }
+}

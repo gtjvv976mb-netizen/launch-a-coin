@@ -1,0 +1,56 @@
+{
+  "requests": [
+    {
+      "index": 176,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "e5acd1a2-b695-4dd8-a9fb-ad7545aa8668"
+          },
+          {
+            "role": "image",
+            "value": "8887d206-92a7-4193-a759-ecf76d9bf92b"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ],
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: cat wif sword (swordcat). The exact ginger kitten in tiny silver armor holding its tall glowing gold sword, preserving the face, pose, armor and blade orientation from the source. Make that exact source identity the reverse hero, set in champagne gold, brushed silver and warm amber enamel, matching the front. Source-matched face, pose, silhouette, proportions and colors are mandatory. Make the exact identity unmistakable and dominant. Omit unrelated captions, scene signage and clothing slogans. Only authentic exact identity-logo lettering is allowed under the owner\u2019s approval; no extra theme names, ticker labels, serials or platform words.\nIMPORTANT REVERSE STRUCTURE: The reverse is fully decorative edge-to-edge. Remove ALL blank nameplates, horizontal title cartouches, pale writing strips, labels and front content panels from Image1. No empty top band or titlebar anywhere. Continue the exact themed ornamental material through the top and bottom border; central identity hero fills the composition."
+      }
+    },
+    {
+      "index": 178,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "bde7e4b3-820c-4ec0-8152-eceb15741c79"
+          },
+          {
+            "role": "image",
+            "value": "702af55c-3303-4d2e-802b-b9647200eb57"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ],
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: Yersinia pestis (PLAGUE). The exact plague-doctor figure in the dark wide-brimmed top hat, beaked mask, round goggles and brown coat, preserving the actual source silhouette and fittings. Make that exact source identity the reverse hero, set in blackened bronze, smoked enamel and antique gold, matching the front. Source-matched face, pose, silhouette, proportions and colors are mandatory. Make the exact identity unmistakable and dominant. Omit unrelated captions, scene signage and clothing slogans. Only authentic exact identity-logo lettering is allowed under the owner\u2019s approval; no extra theme names, ticker labels, serials or platform words.\nIMPORTANT REVERSE STRUCTURE: The reverse is fully decorative edge-to-edge. Remove ALL blank nameplates, horizontal title cartouches, pale writing strips, labels and front content panels from Image1. No empty top band or titlebar anywhere. Continue the exact themed ornamental material through the top and bottom border; central identity hero fills the composition."
+      }
+    }
+  ]
+}

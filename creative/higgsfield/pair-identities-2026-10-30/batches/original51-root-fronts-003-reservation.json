@@ -1,0 +1,10 @@
+{
+  "status": "reserved-before-single-write",
+  "indices": [
+    61,
+    63
+  ],
+  "quotedCredits": 5.5,
+  "executor": "root",
+  "automaticRetry": false
+}

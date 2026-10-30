@@ -96,7 +96,7 @@ describe("CardDex fixed creator cards and token trading", () => {
 
   test("stock references are catalog-derived, survive token trades, and reject spoofed associations", async () => {
     const stockDesigns = CARD_DESIGNS.filter((design) => design.stock);
-    expect(stockDesigns.map(design => design.key).sort()).toEqual(["stock-gme", "stock-tsla", "stock-nvda", "stock-aapl", "stock-mstr", "stock-coin", "gamestop", "amc", "coinbase", "strategy"].sort());
+    expect(stockDesigns.filter(design=>!design.key.startsWith("pair-")).map(design => design.key).sort()).toEqual(["stock-gme", "stock-tsla", "stock-nvda", "stock-aapl", "stock-mstr", "stock-coin", "gamestop", "amc", "coinbase", "strategy"].sort());
     for (const [index, design] of stockDesigns.entries()) {
       const asset = defaultQuoteForDesign(design.key);
       const amount = Math.floor(initialQuoteReserves(asset.key).vSol / 30);

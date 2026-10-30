@@ -1,0 +1,18 @@
+[
+  {
+    "index": 81,
+    "key": "zec",
+    "face": "front",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/zec-front.png"
+  },
+  {
+    "index": 83,
+    "key": "near",
+    "face": "front",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/near-front.png"
+  }
+]

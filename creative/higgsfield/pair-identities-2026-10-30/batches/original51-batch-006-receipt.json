@@ -1,0 +1,93 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Submitted 4/4 image generations.\n- index 18: a812d434-cb2a-469c-9e5d-0afb38f4a0c5 (pending)\n- index 22: fc4145b4-0f18-4cae-bc75-83e20df559ff (pending)\n- index 25: 54c3d6b1-e8ce-4526-9603-1b82362a3d01 (pending)\n- index 27: 664905dc-de18-4ed8-865b-3820ae6d628f (pending)\nWait for the complete requested set with jobs_wait, then show it together with show_generation_by_ids using the collected indexed jobs. This includes jobs submitted across separate calls. job_display accepts only one id and cannot display a group; do not pass ids or call it once per job."
+    }
+  ],
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 18,
+        "job_id": "a812d434-cb2a-469c-9e5d-0afb38f4a0c5",
+        "status": "pending",
+        "adjustments": {
+          "medias[0].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          },
+          "medias[1].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          },
+          "medias[2].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          }
+        }
+      },
+      {
+        "index": 22,
+        "job_id": "fc4145b4-0f18-4cae-bc75-83e20df559ff",
+        "status": "pending",
+        "adjustments": {
+          "medias[0].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          },
+          "medias[1].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          },
+          "medias[2].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          }
+        }
+      },
+      {
+        "index": 25,
+        "job_id": "54c3d6b1-e8ce-4526-9603-1b82362a3d01",
+        "status": "pending",
+        "adjustments": {
+          "medias[0].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          },
+          "medias[1].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          }
+        }
+      },
+      {
+        "index": 27,
+        "job_id": "664905dc-de18-4ed8-865b-3820ae6d628f",
+        "status": "pending",
+        "adjustments": {
+          "medias[0].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          },
+          "medias[1].role": {
+            "requested": "image",
+            "used": "image_references",
+            "reason": "GPT Image 2.5 backend expects schema-key media roles"
+          }
+        }
+      }
+    ],
+    "submitted_count": 4,
+    "failed_count": 0
+  },
+  "isError": false
+}

@@ -1,0 +1,45 @@
+{
+  "context": "Create distinct meme card reverses matching their verified source identities and new frame materials.",
+  "requests": [
+    {
+      "index": 508,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "e40f4b16-44e1-40c2-a0fe-9e62d674b4b8"
+          },
+          {
+            "role": "image",
+            "value": "1bc18784-c784-4d70-bb72-cb54c6cbc398"
+          }
+        ],
+        "prompt": "Create one matching premium BACK CARD SKIN. IMAGE 1 is the exact asset identity: Exact fluffy brown Pomeranian, head tilt, small white chest patch and specific source face. Preserve that exact source expression, pose, silhouette, proportions, intrinsic lettering and recognizable visual features. IMAGE 2 is ONLY the matching accepted front material and perimeter reference. The reverse uses one uninterrupted full-card designed field, with the identity artwork occupying that field rather than blank content rectangles. COMPOSITION: Exact tilted dog portrait on a quiet warm field with source-derived dappled background relief and flowing fur-like outer contours. MATCHED MATERIALS: Copper-brown enamel, warm cream ceramic, subtle amber/olive light accents and satin brass. Carry the specific front frame geometry and materials continuously around this reverse. Use coherent restrained microbevels and sharp high-definition print detail. Only intrinsic exact logo lettering visibly belonging to Image1 may remain; all other surfaces are pictorial or material. Keep a thin flat trading-card print, the complete smooth rounded63:88 outline, directly front-on, neutral even lighting, every detail inside the silhouette. The whole reverse is finished artwork, with no reserved creator fields or empty label plates. Match this specific identity rather than a generic royal award design."
+      }
+    },
+    {
+      "index": 510,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "7e2a83d7-d89e-4a7c-807e-82c0170fc943"
+          },
+          {
+            "role": "image",
+            "value": "54bebbd2-91d1-4aaa-9beb-822341815507"
+          }
+        ],
+        "prompt": "Create one matching premium BACK CARD SKIN. IMAGE 1 is the exact asset identity: Exact brown skeptical bear with narrowed eyes and the source hand raised at its mouth, on crimson. Preserve that exact source expression, pose, silhouette, proportions, intrinsic lettering and recognizable visual features. IMAGE 2 is ONLY the matching accepted front material and perimeter reference. The reverse uses one uninterrupted full-card designed field, with the identity artwork occupying that field rather than blank content rectangles. COMPOSITION: Exact bear/hand expression in a crimson negative-space field with asymmetric brow and ear contours shaping the frame. MATCHED MATERIALS: Dark brown enamel, deep crimson lacquer, black etching and restrained copper. Carry the specific front frame geometry and materials continuously around this reverse. Use coherent restrained microbevels and sharp high-definition print detail. Only intrinsic exact logo lettering visibly belonging to Image1 may remain; all other surfaces are pictorial or material. Keep a thin flat trading-card print, the complete smooth rounded63:88 outline, directly front-on, neutral even lighting, every detail inside the silhouette. The whole reverse is finished artwork, with no reserved creator fields or empty label plates. Match this specific identity rather than a generic royal award design."
+      }
+    }
+  ]
+}

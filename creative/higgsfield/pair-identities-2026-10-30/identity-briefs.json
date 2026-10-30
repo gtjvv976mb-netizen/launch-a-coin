@@ -1,0 +1,2789 @@
+{
+  "schemaVersion": 1,
+  "preparedDate": "2026-10-30",
+  "status": "Identity-specific art briefs for estimate/approval; no generation or app integration",
+  "sourceRegistry": "app/src/lib/carddex/pair-assets.json",
+  "currentQuoteCount": 37,
+  "counts": {
+    "native": 1,
+    "stable": 1,
+    "stock": 7,
+    "collector": 2,
+    "meme": 26,
+    "frontImagesIfAllFresh": 37,
+    "backImagesIfAllFresh": 37,
+    "totalImagesIfAllFresh": 74
+  },
+  "providerRequirement": "All new decorative art uses connected Higgsfield. Obtain the current model schema/quote and a new applicable credit allocation before submission. Existing approvals are not extended by this plan.",
+  "exactIdentityPolicy": "Every quote receives its own exact reference-bound identity. Generic related motifs, renamed old finishes and guessed mascots do not satisfy this request.",
+  "referenceReadiness": "All37 entries deliberately require exact image intake/pinning before generation. Primary company/project pages and exact mint pages are intake sources, not a claim that every mascot image has already been visually verified.",
+  "cryptoScopeNote": "SOL and USDC are the only current crypto/native/stable quote entries. BTC/ETH/ETC designs and admission are separate pending work; no unreviewed quote is enabled by this artifact.",
+  "entries": [
+    {
+      "quoteKey": "sol",
+      "proposedDesignKey": "pair-sol",
+      "name": "Solana Signature",
+      "exactIdentity": "Solana",
+      "symbol": "SOL",
+      "kind": "native",
+      "exactQuoteMint": "So11111111111111111111111111111111111111112",
+      "recognizableIdentityMotif": "The exact wordless Solana three-bar logomark, preserving bar count, spacing, angles and gradient direction.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#111118",
+          "#9945FF",
+          "#14F195",
+          "#E9EDF1"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Black ceramic perimeter with violet-to-mint enamel rails and small exact three-bar emblems confined to the two lower corners.",
+      "reverseHero": "A single large, sharply defined Solana logomark set in a black ceramic field; no invented orbital symbol.",
+      "sourceReferences": [
+        {
+          "url": "https://pump.fun/coin/So11111111111111111111111111111111111111112",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        },
+        {
+          "url": "https://solana.org/branding",
+          "role": "Primary project/company identity source",
+          "inspection": "research page consulted; exact media intake pending"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Brand-page logomark URL was resolved; acquire and visually inspect the official vector before use."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Wrapped SOL",
+          "symbol": "SOL",
+          "uri": "",
+          "source": "6dM4TqWyWJsbx7obrdLcviBkTafD5E8av61zfU6jq57X"
+        },
+        "admission": {
+          "source": "sol",
+          "decimals": 9,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "30000000000",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "usdc",
+      "proposedDesignKey": "pair-usdc",
+      "name": "USDC Signature",
+      "exactIdentity": "USD Coin",
+      "symbol": "USDC",
+      "kind": "stable",
+      "exactQuoteMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "recognizableIdentityMotif": "The exact USDC token emblem from Circle’s primary brand kit, preserving its dollar glyph and enclosing arcs.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#16336B",
+          "#2775CA",
+          "#FFFFFF",
+          "#C6D1DA"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Cobalt enamel and satin palladium around the shared front, with exact arc details confined to the outer rails.",
+      "reverseHero": "The exact USDC token emblem, cleanly rendered in the reference colors with restrained dimensional metal support.",
+      "sourceReferences": [
+        {
+          "url": "https://pump.fun/coin/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        },
+        {
+          "url": "https://www.circle.com/pressroom#brand-kit",
+          "role": "Primary project/company identity source",
+          "inspection": "research page consulted; exact media intake pending"
+        },
+        {
+          "url": "https://www.circle.com/legal/usdc-terms",
+          "role": "Registry issuer reference; identity context, not proof of a logo image",
+          "inspection": "in reviewed quote registry"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Dollar glyph is a token symbol, not an added theme name. Download and visually inspect the official USDC variant; do not use Circle’s separate corporate mark."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "USD Coin",
+          "symbol": "USDC",
+          "uri": "",
+          "source": "5x38Kp4hvdomTCnCrAny4UtMUt5rQBdB6px2K1Ui45Wq"
+        },
+        "admission": {
+          "source": "global",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "4292000000",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "gmex",
+      "proposedDesignKey": "pair-gmex",
+      "name": "GameStop Signature",
+      "exactIdentity": "GameStop xStock",
+      "symbol": "GMEX",
+      "kind": "stock",
+      "exactQuoteMint": "Xsf9mBktVB9BSU5kf4nHxPq5hCBJ2j2ui3ecFGxPRGc",
+      "recognizableIdentityMotif": "The exact GameStop identity from the primary company reference or admitted GMEX token image; a compatible wordless source has not yet been established.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#171719",
+          "#D51C2B",
+          "#F5F0EA",
+          "#AEB3B8"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Scarlet enamel and black carbon rails whose small identity fittings must be derived from the verified source, never a generic controller.",
+      "reverseHero": "A verified wordless GameStop identity emblem, if available; do not replace the company identity with gaming hardware.",
+      "sourceReferences": [
+        {
+          "url": "https://xstocks-metadata.backed.fi/tokens/Solana/GMEx/metadata.json",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/Xsf9mBktVB9BSU5kf4nHxPq5hCBJ2j2ui3ecFGxPRGc",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        },
+        {
+          "url": "https://news.gamestop.com/overview/default.aspx",
+          "role": "Primary project/company identity source",
+          "inspection": "research page consulted; exact media intake pending"
+        },
+        {
+          "url": "https://xstocks.fi/",
+          "role": "Primary project/company identity source",
+          "inspection": "primary reference candidate; exact media intake pending"
+        },
+        {
+          "url": "https://xstocks.fi/documents/xstocks-terms-of-service.pdf",
+          "role": "Registry issuer reference; identity context, not proof of a logo image",
+          "inspection": "in reviewed quote registry"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Reference gate: the reviewed company page presents a wordmark. Resolve an exact wordless identity asset before generation; the no-words rule remains active."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield. If the exact reference contains a wordmark/lettering, resolve its scoped use against the owner’s earlier no-words direction; never substitute generic industry imagery.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": true,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Gamestop xStock",
+          "symbol": "GMEx",
+          "uri": "https://xstocks-metadata.backed.fi/tokens/Solana/GMEx/metadata.json",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 8,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "13875804487",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "tslax",
+      "proposedDesignKey": "pair-tslax",
+      "name": "Tesla Signature",
+      "exactIdentity": "Tesla xStock",
+      "symbol": "TSLAX",
+      "kind": "stock",
+      "exactQuoteMint": "XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB",
+      "recognizableIdentityMotif": "The exact Tesla T emblem from the company gallery, preserving the distinctive curved crossbar and stem.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#F1F1EC",
+          "#CC162B",
+          "#171B20",
+          "#BEC3C8"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Pearl ceramic, polished titanium and narrow Tesla-red enamel; small exact T emblems embedded in the lower rail.",
+      "reverseHero": "A single Tesla T emblem on a restrained pearl-and-red machined field, replacing the generic battery.",
+      "sourceReferences": [
+        {
+          "url": "https://xstocks-metadata.backed.fi/tokens/Solana/TSLAx/metadata.json",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        },
+        {
+          "url": "https://www.tesla.com/tesla-gallery",
+          "role": "Primary project/company identity source",
+          "inspection": "research page consulted; exact media intake pending"
+        },
+        {
+          "url": "https://xstocks.fi/documents/xstocks-terms-of-service.pdf",
+          "role": "Registry issuer reference; identity context, not proof of a logo image",
+          "inspection": "in reviewed quote registry"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Acquire the exact company emblem as an image reference; no vehicle model or battery stands in for it."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Tesla xStock",
+          "symbol": "TSLAx",
+          "uri": "https://xstocks-metadata.backed.fi/tokens/Solana/TSLAx/metadata.json",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 8,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "827441685",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "nvdax",
+      "proposedDesignKey": "pair-nvdax",
+      "name": "NVIDIA Signature",
+      "exactIdentity": "NVIDIA xStock",
+      "symbol": "NVDAX",
+      "kind": "stock",
+      "exactQuoteMint": "Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh",
+      "recognizableIdentityMotif": "The exact NVIDIA eyemark, preserving its recognizable geometry rather than an invented circuit eye.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#101613",
+          "#76B900",
+          "#E7EEDC",
+          "#BBC2B6"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Obsidian and NVIDIA-green enamel, with a precise eye-contour motif confined to the outer frame.",
+      "reverseHero": "The exact NVIDIA eyemark as the single hero, supported by subtle silicon material rather than a generic chip.",
+      "sourceReferences": [
+        {
+          "url": "https://xstocks-metadata.backed.fi/tokens/Solana/NVDAx/metadata.json",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/Xsc9qvGR1efVDFGLrVsmkzv3qi45LTBjeUKSPmx9qEh",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        },
+        {
+          "url": "https://www.nvidia.com/en-us/about-nvidia/legal-info/logo-brand-usage/",
+          "role": "Primary project/company identity source",
+          "inspection": "research page consulted; exact media intake pending"
+        },
+        {
+          "url": "https://xstocks.fi/documents/xstocks-terms-of-service.pdf",
+          "role": "Registry issuer reference; identity context, not proof of a logo image",
+          "inspection": "in reviewed quote registry"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "The primary page confirms the eyemark/wordmark relationship. Obtain the exact reference; retain no-word decoration rather than fabricating a new logo."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "NVIDIA xStock",
+          "symbol": "NVDAx",
+          "uri": "https://xstocks-metadata.backed.fi/tokens/Solana/NVDAx/metadata.json",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 8,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "1564551045",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "aaplx",
+      "proposedDesignKey": "pair-aaplx",
+      "name": "Apple Signature",
+      "exactIdentity": "Apple xStock",
+      "symbol": "AAPLX",
+      "kind": "stock",
+      "exactQuoteMint": "XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp",
+      "recognizableIdentityMotif": "The exact Apple bitten-apple silhouette, including the detached leaf and bite shape.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#F1F0EC",
+          "#D4D6D4",
+          "#202326",
+          "#A7ACB0"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Satin titanium with pearl ceramic and small precisely cut Apple silhouettes in the outer lower fittings.",
+      "reverseHero": "A crisp Apple silhouette centered on a quiet titanium field, replacing the generic central orb.",
+      "sourceReferences": [
+        {
+          "url": "https://xstocks-metadata.backed.fi/tokens/Solana/AAPLx/metadata.json",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/XsbEhLAtcf6HdfpFZ5xEMdqW8nfAvcsP5bdudRLJzJp",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        },
+        {
+          "url": "https://www.apple.com/",
+          "role": "Primary project/company identity source",
+          "inspection": "research page consulted; exact media intake pending"
+        },
+        {
+          "url": "https://xstocks.fi/documents/xstocks-terms-of-service.pdf",
+          "role": "Registry issuer reference; identity context, not proof of a logo image",
+          "inspection": "in reviewed quote registry"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Use the actual company silhouette as an image reference; no phone or abstract orb substitutes for the emblem."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Apple xStock",
+          "symbol": "AAPLx",
+          "uri": "https://xstocks-metadata.backed.fi/tokens/Solana/AAPLx/metadata.json",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 8,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "937991893",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "mstrx",
+      "proposedDesignKey": "pair-mstrx",
+      "name": "Strategy Signature",
+      "exactIdentity": "Strategy xStock",
+      "symbol": "MSTRX",
+      "kind": "stock",
+      "exactQuoteMint": "XsP7xzNPvEHS1m6qfanPUGjNmdnmsLKEoNAnHjdxxyZ",
+      "recognizableIdentityMotif": "The exact current Strategy identity from its primary media kit; any approved wordless emblem must be resolved from that kit.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#171514",
+          "#F58025",
+          "#E2B46C",
+          "#EDE1CC"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Graphite and orange enamel with brushed warm metal, using only verified company identity details in the perimeter.",
+      "reverseHero": "A verified exact Strategy emblem as hero, without generic stacked coins or an invented vault seal.",
+      "sourceReferences": [
+        {
+          "url": "https://xstocks-metadata.backed.fi/tokens/Solana/MSTRx/metadata.json",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/XsP7xzNPvEHS1m6qfanPUGjNmdnmsLKEoNAnHjdxxyZ",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        },
+        {
+          "url": "https://www.strategy.com/",
+          "role": "Primary project/company identity source",
+          "inspection": "research page consulted; exact media intake pending"
+        },
+        {
+          "url": "https://xstocks.fi/documents/xstocks-terms-of-service.pdf",
+          "role": "Registry issuer reference; identity context, not proof of a logo image",
+          "inspection": "in reviewed quote registry"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Reference gate: acquire the current primary media-kit asset and determine whether a wordless emblem is available. Do not automatically substitute the Bitcoin symbol for the company."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield. If the exact reference contains a wordmark/lettering, resolve its scoped use against the owner’s earlier no-words direction; never substitute generic industry imagery.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": true,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "MicroStrategy xStock",
+          "symbol": "MSTRx",
+          "uri": "https://xstocks-metadata.backed.fi/tokens/Solana/MSTRx/metadata.json",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 8,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "2422269854",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "coinx",
+      "proposedDesignKey": "pair-coinx",
+      "name": "Coinbase Signature",
+      "exactIdentity": "Coinbase xStock",
+      "symbol": "COINX",
+      "kind": "stock",
+      "exactQuoteMint": "Xs7ZdzSHLU9ftNJsii5fCeJhoRWSC32SQGzGQtePxNu",
+      "recognizableIdentityMotif": "The exact Coinbase circular C icon from a primary Coinbase asset, preserving the shape and central cutout.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#0A1B54",
+          "#0052FF",
+          "#F2F5FC",
+          "#BEC8D3"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Deep Coinbase-blue enamel, pale palladium and exact C-icon fittings that remain outside the creator-art aperture.",
+      "reverseHero": "A large exact Coinbase icon on a restrained blue field, replacing the generic vault ornament.",
+      "sourceReferences": [
+        {
+          "url": "https://xstocks-metadata.backed.fi/tokens/Solana/COINx/metadata.json",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/Xs7ZdzSHLU9ftNJsii5fCeJhoRWSC32SQGzGQtePxNu",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        },
+        {
+          "url": "https://www.coinbase.com/",
+          "role": "Primary project/company identity source",
+          "inspection": "primary reference candidate; exact media intake pending"
+        },
+        {
+          "url": "https://xstocks.fi/documents/xstocks-terms-of-service.pdf",
+          "role": "Registry issuer reference; identity context, not proof of a logo image",
+          "inspection": "in reviewed quote registry"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "The /brand route could not be fetched by the research tool. Obtain and inspect the current primary icon asset before generation."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Coinbase xStock",
+          "symbol": "COINx",
+          "uri": "https://xstocks-metadata.backed.fi/tokens/Solana/COINx/metadata.json",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 8,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "2101497652",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "amc",
+      "proposedDesignKey": "pair-amc",
+      "name": "AMC Signature",
+      "exactIdentity": "AMC Entertainment tokenized equity",
+      "symbol": "AMC",
+      "kind": "stock",
+      "exactQuoteMint": "AMC1qwR9KhiyrQBRPrxnfo4JfMeMZqEBvt5tgTytNNoc",
+      "recognizableIdentityMotif": "The exact AMC identity from the company or admitted AMC token image; a wordless emblem has not yet been established.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#33151A",
+          "#D71B2D",
+          "#E5C896",
+          "#F3E7D7"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "AMC-red enamel and warm polished metal; identity details must come from an exact accepted source rather than film reels or theater curtains.",
+      "reverseHero": "A verified wordless AMC identity emblem, if available, without inventing a cinema mascot.",
+      "sourceReferences": [
+        {
+          "url": "https://metadata.backpack.exchange/stocks/amc.us.json",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/AMC1qwR9KhiyrQBRPrxnfo4JfMeMZqEBvt5tgTytNNoc",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        },
+        {
+          "url": "https://www.amctheatres.com/",
+          "role": "Primary project/company identity source",
+          "inspection": "research page consulted; exact media intake pending"
+        },
+        {
+          "url": "https://support.backpack.exchange/legal/general-legal/user-agreement",
+          "role": "Registry issuer reference; identity context, not proof of a logo image",
+          "inspection": "in reviewed quote registry"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Reference gate: the company site returned 403. Acquire a primary exact identity image and resolve its letter-bearing logo against the retained no-words rule. The decoded quote metadata points at a Backpack identity image; do not mistake an issuer Backpack mark for AMC company identity."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield. If the exact reference contains a wordmark/lettering, resolve its scoped use against the owner’s earlier no-words direction; never substitute generic industry imagery.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": true,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "AMC Entertainment - Backpack Securities",
+          "symbol": "AMC",
+          "uri": "https://metadata.backpack.exchange/stocks/amc.us.json",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "1084297423",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "doge",
+      "proposedDesignKey": "pair-doge",
+      "name": "Dogecoin Signature",
+      "exactIdentity": "Dogecoin (Sunrise Solana representation)",
+      "symbol": "DOGE",
+      "kind": "meme",
+      "exactQuoteMint": "DoGEV7LASBkQbibMc5k5vKnTZoMg423GpJ5QtJEGfm7R",
+      "recognizableIdentityMotif": "Doge’s recognizable Shiba Inu/Kabosu face, using the exact admitted DOGE identity reference; preserve the specific face rather than drawing an arbitrary Shiba.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#151411",
+          "#CDAF6D",
+          "#E2CCA0",
+          "#F0E8D2"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Meteorite-black and satin-gold rim with small source-faithful Doge reliefs fitted into the rail, clear of the creator art.",
+      "reverseHero": "A source-faithful Doge portrait relief in satin gold, matching the approved Imperial Gold material treatment.",
+      "sourceReferences": [
+        {
+          "url": "https://arweave.net/vkpUTtURQ2woUodsx2SpMx5GvtJt3770oFkz1P2az3o",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/DoGEV7LASBkQbibMc5k5vKnTZoMg423GpJ5QtJEGfm7R",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        },
+        {
+          "url": "https://dogecoin.com/",
+          "role": "Primary project/company identity source",
+          "inspection": "research page consulted; exact media intake pending"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Existing Doge artwork is a potential reuse candidate. Compare it with the exact admitted Solana representation image before marking identity review complete."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Dogecoin",
+          "symbol": "DOGE",
+          "uri": "https://arweave.net/vkpUTtURQ2woUodsx2SpMx5GvtJt3770oFkz1P2az3o",
+          "source": "GLTxHqfwkGbKQNwm54V2SxaBa6zcab2ST434TLCRHfrE"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 8,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "4312934781786",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "fartcoin",
+      "proposedDesignKey": "pair-fartcoin",
+      "name": "Fartcoin Signature",
+      "exactIdentity": "Fartcoin",
+      "symbol": "Fartcoin",
+      "kind": "meme",
+      "exactQuoteMint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+      "recognizableIdentityMotif": "The exact uploaded Fartcoin token-image character/mark at the pinned mint; its visual features must be copied from that image, not inferred from the coin name.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#F1E8C7",
+          "#B8C85B",
+          "#4F5B26",
+          "#CBB37A"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Warm cream ceramic and satin metal with source-derived contour relief in the lower corner fittings; retain exact token-image accent colors after reference intake.",
+      "reverseHero": "The exact Fartcoin identity image as the central reverse hero; explicitly reject the old Ember flame as an identity substitute.",
+      "sourceReferences": [
+        {
+          "url": "https://ipfs.io/ipfs/QmYfe8zVGHA1heej47AkBX3Nnetg2h2kqj5yymz1xyKeHb",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "page visually linked but full-size identity image not yet ingested"
+        },
+        {
+          "url": "https://ipfs.io/ipfs/QmQr3Fz4h1etNsF7oLGMRHiCzhB5y9a7GjyodnF7zLHK1g",
+          "role": "Exact uploaded image CID resolved from this mint’s primary pump.fun coin-image link",
+          "inspection": "URL resolved; fetch failed in local network, visual decoding and hash still pending"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Primary pump.fun page resolved its token-image IPFS CID, but the full-resolution image was not decoded locally. Visual inspection and a pinned image reference are required."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Fartcoin",
+          "symbol": "Fartcoin",
+          "uri": "https://ipfs.io/ipfs/QmYfe8zVGHA1heej47AkBX3Nnetg2h2kqj5yymz1xyKeHb",
+          "source": "9XQ1xyaxP4ALeRbzj9Rm9KByCuwcLjf5yJ4nbyKLxG5u"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "27213371818",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "pnut",
+      "proposedDesignKey": "pair-pnut",
+      "name": "Peanut Signature",
+      "exactIdentity": "Peanut the Squirrel",
+      "symbol": "Pnut",
+      "kind": "meme",
+      "exactQuoteMint": "2qEHjDLDLbuBgRYvsxhc5D6uDWAivNFZGan56P1tpump",
+      "recognizableIdentityMotif": "Peanut the Squirrel, as identified by the exact registry name; the particular squirrel face/pose must come from the admitted token image.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#2F251A",
+          "#B4773F",
+          "#E3BD7D",
+          "#F5E9D5"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Walnut-brown enamel and warm metal, with relief derived from the exact squirrel reference in the outer rail.",
+      "reverseHero": "The exact Peanut token portrait, retaining its recognizable squirrel features and pose; no generic compass or sunburst.",
+      "sourceReferences": [
+        {
+          "url": "https://ipfs.io/ipfs/QmSkEeAv71gDaLjcwnvVMmDnNsFrhHxrFSFX2Tg4upVe48",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/2qEHjDLDLbuBgRYvsxhc5D6uDWAivNFZGan56P1tpump",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Do not invent a squirrel pose or accessories. The primary coin page timed out during this research pass; acquire its exact uploaded/on-chain image."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Peanut the Squirrel",
+          "symbol": "Pnut",
+          "uri": "https://ipfs.io/ipfs/QmSkEeAv71gDaLjcwnvVMmDnNsFrhHxrFSFX2Tg4upVe48",
+          "source": "9dUa9SeDsikxXtCYtXTNviTUKdatFbj38xg8EhujpDsQ"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "84579312602",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "moodeng",
+      "proposedDesignKey": "pair-moodeng",
+      "name": "Moo Deng Signature",
+      "exactIdentity": "Moo Deng",
+      "symbol": "MOODENG",
+      "kind": "meme",
+      "exactQuoteMint": "ED5nyyWEzpPPiWimP8vYm7sD7TD3LAt3Q3gRTWHzPJBY",
+      "recognizableIdentityMotif": "The exact Moo Deng token-image portrait at the pinned mint; retain its specific silhouette and expression after visual reference inspection.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#342C38",
+          "#BCA8B5",
+          "#E5CDD6",
+          "#C5CFCA"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Smoke-lilac ceramic and pale metal with rounded source-derived contour relief in the rails; no generic ocean theme.",
+      "reverseHero": "The exact Moo Deng identity portrait as a source-faithful sculpted relief; do not reuse Tide’s abstract wave reverse.",
+      "sourceReferences": [
+        {
+          "url": "https://ipfs.io/ipfs/QmWVzSC1ZTFiBYFiZZ6QivGUZ9awPJwqZECSFL1UD4gitC",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/ED5nyyWEzpPPiWimP8vYm7sD7TD3LAt3Q3gRTWHzPJBY",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "page visually linked but full-size identity image not yet ingested"
+        },
+        {
+          "url": "https://ipfs.io/ipfs/Qmf1g7dJZNDJHRQru7E7ENwDjcvu7swMUB6x9ZqPXr4RV2",
+          "role": "Exact uploaded image CID resolved from this mint’s primary pump.fun coin-image link",
+          "inspection": "URL resolved; fetch failed in local network, visual decoding and hash still pending"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Primary pump.fun page resolved the exact coin-image IPFS CID. The full-resolution image still needs decoding/visual inspection before any facial or pose detail is specified."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Moo Deng",
+          "symbol": "MOODENG",
+          "uri": "https://ipfs.io/ipfs/QmWVzSC1ZTFiBYFiZZ6QivGUZ9awPJwqZECSFL1UD4gitC",
+          "source": "4Q7aoDr7zBsaBB7emx9vvugE71xsPUsc8MvKHtRfhgY1"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "93071687156",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "troll",
+      "proposedDesignKey": "pair-troll",
+      "name": "TROLL Signature",
+      "exactIdentity": "TROLL",
+      "symbol": "TROLL",
+      "kind": "meme",
+      "exactQuoteMint": "5UUH9RTDiSpq6HKS6bp4NdU9PNJpXRXuiw6ShBTBhgH2",
+      "recognizableIdentityMotif": "The exact TROLL token-image face/mark at the pinned mint, not an arbitrary troll character or generic circuit symbol.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#191A1C",
+          "#E9EBE6",
+          "#838881",
+          "#F5F0DB"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "High-contrast black and ivory enamel with exact face-contour fragments confined to the outer rail.",
+      "reverseHero": "The exact reference face or mark, preserving its expression and silhouette; no neon-circuit replacement.",
+      "sourceReferences": [
+        {
+          "url": "https://cf-ipfs.com/ipfs/QmSEFmDCYb7Asro2VirBVjecp253iNnGwjgVZHdHxm9Rm5",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/5UUH9RTDiSpq6HKS6bp4NdU9PNJpXRXuiw6ShBTBhgH2",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Exact uploaded/on-chain mascot image required; token-name association alone is insufficient to select a particular troll-face variant."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "TROLL",
+          "symbol": "TROLL",
+          "uri": "https://cf-ipfs.com/ipfs/QmSEFmDCYb7Asro2VirBVjecp253iNnGwjgVZHdHxm9Rm5",
+          "source": "AkzsXWv9A4fnHSFhkcgjY4V2SEv9k5W8bNcnAtxVfYgD"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "110469930092",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "bonk",
+      "proposedDesignKey": "pair-bonk",
+      "name": "BONK Signature",
+      "exactIdentity": "Bonk",
+      "symbol": "BONK",
+      "kind": "meme",
+      "exactQuoteMint": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+      "recognizableIdentityMotif": "The exact BONK Shiba-dog identity, preserving the official face and expression from the admitted mint’s reference.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#21202C",
+          "#F49B27",
+          "#F6D095",
+          "#F3E8D3"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "BONK-orange enamel, navy composite and titanium, with small exact face fittings in the lower rail.",
+      "reverseHero": "The exact BONK face as hero. Omit the existing baseball cap/bat unless those features are present in the accepted source image.",
+      "sourceReferences": [
+        {
+          "url": "https://arweave.net/QPC6FYdUn-3V8ytFNuoCS85S2tHAuiDblh6u3CIZLsw",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Existing Stadium Chrome is a material reference only until exact identity comparison passes. Do not mistake a generic Shiba with sports props for the source BONK logo."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Bonk",
+          "symbol": "Bonk",
+          "uri": "https://arweave.net/QPC6FYdUn-3V8ytFNuoCS85S2tHAuiDblh6u3CIZLsw",
+          "source": "FDZZbyY9XGpL3CNKUZxLk3wFTTQYL3TkDiDzqxrizcPN"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 5,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "116092086772036",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "wif",
+      "proposedDesignKey": "pair-wif",
+      "name": "dogwifhat Signature",
+      "exactIdentity": "dogwifhat",
+      "symbol": "WIF",
+      "kind": "meme",
+      "exactQuoteMint": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+      "recognizableIdentityMotif": "The exact dogwifhat dog portrait and knitted hat from the admitted token’s image, retaining the actual hat color, shape and facial proportions.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#3F3029",
+          "#D9B6B1",
+          "#E9DDC6",
+          "#B98577"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Source-matched knitted texture, restrained rose metal and tobacco suede around the shared apertures.",
+      "reverseHero": "The exact hat-wearing dog portrait in source-faithful relief, without added wardrobe or a changed dog face.",
+      "sourceReferences": [
+        {
+          "url": "https://bafkreihwqhounu3cdwgvk2gc2dqcinpntlccbo3xcy4xuerd24yndldl5q.ipfs.nftstorage.link",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Couture Knit is a potential reuse candidate. Compare its portrait and hat with the pinned quote image; the coin page was not accessible during this pass."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "dogwifhat",
+          "symbol": "$WIF",
+          "uri": "https://bafkreihwqhounu3cdwgvk2gc2dqcinpntlccbo3xcy4xuerd24yndldl5q.ipfs.nftstorage.link",
+          "source": "C1BpuaMytZAbSCFf9WM2gm6fAm54Yh1gh32ieptrp12B"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "19481886553",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "cards",
+      "proposedDesignKey": "pair-cards",
+      "name": "Collector Crypt Signature",
+      "exactIdentity": "Collector Crypt",
+      "symbol": "CARDS",
+      "kind": "collector",
+      "exactQuoteMint": "CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp",
+      "recognizableIdentityMotif": "The exact Collector Crypt/CARDS token emblem from the token’s primary identity, not a generic archival seal or an unrelated trading-card franchise.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#1B1B20",
+          "#BBA7E4",
+          "#DBCEAB",
+          "#ECE9E1"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Violet-black ceramic, pale gold and a repeated source-derived emblem contour in the lower fittings.",
+      "reverseHero": "The exact Collector Crypt token emblem as the dominant reverse hero, with the symbol’s actual colors retained.",
+      "sourceReferences": [
+        {
+          "url": "https://gateway.irys.xyz/AQqBpb3bHCptRUX2vpW4JHqTLhTeDimPsYfe9LkRxbfA",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        },
+        {
+          "url": "https://collectorcrypt.com/",
+          "role": "Primary project/company identity source",
+          "inspection": "research page consulted; exact media intake pending"
+        },
+        {
+          "url": "https://collectorcrypt.com/tokenomics",
+          "role": "Primary project/company identity source",
+          "inspection": "primary reference candidate; exact media intake pending"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Primary site returned only an image container. Exact official token-image reference must be acquired; the proposed material palette is not a verified brand specification."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": true,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Collector Crypt",
+          "symbol": "CARDS",
+          "uri": "https://gateway.irys.xyz/AQqBpb3bHCptRUX2vpW4JHqTLhTeDimPsYfe9LkRxbfA",
+          "source": "HbniJMJffiLgi9uGFc9YA77uppQfKDviRNsyapgg1bMw"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "12389452981",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "sv151",
+      "proposedDesignKey": "pair-sv151",
+      "name": "Scarlet & Violet 151 Signature",
+      "exactIdentity": "Scarlet & Violet 151",
+      "symbol": "SV151",
+      "kind": "collector",
+      "exactQuoteMint": "SV151D5pjygAKA8aJJcKzm4wFnRX5G92Fye94jQJk7g",
+      "recognizableIdentityMotif": "The exact SV151 token identity image from the admitted mint. The registry identifies Scarlet & Violet 151; it does not establish a particular Pokémon mascot.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#672331",
+          "#8B63B6",
+          "#E1C27D",
+          "#F1E9D7"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Scarlet/violet enamel and restrained gold, with only verified source-image motifs on the rim.",
+      "reverseHero": "The exact SV151 token emblem or portrait. Do not substitute a generic Poké Ball, Pikachu or unrelated Pokémon card back.",
+      "sourceReferences": [
+        {
+          "url": "https://gateway.irys.xyz/LdHkmwgCT82QrVjpbmuEPI9MomJCuSdutW44gWQCL1c",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/SV151D5pjygAKA8aJJcKzm4wFnRX5G92Fye94jQJk7g",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Exact uploaded/on-chain reference required. If that image is wordmark-only, resolve a source-faithful wordless emblem before generation rather than inventing one."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": true,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Scarlet & Violet 151",
+          "symbol": "SV151",
+          "uri": "https://gateway.irys.xyz/LdHkmwgCT82QrVjpbmuEPI9MomJCuSdutW44gWQCL1c",
+          "source": "APqui2Tpe35B9LNfogGQ49pTmKh1LBayELtcyzSsK4Qq"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "14762495764",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "toad",
+      "proposedDesignKey": "pair-toad",
+      "name": "The Toad Pepe Signature",
+      "exactIdentity": "The Toad Pepe",
+      "symbol": "TOAD",
+      "kind": "meme",
+      "exactQuoteMint": "A13oRB9FFaiUjfi6LdCg6p9ka1u8SfGkUFs4SKvPpump",
+      "recognizableIdentityMotif": "The exact The Toad Pepe token-image face/mark at the admitted mint, including its specific expression; a generic Pepe sculpture does not establish exact identity.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#142C22",
+          "#6FAD55",
+          "#C4D8A2",
+          "#D2D8C8"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Jade and palladium perimeter carrying small details traced from the exact TOAD reference, never covering creator art.",
+      "reverseHero": "The exact TOAD character pose/expression from the uploaded token image, translated with controlled jade relief.",
+      "sourceReferences": [
+        {
+          "url": "https://ipfs.io/ipfs/bafkreifxw72yzkc2hjoktvce2kbtxh672ak2eqv47wvdrdnuchabpdb5za",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/A13oRB9FFaiUjfi6LdCg6p9ka1u8SfGkUFs4SKvPpump",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Jade Reliquary is an existing generic Pepe material reference. Exact TOAD image comparison is required before reuse."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "The Toad Pepe",
+          "symbol": "TOAD",
+          "uri": "https://ipfs.io/ipfs/bafkreifxw72yzkc2hjoktvce2kbtxh672ak2eqv47wvdrdnuchabpdb5za",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "3881389438465",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "pengu",
+      "proposedDesignKey": "pair-pengu",
+      "name": "Pudgy Penguins Signature",
+      "exactIdentity": "Pudgy Penguins",
+      "symbol": "PENGU",
+      "kind": "meme",
+      "exactQuoteMint": "2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv",
+      "recognizableIdentityMotif": "Pudgy Penguins identity, as recorded in the registry; use the exact admitted PENGU token penguin/mark instead of an arbitrary penguin.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#0D3D56",
+          "#7BC6E1",
+          "#ECF1ED",
+          "#D0D5CF"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Ice enamel, pale metal and exact source-derived penguin contour details along the rails.",
+      "reverseHero": "The exact PENGU mascot with its source expression, pose and clothing, rather than Frost’s crystalline motif.",
+      "sourceReferences": [
+        {
+          "url": "https://arweave.net/nFo9Nwcam4ek0SwtKQchYD47T9dkTpGqL62CgcXSjZE",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Acquire and pin the exact token image; do not invent a crown, hoodie or accessories."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Pudgy Penguins",
+          "symbol": "PENGU",
+          "uri": "https://arweave.net/nFo9Nwcam4ek0SwtKQchYD47T9dkTpGqL62CgcXSjZE",
+          "source": "7dW4mRtQNmzD1xXanuEmDL88HTfbpG6VWDUuYZMbKgss"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "460419624030",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "giga",
+      "proposedDesignKey": "pair-giga",
+      "name": "GIGACHAD Signature",
+      "exactIdentity": "GIGACHAD",
+      "symbol": "GIGA",
+      "kind": "meme",
+      "exactQuoteMint": "63LfDmNb3MQ8mw9MtZ2To9bEA2M71kZUUGq5tiJxcqj9",
+      "recognizableIdentityMotif": "The exact GIGACHAD token-image portrait/mark, as pinned to the admitted mint, not an invented strong man.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#111314",
+          "#A6ADB0",
+          "#E3E3DD",
+          "#59616A"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Monochrome brushed metal and black ceramic, with the source silhouette echoed subtly in the perimeter.",
+      "reverseHero": "A source-faithful GIGACHAD portrait/mark, preserving the exact reference’s facial structure and crop.",
+      "sourceReferences": [
+        {
+          "url": "https://bafkreiehz3jw7547ryrb5mr54rbnqmcjsqblkcoz46v7aejszqricvnbsa.ipfs.nftstorage.link",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/63LfDmNb3MQ8mw9MtZ2To9bEA2M71kZUUGq5tiJxcqj9",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Acquire exact uploaded/on-chain image. No invented person or generic black crystal reverse."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "GIGACHAD",
+          "symbol": "GIGA",
+          "uri": "https://bafkreiehz3jw7547ryrb5mr54rbnqmcjsqblkcoz46v7aejszqricvnbsa.ipfs.nftstorage.link",
+          "source": "GJBpCMu5WdZVWt5PwDMJV15WG96a47AYDUnf632Qq5UY"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 5,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "185989613683",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "spx",
+      "proposedDesignKey": "pair-spx",
+      "name": "SPX6900 Signature",
+      "exactIdentity": "SPX6900 (Wormhole Solana representation)",
+      "symbol": "SPX",
+      "kind": "meme",
+      "exactQuoteMint": "J3NKxxXZcnNiMjKw9hYb2K4LUxgwB6t1FtPtQVsv3KFr",
+      "recognizableIdentityMotif": "The exact SPX6900 token emblem from the admitted Wormhole Solana representation; do not confuse the meme identity with the S&P 500 index.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#102641",
+          "#2B64B6",
+          "#DBD4B9",
+          "#EDF1E9"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Navy enamel, blue and pale gold with exact verified emblem contours on the lower rail.",
+      "reverseHero": "The exact SPX6900 emblem as the reverse hero; no generic constellations or financial-chart substitute.",
+      "sourceReferences": [
+        {
+          "url": "https://pump.fun/coin/J3NKxxXZcnNiMjKw9hYb2K4LUxgwB6t1FtPtQVsv3KFr",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Acquire the exact reference. If its identity is letter-bearing, resolve a compatible wordless source without inventing a new mark."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": true,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "SPX6900 (Wormhole)",
+          "symbol": "SPX",
+          "uri": "",
+          "source": "HSuKSY47FT7BfgeSQKw7yo2rABs1RmtsLwPTAXQVSuxe"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 8,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "912319603279",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "trump",
+      "proposedDesignKey": "pair-trump",
+      "name": "OFFICIAL TRUMP Signature",
+      "exactIdentity": "OFFICIAL TRUMP",
+      "symbol": "TRUMP",
+      "kind": "meme",
+      "exactQuoteMint": "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN",
+      "recognizableIdentityMotif": "The exact OFFICIAL TRUMP token-image portrait or emblem at the pinned mint, not an unrelated photo or a newly invented person.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#581B22",
+          "#D4A65A",
+          "#F2E5CF",
+          "#172940"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Deep red enamel and restrained gold, using only source-derived identity relief on the perimeter.",
+      "reverseHero": "The exact token-image portrait/emblem, retaining the original pose, expression and recognizable visual identity.",
+      "sourceReferences": [
+        {
+          "url": "https://arweave.net/cSCP0h2n1crjeSWE9KF-XtLciJalDNFs7Vf-Sm0NNY0",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Acquire the exact official token image and retain its provenance. Avoid added slogans, flags with lettering or invented endorsement claims."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "OFFICIAL TRUMP",
+          "symbol": "TRUMP",
+          "uri": "https://arweave.net/cSCP0h2n1crjeSWE9KF-XtLciJalDNFs7Vf-Sm0NNY0",
+          "source": "H7efTb73LpehuDBaPqZ81Gc585PDf1bCbtQnVb8JpgB8"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "2082554214",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "useless",
+      "proposedDesignKey": "pair-useless",
+      "name": "USELESS COIN Signature",
+      "exactIdentity": "USELESS COIN",
+      "symbol": "USELESS",
+      "kind": "meme",
+      "exactQuoteMint": "Dz9mQ9NzkBcCsuGPFJ3r1bS4wgqKMHBPiVuniW8Mbonk",
+      "recognizableIdentityMotif": "The exact USELESS COIN token-image mark/character at the admitted mint, without inferring a mascot from the name.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#252422",
+          "#C5C3AE",
+          "#EEE9D8",
+          "#9D9A87"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Quiet stone and satin-metal rails carrying the actual reference contour; identity accent colors must be sampled after intake.",
+      "reverseHero": "The exact token-image identity rather than Wildtype’s unrelated creature-collector crest.",
+      "sourceReferences": [
+        {
+          "url": "https://ipfs.io/ipfs/bafkreibwvvvj5rpan4rpb7v3lx7mfve5qfn7lrfsqdrqehpmoyg5fyclsy",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/Dz9mQ9NzkBcCsuGPFJ3r1bS4wgqKMHBPiVuniW8Mbonk",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Exact image reference required; proposed materials are provisional and must not replace the actual identity colors."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "USELESS COIN",
+          "symbol": "USELESS",
+          "uri": "https://ipfs.io/ipfs/bafkreibwvvvj5rpan4rpb7v3lx7mfve5qfn7lrfsqdrqehpmoyg5fyclsy",
+          "source": "BHMfPXBpZZnG62EsgUxQHrcEoraFyBmGeJpY8Qxbfqic"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "23871081976",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "chillguy",
+      "proposedDesignKey": "pair-chillguy",
+      "name": "Chill Guy Signature",
+      "exactIdentity": "Just a chill guy",
+      "symbol": "CHILLGUY",
+      "kind": "meme",
+      "exactQuoteMint": "Df6yfrKC8kZE3KNkrHERKzAetSxbrWeniQfyJY4Jpump",
+      "recognizableIdentityMotif": "The exact Just a chill guy token-image character at the admitted mint, preserving its expression, posture and clothing after reference inspection.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#44362B",
+          "#91A5A4",
+          "#D9C3A2",
+          "#C5B695"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Warm neutral enamel and soft slate with source-derived clothing/outline texture restricted to the rim.",
+      "reverseHero": "The exact Chill Guy character and pose, without turning it into a generic moon or opal ornament.",
+      "sourceReferences": [
+        {
+          "url": "https://ipfs.io/ipfs/Qmckb3nWWHyoJKtX3FeagfmDZXNVqiXM4nKkYsTnygm2Ah",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/Df6yfrKC8kZE3KNkrHERKzAetSxbrWeniQfyJY4Jpump",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Exact uploaded/on-chain reference required; do not improvise character proportions or attire."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Just a chill guy",
+          "symbol": "CHILLGUY",
+          "uri": "https://ipfs.io/ipfs/Qmckb3nWWHyoJKtX3FeagfmDZXNVqiXM4nKkYsTnygm2Ah",
+          "source": "2uK2wjMtppP6CMWaGtme4Gmn9mBrJG9GqRrrNBkPomEu"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "377683201384",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "goat",
+      "proposedDesignKey": "pair-goat",
+      "name": "Goatseus Maximus Signature",
+      "exactIdentity": "Goatseus Maximus",
+      "symbol": "GOAT",
+      "kind": "meme",
+      "exactQuoteMint": "CzLSujWBLFsSjncfkh59rUFqvafWcY5tzedWJSuypump",
+      "recognizableIdentityMotif": "The exact Goatseus Maximus token-image mascot/mark at the admitted mint; the name alone does not justify inventing a goat face.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#28251B",
+          "#B9AF79",
+          "#E3D5AC",
+          "#544E35"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Antique gold and dark enamel, using only exact reference-contour details in the perimeter.",
+      "reverseHero": "The exact GOAT identity from the uploaded/on-chain image, with no generic crown or heraldic-goat substitute.",
+      "sourceReferences": [
+        {
+          "url": "https://ipfs.io/ipfs/QmcGmF4tQxsQKdF3s1mSqYyg1vNqAXou32tbWztnsnEzth",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/CzLSujWBLFsSjncfkh59rUFqvafWcY5tzedWJSuypump",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Exact image reference required. Preserve source features once inspected rather than deriving a mascot from the ticker."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Goatseus Maximus",
+          "symbol": "GOAT",
+          "uri": "https://ipfs.io/ipfs/QmcGmF4tQxsQKdF3s1mSqYyg1vNqAXou32tbWztnsnEzth",
+          "source": "5XupC6FAqqFECx4vTpfGLcF9aTKNdBRFGg18GM8w1DoB"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "248906509047",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "zerebro",
+      "proposedDesignKey": "pair-zerebro",
+      "name": "zerebro Signature",
+      "exactIdentity": "zerebro",
+      "symbol": "ZEREBRO",
+      "kind": "meme",
+      "exactQuoteMint": "8x5VqbHA8D7NkD52uNuS5nnt3PwA8pLD34ymskeSo2Wn",
+      "recognizableIdentityMotif": "The exact zerebro token-image mark/character at the admitted mint, not an assumed brain, star or AI robot.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#211D31",
+          "#AA88C7",
+          "#D7C1A6",
+          "#E9E3D8"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Dark amethyst ceramic and pale metal with contours drawn only from the verified source identity.",
+      "reverseHero": "The exact zerebro identity hero, preserving the reference’s geometry and signature visual features.",
+      "sourceReferences": [
+        {
+          "url": "https://ipfs.io/ipfs/Qmaqr4jU97zckiTbRm7A1vV4354PXYLZrHE75CwMJH1Vsa",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/8x5VqbHA8D7NkD52uNuS5nnt3PwA8pLD34ymskeSo2Wn",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Exact image reference required; colors are provisional material proposals until sampled from that image."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "zerebro",
+          "symbol": "ZEREBRO",
+          "uri": "https://ipfs.io/ipfs/Qmaqr4jU97zckiTbRm7A1vV4354PXYLZrHE75CwMJH1Vsa",
+          "source": "GedjbsLxG7iw4i7LBz4o1dchEpXm4GcR2ZdxyyNqSsb8"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "120014672763",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "act",
+      "proposedDesignKey": "pair-act",
+      "name": "Act I Signature",
+      "exactIdentity": "Act I : The AI Prophecy",
+      "symbol": "ACT",
+      "kind": "meme",
+      "exactQuoteMint": "GJAFwWjJ3vnTsrQVabjBVK2TYB1YtRCQXRDfDgUnpump",
+      "recognizableIdentityMotif": "The exact Act I : The AI Prophecy token-image emblem at the admitted mint, not a generic theater mask, actor or spell vortex.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#19252A",
+          "#72B8B2",
+          "#D6DAD0",
+          "#A8B6B2"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Blackened metal and source-matched enamel, with precise identity contours in the rail.",
+      "reverseHero": "The exact ACT token emblem/mark as hero, rendered with the accepted reference geometry intact.",
+      "sourceReferences": [
+        {
+          "url": "https://ipfs.io/ipfs/QmapPN3ZaZTKQ7XYmEDjh75j2V83dcBoNg8FTQrZGEGcAE",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/GJAFwWjJ3vnTsrQVabjBVK2TYB1YtRCQXRDfDgUnpump",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Exact image reference required. No motif inference from the words Act or AI."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Act I : The AI Prophecy",
+          "symbol": "ACT",
+          "uri": "https://ipfs.io/ipfs/QmapPN3ZaZTKQ7XYmEDjh75j2V83dcBoNg8FTQrZGEGcAE",
+          "source": "E5VVztqVTZ9ToBG1pkjNjrq9aidihAbQiGSmf13BHcwP"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "410161152095",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "pippin",
+      "proposedDesignKey": "pair-pippin",
+      "name": "Pippin Signature",
+      "exactIdentity": "Pippin",
+      "symbol": "pippin",
+      "kind": "meme",
+      "exactQuoteMint": "Dfh5DzRgSvvCFDoYc2ciTkMrbDfRKybA4SoFbPmApump",
+      "recognizableIdentityMotif": "The exact Pippin token-image character at the admitted mint; determine its actual silhouette, colors and accessories from that image.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#30273D",
+          "#B99DC9",
+          "#E9DACA",
+          "#C6D4B9"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Pearl-lilac ceramic and fine satin metal, with source-derived character details on the lower fittings.",
+      "reverseHero": "The exact Pippin character/mark in its reference pose, rather than Bloom’s generic blossom.",
+      "sourceReferences": [
+        {
+          "url": "https://ipfs.io/ipfs/QmWbM38Bhhcj4vQZpSyesRSotgoqicNjfaNoMmuDGtWZ2o",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/Dfh5DzRgSvvCFDoYc2ciTkMrbDfRKybA4SoFbPmApump",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Exact uploaded/on-chain image required. Do not assume a species, horn, pose or wardrobe without the reference."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Pippin",
+          "symbol": "pippin",
+          "uri": "https://ipfs.io/ipfs/QmWbM38Bhhcj4vQZpSyesRSotgoqicNjfaNoMmuDGtWZ2o",
+          "source": "FEYma4Y5Yn4HE2Sht2ZDhMZDE6wiMmsjKM6tHcKrLsW"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "228292037265",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "vine",
+      "proposedDesignKey": "pair-vine",
+      "name": "Vine Coin Signature",
+      "exactIdentity": "Vine Coin",
+      "symbol": "VINE",
+      "kind": "meme",
+      "exactQuoteMint": "6AJcP7wuLwmRYLBNbi825wgguaPsWzPBEHcHndpRpump",
+      "recognizableIdentityMotif": "The exact Vine Coin token-image emblem at the admitted mint; do not automatically use a different legacy app logo.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#143B2C",
+          "#33B684",
+          "#E0E9D6",
+          "#C4D0C6"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Green enamel and polished pale metal, with the verified emblem contour repeated subtly on the rim.",
+      "reverseHero": "The exact admitted VINE identity emblem, not a generic plant vine or grimoire motif.",
+      "sourceReferences": [
+        {
+          "url": "https://ipfs.io/ipfs/QmYTnHwVqLHCYL1xrwGQLY8e1YHdXVMimkLuYeHZNNyUiX",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/6AJcP7wuLwmRYLBNbi825wgguaPsWzPBEHcHndpRpump",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Acquire exact token image and compare any legacy V-shaped mark before selecting it. No added wordmark."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": true,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Vine Coin",
+          "symbol": "VINE",
+          "uri": "https://ipfs.io/ipfs/QmYTnHwVqLHCYL1xrwGQLY8e1YHdXVMimkLuYeHZNNyUiX",
+          "source": "895AYR4LWKnR9hF2QGjHUVSBSZ6p6tfd1ujeCMsuo5uC"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "485903902438",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "aura",
+      "proposedDesignKey": "pair-aura",
+      "name": "aura Signature",
+      "exactIdentity": "aura",
+      "symbol": "aura",
+      "kind": "meme",
+      "exactQuoteMint": "DtR4D9FtVoTX2569gaL837ZgrB6wNjj6tkmnX9Rdk9B2",
+      "recognizableIdentityMotif": "The exact aura token-image mark or character at the admitted mint, not generic stars or a halo inferred from the name.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#2E273C",
+          "#B59ABB",
+          "#E1C7BE",
+          "#D4D1C7"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Iridescent enamel and pale metal, with source-derived identity relief confined to the perimeter.",
+      "reverseHero": "The exact aura token-image identity with its source silhouette and proportions preserved.",
+      "sourceReferences": [
+        {
+          "url": "https://cf-ipfs.com/ipfs/QmciaE8qRSBMFPPFPjFkHCFTVFGfNXWGzc619Kt8ncb88g",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/DtR4D9FtVoTX2569gaL837ZgrB6wNjj6tkmnX9Rdk9B2",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Exact image reference required. The proposed lilac material treatment is not an assertion of official aura brand colors."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "aura",
+          "symbol": "aura",
+          "uri": "https://cf-ipfs.com/ipfs/QmciaE8qRSBMFPPFPjFkHCFTVFGfNXWGzc619Kt8ncb88g",
+          "source": "Bwt6zY3gpsCnPMx8QZdqDuXb7dNshYPQnq1kJhtqqKe"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "461640083871",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "michi",
+      "proposedDesignKey": "pair-michi",
+      "name": "michi Signature",
+      "exactIdentity": "michi",
+      "symbol": "MICHI",
+      "kind": "meme",
+      "exactQuoteMint": "AywAYdNJnSLSXwKWYxDciPjqGRnwp4iZdQptuuQTpump",
+      "recognizableIdentityMotif": "The exact michi token-image character at the admitted mint, with its actual face, pose and defining features retained.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#342F27",
+          "#C6BA99",
+          "#E9DFCE",
+          "#A5AE9D"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Warm pale ceramic and satin metal with a contour treatment derived from the precise mascot reference.",
+      "reverseHero": "The exact michi portrait/character, rather than Spark’s mineral ornament.",
+      "sourceReferences": [
+        {
+          "url": "https://ipfs.io/ipfs/Qmf84hA9DenVxvYfjXKVFWAqpPdTYoFiHQGtL7xdvCwRY2",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/AywAYdNJnSLSXwKWYxDciPjqGRnwp4iZdQptuuQTpump",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Exact uploaded/on-chain mascot reference required. Do not choose an arbitrary cat or invent accessories."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "michi",
+          "symbol": "MICHI",
+          "uri": "https://ipfs.io/ipfs/Qmf84hA9DenVxvYfjXKVFWAqpPdTYoFiHQGtL7xdvCwRY2",
+          "source": "41qygENCb25o86HGfRBTNA1NkWFzpyCKLrbEZ9j12Kbw"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "1476435324360",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "cate",
+      "proposedDesignKey": "pair-cate",
+      "name": "Catecoin Signature",
+      "exactIdentity": "Catecoin",
+      "symbol": "CATE",
+      "kind": "meme",
+      "exactQuoteMint": "Ai66LHZG9MCzg1WKdawwqduVAXpNDUuV8M3uyq5ppump",
+      "recognizableIdentityMotif": "The exact Catecoin token-image mascot/mark at the admitted mint; do not infer the image from the ticker or confuse it with similarly named tokens.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#2A2B33",
+          "#9FAEC3",
+          "#E2D8C7",
+          "#A8AFB5"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Graphite and pale ceramic with identity-derived outlines worked into the lower rail.",
+      "reverseHero": "The exact CATE identity hero from its pinned token image, without Ronin’s unrelated blade or print seal.",
+      "sourceReferences": [
+        {
+          "url": "https://m.rapidlaunch.io/m/Tsg4I9WHC",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/Ai66LHZG9MCzg1WKdawwqduVAXpNDUuV8M3uyq5ppump",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Exact uploaded/on-chain reference required; this is the Token-2022 mint in the registry, not an unverified namesake."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Catecoin",
+          "symbol": "CATE",
+          "uri": "https://m.rapidlaunch.io/m/Tsg4I9WHC",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "80346198734",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "ansem",
+      "proposedDesignKey": "pair-ansem",
+      "name": "The Black Bull Signature",
+      "exactIdentity": "The Black Bull",
+      "symbol": "ANSEM",
+      "kind": "meme",
+      "exactQuoteMint": "9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump",
+      "recognizableIdentityMotif": "The Black Bull, as identified by the registry; any bull portrait or emblem must match this exact ANSEM token’s image.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#131517",
+          "#9D987F",
+          "#D7C7A4",
+          "#4A4E50"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Black ceramic and restrained warm metal with exact source contours on the rim.",
+      "reverseHero": "The exact Black Bull token-image mascot or mark, preserving the reference horn/silhouette geometry if present.",
+      "sourceReferences": [
+        {
+          "url": "https://meta.uxento.io/data/7f4c8448-c38e-4c34-aa37-a28cff9806d0",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Exact image reference required. Do not invent a generic charging bull or use an unrelated Ansem portrait."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "The Black Bull",
+          "symbol": "ANSEM",
+          "uri": "https://meta.uxento.io/data/7f4c8448-c38e-4c34-aa37-a28cff9806d0",
+          "source": "Token2022 inline metadata"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "initialVirtualQuoteReserves": "59973809051",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "bert",
+      "proposedDesignKey": "pair-bert",
+      "name": "Bertram Signature",
+      "exactIdentity": "Bertram The Pomeranian",
+      "symbol": "Bert",
+      "kind": "meme",
+      "exactQuoteMint": "HgBRWfYxEfvPhtqkaeymCQtHCrKE46qQ43pKe8HCpump",
+      "recognizableIdentityMotif": "Bertram The Pomeranian, as identified by the registry; use the exact token-image dog and its recognizable features rather than any Pomeranian.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#382A20",
+          "#C8894E",
+          "#EAD6B2",
+          "#BEA27A"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Warm caramel enamel and soft satin gold, with small details derived from the source portrait in the perimeter.",
+      "reverseHero": "The exact Bertram token portrait, preserving face shape, expression and reference accessories if present.",
+      "sourceReferences": [
+        {
+          "url": "https://ipfs.io/ipfs/QmNxxaTGgX3sTZV6jTgKyy5a33iFpQMjoWmcFUFfhohw5C",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/HgBRWfYxEfvPhtqkaeymCQtHCrKE46qQ43pKe8HCpump",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Exact uploaded/on-chain reference required; no invented sunglasses, hat or coat."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Bertram The Pomeranian",
+          "symbol": "Bert",
+          "uri": "https://ipfs.io/ipfs/QmNxxaTGgX3sTZV6jTgKyy5a33iFpQMjoWmcFUFfhohw5C",
+          "source": "FDQdWegkTkHsr2G4gYmhK7tzwBMCcjTSD4rBxf7FRPfd"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "298056707409",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "chillhouse",
+      "proposedDesignKey": "pair-chillhouse",
+      "name": "Chill House Signature",
+      "exactIdentity": "Chill House",
+      "symbol": "CHILLHOUSE",
+      "kind": "meme",
+      "exactQuoteMint": "GkyPYa7NnCFbduLknCfBfP7p8564X1VZhwZYJ6CZpump",
+      "recognizableIdentityMotif": "The exact Chill House token-image character/mark at the admitted mint, not a house illustration inferred from the name.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#273237",
+          "#A7B8B4",
+          "#DEDCC9",
+          "#7D9192"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Slate enamel and pearl metal with only exact source-derived contour work on the rim.",
+      "reverseHero": "The exact CHILLHOUSE identity hero instead of Abyssal’s generic sea-glass specimen.",
+      "sourceReferences": [
+        {
+          "url": "https://ipfs.io/ipfs/QmcnReE9QBZv5tSXHPY6tnZUhsGQFopDCrBTFSvHajei88",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/GkyPYa7NnCFbduLknCfBfP7p8564X1VZhwZYJ6CZpump",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Exact image reference required. Do not assume architectural imagery or reuse a separate Chill Guy image."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": false,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "Chill House",
+          "symbol": "CHILLHOUSE",
+          "uri": "https://ipfs.io/ipfs/QmcnReE9QBZv5tSXHPY6tnZUhsGQFopDCrBTFSvHajei88",
+          "source": "AxucGwm7FYt5xJ21K2CG9giSC9CQWyG8qSfZ6HqQxuUx"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "4032090281688",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    },
+    {
+      "quoteKey": "usduc",
+      "proposedDesignKey": "pair-usduc",
+      "name": "unstable coin Signature",
+      "exactIdentity": "unstable coin",
+      "symbol": "USDUC",
+      "kind": "meme",
+      "exactQuoteMint": "CB9dDufT3ZuQXqqSfa1c5kY935TEreyBw9XJXxHKpump",
+      "recognizableIdentityMotif": "The exact unstable coin token-image mark/character at the admitted mint. USDUC is classified as a memecoin in this registry, not USDC or a stablecoin.",
+      "palette": {
+        "status": "proposed material palette; exact identity colors must be sampled from accepted image before generation",
+        "proposedMaterialColors": [
+          "#352A24",
+          "#C89763",
+          "#E9DCC6",
+          "#887960"
+        ],
+        "identityColorRule": "Preserve exact mascot/emblem colors; metallic lighting must not recolor identity or turn it into a generic material glyph."
+      },
+      "frontBorderTheme": "Warm ceramic and satin metal, carrying source-derived identity details only after image intake.",
+      "reverseHero": "The exact USDUC token-image identity, without Surge’s generic bolt or an invented USDC-like seal.",
+      "sourceReferences": [
+        {
+          "url": "https://ipfs.io/ipfs/QmVSQeV9hXpEmamqGRZne83qoNr4KgaKLsgPFu6teDcRPM",
+          "role": "Metadata URI decoded from the exact admitted mint; resolve its image field for image-reference intake",
+          "inspection": "Mint metadata decoded by read-only research; image visual inspection remains separate"
+        },
+        {
+          "url": "https://pump.fun/coin/CB9dDufT3ZuQXqqSfa1c5kY935TEreyBw9XJXxHKpump",
+          "role": "Exact quote mint identity page; source image must be checked against this mint",
+          "inspection": "candidate intake URL; not claimed visually verified"
+        }
+      ],
+      "imageReferenceStatus": {
+        "exactImageStillNeeded": true,
+        "pinnedImagePath": null,
+        "sha256": null,
+        "notes": "Exact image reference required. Never borrow USDC’s corporate logo or imply dollar stability from the ticker."
+      },
+      "generationGate": "Do not submit until exact full-resolution identity reference is visually inspected, linked to the pinned mint/company, saved with a hash and supplied as an image reference to Higgsfield.",
+      "constructionReference": {
+        "front": "app/public/assets/carddex/higgsfield/doge-front.webp",
+        "back": "app/public/assets/carddex/higgsfield/doge-back.webp",
+        "purpose": "Approved physical construction/material quality only; do not transfer Doge identity into another theme."
+      },
+      "sharedTemplate": "63:88, rounded 5.04% width radius; creator art x10%-90%, y15%-59%; name x10%-90%, y5.5%-11.5%; ticker/pair y61.5%-64.9%; details y67%-92.5%; no footer slots.",
+      "frontIdentityPlacement": "Small recognizable exact-identity motifs in the outer frame only; do not overlay, replace or duplicate the creator artwork aperture or live text surfaces.",
+      "decorationTextRule": "No extra theme names, ticker labels, platform lettering, serials or placeholder lettering. Exact identity logo/emblem comes only from the accepted source. Prior no-words direction remains: if that exact source is a wordmark or contains lettering, flag this scoped identity-lettering decision before generation rather than replacing the identity with a generic pictogram.",
+      "historyRule": "New proposed key/assets only. Do not overwrite or rebind any of the existing 48 design keys, source media, saved launch metadata or immutable output URLs.",
+      "identityLetteringScopeReview": true,
+      "onChainIdentityEvidence": {
+        "researchArtifact": "research/verified-identities-and-metadata.json",
+        "fetchedAt": "2026-10-29T22:50:57.216Z",
+        "accountSlot": 463055495,
+        "metadata": {
+          "name": "unstable coin",
+          "symbol": "USDUC",
+          "uri": "https://ipfs.io/ipfs/QmVSQeV9hXpEmamqGRZne83qoNr4KgaKLsgPFu6teDcRPM",
+          "source": "8AZNBAioNMRv9cM1zmwXfVfVLyT7rT4HacxK4tNfqb5P"
+        },
+        "admission": {
+          "source": "quoteControl",
+          "decimals": 6,
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "initialVirtualQuoteReserves": "1562298995702",
+          "initialized": true,
+          "paused": false,
+          "defaultFrozen": false
+        },
+        "scope": "Read-only snapshot; this brief does not alter the launch registry."
+      }
+    }
+  ],
+  "onChainResearchArtifact": "research/verified-identities-and-metadata.json",
+  "onChainResearchScope": "All37 current exact mints cross-checked against the independent51-asset read-only research snapshot;14 newly researched crypto identities remain outside this37-entry artifact."
+}

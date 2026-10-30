@@ -1,0 +1,108 @@
+{
+  "requests": [
+    {
+      "index": 116,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "bef2094d-7922-4007-b6be-a28e91bc5831"
+          },
+          {
+            "role": "image",
+            "value": "be4766d7-a415-44cd-989a-d4de19d7ec41"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ],
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: Cupsey (Cupsey). The exact Cupsey identity from the supplied source image as the dominant reverse hero. The exact round cream character, oval black eyes, tiny curved smile, pink cheeks and raised green hand. Surround it with cream porcelain, green enamel and restrained rose metal, consistent with the front; no unrelated generic motif. Source-matched face, pose, silhouette, proportions and colors are mandatory. Make the exact identity unmistakable and dominant. Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels.\nIMPORTANT REVERSE STRUCTURE: The reverse is fully decorative edge-to-edge. Remove ALL blank nameplates, horizontal title cartouches, pale writing strips, labels and front content panels from Image1. No empty top band or titlebar anywhere. Continue the exact themed ornamental material through the top and bottom border; central identity hero fills the composition."
+      }
+    },
+    {
+      "index": 118,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "ea922ece-5063-4654-9e35-d0ec8a382520"
+          },
+          {
+            "role": "image",
+            "value": "f3ae9c63-0dc0-4a2f-8387-d496cc7465f9"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ],
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: alon (ALON). The exact ALON identity from the supplied source image as the dominant reverse hero. The exact gray-haired illustrated character wearing the yellow-and-black cap and white sunglasses; preserve its actual expression and source clothing details. Surround it with turquoise enamel, yellow lacquer and pale titanium, consistent with the front; no unrelated generic motif. Source-matched face, pose, silhouette, proportions and colors are mandatory. Make the exact identity unmistakable and dominant. Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels.\nIMPORTANT REVERSE STRUCTURE: The reverse is fully decorative edge-to-edge. Remove ALL blank nameplates, horizontal title cartouches, pale writing strips, labels and front content panels from Image1. No empty top band or titlebar anywhere. Continue the exact themed ornamental material through the top and bottom border; central identity hero fills the composition."
+      }
+    },
+    {
+      "index": 120,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "759e80a1-4bf6-418f-b744-f9c27154a068"
+          },
+          {
+            "role": "image",
+            "value": "4f47e63c-ce8a-4c9d-b8a9-9c6927ebc351"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ],
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: Jimothy The Raccoon (Jimothy). The exact small raccoon side-profile photograph outlined by warm sunlight, preserving its arched posture and long tail. Original primary Pump fallback is80px. Make this exact identity the reverse hero with charcoal ceramic, warm gold edge-light and pale silver, matching its front; no unrelated generic motif. Source-matched face, pose, silhouette, proportions and colors are mandatory. Make the exact identity unmistakable and dominant. Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels.\nIMPORTANT REVERSE STRUCTURE: The reverse is fully decorative edge-to-edge. Remove ALL blank nameplates, horizontal title cartouches, pale writing strips, labels and front content panels from Image1. No empty top band or titlebar anywhere. Continue the exact themed ornamental material through the top and bottom border; central identity hero fills the composition."
+      }
+    },
+    {
+      "index": 122,
+      "params": {
+        "model": "gpt_image_2_5",
+        "variant": "flare",
+        "quality": "high",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "e2253a4c-3c50-43b3-87fd-8a8dd8ec6891"
+          },
+          {
+            "role": "image",
+            "value": "f3805729-89f9-4e59-980c-bf02c416c962"
+          },
+          {
+            "role": "image",
+            "value": "8b191aa7-1070-43c4-9622-7d5a65508019"
+          }
+        ],
+        "prompt": "Create the MATCHING REVERSE print for the completed front in Image 1. Image 1 is the authoritative completed front of this exact new design: preserve its same physical construction, rounded silhouette, palette, materials, foil edge finish, engraving scale, light direction and manufacturing quality. Image 2 is the EXACT real asset identity and controls its recognizable logo/mascot. Image 3 is the approved card reverse construction reference only; do not transfer its Doge portrait or gold/black theme if unrelated.\nOutput one orthographic flat thin premium card back, portrait 2:3 at high 2K quality, smooth 63:88 rounded card silhouette. Same rim/fittings as its front. A single large unmistakable authentic asset identity hero at the center, with coherent bespoke themed ornament around it. No writing boxes, front content grid, artwork aperture, stats, coins or markets. No generic replacement emblem. No decorative theme name, platform lettering, serials, watermark or invented words; authentic lettering already inside the exact supplied logo is allowed. Smooth refined thin printed card, no case/slab, thick sidewall, pedestal, oblique angle, sharp protrusions or clipped corners.\n\nEXACT REVERSE IDENTITY: LMAO! (LMAO!). The exact LMAO! identity from the supplied source image as the dominant reverse hero. The exact stretched laughing yellow face with closed angled eyes, white side forms, cyan cheeks and open orange mouth. Surround it with golden-yellow enamel, cyan opal and warm satin metal, consistent with the front; no unrelated generic motif. Source-matched face, pose, silhouette, proportions and colors are mandatory. Make the exact identity unmistakable and dominant. Omit scene signage, clothing slogans, dictionary prose, captions and platform UI from source photos. Only exact identity logo lettering approved by the owner may appear; do not add theme names, serials or labels.\nIMPORTANT REVERSE STRUCTURE: The reverse is fully decorative edge-to-edge. Remove ALL blank nameplates, horizontal title cartouches, pale writing strips, labels and front content panels from Image1. No empty top band or titlebar anywhere. Continue the exact themed ornamental material through the top and bottom border; central identity hero fills the composition."
+      }
+    }
+  ]
+}

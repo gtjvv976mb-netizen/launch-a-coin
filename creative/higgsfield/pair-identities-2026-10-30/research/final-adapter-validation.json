@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-10-30T04:42:53.878917+00:00",
+  "workingDirectory": "integrations/pumpfun",
+  "catalogueSnapshot": "output/higgsfield/pair-identities-2026-10-30/integration/final-active-catalogue-95.json",
+  "catalogueSha256": "3f6337f42bfddcc062fb17bbb7c5de104288e4e1dd62e69f10c682eac3cc7341",
+  "checks": [
+    {
+      "command": "/Users/michaelkennethbrillantes/.bun/bin/bun test tests",
+      "exitCode": 0,
+      "testsPassed": 122,
+      "testsFailed": 0,
+      "assertions": 2947,
+      "testFiles": 2,
+      "reportedDurationSeconds": 8.3,
+      "notice": "Optional bigint native bindings unavailable; library used pure JS and all tests passed."
+    },
+    {
+      "command": "/Users/michaelkennethbrillantes/.bun/bin/bun x tsc --noEmit",
+      "exitCode": 0,
+      "diagnostics": []
+    }
+  ],
+  "scope": "Local pinned official SDK adapter tests and TypeScript. No network transaction, signing, wallet spend or deployment. Browser QA and app build owned by other agents.",
+  "repeatedAfterPass": false
+}

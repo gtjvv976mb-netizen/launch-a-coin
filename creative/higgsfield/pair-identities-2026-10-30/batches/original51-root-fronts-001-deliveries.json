@@ -1,0 +1,18 @@
+[
+  {
+    "index": 53,
+    "key": "zerebro",
+    "face": "front",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/zerebro-front.png"
+  },
+  {
+    "index": 55,
+    "key": "act",
+    "face": "front",
+    "status": "completed",
+    "downloaded": true,
+    "masterPath": "output/higgsfield/pair-identities-2026-10-30/originals/act-front.png"
+  }
+]

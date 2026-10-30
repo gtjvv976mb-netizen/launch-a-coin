@@ -1,0 +1,76 @@
+{
+  "executor": "root-only",
+  "preparedAt": "2026-10-30T03:37:15.870298+00:00",
+  "rootQualityGate": "First two controlled fresh field-only candidates; remaining28 waits native result before execution.",
+  "imageCount": 2,
+  "quotedPlanCredits": 1.0,
+  "provider": "Higgsfield",
+  "model": "seedream_5_0_flash",
+  "quotedCreditsPerImage": 0.5,
+  "accountingMode": "verified-current-balance",
+  "verifiedBalanceBeforeThisPlan": 45,
+  "verifiedNetConsumedBeforeThisPlan": 551.5,
+  "heldOldUnknownCredits": 27.5,
+  "internalNetAllocationCap": 594,
+  "absoluteStartingBalanceCap": 596.5,
+  "knownGrossQuotedCreditsBeforeThisPlan": 557,
+  "unattributedGrossVsBalanceDifference": 5.5,
+  "noPurchases": true,
+  "noDeployment": true,
+  "automaticUnknownRetry": false,
+  "keyMap": [
+    {
+      "index": 503,
+      "quoteKey": "agency",
+      "designKey": "pair-agency",
+      "exactQuoteMint": "7VertkgF9KLhxxJXHX6uaWuoYZTP9LdGj2bWmVXVpump",
+      "face": "back",
+      "acceptedFrontJobId": "a780bec6-153e-4c9e-a60a-5c1cb6fdea45",
+      "acceptedFrontSha256": "e2cf964c889241345849c8293b2d19aac372821a9478ffb62928219a919c50a9",
+      "materialReference": {
+        "quoteKey": "agency",
+        "sha256": "8bc09e7923df3cf4d8e14455f10a8719d7c448a9355e0595e1a70ebaa3258ac2",
+        "sourceFrontSha256": "e2cf964c889241345849c8293b2d19aac372821a9478ffb62928219a919c50a9",
+        "mediaId": "78d8d6f8-81cb-4c78-b498-1676f519d7cf",
+        "putStatus": 200,
+        "dimensions": [
+          512,
+          1024
+        ]
+      }
+    },
+    {
+      "index": 509,
+      "quoteKey": "biketyson",
+      "designKey": "pair-biketyson",
+      "exactQuoteMint": "CbyTNf7UPzvewHh4Zp6umogM2RWahhmGRJWLJnPwpump",
+      "face": "back",
+      "acceptedFrontJobId": "dc293bf3-952b-45bb-9c1a-f01995233447",
+      "acceptedFrontSha256": "98a9c0174aac5634133257a00b2a834cc5d1b5bdc654fa5428c118357193fb42",
+      "materialReference": {
+        "quoteKey": "biketyson",
+        "sha256": "76419f676a8dbaa2d0bc2ba4d2974b3353592c6be2a3a9cb0c01b8cb5375a7ea",
+        "sourceFrontSha256": "98a9c0174aac5634133257a00b2a834cc5d1b5bdc654fa5428c118357193fb42",
+        "mediaId": "e116ea7f-86fe-4346-8a5f-63d91f978de7",
+        "putStatus": 200,
+        "dimensions": [
+          512,
+          1024
+        ]
+      }
+    }
+  ],
+  "batches": [
+    {
+      "batchId": "meme-tailoring-v2-backs-material-only-001",
+      "indices": [
+        503,
+        509
+      ],
+      "requestFile": "tailoring-v2/batches/meme-tailoring-v2-backs-material-only-001-request.json",
+      "receiptFile": "tailoring-v2/batches/meme-tailoring-v2-backs-material-only-001-receipt.json",
+      "statusFile": "tailoring-v2/batches/meme-tailoring-v2-backs-material-only-001-status.json",
+      "requestSha256": "1941a70d0c36073afd0ef2c0d977d6c3894591200af767bd48853357aa67794c"
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "scope": "Prepared creative briefs only; no executable request or approved front reference yet.",
+  "fullRolloutAuthorized": false,
+  "briefs": [
+    {
+      "quoteKey": "pepe",
+      "designKey": "pair-pepe",
+      "exactQuoteMint": "PEPEqnuuCDbBC89p1u9vpnP1KQ2oj1xTcQBsjt9X55m",
+      "exactSourceMediaId": "c2b0c51f-2e9d-4938-9bcb-17cd78dc2873",
+      "identityReference": {
+        "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-direct-references/pepe-ec537de040a7.png",
+        "sha256": "ec537de040a73db93b37350b1e6ec11f9d51f663c121ddc9fed6ad9b9f803eac",
+        "dimensions": [
+          64,
+          64
+        ],
+        "format": "PNG",
+        "status": "Pinned exact-identity reference visually compared; no generated source is used as identity evidence."
+      },
+      "direction": "Exact Pepe expression in a source-line-derived green field, with eye/mouth arcs and low waterline ripple contours joining the perimeter; no royal medallion.",
+      "prompt": "Create one BACK CARD SKIN. This is a premium high-definition thin rounded trading-card skin, rendered directly front-on with the complete card visible and no perspective, case, slab, cast shadow or product mockup. Use only the exact supplied identity reference; preserve its actual facial features, silhouette, expression, pose, geometry and identity colors. Do not hallucinate detail missing from a low-resolution source. No generic royal four-point stars, laurel wreath, stock medallion oval, generic marble lattice, crown or Doge ornament. The design must be recognizably tailored through its perimeter geometry, material and relief, even if the hero were covered. No theme labels, platform names, new words, numbers, serials or footer slots. Only authentic lettering that belongs to the pinned source logo may remain; omit incidental prose/slogans unless separately approved as the exact identity mark. Keep the card thin, edges smooth and rounded, with even neutral light and no clipped ornament. Exact quotes and branding do not imply affiliation or issuer endorsement. Exact classic green Pepe head/upper-body line image with half-lidded eyes and red mouth from the64px source. Identity-specific exclusions: No large front frog over creator art, new expression/costume, asserted source habitat, generic marble, laurel or star. The back wireframe gives ONLY the same thin rounded outer-card geometry. It does not prescribe a central circle, crest, star, frame language or hero position. Use the unique source-derived composition below. Match the accepted new front materials when it is supplied as a separate reference. Do not copy content apertures onto the back or borrow any old generic royal template. UNIQUE REVERSE: Exact Pepe expression in a source-line-derived green field, with eye/mouth arcs and low waterline ripple contours joining the perimeter; no royal medallion. MATCHING MATERIALS: Moss-green enamel, dark etched metal, small red enamel accents and restrained satin gold. MATCHING-FRONT GATE: do not submit before a new approved blank-template FRONT is accepted. Use that actual accepted front for matching materials and the exact source as identity authority, plus geometry-only back outline; never pass the old generic Doge decorative back as style. The entire reverse is a continuous finished identity composition, with no pale paper panels or front-grid remnants. Preserve exactly the supplied half-lidded Pepe eyes, mouth/lips and upper-body pose, not a new grinning expression or costume. Source-line arcs should shape asymmetric moss-green enamel perimeter; abstract water ripple/lily-pad material is an artistic interpretation only. No laurel or royal oval badge.",
+      "status": "brief-only-unsubmitted-await-new-accepted-front",
+      "paidSubmissionAuthorized": false,
+      "matchingAcceptedFrontJobId": null
+    },
+    {
+      "quoteKey": "fone",
+      "designKey": "pair-fone",
+      "exactQuoteMint": "CTPoyCwkjMvoJwU4xvZZqoD8tiYk6yDchySiN5gGpump",
+      "exactSourceMediaId": "2eaf1fad-2f99-4892-a4e4-3bc044518915",
+      "identityReference": {
+        "path": "creative/higgsfield/pair-identities-2026-10-30/expansion-references/fone-08061211879a.jpg",
+        "sha256": "08061211879aad673eb5dfc27f6378d555623d84de22e40941484c1a94c4f145",
+        "dimensions": [
+          800,
+          800
+        ],
+        "format": "JPEG",
+        "status": "Pinned exact-identity reference visually compared; no generated source is used as identity evidence."
+      },
+      "direction": "Exact monkey/phone pose in a shallow dark-glass field with slim phone-button/bevel geometry continuing around the rim.",
+      "prompt": "Create one BACK CARD SKIN. This is a premium high-definition thin rounded trading-card skin, rendered directly front-on with the complete card visible and no perspective, case, slab, cast shadow or product mockup. Use only the exact supplied identity reference; preserve its actual facial features, silhouette, expression, pose, geometry and identity colors. Do not hallucinate detail missing from a low-resolution source. No generic royal four-point stars, laurel wreath, stock medallion oval, generic marble lattice, crown or Doge ornament. The design must be recognizably tailored through its perimeter geometry, material and relief, even if the hero were covered. No theme labels, platform names, new words, numbers, serials or footer slots. Only authentic lettering that belongs to the pinned source logo may remain; omit incidental prose/slogans unless separately approved as the exact identity mark. Keep the card thin, edges smooth and rounded, with even neutral light and no clipped ornament. Exact quotes and branding do not imply affiliation or issuer endorsement. Exact young brown monkey seated and looking down at a black smartphone held in both hands. Identity-specific exclusions: No jungle invention, screen UI/text, alternate monkey, new hand pose, thick phone/slab, laurel or star. The back wireframe gives ONLY the same thin rounded outer-card geometry. It does not prescribe a central circle, crest, star, frame language or hero position. Use the unique source-derived composition below. Match the accepted new front materials when it is supplied as a separate reference. Do not copy content apertures onto the back or borrow any old generic royal template. UNIQUE REVERSE: Exact monkey/phone pose in a shallow dark-glass field with slim phone-button/bevel geometry continuing around the rim. MATCHING MATERIALS: Dark reflective glass, warm bronze, soft brown enamel and pale neutral writing surfaces. MATCHING-FRONT GATE: do not submit before a new approved blank-template FRONT is accepted. Use that actual accepted front for matching materials and the exact source as identity authority, plus geometry-only back outline; never pass the old generic Doge decorative back as style. The entire reverse is a continuous finished identity composition, with no pale paper panels or front-grid remnants. Keep the actual young brown monkey seated and looking down at the same black smartphone in both hands. Integrate dark glass, bronze edge and small button-derived rail relief. No extra monkeys or invented phone interface, app icons or visible brand. Do not make a 3D smartphone product mockup; this remains a flat thin printed trading-card reverse.",
+      "status": "brief-only-unsubmitted-await-new-accepted-front",
+      "paidSubmissionAuthorized": false,
+      "matchingAcceptedFrontJobId": null
+    }
+  ]
+}

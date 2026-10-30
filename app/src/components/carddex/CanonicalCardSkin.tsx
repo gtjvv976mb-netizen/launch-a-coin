@@ -1,8 +1,8 @@
 import { useId, useRef } from "react";
-import { getCardDesign } from "../../lib/carddex/designs";
+import { getCardDesign, type CardDesign } from "../../lib/carddex/designs";
 import renderAssets from "../../lib/carddex/render-assets.json";
 import { CANONICAL_CARD_LAYOUT, CARD_RENDERER_VERSION } from "../../lib/carddex/card-template";
-import { generatedSkinSource, phoneCopy, useDeferredPlate, useReadyImage } from "./GeneratedCardArt";
+import { generatedSkinSource, phoneCopy, useDeferredPlate, useReadyImage, type GeneratedSkinSource } from "./GeneratedCardArt";
 import { defaultQuoteForDesign, getPairAsset } from "../../lib/carddex/pairs";
 import { useFreshMount } from "../mintdex/card3d/motion3d";
 
@@ -95,13 +95,40 @@ export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,eag
 }
 
 /** Pure SVG surface shared with the trusted PNG compositor; no loading hooks or alternate print geometry. */
-export function CanonicalSkinSurface({cardTemplate,sourceUri,id="canonical"}:{cardTemplate:string;quoteAssetKey?:string;sourceUri?:string|null;id?:string}) {
-  const design=getCardDesign(cardTemplate);
-  const source=generatedSkinSource(cardTemplate);
+export function CanonicalSkinSurface({cardTemplate,sourceUri,id="canonical",preparedSource}:{cardTemplate:string;quoteAssetKey?:string;sourceUri?:string|null;id?:string;preparedSource?:{design:Pick<CardDesign,"key"|"palette">;source:GeneratedSkinSource}}) {
+  // Offline preparation uses explicit reviewed inputs before the complete-install gate can activate a new design.
+  const design=preparedSource?.design??getCardDesign(cardTemplate);
+  const source=preparedSource?.source??generatedSkinSource(cardTemplate);
   const ready=!!sourceUri && !!source;
   const dark=design.key==="neon-circuit";
   const raster=`${id}raster`,material=`${id}material`,mask=`${id}material-mask`,edge=`${id}edge`;
   const paper=dark?"#102b30":design.palette[2];
+  const pairSource=design.key.startsWith("pair-")&&source;
+  // New masters have no footer holes. Select only their native outer ornament,
+  // excluding the measured content rims so the shared print has no double frame.
+  const rails=pairSource?{
+    x:Math.max(.025,Math.min(source.art.x,...Object.values(source.plates).map(b=>b.x),1-source.art.x-source.art.w,...Object.values(source.plates).map(b=>1-b.x-b.w))-.012),
+    top:Math.max(.02,source.plates.name.y-.0065),
+    bottom:Math.max(.022,1-source.plates.text.y-source.plates.text.h-.0065),
+  }:SOURCE_RAIL;
+  const targetRails=pairSource?{x:.088,top:.0485,bottom:.0685}:TARGET_RAIL;
+  // Some new skins share a single native line between panels. Never grow a
+  // sampled rim far enough to borrow pixels from the neighboring aperture.
+  const sourceRim=pairSource&&source.sourceMaterialGaps?{...SOURCE_RIM,y:Math.min(SOURCE_RIM.y,Math.max(.001,Math.min(
+    source.art.y-source.plates.name.y-source.plates.name.h,
+    source.plates.type.y-source.art.y-source.art.h,
+    source.plates.text.y-source.plates.type.y-source.plates.type.h,
+  )*.45))}:SOURCE_RIM;
+  const sourceMaterialGaps=pairSource&&source.sourceMaterialGaps?[
+    [source.plates.name,source.art,CANONICAL_CARD_LAYOUT.name,CANONICAL_CARD_LAYOUT.window],
+    [source.art,source.plates.type,CANONICAL_CARD_LAYOUT.window,CANONICAL_CARD_LAYOUT.type],
+    [source.plates.type,source.plates.text,CANONICAL_CARD_LAYOUT.type,CANONICAL_CARD_LAYOUT.text],
+  ].map(([above,below,targetAbove,targetBelow])=>{
+    const center=(above.y+above.h+below.y)/2;
+    const height=Math.max(.001,Math.min(.004,(below.y-above.y-above.h)*.35));
+    const left=Math.max(above.x,below.x),right=Math.min(above.x+above.w,below.x+below.w);
+    return {from:{x:left,y:center-height/2,w:right-left,h:height},to:{x:.088,y:targetAbove.y+targetAbove.h+RIM.y,w:.824,h:targetBelow.y-targetAbove.y-targetAbove.h-2*RIM.y}};
+  }).filter(gap=>gap.from.h>0&&gap.to.h>0):[];
   return (
     <svg className="cdx-canonical-skin__surface" viewBox="0 0 1000 1000" preserveAspectRatio="none" focusable="false">
       <defs>
@@ -125,9 +152,10 @@ export function CanonicalSkinSurface({cardTemplate,sourceUri,id="canonical"}:{ca
       <g clipPath={`url(#${edge})`}>
         <rect width="1000" height="1000" fill={`url(#${id}base)`} />
         {ready&&source?<g className="cdx-canonical-skin__atlas">
-          <SurfaceSlice source={material} from={WHOLE} to={WHOLE} sourceInset={SOURCE_RAIL} targetInset={TARGET_RAIL} />
-          <SurfaceSlice source={material} from={grow(source.art,SOURCE_RIM.x,SOURCE_RIM.y)} to={grow(CANONICAL_CARD_LAYOUT.window,RIM.x,RIM.y)} sourceInset={SOURCE_RIM} targetInset={RIM} />
-          {Object.entries(PLATES).map(([key,box])=><SurfaceSlice key={key} source={raster} from={grow(source.plates[key],SOURCE_RIM.x,SOURCE_RIM.y)} to={grow(box,RIM.x,RIM.y)} sourceInset={SOURCE_RIM} targetInset={RIM} center />)}
+          {sourceMaterialGaps.map(({from,to},index)=><svg key={`material-gap-${index}`} x={to.x*1000} y={to.y*1000} width={to.w*1000} height={to.h*1000} viewBox={`${from.x*1000} ${from.y*1000} ${from.w*1000} ${from.h*1000}`} preserveAspectRatio="none" overflow="hidden"><use href={`#${raster}`} /></svg>)}
+          <SurfaceSlice source={material} from={WHOLE} to={WHOLE} sourceInset={rails} targetInset={targetRails} />
+          <SurfaceSlice source={material} from={grow(source.art,sourceRim.x,sourceRim.y)} to={grow(CANONICAL_CARD_LAYOUT.window,RIM.x,RIM.y)} sourceInset={sourceRim} targetInset={RIM} />
+          {Object.entries(PLATES).map(([key,box])=><SurfaceSlice key={key} source={raster} from={grow(source.plates[key],sourceRim.x,sourceRim.y)} to={grow(box,RIM.x,RIM.y)} sourceInset={sourceRim} targetInset={RIM} center />)}
         </g>:<>
           <rect x="14" y="10" width="972" height="980" rx="40" fill="none" stroke={`url(#${id}metal)`} strokeWidth="15" />
           <rect {...{x:(CANONICAL_CARD_LAYOUT.window.x-RIM.x)*1000,y:(CANONICAL_CARD_LAYOUT.window.y-RIM.y)*1000,width:(CANONICAL_CARD_LAYOUT.window.w+RIM.x*2)*1000,height:(CANONICAL_CARD_LAYOUT.window.h+RIM.y*2)*1000}} rx="10" fill={design.palette[0]} stroke={`url(#${id}metal)`} strokeWidth="9" />

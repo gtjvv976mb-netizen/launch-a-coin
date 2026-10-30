@@ -1,0 +1,50 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "jobs[4]{index,job_id,status,type,model}:\n  449,97454461-4c63-4036-8cb2-bbe4fd6a9e3f,in_progress,image,seedream_5_0_flash\n  450,f1e93e51-7774-4536-9ba8-87c28eb37c1f,in_progress,image,seedream_5_0_flash\n  451,c636bed9-54c5-4971-9eff-4120bb54131d,in_progress,image,seedream_5_0_flash\n  452,31714c8d-14d6-470a-b41d-5f727b9bee8f,in_progress,image,seedream_5_0_flash\nsummary:\n  total: 4\n  completed: 0\n  failed: 0\n  active: 4\n  errors: 0\nall_terminal: false\npoll_after_seconds: 10\n\nWork is still pending. Wait poll_after_seconds, then call jobs_wait again in this turn. Do not ask the user to say 'continue' just because the polling window ended. Respect cancellation and host execution limits."
+    }
+  ],
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 449,
+        "job_id": "97454461-4c63-4036-8cb2-bbe4fd6a9e3f",
+        "status": "in_progress",
+        "type": "image",
+        "model": "seedream_5_0_flash"
+      },
+      {
+        "index": 450,
+        "job_id": "f1e93e51-7774-4536-9ba8-87c28eb37c1f",
+        "status": "in_progress",
+        "type": "image",
+        "model": "seedream_5_0_flash"
+      },
+      {
+        "index": 451,
+        "job_id": "c636bed9-54c5-4971-9eff-4120bb54131d",
+        "status": "in_progress",
+        "type": "image",
+        "model": "seedream_5_0_flash"
+      },
+      {
+        "index": 452,
+        "job_id": "31714c8d-14d6-470a-b41d-5f727b9bee8f",
+        "status": "in_progress",
+        "type": "image",
+        "model": "seedream_5_0_flash"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "completed": 0,
+      "failed": 0,
+      "active": 4,
+      "errors": 0
+    },
+    "all_terminal": false,
+    "poll_after_seconds": 10
+  },
+  "isError": false
+}

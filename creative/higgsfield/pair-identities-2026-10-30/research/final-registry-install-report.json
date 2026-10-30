@@ -1,0 +1,22 @@
+{
+  "appAssets": 97,
+  "adapterAssets": 97,
+  "stagedDesigns": 97,
+  "newKeys": [
+    "pump",
+    "alch",
+    "pumpcade",
+    "codec",
+    "ape",
+    "link",
+    "ore",
+    "skr"
+  ],
+  "priorAppObjectsUnchanged": 89,
+  "priorAdapterObjectsUnchanged": 89,
+  "priorStagedObjectsUnchanged": 89,
+  "priorFixtureAccountsUnchanged": 91,
+  "priorFixtureContextUnchanged": true,
+  "newMintAccounts": 8,
+  "rootApproval": "Root accepted eight exact identities within existing maximize-credit scope; no paid calls here."
+}

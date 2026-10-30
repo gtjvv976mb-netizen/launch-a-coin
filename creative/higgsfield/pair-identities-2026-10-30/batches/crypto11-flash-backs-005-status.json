@@ -1,0 +1,31 @@
+{
+  "derivedFrom": "batches/crypto11-flash-backs-group-3-status-3-1793330253530.json",
+  "structuredContent": {
+    "jobs": [
+      {
+        "index": 609,
+        "job_id": "e2e735da-c4b6-4cfc-85d3-545a0e81b85d",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_031701_e2e735da-c4b6-4cfc-85d3-545a0e81b85d.png"
+      },
+      {
+        "index": 610,
+        "job_id": "2a6f8f92-d637-4cf3-9296-b9bdf716f690",
+        "status": "completed",
+        "type": "image",
+        "model": "seedream_5_0_flash",
+        "result_url": "https://d8j0ntlcm91z4.cloudfront.net/user_3FyGGgvr86P2yKo8RswRabCMo0c/hf_20261030_031701_2a6f8f92-d637-4cf3-9296-b9bdf716f690.png"
+      }
+    ],
+    "summary": {
+      "total": 3,
+      "completed": 3,
+      "failed": 0,
+      "active": 0,
+      "errors": 0
+    },
+    "all_terminal": true
+  }
+}

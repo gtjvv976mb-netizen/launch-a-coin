@@ -1,0 +1,814 @@
+{
+  "checkedAt": "2026-10-30T04:34:58.910128+00:00",
+  "nativeAcceptedPairs": 62,
+  "acceptedFacesVerified": 124,
+  "allSourceHashesMatch": true,
+  "allSourcesDistinct": true,
+  "distinctWrittenFrameDirections": 62,
+  "sourceOnlyDerivativeFaces": [
+    {
+      "designKey": "pair-biketyson",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/biketyson-back-source-composition.png",
+      "derivation": {
+        "path": "output/higgsfield/pair-identities-2026-10-30/tailoring-v2/biketyson-source-composition/derivation.json",
+        "sha256": "8b11564f883fbf05f66f904522b69fd75b6ca996cd865eab18a81f2aa6e7ef42",
+        "method": "Actual Higgsfield source crops, resize and alpha composition only; no new illustration or provider call",
+        "newGeneration": false
+      }
+    },
+    {
+      "designKey": "pair-michi",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/michi-back-source-composition.png",
+      "derivation": {
+        "path": "output/higgsfield/pair-identities-2026-10-30/source-only-michi-reverse/derivation.json",
+        "sha256": "2f32a20ddd8a3474de78ef1e7336c87bb94b74c3207e42c501abb53fca82987a",
+        "method": "Isolated deterministic source-only reverse composition; pending independent root/crypto acceptance, no app or registry write.",
+        "newGeneration": false
+      }
+    },
+    {
+      "designKey": "pair-trump",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/trump-back-source-composition.png",
+      "derivation": {
+        "path": "output/higgsfield/pair-identities-2026-10-30/tailoring-v2/trump-source-composition/derivation.json",
+        "sha256": "854f5151f0ecdefe1f7ef9e48cb43df5f22bb6002e92b57804a4047a2db3fb16",
+        "method": "Actual Higgsfield source crop/alpha composition only; no new illustration or lettering",
+        "newGeneration": false
+      }
+    },
+    {
+      "designKey": "pair-zauth",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/zauth-back-source-composition.png",
+      "derivation": {
+        "path": "output/higgsfield/pair-identities-2026-10-30/tailoring-v2/zauth-source-composition/derivation.json",
+        "sha256": "74bff0849e65e5401e261c01055cb91e10e4d87bf8af565ca233e4bf113be8e9",
+        "method": "Exact source identity plus existing Higgsfield perimeter only",
+        "newGeneration": false
+      }
+    },
+    {
+      "designKey": "pair-zerebro",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/zerebro-back-source-composition.png",
+      "derivation": {
+        "path": "output/higgsfield/pair-identities-2026-10-30/tailoring-v2/zerebro-source-cleanup/derivation.json",
+        "sha256": "ea3cc5bb693c22acd6561ca945aa47f6d5c445d3b8d57684b4416f112373ff9c",
+        "method": "Actual source560 blank black material crop/resize/feather over incidental CA only; no new illustration",
+        "newGeneration": false
+      }
+    }
+  ],
+  "newPaidJobsKnown": 145,
+  "newGrossQuotedCredits": 72.5,
+  "checks": [
+    {
+      "designKey": "pair-pepe",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/pepe-front-303.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-pepe",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/pepe-back-305.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-fone",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/fone-front-304.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-fone",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/fone-back-307.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-67",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/67-front-401.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-67",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/67-back-801.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-act",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/act-front-402.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-act",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/act-back-802.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-agency",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/agency-front-701.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-agency",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/agency-back-503.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-alon",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/alon-front-404.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-alon",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/alon-back-803.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-ansem",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/ansem-front-405.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-ansem",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/ansem-back-804.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-aura",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/aura-front-406.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-aura",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/aura-back-805.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-baton",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/baton-front-407.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-baton",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/baton-back-806.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-bert",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/bert-front-408.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-bert",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/bert-back-807.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-biketyson",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/biketyson-front-409.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-biketyson",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/biketyson-back-source-composition.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-bobo",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/bobo-front-410.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-bobo",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/bobo-back-510.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-bonk",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/bonk-front-411.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-bonk",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/bonk-back-511.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-buttcoin",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/buttcoin-front-412.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-buttcoin",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/buttcoin-back-512.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-cards",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/cards-front-413.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-cards",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/cards-back-808.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-cashcat",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/cashcat-front-414.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-cashcat",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/cashcat-back-514.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-cate",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/cate-front-415.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-cate",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/cate-back-515.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-chillguy",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/chillguy-front-416.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-chillguy",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/chillguy-back-516.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-chillhouse",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/chillhouse-front-417.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-chillhouse",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/chillhouse-back-517.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-claudia",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/claudia-front-418.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-claudia",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/claudia-back-809.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-claw",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/claw-front-419.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-claw",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/claw-back-519.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-cupsey",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/cupsey-front-420.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-cupsey",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/cupsey-back-520.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-fartcoin",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/fartcoin-front-421.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-fartcoin",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/fartcoin-back-521.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-giga",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/giga-front-422.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-giga",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/giga-back-810.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-goat",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/goat-front-423.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-goat",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/goat-back-811.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-gork",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/gork-front-424.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-gork",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/gork-back-812.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-hodl",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/hodl-front-425.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-hodl",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/hodl-back-813.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-jeanphil",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/jeanphil-front-426.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-jeanphil",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/jeanphil-back-526.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-jimothy",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/jimothy-front-427.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-jimothy",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/jimothy-back-814.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-jotchua",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/jotchua-front-428.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-jotchua",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/jotchua-back-528.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-kins",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/kins-front-429.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-kins",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/kins-back-815.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-lmao",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/lmao-front-430.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-lmao",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/lmao-back-530.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-manifest",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/manifest-front-431.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-manifest",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/manifest-back-531.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-michi",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/michi-front-432.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-michi",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/michi-back-source-composition.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-moodeng",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/moodeng-front-433.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-moodeng",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/moodeng-back-818.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-neet",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/neet-front-434.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-neet",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/neet-back-534.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-npc",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/npc-front-435.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-npc",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/npc-back-535.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-otc",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/otc-front-436.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-otc",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/otc-back-536.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-paid",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/paid-front-437.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-paid",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/paid-back-537.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-pengu",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/pengu-front-438.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-pengu",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/pengu-back-538.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-percolator",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/percolator-front-439.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-percolator",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/percolator-back-539.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-pill",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/pill-front-440.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-pill",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/pill-back-540.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-pippin",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/pippin-front-441.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-pippin",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/pippin-back-541.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-plague",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/plague-front-442.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-plague",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/plague-back-542.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-shib",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/shib-front-443.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-shib",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/shib-back-543.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-solangeles",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/solangeles-front-444.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-solangeles",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/solangeles-back-544.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-spx",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/spx-front-445.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-spx",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/spx-back-545.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-stonk",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/stonk-front-446.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-stonk",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/stonk-back-546.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-sv151",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/sv151-front-447.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-sv151",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/sv151-back-547.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-swordcat",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/swordcat-front-448.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-swordcat",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/swordcat-back-548.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-toad",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/toad-front-449.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-toad",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/toad-back-549.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-tokabu",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/tokabu-front-450.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-tokabu",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/tokabu-back-550.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-triplet",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/triplet-front-451.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-triplet",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/triplet-back-551.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-troll",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/troll-front-452.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-troll",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/troll-back-552.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-trump",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/trump-front-453.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-trump",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/trump-back-source-composition.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-usduc",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/usduc-front-454.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-usduc",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/usduc-back-554.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-useless",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/useless-front-455.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-useless",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/useless-back-555.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-vine",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/vine-front-456.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-vine",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/vine-back-556.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-wojak",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/wojak-front-457.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-wojak",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/wojak-back-557.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-zauth",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/zauth-front-458.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-zauth",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/zauth-back-source-composition.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-zcat",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/zcat-front-459.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-zcat",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/zcat-back-559.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-zerebro",
+      "face": "front",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/zerebro-front-460.png",
+      "hashMatches": true
+    },
+    {
+      "designKey": "pair-zerebro",
+      "face": "back",
+      "path": "output/higgsfield/pair-identities-2026-10-30/originals/tailoring-v2/zerebro-back-source-composition.png",
+      "hashMatches": true
+    }
+  ],
+  "scope": "Source-pin and completeness check supplements actual native visual review; unique hashes/directions alone do not prove aesthetic quality."
+}

@@ -1,0 +1,45 @@
+{
+  "context": "Create distinct meme card reverses matching their verified source identities and new frame materials.",
+  "requests": [
+    {
+      "index": 511,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "7bf49aff-428f-48b8-ba27-e2eebd6f5119"
+          },
+          {
+            "role": "image",
+            "value": "5bcb6517-91e8-4245-b4cf-4060240e72db"
+          }
+        ],
+        "prompt": "Create one matching premium BACK CARD SKIN. IMAGE 1 is the exact asset identity: Exact orange/white dog, yellow disc and three red impact strokes. Preserve that exact source expression, pose, silhouette, proportions, intrinsic lettering and recognizable visual features. IMAGE 2 is ONLY the matching accepted front material and perimeter reference. The reverse uses one uninterrupted full-card designed field, with the identity artwork occupying that field rather than blank content rectangles. COMPOSITION: Exact dog/disc/impact strokes in an energetic radial impact-cut field that connects directly into the outer frame. MATCHED MATERIALS: Orange/yellow enamel, red glass inlays, black ceramic and narrow satin-gold bevels. Carry the specific front frame geometry and materials continuously around this reverse. Use coherent restrained microbevels and sharp high-definition print detail. Only intrinsic exact logo lettering visibly belonging to Image1 may remain; all other surfaces are pictorial or material. Keep a thin flat trading-card print, the complete smooth rounded63:88 outline, directly front-on, neutral even lighting, every detail inside the silhouette. The whole reverse is finished artwork, with no reserved creator fields or empty label plates. Match this specific identity rather than a generic royal award design."
+      }
+    },
+    {
+      "index": 512,
+      "params": {
+        "model": "seedream_5_0_flash",
+        "resolution": "2k",
+        "aspect_ratio": "2:3",
+        "count": 1,
+        "medias": [
+          {
+            "role": "image",
+            "value": "4160954a-73ec-4ec9-a9de-6be20f29c94b"
+          },
+          {
+            "role": "image",
+            "value": "018fb446-9358-47c2-ac40-c0b9f3a89c2e"
+          }
+        ],
+        "prompt": "Create one matching premium BACK CARD SKIN. IMAGE 1 is the exact asset identity: Exact orange circular mark with its white butt-shaped negative-space contour. Preserve that exact source expression, pose, silhouette, proportions, intrinsic lettering and recognizable visual features. IMAGE 2 is ONLY the matching accepted front material and perimeter reference. The reverse uses one uninterrupted full-card designed field, with the identity artwork occupying that field rather than blank content rectangles. COMPOSITION: Exact source symbol expanded into a sculptural orange/white negative-space composition that connects directly to the perimeter. MATCHED MATERIALS: Tangerine enamel, warm-white ceramic and fine champagne-metal edges. Carry the specific front frame geometry and materials continuously around this reverse. Use coherent restrained microbevels and sharp high-definition print detail. Only intrinsic exact logo lettering visibly belonging to Image1 may remain; all other surfaces are pictorial or material. Keep a thin flat trading-card print, the complete smooth rounded63:88 outline, directly front-on, neutral even lighting, every detail inside the silhouette. The whole reverse is finished artwork, with no reserved creator fields or empty label plates. Match this specific identity rather than a generic royal award design."
+      }
+    }
+  ]
+}
