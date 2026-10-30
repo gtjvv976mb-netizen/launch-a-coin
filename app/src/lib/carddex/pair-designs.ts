@@ -1,10 +1,4 @@
 import staged from "./pair-designs.json";
-import quotes from "./pair-assets.json";
-import { CARD_GENERATED_ASSETS } from "./generated-assets";
-import layouts from "./generated-layouts.json";
-import atlases from "./render-assets.json";
-import reverses from "./token-back-assets.json";
-import reviewed from "../../../../integrations/pumpfun/src/design-assets.json";
 import { CARD_RENDERER_VERSION } from "./card-template";
 
 export type PairDesignKey = `pair-${string}`;
@@ -61,15 +55,11 @@ export const STAGED_PAIR_DESIGNS = Object.freeze(staged.map(design=>{
   }
   return Object.freeze(design) as unknown as PairDesign;
 }));
-export const ACTIVE_PAIR_DESIGNS:readonly PairDesign[] = Object.freeze(STAGED_PAIR_DESIGNS.filter(design => {
-  const quote=quotes.find(asset=>asset.key===design.quoteKey);
-  const atlasKey=design.key+(design.category==="stocks"?"--stock":"");
-  return isPairDesignInstalled(design, {
-    assets:(CARD_GENERATED_ASSETS as Record<string,Assets>)[design.key],
-    layout:(layouts as Record<string,unknown>)[design.key],
-    source:(reviewed as Record<string,{front:Source;back:Source}>)[design.key],
-    atlas:(atlases as Record<string,Atlas>)[atlasKey],
-    reverse:(reverses as Record<string,Reverse>)[design.key],quoteMint:quote?.mint,
-  });
-}));
-export const activePairDesignForQuote = (key:string) => ACTIVE_PAIR_DESIGNS.find(design=>design.quoteKey===key) ?? null;
+/**
+ * Staged pair designs with no finished art (owner rule 4, 30 October 2026): their pairs are not offered for new
+ * launches until a finished card exists. The manifests are checked in tests (pair-designs-installed.ts) instead of
+ * here, so the token-back, reviewed-source and atlas manifests stay out of the browser bundle.
+ */
+export const WITHHELD_PAIR_DESIGNS: readonly PairDesignKey[] = Object.freeze(["pair-aave", "pair-uni"] as PairDesignKey[]);
+export const ACTIVE_PAIR_DESIGNS: readonly PairDesign[] = Object.freeze(STAGED_PAIR_DESIGNS.filter(design => !WITHHELD_PAIR_DESIGNS.includes(design.key)));
+export const activePairDesignForQuote = (key: string) => ACTIVE_PAIR_DESIGNS.find(design => design.quoteKey === key) ?? null;

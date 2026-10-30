@@ -2,7 +2,7 @@ import verifiedAssets from "./pair-assets.json";
 import { isCardDesignKey, type CardDesignKey } from "./designs";
 import { DESIGN_QUOTE_KEYS, PAIR_DESIGNS } from "./design-pairings";
 
-export const PAIR_ASSET_KEYS = ["sol", "usdc", "gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc", "doge", "fartcoin", "pnut", "moodeng", "troll", "bonk", "wif", "cards", "sv151", "toad", "pengu", "giga", "spx", "trump", "useless", "chillguy", "goat", "zerebro", "act", "pippin", "vine", "aura", "michi", "cate", "ansem", "bert", "chillhouse", "usduc"] as const;
+export const PAIR_ASSET_KEYS = ["sol", "usdc", "gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc", "doge", "fartcoin", "pnut", "moodeng", "troll", "bonk", "wif", "cards", "sv151", "toad", "pengu", "giga", "spx", "trump", "useless", "chillguy", "goat", "zerebro", "act", "pippin", "vine", "aura", "michi", "cate", "ansem", "bert", "chillhouse", "usduc", "wbtc", "eth", "hype", "zec", "near", "xrp", "xmr", "sui", "arb", "aave", "uni", "tao", "peaq", "mon", "cashcat", "neet", "otc", "fone", "buttcoin", "triplet", "cupsey", "alon", "jimothy", "lmao", "bobo", "tokabu", "manifest", "baton", "claw", "67", "zauth", "kins", "percolator", "jotchua", "zcat", "gork", "stonk", "solangeles", "paid", "pepe", "jeanphil", "pill", "biketyson", "npc", "wojak", "eacc", "hodl", "agency", "claudia", "shib", "swordcat", "plague", "pump", "alch", "pumpcade", "codec", "ape", "link", "ore", "skr"] as const;
 export type PairAssetKey = typeof PAIR_ASSET_KEYS[number];
 export type PairAsset = {
   key: PairAssetKey;
@@ -11,7 +11,7 @@ export type PairAsset = {
   mint: string;
   decimals: number;
   tokenProgram: string;
-  kind: "native" | "stable" | "stock" | "meme" | "collector";
+  kind: "native" | "stable" | "stock" | "meme" | "collector" | "crypto";
   issuer: string | null;
   issuerTerms: string | null;
   listingProvider?: string;
@@ -20,6 +20,9 @@ export type PairAsset = {
   verifiedAt: string;
   verificationSlot: number;
   admission: string;
+  /** Admitted by pump.fun's program on-chain but missing from its dated public pairs table (Codex, 30 October 2026). */
+  listingStatus?: "direct-onchain";
+  listingNotice?: string;
   /** Reviewed on-chain snapshot for the local demo. Production resolves fresh account state. */
   initialVirtualQuoteReserves: string;
 };
@@ -27,7 +30,12 @@ export type PairAsset = {
 export const PAIR_ASSETS: readonly Readonly<PairAsset>[] = Object.freeze(verifiedAssets.map(asset => Object.freeze(asset as PairAsset)));
 const BY_KEY = new Map<string, Readonly<PairAsset>>(PAIR_ASSETS.map(asset => [asset.key, asset]));
 export const PAIR_ASSETS_SOURCE = "https://pump.fun/docs/custom-pairs";
-export const PAIR_ASSETS_VERIFIED_AT = "2026-10-29";
+export const PAIR_ASSETS_VERIFIED_AT = "2026-10-30";
+
+/** A pair pump.fun's program admits on-chain that its dated public pairs table does not list. */
+export function isDirectPair(asset: Readonly<PairAsset>): boolean {
+  return asset.listingStatus === "direct-onchain";
+}
 
 export function isPairAssetKey(value: unknown): value is PairAssetKey {
   return typeof value === "string" && BY_KEY.has(value);
@@ -45,14 +53,23 @@ export function getPairAsset(key?: string | null): Readonly<PairAsset> {
 /** The pair a fresh Launch starts on. */
 export const DEFAULT_PAIR: PairAssetKey = "sol";
 
-const PAIR_DESIGN: Readonly<Record<string, CardDesignKey>> = PAIR_DESIGNS;
-const DESIGN_PAIR = new Map<string, PairAssetKey>(Object.entries(PAIR_DESIGNS).map(([pair, design]) => [design, pair as PairAssetKey]));
-// One pair, one design: a second pair on the same design, or a pair without a reviewed asset, stops the module loading.
-if (DESIGN_PAIR.size !== PAIR_ASSETS.length || PAIR_ASSETS.some(asset => !PAIR_DESIGN[asset.key])) throw new Error("Every pair needs exactly one card design of its own.");
+const PAIR_DESIGN: Readonly<Partial<Record<string, CardDesignKey>>> = PAIR_DESIGNS;
+const DESIGN_PAIR = new Map<string, PairAssetKey>(Object.entries(PAIR_DESIGNS).map(([pair, design]) => [design!, pair as PairAssetKey]));
+// One offered pair, one design: a pair outside the registry, an unknown design or a design named twice stops the module loading.
+if (Object.entries(PAIR_DESIGNS).some(([pair, design]) => !BY_KEY.has(pair) || !isCardDesignKey(design)) || DESIGN_PAIR.size !== Object.keys(PAIR_DESIGNS).length) {
+  throw new Error("Every offered pair needs exactly one card design of its own.");
+}
 
-/** The one card design a pair launches with (null for an unknown pair). */
+/** The pairs offered for new launches: those with a finished design (AAVE and UNI wait for theirs). */
+export const OFFERED_PAIRS: readonly Readonly<PairAsset>[] = Object.freeze(PAIR_ASSETS.filter(asset => PAIR_DESIGN[asset.key]));
+export function isOfferedPair(key?: string | null): boolean {
+  return !!key && isPairAssetKey(key) && !!PAIR_DESIGN[key];
+}
+export const NOT_OFFERED_PAIR = "That pair is not offered yet. Pick another pair.";
+
+/** The one card design a pair launches with (null for an unknown pair or one not offered yet). */
 export function designForPair(key?: string | null): CardDesignKey | null {
-  return key && isPairAssetKey(key) ? PAIR_DESIGN[key]! : null;
+  return key && isPairAssetKey(key) ? PAIR_DESIGN[key] ?? null : null;
 }
 
 /** The pair a design belongs to; null for the designs no pair names (offered only to coins that already have one). */
@@ -81,7 +98,13 @@ export function completeLaunchPair(input: { cardTemplate?: string; quoteAssetKey
     }
   }
   const asset = getPairAsset(quoteAssetKey);
-  return { cardTemplate: input.cardTemplate ?? designForPair(asset.key)!, quoteAssetKey: asset.key as string, quoteMint: input.quoteMint ?? asset.mint };
+  let cardTemplate = input.cardTemplate;
+  if (cardTemplate === undefined) {
+    const design = designForPair(asset.key);
+    if (!design) throw new Error(NOT_OFFERED_PAIR);
+    cardTemplate = design;
+  }
+  return { cardTemplate, quoteAssetKey: asset.key as string, quoteMint: input.quoteMint ?? asset.mint };
 }
 
 /**
@@ -91,7 +114,8 @@ export function completeLaunchPair(input: { cardTemplate?: string; quoteAssetKey
  */
 export function resolveNewLaunchPair(input: { cardTemplate?: string; quoteAssetKey?: string; quoteMint?: string }): { asset: Readonly<PairAsset>; designKey: CardDesignKey } {
   const fields = completeLaunchPair(input);
-  const asset = getPairAsset(fields.quoteAssetKey), designKey = designForPair(asset.key)!;
+  const asset = getPairAsset(fields.quoteAssetKey), designKey = designForPair(asset.key);
+  if (!designKey) throw new Error(NOT_OFFERED_PAIR);
   if (fields.cardTemplate !== designKey) {
     if (!isCardDesignKey(fields.cardTemplate)) throw new Error(unknownDesign);
     throw new Error(pairForDesign(fields.cardTemplate) ? `The ${asset.symbol} pair comes with its own card. Pick a pair and its card comes with it.` : UNPAIRED_DESIGN);

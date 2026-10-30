@@ -143,6 +143,8 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     for (const quote of PAIR_ASSETS) {
       const input = defaultInput(); input.quoteKey = quote.key;
       input.card = { ...input.card, designKey: "obsidian-archive", frontSha256: art["obsidian-archive"].front.sha256, backSha256: art["obsidian-archive"].back.sha256 };
+      // ZCAT's Token-2022 mint charges a 3% transfer fee: the pre-send check refuses it before any plan exists.
+      if (quote.key === "zcat") { await expect(prepareTokenTransaction(input, { connection: mockRpc().connection })).rejects.toThrow("transfer fee"); continue; }
       const rpc=mockRpc();
       const plan = await prepareTokenTransaction(input, { connection: rpc.connection });
       expect(validateLivePlan(plan, expectedPlan(input, plan)).signers).toEqual([input.creator, input.mint]);

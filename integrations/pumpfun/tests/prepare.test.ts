@@ -12,7 +12,7 @@ import art from "../src/design-assets.json";
 import finalIdentitySnapshot from "../../../creative/higgsfield/pair-identities-2026-10-30/research/expansion-final-identities-and-metadata.json";
 import finalRawSnapshot from "../../../creative/higgsfield/pair-identities-2026-10-30/research/expansion-final-public-account-snapshots.json";
 import { CARD_DESIGNS } from "../../../app/src/lib/carddex/designs";
-import { defaultQuoteForDesign } from "../../../app/src/lib/carddex/pairs";
+import { OFFERED_PAIRS, defaultQuoteForDesign, designForPair } from "../../../app/src/lib/carddex/pairs";
 import {
   MAINNET_GENESIS_HASH, PAIR_ASSETS, preparePumpLaunchPlan,
   type PairReadConnection, type PrepareLaunchInput,
@@ -22,6 +22,11 @@ import {
 const creator = Keypair.fromSeed(new Uint8Array(32).fill(101)).publicKey.toBase58();
 const mint = Keypair.fromSeed(new Uint8Array(32).fill(102)).publicKey.toBase58();
 const now = () => new Date("2026-10-28T12:00:00Z");
+/**
+ * Reviewed pairs whose Token-2022 mint charges a transfer fee (ZCAT: 3%, in the 30 October fixtures). This adapter's
+ * pre-send check (quoteIssuerControls) refuses them, since SDK 4.1.0 prices buys without the fee; the demo is unaffected.
+ */
+const TRANSFER_FEE_QUOTES = new Set(["zcat"]);
 const moreMemeQuotes = ["goat", "zerebro", "act", "pippin", "vine", "aura", "michi", "cate", "ansem", "bert", "chillhouse", "usduc"];
 
 function input(designKey = "stock-tsla", quoteKey = "tslax"): PrepareLaunchInput {
@@ -134,6 +139,10 @@ describe("unsigned official Pump custom-pair preparer", () => {
   test("all admitted catalog assets use exact reviewed mints/programs; SOL has no extra quote accounts", async () => {
     expect(PAIR_ASSETS.length).toBeGreaterThanOrEqual(51);
     for (const asset of PAIR_ASSETS) {
+      if (TRANSFER_FEE_QUOTES.has(asset.key)) {
+        await expect(preparePumpLaunchPlan(input("obsidian-archive", asset.key), { connection: reader().connection, now })).rejects.toThrow("transfer fee");
+        continue;
+      }
       const plan = await preparePumpLaunchPlan(input("obsidian-archive", asset.key), { connection: reader().connection, now });
       expect(plan.binding.quote.mint).toBe(asset.mint);
       expect(plan.binding.quote.decimals).toBe(asset.decimals);
@@ -149,9 +158,31 @@ describe("unsigned official Pump custom-pair preparer", () => {
   test("all active designs use the app's immutable design/pair policy", async () => {
     expect(Object.keys(art).length).toBeGreaterThanOrEqual(CARD_DESIGNS.length);
     for (const design of CARD_DESIGNS) {
-      const plan = await preparePumpLaunchPlan(input(design.key, defaultQuoteForDesign(design.key).key), { connection: reader().connection, now });
+      const quoteKey = defaultQuoteForDesign(design.key).key;
+      if (TRANSFER_FEE_QUOTES.has(quoteKey)) {
+        await expect(preparePumpLaunchPlan(input(design.key, quoteKey), { connection: reader().connection, now })).rejects.toThrow("transfer fee");
+        continue;
+      }
+      const plan = await preparePumpLaunchPlan(input(design.key, quoteKey), { connection: reader().connection, now });
       expect(plan.binding.card.designKey).toBe(design.key);
-      expect(plan.binding.quote.key).toBe(defaultQuoteForDesign(design.key).key);
+      expect(plan.binding.quote.key).toBe(quoteKey);
+    }
+  });
+
+  test("every offered pair prepares with its own design's reviewed art hashes (the pair picks the card)", async () => {
+    expect(OFFERED_PAIRS).toHaveLength(95);
+    for (const asset of OFFERED_PAIRS) {
+      const designKey = designForPair(asset.key)!, request = input(designKey, asset.key);
+      expect(art[designKey as keyof typeof art]).toBeDefined();
+      expect(request.card.frontSha256).toBe(art[designKey as keyof typeof art].front.sha256);
+      expect(request.card.backSha256).toBe(art[designKey as keyof typeof art].back.sha256);
+      if (TRANSFER_FEE_QUOTES.has(asset.key)) {
+        await expect(preparePumpLaunchPlan(request, { connection: reader().connection, now })).rejects.toThrow("transfer fee");
+        continue;
+      }
+      const plan = await preparePumpLaunchPlan(request, { connection: reader().connection, now });
+      expect(plan.binding.card).toMatchObject({ designKey, frontSha256: request.card.frontSha256, backSha256: request.card.backSha256 });
+      expect(plan.binding.quote).toMatchObject({ key: asset.key, mint: asset.mint });
     }
   });
 

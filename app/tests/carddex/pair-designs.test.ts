@@ -1,11 +1,19 @@
 import {describe,expect,test} from "bun:test";
-import {ACTIVE_PAIR_DESIGNS,STAGED_PAIR_DESIGNS,isPairDesignInstalled,type PairDesignInstallation} from "../../src/lib/carddex/pair-designs";
+import {ACTIVE_PAIR_DESIGNS,STAGED_PAIR_DESIGNS,WITHHELD_PAIR_DESIGNS,isPairDesignInstalled,type PairDesignInstallation} from "../../src/lib/carddex/pair-designs";
+import {installedPairDesignKeys} from "../../src/lib/carddex/pair-designs-installed";
 import {CARD_DESIGNS,LEGACY_CARD_DESIGNS,isCardDesignKey} from "../../src/lib/carddex/designs";
 import {MEME_PAIR_PRESETS} from "../../src/lib/carddex/design-pairings";
-import {getPairAsset,allowedQuotesForDesign,defaultQuoteForDesign,matchingDesignsForQuote,preferredDesignForQuote,resolveLaunchQuote} from "../../src/lib/carddex/pairs";
+import {getPairAsset,allowedQuotesForDesign,defaultQuoteForDesign,designForPair,pairForDesign,resolveLaunchQuote} from "../../src/lib/carddex/pairs";
 import {CARD_RENDERER_VERSION} from "../../src/lib/carddex/card-template";
 
 describe("reviewed exact pair-identity designs",()=>{
+  test("the active designs are exactly the installed ones: every staged design but the two without finished art",()=>{
+    expect(WITHHELD_PAIR_DESIGNS).toEqual(["pair-aave","pair-uni"]);
+    expect(ACTIVE_PAIR_DESIGNS).toHaveLength(95);
+    // A missing or mismatched asset or hash fails here (the gates), not on the page: the manifests stay off the client.
+    expect(ACTIVE_PAIR_DESIGNS.map(d=>d.key)).toEqual(installedPairDesignKeys());
+    expect(STAGED_PAIR_DESIGNS.filter(d=>!installedPairDesignKeys().includes(d.key)).map(d=>d.key)).toEqual([...WITHHELD_PAIR_DESIGNS]);
+  });
   test("the original48 identities remain valid and staged artwork never creates a placeholder option",()=>{
     expect(LEGACY_CARD_DESIGNS).toHaveLength(48);
     expect(CARD_DESIGNS).toHaveLength(48+ACTIVE_PAIR_DESIGNS.length);
@@ -40,18 +48,25 @@ describe("reviewed exact pair-identity designs",()=>{
     expect(isPairDesignInstalled(design,{...install,reverse:{...install.reverse!,sourceSha256:"f".repeat(64)}})).toBe(false);
     expect(isPairDesignInstalled(design,{...install,atlas:{...install.atlas!,rendererVersion:"stale"}})).toBe(false);
   });
-  test("installed exact identities bind only their own pair and replace chooser recommendations",()=>{
+  test("installed exact identities bind only their own pair, and are their pair's card except SOL's and USDC's",()=>{
     for(const design of ACTIVE_PAIR_DESIGNS){
       const asset=getPairAsset(design.quoteKey);
       expect(defaultQuoteForDesign(design.key)).toBe(asset);
       expect(allowedQuotesForDesign(design.key)).toEqual([asset]);
-      expect(preferredDesignForQuote(asset.key)).toBe(design.key);
-      expect(matchingDesignsForQuote(asset.key).map(d=>d.key)).toEqual([design.key]);
+      // The owner keeps One Piece on SOL and Duel Masters on USDC: pair-sol and pair-usdc render but are never offered.
+      if(asset.key==="sol"||asset.key==="usdc"){
+        expect(designForPair(asset.key)).toBe(asset.key==="sol"?"one-piece":"duel-masters");
+        expect(pairForDesign(design.key)).toBeNull();
+      }else{
+        expect(designForPair(asset.key)).toBe(design.key);
+        expect(pairForDesign(design.key)).toBe(asset);
+      }
       expect(resolveLaunchQuote(design.key,{quoteAssetKey:asset.key,quoteMint:asset.mint})).toBe(asset);
       const other=getPairAsset(asset.key==="sol"?"usdc":"sol");
       expect(()=>resolveLaunchQuote(design.key,{quoteAssetKey:other.key})).toThrow("paired with");
       expect(()=>resolveLaunchQuote(design.key,{quoteAssetKey:asset.key,quoteMint:other.mint})).toThrow("quote mint");
-      if(design.category==="memes")expect(MEME_PAIR_PRESETS.filter(p=>p.quote===asset.key)).toEqual([{design:design.key,quote:asset.key}]);
+      // The historical presets are kept byte for byte: none names an identity design.
+      expect(MEME_PAIR_PRESETS.some(p=>p.design===design.key)).toBe(false);
     }
     for(const oldNeutral of ["spark","ember","frost","obsidian-archive","pokemon-classic","pepe"]){
       expect(defaultQuoteForDesign(oldNeutral).key).toBe("sol");
