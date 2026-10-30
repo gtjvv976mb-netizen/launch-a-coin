@@ -51,7 +51,7 @@
   outline: none;
 }
 @media (min-width: 1024px) {
-  .cdx-legal__doc { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--color-hairline) transparent; }
+  .cdx-legal__doc { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) transparent; }
 }
 @media (max-width: 639.98px) {
   .cdx-legal__doc { padding: 16px; }

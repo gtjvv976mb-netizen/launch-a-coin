@@ -7,6 +7,7 @@ import { View3DHost } from "../components/mintdex/card3d";
 import {
   Button,
   Change,
+  changeWords,
   GridCaption,
   Icon,
   IconButton,
@@ -267,6 +268,8 @@ function Discover() {
 function CoinCell({ coin, width, list, index }: { coin: CoinSummary; width: number; list: Array<{ id: string; card: CoinSummary }>; index: number }) {
   const mc = marketCapText(coin);
   const native = coin.mcapUsd == null;
+  // The 24h change as Change prints it, for the link's name (Home's rows read it too).
+  const changeText = changeWords(coin.change24h);
   const figure = (
     <Num size="sm" tone="inherit" watch={marketCapWatch(coin)}>
       {mc}
@@ -278,19 +281,22 @@ function CoinCell({ coin, width, list, index }: { coin: CoinSummary; width: numb
         to="/coin/$id"
         params={{ id: coin.id }}
         className="block"
-        aria-label={`${coin.name}, $${coin.ticker}, market cap ${mc}, ${getCardDesign(coin.cardTemplate).name} design`}
+        aria-label={`${coin.name}, $${coin.ticker}, market cap ${mc}, ${changeText}, ${getCardDesign(coin.cardTemplate).name} design`}
       >
         <ShelfItem
           width={width}
           card={
             // The first four load at once and at high priority; the rest when they near the screen. The sizes follow
-            // the laid-out card (under half the screen on phones, 150 to 240px on the fitted desktop shelf).
-            <MintCard card={coin} compact={width < 190} priority={index < 4} sizes="(max-width: 1023px) 46vw, 240px" />
+            // the creature art, about 79% of the card (36vw of a phone's under-half-screen card, at most 240px on the
+            // fitted desktop shelf); a phone's frame still takes its smallest copy, 480w.
+            <MintCard card={coin} compact={width < 190} priority={index < 4} sizes="(max-width: 1023px) 36vw, 240px" />
           }
           caption={
             <GridCaption
               name={coin.name}
-              value={native ? undefined : figure}
+              // A market cap in its own quote is long, so it takes the ticker's line and the change moves up beside
+              // the name: every cell shows its 24h change, as Home does.
+              value={native ? <Change v={coin.change24h} /> : figure}
               sub={<span className="text-slate">${coin.ticker}</span>}
               subRight={native ? figure : <Change v={coin.change24h} />}
             />

@@ -74,6 +74,17 @@ nav > a.mdx-link.min-h-11 { min-width: 40px; justify-content: center; }
   html .cdx-app .cdx-filter button { min-height: 44px; }
   .cdx-archive__pair-link::before { inset: min(-6px, calc((100% - 44px) / 2)) -4px; }
   nav > a.mdx-link.min-h-11 { min-width: 44px; }
+  /* Touch screens 1024px and wider keep the desktop rail and ladder, at 44px (the rail pill steps with its tabs). */
+  .cdx-app .mdx-playbtn { width: 44px; height: 44px; }
+  .cdx-app .mdx-rail .mdx-input,
+  .cdx-app .mdx-rail .mdx-link.min-h-6,
+  .cdx-app .cdx-hero-turntable__controls button { min-height: 44px; }
+  .cdx-app .mdx-rail .mdx-tab,
+  .cdx-app .mdx-rail .mdx-rail-pill { height: 44px; }
+  .cdx-app .mdx-rail .mdx-rail-pill { transform: translateY(calc(var(--i, 0) * 44px)); }
+  .cdx-app .cdx-ladder { --row: 44px; }
+  .cdx-app .mdx-ticker__pause { width: 44px; }
+  .cdx-app .mdx-lockup::after { inset: -6px 0; }
 }
 
 /* ------------------------------------------------ one selected style per control kind (VD-09)

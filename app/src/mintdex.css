@@ -254,7 +254,7 @@
 
 .mdx-scroll {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-hairline) transparent;
+  scrollbar-color: var(--scroll-thumb) transparent;
 }
 .mdx-noscrollbar {
   scrollbar-width: none;
@@ -615,7 +615,9 @@
     align-items: center;
     justify-content: center;
     gap: 4px;
-    font-size: var(--type-min, 12px);
+    /* The bar is a fixed --tabbar-h, so a larger browser font size grows the label only until a fifth of the
+     * screen holds "Portfolio" (12px at the default size). */
+    font-size: min(var(--type-min, 12px), max(12px, 4vw));
     font-weight: 500;
     line-height: 1;
     color: var(--color-slate);
@@ -715,7 +717,7 @@
   }
   .mdx-tabs:not([data-measured]) .mdx-tabs__tab[data-selected] {
     background: var(--color-sheet);
-    box-shadow: var(--shadow-raise), 0 0 0 1px rgb(var(--rgb-gold) / 0.35);
+    box-shadow: var(--shadow-raise), 0 0 0 1px rgb(var(--rgb-gold));
   }
   .mdx-tabs__thumb {
     position: absolute;
@@ -728,7 +730,7 @@
     transform-origin: left center;
     border-radius: var(--radius-pill);
     background: var(--color-sheet);
-    box-shadow: var(--shadow-raise), 0 0 0 1px rgb(var(--rgb-gold) / 0.35), 0 0 14px -4px rgb(var(--rgb-gold) / 0.5);
+    box-shadow: var(--shadow-raise), 0 0 0 1px rgb(var(--rgb-gold)), 0 0 14px -4px rgb(var(--rgb-gold) / 0.5);
     pointer-events: none;
   }
   .mdx-tabs:not([data-measured]) .mdx-tabs__thumb {
@@ -875,8 +877,10 @@
     transition: opacity var(--t-skin) var(--ease-room);
   }
   /* Primary: red enamel with a gold rim (cream label 5.9:1 on the enamel). */
+  /* Under every D1 skin, a token fill and rim (THEME-1): the skin's fill covers them, and they keep the control's
+   * shape while a skin is slow or fails to load. */
   .mdx-btn--primary {
-    background: none;
+    background: var(--color-hype);
     border-image-source: var(--skin-primary);
     border-image-slice: var(--skin-primary-slice);
     color: var(--color-on-hype);
@@ -906,11 +910,11 @@
   }
   /* Secondary (the class keeps the name "outline" so no call site changes): chocolate suede with a gold rim. */
   .mdx-btn--outline {
-    background: none;
+    background: var(--color-sheet);
     border-image-source: var(--skin-secondary);
     border-image-slice: var(--skin-secondary-slice);
     color: var(--color-ink);
-    box-shadow: 0 6px 14px -10px rgb(var(--rgb-shade) / 0.8); /* taste-skill-ignore: D1 premium button, the suede pill's cast shadow */
+    box-shadow: inset 0 0 0 1px var(--color-control-border), 0 6px 14px -10px rgb(var(--rgb-shade) / 0.8); /* taste-skill-ignore: D1 premium button, the suede pill's cast shadow */
   }
   :root[data-skins] .mdx-btn--outline::before {
     border-image-source: var(--skin-secondary-pressed);
@@ -927,7 +931,8 @@
     height: 32px;
     padding: 0;
     border-radius: var(--radius-pill);
-    background: none;
+    background: var(--color-sheet);
+    box-shadow: inset 0 0 0 1px var(--color-control-border);
     border-image-source: var(--skin-chip);
     border-image-slice: var(--skin-chip-slice);
     color: var(--color-ink);
@@ -949,9 +954,9 @@
     height: 32px;
     padding: 0;
     border-image: none;
-    background: var(--skin-icon) center / 100% 100% no-repeat;
+    background: var(--skin-icon) center / 100% 100% no-repeat var(--color-sheet);
     color: var(--color-ink);
-    box-shadow: none;
+    box-shadow: inset 0 0 0 1px var(--color-control-border);
   }
 
   @media (hover: hover) {
@@ -1097,10 +1102,10 @@
     cursor: not-allowed;
   }
 
-  /* Phones (backlog P1-25): 44px touch targets. Small buttons and chips grow to 44 (min-height also beats
+  /* Phones (backlog P1-25), and touch screens at any width (an iPad held sideways): 44px touch targets. Small buttons and chips grow to 44 (min-height also beats
    * a height utility such as Accept's h-7), chevrons become 44px circles, segmented tracks 44px, range
    * options at least 44 wide, and .mdx-hit widens a text link's hit area without moving its text. */
-  @media (max-width: 1023.98px) {
+  @media (max-width: 1023.98px), (pointer: coarse) {
     .mdx-btn--sm,
     .mdx-btn--chip {
       --skin-h: 44px;
@@ -1235,11 +1240,15 @@
     cursor: pointer;
     transition: background-color var(--t-fast) var(--ease-room);
   }
-  /* Phones (P1-25): the sort select and the design menu trigger are 44px pills. */
-  @media (max-width: 1023.98px) {
+  /* Phones and touch screens (P1-25): the sort select and the design menu trigger are 44px pills, and the select's
+   * text is 16px so iOS Safari does not zoom the page when it takes focus. */
+  @media (max-width: 1023.98px), (pointer: coarse) {
     .mdx-select,
     .mdx-menu-trigger {
       height: 44px;
+    }
+    .mdx-select {
+      font-size: 16px;
     }
   }
 
@@ -2267,9 +2276,10 @@ a:focus-visible .mdx-lift {
     height: 44px;
     flex-direction: row;
     gap: 6px;
+    font-size: min(var(--type-min, 12px), max(12px, 2vw));
   }
   .mdx-main {
-    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+    padding-bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom));
   }
 }
 /* While the on-screen keyboard is up the tab bar steps aside, so a keyboard that resizes the page
@@ -2278,6 +2288,17 @@ a:focus-visible .mdx-lift {
 @media (max-width: 1023.98px) {
   html[data-keyboard] [data-tabbar] {
     display: none;
+  }
+}
+/* Focus not obscured (WCAG 2.4.11): a control that Tab scrolls into view stops clear of the sticky header (0 when it
+ * scrolls away sideways) and of the tab bar; with the tab bar stepped aside for the keyboard, nothing is reserved. */
+@media (max-width: 1023.98px) {
+  html {
+    scroll-padding-top: calc(var(--mhead-h) + 8px);
+    scroll-padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 8px);
+  }
+  html[data-keyboard] {
+    scroll-padding-bottom: 0;
   }
 }
 

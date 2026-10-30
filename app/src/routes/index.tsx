@@ -43,6 +43,7 @@ import { hasRecentActivity } from "../lib/mintdex/activity-freshness";
 import { CARD_BIDDING_SUSPENDED } from "../lib/mintdex/card-bidding";
 import { fetchLiveLaunches } from "../lib/carddex/live/launches";
 import { getCardDesign } from "../lib/carddex/designs";
+import { designChipText, featuredStepText } from "../lib/carddex/featured-copy";
 import { marketCapText, marketCapWatch } from "../lib/carddex/quote-display";
 import { EXPLORE_COINS, HOME_COPY, IS_SIM, WORDS } from "../lib/mintdex/copy";
 import { sol, usdCompact } from "../lib/mintdex/format";
@@ -193,9 +194,7 @@ function useLot(featured: CoinSummary[], initialId?: string, onSelect?: (id: str
     setDir(wrapped ? (target === 0 ? 1 : -1) : target > index ? 1 : -1);
     setSel({ id: to.id, i: target });
     if (how === "auto") return;
-    setAnnounce(
-      `${to.name}, ${tierForLevel(to.level).name} design, market cap ${marketCapText(to)}, ${target + 1} of ${count}`,
-    );
+    setAnnounce(featuredStepText(to, target + 1, count));
     onSelect?.(to.id);
   }
 
@@ -418,7 +417,7 @@ function LotCaption({ coin: c, rows }: { coin: CoinSummary; rows: number }) {
       <h2 className="mdx-name mt-0 truncate">{c.name}</h2>
       {/* The coin's one creator-chosen design (MintDex's design chip), then the demo's Simulated tag. */}
       <p className="cdx-home__design max-lg:hidden">
-        <span className="cdx-home__chip">{getCardDesign(c.cardTemplate).name} design</span>
+        <span className="cdx-home__chip">{designChipText(c)}</span>
         <SimTag className="self-center" />
       </p>
       <dl

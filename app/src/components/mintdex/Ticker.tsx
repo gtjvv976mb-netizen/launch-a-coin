@@ -211,7 +211,6 @@ export function Ticker() {
       <button
         type="button"
         className="mdx-ticker__pause"
-        aria-pressed={held}
         aria-label={`${held ? "Play" : "Pause"} ${recent ? recentName.toLowerCase() : "past"} activity`}
         onClick={() => setHeld((h) => !h)}
       >

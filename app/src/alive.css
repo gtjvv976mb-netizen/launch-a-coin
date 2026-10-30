@@ -727,14 +727,16 @@ body:has(.mdx-inspect) .mdx-sky {
   width: var(--sw-w);
   height: var(--sw-h);
   border-radius: var(--radius-pill);
-  background: var(--skin-toggle-off) center / 100% 100% no-repeat;
+  /* Token fill and rim under the art (THEME-1), so the switch keeps its shape while the art is missing. */
+  background: var(--skin-toggle-off) center / 100% 100% no-repeat var(--color-sheet);
+  box-shadow: inset 0 0 0 1px var(--color-control-border);
 }
 .mdx-switch::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: var(--skin-toggle-on) center / 100% 100% no-repeat;
+  background: var(--skin-toggle-on) center / 100% 100% no-repeat var(--color-hype);
   opacity: 0;
   transition: opacity var(--t-base) var(--ease-room);
 }
@@ -762,7 +764,7 @@ body:has(.mdx-inspect) .mdx-sky {
   width: var(--knob);
   height: var(--knob);
   border-radius: 50%;
-  background: var(--skin-toggle-off) calc(var(--knob-off) * -1) calc((var(--sw-h) - var(--knob)) / -2) / var(--sw-w) var(--sw-h) no-repeat;
+  background: var(--skin-toggle-off) calc(var(--knob-off) * -1) calc((var(--sw-h) - var(--knob)) / -2) / var(--sw-w) var(--sw-h) no-repeat var(--color-neon);
   box-shadow: 0 1px 2px rgb(var(--rgb-shade) / 0.55);
   transition: transform var(--t-base) var(--ease-spring);
 }

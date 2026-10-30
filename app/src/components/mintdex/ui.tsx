@@ -932,7 +932,7 @@ export function Stepper({
             aria-label={`Show card ${k + 1} of ${count}`}
             aria-current={k === i || undefined}
             className={cx(
-              "grid h-10 w-10 flex-none place-items-center rounded-pill",
+              "grid h-10 w-10 flex-none place-items-center rounded-pill pointer-coarse:h-11 pointer-coarse:w-11",
             )}
           >
             <span className="mdx-step-dot" data-active={k === i || undefined} />
@@ -1180,6 +1180,18 @@ export function LabelNum({
   );
 }
 
+/** A change's digits as Change prints them: one decimal under 100%, none from 100%, no sign. */
+function changeDigits(v: number) {
+  const pct = Number.isFinite(v) ? Math.abs(v * 100) : 0;
+  return pct >= 100 ? pct.toFixed(0) : pct.toFixed(1);
+}
+
+/** What Change says, for a link's name: "+4.1% in 24 hours", "−2.3% in 24 hours", "no change in 24 hours". */
+export function changeWords(v: number, period = "in 24 hours") {
+  const text = changeDigits(v);
+  return text === "0.0" ? `no change ${period}` : `${v > 0 ? "+" : "−"}${text}% ${period}`;
+}
+
 /**
  * A signed change: "+4.1%" in --color-up, "−2.3%" in --color-down, tabular; direction is in the sign, never colour
  * alone. One decimal under 100%. Zero renders "0.0%" in slate with no sign. `pill` sets it on the soft pair (track
@@ -1199,8 +1211,7 @@ export function Change({
   /** Render nothing when the change rounds to 0.0% (a quiet coin says nothing instead of "0.0%"). */
   hideZero?: boolean;
 }) {
-  const pct = Number.isFinite(v) ? Math.abs(v * 100) : 0;
-  const text = pct >= 100 ? pct.toFixed(0) : pct.toFixed(1);
+  const text = changeDigits(v);
   if (text === "0.0") {
     if (hideZero) return null;
     return (

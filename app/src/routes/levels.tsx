@@ -5,7 +5,7 @@ import { HeroTurntable } from "../components/carddex/HeroTurntable";
 import { useViewIn3D } from "../components/carddex/CardControls";
 import { MintCard, type CardData } from "../components/mintdex/MintCard";
 import { ButtonLink, Tabs, TextLink } from "../components/mintdex/ui";
-import { COLLECTION, DesignMini } from "../components/carddex/GalleryTile";
+import { DesignMini } from "../components/carddex/GalleryTile";
 import { getCardDesign, isCardDesignKey, type CardDesign } from "../lib/carddex/designs";
 import { pageHead } from "../lib/mintdex/seo";
 import { defaultQuoteForDesign, designForPair, isOfferedPair, pairForDesign, type PairAsset } from "../lib/carddex/pairs";
@@ -108,7 +108,7 @@ function Designs() {
     quoteMint: quote.mint,
     mcapUsd: sampleMetrics.mcapUsd,
     mcapQuote: sampleMetrics.mcapQuote,
-    holders: 842,
+    holders: 0, // not launched: CardPrint prints "—" for the sample, as the Launch preview does
     dexNo: 0,
     dexLabel: "Sample",
     lore: "A small creature with a very big world to discover.",
@@ -166,6 +166,18 @@ function Designs() {
     const chip = strip?.querySelector<HTMLElement>(`[data-design="${design.key}"]`);
     if (strip && chip && strip.clientWidth) strip.scrollLeft = chip.offsetLeft - (strip.clientWidth - chip.offsetWidth) / 2;
   }, [design.key, group]);
+  // A chip reached by keyboard comes fully into view, centred as the strip snaps: the browser leaves a chip that is
+  // partly in view where it is, half past the edge.
+  const showFocusedChip = (e: { currentTarget: HTMLDivElement; target: EventTarget }) => {
+    const strip = e.currentTarget;
+    const chip = e.target as HTMLElement;
+    if (chip === strip || !chip.matches(":focus-visible")) return;
+    const r = chip.getBoundingClientRect();
+    const s = strip.getBoundingClientRect();
+    const left = Math.max(s.left, 0);
+    const right = Math.min(s.right, window.innerWidth);
+    if (r.left < left || r.right > right) strip.scrollLeft += r.left + r.width / 2 - (left + right) / 2;
+  };
 
   // The one primary: Launch on this design's pair (its card comes with it). A design no pair has offers none.
   const primary = pair ? (
@@ -173,7 +185,6 @@ function Designs() {
       Use this pair
     </ButtonLink>
   ) : null;
-  const collectionName = COLLECTION[design.category];
   const fan = index === -1 ? [] : shown.map((d, i) => ({ d, n: i - index })).filter(({ n }) => n !== 0 && Math.abs(n) <= FAN_REACH);
 
   return (
@@ -230,16 +241,13 @@ function Designs() {
                   </div>
                 </div>
               </div>
-              {/* The caption under the ledge: the plate, the name, its collection and pair, the one primary. */}
+              {/* The caption under the ledge: the plate, the name, its pair, the one primary. */}
               <div className="cdx-cf-cap">
                 {pair ? <span className="mdx-plate cdx-cf-cap__no">No. {catalogueNo(design)}</span> : null}
                 <span className="cdx-cf-cap__name">{design.name}</span>
                 <span data-chip="" className="cdx-cf-cap__chip">
                   <DesignMini design={design} />
-                  <span>
-                    {collectionName}
-                    <span className="text-slate"> · {pair ? `${pair.symbol} pair` : unofferedIdentity ? "Not offered" : "Existing coins only"}</span>
-                  </span>
+                  <span>{pair ? `${pair.symbol} pair` : unofferedIdentity ? "Not offered" : "Existing coins only"}</span>
                 </span>
                 {primary ? <span className="cdx-cf-cap__go">{primary}</span> : null}
               </div>
@@ -250,6 +258,7 @@ function Designs() {
                 role="group"
                 aria-label="Designs"
                 className="mdx-strip cdx-designs__strip -mx-4 mt-3 flex flex-none px-4 py-0.5 lg:hidden"
+                onFocus={showFocusedChip}
               >
                 {shown.map((d) => (
                   <button
@@ -310,7 +319,6 @@ function Designs() {
             <div className="cdx-designs__info">
               <h2 className="mdx-h2 cdx-designs__title">
                 <span>{design.name}</span>
-                <span className="cdx-designs__tagline">{collectionName}</span>
               </h2>
               <p className="cdx-designs__desc">{design.description}</p>
               <p className="cdx-designs__pair">
