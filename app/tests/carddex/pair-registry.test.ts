@@ -2,14 +2,14 @@ import { describe, expect, test } from "bun:test";
 import appAssets from "../../src/lib/carddex/pair-assets.json";
 import adapterCatalog from "../../../reports/pump-pair-assets-2026-10-28.json";
 import legacyAssets from "./fixtures/legacy-pair-assets-2026-10-29.json";
-import cryptoSnapshot from "../../../creative/higgsfield/pair-identities-2026-10-30/research/verified-identities-and-metadata.json";
-import expansionSnapshot from "../../../creative/higgsfield/pair-identities-2026-10-30/research/expansion-verified-identities-and-metadata.json";
-import directSnapshot from "../../../creative/higgsfield/pair-identities-2026-10-30/research/expansion-direct-verified-identities-and-metadata.json";
+import cryptoSnapshot from "./fixtures/codex-research-2026-10-30/verified-identities-and-metadata.json";
+import expansionSnapshot from "./fixtures/codex-research-2026-10-30/expansion-verified-identities-and-metadata.json";
+import directSnapshot from "./fixtures/codex-research-2026-10-30/expansion-direct-verified-identities-and-metadata.json";
 import previous72 from "./fixtures/legacy-pair-assets-72-2026-10-30.json";
 import previous89 from "./fixtures/legacy-pair-assets-89-2026-10-30.json";
 import previousDesigns89 from "./fixtures/legacy-pair-designs-89-2026-10-30.json";
 import stagedDesigns from "../../src/lib/carddex/pair-designs.json";
-import finalSnapshot from "../../../creative/higgsfield/pair-identities-2026-10-30/research/expansion-final-identities-and-metadata.json";
+import finalSnapshot from "./fixtures/codex-research-2026-10-30/expansion-final-identities-and-metadata.json";
 
 type RegistryAsset = {
   key: string; symbol: string; mint: string; decimals: number;

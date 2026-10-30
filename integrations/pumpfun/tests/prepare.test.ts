@@ -9,8 +9,8 @@ import { getAssociatedTokenAddressSync, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID 
 import { Keypair, PublicKey, type AccountInfo } from "@solana/web3.js";
 import fixture from "./fixtures/mainnet-pair-accounts-2026-10-28.json";
 import art from "../src/design-assets.json";
-import finalIdentitySnapshot from "../../../creative/higgsfield/pair-identities-2026-10-30/research/expansion-final-identities-and-metadata.json";
-import finalRawSnapshot from "../../../creative/higgsfield/pair-identities-2026-10-30/research/expansion-final-public-account-snapshots.json";
+import finalIdentitySnapshot from "./fixtures/codex-research-2026-10-30/expansion-final-identities-and-metadata.json";
+import finalRawSnapshot from "./fixtures/codex-research-2026-10-30/expansion-final-public-account-snapshots.json";
 import { CARD_DESIGNS } from "../../../app/src/lib/carddex/designs";
 import { OFFERED_PAIRS, defaultQuoteForDesign, designForPair } from "../../../app/src/lib/carddex/pairs";
 import {

@@ -1,9 +1,0 @@
-{
-  "executor": "root",
-  "indices": [
-    815
-  ],
-  "maximumQuotedCredits": 0.5,
-  "status": "reserved-before-one-write",
-  "automaticUnknownRetry": false
-}
