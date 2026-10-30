@@ -1,5 +1,6 @@
 import { isCardDesignKey, type CardDesignKey } from "../../lib/carddex/designs";
-import { DEFAULT_PAIR, designForPair, getPairAsset, isPairAssetKey, pairForDesign, type PairAssetKey } from "../../lib/carddex/pairs";
+import { PAIR_DESIGNS_2026_10_30 } from "../../lib/carddex/design-pairings";
+import { DEFAULT_PAIR, boundQuoteForDesign, designForPair, getPairAsset, isOfferedPair, pairForDesign, type PairAssetKey } from "../../lib/carddex/pairs";
 
 /**
  * Pure helpers for the one-page Launch form (routes/launch.tsx): which pair the page opens on and which card it shows
@@ -7,16 +8,25 @@ import { DEFAULT_PAIR, designForPair, getPairAsset, isPairAssetKey, pairForDesig
  * React, no DOM; tested in tests/carddex/launch-form.test.ts.
  */
 
+/** Where an older ?design= link's pair came from before the identity designs: design -> pair (30 October 2026). */
+const EARLIER_DESIGN_PAIR = new Map<string, string>(Object.entries(PAIR_DESIGNS_2026_10_30).map(([pair, design]) => [design, pair]));
+
 /**
- * The pair a Launch address opens on: ?quote= names it; an older ?design= link opens on that design's own pair; a
- * design no pair has, or nothing, opens on SOL without a word. An unknown ?quote= opens on SOL and says so.
+ * The pair a Launch address opens on: ?quote= names it (an offered pair only). An older ?design= link opens on that
+ * design's pair: today's, else the pair it had before the identity designs ("doge" DOGE, "pepe" TOAD), else its
+ * permanent binding; a design with none of these, or nothing, opens on SOL without a word. A ?quote= that is unknown
+ * or not offered (AAVE, UNI) opens on SOL and says so.
  */
 export function pairFromSearch(search: { quote?: string; design?: string }): { pair: PairAssetKey; notice: string } {
   if (search.quote) {
-    if (isPairAssetKey(search.quote)) return { pair: search.quote, notice: "" };
+    if (isOfferedPair(search.quote)) return { pair: search.quote as PairAssetKey, notice: "" };
     return { pair: DEFAULT_PAIR, notice: `That pair is unavailable. ${getPairAsset(DEFAULT_PAIR).symbol} selected.` };
   }
-  return { pair: pairForDesign(search.design)?.key ?? DEFAULT_PAIR, notice: "" };
+  const design = search.design;
+  if (!design) return { pair: DEFAULT_PAIR, notice: "" };
+  const candidates = [pairForDesign(design)?.key, EARLIER_DESIGN_PAIR.get(design), boundQuoteForDesign(design)?.key];
+  const pair = candidates.find((key) => isOfferedPair(key));
+  return { pair: (pair as PairAssetKey | undefined) ?? DEFAULT_PAIR, notice: "" };
 }
 
 /**
@@ -51,7 +61,7 @@ export function pickPair(
 
 /** A draft this browser kept: its pair, if it is still offered (an older draft's separate design is not used). */
 export function draftPair(draft: { quoteKey?: unknown } | null | undefined): PairAssetKey | null {
-  return isPairAssetKey(draft?.quoteKey) ? draft.quoteKey : null;
+  return typeof draft?.quoteKey === "string" && isOfferedPair(draft.quoteKey) ? draft.quoteKey as PairAssetKey : null;
 }
 
 /** True when the typed amount is the same number as the quick amount (0.50 is 0.5). Empty and 0 are "None". */

@@ -8,9 +8,10 @@ import { PAIR_GROUPS, filterPairs, gridStep, pairMonogram, tileName, type PairGr
 const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 /**
- * Launch's pair HUD: the pair picks the card. A filter (All, Memes, Stocks, Collector, Base), a search for a symbol or
- * name, and every pair as a tile in one radio group (arrow keys move and select, as radio groups do): a grid from
- * 1024px, a sideways strip two tiles tall below it so the HUD stays short on phones. Choosing a pair
+ * Launch's pair HUD: the pair picks the card. A filter (All, Memes, Stocks, Crypto, Collector), a ranked search for a
+ * symbol or name (Enter picks the best match), and every offered pair as a tile in one radio group (arrow keys move and
+ * select, as radio groups do): from 1024px a grid that scrolls down past seven rows, below it a sideways strip two
+ * tiles tall so the HUD stays short on phones. Choosing a pair
  * is choosing its card: the live card preview shows that pair's design at once, so the HUD never shows a design name,
  * thumbnail or swatch. Under it, the chosen pair's safety facts: its name and issuer, the full mint, when it was
  * reviewed and the terms links. Explanations live at /how#pairs. Styles: styles/screens/launch.css.
@@ -37,16 +38,24 @@ export function PairHud({ value, onChange, ticker, live = false, disabled = fals
   const checked = shown.findIndex((pair) => pair.key === asset.key);
   const tabStop = checked >= 0 ? checked : 0;
 
-  // Below 1024px the tiles are a sideways strip two tiles tall (launch.css): the chosen tile's column is brought to its
-  // middle, as the Designs strip does, at once (no travel). From 1024px the grid does not scroll and this does nothing.
+  // The chosen tile is brought into view at once (no travel), on mount, on a filter or search and on a pick. Below
+  // 1024px the tiles are a sideways strip two tiles tall (launch.css): its column goes to the strip's middle, as the
+  // Designs strip does. From 1024px the grid scrolls down past seven rows: its row is shown whole, centred when it was
+  // out of view. A filter or search that hides the chosen pair starts at its own first tile.
   useIsoLayoutEffect(() => {
-    const strip = gridRef.current;
-    if (!strip || strip.scrollWidth <= strip.clientWidth) return;
-    const tile = strip.querySelector<HTMLElement>(`[data-pair="${asset.key}"]`);
-    // A filter or search that hides the chosen pair starts at its own first tile, not at the old scroll position.
-    if (!tile) { strip.scrollLeft = 0; return; }
-    const left = tile.getBoundingClientRect().left - strip.getBoundingClientRect().left + strip.scrollLeft;
-    strip.scrollLeft = left - (strip.clientWidth - tile.offsetWidth) / 2;
+    const grid = gridRef.current;
+    if (!grid) return;
+    const across = grid.scrollWidth > grid.clientWidth, down = grid.scrollHeight > grid.clientHeight;
+    if (!across && !down) return;
+    const tile = grid.querySelector<HTMLElement>(`[data-pair="${asset.key}"]`);
+    if (!tile) { grid.scrollLeft = 0; grid.scrollTop = 0; return; }
+    const box = grid.getBoundingClientRect(), at = tile.getBoundingClientRect();
+    if (across) grid.scrollLeft = at.left - box.left + grid.scrollLeft - (grid.clientWidth - tile.offsetWidth) / 2;
+    if (down) {
+      const top = at.top - box.top + grid.scrollTop;
+      const visible = top >= grid.scrollTop && top + tile.offsetHeight <= grid.scrollTop + grid.clientHeight;
+      if (!visible) grid.scrollTop = top - (grid.clientHeight - tile.offsetHeight) / 2;
+    }
   }, [asset.key, group, query]);
 
   /**

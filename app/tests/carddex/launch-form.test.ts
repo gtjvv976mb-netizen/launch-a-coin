@@ -1,9 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { draftPair, enterTarget, firstProblem, formDesign, launchDesign, pairFromSearch, pickPair, sameAmount, signedOutPress } from "../../src/components/carddex/launch-form";
-import { ORDERED_PAIRS, PAIR_GROUPS, filterPairs, gridStep, pairGroupOf, pairMonogram, pairsInGroup, shortPairName, tileName } from "../../src/components/carddex/pair-groups";
+import { ORDERED_PAIRS, PAIR_GROUPS, filterPairs, gridStep, groupAlias, isPairGroup, pairGroupOf, pairMonogram, pairsInGroup, shortPairName, tileName } from "../../src/components/carddex/pair-groups";
+import { PAIR_DESIGNS_2026_10_30 } from "../../src/lib/carddex/design-pairings";
 import { walletNoticeItems, walletNoticePreview, WALLET_NOTICE_COPY } from "../../src/components/carddex/live/wallet-notice";
 import { CARD_DESIGNS } from "../../src/lib/carddex/designs";
-import { PAIR_ASSETS, designForPair, getPairAsset, pairForDesign } from "../../src/lib/carddex/pairs";
+import { OFFERED_PAIRS, designForPair, getPairAsset, pairForDesign } from "../../src/lib/carddex/pairs";
 
 // The one-page Launch form (routes/launch.tsx): the pair it opens on and the card it shows (the pair picks the card),
 // the pair HUD's groups, search and arrow keys, the quick initial-buy amounts, and where focus goes when something is
@@ -14,27 +15,30 @@ describe("the Launch form derives its card from the pair", () => {
     expect(launchDesign("sol")).toBe("one-piece");
     expect(launchDesign("usdc")).toBe("duel-masters");
   });
-  test("every pair shows its own design, and the design changes only with the pair", () => {
-    for (const asset of PAIR_ASSETS) {
+  test("every offered pair shows its own design, and the design changes only with the pair", () => {
+    for (const asset of OFFERED_PAIRS) {
       expect(launchDesign(asset.key)).toBe(designForPair(asset.key)!);
       expect(launchDesign(asset.key, null)).toBe(designForPair(asset.key)!);
     }
-    expect(launchDesign("doge")).toBe("doge");
-    expect(launchDesign("tslax")).toBe("stock-tsla");
-    expect(launchDesign("cards")).toBe("obsidian-archive");
+    expect(launchDesign("doge")).toBe("pair-doge");
+    expect(launchDesign("tslax")).toBe("pair-tslax");
+    expect(launchDesign("cards")).toBe("pair-cards");
     expect(launchDesign("unknown")).toBe("one-piece");
+    expect(launchDesign("aave")).toBe("one-piece");
   });
   test("a saved mainnet launch keeps the design it was saved with, even one its pair would not pick now", () => {
     expect(launchDesign("sol", "pokemon-classic")).toBe("pokemon-classic");
     expect(launchDesign("gmex", "gamestop")).toBe("gamestop");
+    expect(launchDesign("doge", "doge")).toBe("doge");
     expect(launchDesign("sol", "not-a-design")).toBe("one-piece");
   });
   test("a saved launch's own design stays in mainnet mode: Demo shows and sends the pair's own card", () => {
     // Review finding 2: a pre-change SOL launch (Pokemon Classic) loaded in mainnet mode, then Demo with ?quote=sol.
     expect(formDesign("sol", "pokemon-classic", true)).toBe("pokemon-classic");
     expect(formDesign("sol", "pokemon-classic", false)).toBe("one-piece");
-    expect(formDesign("gmex", "gamestop", false)).toBe("stock-gme");
-    for (const asset of PAIR_ASSETS) {
+    expect(formDesign("gmex", "gamestop", false)).toBe("pair-gmex");
+    expect(formDesign("tslax", "stock-tsla", true)).toBe("stock-tsla");
+    for (const asset of OFFERED_PAIRS) {
       expect(formDesign(asset.key, null, true)).toBe(designForPair(asset.key)!);
       expect(formDesign(asset.key, "pokemon-full-art", false)).toBe(designForPair(asset.key)!);
     }
@@ -47,54 +51,93 @@ describe("the Launch form derives its card from the pair", () => {
     const back = pickPair({ pair: "sol", savedDesign: "pokemon-classic" }, "sol")!;
     expect(formDesign(back.pair, back.savedDesign, true)).toBe("one-piece");
   });
-  test("?quote= preselects its pair; an old ?design= link opens on that design's pair, or on SOL without an error", () => {
+  test("?quote= preselects an offered pair; an old ?design= link opens on its pair (today's, then the 30 October one)", () => {
     expect(pairFromSearch({ quote: "doge" })).toEqual({ pair: "doge", notice: "" });
+    expect(pairFromSearch({ quote: "pepe" })).toEqual({ pair: "pepe", notice: "" });
     expect(pairFromSearch({ quote: "tslax", design: "pepe" })).toEqual({ pair: "tslax", notice: "" });
     for (const design of CARD_DESIGNS) {
       const pair = pairForDesign(design.key);
-      expect(pairFromSearch({ design: design.key })).toEqual({ pair: pair?.key ?? "sol", notice: "" });
+      if (pair) expect(pairFromSearch({ design: design.key })).toEqual({ pair: pair.key, notice: "" });
     }
-    expect(pairFromSearch({ design: "gamestop" })).toEqual({ pair: "sol", notice: "" });
+    // Links from before the identity designs keep their pair: design "pepe" was TOAD's card, "doge" DOGE's.
+    for (const [pair, design] of Object.entries(PAIR_DESIGNS_2026_10_30)) expect(pairFromSearch({ design })).toEqual({ pair, notice: "" });
+    expect(pairFromSearch({ design: "pepe" })).toEqual({ pair: "toad", notice: "" });
+    expect(pairFromSearch({ design: "doge" })).toEqual({ pair: "doge", notice: "" });
+    expect(pairFromSearch({ design: "stock-tsla" })).toEqual({ pair: "tslax", notice: "" });
+    // pair-sol and pair-usdc are bound to their pairs but never offered: their links open on SOL and USDC.
+    expect(pairFromSearch({ design: "pair-sol" })).toEqual({ pair: "sol", notice: "" });
+    expect(pairFromSearch({ design: "pair-usdc" })).toEqual({ pair: "usdc", notice: "" });
+    expect(pairFromSearch({ design: "gamestop" })).toEqual({ pair: "gmex", notice: "" });
+    expect(pairFromSearch({ design: "pokemon-full-art" })).toEqual({ pair: "sol", notice: "" });
     expect(pairFromSearch({ design: "nope" })).toEqual({ pair: "sol", notice: "" });
-    expect(pairFromSearch({ quote: "pepe" })).toEqual({ pair: "sol", notice: "That pair is unavailable. SOL selected." });
+    for (const quote of ["aave", "uni", "popcat"]) expect(pairFromSearch({ quote })).toEqual({ pair: "sol", notice: "That pair is unavailable. SOL selected." });
   });
-  test("a kept draft brings back its pair only (an older draft's separate design is not used)", () => {
+  test("a kept draft brings back its pair only, if it is still offered (an older draft's separate design is not used)", () => {
     expect(draftPair({ quoteKey: "bonk" })).toBe("bonk");
-    expect(draftPair({ quoteKey: "pepe" })).toBeNull();
+    expect(draftPair({ quoteKey: "pepe" })).toBe("pepe");
+    expect(draftPair({ quoteKey: "aave" })).toBeNull();
+    expect(draftPair({ quoteKey: "popcat" })).toBeNull();
     expect(draftPair({})).toBeNull();
     expect(draftPair(null)).toBeNull();
   });
 });
 
 describe("the pair HUD", () => {
-  test("All holds every pair once: SOL first, then memes, stocks and collector tokens", () => {
-    expect(ORDERED_PAIRS).toHaveLength(37);
-    expect(new Set(ORDERED_PAIRS.map(pair => pair.key)).size).toBe(37);
-    expect(ORDERED_PAIRS[0]!.key).toBe("sol");
-    expect(PAIR_GROUPS.map(group => group.name)).toEqual(["All", "Memes", "Stocks", "Collector", "Base"]);
-    expect(pairsInGroup("base").map(pair => pair.key)).toEqual(["sol", "usdc"]);
+  test("All holds every offered pair once: SOL and USDC, the stocks, memes, other crypto, then collector tokens", () => {
+    expect(ORDERED_PAIRS).toHaveLength(95);
+    expect(new Set(ORDERED_PAIRS.map(pair => pair.key)).size).toBe(95);
+    expect(ORDERED_PAIRS.map(pair => pair.key).sort()).toEqual(OFFERED_PAIRS.map(pair => pair.key).sort());
+    expect(ORDERED_PAIRS.slice(0, 4).map(pair => pair.key)).toEqual(["sol", "usdc", "gmex", "tslax"]);
+    expect(ORDERED_PAIRS.findIndex(pair => pair.key === "tslax")).toBe(3);
+    expect(ORDERED_PAIRS.some(pair => pair.key === "aave" || pair.key === "uni")).toBe(false);
+    expect(PAIR_GROUPS.map(group => group.name)).toEqual(["All", "Memes", "Stocks", "Crypto", "Collector"]);
+    expect(pairsInGroup("crypto").slice(0, 2).map(pair => pair.key)).toEqual(["sol", "usdc"]);
+    expect(pairsInGroup("crypto")).toHaveLength(22);
     expect(pairsInGroup("collector").map(pair => pair.key)).toEqual(["cards", "sv151"]);
     expect(pairsInGroup("stocks").map(pair => pair.key)).toEqual(["gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc"]);
-    expect(pairsInGroup("memes")).toHaveLength(26);
+    expect(pairsInGroup("memes")).toHaveLength(64);
     expect(pairsInGroup("memes").every(pair => pairGroupOf(pair) === "memes" && pair.kind === "meme")).toBe(true);
     const sizes = PAIR_GROUPS.filter(group => group.key !== "all").map(group => pairsInGroup(group.key).length);
-    expect(sizes.reduce((a, b) => a + b, 0)).toBe(37);
+    expect(sizes.reduce((a, b) => a + b, 0)).toBe(95);
+    // Old links named the base group (SOL and USDC): it is part of Crypto now.
+    expect(groupAlias("base")).toBe("crypto");
+    expect(groupAlias("memes")).toBe("memes");
+    expect(isPairGroup(groupAlias("base"))).toBe(true);
+    expect(isPairGroup("base")).toBe(false);
   });
-  test("search finds a symbol or a name, inside the group in view", () => {
+  test("search finds a symbol or a name, inside the group in view, best match first", () => {
     expect(filterPairs("all", "doge").map(pair => pair.key)).toEqual(["doge"]);
     expect(filterPairs("all", "DOGE").map(pair => pair.key)).toEqual(["doge"]);
-    expect(filterPairs("all", "$wif").map(pair => pair.key)).toEqual(["wif"]);
+    expect(filterPairs("all", "$wif").map(pair => pair.key)).toEqual(["wif", "swordcat"]);
     expect(filterPairs("all", "tesla").map(pair => pair.key)).toEqual(["tslax"]);
     expect(filterPairs("all", "chill").map(pair => pair.key)).toEqual(["chillguy", "chillhouse"]);
     expect(filterPairs("stocks", "chill")).toEqual([]);
     expect(filterPairs("memes", "  ")).toEqual(pairsInGroup("memes"));
+    // An exact symbol beats a name that contains it: "pepe" is PEPE first, then The Toad Pepe.
+    expect(filterPairs("all", "pepe").map(pair => pair.key)).toEqual(["pepe", "toad"]);
+    expect(filterPairs("all", "ape")[0]!.key).toBe("ape");
+    expect(filterPairs("all", "aave")).toEqual([]);
+  });
+  test("ranked search: typing any offered pair's symbol puts it first, 93 or more within 4 characters", () => {
+    let quick = 0;
+    for (const pair of ORDERED_PAIRS) {
+      expect(filterPairs("all", pair.symbol)[0]!.key).toBe(pair.key);
+      const symbol = pair.symbol.toLowerCase();
+      for (let n = 1; n <= symbol.length; n++) {
+        if (filterPairs("all", symbol.slice(0, n))[0]?.key === pair.key) { if (n <= 4) quick++; break; }
+      }
+    }
+    expect(quick).toBeGreaterThanOrEqual(93);
+    for (const [query, key] of [["pepe", "pepe"], ["ape", "ape"], ["mon", "mon"], ["near", "near"], ["pump", "pump"], ["sola", "solangeles"], ["e/a", "eacc"], ["67", "67"], ["link", "link"], ["wbtc", "wbtc"]]) {
+      expect(filterPairs("all", query!)[0]!.key).toBe(key!);
+    }
   });
   test("tiles read as a symbol, a short name (unless it only repeats the symbol) and a monogram, never a design", () => {
     expect(tileName(getPairAsset("doge"))).toBe("Dogecoin");
     expect(tileName(getPairAsset("tslax"))).toBe("Tesla");
-    // Seven pairs' short names only repeat their symbol: their tiles show the symbol alone.
+    // Pairs whose short names only repeat their symbol show the symbol alone (the earlier seven among them).
     const repeats = ORDERED_PAIRS.filter(pair => tileName(pair) === null).map(pair => pair.key);
-    expect(repeats.sort()).toEqual(["aura", "bonk", "fartcoin", "michi", "pippin", "troll", "zerebro"]);
+    expect(repeats).toEqual(expect.arrayContaining(["aura", "bonk", "fartcoin", "michi", "pippin", "troll", "zerebro"]));
     for (const pair of ORDERED_PAIRS) {
       const name = tileName(pair);
       if (name !== null) expect(name.toLowerCase()).not.toBe(pair.symbol.toLowerCase());
@@ -109,19 +152,24 @@ describe("the pair HUD", () => {
     for (const pair of ORDERED_PAIRS) expect(names.has(shortPairName(pair))).toBe(false);
   });
   test("arrow keys move one tile or one row and wrap at the ends, as a radio group does", () => {
-    // 37 tiles in 5 columns: the last row holds 2.
-    expect(gridStep("ArrowRight", 0, 37, 5)).toBe(1);
-    expect(gridStep("ArrowRight", 36, 37, 5)).toBe(0);
-    expect(gridStep("ArrowLeft", 0, 37, 5)).toBe(36);
-    expect(gridStep("ArrowDown", 2, 37, 5)).toBe(7);
+    // 95 tiles in 5 columns: 19 full rows.
+    expect(gridStep("ArrowRight", 0, 95, 5)).toBe(1);
+    expect(gridStep("ArrowRight", 94, 95, 5)).toBe(0);
+    expect(gridStep("ArrowLeft", 0, 95, 5)).toBe(94);
+    expect(gridStep("ArrowDown", 2, 95, 5)).toBe(7);
+    expect(gridStep("ArrowDown", 92, 95, 5)).toBe(3);
+    expect(gridStep("ArrowDown", 94, 95, 5)).toBe(0);
+    expect(gridStep("ArrowUp", 7, 95, 5)).toBe(2);
+    expect(gridStep("ArrowUp", 0, 95, 5)).toBe(94);
+    expect(gridStep("ArrowUp", 3, 95, 5)).toBe(92);
+    expect(gridStep("ArrowUp", 1, 95, 5)).toBe(90);
+    expect(gridStep("Home", 20, 95, 5)).toBe(0);
+    expect(gridStep("End", 2, 95, 5)).toBe(94);
+    // 37 tiles in 5 columns (a filtered list): the last row holds 2.
     expect(gridStep("ArrowDown", 32, 37, 5)).toBe(3);
     expect(gridStep("ArrowDown", 34, 37, 5)).toBe(0);
-    expect(gridStep("ArrowUp", 7, 37, 5)).toBe(2);
-    expect(gridStep("ArrowUp", 0, 37, 5)).toBe(36);
     expect(gridStep("ArrowUp", 3, 37, 5)).toBe(32);
     expect(gridStep("ArrowUp", 1, 37, 5)).toBe(35);
-    expect(gridStep("Home", 20, 37, 5)).toBe(0);
-    expect(gridStep("End", 2, 37, 5)).toBe(36);
     expect(gridStep("Enter", 2, 37, 5)).toBeNull();
     expect(gridStep("ArrowDown", 0, 1, 5)).toBe(0);
     expect(gridStep("ArrowRight", 0, 0, 5)).toBeNull();

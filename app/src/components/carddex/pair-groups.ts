@@ -1,26 +1,38 @@
-import { PAIR_ASSETS, type PairAsset } from "../../lib/carddex/pairs";
+import { OFFERED_PAIRS, type PairAsset } from "../../lib/carddex/pairs";
 
 /**
  * The pair groups, in one order with one set of short names, shared by Launch's pair HUD (PairHud) and the Designs
- * screen. The pair picks the card, so the groups are the pairs' own kinds: memecoins, tokenized stocks, collector
- * tokens, and the base quotes SOL and USDC. Pure helpers, no React; tested in tests/carddex/launch-form.test.ts.
+ * screen. The pair picks the card, so the groups are the pairs' own kinds: memecoins, tokenized stocks, crypto (SOL,
+ * USDC and Solana versions of other coins) and collector tokens. Only offered pairs appear (pairs.ts OFFERED_PAIRS).
+ * Pure helpers, no React; tested in tests/carddex/launch-form.test.ts.
  */
 export const PAIR_GROUPS = [
   { key: "all", name: "All" },
   { key: "memes", name: "Memes" },
   { key: "stocks", name: "Stocks" },
+  { key: "crypto", name: "Crypto" },
   { key: "collector", name: "Collector" },
-  { key: "base", name: "Base" },
 ] as const;
 export type PairGroup = (typeof PAIR_GROUPS)[number]["key"];
 
-const KIND_GROUP: Record<PairAsset["kind"], Exclude<PairGroup, "all">> = { native: "base", stable: "base", stock: "stocks", meme: "memes", collector: "collector" };
+const KIND_GROUP: Record<PairAsset["kind"], Exclude<PairGroup, "all">> = { native: "crypto", stable: "crypto", crypto: "crypto", stock: "stocks", meme: "memes", collector: "collector" };
 export const pairGroupOf = (asset: Readonly<PairAsset>) => KIND_GROUP[asset.kind];
+/** Old group names in links: "base" (SOL and USDC) became part of "crypto" on 30 October 2026. */
+export const groupAlias = (value: unknown): unknown => (value === "base" ? "crypto" : value);
 export const isPairGroup = (value: unknown): value is PairGroup => PAIR_GROUPS.some((group) => group.key === value);
 
-/** Every pair in reading order: the base quotes (the default SOL first), then memes, stocks and collector tokens. */
-const ORDER: readonly Exclude<PairGroup, "all">[] = ["base", "memes", "stocks", "collector"];
-export const ORDERED_PAIRS: readonly Readonly<PairAsset>[] = ORDER.flatMap((group) => PAIR_ASSETS.filter((asset) => pairGroupOf(asset) === group));
+/**
+ * Every offered pair in reading order: SOL and USDC (the default SOL first), the stocks, the memes, the other crypto
+ * pairs, then the collector tokens. Stocks come early so a stock pair is a short swipe away on phones.
+ */
+const BASE_KINDS = new Set<PairAsset["kind"]>(["native", "stable"]);
+export const ORDERED_PAIRS: readonly Readonly<PairAsset>[] = [
+  ...OFFERED_PAIRS.filter((asset) => BASE_KINDS.has(asset.kind)),
+  ...OFFERED_PAIRS.filter((asset) => asset.kind === "stock"),
+  ...OFFERED_PAIRS.filter((asset) => asset.kind === "meme"),
+  ...OFFERED_PAIRS.filter((asset) => asset.kind === "crypto"),
+  ...OFFERED_PAIRS.filter((asset) => asset.kind === "collector"),
+];
 
 /** The pairs a group holds, in reading order. */
 export function pairsInGroup(group: PairGroup): readonly Readonly<PairAsset>[] {
@@ -38,12 +50,34 @@ export function tileName(asset: Readonly<PairAsset>): string | null {
   return name.toLowerCase() === asset.symbol.toLowerCase() ? null : name;
 }
 
-/** The pairs in a group whose symbol or name contains the query (case and spacing ignored); all of them for "". */
+/**
+ * How well a pair matches a query: 0 an exact symbol or key, 1 a symbol or key prefix, 2 a name word's prefix, 3 the
+ * query anywhere in the symbol, key or name; null for no match.
+ */
+function matchRank(asset: Readonly<PairAsset>, q: string): number | null {
+  const symbol = asset.symbol.toLowerCase(), key = asset.key, name = asset.name.toLowerCase();
+  if (symbol === q || key === q) return 0;
+  if (symbol.startsWith(q) || key.startsWith(q)) return 1;
+  if (name.split(/[^a-z0-9]+/).some((word) => word && word.startsWith(q)) || name.startsWith(q)) return 2;
+  if (symbol.includes(q) || key.includes(q) || name.includes(q)) return 3;
+  return null;
+}
+
+/**
+ * The pairs in a group that match the query (case and spacing ignored, a leading $ dropped), best match first: an exact
+ * symbol, then a symbol prefix, a name word, anywhere; within each, reading order. All of them for "". Enter in the
+ * search picks the first, so typing a full symbol always picks that pair ("pepe" is PEPE, not The Toad Pepe).
+ */
 export function filterPairs(group: PairGroup, query: string): readonly Readonly<PairAsset>[] {
   const q = query.trim().toLowerCase().replace(/^\$/, "").replace(/\s+/g, " ");
   const pairs = pairsInGroup(group);
   if (!q) return pairs;
-  return pairs.filter((asset) => asset.symbol.toLowerCase().includes(q) || asset.name.toLowerCase().includes(q) || asset.key.includes(q));
+  const ranked: Readonly<PairAsset>[][] = [[], [], [], []];
+  for (const asset of pairs) {
+    const rank = matchRank(asset, q);
+    if (rank !== null) ranked[rank]!.push(asset);
+  }
+  return ranked.flat();
 }
 
 /** A pair's typographic monogram: the first letter or digit of its symbol (no pair ships its own logo here). */

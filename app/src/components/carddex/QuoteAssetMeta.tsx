@@ -1,10 +1,11 @@
-import { PAIR_ASSETS_SOURCE, getPairAsset } from "../../lib/carddex/pairs";
+import { PAIR_ASSETS_SOURCE, getPairAsset, isDirectPair } from "../../lib/carddex/pairs";
 import { Icon } from "../mintdex/ui";
 
 /**
  * The pair's safety facts, all visible (under Launch's pair HUD; no disclosure): the asset and its
  * issuer, the full mint linked to Solscan (its name starts with the visible mint, WCAG 2.5.3), when the mint was
- * reviewed, each terms link, then what the quote does and does not do.
+ * reviewed (and, for a pair pump.fun's program admits that its public list leaves out, that fact), each terms link,
+ * then what the quote does and does not do.
  */
 export function QuoteAssetMeta({ quoteAssetKey, live = false, named = false }: {
   quoteAssetKey: string; live?: boolean;
@@ -25,6 +26,7 @@ export function QuoteAssetMeta({ quoteAssetKey, live = false, named = false }: {
     </p>
     {/* A line of text between the mint and the terms row, so the terms links' 44px hit areas stay off the mint. */}
     <p>Mint reviewed {asset.verifiedAt}.{asset.kind !== "native" ? " SOL also pays network and account costs." : ""}</p>
+    {isDirectPair(asset) ? <p className="cdx-pair-meta__direct">Not on pump.fun's public pairs list; admitted on-chain (checked {asset.verifiedAt}).</p> : null}
     <p className="cdx-pair-meta__links">
       {asset.issuerTerms ? external(asset.issuerTerms, "Issuer terms") : null}
       {asset.listingProviderTerms ? external(asset.listingProviderTerms, `${asset.listingProvider ?? "Listing"} terms`) : null}
