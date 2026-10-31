@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMatch } from "@tanstack/react-router";
-import { getLiveLaunchReadiness } from "../../../lib/carddex/live/api";
-import type { LiveReadiness } from "../../../lib/carddex/live/types";
+import { getLiveCreateOptions, getLiveLaunchReadiness } from "../../../lib/carddex/live/api";
+import type { LiveCreateOptions, LiveReadiness } from "../../../lib/carddex/live/types";
 import { liveModeOpen } from "./mode";
 
 export { liveModeOpen };
@@ -45,4 +45,13 @@ export function useLiveLaunchOpen(active = true): boolean {
 export function useLiveRecoveryOpen(active = true): boolean {
   const readiness = useLiveReadiness(active);
   return active && liveModeOpen(readiness.data);
+}
+
+/**
+ * What pump.fun allows for the create options right now (holder rewards; a custom creator fee rate), read by the server
+ * from pump.fun's Global. Only while new launches are open; anything unknown (loading, an error) offers nothing new.
+ */
+export function useLiveCreateOptions(active: boolean): LiveCreateOptions | null {
+  const query = useQuery({ queryKey: ["live-create-options"], queryFn: (): Promise<LiveCreateOptions> => getLiveCreateOptions(), enabled: active, staleTime: 60_000, retry: 1 });
+  return active ? query.data ?? null : null;
 }

@@ -15,6 +15,10 @@ import { isCardDesignKey } from "../../../app/src/lib/carddex/designs";
 import { resolveLaunchQuote } from "../../../app/src/lib/carddex/pairs";
 import { archivedDesignForHashes } from "../../../app/src/lib/carddex/design-versions";
 import designAssets from "./design-assets.json";
+import BN from "bn.js";
+import { CREATOR_FEE_RATE_PAIR, createOptionsProblem, readCreateOptions, type CreateOptions, type CreateOptionsGlobal } from "./create-options.ts";
+
+export type { CreateOptions, CreateOptionsGlobal };
 
 export const SDK_VERSION = "4.1.0";
 export const MAINNET_GENESIS_HASH = "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d";
@@ -45,6 +49,13 @@ export interface PrepareLaunchInput {
     backSha256: string;
     nftMetadataUri: string;
   };
+  /**
+   * pump.fun holder rewards (create-options.ts): creator fees go to eligible holders, permanently. Absent (or false) for
+   * a regular coin, exactly as every launch saved before this option.
+   */
+  holderReward?: boolean;
+  /** A custom creator fee rate in basis points, custom (QuoteControl) pairs only; absent for pump.fun's standard rate. */
+  creatorFeeBps?: number;
 }
 
 export function hash(value: string): string {
@@ -124,7 +135,30 @@ export function reviewLaunchInput(input: PrepareLaunchInput) {
     backSha256: input.card.backSha256,
     nftMetadataUri: publicUri(input.card.nftMetadataUri, "NFT metadata"),
   };
-  return { asset, creator, mint, quoteMint, tokenMetadataUri, card };
+  let options: CreateOptions;
+  try { options = readCreateOptions(input); } catch (error) { throw new Error(error instanceof Error ? error.message : "Invalid create options"); }
+  const problem = createOptionsProblem(options, { admission: asset.admission });
+  if (problem) throw new Error(problem);
+  return { asset, creator, mint, quoteMint, tokenMetadataUri, card, options };
+}
+
+type DecodedGlobal = ReturnType<typeof PUMP_SDK.decodeGlobal>;
+/** What pump.fun's Global allows for the create options, from a decoded Global. */
+export function createOptionsGlobal(global: DecodedGlobal): CreateOptionsGlobal {
+  // A u16 in the IDL (a number), read through toString() so a BN-typed decoder reads the same.
+  const raw = (global as { maxConfigurableCreatorFeeBps?: { toString(): string } | number | null }).maxConfigurableCreatorFeeBps;
+  const max = raw === undefined || raw === null ? 0 : Number(raw.toString());
+  return { holderRewards: global.isHolderRewardEnabled === true, creatorFeeConfigurable: global.creatorFeeConfigurable === true,
+    maxCreatorFeeBps: Number.isSafeInteger(max) && max > 0 ? max : 0 };
+}
+/** create_v2's option arguments for these options: mayhem and cashback always off; unset options encode as before. */
+export function createV2Flags(options: CreateOptions) {
+  return { mayhemMode: false, cashback: false, holderReward: options.holderReward === true,
+    ...(options.creatorFeeBps ? { creatorFeeBps: new BN(options.creatorFeeBps) } : {}) };
+}
+/** The options as a binding adds them: nothing for a regular coin, so older bindings hash exactly as before. */
+export function bindingOptions(options: CreateOptions) {
+  return { ...(options.holderReward ? { holderReward: true as const } : {}), ...(options.creatorFeeBps ? { creatorFeeBps: options.creatorFeeBps } : {}) };
 }
 
 /**
@@ -159,7 +193,7 @@ export async function preparePumpLaunchPlan(
   input: PrepareLaunchInput,
   options: { connection?: PairReadConnection; now?: () => Date } = {},
 ) {
-  const { asset, creator, mint, quoteMint, tokenMetadataUri, card } = reviewLaunchInput(input);
+  const { asset, creator, mint, quoteMint, tokenMetadataUri, card, options: createOptions } = reviewLaunchInput(input);
   const connection = options.connection ?? new Connection(PUBLIC_MAINNET_RPC, "confirmed");
   const keys = [GLOBAL_PDA, QUOTE_CONTROL_PDA, quoteMint, mint];
   const [genesisHash, snapshot] = await Promise.all([
@@ -177,6 +211,9 @@ export async function preparePumpLaunchPlan(
   if (!quoteInfo || quoteInfo.executable) throw new Error("Pair mint account is missing or executable");
   const global = PUMP_SDK.decodeGlobal(globalInfo);
   if (!global.createV2Enabled) throw new Error("Pump create_v2 is disabled");
+  // The chosen options against what pump.fun allows right now: a change since the form was filled is refused here.
+  const optionsProblem = createOptionsProblem(createOptions, { admission: asset.admission, global: createOptionsGlobal(global) });
+  if (optionsProblem) throw new Error(optionsProblem);
   const quoteControl = quoteControlInfo ? PUMP_SDK.decodeQuoteControl(quoteControlInfo) : null;
   const inGlobal = global.whitelistedQuoteMints.some((key) => key.equals(quoteMint));
   const inControl = quoteControl?.mints.some((entry) => entry.mint.equals(quoteMint)) ?? false;
@@ -193,6 +230,8 @@ export async function preparePumpLaunchPlan(
   } as unknown as Connection;
   const resolved = await new OnlinePumpSdk(snapshotConnection).resolveQuoteMint(quoteMint);
   if (resolved.source === "pumpCoin") throw new Error("Nested pump-coin quotes require separate review");
+  // pump.fun stores a custom rate only for a QuoteControl quote and silently drops it elsewhere: never sent where ignored.
+  if (createOptions.creatorFeeBps && resolved.source !== "quoteControl") throw new Error(CREATOR_FEE_RATE_PAIR);
   if (resolved.decimals !== asset.decimals || resolved.quoteTokenProgram.toBase58() !== asset.tokenProgram) {
     throw new Error("Pair mint decimals or token program changed from the reviewed catalog");
   }
@@ -206,7 +245,7 @@ export async function preparePumpLaunchPlan(
   const instruction = await PUMP_SDK.createV2Instruction({
     mint, user: creator, creator, name: input.name, symbol: input.symbol,
     uri: tokenMetadataUri, quoteMint, quoteTokenProgram: resolved.quoteTokenProgram,
-    mayhemMode: false, cashback: false, holderReward: false,
+    ...createV2Flags(createOptions),
   });
   const binding = {
     network: "solana-mainnet-beta" as const,
@@ -217,6 +256,7 @@ export async function preparePumpLaunchPlan(
       mint: asset.mint, decimals: resolved.decimals, tokenProgram: asset.tokenProgram,
     },
     card,
+    ...bindingOptions(createOptions),
   };
   const serializedInstruction = {
     programId: instruction.programId.toBase58(),

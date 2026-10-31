@@ -126,6 +126,11 @@
 .cdx-launch-fees__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: var(--hit); }
 .cdx-launch-fees__total { font-size: 14px; line-height: 20px; color: var(--color-down); }
 .cdx-launch-fees__total[data-ok] { color: var(--color-ink); }
+/* Creator fees (More options): two models that never combine, then the optional custom rate on custom pairs. */
+.cdx-launch-creator-fees > legend { float: left; width: 100%; padding: 0; margin: 0 0 4px; }
+.cdx-launch-creator-fees__choices { display: grid; gap: 8px; }
+.cdx-launch-creator-fees__rate { display: grid; gap: 8px; }
+.cdx-launch-creator-fees__rate > .cdx-launch-f { max-width: 200px; }
 @media (min-width: 640px) {
   .cdx-launch-fees__row { grid-template-columns: minmax(0, 1fr) 128px auto; }
   .cdx-launch-fees__wallet { grid-column: auto; }

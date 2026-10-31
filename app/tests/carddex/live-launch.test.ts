@@ -102,8 +102,11 @@ const guarded = (bytes: string) => bytes.endsWith("-guarded");
 const refreshed = (bytes: string) => bytes.endsWith("-refreshed");
 function signatureFor(prepared: {kind: string; messageSha256: string}, bytes: string) { const signature = signedSignature(prepared); return guarded(bytes) ? signature.slice(0, 87) + "G" : signature; }
 const signedHash = (prepared: {messageSha256: string}, bytes: string) => guarded(bytes) ? "e".repeat(62) + prepared.messageSha256.slice(-2) : prepared.messageSha256;
+// pump.fun's Global as the create options read it, and how many times it was read.
+let createGlobal: {holderRewards: boolean; creatorFeeConfigurable: boolean; maxCreatorFeeBps: number} | Error = {holderRewards: true, creatorFeeConfigurable: true, maxCreatorFeeBps: 300}, globalReads = 0;
 mock.module("../../../integrations/pumpfun/src/live", () => ({
   createMainnetConnection: () => ({}),
+  readCreateOptionsGlobal: async () => { globalReads++; if (createGlobal instanceof Error) throw createGlobal; return createGlobal; },
   measureTokenTransaction: async (input: any) => { measured.push(input); return {limit: 1232, ...sizes}; },
   prepareTokenTransaction: async (input: any) => { tokenInputs.push(input); return plan(input, "token"); },
   verifyTokenLaunch: async (input: any, options: any) => { verifyHashes.push(options.expectedMessageSha256);
@@ -182,6 +185,7 @@ beforeEach(() => {
   verifyHashes = []; nftTokenHashes = []; expiryGates = []; checkedHeight = null;
   aheadInputs = []; aheadFails = false; walletLamports = "10000000000"; storagePuts = 0; keptAlive = 0;
   tokenFailed = false; verifyThrows = null; resendAnswer = "resent"; resends = []; refusedSend = false;
+  createGlobal = {holderRewards: true, creatorFeeConfigurable: true, maxCreatorFeeBps: 300}; globalReads = 0; service.resetLiveCreateOptions();
   feeInputs = []; feeChecks = []; feeRecipientRefusal = null; feeAlready = null; feeVerified = feeFailed = false; feeRead = {state: "unset", shareholders: null}; feePlans = 0; feeReads = [];
 });
 afterAll(() => { globalThis.fetch = nativeFetch; sqlite.close(); });
@@ -2115,5 +2119,110 @@ describe("announcing the coin on @launchacard (CARDDEX_X_AUTOPOST)", () => {
     expect((await service.getLiveLaunchIntent(creator, done.intent.id)).xAnnounce).toBeUndefined();
     const {missingMigrations} = await import("../../src/lib/carddex/live/limits.server");
     expect(await missingMigrations()).toEqual(["0018"]);
+  });
+});
+
+describe("create options: holder rewards and a custom creator fee rate", () => {
+  const legacyHash = async (original: Awaited<ReturnType<typeof input>>) =>
+    auth.sha256(JSON.stringify({creator, fields: normalizeLiveFields(original), assets: original.assets, initialBuyQuoteBaseUnits: original.initialBuyQuoteBaseUnits, slippageBps: original.slippageBps}));
+  const intents = () => (sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get() as {n: number}).n;
+  const row = () => sqlite.query("SELECT payload_sha256, payload_json FROM live_launch_intents").get() as {payload_sha256: string; payload_json: string};
+  const custom = OFFERED_PAIRS.find(asset => asset.admission === "quoteControl" && !mainnetPairHold(asset.key))!;
+  const customInput = () => input({cardTemplate: designForPair(custom.key)!, quoteAssetKey: custom.key, quoteMint: custom.mint});
+  async function complete(prepared: Awaited<ReturnType<typeof service.prepareLiveLaunch>>) {
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: prepared.intent.id, signature: "s".repeat(88), messageSha256: prepared.transaction!.messageSha256});
+    const nft = await service.prepareLiveCreatorNft(creator, {intentId: prepared.intent.id});
+    nftVerified = true;
+    await service.confirmLiveCreatorNft(creator, {intentId: prepared.intent.id, signature: "t".repeat(88), messageSha256: nft.transaction!.messageSha256});
+  }
+
+  test("a regular coin, with the options absent, false or 0, keeps the request hash, payload and adapter input it always had", async () => {
+    for (const extra of [{}, {holderReward: false, creatorFeeBps: 0}]) {
+      sqlite.close(); sqlite = new Database(":memory:");
+      for (const name of readdirSync(migrations).filter(name => name.endsWith(".sql")).sort()) { const sql = readFileSync(resolve(migrations, name), "utf8"); if (sql.replace(/--[^\n]*/g, "").trim()) sqlite.exec(sql); }
+      const original = await input();
+      const prepared = await service.prepareLiveLaunch(creator, {...original, ...extra});
+      expect(row().payload_sha256).toBe(await legacyHash(original));
+      const saved = JSON.parse(row().payload_json).input;
+      expect("holderReward" in saved || "creatorFeeBps" in saved).toBe(false);
+      expect(prepared.intent.holderReward).toBeUndefined(); expect(prepared.intent.creatorFeeBps).toBeUndefined();
+    }
+    expect(tokenInputs[0]).toEqual(tokenInputs[1]);
+    expect(globalReads).toBe(0);
+  });
+
+  test("holders get the fees: saved in the launch's identity, sent to the adapter, kept through every read, and never changeable", async () => {
+    const original = await input();
+    const prepared = await service.prepareLiveLaunch(creator, {...original, holderReward: true});
+    expect(globalReads).toBe(1);
+    expect(tokenInputs[0]).toMatchObject({holderReward: true}); expect(tokenInputs[0].creatorFeeBps).toBeUndefined();
+    expect(row().payload_sha256).not.toBe(await legacyHash(original));
+    expect(row().payload_sha256).toBe(await auth.sha256(JSON.stringify({creator, fields: normalizeLiveFields(original), assets: original.assets, initialBuyQuoteBaseUnits: "0", slippageBps: 100, holderReward: true})));
+    expect(prepared.intent.holderReward).toBe(true);
+    // Prepared again: the same request is the same launch; without the choice it is another launch, refused.
+    expect((await service.prepareLiveLaunch(creator, {...original, holderReward: true})).intent.id).toBe(prepared.intent.id);
+    expect(tokenInputs[1]).toEqual(tokenInputs[0]);
+    await expect(service.prepareLiveLaunch(creator, original)).rejects.toThrow("already bound to different launch details");
+    await complete(prepared);
+    expect((await service.getLiveLaunchIntent(creator, prepared.intent.id)).holderReward).toBe(true);
+    expect((await service.listLiveLaunchIntents(creator))[0].holderReward).toBe(true);
+    expect(nftInputs[0]).toMatchObject({holderReward: true});
+    const {listCompletedLaunches} = await import("../../src/lib/carddex/live/launches.server");
+    const [coin] = await listCompletedLaunches();
+    expect(coin).toMatchObject({tokenMint: mint, holderReward: true}); expect(coin.creatorFeeBps).toBeUndefined();
+    // A creator fee split can never be set on it, even with sharing on.
+    env.CARDDEX_LIVE_FEE_SHARING = "true";
+    await expect(service.prepareLiveFeeShare(creator, {intentId: prepared.intent.id})).rejects.toThrow("can't also share them");
+    expect(feeInputs).toHaveLength(0);
+    delete env.CARDDEX_LIVE_FEE_SHARING;
+  });
+
+  test("holder rewards with a creator fee split are refused before anything is made", async () => {
+    env.CARDDEX_LIVE_FEE_SHARING = "true";
+    const puts = storagePuts;
+    await expect(service.prepareLiveLaunch(creator, {...await input(), holderReward: true, feeShares: [{address: creator, bps: 10_000}]})).rejects.toThrow("can't also share them");
+    expect(prepareCalls).toBe(0); expect(intents()).toBe(0); expect(storagePuts).toBe(puts + 3); expect(feeChecks).toHaveLength(0);
+    delete env.CARDDEX_LIVE_FEE_SHARING;
+  });
+
+  test("an option pump.fun's Global no longer allows is refused in plain words before any upload or plan", async () => {
+    createGlobal = {holderRewards: false, creatorFeeConfigurable: true, maxCreatorFeeBps: 300};
+    const puts = storagePuts;
+    await expect(service.prepareLiveLaunch(creator, {...await input(), holderReward: true})).rejects.toThrow("holder rewards switched off");
+    createGlobal = {holderRewards: true, creatorFeeConfigurable: false, maxCreatorFeeBps: 300};
+    await expect(service.prepareLiveLaunch(creator, {...await customInput(), creatorFeeBps: 100})).rejects.toThrow("doesn't accept custom creator fee rates");
+    createGlobal = {holderRewards: true, creatorFeeConfigurable: true, maxCreatorFeeBps: 100};
+    await expect(service.prepareLiveLaunch(creator, {...await customInput(), creatorFeeBps: 150})).rejects.toThrow("0.01% to 1.00%");
+    // An unreadable Global stops the launch too: nothing is guessed.
+    createGlobal = new Error("fetch failed");
+    await expect(service.prepareLiveLaunch(creator, {...await input(), holderReward: true})).rejects.toThrow("didn't answer");
+    // Only the creator's own composed images (the same bytes each time) were stored: no design copy, metadata or coin image.
+    expect(prepareCalls).toBe(0); expect(intents()).toBe(0); expect(storagePuts).toBe(puts + 3);
+  });
+
+  test("a custom creator fee rate: custom pairs only, 1 to 300 basis points, saved in the identity, alone or with holder rewards", async () => {
+    await expect(service.prepareLiveLaunch(creator, {...await input(), creatorFeeBps: 100})).rejects.toThrow("only stored for custom pairs");
+    const usdc = getPairAsset("usdc");
+    await expect(service.prepareLiveLaunch(creator, {...await input({cardTemplate: designForPair("usdc")!, quoteAssetKey: "usdc", quoteMint: usdc.mint}), creatorFeeBps: 100})).rejects.toThrow("only stored for custom pairs");
+    await expect(service.prepareLiveLaunch(creator, {...await customInput(), creatorFeeBps: 301})).rejects.toThrow("0.01% to 3.00%");
+    expect(intents()).toBe(0); expect(globalReads).toBe(0);
+    const prepared = await service.prepareLiveLaunch(creator, {...await customInput(), creatorFeeBps: 150, holderReward: true});
+    expect(tokenInputs[0]).toMatchObject({creatorFeeBps: 150, holderReward: true, quoteKey: custom.key});
+    expect(prepared.intent).toMatchObject({creatorFeeBps: 150, holderReward: true});
+    await expect(service.prepareLiveLaunch(creator, {...await customInput(), creatorFeeBps: 151, holderReward: true})).rejects.toThrow("already bound to different launch details");
+  });
+
+  test("the form's offer: read from Global once a minute, off while launches are off or Global can't be read", async () => {
+    expect(await service.liveCreateOptions(1_000)).toEqual({holderRewards: true, creatorFeeRate: {maxBps: 300}});
+    createGlobal = {holderRewards: false, creatorFeeConfigurable: false, maxCreatorFeeBps: 0};
+    expect(await service.liveCreateOptions(30_000)).toEqual({holderRewards: true, creatorFeeRate: {maxBps: 300}});
+    expect(globalReads).toBe(1);
+    expect(await service.liveCreateOptions(62_000)).toEqual({holderRewards: false, creatorFeeRate: null});
+    service.resetLiveCreateOptions(); createGlobal = new Error("fetch failed");
+    expect(await service.liveCreateOptions()).toEqual({holderRewards: false, creatorFeeRate: null});
+    service.resetLiveCreateOptions(); createGlobal = {holderRewards: true, creatorFeeConfigurable: true, maxCreatorFeeBps: 300};
+    env.CARDDEX_LIVE_LAUNCH_ENABLED = "false";
+    expect(await service.liveCreateOptions()).toEqual({holderRewards: false, creatorFeeRate: null});
   });
 });

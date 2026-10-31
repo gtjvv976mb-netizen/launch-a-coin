@@ -43,6 +43,10 @@ export type PublicLiveLaunch = {
   /** The creator wallet shortened to "AbCd…WxYz". */
   creator: string | null;
   createdAt: number;
+  /** pump.fun holder rewards: the coin's creator fees go to eligible holders, paid out by pump.fun. Absent otherwise. */
+  holderReward?: true;
+  /** The coin's custom creator fee rate in basis points, when its launch set one. Absent for pump.fun's standard rate. */
+  creatorFeeBps?: number;
 };
 
 export const pumpFunCoinUrl = (mint: string) => `https://pump.fun/coin/${mint}`;

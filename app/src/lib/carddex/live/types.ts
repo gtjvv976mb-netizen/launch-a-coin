@@ -25,7 +25,18 @@ export type LivePrepareInput = {
    * its payload or binding. The post is made after the card is confirmed.
    */
   announceOnX?: boolean;
+  /**
+   * pump.fun holder rewards ("Holders get the fees"): the coin's creator fees go to eligible holders, paid out by
+   * pump.fun, permanently; the creator earns none. Part of the launch's identity (it changes the create_v2 bytes): saved
+   * in its payload, request hash and binding, and absent (never false) for a regular coin, so older launches hash as before.
+   * Never combined with feeShares.
+   */
+  holderReward?: boolean;
+  /** A custom creator fee rate in basis points (custom pairs only), part of the identity the same way; absent for pump.fun's standard rate. */
+  creatorFeeBps?: number;
 };
+/** What pump.fun allows for the create options right now (getLiveCreateOptions); everything off when unknown. */
+export type LiveCreateOptions = { holderRewards: boolean; creatorFeeRate: {maxBps: number} | null };
 export type LiveFeeRecipient = { address: string; bps: number };
 export type LiveFeeShareStatus = "requested" | "prepared" | "pending" | "complete" | "set_elsewhere" | "skipped" | "failed";
 /** A launch's creator fee split as saved: what was chosen, where it stands, and (set_elsewhere) the split on chain. */
@@ -77,6 +88,10 @@ export type LiveLaunchIntent = {
   feeShare?: LiveFeeShare;
   /** The announcement on @launchacard the creator asked for; absent when they did not. */
   xAnnounce?: LiveXAnnounce;
+  /** Saved with the launch: pump.fun holder rewards (creator fees go to holders). Absent for a regular coin. */
+  holderReward?: true;
+  /** Saved with the launch: its custom creator fee rate in basis points. Absent for pump.fun's standard rate. */
+  creatorFeeBps?: number;
 };
 /**
  * What the last chain check of a saved launch found. "failed-on-chain": its transaction landed and failed, so nothing

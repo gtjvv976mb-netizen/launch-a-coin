@@ -25,6 +25,13 @@ const payload = {
 };
 
 describe("public live launch rows", () => {
+  test("carry the coin's creator fee model and custom rate only when its launch chose them", () => {
+    const plain = publicLaunchFromRow(row(payload))!;
+    expect("holderReward" in plain || "creatorFeeBps" in plain).toBe(false);
+    expect(publicLaunchFromRow(row({ ...payload, input: { ...payload.input, holderReward: true, creatorFeeBps: 150 } }))).toMatchObject({ holderReward: true, creatorFeeBps: 150 });
+    const odd = publicLaunchFromRow(row({ ...payload, input: { ...payload.input, holderReward: "true", creatorFeeBps: 1.5 } }))!;
+    expect("holderReward" in odd || "creatorFeeBps" in odd).toBe(false);
+  });
   test("carry the named fields only, with the creator shortened and the description the card prints", () => {
     const out = publicLaunchFromRow(row(payload));
     expect(out).toMatchObject({

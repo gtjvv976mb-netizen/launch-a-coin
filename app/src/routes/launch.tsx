@@ -29,7 +29,9 @@ import { CREATION_MCAP_LABEL } from "../lib/carddex/card-template";
 import type { LiveLaunchHandle, LivePrimary } from "../components/carddex/live/LiveLaunchPanel";
 import { draftDesign, draftPair, firstProblem, enterTarget, formDesign, pairFromSearch, pickDesign as nextDesign, pickPair as nextPick, type FormCheck } from "../components/carddex/launch-form";
 import { DesignChooser } from "../components/carddex/DesignChooser";
-import { liveReadinessQuery, useLiveLaunchOpen, useLiveReadiness, useLiveRecoveryOpen } from "../components/carddex/live/readiness";
+import { liveReadinessQuery, useLiveCreateOptions, useLiveLaunchOpen, useLiveReadiness, useLiveRecoveryOpen } from "../components/carddex/live/readiness";
+import { CreatorFeesFields } from "../components/carddex/live/CreatorFeesFields";
+import { creatorFeeRateEligible, creatorFeesView, EMPTY_CREATOR_FEES, readCreatorFeesDraft, type CreatorFeesDraft } from "../components/carddex/live/creator-fees";
 import { decimalText, FeeSplitFields, firstFeeSplitField } from "../components/carddex/live/FeeSplitFields";
 import { checkFeeSplit, EMPTY_FEE_SPLIT, formatShare, readFeeSplitDraft, type FeeSplitDraft } from "../components/carddex/live/fee-split";
 import { XAnnounceField } from "../components/carddex/live/XAnnounceField";
@@ -86,6 +88,8 @@ type LaunchDraft = {
   feeSplit?: FeeSplitDraft;
   /** "Announce my coin on @launchacard", when ticked; drafts written before it have none (off). */
   announceOnX?: boolean;
+  /** "Creator fees" (who gets them, the custom rate), when changed from the default; older drafts have none. */
+  creatorFees?: CreatorFeesDraft;
 };
 function readDraft(): Partial<LaunchDraft> | null {
   try {
@@ -151,7 +155,7 @@ function linkError(value: string, kind: "web" | "x"): string | null {
 
 type FieldKey = "name" | "ticker" | "website" | "x";
 /** The form's checks, in DOM order: the first one that fails takes focus (Launch pressed, or Enter in a field). */
-type ProblemKey = "name" | "ticker" | "art" | "buy" | "website" | "x" | "fees" | "terms";
+type ProblemKey = "name" | "ticker" | "art" | "buy" | "website" | "x" | "fees" | "rate" | "terms";
 
 /**
  * Below 1024px (MintDex's lg; launch.css uses the same query): the live card sits in the form beside Name and
@@ -226,6 +230,8 @@ function Launch() {
   const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
   // "Announce my coin on @launchacard" (More options): off by default.
   const [announce, setAnnounce] = useState(false);
+  // "Creator fees" (More options): the creator keeps them (default) or holders get them, and a custom rate on custom pairs.
+  const [creatorFees, setCreatorFees] = useState<CreatorFeesDraft>(EMPTY_CREATOR_FEES);
   const viewId = useId();
   const formId = `${viewId}-form`;
   const phoneCard = usePhoneCard();
@@ -273,6 +279,8 @@ function Launch() {
     // The saved launch's own split (locked with it), or none.
     setFeeSplit(intent.feeShare ? { on: true, rows: intent.feeShare.recipients.map(entry => ({ wallet: entry.address, percent: formatShare(entry.bps).replace("%", "") })) } : EMPTY_FEE_SPLIT);
     setAnnounce(!!intent.xAnnounce);
+    // The saved launch's own creator fee model and rate (locked with it).
+    setCreatorFees({ holders: intent.holderReward === true, rate: intent.creatorFeeBps ? (intent.creatorFeeBps / 100).toFixed(2) : "" });
     setPreview(intent.assets.artwork.url);
   }, []);
   useEffect(() => {
@@ -306,6 +314,7 @@ function Launch() {
       if (!search.design && !search.quote && savedPair) { setQuoteKey(savedPair); setChosenDesign(draftDesign(d)); setDevBuy(str(d.devBuy)); }
       setFeeSplit(readFeeSplitDraft(d.feeSplit));
       setAnnounce(d.announceOnX === true);
+      setCreatorFees(readCreatorFeesDraft(d.creatorFees));
     }
     setDraftReady(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -350,12 +359,28 @@ function Launch() {
     if (!buyBlocked) setBuyDropped(false);
     else if (devBuy) { if (/[1-9]/.test(devBuy)) setBuyDropped(true); setDevBuy(""); }
   }, [buyBlocked, devBuy]);
+  // Creator fees: each option only while pump.fun allows it (the server reads its Global), the rate on custom pairs
+  // only. A saved launch shows what it chose, locked. Holder rewards and a fee split never combine: choosing holders
+  // hides the split and drops it from the launch.
+  // A holders choice stays shown even if pump.fun switched holder rewards off since: prepare then refuses it in plain
+  // words, rather than the coin quietly launching as a regular one. A typed rate is never dropped without a word
+  // either (creatorFeesView). Once shown, each control stays mounted for the session, so focus never falls out of it.
+  const [feesSeen, setFeesSeen] = useState({ holders: false, rate: false });
+  const createOptions = useLiveCreateOptions(liveOpen && !liveLocked);
+  const { offer, holdersShown, holdersOffered, holdersActive, rateMax, rateCheck, rateNote, holdersNote } =
+    creatorFeesView({ options: createOptions, admission: quoteAsset.admission, draft: creatorFees, locked: liveLocked, seen: feesSeen });
   useEffect(() => {
-    if (devBuy || website || xUrl || feeSplit.on && feesOpen || announce && xOpen) setMoreOpen(true);
-  }, [devBuy, website, xUrl, feeSplit.on, feesOpen, announce, xOpen]);
+    if (liveLocked) return;
+    const rate = rateMax !== null && creatorFeeRateEligible(quoteAsset.admission);
+    if ((holdersShown && !feesSeen.holders) || (rate && !feesSeen.rate)) setFeesSeen(seen => ({ holders: seen.holders || holdersShown, rate: seen.rate || rate }));
+  }, [liveLocked, holdersShown, rateMax, quoteAsset.admission, feesSeen]);
+  const rateOk = !rateCheck.error;
+  useEffect(() => {
+    if (devBuy || website || xUrl || feeSplit.on && feesOpen || announce && xOpen || holdersActive || creatorFees.rate && rateMax !== null) setMoreOpen(true);
+  }, [devBuy, website, xUrl, feeSplit.on, feesOpen, announce, xOpen, holdersActive, creatorFees.rate, rateMax]);
   // The split counts only while it is offered and switched on; then it must pass every check the form can make.
   const feeCheck = checkFeeSplit(feeSplit.rows);
-  const feesActive = feesOpen && feeSplit.on;
+  const feesActive = feesOpen && feeSplit.on && !holdersActive;
   const feesOk = !feesActive || !!feeCheck.shares;
   const websiteError = linkError(website, "web");
   const xError = linkError(xUrl, "x");
@@ -368,6 +393,7 @@ function Launch() {
     !xError &&
     !devError &&
     feesOk &&
+    rateOk &&
     !uploading;
 
   // An error shows once the field is left with something in it, or after Launch is pressed.
@@ -380,12 +406,12 @@ function Launch() {
   const xMsg = xError && shown("x", xUrl) ? xError : null;
   const touch = (key: FieldKey) => () => setTouched((t) => (t[key] ? t : { ...t, [key]: true }));
 
-  const dirty = !!(name || ticker || lore || website || xUrl || devBuy || preparedArt || feeSplit.on);
+  const dirty = !!(name || ticker || lore || website || xUrl || devBuy || preparedArt || feeSplit.on || creatorFees.holders || creatorFees.rate);
   useEffect(() => {
     if (justRestored.current) { justRestored.current = false; return; }
     if (!draftReady || liveLocked || recoveryOnly) return;
-    writeDraft(dirty ? { name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey, designChosen: chosenDesign !== null, ...(feeSplit.on || feeSplit.rows.length ? { feeSplit } : {}), ...(announce ? { announceOnX: true } : {}) } : null);
-  }, [draftReady, dirty, name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey, chosenDesign, feeSplit, announce, liveLocked, recoveryOnly]);
+    writeDraft(dirty ? { name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey, designChosen: chosenDesign !== null, ...(feeSplit.on || feeSplit.rows.length ? { feeSplit } : {}), ...(announce ? { announceOnX: true } : {}), ...(creatorFees.holders || creatorFees.rate ? { creatorFees } : {}) } : null);
+  }, [draftReady, dirty, name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey, chosenDesign, feeSplit, announce, creatorFees, liveLocked, recoveryOnly]);
 
   // The description grows with its text (field-sizing in launch.css); browsers without it are sized here, so the
   // box never scrolls on its own.
@@ -444,15 +470,16 @@ function Launch() {
     { key: "website", ok: !websiteError },
     { key: "x", ok: !xError },
     { key: "fees", ok: feesOk },
+    { key: "rate", ok: rateOk },
     // The terms checkbox sits in the ticket, after every field and before the primary.
     { key: "terms", ok: !(live && termsNeeded) },
   ];
-  const problemRefs: Record<Exclude<ProblemKey, "terms" | "fees">, RefObject<HTMLElement | null>> = {
+  const problemRefs: Record<Exclude<ProblemKey, "terms" | "fees" | "rate">, RefObject<HTMLElement | null>> = {
     name: nameRef, ticker: tickerRef, art: artRef, buy: devRef, website: websiteRef, x: xRef,
   };
-  const problemEl = (key: ProblemKey) => key === "terms" ? liveRef.current?.terms() : key === "fees" ? document.getElementById(firstFeeSplitField(feeCheck) ?? "fee-split-on") : problemRefs[key].current;
+  const problemEl = (key: ProblemKey) => key === "terms" ? liveRef.current?.terms() : key === "fees" ? document.getElementById(firstFeeSplitField(feeCheck) ?? "fee-split-on") : key === "rate" ? document.getElementById("creator-fee-rate") : problemRefs[key].current;
   /** A problem inside More options opens it first (a closed disclosure's fields cannot take focus). */
-  const inMore = (key: ProblemKey) => key === "buy" || key === "website" || key === "x" || key === "fees";
+  const inMore = (key: ProblemKey) => key === "buy" || key === "website" || key === "x" || key === "fees" || key === "rate";
   /** Focus, then bring it into view at once (no smooth scroll); scroll-margin keeps it clear of the screen edges. */
   const land = (el: HTMLElement | null | undefined) => {
     if (!el) return;
@@ -477,7 +504,7 @@ function Launch() {
     const target = enterTarget(checks());
     if (target === "primary") land(visiblePrimary());
     else {
-      if (target !== "terms" && target !== "fees") setTouched((t) => ({ ...t, [target]: true }));
+      if (target !== "terms" && target !== "fees" && target !== "rate") setTouched((t) => ({ ...t, [target]: true }));
       if (inMore(target) && !moreOpen) {
         setMoreOpen(true);
         requestAnimationFrame(() => land(problemEl(target)));
@@ -489,7 +516,7 @@ function Launch() {
   const clearedRef = useRef(false);
   function clearFields() {
     writeDraft(null);
-    setName(""); setTicker(""); setLore(""); setWebsite(""); setXUrl(""); setDevBuy(""); setFeeSplit(EMPTY_FEE_SPLIT); setAnnounce(false);
+    setName(""); setTicker(""); setLore(""); setWebsite(""); setXUrl(""); setDevBuy(""); setFeeSplit(EMPTY_FEE_SPLIT); setAnnounce(false); setCreatorFees(EMPTY_CREATOR_FEES);
     setPreview(null); setPreparedArt(null); setTickerNote("");
     setTouched({}); setShowErrors(false);
   }
@@ -579,11 +606,12 @@ function Launch() {
   // read it), and a string of those fields for change checks.
   const liveDraft = useMemo(
     () => ready && preparedArt && liveDev !== null ? { name: name.trim(), symbol: ticker, description: lore.trim(), website: website.trim(), xUrl: xUrl.trim(), cardTemplate: designKey, quoteAssetKey: quoteKey, quoteMint: quoteAsset.mint, initialBuyQuoteBaseUnits: liveDev, artwork: preparedArt,
-      feeShares: feesActive ? feeCheck.shares : null, announceOnX: xOpen && announce } : null,
+      feeShares: feesActive ? feeCheck.shares : null, announceOnX: xOpen && announce,
+      holderReward: holdersActive, creatorFeeBps: rateCheck.bps } : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [ready, preparedArt, liveDev, name, ticker, lore, website, xUrl, designKey, quoteKey, quoteAsset.mint, feesActive, JSON.stringify(feeCheck.shares), xOpen, announce],
+    [ready, preparedArt, liveDev, name, ticker, lore, website, xUrl, designKey, quoteKey, quoteAsset.mint, feesActive, JSON.stringify(feeCheck.shares), xOpen, announce, holdersActive, rateCheck.bps],
   );
-  const draftKey = [name.trim(), ticker, lore.trim(), website.trim(), xUrl.trim(), designKey, quoteKey, liveDev ?? "", preparedArt?.size ?? 0, feesActive ? JSON.stringify(feeCheck.shares) : "", xOpen && announce ? "x" : ""].join("|");
+  const draftKey = [name.trim(), ticker, lore.trim(), website.trim(), xUrl.trim(), designKey, quoteKey, liveDev ?? "", preparedArt?.size ?? 0, feesActive ? JSON.stringify(feeCheck.shares) : "", xOpen && announce ? "x" : "", holdersActive ? "holders" : "", rateCheck.bps ?? ""].join("|");
   const liveBuyText = live && liveDev && liveDev !== "0" ? `${devBuy.trim()} ${quoteAsset.symbol}` : null;
 
   // ------------------------------------------------ the header's one line: the draft, or a saved launch to finish
@@ -766,7 +794,7 @@ function Launch() {
             <summary>
               <Icon name="chevron-right" size={16} className="cdx-launch-more__chev" />
               <span className="cdx-launch-more__title">More options</span>
-              <span className="cdx-launch-more__sub">{["Links, initial buy", feesOpen ? "creator fees" : "", xOpen ? "announcement" : ""].filter(Boolean).join(", ")}</span>
+              <span className="cdx-launch-more__sub">{["Links, initial buy", feesOpen || offer.holders || offer.rateMax !== null ? "creator fees" : "", xOpen ? "announcement" : ""].filter(Boolean).join(", ")}</span>
             </summary>
             <div className="cdx-launch-more__body">
               <div className="cdx-launch-links">
@@ -849,7 +877,14 @@ function Launch() {
               ) : null}
               {/* Share creator fees: off by default; set after the card by its own approval (CARDDEX_LIVE_FEE_SHARING). A
                   saved launch shows the split it was saved with, locked. */}
-              {feesOpen || liveLocked && feeSplit.on ? <FeeSplitFields value={feeSplit} onChange={setFeeSplit} connected={connectedWallet} disabled={locked} showErrors={showErrors} /> : null}
+              {/* Creator fees: who gets them (holder rewards while pump.fun allows them) and a custom rate on custom pairs,
+                  with the split under "Creator keeps fees". Without either option, the split shows on its own as before. */}
+              {(() => {
+                const split = feesOpen || liveLocked && feeSplit.on ? <FeeSplitFields value={feeSplit} onChange={setFeeSplit} connected={connectedWallet} disabled={locked} showErrors={showErrors} /> : null;
+                return holdersShown || rateMax !== null || rateNote
+                  ? <CreatorFeesFields value={creatorFees} onChange={setCreatorFees} holders={holdersShown} holdersOffered={holdersOffered} holdersNote={holdersNote} rateMax={rateMax} rateNote={rateNote} rateError={creatorFees.rate.trim() || showErrors ? rateCheck.error : null} disabled={locked} split={split} />
+                  : split;
+              })()}
               {/* Announce on @launchacard: off by default; one post after the card (CARDDEX_X_AUTOPOST). A saved launch
                   shows its choice, locked. */}
               {xOpen || liveLocked && announce ? <XAnnounceField checked={announce} onChange={setAnnounce} disabled={locked} /> : null}

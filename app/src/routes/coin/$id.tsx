@@ -14,6 +14,7 @@ import {
   type PublicLiveLaunch,
 } from "../../lib/carddex/live/launches";
 import { getPairAsset } from "../../lib/carddex/pairs";
+import { feeRateLine, HOLDERS_LINE, HOLDERS_WHO_PAYS } from "../../components/carddex/live/creator-fees";
 import { clip, pageHead, sentences, shareArt } from "../../lib/mintdex/seo";
 
 /*
@@ -112,6 +113,19 @@ function CoinView() {
               <dt>Card design</dt>
               <dd>{design.name}</dd>
             </div>
+            {/* Chosen at launch and permanent: shown only when the coin is not a regular one. */}
+            {coin.holderReward ? (
+              <div>
+                <dt>Creator fees</dt>
+                <dd>{HOLDERS_LINE}</dd>
+              </div>
+            ) : null}
+            {coin.creatorFeeBps ? (
+              <div>
+                <dt>Creator fee rate</dt>
+                <dd className="num">{feeRateLine(coin.creatorFeeBps)}</dd>
+              </div>
+            ) : null}
             {coin.creator ? (
               <div>
                 <dt>Creator</dt>
@@ -143,6 +157,12 @@ function CoinView() {
               </div>
             ) : null}
           </dl>
+          {/* Buyers read this row: who pays, the minimum, and that nothing is guaranteed, right under it. */}
+          {coin.holderReward ? (
+            <p className="cdx-coin-launched__note">
+              Holder rewards: {HOLDERS_WHO_PAYS} <TextLink to="/legal" search={{ tab: "fees" }}>Fee details</TextLink>
+            </p>
+          ) : null}
           <div className="cdx-coin-launched__actions">
             <External href={pumpFunCoinUrl(coin.tokenMint)} primary label={`Trade ${coin.name} on pump.fun`}>
               Trade on pump.fun

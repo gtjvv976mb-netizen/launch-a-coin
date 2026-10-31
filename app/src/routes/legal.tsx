@@ -146,6 +146,22 @@ const SECTIONS: Section[] = [
                   </td>
                 </tr>
                 <tr>
+                  <th scope="row">Holder rewards (optional, chosen at launch)</th>
+                  <td>
+                    No extra cost. Your coin's creator fees go to its holders instead of you, permanently; pump.fun decides
+                    and sends those payouts, net of its costs, only to wallets holding at least pump.fun's minimum (about
+                    US$20 worth today), and does not guarantee them. Launch a Card never holds or sends them.
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">Custom creator fee rate (optional, custom pairs)</th>
+                  <td>
+                    No extra cost to set. It replaces pump.fun's standard creator fee on every trade of your coin's bonding
+                    curve, up to 3%, fixed for the coin's life. Every buyer and seller pays this rate instead of the standard
+                    one, so a higher rate costs traders more.
+                  </td>
+                </tr>
+                <tr>
                   <th scope="row">pump.fun creation and trading fees</th>
                   <td>
                     Set and charged by pump.fun.

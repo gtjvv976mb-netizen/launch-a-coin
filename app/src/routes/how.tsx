@@ -134,6 +134,15 @@ const SECTIONS: Section[] = [
           in your split.
         </li>
         <li>
+          "Holders get the fees", when Launch offers it, makes your coin a pump.fun holder rewards coin: its creator fees
+          go to holders instead of you, for good, and it can't also share fees. pump.fun alone sends those payouts, from
+          time to time and net of its costs, to wallets above its minimum; they are not guaranteed. It adds no cost.
+        </li>
+        <li>
+          On custom pairs you may set your coin's own creator fee rate instead of pump.fun's standard one. It is fixed for
+          the coin's life and every trader pays it.
+        </li>
+        <li>
           Every fee in one table: <TextLink to="/legal" search={{ tab: "fees" }}>Fees</TextLink>.
         </li>
       </ul>

@@ -120,7 +120,7 @@ function Launches({ address }: { address: string }) {
                     to="/coin/$id"
                     params={{ id: l.tokenMint }}
                     className="block"
-                    aria-label={`${l.name}, $${l.ticker}, ${pair.symbol} pair, ${getCardDesign(l.designKey).name} design`}
+                    aria-label={`${l.name}, $${l.ticker}, ${pair.symbol} pair, ${getCardDesign(l.designKey).name} design${l.holderReward ? ", Holder rewards" : ""}`}
                   >
                     <MintCard card={items[i].card} priority={i < 4} sizes="(max-width: 1023px) 44vw, 220px" />
                     <GridCaption

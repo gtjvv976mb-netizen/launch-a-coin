@@ -9,6 +9,8 @@ import {
 import {
   PUMP_FEES_PROGRAM, feeShareInstructionsProblem, sameFeeSplit, type FeeRecipient, type FeeShareExpected,
 } from "../../../../../integrations/pumpfun/src/fee-share-rules";
+// The coin's create options (holder rewards, a custom creator fee rate): the flag bytes create_v2 must carry.
+import { createV2FlagTail } from "../../../../../integrations/pumpfun/src/create-options";
 
 const ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const TOKEN_2022 = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
@@ -116,6 +118,8 @@ export type ExpectedPlan = {
   tokenMetadataUri: string; nftMetadataUri: string; cardTemplate: string; cardImageSha256: string; nftMetadataSha256: string;
   bindingSha256: string; quoteKey: string; quoteMint: string; quoteTokenProgram: string; quoteDecimals: number;
   initialBuyQuoteBaseUnits: string; launchInitialBuyQuoteBaseUnits: string;
+  /** The create options saved with this launch: holder rewards, and a custom creator fee rate. Absent for neither. */
+  holderReward?: boolean; creatorFeeBps?: number;
 };
 function dataReader(data: Uint8Array) {
   let offset = 0;
@@ -144,7 +148,7 @@ function validateOperations(wire: Wire, expected: ExpectedPlan, plan: Transactio
     const pump = wire.instructions.filter(i => i.program === LIVE_PROGRAMS.pump);
     if (pump.length !== (BigInt(expected.initialBuyQuoteBaseUnits) > 0n ? 2 : 1)) throw new Error("The token transaction has unexpected Pump operations.");
     const create = pump[0], r = dataReader(create.data);
-    if (hex(r.take(8)) !== "d6904cec5f8b31b4" || r.text() !== expected.name || r.text() !== expected.symbol || r.text() !== expected.tokenMetadataUri || base58(r.take(32)) !== expected.creator || r.take(11).some(Boolean) || !r.done()) throw new Error("The token creation arguments do not match your launch.");
+    if (hex(r.take(8)) !== "d6904cec5f8b31b4" || r.text() !== expected.name || r.text() !== expected.symbol || r.text() !== expected.tokenMetadataUri || base58(r.take(32)) !== expected.creator || !sameBytes(r.take(11), createV2FlagTail({ ...(expected.holderReward ? { holderReward: true } : {}), ...(expected.creatorFeeBps ? { creatorFeeBps: expected.creatorFeeBps } : {}) })) || !r.done()) throw new Error("The token creation arguments do not match your launch.");
     if (create.accounts.length !== (expected.quoteKey === "sol" ? 16 : 20) || create.accounts[0] !== expected.tokenMint || create.accounts[5] !== expected.creator || expected.quoteKey !== "sol" && (create.accounts[16] !== expected.quoteMint || create.accounts[18] !== expected.quoteTokenProgram)) throw new Error("The token creation accounts do not match your mint, creator or quote.");
     if (pump[1]) {
       const buy = pump[1];

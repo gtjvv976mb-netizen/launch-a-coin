@@ -5,13 +5,14 @@ import { createHash } from "node:crypto";
 import { ComputeBudgetProgram, Keypair, PublicKey, SystemProgram, TransactionInstruction, TransactionMessage, VersionedTransaction, type AccountInfo } from "@solana/web3.js";
 import { AccountLayout, AccountState, AccountType, ExtensionType, MintLayout, TOKEN_2022_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { pack } from "@solana/spl-token-metadata";
-import { bondingCurvePda, creatorVaultPda, feeSharingConfigPda, GLOBAL_PDA, PUMP_FEE_CONFIG_PDA, PUMP_FEE_PROGRAM_ID, PUMP_PROGRAM_ID, PUMP_SDK, QUOTE_CONTROL_PDA, newBondingCurve } from "@pump-fun/pump-sdk";
+import { bondingCurvePda, creatorVaultPda, feeSharingConfigPda, GLOBAL_PDA, holderRewardsPda, PUMP_FEE_CONFIG_PDA, PUMP_FEE_PROGRAM_ID, PUMP_PROGRAM_ID, PUMP_SDK, QUOTE_CONTROL_PDA, newBondingCurve } from "@pump-fun/pump-sdk";
 import { getCreateV2InstructionDataSerializer, getUpdateV1InstructionDataSerializer, getPluginHeaderV1AccountDataSerializer, getPluginSerializer, Key, PluginType } from "@metaplex-foundation/mpl-core";
 import { getAssetV1AccountDataSerializer as rawAssetSerializer } from "@metaplex-foundation/mpl-core/dist/src/generated/types/assetV1AccountData.js";
 import { getPluginRegistryV1AccountDataSerializer as rawRegistrySerializer } from "@metaplex-foundation/mpl-core/dist/src/generated/types/pluginRegistryV1AccountData.js";
 import { publicKey as umiKey } from "@metaplex-foundation/umi";
 import { MAINNET_GENESIS_HASH, PAIR_ASSETS } from "../src/index.ts";
 import { RENT_EXEMPT_MINIMUM_LAMPORTS, RPC_TIMEOUT_MS, TransactionFailedOnChain, resendSignedWalletTransaction, rpcFetchWithTimeout } from "../src/live.ts";
+import { assertCreateFlags, readCreateOptionsGlobal } from "../src/live.ts";
 import { MAX_FEE_RECIPIENTS, checkFeeRecipientAccounts, measureFeeShareTransaction, prepareFeeShareTransaction, readFeeSplit, verifyFeeShareLanded, verifyFeeSharePlan, type FeeSharePlan } from "../src/live.ts";
 import { CORE_PROGRAM_ID, PACKET_LIMIT, PUMP_LOOKUP_TABLE, REFRESHED_BLOCKHASH_MARGIN, WALLET_SIZE_TARGET, pinnedLookupTable, SignedTransactionNotSent, assertNftMintReplaceable, broadcastSignedWalletTransaction, checkSignedWalletTransaction, assertTokenMintReplaceable, creatorNftInstructions, describeWalletChange, measureTokenTransaction, prepareCreatorNftAheadOfCoin, prepareCreatorNftTransaction, prepareTokenTransaction, recoverCreatorLaunch, sendSignedWalletTransaction, transactionBytes, validateSignedWalletTransaction, verifyCreatorNft, verifyTokenLaunch, type LiveConnection, type LiveLaunchInput, type WalletTransactionPlan } from "../src/live.ts";
 import fixture from "./fixtures/mainnet-pair-accounts-2026-10-28.json";
@@ -1182,5 +1183,173 @@ describe("the creator fee split after the card (one signer, mock RPC only)", () 
     expect(view.staticKeys).toContain(PUMP_FEE_PROGRAM_ID.toBase58());
     // Every pinned entry still matches the table fixture (a table only grows; its entries never change).
     expect(pinnedLookupTable(accountFromFixture(tableFixture.value))).not.toBeNull();
+  });
+});
+
+describe("create options: holder rewards and a custom creator fee rate (mock RPC only)", () => {
+  const pumpCoder = () => (PUMP_SDK as any).offlinePumpProgram.coder.accounts;
+  const regular = (): LiveLaunchInput => ({ ...defaultInput(), quoteKey: "sol",
+    card: { ...defaultInput().card, designKey: "obsidian-archive", frontSha256: art["obsidian-archive"].front.sha256, backSha256: art["obsidian-archive"].back.sha256 } });
+  const custom = (): LiveLaunchInput => ({ ...regular(), quoteKey: "pengu" });
+  async function setGlobal(rpc: ReturnType<typeof mockRpc>, change: Record<string, unknown>) {
+    // Global is over the 1,000 bytes Anchor's encode() allocates: its layout is used directly, into the account's length.
+    const before = rpc.accounts.get(GLOBAL_PDA.toBase58())!, global = PUMP_SDK.decodeGlobal(before);
+    const coder = pumpCoder(), layout = coder.accountLayouts.get("global") ?? coder.accountLayouts.get("Global");
+    const body = Buffer.alloc(4096), length = layout.layout.encode({ ...global, ...change }, body);
+    const data = Buffer.alloc(before.data.length); before.data.copy(data, 0, 0, 8); body.copy(data, 8, 0, length);
+    rpc.accounts.set(GLOBAL_PDA.toBase58(), info(PUMP_PROGRAM_ID, data));
+  }
+  async function setCurve(rpc: ReturnType<typeof mockRpc>, input: LiveLaunchInput, change: Record<string, unknown>) {
+    const key = bondingCurvePda(new PublicKey(input.mint)).toBase58();
+    rpc.accounts.set(key, info(PUMP_PROGRAM_ID, await pumpCoder().encode("bondingCurve", { ...PUMP_SDK.decodeBondingCurve(rpc.accounts.get(key)!), ...change })));
+  }
+  const createData = (plan: WalletTransactionPlan) => {
+    const tx = VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64"));
+    const create = tx.message.compiledInstructions.find((ix) => tx.message.staticAccountKeys[ix.programIdIndex].equals(PUMP_PROGRAM_ID))!;
+    return Buffer.from(create.data);
+  };
+  const expectedWith = (input: LiveLaunchInput, plan: WalletTransactionPlan, options: { holderReward?: boolean; creatorFeeBps?: number }) => ({ ...expectedPlan(input, plan), ...options });
+
+  test("a regular coin's binding, plan bytes and Core binding attribute are exactly as before the options existed", async () => {
+    const input = regular(), rpc = mockRpc();
+    const plan = await prepareTokenTransaction(input, { connection: rpc.connection });
+    // The binding as fa24f40 built it, field for field: no option keys.
+    const legacy = { network: "solana-mainnet-beta", creatorWallet: input.creator, tokenMint: input.mint, tokenName: input.name, tokenSymbol: input.symbol,
+      tokenMetadataUri: input.tokenMetadataUri, quoteKey: "sol", quoteMint: PAIR_ASSETS.find((asset) => asset.key === "sol")!.mint, card: input.card, nftName: input.name,
+      renderedCardSha256: input.renderedCardSha256, nftMetadataSha256: input.nftMetadataSha256, initialBuyQuoteBaseUnits: "0", slippageBps: 100 };
+    expect(plan.bindingSha256).toBe(createHash("sha256").update(JSON.stringify(legacy)).digest("hex"));
+    for (const extra of [{ holderReward: false }, { creatorFeeBps: 0 }, { holderReward: false, creatorFeeBps: 0 }]) {
+      const again = await prepareTokenTransaction({ ...input, ...extra }, { connection: mockRpc().connection });
+      expect(again.transactionBase64).toBe(plan.transactionBase64); expect(again.bindingSha256).toBe(plan.bindingSha256);
+    }
+    expect(createData(plan).subarray(-11).every((byte) => byte === 0)).toBe(true);
+    expect(creatorNftInstructions(input)[0].data).toEqual(creatorNftInstructions({ ...input, holderReward: false, creatorFeeBps: 0 })[0].data);
+  });
+
+  test("builders send exactly the chosen flag bytes; the browser accepts them only for the saved choice", async () => {
+    const cases: [LiveLaunchInput, { holderReward?: boolean; creatorFeeBps?: number }, string][] = [
+      [regular(), {}, "0000000000000000000000"],
+      [{ ...regular(), holderReward: true }, { holderReward: true }, "0000000000000000000001"],
+      [{ ...custom(), creatorFeeBps: 300 }, { creatorFeeBps: 300 }, "00002c0100000000000000"],
+      [{ ...custom(), holderReward: true, creatorFeeBps: 1 }, { holderReward: true, creatorFeeBps: 1 }, "0000010000000000000001"],
+    ];
+    const bindings = new Set<string>();
+    for (const [input, options, tail] of cases) {
+      const plan = await prepareTokenTransaction(input, { connection: mockRpc().connection });
+      bindings.add(plan.bindingSha256);
+      expect(createData(plan).subarray(-11).toString("hex")).toBe(tail);
+      expect(validateLivePlan(plan, expectedWith(input, plan, options)).signers).toEqual([input.creator, input.mint]);
+      // Any other choice is refused: the flags flipped, another rate, or none at all.
+      const wrongs: { holderReward?: boolean; creatorFeeBps?: number }[] = [{}, { holderReward: !options.holderReward }, { ...options, creatorFeeBps: (options.creatorFeeBps ?? 0) + 1 }];
+      for (const wrong of wrongs) {
+        if (!!wrong.holderReward === !!options.holderReward && (wrong.creatorFeeBps ?? 0) === (options.creatorFeeBps ?? 0)) continue;
+        expect(() => validateLivePlan(plan, { ...expectedPlan(input, plan), ...wrong })).toThrow("token creation arguments");
+      }
+      // The size never changes: the 11 flag bytes are always sent.
+      expect(plan.review.transactionBytes).toBe((await prepareTokenTransaction({ ...input, holderReward: false, creatorFeeBps: 0 }, { connection: mockRpc().connection })).review.transactionBytes);
+    }
+    expect(bindings.size).toBe(cases.length);
+    const sized = await measureTokenTransaction({ creator: regular().creator, name: "A", symbol: "B", tokenMetadataUri: regular().tokenMetadataUri, quoteKey: "pengu", holderReward: true, creatorFeeBps: 300 }, { connection: mockRpc().connection });
+    const plain = await measureTokenTransaction({ creator: regular().creator, name: "A", symbol: "B", tokenMetadataUri: regular().tokenMetadataUri, quoteKey: "pengu" }, { connection: mockRpc().connection });
+    expect(sized).toEqual(plain);
+  });
+
+  test("a tampered flag byte is refused by the browser even when the plan's hash is recomputed, and by the server's own check", async () => {
+    const input = { ...regular(), holderReward: true }, plan = await prepareTokenTransaction(input, { connection: mockRpc().connection });
+    const bytes = Buffer.from(plan.transactionBase64, "base64"), data = createData(plan);
+    const at = bytes.indexOf(data) + data.length - 1;
+    expect(bytes[at]).toBe(1);
+    for (const [offset, value] of [[at, 0], [at - 9, 1], [at - 10, 1]] as const) {
+      const tampered = Buffer.from(bytes); tampered[offset] = value;
+      const message = tampered.subarray(1 + 64 * 2);
+      const forged = { ...plan, transactionBase64: tampered.toString("base64"), messageSha256: createHash("sha256").update(message).digest("hex") };
+      expect(() => validateLivePlan(forged, expectedWith(input, plan, { holderReward: true }))).toThrow("token creation arguments");
+    }
+    expect(() => assertCreateFlags(data, {})).toThrow("create options differ");
+    expect(() => assertCreateFlags(data, { holderReward: true, creatorFeeBps: 1 })).toThrow("create options differ");
+    expect(() => assertCreateFlags(data, { holderReward: true })).not.toThrow();
+  });
+
+  test("prepare refuses what pump.fun ignores or no longer allows, in plain words", async () => {
+    await expect(prepareTokenTransaction({ ...regular(), creatorFeeBps: 100 }, { connection: mockRpc().connection })).rejects.toThrow("only stored for custom pairs");
+    await expect(prepareTokenTransaction({ ...regular(), quoteKey: "usdc", creatorFeeBps: 100 }, { connection: mockRpc().connection })).rejects.toThrow("only stored for custom pairs");
+    await expect(prepareTokenTransaction({ ...custom(), creatorFeeBps: 301 }, { connection: mockRpc().connection })).rejects.toThrow("0.01% to 3.00%");
+    await expect(prepareTokenTransaction({ ...regular(), holderReward: "yes" as never }, { connection: mockRpc().connection })).rejects.toThrow("who receives");
+    let rpc = mockRpc(); await setGlobal(rpc, { isHolderRewardEnabled: false });
+    await expect(prepareTokenTransaction({ ...regular(), holderReward: true }, { connection: rpc.connection })).rejects.toThrow("holder rewards switched off");
+    // A regular coin is unaffected by the switch.
+    expect((await prepareTokenTransaction(regular(), { connection: rpc.connection })).kind).toBe("token");
+    rpc = mockRpc(); await setGlobal(rpc, { creatorFeeConfigurable: false });
+    await expect(prepareTokenTransaction({ ...custom(), creatorFeeBps: 100 }, { connection: rpc.connection })).rejects.toThrow("doesn't accept custom creator fee rates");
+    rpc = mockRpc(); await setGlobal(rpc, { maxConfigurableCreatorFeeBps: typeof PUMP_SDK.decodeGlobal(rpc.accounts.get(GLOBAL_PDA.toBase58())!).maxConfigurableCreatorFeeBps === "number" ? 100 : new BN(100) });
+    await expect(prepareTokenTransaction({ ...custom(), creatorFeeBps: 101 }, { connection: rpc.connection })).rejects.toThrow("0.01% to 1.00%");
+    expect((await prepareTokenTransaction({ ...custom(), creatorFeeBps: 100 }, { connection: rpc.connection })).kind).toBe("token");
+    expect(await readCreateOptionsGlobal({ connection: rpc.connection })).toEqual({ holderRewards: true, creatorFeeConfigurable: true, maxCreatorFeeBps: 100 });
+  });
+
+  test("the first-buy estimate pays the coin's own creator fee rate", async () => {
+    const standard: LiveLaunchInput = { ...custom(), initialBuyQuoteBaseUnits: "1000000" }, rpc = mockRpc();
+    rpc.addQuoteBalance(standard, 10_000_000n);
+    const plain = await prepareTokenTransaction(standard, { connection: rpc.connection });
+    const dear = await prepareTokenTransaction({ ...standard, creatorFeeBps: 300 }, { connection: rpc.connection });
+    expect(BigInt(dear.review.minimumTokensOut)).toBeLessThan(BigInt(plain.review.minimumTokensOut));
+    const holders = await prepareTokenTransaction({ ...standard, holderReward: true }, { connection: rpc.connection });
+    expect(holders.review.minimumTokensOut).toBe(plain.review.minimumTokensOut);
+    expect(validateLivePlan(dear, expectedWith({ ...standard, creatorFeeBps: 300 }, dear, { creatorFeeBps: 300 })).signers).toHaveLength(2);
+  });
+
+  test("finalized: holderRewardsPda is the creator only for a holder-rewards launch, and the rate must be the chosen one", async () => {
+    const input: LiveLaunchInput = { ...regular(), holderReward: true }, rpc = mockRpc(), mint = new PublicKey(input.mint);
+    const plan = await prepareTokenTransaction(input, { connection: rpc.connection });
+    rpc.remember(plan, tokenSignature); await rpc.addToken(input);
+    const verify = (launch: LiveLaunchInput) => verifyTokenLaunch(launch, { connection: rpc.connection, signature: tokenSignature, expectedMessageSha256: plan.messageSha256 });
+    // The curve as pump.fun makes it for a holder-rewards coin.
+    await expect(verify(input)).rejects.toThrow("differs from the creator");
+    await setCurve(rpc, input, { isHolderReward: true, creator: holderRewardsPda(mint) });
+    expect(await verify(input)).toMatchObject({ status: "verified" });
+    expect((await recoverCreatorLaunch(input, { connection: rpc.connection, tokenSignature, tokenMessageSha256: plan.messageSha256 })).status).toBe("token-created-nft-pending");
+    const card = await prepareCreatorNftTransaction(input, { connection: rpc.connection, tokenSignature, tokenMessageSha256: plan.messageSha256 });
+    if (card.status !== "wallet-signature-required") throw new Error("Expected a card plan");
+    expect(validateLivePlan(card, expectedWith(input, card, { holderReward: true })).signers).toEqual([input.creator, input.nftMint]);
+    // A holder flag with any other creator, a regular launch's record of this coin, mayhem, or a rate never chosen.
+    await setCurve(rpc, input, { isHolderReward: true, creator: new PublicKey(input.creator) });
+    await expect(verify(input)).rejects.toThrow("differs from the creator");
+    await setCurve(rpc, input, { isHolderReward: false, creator: holderRewardsPda(mint) });
+    await expect(verify(input)).rejects.toThrow("differs from the creator");
+    await setCurve(rpc, input, { isHolderReward: true, creator: holderRewardsPda(mint), isMayhemMode: true });
+    await expect(verify(input)).rejects.toThrow("differs from the creator");
+    await setCurve(rpc, input, { isMayhemMode: false, creatorFeeBps: new BN(30) });
+    await expect(verify(input)).rejects.toThrow("differs from the creator");
+    // A regular launch never accepts a holder-rewards curve (its create would not even match: holder flag 0).
+    const plain = regular(), plainRpc = mockRpc(), plainPlan = await prepareTokenTransaction(plain, { connection: plainRpc.connection });
+    plainRpc.remember(plainPlan, tokenSignature); await plainRpc.addToken(plain);
+    const verifyPlain = () => verifyTokenLaunch(plain, { connection: plainRpc.connection, signature: tokenSignature, expectedMessageSha256: plainPlan.messageSha256 });
+    expect(await verifyPlain()).toMatchObject({ status: "verified" });
+    await setCurve(plainRpc, plain, { isHolderReward: true, creator: holderRewardsPda(new PublicKey(plain.mint)) });
+    await expect(verifyPlain()).rejects.toThrow("differs from the creator");
+    await setCurve(plainRpc, plain, { isHolderReward: false, creator: new PublicKey(plain.creator), creatorFeeBps: new BN(100) });
+    await expect(verifyPlain()).rejects.toThrow("differs from the creator");
+    // The saved launch without its holder choice is another launch: its create instruction does not match.
+    await expect(verifyTokenLaunch(regular(), { connection: rpc.connection, signature: tokenSignature, expectedMessageSha256: plan.messageSha256 })).rejects.toThrow("exact creator/token/quote/metadata");
+  });
+
+  test("a custom rate verifies only at the chosen rate", async () => {
+    const input: LiveLaunchInput = { ...custom(), creatorFeeBps: 150 }, rpc = mockRpc();
+    const plan = await prepareTokenTransaction(input, { connection: rpc.connection });
+    rpc.remember(plan, tokenSignature); await rpc.addToken(input);
+    const verify = () => verifyTokenLaunch(input, { connection: rpc.connection, signature: tokenSignature, expectedMessageSha256: plan.messageSha256 });
+    await expect(verify()).rejects.toThrow("differs from the creator");
+    await setCurve(rpc, input, { creatorFeeBps: new BN(150) });
+    expect(await verify()).toMatchObject({ status: "verified" });
+    await setCurve(rpc, input, { creatorFeeBps: new BN(149) });
+    await expect(verify()).rejects.toThrow("differs from the creator");
+  });
+
+  test("a holder-rewards coin can never get a creator fee split", async () => {
+    const input: LiveLaunchInput = { ...regular(), holderReward: true }, rpc = mockRpc();
+    await rpc.addToken(input); await setCurve(rpc, input, { isHolderReward: true, creator: holderRewardsPda(new PublicKey(input.mint)) });
+    const recipients = [{ address: Keypair.fromSeed(new Uint8Array(32).fill(150)).publicKey.toBase58(), bps: 10_000 }];
+    await expect(prepareFeeShareTransaction(input, recipients, { connection: rpc.connection })).rejects.toThrow("can't also share them");
+    await expect(readFeeSplit(input, { connection: rpc.connection })).rejects.toThrow("can't also share them");
   });
 });

@@ -50,6 +50,9 @@ const feeShares = z.array(z.object({address: publicKey, bps: z.number().int().mi
 // Readiness is site-wide configuration, not per-user data, and /launch reads it during page SSR: revalidate it on every
 // use (no-cache) rather than no-store, which would also keep the /launch page out of the back/forward cache.
 export const getLiveLaunchReadiness = createServerFn({method: "GET"}).handler(() => { revalidate(); return liveReadiness(); });
+// What pump.fun's Global allows for the create options (holder rewards, a custom creator fee rate). Site-wide and cached
+// on the server for a minute; anything unknown reads as off, so the form offers only what prepare will accept.
+export const getLiveCreateOptions = createServerFn({method: "GET"}).handler(async () => { revalidate(); return service.liveCreateOptions(); });
 export const getLiveWallet = createServerFn({method: "GET"}).handler(() => { noStore(); return liveReadiness().recoveryReady ? liveWalletFromToken(getCookie(LIVE_SESSION_COOKIE)) : null; });
 export const createLiveWalletChallenge = createServerFn({method: "POST"}).validator(z.object({wallet: publicKey})).handler(({data}) => attempt("challenge", async () => {
   await sameOrigin(); return createWalletChallenge(data.wallet, clientAddress());
@@ -78,6 +81,7 @@ export const prepareLiveLaunch = createServerFn({method: "POST"}).validator(z.ob
   initialBuyQuoteBaseUnits: z.string().regex(/^(0|[1-9][0-9]{0,19})$/), slippageBps: z.number().int().min(0).max(1000),
   assets: z.object({artwork: asset, cardImage: asset, caseImage: asset}), termsAcknowledged: z.literal(true), withCard: z.boolean().optional(),
   feeShares: feeShares.optional(), announceOnX: z.boolean().optional(),
+  holderReward: z.boolean().optional(), creatorFeeBps: z.number().int().min(0).max(10_000).optional(),
 })).handler(({data}) => attempt("prepare", async () => { await sameOrigin(); await perAddress(LIMITS.prepareIp); return service.prepareLiveLaunch(await signedIn(LIMITS.prepareWallet), data); }));
 // A pre-ground coin address ending in "card" for the signed-in creator's next new launch (vanity.server.ts), or null:
 // not configured, an empty pool, no session, another site, a limit or any error. The page then uses a random address,

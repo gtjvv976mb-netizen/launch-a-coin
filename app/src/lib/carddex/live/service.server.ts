@@ -1,6 +1,7 @@
 import * as sdk from "../../../../../integrations/pumpfun/src/live";
 import type { FeeSharePlan, LiveLaunchInput, WalletTransactionPlan } from "../../../../../integrations/pumpfun/src/live";
 import { feeRecipientsProblem, sameFeeSplit } from "../../../../../integrations/pumpfun/src/fee-share-rules";
+import { HOLDER_REWARDS_NO_SPLIT, createOptionsProblem, readCreateOptions, type CreateOptions } from "../../../../../integrations/pumpfun/src/create-options";
 import { isWalletAddress } from "../../../components/carddex/live/transaction";
 import reviewedDesigns from "../../../../../integrations/pumpfun/src/design-assets.json";
 import { getCardDesign } from "../designs";
@@ -16,7 +17,7 @@ import { FEE_SHARING_OFF, liveReadiness, requireFeeSharing, requireLiveConfig } 
 import { normalizeLiveFields, normalizeLiveIdentity, requireNewLaunchPair } from "./validation.server";
 import { cardMintClaim } from "./vanity.server";
 import { keepXOptin, queueXAnnouncement, xAnnounceFor, xOptinStatement } from "./x-announce.server";
-import { LIVE_PACKET_LIMIT, type LiveApprovedCard, type LiveAssets, type LiveChainCheck, type LiveFeeRecipient, type LiveFeeShare, type LiveFeeShareStatus, type LiveLaunchIntent, type LivePrepareRequest, type LiveStage } from "./types";
+import { LIVE_PACKET_LIMIT, type LiveCreateOptions, type LiveApprovedCard, type LiveAssets, type LiveChainCheck, type LiveFeeRecipient, type LiveFeeShare, type LiveFeeShareStatus, type LiveLaunchIntent, type LivePrepareRequest, type LiveStage } from "./types";
 
 type Payload = {input: Omit<LiveLaunchInput, "nftMint">; assets: LiveAssets; fields: ReturnType<typeof normalizeLiveFields>};
 type IntentRow = {id: string; creator_wallet: string; token_mint: string; nft_mint: string; quote_key: string; quote_mint: string; design_key: string; payload_sha256: string; payload_json: string; binding_sha256: string; token_metadata_uri: string; nft_metadata_uri: string; status: LiveStage; token_signature: string | null; nft_signature: string | null; token_receipt_json: string | null; nft_receipt_json: string | null; created_at: number; updated_at: number};
@@ -38,7 +39,10 @@ function publicIntent(row: IntentRow): LiveLaunchIntent {
     bindingSha256: row.binding_sha256, initialBuyQuoteBaseUnits: payload.input.initialBuyQuoteBaseUnits ?? "0",
     nftMetadataSha256: payload.input.nftMetadataSha256!,
     tokenMetadataUri: row.token_metadata_uri, nftMetadataUri: row.nft_metadata_uri, assets: payload.assets,
-    tokenSignature: row.token_signature, nftSignature: row.nft_signature, createdAt: row.created_at, updatedAt: row.updated_at};
+    tokenSignature: row.token_signature, nftSignature: row.nft_signature, createdAt: row.created_at, updatedAt: row.updated_at,
+    // The create options saved with the launch, only when chosen (a regular coin reads exactly as before).
+    ...(payload.input?.holderReward === true ? {holderReward: true as const} : {}),
+    ...(typeof payload.input?.creatorFeeBps === "number" && payload.input.creatorFeeBps > 0 ? {creatorFeeBps: payload.input.creatorFeeBps} : {})};
 }
 /** A launch transaction that landed and failed on Solana: nothing it would have created exists. */
 export class LaunchFailedOnChain extends UserError {
@@ -180,7 +184,7 @@ async function sourceAssets(wallet: string, designKey: string) {
   };
   return {front: await load(design.front), back: await load(design.back)};
 }
-async function preparePayload(wallet: string, raw: LivePrepareRequest): Promise<Payload> {
+async function preparePayload(wallet: string, raw: LivePrepareRequest, createOptions: CreateOptions = {}): Promise<Payload> {
   const fields = normalizeLiveFields(raw);
   walletBytes(wallet); walletBytes(raw.nftMint);
   if (new Set([wallet, fields.tokenMint, raw.nftMint, fields.quoteMint]).size !== 4) throw new UserError("Creator, new token mint, creator NFT and quote mint must be distinct addresses.");
@@ -219,8 +223,49 @@ async function preparePayload(wallet: string, raw: LivePrepareRequest): Promise<
     initialBuyQuoteBaseUnits: raw.initialBuyQuoteBaseUnits, slippageBps: raw.slippageBps,
     renderedCardSha256: raw.assets.cardImage.sha256, nftMetadataSha256: nftMetadata.sha256,
     card: {designKey: fields.cardTemplate, frontUri: sources.front.url, backUri: sources.back.url,
-      frontSha256: sources.front.sha256, backSha256: sources.back.sha256, nftMetadataUri: nftMetadata.url}}};
+      frontSha256: sources.front.sha256, backSha256: sources.back.sha256, nftMetadataUri: nftMetadata.url},
+    // Last, and only when chosen: the coin's create options (they change its create_v2 bytes and its binding).
+    ...createOptions}};
 }
+/**
+ * The create options a launch request carries (create-options.ts), checked against its pair, or {} for a regular coin.
+ * A holder-rewards coin can never also share its creator fees (pump-fees refuses: its creator is pump.fun's holder
+ * rewards account), so a request with both is refused before anything is made.
+ */
+function requestedCreateOptions(raw: LivePrepareRequest, fields: {quoteAssetKey: string}, feeShares: readonly LiveFeeRecipient[] | null): CreateOptions {
+  let options: CreateOptions;
+  try { options = readCreateOptions(raw); } catch (error) { throw new UserError(error instanceof Error ? error.message : "Choose who receives the creator fees."); }
+  const problem = createOptionsProblem(options, {admission: isPairAssetKey(fields.quoteAssetKey) ? getPairAsset(fields.quoteAssetKey).admission : ""});
+  if (problem) throw new UserError(problem);
+  if (options.holderReward && feeShares) throw new UserError(HOLDER_REWARDS_NO_SPLIT);
+  return options;
+}
+/** The options as the launch request hash adds them: nothing for a regular coin, so saved launches keep their hash. */
+const hashedOptions = (options: CreateOptions) => ({...(options.holderReward ? {holderReward: true} : {}), ...(options.creatorFeeBps ? {creatorFeeBps: options.creatorFeeBps} : {})});
+const OPTIONS_TTL_MS = 60_000;
+let optionsCache: {at: number; value: LiveCreateOptions} | null = null;
+const OPTIONS_OFF: LiveCreateOptions = {holderRewards: false, creatorFeeRate: null};
+/**
+ * What pump.fun allows for the create options right now, for Launch's form: one read of pump.fun's Global, kept for a
+ * minute per Worker isolate. Off (nothing offered) while launches are off or when Global can't be read. Prepare reads
+ * Global again and refuses an option it no longer allows.
+ */
+export async function liveCreateOptions(now = Date.now()): Promise<LiveCreateOptions> {
+  if (!liveReadiness().ready) return OPTIONS_OFF;
+  if (optionsCache && now - optionsCache.at < OPTIONS_TTL_MS) return optionsCache.value;
+  try {
+    const global = await sdk.readCreateOptionsGlobal({connection: connection()});
+    const value: LiveCreateOptions = {holderRewards: global.holderRewards,
+      creatorFeeRate: global.creatorFeeConfigurable && global.maxCreatorFeeBps > 0 ? {maxBps: Math.min(300, global.maxCreatorFeeBps)} : null};
+    optionsCache = {at: now, value};
+    return value;
+  } catch (error) {
+    logLaunchEvent("create_options_unavailable", {reason: error instanceof Error ? error.message : "unknown"});
+    return OPTIONS_OFF;
+  }
+}
+/** Test hook: forget the cached Global answer. */
+export function resetLiveCreateOptions() { optionsCache = null; }
 /**
  * Exact coin-transaction size for this creator, name, symbol and quote, before any artwork or metadata is uploaded.
  * `limit` is the wallet size target (Solana's packet limit less room for wallet assertions). `buyBlocked` is set when
@@ -277,7 +322,9 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareRequest)
   const feesOpen = liveReadiness().feeSharing === true;
   // "Announce my coin on @launchacard": saved beside the launch while announcements are on (ignored while off).
   const announce = raw.announceOnX === true && liveReadiness().xAnnounce === true;
-  const requestedHash = await sha256(JSON.stringify({creator: wallet, fields, assets: raw.assets, initialBuyQuoteBaseUnits: raw.initialBuyQuoteBaseUnits, slippageBps: raw.slippageBps}));
+  // Holder rewards and a custom creator fee rate: part of the launch's identity (they change its create bytes).
+  const createOptions = requestedCreateOptions(raw, fields, feeShares);
+  const requestedHash = await sha256(JSON.stringify({creator: wallet, fields, assets: raw.assets, initialBuyQuoteBaseUnits: raw.initialBuyQuoteBaseUnits, slippageBps: raw.slippageBps, ...hashedOptions(createOptions)}));
   const found = await one<IntentRow>("SELECT * FROM live_launch_intents WHERE token_mint = ? OR (creator_wallet = ? AND idempotency_key = ?)", fields.tokenMint, wallet, raw.idempotencyKey);
   if (found) {
     if (found.creator_wallet !== wallet || found.payload_sha256 !== requestedHash) throw new UserError("This mint or request identifier is already bound to different launch details.");
@@ -309,7 +356,13 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareRequest)
   // A recipient that is a program or holds data is refused now, while nothing is uploaded (the live read is repeated
   // when the split is prepared).
   if (feeShares) await chain(() => sdk.checkFeeRecipientAccounts(feeShares, {connection: connection()}));
-  const payload = await preparePayload(wallet, raw);
+  // A chosen create option pump.fun no longer allows is refused now, before anything is uploaded (prepare checks again).
+  if (createOptions.holderReward || createOptions.creatorFeeBps) {
+    const global = await chain(() => sdk.readCreateOptionsGlobal({connection: connection()}));
+    const problem = createOptionsProblem(createOptions, {admission: getPairAsset(fields.quoteAssetKey).admission, global});
+    if (problem) throw new UserError(problem);
+  }
+  const payload = await preparePayload(wallet, raw, createOptions);
   // With withCard, the card plan is prepared alongside (prepareCardAhead) and saved in the same batch as the coin's.
   const [transaction, ahead] = await Promise.all([chain(() => sdk.prepareTokenTransaction({...payload.input, nftMint: raw.nftMint}, {connection: connection()})),
     raw.withCard ? prepareCardAhead({...payload.input, nftMint: raw.nftMint}) : null]);
@@ -754,6 +807,7 @@ async function withFeeShare(intent: LiveLaunchIntent): Promise<LiveLaunchIntent>
 }
 async function ownedFeeShare(wallet: string, intentId: string) {
   const row = await ownedIntent(wallet, intentId);
+  if ((JSON.parse(row.payload_json) as Payload).input?.holderReward === true) throw new UserError(HOLDER_REWARDS_NO_SPLIT);
   const fee = await one<FeeShareRow>("SELECT * FROM live_fee_shares WHERE intent_id = ?", row.id);
   if (!fee) throw new UserError("This launch has no creator fee split to set.");
   return {row, fee, recipients: JSON.parse(fee.recipients_json) as LiveFeeRecipient[]};

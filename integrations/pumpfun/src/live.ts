@@ -12,7 +12,7 @@ import {
   unpackAccount, unpackMint,
 } from "@solana/spl-token";
 import {
-  bondingCurvePda, creatorVaultPda, feeSharingConfigPda, GLOBAL_PDA, isSharingConfigEditable, PUMP_FEE_CONFIG_PDA, PUMP_FEE_PROGRAM_ID, PUMP_PROGRAM_ID,
+  bondingCurvePda, creatorVaultPda, feeSharingConfigPda, GLOBAL_PDA, holderRewardsPda, isSharingConfigEditable, PUMP_FEE_CONFIG_PDA, PUMP_FEE_PROGRAM_ID, PUMP_PROGRAM_ID,
   PUMP_SDK, QUOTE_CONTROL_PDA, getBuyV3TokenAmountFromQuoteAmount,
   newBondingCurve, type SharingConfig,
 } from "@pump-fun/pump-sdk";
@@ -27,7 +27,7 @@ import {
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { toWeb3JsInstruction } from "@metaplex-foundation/umi-web3js-adapters";
 import {
-  ALLOW_PERMANENT_DELEGATE_QUOTE_BUY, MAINNET_GENESIS_HASH, PAIR_ASSETS, PERMANENT_DELEGATE_BUY_REFUSAL, PUBLIC_MAINNET_RPC, hash, immutable,
+  ALLOW_PERMANENT_DELEGATE_QUOTE_BUY, bindingOptions, createOptionsGlobal, createV2Flags, MAINNET_GENESIS_HASH, PAIR_ASSETS, PERMANENT_DELEGATE_BUY_REFUSAL, PUBLIC_MAINNET_RPC, hash, immutable,
   preparePumpLaunchPlan, publicKey, quoteIssuerControls, reviewLaunchInput, reviewTokenFields, type PairKey, type PrepareLaunchInput,
 } from "./index.ts";
 import {
@@ -37,7 +37,9 @@ import {
 import {
   MAX_FEE_RECIPIENTS, feeRecipientsProblem, feeShareInstructionsProblem, sameFeeSplit, type FeeRecipient, type FeeShareExpected,
 } from "./fee-share-rules.ts";
+import { HOLDER_REWARDS_NO_SPLIT, createV2FlagTail, readCreateOptions, type CreateOptions } from "./create-options.ts";
 
+export { HOLDER_REWARDS_NO_SPLIT, createOptionsGlobal };
 export { LIGHTHOUSE_PROGRAM_ID, MAX_FEE_RECIPIENTS, PACKET_LIMIT, PUMP_LOOKUP_TABLE, WALLET_GUARD_RESERVE_BYTES, WALLET_SIZE_TARGET, type FeeRecipient };
 
 export const CORE_PROGRAM_ID = new PublicKey("CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d");
@@ -110,6 +112,8 @@ function identity(input: LiveLaunchInput) {
     card: reviewed.card, nftName, renderedCardSha256: input.renderedCardSha256!,
     nftMetadataSha256: input.nftMetadataSha256!,
     initialBuyQuoteBaseUnits: buy.toString(), slippageBps,
+    // Only a chosen option is added, so every binding made before these options hashes exactly as before.
+    ...bindingOptions(reviewed.options),
   };
   return { ...reviewed, nftMint, nftName, buy, slippageBps, binding, bindingSha256: hash(JSON.stringify(binding)) };
 }
@@ -328,8 +332,18 @@ export type AnyWalletPlan = WalletTransactionPlan | FeeSharePlan;
 
 type PumpGlobal = ReturnType<typeof PUMP_SDK.decodeGlobal>;
 type PumpQuoteControl = ReturnType<typeof PUMP_SDK.decodeQuoteControl>;
-function launchCurve(global: PumpGlobal, quoteControl: PumpQuoteControl, quoteMint: PublicKey, creator: PublicKey) {
-  return { ...newBondingCurve(global, quoteMint, quoteControl), creator, isMayhemMode: false };
+/**
+ * The curve create_v2 makes for this launch, for the first-buy estimate: its custom creator fee rate when one was chosen
+ * (the buy's fee follows it), and for holder rewards the coin's holderRewardsPda as creator, as the program sets it.
+ */
+function launchCurve(global: PumpGlobal, quoteControl: PumpQuoteControl, quoteMint: PublicKey, creator: PublicKey, mint: PublicKey, options: CreateOptions = {}) {
+  return { ...newBondingCurve(global, quoteMint, quoteControl, options.creatorFeeBps ? new BN(options.creatorFeeBps) : undefined, options.holderReward === true),
+    creator: options.holderReward ? holderRewardsPda(mint) : creator, isMayhemMode: false };
+}
+/** Throws unless a create_v2 instruction's data ends with exactly the flag bytes these options make (create-options.ts). */
+export function assertCreateFlags(data: Uint8Array, options: CreateOptions) {
+  const tail = data.subarray(data.length - 11), expected = createV2FlagTail(options);
+  if (data.length < 11 || tail.some((byte, index) => byte !== expected[index])) throw new Error("The coin's create options differ from the ones chosen for this launch");
 }
 /** The initial buy as the wallet receives it: base ATA, the buyback ATA on token quotes, then buy_exact_quote_in_v3. */
 async function firstBuyInstructions(keys: { mint: PublicKey; creator: PublicKey; quoteMint: PublicKey; quoteTokenProgram: PublicKey },
@@ -375,6 +389,8 @@ export async function prepareTokenTransaction(input: LiveLaunchInput, options: L
   const id = identity(input), connection = options.connection;
   const validated = await preparePumpLaunchPlan(input, { connection, now: options.now });
   const instructions = [decodeInstruction(validated.createInstruction)];
+  // The server's own check of the create flags (the browser repeats it before the wallet opens): exactly the chosen ones.
+  assertCreateFlags(instructions[0].data, id.options);
   let minimumTokensOut = "0";
   if (id.buy > 0n && validated.quoteIssuerControls.permanentDelegate && !ALLOW_PERMANENT_DELEGATE_QUOTE_BUY) throw new Error(PERMANENT_DELEGATE_BUY_REFUSAL);
   if (id.buy > 0n) {
@@ -389,7 +405,7 @@ export async function prepareTokenTransaction(input: LiveLaunchInput, options: L
       const account = unpackAccount(quoteAta, quoteAccount, new PublicKey(id.asset.tokenProgram));
       if (!account.owner.equals(id.creator) || !account.mint.equals(id.quoteMint) || account.isFrozen || account.amount < id.buy) throw new Error(`Insufficient or frozen ${id.asset.symbol} quote balance`);
     }
-    const curve = launchCurve(global, quoteControl, id.quoteMint, id.creator);
+    const curve = launchCurve(global, quoteControl, id.quoteMint, id.creator, id.mint, id.options);
     const estimate = getBuyV3TokenAmountFromQuoteAmount({ global, feeConfig, mintSupply: global.tokenTotalSupply,
       bondingCurve: curve, amount: new BN(id.buy.toString()), curveBaseTokenBalance: global.tokenTotalSupply });
     if (estimate.lten(0)) throw new Error("The selected initial buy is too small to receive any token units");
@@ -403,7 +419,7 @@ export async function prepareTokenTransaction(input: LiveLaunchInput, options: L
 
 // Placeholders only change key and hash values, never the wire size: a mint signer and a blockhash are 32 bytes each.
 const SIZE_MINT = new PublicKey(new Uint8Array(32).fill(7)), SIZE_BLOCKHASH = new PublicKey(new Uint8Array(32).fill(8)).toBase58();
-export type TokenSizeInput = { creator: string; name: string; symbol: string; tokenMetadataUri: string; quoteKey: PairKey };
+export type TokenSizeInput = { creator: string; name: string; symbol: string; tokenMetadataUri: string; quoteKey: PairKey; holderReward?: boolean; creatorFeeBps?: number };
 /**
  * Exact wire size of the coin transaction prepareTokenTransaction builds, with and without an initial buy, from the
  * same builders, the real Pump accounts, the same lookup-table choice and a metadata URI of the final length. The buy
@@ -416,8 +432,10 @@ export async function measureTokenTransaction(input: TokenSizeInput, options: { 
   if (!asset) throw new Error("Choose a verified CardDex pair asset");
   const creator = publicKey(input.creator, "creator"), quoteMint = new PublicKey(asset.mint), quoteTokenProgram = new PublicKey(asset.tokenProgram);
   const tokenMetadataUri = reviewTokenFields(input);
+  // The options never change the size (create_v2 always carries all 11 flag bytes); built with them all the same.
+  const createOptions = readCreateOptions(input);
   const create = await PUMP_SDK.createV2Instruction({ mint: SIZE_MINT, user: creator, creator, name: input.name, symbol: input.symbol,
-    uri: tokenMetadataUri, quoteMint, quoteTokenProgram, mayhemMode: false, cashback: false, holderReward: false });
+    uri: tokenMetadataUri, quoteMint, quoteTokenProgram, ...createV2Flags(createOptions) });
   const snapshot = await options.connection.getMultipleAccountsInfoAndContext([GLOBAL_PDA, QUOTE_CONTROL_PDA, TABLE_ADDRESS, quoteMint], "confirmed");
   const [globalInfo, quoteControlInfo, tableInfo, quoteInfo] = snapshot.value;
   if (!globalInfo?.owner.equals(PUMP_PROGRAM_ID) || !quoteControlInfo?.owner.equals(PUMP_PROGRAM_ID)) throw new Error("Current Pump accounts are unavailable");
@@ -425,11 +443,23 @@ export async function measureTokenTransaction(input: TokenSizeInput, options: { 
   const global = PUMP_SDK.decodeGlobal(globalInfo), quoteControl = PUMP_SDK.decodeQuoteControl(quoteControlInfo);
   const issuerControls = quoteIssuerControls(unpackMint(quoteMint, quoteInfo, quoteTokenProgram));
   const buy = await withoutExistingSetup(options.connection, [create, ...await firstBuyInstructions({ mint: SIZE_MINT, creator, quoteMint, quoteTokenProgram },
-    global, launchCurve(global, quoteControl, quoteMint, creator), 1n, new BN(1), "1")]);
+    global, launchCurve(global, quoteControl, quoteMint, creator, SIZE_MINT, createOptions), 1n, new BN(1), "1")]);
   const table = pinnedLookupTable(tableInfo ?? null);
   const bytes = (instructions: TransactionInstruction[]) => transactionBytes(compileWalletTransaction(creator, SIZE_BLOCKHASH, 1_400_000, 1_000, instructions, table).message);
   return { limit: WALLET_SIZE_TARGET, packetLimit: PACKET_LIMIT, createBytes: bytes([create]), buyBytes: bytes(buy), lookupTable: !!table,
     buyBlocked: issuerControls.permanentDelegate && !ALLOW_PERMANENT_DELEGATE_QUOTE_BUY ? "issuer-controls" as const : null };
+}
+
+/**
+ * What pump.fun's Global allows for the create options right now (holder rewards; a custom creator fee rate and its
+ * maximum), from one read of Global. Read-only; prepare re-checks the same Global before building the coin.
+ */
+export async function readCreateOptionsGlobal(options: { connection: Pick<LiveConnection, "getAccountInfo"> }) {
+  const info = await options.connection.getAccountInfo(GLOBAL_PDA, "confirmed");
+  if (!info?.owner.equals(PUMP_PROGRAM_ID)) throw new Error("Current Pump accounts are unavailable");
+  const global = PUMP_SDK.decodeGlobal(info);
+  if (!global.createV2Enabled) return { holderRewards: false, creatorFeeConfigurable: false, maxCreatorFeeBps: 0 };
+  return createOptionsGlobal(global);
 }
 
 function coreAttributes(input: LiveLaunchInput) {
@@ -514,8 +544,8 @@ export async function verifyTokenLaunch(input: LiveLaunchInput, options: VerifyO
   const allowedPrograms = new Set([PUMP_PROGRAM_ID.toBase58(), ComputeBudgetProgram.programId.toBase58(), "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"]);
   if (details.instructions.some((ix) => !allowedPrograms.has(ix.programId.toBase58()))) throw new Error("Finalized token launch contains an unexpected outer program");
   const expectedCreate = await PUMP_SDK.createV2Instruction({ mint: id.mint, creator: id.creator, user: id.creator,
-    name: input.name, symbol: input.symbol, uri: input.tokenMetadataUri, mayhemMode: false, cashback: false,
-    holderReward: false, quoteMint: id.quoteMint, quoteTokenProgram: new PublicKey(id.asset.tokenProgram) });
+    name: input.name, symbol: input.symbol, uri: input.tokenMetadataUri, ...createV2Flags(id.options),
+    quoteMint: id.quoteMint, quoteTokenProgram: new PublicKey(id.asset.tokenProgram) });
   const matches = details.instructions.filter((ix) => matchesInstruction(ix, expectedCreate));
   const signers = details.message.staticAccountKeys.slice(0, details.message.header.numRequiredSignatures).map((key) => key.toBase58());
   if (matches.length !== 1 || details.keys.get(0)?.toBase58() !== input.creator || !signers.includes(input.creator) || !signers.includes(input.mint)) {
@@ -539,8 +569,14 @@ export async function verifyTokenLaunch(input: LiveLaunchInput, options: VerifyO
   // After the creator's fee split the curve's creator is the coin's sharing config, never anyone else's: accepted only
   // when that config exists, is pump-fees' own, is for this coin and keeps the creator as its admin (it stays the
   // admin after the split locks, verified by mainnet simulation).
-  const creatorOk = curve.creator.equals(id.creator) || curve.creator.equals(feeSharingConfigPda(id.mint)) && !!await creatorSharingConfig(connection, id, transaction.slot);
-  if (!mintState.isInitialized || mintState.decimals !== 6 || !creatorOk || !curve.quoteMint.equals(expectedStoredQuote) || curve.isMayhemMode || curve.isHolderReward) {
+  // A holder-rewards coin (chosen and saved with the launch): its creator is the coin's holderRewardsPda, set by pump.fun
+  // for good, and accepted only then. Every other coin must not be one.
+  const creatorOk = id.options.holderReward
+    ? curve.isHolderReward && curve.creator.equals(holderRewardsPda(id.mint))
+    : !curve.isHolderReward && (curve.creator.equals(id.creator) || curve.creator.equals(feeSharingConfigPda(id.mint)) && !!await creatorSharingConfig(connection, id, transaction.slot));
+  // The coin's own creator fee rate: the chosen one, or 0 (pump.fun's standard rate) when none was chosen.
+  const rateOk = (curve.creatorFeeBps ? BigInt(curve.creatorFeeBps.toString()) : 0n) === BigInt(id.options.creatorFeeBps ?? 0);
+  if (!mintState.isInitialized || mintState.decimals !== 6 || !creatorOk || !rateOk || !curve.quoteMint.equals(expectedStoredQuote) || curve.isMayhemMode) {
     throw new Error("Finalized token state differs from the creator and selected pair");
   }
   const metadata = await getTokenMetadata(connection as Connection, id.mint, "finalized", TOKEN_2022_PROGRAM_ID);
@@ -648,6 +684,7 @@ export function feeShareExpected(input: LiveLaunchInput, recipients: readonly Fe
  */
 export function reviewFeeRecipients(input: LiveLaunchInput, recipients: readonly FeeRecipient[]): FeeRecipient[] {
   const id = identity(input), keys = feeShareKeys(id);
+  if (id.options.holderReward) throw new Error(HOLDER_REWARDS_NO_SPLIT);
   const forbidden = [id.mint, id.nftMint, id.quoteMint, keys.bondingCurve, keys.sharingConfig, keys.sharingVault, PUMP_PROGRAM_ID, PUMP_FEE_PROGRAM_ID,
     TOKEN_2022_PROGRAM_ID, keys.quoteTokenProgram, ASSOCIATED_TOKEN_PROGRAM_ID, SYSTEM_PROGRAM_ID, CORE_PROGRAM_ID].map((key) => key.toBase58());
   const problem = feeRecipientsProblem(recipients, { forbidden, isWallet: (address) => { try { return PublicKey.isOnCurve(new PublicKey(address).toBytes()); } catch { return false; } } });
@@ -673,6 +710,7 @@ export async function checkFeeRecipientAccounts(recipients: readonly FeeRecipien
 }
 async function feeSplitSnapshot(input: LiveLaunchInput, connection: LiveConnection, commitment: "confirmed" | "finalized", minContextSlot?: number) {
   const id = identity(input), keys = feeShareKeys(id);
+  if (id.options.holderReward) throw new Error(HOLDER_REWARDS_NO_SPLIT);
   const snapshot = await connection.getMultipleAccountsInfoAndContext([keys.bondingCurve, keys.sharingConfig, id.creator], { commitment, ...(minContextSlot ? { minContextSlot } : {}) });
   const [curveInfo, configInfo, creatorInfo] = snapshot.value;
   if (!curveInfo?.owner.equals(PUMP_PROGRAM_ID)) throw new Error("This coin's pump.fun curve is unavailable");

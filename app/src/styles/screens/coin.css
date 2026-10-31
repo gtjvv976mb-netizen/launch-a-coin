@@ -289,6 +289,7 @@
 .cdx-coin-launched__list > div:first-child { border-top: 0; }
 .cdx-coin-launched__list dt { font-size: 14px; color: var(--color-slate); }
 .cdx-coin-launched__list dd { margin: 0; min-width: 0; font-size: 14px; color: var(--color-ink); text-align: right; overflow-wrap: anywhere; }
+.cdx-coin-launched__note { margin: 0; font-size: 14px; line-height: 1.5; color: var(--color-slate); text-wrap: pretty; }
 .cdx-coin-launched__pair { display: inline-flex; align-items: center; gap: 8px; }
 .cdx-coin-launched__actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .cdx-coin-launched__actions > a { gap: 8px; }

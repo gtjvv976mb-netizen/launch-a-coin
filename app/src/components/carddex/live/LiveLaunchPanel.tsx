@@ -36,6 +36,7 @@ import { requestCardMintSigner } from "./card-mint";
 import { ONE_APPROVAL_NEXT, ONE_APPROVAL_NEXT_FEES, PAIR_REVIEW_COPY, SEPARATE_APPROVALS_NEXT, SEPARATE_APPROVALS_NEXT_FEES, WALLET_NOTICE_COPY, WALLET_OPEN_COPY, WALLET_OPEN_PAIR_COPY, walletNoticePreview } from "./wallet-notice";
 import { OFFICIAL_X_HANDLE } from "../../../lib/carddex/official";
 import { X_ANNOUNCE_REVIEW, xAnnounceStatusText, xPostUrl } from "../../../lib/carddex/live/x-announce";
+import { createOptionsChanged, FEE_RATE_PERMANENT, feeRateLine, HOLDER_REWARDS_NO_SPLIT, HOLDERS_LINE, HOLDERS_PERMANENT, HOLDERS_WHO_PAYS } from "./creator-fees";
 
 export type LiveLaunchDraft = {
   name: string; symbol: string; description: string; website: string; xUrl: string;
@@ -45,6 +46,10 @@ export type LiveLaunchDraft = {
   feeShares: LiveFeeRecipient[] | null;
   /** "Announce my coin on @launchacard", ticked while announcements are on. */
   announceOnX?: boolean;
+  /** "Holders get the fees": pump.fun holder rewards, permanent. Never with feeShares. */
+  holderReward?: boolean;
+  /** A custom creator fee rate in basis points (custom pairs only), or null for pump.fun's standard rate. */
+  creatorFeeBps?: number | null;
 };
 export type LiveLaunchHandle = { submit(): void; startAnother(): void; /** The terms checkbox, while it shows. */ terms(): HTMLInputElement | null };
 /**
@@ -86,6 +91,8 @@ function unwrap<T extends object>(result: LiveResult<T>): T {
 }
 const brief = (value: string) => `${value.slice(0, 5)}…${value.slice(-5)}`;
 // The server's split differs from the one the creator chose in this tab: nothing is reviewed or signed.
+// The server's create options differ from the ones chosen in this tab: nothing is reviewed or signed.
+const OPTIONS_CHANGED = "The creator fee choice the server returned differs from the one you made, so nothing was prepared for your wallet. Check your saved launch before continuing.";
 const SPLIT_CHANGED = "The fee split the server returned differs from the wallets and shares you chose, so nothing was prepared for your wallet. Check your saved launch before continuing.";
 /**
  * A refusal that names one recipient (its first and last 4 characters, as fee-share-rules and the server write them)
@@ -216,6 +223,15 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
   const assertOwnSplit = (current: LiveLaunchIntent) => {
     const own = preparedInput.current?.tokenMint === current.tokenMint ? preparedInput.current.feeShares : undefined;
     if (own && current.feeShare && !sameFeeSplit(current.feeShare.recipients, own)) throw new Error(SPLIT_CHANGED);
+    assertOwnOptions(current);
+  };
+  /**
+   * The create options (holder rewards, a custom rate) the server names must be the ones the creator chose in this tab,
+   * for the same coin. Checked wherever a server intent becomes a coin plan's expectation (expectedFor), so an intent
+   * adopted on a refresh or a recovery can never carry flipped options to the wallet.
+   */
+  const assertOwnOptions = (current: LiveLaunchIntent) => {
+    if (createOptionsChanged(preparedInput.current, current)) throw new Error(OPTIONS_CHANGED);
   };
   const retain = (next: LiveLaunchIntent) => {
     // The server's saved approval is adopted; one held only here (its save failed) stays until the card no longer needs it.
@@ -345,6 +361,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
       const held = mainnetPairRefusal(draft.quoteAssetKey);
       if (held) throw new Error(held);
       // A creator fee split: wallets only (on the curve: never a program address), checked before anything is uploaded.
+      if (draft.holderReward && draft.feeShares) throw new Error(HOLDER_REWARDS_NO_SPLIT);
       if (draft.feeShares) {
         if (!feesOpen) throw new Error("Creator fee sharing is not open right now. Turn it off in More options to launch; you keep 100% of creator fees.");
         const problem = feeRecipientsProblem(draft.feeShares, { isWallet: isWalletAddress, forbidden: [draft.quoteMint] });
@@ -381,6 +398,8 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
         quoteAssetKey: draft.quoteAssetKey, quoteMint: draft.quoteMint, initialBuyQuoteBaseUnits: draft.initialBuyQuoteBaseUnits,
         slippageBps, assets, termsAcknowledged: true, ...(draft.feeShares ? { feeShares: draft.feeShares } : {}),
         ...(draft.announceOnX ? { announceOnX: true } : {}),
+        // Only when chosen, so a regular coin's request is exactly as before.
+        ...(draft.holderReward ? { holderReward: true } : {}), ...(draft.creatorFeeBps ? { creatorFeeBps: draft.creatorFeeBps } : {}),
       };
       preparedInput.current = input;
       // withCard: a wallet that approves the coin and its card in one prompt gets the card plan now too.
@@ -403,13 +422,15 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
     return { coin, card };
   }
   function expectedFor(current: LiveLaunchIntent, kind: "token" | "nft"): ExpectedPlan {
+    if (kind === "token") assertOwnOptions(current);
     const quote = getPairAsset(current.quoteAssetKey);
     return { kind, creator: current.creatorWallet, mint: kind === "token" ? current.tokenMint : current.nftMint,
       tokenMint: current.tokenMint, name: current.name, symbol: current.symbol, tokenMetadataUri: current.tokenMetadataUri,
       nftMetadataUri: current.nftMetadataUri, cardTemplate: current.cardTemplate, cardImageSha256: current.assets.cardImage.sha256,
       nftMetadataSha256: current.nftMetadataSha256, bindingSha256: current.bindingSha256, quoteKey: current.quoteAssetKey,
       quoteMint: current.quoteMint, quoteTokenProgram: quote.tokenProgram, quoteDecimals: quote.decimals,
-      initialBuyQuoteBaseUnits: kind === "token" ? current.initialBuyQuoteBaseUnits : "0", launchInitialBuyQuoteBaseUnits: current.initialBuyQuoteBaseUnits };
+      initialBuyQuoteBaseUnits: kind === "token" ? current.initialBuyQuoteBaseUnits : "0", launchInitialBuyQuoteBaseUnits: current.initialBuyQuoteBaseUnits,
+      ...(current.holderReward ? { holderReward: true } : {}), ...(current.creatorFeeBps ? { creatorFeeBps: current.creatorFeeBps } : {}) };
   }
   async function prepareNft() {
     const current = pendingIntent.current;
@@ -569,7 +590,8 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
     if (kind === "token" ? !input : !cardKey) throw new Error("This page no longer holds this launch's details. Resume the saved launch to recover safely.");
     setBusy("refreshing");
     const response = unwrap(await (kind === "token" ? prepareLiveLaunch({ data: input! }) : prepareLiveCreatorNft({ data: { intentId: current.id, nftMint: cardKey!.address } })));
-    assertCurrent(version, address); retain(response.intent);
+    // A changed choice is refused before the intent is adopted, so neither this tab's intent nor its plan ever holds it.
+    assertCurrent(version, address); if (kind === "token") assertOwnSplit(response.intent); retain(response.intent);
     if (!response.transaction) return null;
     const next = response.transaction as TransactionPlan;
     validateLivePlan(next, expectedFor(response.intent, kind));
@@ -581,7 +603,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
     if (!input) throw new Error("This page no longer holds this launch's details. Resume the saved launch to recover safely.");
     setBusy("refreshing");
     const response = unwrap(await prepareLiveLaunch({ data: { ...input, withCard: true } }));
-    assertCurrent(version, address); retain(response.intent);
+    assertCurrent(version, address); assertOwnSplit(response.intent); retain(response.intent);
     return acceptPrepared(response);
   }
   async function approveInWallet() {
@@ -807,6 +829,8 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
   const reviewFees = intent?.feeShare?.recipients ?? preparedInput.current?.feeShares ?? null;
   // The @launchacard announcement the review names: the saved launch's, or the one this tab asked for.
   const reviewAnnounce = !!intent?.xAnnounce || preparedInput.current?.announceOnX === true;
+  // The coin's creator fee model and rate the review names: the saved launch's (the server's, already checked against this tab's).
+  const reviewHolders = intent?.holderReward === true, reviewRate = intent?.creatorFeeBps;
   const recoveryItems = recoverable.filter(i => !settled(i));
   const savedListShown = canRecover && !intent && (canLaunch || recoveryItems.length > 0);
   const siteHost = readiness.data?.publicOrigin ? new URL(readiness.data.publicOrigin).host : undefined;
@@ -997,6 +1021,8 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
         <div><dt>Card design</dt><dd>{getCardDesign(intent.cardTemplate).name}</dd></div>
         {intent.xAnnounce ? <div><dt>Announcement on {OFFICIAL_X_HANDLE}</dt><dd>{intent.xAnnounce.status === "posted" && intent.xAnnounce.postId
           ? <TextLink href={xPostUrl(intent.xAnnounce.postId)} target="_blank">Posted<Icon name="external" size={12} /></TextLink> : xAnnounceStatusText(intent.xAnnounce)}</dd></div> : null}
+        {intent.holderReward ? <div><dt>Creator fees</dt><dd>{HOLDERS_LINE}</dd></div> : null}
+        {intent.creatorFeeBps ? <div><dt>Creator fee rate</dt><dd>{feeRateLine(intent.creatorFeeBps)}</dd></div> : null}
         {intent.feeShare ? <div><dt>Creator fee split</dt><dd><FeeSplitList recipients={intent.feeShare.status === "set_elsewhere" && intent.feeShare.onChain ? intent.feeShare.onChain : intent.feeShare.recipients} creator={intent.creatorWallet} /></dd></div> : null}
       </dl>
       {intent.feeShare && !["complete", "set_elsewhere", "skipped"].includes(intent.feeShare.status) ? <p className="cdx-live-meta">{FEE_SPLIT_PERMANENT} {FEE_SPLIT_FREE}</p> : null}
@@ -1062,6 +1088,11 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
           {plan.kind === "token" && reviewFees ? <><h3 className="cdx-live-subhead">Creator fee split, after your card</h3>
             <FeeSplitList recipients={reviewFees} creator={reviewIntent.creatorWallet} />
             <p>Set by its own approval once your coin and card are confirmed. {FEE_SPLIT_PERMANENT} {FEE_SPLIT_FREE}</p></> : null}
+          {/* The coin's creator fee model and rate: in its create bytes, so permanent from this approval. */}
+          {plan.kind === "token" && reviewHolders ? <><h3 className="cdx-live-subhead">Creator fees go to holders</h3>
+            <p><strong>{HOLDERS_PERMANENT}</strong> {HOLDERS_WHO_PAYS}</p></> : null}
+          {plan.kind === "token" && reviewRate ? <><h3 className="cdx-live-subhead">Creator fee rate: {feeRateLine(reviewRate)}</h3>
+            <p>{FEE_RATE_PERMANENT}{reviewHolders ? " It is the rate paid to holders." : ""}</p></> : null}
           {plan.kind === "token" && reviewAnnounce ? <><h3 className="cdx-live-subhead">Announcement on {OFFICIAL_X_HANDLE}</h3><p>{X_ANNOUNCE_REVIEW}</p></> : null}
           {plan.kind === "fees" ? <><h3 className="cdx-live-subhead">Who receives your coin's creator fees</h3>
             <FeeSplitList recipients={reviewFees ?? []} creator={reviewIntent.creatorWallet} />

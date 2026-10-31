@@ -44,7 +44,7 @@ export function publicLaunchFromRow(row: LaunchRow): PublicLiveLaunch | null {
   if (!SOLANA_ADDRESS.test(row.token_mint)) return null;
   let payload: {
     fields?: { name?: unknown; symbol?: unknown; description?: unknown; quoteAssetKey?: unknown; quoteMint?: unknown };
-    input?: { card?: { frontSha256?: unknown; backSha256?: unknown } };
+    input?: { card?: { frontSha256?: unknown; backSha256?: unknown }; holderReward?: unknown; creatorFeeBps?: unknown };
     assets?: { artwork?: { url?: unknown }; cardImage?: { url?: unknown } };
   };
   try {
@@ -71,6 +71,10 @@ export function publicLaunchFromRow(row: LaunchRow): PublicLiveLaunch | null {
     cardImage: assetPath(payload.assets?.cardImage?.url),
     creator: shortAddress(row.creator_wallet),
     createdAt: row.created_at,
+    // The coin's create options, only when its launch chose them (a regular coin's row is exactly as before).
+    ...(payload.input?.holderReward === true ? { holderReward: true as const } : {}),
+    ...(typeof payload.input?.creatorFeeBps === "number" && Number.isInteger(payload.input.creatorFeeBps) && payload.input.creatorFeeBps > 0
+      ? { creatorFeeBps: payload.input.creatorFeeBps } : {}),
   };
 }
 
