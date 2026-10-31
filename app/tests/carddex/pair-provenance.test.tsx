@@ -36,7 +36,7 @@ describe("pair catalogue provenance",()=>{
     }
   });
   test("staged descriptions are concise identity/material copy without production instructions",()=>{
-    expect(STAGED_PAIR_DESIGNS).toHaveLength(117);
+    expect(STAGED_PAIR_DESIGNS).toHaveLength(137);
     for(const design of STAGED_PAIR_DESIGNS){
       expect(design.description.length).toBeGreaterThan(15);
       expect(design.description.length).toBeLessThan(140);

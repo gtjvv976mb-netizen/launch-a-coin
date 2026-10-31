@@ -3,7 +3,7 @@ import {readFileSync,readdirSync} from "node:fs";
 import path from "node:path";
 import {CARD_DESIGNS} from "../../src/lib/carddex/designs";
 import {HELD_PAIR_DESIGNS} from "../../src/lib/carddex/pair-designs";
-import {PAIR_DESIGNS,PAIR_DESIGNS_2026_10_30} from "../../src/lib/carddex/design-pairings";
+import {PAIR_ALTERNATE_DESIGNS,PAIR_DESIGNS,PAIR_DESIGNS_2026_10_30} from "../../src/lib/carddex/design-pairings";
 
 /**
  * A held identity design's art stays in the repo but is never deployed (readiness audit, 30 October 2026): vite copies
@@ -22,7 +22,7 @@ describe("held designs are not deployed", () => {
     expect(lines.map(line => line.slice(0, -"[-.]*".length)).sort()).toEqual([...held].sort());
   });
   test("no design a release offers is held (coins keep their art for good)", () => {
-    const offered = new Set<string>([...Object.values(PAIR_DESIGNS), ...Object.values(PAIR_DESIGNS_2026_10_30)] as string[]);
+    const offered = new Set<string>([...Object.values(PAIR_DESIGNS), ...Object.values(PAIR_DESIGNS_2026_10_30), ...Object.values(PAIR_ALTERNATE_DESIGNS).flat()] as string[]);
     for (const design of held) expect(offered.has(design)).toBe(false);
   });
   test("each line covers only its own design's files: 13 each, and no file of another design", () => {

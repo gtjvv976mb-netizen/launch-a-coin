@@ -1753,5 +1753,305 @@
     ],
     "finish": "holo",
     "quoteMint": "XsaBXg8dU5cPM6ehmVctMkVqoiRG2ZjMo1cyBJ3AykQ"
+  },
+  {
+    "key": "pair-bonk-alt1",
+    "quoteKey": "bonk",
+    "name": "BONK Urushi",
+    "description": "BONK in glossy black and vermilion urushi lacquer with gold maki-e cherry blossoms and fine gold rims.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#060606",
+      "#F49B27",
+      "#ECE0CC"
+    ],
+    "finish": "holo",
+    "quoteMint": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"
+  },
+  {
+    "key": "pair-bonk-alt2",
+    "quoteKey": "bonk",
+    "name": "BONK Glacier",
+    "description": "BONK in frosted ice-blue crystal, polished silver and carved snowflake facets.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#75C0F6",
+      "#F49B27",
+      "#F0ECE4"
+    ],
+    "finish": "holo",
+    "quoteMint": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"
+  },
+  {
+    "key": "pair-wif-alt1",
+    "quoteKey": "wif",
+    "name": "dogwifhat Heraldry",
+    "description": "dogwifhat in deep navy velvet, polished gold laurels, small crowns and royal crest engraving.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#062562",
+      "#D9B6B1",
+      "#E9DCC5"
+    ],
+    "finish": "holo",
+    "quoteMint": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm"
+  },
+  {
+    "key": "pair-wif-alt2",
+    "quoteKey": "wif",
+    "name": "dogwifhat Comic Foil",
+    "description": "dogwifhat in holographic rainbow foil, bold black ink outlines, halftone dot patterns and pop-art bursts.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#8B014C",
+      "#D9B6B1",
+      "#ECDEC5"
+    ],
+    "finish": "holo",
+    "quoteMint": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm"
+  },
+  {
+    "key": "pair-pengu-alt1",
+    "quoteKey": "pengu",
+    "name": "Pudgy Penguins Polar Lights",
+    "description": "Pudgy Penguins in deep teal enamel, glowing aurora-green and violet glass ribbons, silver stars.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#004659",
+      "#7BC6E1",
+      "#EEE6DA"
+    ],
+    "finish": "holo",
+    "quoteMint": "2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv"
+  },
+  {
+    "key": "pair-pengu-alt2",
+    "quoteKey": "pengu",
+    "name": "Pudgy Penguins Tropic",
+    "description": "Pudgy Penguins in coral-pink and turquoise enamel, rose-gold palm leaves and pearl shells.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#36C3CB",
+      "#7BC6E1",
+      "#F0E4D2"
+    ],
+    "finish": "holo",
+    "quoteMint": "2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv"
+  },
+  {
+    "key": "pair-toad-alt1",
+    "quoteKey": "toad",
+    "name": "The Toad Pepe Lily Pond",
+    "description": "The Toad Pepe in emerald enamel, gold art-nouveau lily pads, water lilies and flowing water lines.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#113E26",
+      "#6FAD55",
+      "#EBE1C8"
+    ],
+    "finish": "holo",
+    "quoteMint": "A13oRB9FFaiUjfi6LdCg6p9ka1u8SfGkUFs4SKvPpump"
+  },
+  {
+    "key": "pair-toad-alt2",
+    "quoteKey": "toad",
+    "name": "The Toad Pepe Neon Arcade",
+    "description": "The Toad Pepe in dark smoked glass, lime and magenta neon tube outlines and polished chrome.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#2B024F",
+      "#6FAD55",
+      "#EDE5D4"
+    ],
+    "finish": "holo",
+    "quoteMint": "A13oRB9FFaiUjfi6LdCg6p9ka1u8SfGkUFs4SKvPpump"
+  },
+  {
+    "key": "pair-fartcoin-alt1",
+    "quoteKey": "fartcoin",
+    "name": "Fartcoin Steampunk",
+    "description": "Fartcoin in polished brass gears, copper pipes, riveted plates and green glass gauges.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#78572D",
+      "#B8C85B",
+      "#F0E9DA"
+    ],
+    "finish": "holo",
+    "quoteMint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump"
+  },
+  {
+    "key": "pair-fartcoin-alt2",
+    "quoteKey": "fartcoin",
+    "name": "Fartcoin Candy",
+    "description": "Fartcoin in glossy pastel pink and mint lacquer, pearl beads and sugar-sparkle details.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#B8E8C3",
+      "#B8C85B",
+      "#EFE8D8"
+    ],
+    "finish": "holo",
+    "quoteMint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump"
+  },
+  {
+    "key": "pair-doge-alt1",
+    "quoteKey": "doge",
+    "name": "Dogecoin Lapis",
+    "description": "Dogecoin in deep lapis lazuli and gold with lotus, scarab and sun-disc patterns.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#002887",
+      "#CDAF6D",
+      "#EDE1C8"
+    ],
+    "finish": "holo",
+    "quoteMint": "DoGEV7LASBkQbibMc5k5vKnTZoMg423GpJ5QtJEGfm7R"
+  },
+  {
+    "key": "pair-doge-alt2",
+    "quoteKey": "doge",
+    "name": "Dogecoin Moonshot",
+    "description": "Dogecoin in brushed white ceramic, polished chrome, orange enamel stripes and tiny rocket and moon details.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#010307",
+      "#CDAF6D",
+      "#EDE4D2"
+    ],
+    "finish": "holo",
+    "quoteMint": "DoGEV7LASBkQbibMc5k5vKnTZoMg423GpJ5QtJEGfm7R"
+  },
+  {
+    "key": "pair-pnut-alt1",
+    "quoteKey": "pnut",
+    "name": "Peanut Sapphire",
+    "description": "Peanut in navy enamel, polished silver filigree and small sapphire crowns.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#002A83",
+      "#B4773F",
+      "#ECE4D5"
+    ],
+    "finish": "holo",
+    "quoteMint": "2qEHjDLDLbuBgRYvsxhc5D6uDWAivNFZGan56P1tpump"
+  },
+  {
+    "key": "pair-pnut-alt2",
+    "quoteKey": "pnut",
+    "name": "Peanut Stained Glass",
+    "description": "Peanut in leaded stained glass in autumn amber, moss green and golden yellow with oak leaves and acorns.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#DA9C3D",
+      "#B4773F",
+      "#F0E9DA"
+    ],
+    "finish": "holo",
+    "quoteMint": "2qEHjDLDLbuBgRYvsxhc5D6uDWAivNFZGan56P1tpump"
+  },
+  {
+    "key": "pair-moodeng-alt1",
+    "quoteKey": "moodeng",
+    "name": "Moo Deng Temple Gold",
+    "description": "Moo Deng in gold leaf, red lacquer and glittering glass mosaic in Thai temple patterns.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#6B0103",
+      "#BCA8B5",
+      "#F0E9DA"
+    ],
+    "finish": "holo",
+    "quoteMint": "ED5nyyWEzpPPiWimP8vYm7sD7TD3LAt3Q3gRTWHzPJBY"
+  },
+  {
+    "key": "pair-moodeng-alt2",
+    "quoteKey": "moodeng",
+    "name": "Moo Deng Splash",
+    "description": "Moo Deng in pearlescent aqua and bubblegum-pink enamel, water ripples and polished chrome droplets.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#3DC5D8",
+      "#BCA8B5",
+      "#EDE6D6"
+    ],
+    "finish": "holo",
+    "quoteMint": "ED5nyyWEzpPPiWimP8vYm7sD7TD3LAt3Q3gRTWHzPJBY"
+  },
+  {
+    "key": "pair-michi-alt1",
+    "quoteKey": "michi",
+    "name": "michi Sakura",
+    "description": "michi in white porcelain, pink cherry-blossom enamel and fine gold lines.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#EFCACA",
+      "#C6BA99",
+      "#F3E6D8"
+    ],
+    "finish": "holo",
+    "quoteMint": "AywAYdNJnSLSXwKWYxDciPjqGRnwp4iZdQptuuQTpump"
+  },
+  {
+    "key": "pair-michi-alt2",
+    "quoteKey": "michi",
+    "name": "michi Moonlight",
+    "description": "michi in deep indigo velvet, silver crescent moons and small star jewels.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#0C1841",
+      "#C6BA99",
+      "#EEE6D6"
+    ],
+    "finish": "holo",
+    "quoteMint": "AywAYdNJnSLSXwKWYxDciPjqGRnwp4iZdQptuuQTpump"
+  },
+  {
+    "key": "pair-chillguy-alt1",
+    "quoteKey": "chillguy",
+    "name": "Chill Guy Vaporwave",
+    "description": "Chill Guy in lilac-to-peach gradient enamel, chrome palm trees and fine perspective grid lines.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#CA87D3",
+      "#91A5A4",
+      "#EDE4D6"
+    ],
+    "finish": "holo",
+    "quoteMint": "Df6yfrKC8kZE3KNkrHERKzAetSxbrWeniQfyJY4Jpump"
+  },
+  {
+    "key": "pair-chillguy-alt2",
+    "quoteKey": "chillguy",
+    "name": "Chill Guy Cabin",
+    "description": "Chill Guy in warm oak wood, red wool tartan and brass lantern details.",
+    "category": "memes",
+    "materialLevel": 14,
+    "palette": [
+      "#A66F32",
+      "#91A5A4",
+      "#F0E9DA"
+    ],
+    "finish": "holo",
+    "quoteMint": "Df6yfrKC8kZE3KNkrHERKzAetSxbrWeniQfyJY4Jpump"
   }
 ]

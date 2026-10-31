@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { CONFIRMED_DIRECT_PAIRS, DEFAULT_PAIR, DIRECT_PAIR_HELD, NOT_OFFERED_PAIR, OFFERED_PAIRS, TRADED_PAIRS, TRANSFER_FEE_PAIR, TRANSFER_FEE_PAIRS, chargesTransferFee, mainnetPairHold, mainnetPairRefusal, PAIR_ASSETS, PAIR_ASSETS_VERIFIED_AT, PAIR_ASSET_KEYS, UNPAIRED_DESIGN, allowedQuotesForDesign, completeLaunchPair, defaultQuoteForDesign, designForPair, designsForPair, getPairAsset, pairDesignProblems, solOnlyDesign, otherPairDesign, getTradingPair, isDirectPair, isOfferedPair, pairForDesign, resolveLaunchQuote, resolveNewLaunchPair } from "../../src/lib/carddex/pairs";
-import { DESIGN_QUOTE_KEYS, LEGACY_DESIGN_QUOTE_KEYS, MEME_PAIR_PRESETS, PAIR_DESIGNS, PAIR_DESIGNS_2026_10_30, PAIR_IDENTITY_DESIGNS, SOL_DESIGN_OPTIONS } from "../../src/lib/carddex/design-pairings";
+import { CONFIRMED_DIRECT_PAIRS, DEFAULT_PAIR, DIRECT_PAIR_HELD, NOT_OFFERED_PAIR, OFFERED_PAIRS, TRADED_PAIRS, TRANSFER_FEE_PAIR, TRANSFER_FEE_PAIRS, chargesTransferFee, mainnetPairHold, mainnetPairRefusal, PAIR_ASSETS, PAIR_ASSETS_VERIFIED_AT, PAIR_ASSET_KEYS, UNPAIRED_DESIGN, allowedQuotesForDesign, completeLaunchPair, defaultQuoteForDesign, designForPair, designsForPair, getPairAsset, pairDesignProblems, solOnlyDesign, otherPairDesign, anotherPairsDesign, getTradingPair, isDirectPair, isOfferedPair, pairForDesign, resolveLaunchQuote, resolveNewLaunchPair } from "../../src/lib/carddex/pairs";
+import { DESIGN_QUOTE_KEYS, LEGACY_DESIGN_QUOTE_KEYS, MEME_PAIR_PRESETS, PAIR_ALTERNATE_DESIGNS, PAIR_DESIGNS, PAIR_DESIGNS_2026_10_30, PAIR_IDENTITY_DESIGNS, SOL_DESIGN_OPTIONS } from "../../src/lib/carddex/design-pairings";
 import { HELD_PAIR_DESIGNS, WITHHELD_PAIR_DESIGNS } from "../../src/lib/carddex/pair-designs";
 import accepted from "./fixtures/launch-quote-acceptance-f603773.json";
 import { marketCapText, quoteAtoms } from "../../src/lib/carddex/quote-display";
@@ -15,6 +15,8 @@ import type { CoinSummary } from "../../src/lib/mintdex/types";
  * design production gave them.
  */
 const WITHHELD = ["aave", "uni"];
+/** The meme pairs with two alternate cards each (owner, 1 November 2026). */
+const ALT_PAIRS: string[] = ["bonk", "wif", "pengu", "toad", "fartcoin", "doge", "pnut", "moodeng", "michi", "chillguy"];
 const HELD_OUT = ["agency", "alon", "jeanphil", "claudia", "biketyson", "neet"];
 /** The owner released 14 holds on 31 October 2026 ("all should go live"): 67, HODL, SOLANGELES, TRUMP, GIGA, the six stocks, AMC, SV151 and FARTCOIN. */
 const HELD_LIVE: Record<string, string> = { ansem: "sovereign", spx: "celestial", vine: "magic-etched" };
@@ -125,7 +127,7 @@ describe("the pair picks the card", () => {
     expect(Object.values(PAIR_DESIGNS_2026_10_30).filter(design => !["one-piece", "duel-masters"].includes(design)).sort()).toEqual([...EARLIER_PAIRED].sort());
   });
   test("23 designs no pair offers leave new launches (gamestop, coinbase, strategy, doge, bonk, wif, amc, the six stock-* finishes, pair-usdc and 9 held); every other has one pair", () => {
-    expect(CARD_DESIGNS).toHaveLength(163);
+    expect(CARD_DESIGNS).toHaveLength(183);
     expect(LEGACY_CARD_DESIGNS).toHaveLength(48);
     expect(CARD_DESIGNS.filter(design => !pairForDesign(design.key)).map(design => design.key).sort()).toEqual([...UNPAIRED].sort());
     expect(UNPAIRED).toHaveLength(23);
@@ -135,11 +137,12 @@ describe("the pair picks the card", () => {
   });
   test("the bindings existing coins read agree with the map wherever a bound design still has a pair", () => {
     expect({...DESIGN_QUOTE_KEYS}).toMatchObject({...LEGACY_DESIGN_QUOTE_KEYS});
-    expect(Object.keys(DESIGN_QUOTE_KEYS)).toHaveLength(13 + 115);
+    expect(Object.keys(DESIGN_QUOTE_KEYS)).toHaveLength(13 + 135);
     for (const [design, quote] of Object.entries(DESIGN_QUOTE_KEYS)) {
       const pair = pairForDesign(design);
       if (pair) expect(pair.key).toBe(quote);
-      else expect([...Object.keys(LEGACY_DESIGN_QUOTE_KEYS), "pair-usdc", ...HELD_KEYS]).toContain(design);
+      // A retired meme alternate (taken off PAIR_ALTERNATE_DESIGNS) stays bound with no pair offering it.
+      else if (!/^pair-[a-z0-9]+-alt[1-9]$/.test(design)) expect([...Object.keys(LEGACY_DESIGN_QUOTE_KEYS), "pair-usdc", ...HELD_KEYS]).toContain(design);
     }
     expect(DESIGN_QUOTE_KEYS["pair-sol"]).toBe("sol");
     expect(DESIGN_QUOTE_KEYS["pair-usdc"]).toBe("usdc");
@@ -152,10 +155,16 @@ describe("the pair picks the card", () => {
       expect(resolveNewLaunchPair({cardTemplate: design})).toEqual({asset, designKey: design});
       // Any other pair's design with this pair is refused; so is the right design with another asset's mint.
       const other = OFFERED_PAIRS.find(o => o.key !== asset.key && o.key !== "sol")!;
-      expect(() => resolveNewLaunchPair({quoteAssetKey: asset.key, cardTemplate: designForPair(other.key)!})).toThrow(asset.key === "sol" ? otherPairDesign(other.symbol) : `The ${asset.symbol} pair comes with its own card`);
+      const many = designsForPair(asset.key).length > 1;
+      expect(() => resolveNewLaunchPair({quoteAssetKey: asset.key, cardTemplate: designForPair(other.key)!})).toThrow(asset.key === "sol" ? otherPairDesign(other.symbol) : many ? anotherPairsDesign(other.symbol, asset.symbol) : `The ${asset.symbol} pair comes with its own card`);
+      // Each of this pair's designs (its own card and any alternates) launches on it, alone or with the pair.
+      for (const each of designsForPair(asset.key)) {
+        expect(resolveNewLaunchPair({quoteAssetKey: asset.key, quoteMint: asset.mint, cardTemplate: each})).toEqual({asset, designKey: each});
+        expect(resolveNewLaunchPair({cardTemplate: each})).toEqual({asset, designKey: each});
+      }
       expect(() => resolveNewLaunchPair({quoteAssetKey: asset.key, quoteMint: other.mint})).toThrow("quote mint");
       // SOL's options go with SOL only.
-      if (asset.key !== "sol") for (const option of SOL_OPTIONS) expect(() => resolveNewLaunchPair({quoteAssetKey: asset.key, cardTemplate: option})).toThrow(solOnlyDesign(asset.symbol));
+      if (asset.key !== "sol") for (const option of SOL_OPTIONS) expect(() => resolveNewLaunchPair({quoteAssetKey: asset.key, cardTemplate: option})).toThrow(solOnlyDesign(asset.symbol, many));
     }
     expect(resolveNewLaunchPair({})).toEqual({asset: getPairAsset("sol"), designKey: "pair-sol"});
     expect(resolveNewLaunchPair({quoteAssetKey: "sol"})).toEqual({asset: getPairAsset("sol"), designKey: "pair-sol"});
@@ -396,26 +405,47 @@ describe("SOL's designs (owner, 31 October 2026)", () => {
       expect(pairForDesign(option)?.key).toBe("sol");
     }
   });
-  test("designsForPair: SOL's options, any other offered pair its one design, else none", () => {
+  test("designsForPair: SOL's options, a meme pair's own card then its alternates, any other offered pair its one design, else none", () => {
+    expect({...PAIR_ALTERNATE_DESIGNS}).toEqual(Object.fromEntries(ALT_PAIRS.map(pair => [pair, [`pair-${pair}-alt1`, `pair-${pair}-alt2`]])));
     for (const asset of OFFERED_PAIRS) {
       if (asset.key === "sol") continue;
-      expect(designsForPair(asset.key)).toEqual([designForPair(asset.key)!]);
+      expect(designsForPair(asset.key)).toEqual([designForPair(asset.key)!, ...(PAIR_ALTERNATE_DESIGNS[asset.key] ?? [])]);
       expect(Object.isFrozen(designsForPair(asset.key))).toBe(true);
     }
     for (const key of [...NOT_OFFERED, "unknown", "", null, undefined]) expect(designsForPair(key)).toEqual([]);
   });
-  test("the invariant: one design per pair but SOL, no design in two pairs, SOL's options its own", () => {
+  test("alternates: refused unless each is its own pair's installed, bound, unheld pair-<key>-alt<n> on an offered pair whose main is its own card", () => {
+    const maps = {pairDesigns: PAIR_DESIGNS, identities: PAIR_IDENTITY_DESIGNS, solOptions: SOL_DESIGN_OPTIONS, alternates: PAIR_ALTERNATE_DESIGNS, bindings: DESIGN_QUOTE_KEYS};
+    expect(pairDesignProblems(maps)).toEqual([]);
+    const bad = (alternates: Record<string, string[]>, extra: Partial<typeof maps> = {}) => pairDesignProblems({...maps, ...extra, alternates: alternates as never}).join("; ");
+    expect(bad({sol: ["pair-sol-alt1"]})).toContain("SOL's extra designs are SOL_DESIGN_OPTIONS");
+    expect(bad({bonk: ["pair-wif-alt1"]})).toContain("pair-wif-alt1: not a pair-bonk-alt<n> key");
+    expect(bad({bonk: ["pair-wif-alt1"]})).toContain("pair-wif-alt1: not bound to bonk");
+    expect(bad({bonk: ["pair-bonk-alt9"]})).toContain("pair-bonk-alt9: not an installed design");
+    expect(bad({bonk: ["pair-bonk-alt1", "pair-bonk-alt1"]})).toContain("bonk: alternates empty or repeated");
+    expect(bad({bonk: []})).toContain("bonk: alternates empty or repeated");
+    expect(bad({aave: ["pair-bonk-alt1"]})).toContain("aave: alternates on a pair that is not offered");
+    // ANSEM launches with a held card (sovereign): a pair whose main is not its own unheld identity can't list alternates.
+    expect(bad({ansem: ["pair-bonk-alt1"]})).toContain("ansem: alternates need the pair's own unheld identity card");
+    // The same alternate under two pairs, or also among SOL's options, is one design in two pairs.
+    expect(bad({...PAIR_ALTERNATE_DESIGNS, wif: ["pair-wif-alt1", "pair-bonk-alt1"]} as never)).toContain("a design belongs to two pairs");
+    expect(pairDesignProblems({...maps, solOptions: [...SOL_DESIGN_OPTIONS, "pair-bonk-alt1"] as never}).join("; ")).toContain("a design belongs to two pairs");
+  });
+  test("every card design has its own name (Discover and Designs list designs by name)", () => {
+    expect(new Set(CARD_DESIGNS.map(design => design.name)).size).toBe(CARD_DESIGNS.length);
+  });
+  test("the invariant: one design per pair but SOL and the alternate pairs, no design in two pairs, SOL's options its own", () => {
     expect(pairDesignProblems()).toEqual([]);
     const owner = new Map<string, string>();
     for (const asset of OFFERED_PAIRS) {
       const designs = designsForPair(asset.key);
-      expect(designs.length).toBe(asset.key === "sol" ? 32 : 1);
+      expect(designs.length).toBe(asset.key === "sol" ? 32 : ALT_PAIRS.includes(asset.key) ? 3 : 1);
       for (const design of designs) {
         expect(owner.has(design)).toBe(false);
         owner.set(design, asset.key);
       }
     }
-    expect(owner.size).toBe(108 + 32);
+    expect(owner.size).toBe(108 + 32 + 20);
     // No option is held, withheld, pair-usdc or bound to another quote for good.
     for (const option of SOL_OPTIONS) {
       expect(Object.hasOwn(HELD_PAIR_DESIGNS, option)).toBe(false);

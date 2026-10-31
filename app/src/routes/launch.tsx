@@ -56,7 +56,7 @@ export const Route = createFileRoute("/launch")({
       path: "/launch",
       title: "Launch a coin | Launch a Card",
       description: sentences(
-        `Pick your coin's pair and its card design comes with it, or one of SOL's ${designsForPair("sol").length} designs. Add your coin details and preview its one-of-one card`,
+        `Pick your coin's pair and its card comes with it; SOL and some meme pairs offer more. Add your coin details and preview its one-of-one card`,
         "Launch it on pump.fun from your Solana wallet",
       ),
     }),
@@ -81,7 +81,7 @@ const DRAFT_KEY = "carddex.launch.draft.v1";
 type LaunchDraft = {
   name: string; ticker: string; lore: string; website: string; xUrl: string; devBuy: string;
   designKey: string; quoteKey: string;
-  /** True when the creator picked the design (SOL's chooser or a ?design= link). Drafts written before SOL had a
+  /** True when the creator picked the design (a pair's chooser or a ?design= link). Drafts written before SOL had a
    * chooser always hold SOL's old card (one-piece) without this, so they reopen on SOL's main card instead. */
   designChosen?: boolean;
   /** "Share creator fees" as typed (on or off, and its rows); drafts written before it have none (off). */
@@ -188,8 +188,8 @@ function useSettledValue<T>(value: T, ms: number): T {
 /**
  * mintdex.fun's one-page Launch: the form panel (Name | Ticker, the pair HUD, SOL's design chooser, Card art |
  * Description, More options, then the ticket with the one primary at its foot) beside the live card. The pair picks
- * the card: choosing a pair shows its design on the live card. SOL alone offers a choice (its own card first, the
- * main one), in the chooser right under the pair HUD. No steps and no separate review; Enter
+ * the card: choosing a pair shows its design on the live card. SOL and the meme pairs with alternates offer a choice
+ * (their own card first, the main one), in the chooser right under the pair HUD. No steps and no separate review; Enter
  * never submits (it moves on to the next field that needs something, or to the primary).
  */
 function Launch() {
@@ -255,7 +255,10 @@ function Launch() {
   // chooser under the pair HUD (?quote=sol&design= opens on one). A saved launch keeps the design it was saved with
   // (one prepared before this rule may carry another); any pair or design tap ends that, the checked pair's included.
   const [quoteKey, setQuoteKey] = useState<PairAssetKey>(() => pairFromSearch(search).pair);
-  const [chosenDesign, setChosenDesign] = useState<string | null>(() => pairFromSearch(search).design);
+  // One pick per pair (SOL and the meme pairs with alternates each have a chooser): a pick on one pair never erases
+  // another's, so coming back to a pair brings back the card picked there.
+  const [chosenByPair, setChosenByPair] = useState<Partial<Record<string, string>>>(() => { const from = pairFromSearch(search); return from.design ? { [from.pair]: from.design } : {}; });
+  const chosenDesign = chosenByPair[quoteKey] ?? null;
   const [savedDesign, setSavedDesign] = useState<string | null>(null);
   // The pinned art version the saved launch recorded, when a redesign has since replaced it (design-versions.ts).
   const [savedVersion, setSavedVersion] = useState<string | null>(null);
@@ -286,7 +289,7 @@ function Launch() {
   useEffect(() => {
     const next = pairFromSearch(search);
     setQuoteKey(next.pair);
-    setChosenDesign(next.design);
+    setChosenByPair(next.design ? { [next.pair]: next.design } : {});
     setSavedDesign(null);
     setDevBuy("");
     setPairNotice(next.notice);
@@ -309,9 +312,9 @@ function Launch() {
     if (d) {
       setName(str(d.name).slice(0, 24)); setTicker(str(d.ticker).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8));
       setLore(str(d.lore).slice(0, 280)); setWebsite(str(d.website)); setXUrl(str(d.xUrl));
-      // The draft's pair comes back (its card follows), and for SOL the design picked in its chooser.
+      // The draft's pair comes back (its card follows), and the design picked in its chooser when it has one.
       const savedPair = draftPair(d);
-      if (!search.design && !search.quote && savedPair) { setQuoteKey(savedPair); setChosenDesign(draftDesign(d)); setDevBuy(str(d.devBuy)); }
+      if (!search.design && !search.quote && savedPair) { const kept = draftDesign(d); setQuoteKey(savedPair); setChosenByPair(kept ? { [savedPair]: kept } : {}); setDevBuy(str(d.devBuy)); }
       setFeeSplit(readFeeSplitDraft(d.feeSplit));
       setAnnounce(d.announceOnX === true);
       setCreatorFees(readCreatorFeesDraft(d.creatorFees));
@@ -585,13 +588,13 @@ function Launch() {
     if (pick.changed && devBuy) { setDevBuy(""); setPairNotice("Initial buy cleared."); }
     else setPairNotice("");
   };
-  /** A design pick in SOL's chooser: the preview shows it at once. It ends a saved launch's own design, as a pair tap does. */
+  /** A design pick in a pair's chooser (SOL's, or a meme pair's with alternates): the preview shows it at once. It ends a saved launch's own design, as a pair tap does. */
   const pickDesign = (next: string) => {
     if (liveLocked) return;
     const pick = nextDesign({ pair: quoteKey, chosen: chosenDesign, savedDesign }, next);
     if (!pick) return;
     setSavedDesign(pick.savedDesign);
-    setChosenDesign(pick.chosen);
+    setChosenByPair(prev => ({ ...prev, [quoteKey]: pick.chosen }));
   };
 
   // Recovery only: the fields wait for a saved launch to fill them, and stay locked once it does. They also hold
@@ -740,7 +743,7 @@ function Launch() {
           <div className="cdx-launch-f cdx-launch-f--pair">
             <PairHud value={quoteKey} onChange={pickPair} ticker={ticker} live disabled={locked} notice={pairNotice} />
           </div>
-          {/* SOL alone offers more than one design: its chooser sits right under the pair HUD (DesignChooser). */}
+          {/* SOL and the meme pairs with alternates offer more than one design: the chooser sits right under the pair HUD (DesignChooser). */}
           {designsForPair(quoteKey).length > 1 ? (
             <>
               {spacer}

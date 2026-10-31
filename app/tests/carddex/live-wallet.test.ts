@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { ed25519 } from "@noble/curves/ed25519.js";
 import { parseLiveAmount, formatLiveAmount } from "../../src/components/carddex/live/amounts";
-import { designForPair, getPairAsset, OFFERED_PAIRS, PAIR_ASSETS } from "../../src/lib/carddex/pairs";
+import { designForPair, designsForPair, getPairAsset, OFFERED_PAIRS, PAIR_ASSETS } from "../../src/lib/carddex/pairs";
 import { MEME_PAIR_PRESETS } from "../../src/lib/carddex/design-pairings";
 import { CARD_DESIGNS } from "../../src/lib/carddex/designs";
 import { base58, fromBase58, hexHash, LIVE_PROGRAMS, parseLiveTransaction, partiallySignPlan, toBase64, unsentStageNext, validateLivePlan, validateWalletResult, destroyEphemeralSigner, type ExpectedPlan, type TransactionPlan,
@@ -54,8 +54,10 @@ describe("creator-wallet transaction commitments", () => {
     // chooser combinations saved launches may carry, and a neutral design on every reviewed quote (AAVE and UNI
     // included: saved launches never re-check the offer).
     const held = Object.keys(HELD_PAIR_DESIGNS).map(key => [key, key.slice(5)] as const);
-    const pairs = [...Object.entries(stockPairs), ...MEME_PAIR_PRESETS.map(({design, quote}) => [design, quote] as const), ...OFFERED_PAIRS.map(asset => [designForPair(asset.key)!, asset.key] as const), ...held, ...PAIR_ASSETS.map(asset=>["pokemon-classic",asset.key] as const)];
-    expect(pairs).toHaveLength(10 + 31 + 109 + 9 + 117);
+    // The meme alternates (1 November 2026) on their own pairs too.
+    const alternates = OFFERED_PAIRS.flatMap(asset => asset.key === "sol" ? [] : designsForPair(asset.key).slice(1).map(design => [design, asset.key] as const));
+    const pairs = [...Object.entries(stockPairs), ...MEME_PAIR_PRESETS.map(({design, quote}) => [design, quote] as const), ...OFFERED_PAIRS.map(asset => [designForPair(asset.key)!, asset.key] as const), ...alternates, ...held, ...PAIR_ASSETS.map(asset=>["pokemon-classic",asset.key] as const)];
+    expect(pairs).toHaveLength(10 + 31 + 109 + 20 + 9 + 117);
     for (const [design, quoteKey] of pairs) {
       const token = fixture(design, quoteKey), nft = nftFixture(design, quoteKey);
       const wire=validateLivePlan(token.plan, token.expected);

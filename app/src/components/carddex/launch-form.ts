@@ -11,7 +11,7 @@ import { DEFAULT_PAIR, boundQuoteForDesign, designForPair, designsForPair, getPa
 /** Where an older ?design= link's pair came from before the identity designs: design -> pair (30 October 2026). */
 const EARLIER_DESIGN_PAIR = new Map<string, string>(Object.entries(PAIR_DESIGNS_2026_10_30).map(([pair, design]) => [design, pair]));
 
-/** A design the pair offers for a new launch (SOL: any of its options), else null. */
+/** A design the pair offers for a new launch (SOL: any of its options; a pair with alternates: its own card or one of them), else null. */
 export function pairOption(pair: string, design?: string | null): CardDesignKey | null {
   return design ? designsForPair(pair).find((key) => key === design) ?? null : null;
 }
@@ -31,8 +31,8 @@ export function pairFromSearch(search: { quote?: string; design?: string }): { p
     if (!isOfferedPair(search.quote)) return { pair: DEFAULT_PAIR, design: null, notice: `That pair is unavailable. ${sol} selected.` };
     const pair = search.quote as PairAssetKey;
     const design = pairOption(pair, search.design);
-    // A design another pair owns, sent with this pair, is dropped without a word: the pair wins. A design SOL does
-    // not offer, sent with SOL, says so (SOL is the one pair with a choice).
+    // A design another pair owns, sent with this pair, is dropped without a word: the pair wins. A design a pair with a
+    // choice (SOL, or a meme pair with alternates) does not offer, sent with that pair, says so.
     const refused = !design && !!search.design && designsForPair(pair).length > 1;
     return { pair, design: designsForPair(pair).length > 1 ? design : null, notice: refused ? `That card is unavailable. ${getPairAsset(pair).symbol} selected.` : "" };
   }
@@ -64,7 +64,7 @@ export function formDesign(pair: string, savedDesign: string | null, live: boole
 }
 
 /**
- * A tap on a design in SOL's chooser: the form's next chosen design, or null when nothing changes (a design the pair
+ * A tap on a design in a pair's chooser (SOL's, or a meme pair's with alternates): the form's next chosen design, or null when nothing changes (a design the pair
  * does not offer, or the one already shown). It ends a saved launch's own design, as a pair tap does.
  */
 export function pickDesign(
@@ -97,7 +97,7 @@ export function draftPair(draft: { quoteKey?: unknown } | null | undefined): Pai
 
 /**
  * A draft's chosen design: kept when the creator picked it (designChosen) and its pair still offers it as a choice
- * (SOL's options), else null (the main card). Drafts from before SOL's chooser carry SOL's old card (one-piece) without
+ * (SOL's options, or a meme pair's own card and alternates), else null (the main card). Drafts from before SOL's chooser carry SOL's old card (one-piece) without
  * designChosen; they reopen on SOL's main card, since nobody picked One Piece.
  */
 export function draftDesign(draft: { quoteKey?: unknown; designKey?: unknown; designChosen?: unknown } | null | undefined): CardDesignKey | null {

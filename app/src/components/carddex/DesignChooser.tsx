@@ -7,12 +7,13 @@ import { gridStep } from "./pair-groups";
 /** A layout effect in the browser (measured before paint), a plain one on the server (where neither runs). */
 const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-/** A design's small card-front picture (tools/carddex/make_design_thumbs.py writes one for each of SOL's options). */
+/** A design's small card-front picture (tools/carddex/make_design_thumbs.py writes one for each design a chooser shows). */
 export const designThumb = (key: string) => `/assets/carddex/thumbs/${key}-front-128.webp`;
 
 /**
- * Launch's card design chooser, under the pair HUD while the picked pair offers more than one design (SOL alone: its
- * own card, its main design, first, then the designs no other pair uses). One radio group of small card fronts, each
+ * Launch's card design chooser, under the pair HUD while the picked pair offers more than one design (SOL: its own
+ * card, its main design, first, then the designs no other pair uses; a meme pair with alternates: its own card, then
+ * its alternates, PAIR_ALTERNATE_DESIGNS). One radio group of small card fronts, each
  * with its name: arrow keys, Home and End move and select, and the preview card shows the choice at once. From 1024px
  * a grid that scrolls down past two rows, below it one sideways strip. Every other pair has one design, so the form
  * shows no chooser for it. Styles: styles/screens/launch.css (.cdx-design-pick).

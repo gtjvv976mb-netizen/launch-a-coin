@@ -15,12 +15,12 @@ if (one) {
   const wasm = await readFile("node_modules/@resvg/resvg-wasm/index_bg.wasm");
   Bun.plugin({ name: "resvg-wasm", setup(build) { build.module("virtual:launchacard-resvg-wasm", () => ({ exports: { default: wasm }, loader: "object" })); } });
   const { composeCreatorTokenMedia } = await import("../src/lib/carddex/live/compose.server");
-  const { defaultQuoteForDesign, designForPair, pairForDesign } = await import("../src/lib/carddex/pairs");
+  const { defaultQuoteForDesign, designsForPair, pairForDesign } = await import("../src/lib/carddex/pairs");
   const { getCardDesign } = await import("../src/lib/carddex/designs");
   const { TOKEN_ANIMATION_MAX_BYTES } = await import("../src/lib/carddex/live/token-turntable");
   // --any: an earlier design too (for comparison), on the quote its stored coins read as.
   const pair = pairForDesign(one) ?? (process.argv.includes("--any") ? defaultQuoteForDesign(one) : null), design = getCardDesign(one);
-  if (!pair || (!process.argv.includes("--any") && designForPair(pair.key) !== one)) throw new Error(`${one} is not an offered pair's design`);
+  if (!pair || (!process.argv.includes("--any") && !designsForPair(pair.key).includes(one as never))) throw new Error(`${one} is not an offered pair's design`);
   const artwork = new Uint8Array(await readFile(artPath));
   const baselineRss = process.resourceUsage().maxRSS;
   const card = { cardTemplate: one, name: "Measure Token", ticker: "MEASURE", image: "", level: design.materialLevel, quoteAssetKey: pair.key, quoteMint: pair.mint, mcapUsd: null, mcapQuote: 0, holders: 0, dexNo: 1, dexLabel: "No. 001", lore: "A fixed fixture for measuring the coin image.", ownerHandle: "creator" } as never;
@@ -32,8 +32,9 @@ if (one) {
   process.exit(0);
 }
 
-const { OFFERED_PAIRS, designForPair } = await import("../src/lib/carddex/pairs");
-const designs = OFFERED_PAIRS.map((pair) => designForPair(pair.key)!);
+const { OFFERED_PAIRS, designForPair, designsForPair } = await import("../src/lib/carddex/pairs");
+// Each offered pair's main design, and every alternate (PAIR_ALTERNATE_DESIGNS): SOL's other options are measured with --design.
+const designs = OFFERED_PAIRS.flatMap((pair) => pair.key === "sol" ? [designForPair(pair.key)!] : designsForPair(pair.key));
 const jobs = Number(arg("jobs") ?? 2), rows: unknown[] = [];
 let next = 0;
 async function worker() {

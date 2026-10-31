@@ -2,6 +2,14 @@ import staged from "./pair-designs.json";
 import { CARD_RENDERER_VERSION } from "./card-template";
 
 export type PairDesignKey = `pair-${string}`;
+/**
+ * A pair's alternate card (owner, 1 November 2026: more card choices for meme pairs): `pair-<quoteKey>-alt<n>`, n 1-9,
+ * bound to that pair for good like its identity design. Pair keys never contain "-", so an alternate key can never equal
+ * another pair's `pair-<key>`; "alt<n>" with no dash keeps the number apart from the -320/-480/-640 file-size suffixes.
+ */
+export const ALTERNATE_PAIR_DESIGN = /^pair-([a-z0-9]+)-alt([1-9])$/;
+/** The pair an alternate design key belongs to, or null for any other key. */
+export const alternatePairOf = (key?: string | null): string | null => (key && ALTERNATE_PAIR_DESIGN.exec(key)?.[1]) || null;
 export type PairDesign = {
   key: PairDesignKey; quoteKey: string; quoteMint: string; name: string; description: string;
   category: "stocks" | "memes" | "crypto"; materialLevel: number;
@@ -48,7 +56,7 @@ export function isPairDesignInstalled(design:PairDesign, install:PairDesignInsta
 }
 
 export const STAGED_PAIR_DESIGNS = Object.freeze(staged.map(design=>{
-  if(design.key!==`pair-${design.quoteKey}` || !/^[a-z0-9-]+$/.test(design.quoteKey) ||
+  if(!/^[a-z0-9]+$/.test(design.quoteKey) || !(design.key===`pair-${design.quoteKey}` || alternatePairOf(design.key)===design.quoteKey) ||
     !["stocks","memes","crypto"].includes(design.category) || !["holo","gold","prism"].includes(design.finish) ||
     design.palette.length!==3 || design.palette.some(color=>!/^#[a-fA-F0-9]{6}$/.test(color))) {
     throw new Error("Invalid staged pair-design metadata.");

@@ -2968,5 +2968,305 @@
       "height": 894,
       "sha256": "eb9ba408f72ad77fdf09e51d6e8860896f3e023521f24c4480a15caf5005af28"
     }
+  },
+  "pair-bonk-alt1": {
+    "atlasSha256": "f9c8c2e7e99103257db0250adae17a94868c6f99039fdc335fe9b95fe73b2142",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-bonk-alt1-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "4ec45e9d3926006c4d2009a38ace3e45c142ace837b9bf837c3236a482e00e9e"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-bonk-alt1-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "fe42655ea720b5060be3603fe3de22d285a3ba19db6442b93da04889fc9b32ca"
+    }
+  },
+  "pair-bonk-alt2": {
+    "atlasSha256": "6bc629d23cb7ad9ee022dbb6a940a83ff0a9f2db0053f832d8c123fc3d663b44",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-bonk-alt2-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "0feb7bc436ce018553073a77bd69949c9d8c12a834034c4b4bbef305dbb21f26"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-bonk-alt2-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "0f1a57811a717a73536f5c3935471fd1107470e8a828a071f2cbda29b50b20fb"
+    }
+  },
+  "pair-wif-alt1": {
+    "atlasSha256": "357afcb137501cfee5b0a245c7cf67ee182649745286fcb4b6c7eae33e6f6ff4",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-wif-alt1-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "9114822d7591a9b9fa4cc1e2af44b60ab2ee54a56b911b3465f319642453799e"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-wif-alt1-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "62238108b0bac3b02449ef1244b607ca69c63bb08dbcb5c99e54e83743e8c07d"
+    }
+  },
+  "pair-wif-alt2": {
+    "atlasSha256": "f27506751053c9f8d5cae0156dc5543548ddc175e09b4ec22e99d2c1bb21946f",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-wif-alt2-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "96039250c7bd5ac7ee9bee5b623a1ec4ab721435627ff41744d3419841dc354c"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-wif-alt2-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "7bf2b681179c1832cbc1b3fb65ea49dcafb500e1f942cd7a9c66f6d4a362e091"
+    }
+  },
+  "pair-pengu-alt1": {
+    "atlasSha256": "a858e651fe9e2b34fe949a05246c9508c27b8b7a6da0c5b28ce859d56b871193",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-pengu-alt1-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "1caef5ca561aac494fb99c06a905e6d12f7f5db4c5cb703c85fa4de640529c97"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-pengu-alt1-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "bdc76b8b322b34b7165d292c557203642266ec1fe883db30f4aea7db1dbf3e4a"
+    }
+  },
+  "pair-pengu-alt2": {
+    "atlasSha256": "35502aa62477a43c74d60ebe9c9784e30a70f907666c58b752e7703ad8fc7da7",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-pengu-alt2-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "5c16b6b374017d76d96528669372a0217cae5b16e7117c5691ecd1e781f77327"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-pengu-alt2-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "6e0a5f243d0d1d0c572af32c45e69998f8bd322a719bba2769a7d9efbe8be83f"
+    }
+  },
+  "pair-toad-alt1": {
+    "atlasSha256": "89af5384c86cbe2e907a45ec67edbd8872fa55f9ccb22a771ad734341abc0fe1",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-toad-alt1-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "6fe3768f13ff180b67ee6b95520a58c50deaef316d9f5c64be52fb9a9ff39ff1"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-toad-alt1-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "f3d75cf2f6d35e4cb93c046e4a236e858910daa39924c4e630906ebe82589648"
+    }
+  },
+  "pair-toad-alt2": {
+    "atlasSha256": "e7bdd530153da6d01465c1600b44b7537b981304b1771a7002950482e9d11cf9",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-toad-alt2-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "6f907bd9e67fe6d3c70bc55421d05ef174c8aaf5943a6dbf749b75506ece457d"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-toad-alt2-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "aae9f154cee475a63bb8cc54ddabe86ad76a82a087b8dcb821e06319e3fe0541"
+    }
+  },
+  "pair-fartcoin-alt1": {
+    "atlasSha256": "7bcbb69f1bc2b37ed2fef8106ba9299701b45885d33340d79b1c1c179f9fc244",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-fartcoin-alt1-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "a6765c77acde8dd8c51b26e3df1a5826d25348b9b5e7a17be7003e20eb99ef99"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-fartcoin-alt1-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "7e4c9b02baafcf3bba7c4c0e7d6bba1225554674d994029bf0d432b7988c1ca1"
+    }
+  },
+  "pair-fartcoin-alt2": {
+    "atlasSha256": "abd4a920a9f79d51721036fa6838235194764690e5819836c8275db6e366fe6a",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-fartcoin-alt2-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "270cef5ece42477e86712bea171702df7944d7f0210e30b838a0bebfcfdc040b"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-fartcoin-alt2-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "07d6bb6fdeaf1414e3a5ad8bb91afbbc7c404559930c2b33b4b113319abc4d5a"
+    }
+  },
+  "pair-doge-alt1": {
+    "atlasSha256": "9575304148a01e5b1381941ae5991c8b496d474f0eabc17fca305dbf7551347c",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-doge-alt1-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "f2c0c1cc8574e820934708c02c005d597bbd1ce9c2cf31f557460022359c1711"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-doge-alt1-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "3014a57fd75b666cfb7ff30b0ed689cef88dbde63c69cb1807f1e52fb88f98cc"
+    }
+  },
+  "pair-doge-alt2": {
+    "atlasSha256": "84e3d3758798bad03ef90b2aa0f0eef988ab7d2b82186bc3e03e4e5b1735ad88",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-doge-alt2-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "c18a9732f6d4176cab8a670b024993f97364396b66db675d5a7b24b9b7ad2f68"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-doge-alt2-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "1c19c9d63ffe29211fcac0268be9cff0a169bd307e08e6077a4c95c1c9e42493"
+    }
+  },
+  "pair-pnut-alt1": {
+    "atlasSha256": "d0b9ce429054f41fc9c6685c9d26341b3779b50360836b8c7f6a9aa453ecdaa9",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-pnut-alt1-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "4d56c8e660e3d32b8fdb9c8b38f5d626e9aeff1abfc55b3a1a0937c7a4218116"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-pnut-alt1-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "9ef5c2410294c5bbb2f0d46be59927e3562311ee45c745702683cf4e35725383"
+    }
+  },
+  "pair-pnut-alt2": {
+    "atlasSha256": "7814dd6271bb1995cb71864b648d2bef90a139874a90ea527d475cec8c49e056",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-pnut-alt2-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "5fcbc509401d38aa8c76ab00e56cf4c2db160a103cc4493b7ffbb43618b36582"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-pnut-alt2-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "7a4f0bdcefcde093f541af847e418644f514cc434dedde845bcff9c52e22d6d8"
+    }
+  },
+  "pair-moodeng-alt1": {
+    "atlasSha256": "6796c18fb8bb30e10674cd360239856170228a7b650dc449f55ddfd2c66cccfd",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-moodeng-alt1-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "2a92ea83d96959b40a10c4945d25738e0ccfaa5564febab0cf331c241f138dc0"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-moodeng-alt1-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "cce3c7655c405c97bccf7da6f9dd237e23e06a3313d23413553cf6f6deaf56c3"
+    }
+  },
+  "pair-moodeng-alt2": {
+    "atlasSha256": "fbd5a1e8e7b886d7ab8a5f685305317b9ceb75bb9b04feedc190e0e304d90b4b",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-moodeng-alt2-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "83c92b3896f1e221563b9d237d515cce5301950518d932ef594e05f431ffd7fe"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-moodeng-alt2-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "07cda3b21ee61e58cca3eccb024b699a96934ff09970fad10ddc4a748ce2af79"
+    }
+  },
+  "pair-michi-alt1": {
+    "atlasSha256": "0ec493de50fdbcdecddcfa62d81cc93915351e8de3f728fe66cb25ed419c58ac",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-michi-alt1-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "cb589c6007ea2ed518c2c6d75cb6edba825b459a6fd89cc3a0f882aa60d11ef1"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-michi-alt1-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "366c1cdfeac963cc5a70c37e9e4abbfa08339df81528deccd59f857cda738fb3"
+    }
+  },
+  "pair-michi-alt2": {
+    "atlasSha256": "b120380d75612aeb0808d13e6f9a6d367f2c8d001db9409938c1039ef3704c22",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-michi-alt2-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "4909bb437aec386d148f2e47128f0be5f15756577e5af2256df4cf4243c033ed"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-michi-alt2-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "80b1b7f5f95fe3304f5817e7fcf882f51e611ecb98c25698d6246630214b49db"
+    }
+  },
+  "pair-chillguy-alt1": {
+    "atlasSha256": "378c6faed3d4eb23ae07dc5cd84dd73143932c7cc2020709dd8af0f75b4dc471",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-chillguy-alt1-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "b0343154d63e66197f1a8f227d3e881c1c076833d5b09c329e0d2fc20729df68"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-chillguy-alt1-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "cd96180e216d4520efe5637513452e2a1ee3f7fb01a46ba64d8eba071708133f"
+    }
+  },
+  "pair-chillguy-alt2": {
+    "atlasSha256": "4dfc04657c4e95ca23493586f4b82af9f63e340d739a9c33b479e15406f21489",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-chillguy-alt2-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "d45efe91f03d146e5c8d604dd81f164979a072582958ed1fb4f8a67069dec839"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-chillguy-alt2-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "ae873276a5753c8b4048db382944dba2f055a4cc21dd8cc68e9c5a491f30c12b"
+    }
   }
 }

@@ -1,7 +1,7 @@
 import verifiedAssets from "./pair-assets.json";
 import { isCardDesignKey, type CardDesignKey } from "./designs";
-import { DESIGN_QUOTE_KEYS, PAIR_DESIGNS, PAIR_DESIGNS_2026_10_30, SOL_DESIGN_OPTIONS } from "./design-pairings";
-import { HELD_PAIR_DESIGNS, WITHHELD_PAIR_DESIGNS } from "./pair-designs";
+import { DESIGN_QUOTE_KEYS, PAIR_ALTERNATE_DESIGNS, PAIR_DESIGNS, PAIR_DESIGNS_2026_10_30, PAIR_IDENTITY_DESIGNS, SOL_DESIGN_OPTIONS } from "./design-pairings";
+import { HELD_PAIR_DESIGNS, WITHHELD_PAIR_DESIGNS, alternatePairOf } from "./pair-designs";
 
 export const PAIR_ASSET_KEYS = ["sol", "usdc", "gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc", "doge", "fartcoin", "pnut", "moodeng", "troll", "bonk", "wif", "cards", "sv151", "toad", "pengu", "giga", "spx", "trump", "useless", "chillguy", "goat", "zerebro", "act", "pippin", "vine", "aura", "michi", "cate", "ansem", "bert", "chillhouse", "usduc", "wbtc", "eth", "hype", "zec", "near", "xrp", "xmr", "sui", "arb", "aave", "uni", "tao", "peaq", "mon", "cashcat", "neet", "otc", "fone", "buttcoin", "triplet", "cupsey", "alon", "jimothy", "lmao", "bobo", "tokabu", "manifest", "baton", "claw", "67", "zauth", "kins", "percolator", "jotchua", "zcat", "gork", "stonk", "solangeles", "paid", "pepe", "jeanphil", "pill", "biketyson", "npc", "wojak", "eacc", "hodl", "agency", "claudia", "shib", "swordcat", "plague", "pump", "alch", "pumpcade", "codec", "ape", "link", "ore", "skr", "ray", "met", "bp", "w", "psol", "hsol", "cbltc", "cbada", "spyx", "qqqx", "googlx", "msftx", "metax", "amznx", "crclx", "hoodx", "gldx", "pltrx", "mcdx", "kox"] as const;
 export type PairAssetKey = typeof PAIR_ASSET_KEYS[number];
@@ -59,35 +59,58 @@ export function getPairAsset(key?: string | null): Readonly<PairAsset> {
 export const DEFAULT_PAIR: PairAssetKey = "sol";
 
 const PAIR_DESIGN: Readonly<Partial<Record<string, CardDesignKey>>> = PAIR_DESIGNS;
-/** The pair whose designs SOL_DESIGN_OPTIONS lists: the one pair with more than one design. */
+/** The pair whose designs SOL_DESIGN_OPTIONS lists (designs no other pair uses). */
 const MANY_DESIGNS_PAIR = "sol";
-/** Each offered pair's designs, its main one first: SOL's options; every other pair its one design. */
-const PAIR_DESIGN_LISTS: Readonly<Partial<Record<string, readonly CardDesignKey[]>>> = Object.freeze(Object.fromEntries(
-  Object.entries(PAIR_DESIGNS).map(([pair, design]) => [pair, Object.freeze(pair === MANY_DESIGNS_PAIR ? [...SOL_DESIGN_OPTIONS] : [design!])]),
-));
+type DesignMaps = {
+  pairDesigns: Readonly<Partial<Record<string, CardDesignKey>>>; identities: Readonly<Partial<Record<string, CardDesignKey>>>;
+  solOptions: readonly CardDesignKey[]; alternates: Readonly<Partial<Record<string, readonly CardDesignKey[]>>>;
+  bindings: Readonly<Record<string, string>>;
+};
+const DESIGN_MAPS: DesignMaps = { pairDesigns: PAIR_DESIGNS, identities: PAIR_IDENTITY_DESIGNS, solOptions: SOL_DESIGN_OPTIONS, alternates: PAIR_ALTERNATE_DESIGNS, bindings: DESIGN_QUOTE_KEYS };
+/** Each offered pair's designs, its main one first: SOL's options; a pair with alternates its own card, then those; every other pair its one design. */
+function designLists(maps: DesignMaps): Readonly<Partial<Record<string, readonly CardDesignKey[]>>> {
+  return Object.freeze(Object.fromEntries(Object.entries(maps.pairDesigns).map(([pair, design]) =>
+    [pair, Object.freeze(pair === MANY_DESIGNS_PAIR ? [...maps.solOptions] : [design!, ...(maps.alternates[pair] ?? [])])])));
+}
+const PAIR_DESIGN_LISTS = designLists(DESIGN_MAPS);
 const DESIGN_PAIR = new Map<string, PairAssetKey>(Object.entries(PAIR_DESIGN_LISTS).flatMap(([pair, designs]) => designs!.map(design => [design, pair as PairAssetKey] as const)));
-const LISTED_DESIGNS = Object.values(PAIR_DESIGN_LISTS).reduce((n, designs) => n + designs!.length, 0);
 /**
  * Checked at module load (a broken list stops the app and the tests): every offered pair is a registry pair with an
  * installed design; SOL's options start with its main design and are installed design keys, none held, withheld or
- * bound to another quote for good; and no design belongs to two pairs, so every pair but SOL has one design no other
- * pair uses.
+ * bound to another quote for good; a pair's alternates are its own installed `pair-<key>-alt<n>` designs, bound to it,
+ * on an offered pair (not SOL) whose main design is its own unheld identity card; and no design belongs to two pairs.
+ * The maps are a parameter so the tests can feed it broken ones.
  */
-export function pairDesignProblems(): string[] {
+export function pairDesignProblems(maps: DesignMaps = DESIGN_MAPS): string[] {
   const problems: string[] = [];
-  for (const [pair, design] of Object.entries(PAIR_DESIGNS)) {
+  const lists = designLists(maps);
+  for (const [pair, design] of Object.entries(maps.pairDesigns)) {
     if (!BY_KEY.has(pair)) problems.push(`${pair}: not a registry pair`);
     if (!isCardDesignKey(design)) problems.push(`${pair}: ${design} is not an installed design`);
   }
-  if (PAIR_DESIGNS[MANY_DESIGNS_PAIR] !== SOL_DESIGN_OPTIONS[0]) problems.push("SOL's options must start with its main design");
-  for (const design of SOL_DESIGN_OPTIONS) {
+  if (maps.pairDesigns[MANY_DESIGNS_PAIR] !== maps.solOptions[0]) problems.push("SOL's options must start with its main design");
+  for (const design of maps.solOptions) {
     if (!isCardDesignKey(design)) problems.push(`${design}: not an installed design`);
     if (Object.hasOwn(HELD_PAIR_DESIGNS, design) || (WITHHELD_PAIR_DESIGNS as readonly string[]).includes(design)) problems.push(`${design}: held or withheld`);
-    const bound = DESIGN_QUOTE_KEYS[design];
+    const bound = maps.bindings[design];
     if (bound && bound !== MANY_DESIGNS_PAIR) problems.push(`${design}: bound to ${bound}`);
   }
-  if (new Set(SOL_DESIGN_OPTIONS).size !== SOL_DESIGN_OPTIONS.length) problems.push("SOL's options name a design twice");
-  if (DESIGN_PAIR.size !== LISTED_DESIGNS) problems.push("a design belongs to two pairs");
+  if (new Set(maps.solOptions).size !== maps.solOptions.length) problems.push("SOL's options name a design twice");
+  for (const [pair, alternates] of Object.entries(maps.alternates)) {
+    if (pair === MANY_DESIGNS_PAIR) problems.push("SOL's extra designs are SOL_DESIGN_OPTIONS, not alternates");
+    if (!BY_KEY.has(pair) || !maps.pairDesigns[pair]) problems.push(`${pair}: alternates on a pair that is not offered`);
+    // Its main design must be its own identity card, unheld: a held main's `pair-<key>[-.]*` ignore line would also hide the alternates.
+    if (maps.pairDesigns[pair] !== `pair-${pair}` || maps.identities[pair] !== `pair-${pair}` || Object.hasOwn(HELD_PAIR_DESIGNS, `pair-${pair}`)) problems.push(`${pair}: alternates need the pair's own unheld identity card as its main design`);
+    if (!alternates!.length || new Set(alternates).size !== alternates!.length) problems.push(`${pair}: alternates empty or repeated`);
+    for (const design of alternates!) {
+      if (alternatePairOf(design) !== pair) problems.push(`${design}: not a pair-${pair}-alt<n> key`);
+      if (!isCardDesignKey(design)) problems.push(`${design}: not an installed design`);
+      if (maps.bindings[design] !== pair) problems.push(`${design}: not bound to ${pair}`);
+      if (Object.hasOwn(HELD_PAIR_DESIGNS, design) || (WITHHELD_PAIR_DESIGNS as readonly string[]).includes(design)) problems.push(`${design}: held or withheld`);
+    }
+  }
+  const listed = Object.values(lists).reduce((n, designs) => n + designs!.length, 0);
+  if (new Set(Object.values(lists).flat()).size !== listed) problems.push("a design belongs to two pairs");
   return problems;
 }
 if (pairDesignProblems().length) {
@@ -152,22 +175,25 @@ export function designForPair(key?: string | null): CardDesignKey | null {
 }
 
 /**
- * Every design a new launch on this pair may take, its main design first: SOL's options (SOL_DESIGN_OPTIONS), any
- * other offered pair's one design, or none for an unknown pair or one not offered.
+ * Every design a new launch on this pair may take, its main design first: SOL's options (SOL_DESIGN_OPTIONS), a meme
+ * pair's own card and its alternates (PAIR_ALTERNATE_DESIGNS), any other offered pair's one design, or none for an
+ * unknown pair or one not offered.
  */
 export function designsForPair(key?: string | null): readonly CardDesignKey[] {
   return (key && isPairAssetKey(key) ? PAIR_DESIGN_LISTS[key] : undefined) ?? [];
 }
 
-/** The pair a design belongs to (any of SOL's options is SOL's); null for the designs no pair offers (kept by coins that already have one). */
+/** The pair a design belongs to (any of SOL's options is SOL's, an alternate its pair's); null for the designs no pair offers (kept by coins that already have one). */
 export function pairForDesign(designKey?: string | null): Readonly<PairAsset> | null {
   const key = designKey ? DESIGN_PAIR.get(designKey) : undefined;
   return key ? getPairAsset(key) : null;
 }
 
 export const UNPAIRED_DESIGN = "This card design is no longer offered for new coins. Pick a pair: its card comes with it.";
-/** A SOL option sent with another pair. */
-export const solOnlyDesign = (symbol: string) => `That card design is for the SOL pair only. The ${symbol} pair comes with its own card.`;
+/** A SOL option sent with another pair (`many`: that pair offers several cards of its own). */
+export const solOnlyDesign = (symbol: string, many = false) => `That card design is for the SOL pair only. The ${symbol} pair comes with its own card${many ? "s" : ""}.`;
+/** One pair's design (an identity card or an alternate) sent with a pair other than SOL that offers several cards. */
+export const anotherPairsDesign = (owner: string, symbol: string) => `That card belongs to the ${owner} pair. Pick ${owner} for it, or one of ${symbol}'s cards.`;
 /** Another pair's design sent with SOL (SOL offers many designs, so it does not say SOL has one card). */
 export const otherPairDesign = (symbol: string) => `That card belongs to the ${symbol} pair. Pick ${symbol} for it, or one of SOL's designs.`;
 const unknownDesign = "Choose an available card design.";
@@ -200,8 +226,9 @@ export function completeLaunchPair(input: { cardTemplate?: string; quoteAssetKey
 
 /**
  * New launches only (the demo launch, the live card composition and a first live prepare): the pair picks the card.
- * The request's design, if it names one, must be one of that pair's designs (designsForPair: SOL's options, any other
- * pair's one design; none named is the main one), and its mint the pair's reviewed mint. Saved launches, coin reads,
+ * The request's design, if it names one, must be one of that pair's designs (designsForPair: SOL's options, a pair's
+ * own card and its alternates, any other pair's one design; none named is the main one), and its mint the pair's
+ * reviewed mint. Saved launches, coin reads,
  * trades and recovery never come through here: they keep whatever they stored.
  */
 export function resolveNewLaunchPair(input: { cardTemplate?: string; quoteAssetKey?: string; quoteMint?: string }): { asset: Readonly<PairAsset>; designKey: CardDesignKey } {
@@ -212,9 +239,11 @@ export function resolveNewLaunchPair(input: { cardTemplate?: string; quoteAssetK
   if (!designKey) {
     if (!isCardDesignKey(fields.cardTemplate)) throw new Error(unknownDesign);
     const owner = pairForDesign(fields.cardTemplate);
+    const many = designs.length > 1;
     throw new Error(!owner ? UNPAIRED_DESIGN
-      : owner.key === MANY_DESIGNS_PAIR ? solOnlyDesign(asset.symbol)
+      : owner.key === MANY_DESIGNS_PAIR ? solOnlyDesign(asset.symbol, many)
       : asset.key === MANY_DESIGNS_PAIR ? otherPairDesign(owner.symbol)
+      : many ? anotherPairsDesign(owner.symbol, asset.symbol)
       : `The ${asset.symbol} pair comes with its own card. Pick a pair and its card comes with it.`);
   }
   if (fields.quoteMint !== asset.mint) throw new Error("The quote mint does not match the selected asset.");

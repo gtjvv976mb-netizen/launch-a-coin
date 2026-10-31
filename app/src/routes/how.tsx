@@ -16,6 +16,12 @@ const DOGE_DESIGN = getCardDesign(designForPair("doge") ?? undefined).name;
 const SOL_DESIGNS = designsForPair("sol");
 const SOL_MAIN = getCardDesign(SOL_DESIGNS[0]).name;
 const SOL_MORE = SOL_DESIGNS.length - 1;
+/** The other pairs with more than one card (PAIR_ALTERNATE_DESIGNS): their symbols, for the Pairs and Cards sections. */
+const MULTI = OFFERED_PAIRS.filter((asset) => asset.key !== "sol" && designsForPair(asset.key).length > 1);
+const MULTI_SYMBOLS = new Intl.ListFormat("en", { type: "conjunction" }).format(MULTI.map((asset) => asset.symbol));
+/** How many more cards each of those pairs offers, when they all offer the same number (else the copy says "more"). */
+const MULTI_COUNTS = new Set(MULTI.map((asset) => designsForPair(asset.key).length - 1));
+const MULTI_MORE = MULTI_COUNTS.size === 1 ? `${[...MULTI_COUNTS][0]} more` : "more";
 const OFFERS_CRYPTO = OFFERED_PAIRS.some((asset) => asset.kind === "crypto");
 const OFFERS_DIRECT = OFFERED_PAIRS.some(isDirectPair);
 // Direct pairs wait for the owner's confirmation before mainnet launches (pairs.ts CONFIRMED_DIRECT_PAIRS).
@@ -51,7 +57,7 @@ const STEPS: Step[] = [
   },
   {
     title: "The pair picks its card",
-    body: `Each pair has its own card design, shown as you pick. SOL also offers ${SOL_MORE} more. After the coin is verified, approve its one-of-one card to your wallet.`,
+    body: `Each pair has its own card design, shown as you pick. SOL also offers ${SOL_MORE} more${MULTI.length ? `, and some meme pairs a few` : ""}. After the coin is verified, approve its one-of-one card to your wallet.`,
   },
   {
     title: "Trade the coin. Keep the card.",
@@ -90,7 +96,7 @@ const SECTIONS: Section[] = [
     body: (
       <ul>
         <li>The pair is what your coin is priced and bought in: SOL, USDC, a crypto, meme or collector token, or a tokenized stock.</li>
-        <li>The pair picks the card. Every pair but SOL has exactly one design of its own, so choosing the pair is choosing the design. DOGE gets {DOGE_DESIGN}.</li>
+        <li>The pair picks the card. Each pair has its own design, and for most pairs choosing the pair chooses the card. DOGE gets {DOGE_DESIGN}.{MULTI.length ? ` ${MULTI_SYMBOLS} also offer ${MULTI_MORE} cards of their own, picked under the pair panel.` : ""}</li>
         <li>SOL is pump.fun's default pair. Its own card, {SOL_MAIN}, is its main design, and it offers {SOL_MORE} more designs no other pair uses. Pick one under the pair panel. USDC gets Duel Masters.</li>
         {OFFERS_CRYPTO ? <li>Crypto pairs are Solana tokens or Solana versions of other coins; the panel names the bridge where one is listed.</li> : null}
         {OFFERS_DIRECT ? <li>Some pairs are admitted on-chain but missing from pump.fun's dated public list; their panel says so.{DIRECT_HELD ? " Mainnet launches can't use them yet." : SOME_DIRECT_HELD ? " Mainnet launches can use only the ones confirmed so far." : ""}</li> : null}
@@ -110,8 +116,8 @@ const SECTIONS: Section[] = [
         <li>The design is printed on the card and kept for good. Market cap never changes it.</li>
         <li>The token trades. Its creator holds the separate one-of-one card made at launch.</li>
         <li>Picking another pair keeps your coin details and artwork; only the pair and its card change.</li>
-        <li>SOL's own card is its main design. SOL also offers {SOL_MORE} more designs no other pair uses. Every other pair has exactly one design of its own.</li>
-        <li>Designs shows one sample coin in each pair's design and in all of SOL's, grouped as Memes, Stocks, Crypto and Collector.</li>
+        <li>SOL's own card is its main design. SOL also offers {SOL_MORE} more designs no other pair uses.{MULTI.length ? ` ${MULTI.length} meme pairs offer their own card first and ${MULTI_MORE} of their own (listed under Pairs).` : ""} Every other pair has exactly one design of its own.</li>
+        <li>Designs shows one sample coin in each design a pair offers (all of SOL's, and each meme pair's own card and alternates), grouped as Memes, Stocks, Crypto and Collector.</li>
         <li>Designs no pair offers are kept by the coins already made with them. They are not offered for new coins.</li>
         <li>The card is permanent once your coin is created.</li>
         <li>There are no card sales, bids, auctions or royalties. The card NFT gives no token ownership or stock rights.</li>

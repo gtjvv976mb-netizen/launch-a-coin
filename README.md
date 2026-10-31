@@ -166,6 +166,14 @@ Both review forms need a completed mainnet launch signature, so send them after 
 
 Current provider reference, reviewed 28 October 2026: [official pump.fun coin creation](https://github.com/pump-fun/pump-public-docs/blob/main/docs/instructions/COIN_CREATION.md). Historical accounts and fees are not assumed current.
 
+## Alternate cards for meme pairs (1 November 2026)
+
+Ten meme pairs offer two alternate cards each after their own identity card (`PAIR_ALTERNATE_DESIGNS` in `app/src/lib/carddex/design-pairings.ts`, an explicit owner-reviewed list). An alternate's key is `pair-<pairKey>-alt<n>` (`ALTERNATE_PAIR_DESIGN` in `pair-designs.ts`); it is staged in `pair-designs.json` with its pair's `quoteKey`, so it is bound to that pair for good like the identity card. Launch shows the same chooser it shows for SOL while such a pair is picked, with thumbnails from `tools/carddex/make_design_thumbs.py`.
+
+- Generate with `tools/carddex/pair-alternates/alt_plan.py` (prompts) and compose with `compose2.py` (adds pale-window detection and `--plain-window` for a starfield window); install with `tools/carddex/pair-alternates/install.py <composed-dir>`, which only creates entries. Stage, install and list in one commit: `pairs.ts` refuses a listed alternate that is not installed, and the tests refuse a staged one no pair lists. Then run `card-skin-variants.ts --missing`, `generated-face-variants.ts --missing` and `make_design_thumbs.py`.
+- Measure each new design's coin GIF with random-noise art before listing it (`bun scripts/measure-token-gifs.ts --art <noise.png> --out <json> --design <key>`); it must stay under `TOKEN_ANIMATION_MAX_BYTES` (12 MiB), or a launch on it fails at prepare. On 1 November three busy backs (BONK Glacier, WIF Comic Foil, MOODENG Temple Gold) went over and were regenerated calmer; all 20 now measure 8.4 to 11.9 MiB.
+- Retire an alternate only by taking it off `PAIR_ALTERNATE_DESIGNS`; never hold it, ignore its files or delete its row once a release has offered it. A pair with alternates keeps its own unheld identity card as its main design (checked at load), so a hold's `pair-<key>[-.]*` ignore line can never hide them. Never run `tools/carddex/measure_front_assets.py` after alternates exist (it rewrites pair layouts).
+
 ## Generated assets
 
 **Required card-artwork pipeline:** all new or redesigned fronts, backs, limited editions, stock/meme themes and card-based logos use Higgsfield. The [workflow](creative/higgsfield/WORKFLOW.md) requires matched front/back references, the shared v2 template and desktop/phone visual checks; code handles content composition and motion. The [local provenance audit](creative/higgsfield/artwork-provenance-audit-2026-10-29.json) verifies all48 pairs:96 completed Higgsfield jobs and96 matching full-size source WebPs, with no missing files or hash mismatches. Existing verified finishes may be reused for supported pair presets.

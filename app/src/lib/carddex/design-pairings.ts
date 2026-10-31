@@ -93,7 +93,7 @@ export const PAIR_IDENTITY_DESIGNS: Readonly<Partial<Record<PairAssetKey, CardDe
 
 /**
  * The pair picks the card (owner, 30 October 2026): every offered pair has one design of its own, and a new launch
- * takes its pair's design (SOL alone offers more: SOL_DESIGN_OPTIONS). This map gives each pair's main design (pairs.ts
+ * takes its pair's design (SOL offers more, SOL_DESIGN_OPTIONS, and so do the meme pairs in PAIR_ALTERNATE_DESIGNS). This map gives each pair's main design (pairs.ts
  * designForPair, designsForPair and pairForDesign read it): the identity rule above with the content holds applied (pair-designs.ts HELD_PAIR_DESIGNS), so a held identity's
  * pair launches with the design the hold names, or is not offered when it names none. A pair missing here is not
  * offered for new launches. Designs no pair names here, and SOL_DESIGN_OPTIONS leaves out, are not offered either;
@@ -133,6 +133,29 @@ export const SOL_DESIGN_OPTIONS: readonly CardDesignKey[] = Object.freeze([
   "pepe", "shib", "popcat", "blackberry", "nokia", "binance", "kraken",
   "wildtype", "ronin", "astral", "neon-circuit", "abyssal",
 ] as CardDesignKey[]);
+
+/**
+ * More card choices for meme pairs (owner, 1 November 2026: "do more meme pair card designs", choosing alternate cards
+ * for meme pairs over new SOL-only designs). Each listed pair offers its own identity card first (PAIR_DESIGNS, the
+ * main design) and then these alternates, each staged in pair-designs.json with that pair's quoteKey, so it is bound
+ * to the pair for good (DESIGN_QUOTE_KEYS) like the identity card: coins and saved launches keep it on that pair.
+ * An explicit, owner-reviewed list, never derived from staging, so staged art never offers itself. Staging, installing
+ * and listing land in one commit (pairs.ts refuses a listed alternate that is not installed; the tests refuse a staged
+ * one no pair lists). To retire one, take it off this list only: it stays installed and bound for the coins that carry
+ * it, and it is never held or added to .assetsignore. A pair with alternates must keep its own, unheld identity card as
+ * its main design (pairs.ts pairDesignProblems), so the `pair-<key>[-.]*` hold pattern can never hide its alternates.
+ * TRUMP and GIGA were left out (their identity art shows real people); TOAD and MICHI took their places. Content
+ * check (1 November 2026, every front and back looked at): each alternate shows its pair's own character (a cartoon
+ * dog, cat, frog, penguin, squirrel or hippo, or FARTCOIN's gas cloud) in new materials, with no real person, no text
+ * and no other company's logo or wordmark.
+ */
+export const PAIR_ALTERNATE_DESIGNS: Readonly<Partial<Record<PairAssetKey, readonly CardDesignKey[]>>> = Object.freeze({
+  bonk: ["pair-bonk-alt1", "pair-bonk-alt2"], wif: ["pair-wif-alt1", "pair-wif-alt2"],
+  pengu: ["pair-pengu-alt1", "pair-pengu-alt2"], toad: ["pair-toad-alt1", "pair-toad-alt2"],
+  fartcoin: ["pair-fartcoin-alt1", "pair-fartcoin-alt2"], doge: ["pair-doge-alt1", "pair-doge-alt2"],
+  pnut: ["pair-pnut-alt1", "pair-pnut-alt2"], moodeng: ["pair-moodeng-alt1", "pair-moodeng-alt2"],
+  michi: ["pair-michi-alt1", "pair-michi-alt2"], chillguy: ["pair-chillguy-alt1", "pair-chillguy-alt2"],
+} as Partial<Record<PairAssetKey, readonly CardDesignKey[]>>);
 
 /**
  * Historical: the design and pair combinations the earlier separate chooser offered (before 30 October 2026). Coins

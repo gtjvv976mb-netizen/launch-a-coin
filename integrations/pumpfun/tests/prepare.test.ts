@@ -12,7 +12,7 @@ import art from "../src/design-assets.json";
 import finalIdentitySnapshot from "./fixtures/codex-research-2026-10-30/expansion-final-identities-and-metadata.json";
 import finalRawSnapshot from "./fixtures/codex-research-2026-10-30/expansion-final-public-account-snapshots.json";
 import { CARD_DESIGNS } from "../../../app/src/lib/carddex/designs";
-import { OFFERED_PAIRS, TRANSFER_FEE_PAIRS, defaultQuoteForDesign, designForPair } from "../../../app/src/lib/carddex/pairs";
+import { OFFERED_PAIRS, TRANSFER_FEE_PAIRS, defaultQuoteForDesign, designForPair, designsForPair } from "../../../app/src/lib/carddex/pairs";
 import {
   MAINNET_GENESIS_HASH, PAIR_ASSETS, preparePumpLaunchPlan,
   type PairReadConnection, type PrepareLaunchInput,
@@ -185,6 +185,20 @@ describe("unsigned official Pump custom-pair preparer", () => {
       const plan = await preparePumpLaunchPlan(request, { connection: reader().connection, now });
       expect(plan.binding.card).toMatchObject({ designKey, frontSha256: request.card.frontSha256, backSha256: request.card.backSha256 });
       expect(plan.binding.quote).toMatchObject({ key: asset.key, mint: asset.mint });
+    }
+  });
+
+  test("every meme alternate (1 November 2026) prepares on its own pair with its reviewed art, and is refused on any other", async () => {
+    const alternates = OFFERED_PAIRS.flatMap(asset => asset.key === "sol" ? [] : designsForPair(asset.key).slice(1).map(design => [design, asset] as const));
+    expect(alternates).toHaveLength(20);
+    for (const [designKey, asset] of alternates) {
+      const request = input(designKey, asset.key);
+      expect(request.card.frontSha256).toBe(art[designKey as keyof typeof art].front.sha256);
+      expect(request.card.backSha256).toBe(art[designKey as keyof typeof art].back.sha256);
+      const plan = await preparePumpLaunchPlan(request, { connection: reader().connection, now });
+      expect(plan.binding.card).toMatchObject({ designKey, frontSha256: request.card.frontSha256, backSha256: request.card.backSha256 });
+      expect(plan.binding.quote).toMatchObject({ key: asset.key, mint: asset.mint });
+      for (const other of ["sol", "usdc", "tslax"]) await expect(preparePumpLaunchPlan(input(designKey, other), { connection: reader().connection, now })).rejects.toThrow("paired with");
     }
   });
 

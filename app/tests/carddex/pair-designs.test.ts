@@ -1,15 +1,17 @@
 import {describe,expect,test} from "bun:test";
-import {ACTIVE_PAIR_DESIGNS,HELD_PAIR_DESIGNS,STAGED_PAIR_DESIGNS,WITHHELD_PAIR_DESIGNS,isHeldPairDesign,isPairDesignInstalled,type PairDesignInstallation} from "../../src/lib/carddex/pair-designs";
+import {ACTIVE_PAIR_DESIGNS,HELD_PAIR_DESIGNS,STAGED_PAIR_DESIGNS,WITHHELD_PAIR_DESIGNS,alternatePairOf,isHeldPairDesign,isPairDesignInstalled,type PairDesignInstallation} from "../../src/lib/carddex/pair-designs";
 import {installedPairDesignKeys} from "../../src/lib/carddex/pair-designs-installed";
 import {CARD_DESIGNS,LEGACY_CARD_DESIGNS,isCardDesignKey} from "../../src/lib/carddex/designs";
-import {MEME_PAIR_PRESETS} from "../../src/lib/carddex/design-pairings";
-import {UNPAIRED_DESIGN,getPairAsset,allowedQuotesForDesign,defaultQuoteForDesign,designForPair,pairForDesign,resolveLaunchQuote,resolveNewLaunchPair} from "../../src/lib/carddex/pairs";
+import {MEME_PAIR_PRESETS,PAIR_ALTERNATE_DESIGNS} from "../../src/lib/carddex/design-pairings";
+import {UNPAIRED_DESIGN,getPairAsset,allowedQuotesForDesign,defaultQuoteForDesign,designForPair,designsForPair,pairForDesign,resolveLaunchQuote,resolveNewLaunchPair} from "../../src/lib/carddex/pairs";
 import {CARD_RENDERER_VERSION} from "../../src/lib/carddex/card-template";
 
 describe("reviewed exact pair-identity designs",()=>{
   test("the active designs are exactly the installed ones: every staged design but the two without finished art",()=>{
     expect(WITHHELD_PAIR_DESIGNS).toEqual(["pair-aave","pair-uni"]);
-    expect(ACTIVE_PAIR_DESIGNS).toHaveLength(115);
+    // 115 identity designs and 20 meme alternates (1 November 2026).
+    expect(ACTIVE_PAIR_DESIGNS).toHaveLength(135);
+    expect(ACTIVE_PAIR_DESIGNS.filter(d=>alternatePairOf(d.key))).toHaveLength(20);
     // A missing or mismatched asset or hash fails here (the gates), not on the page: the manifests stay off the client.
     expect(ACTIVE_PAIR_DESIGNS.map(d=>d.key)).toEqual(installedPairDesignKeys());
     expect(STAGED_PAIR_DESIGNS.filter(d=>!installedPairDesignKeys().includes(d.key)).map(d=>d.key)).toEqual([...WITHHELD_PAIR_DESIGNS]);
@@ -34,7 +36,8 @@ describe("reviewed exact pair-identity designs",()=>{
     expect(new Set(STAGED_PAIR_DESIGNS.map(d=>d.key)).size).toBe(STAGED_PAIR_DESIGNS.length);
     for(const design of LEGACY_CARD_DESIGNS)expect(isCardDesignKey(design.key)).toBe(true);
     for(const design of STAGED_PAIR_DESIGNS){
-      expect(design.key).toBe(`pair-${design.quoteKey}`);
+      // Its pair's identity key, or one of its pair's alternates (pair-<key>-alt<n>).
+      expect(design.key===`pair-${design.quoteKey}`||alternatePairOf(design.key)===design.quoteKey).toBe(true);
       expect(design.quoteMint).toBe(getPairAsset(design.quoteKey).mint);
       const kind=getPairAsset(design.quoteKey).kind;
       expect(design.category).toBe(kind==="stock"?"stocks":["meme","collector"].includes(kind)?"memes":"crypto");
@@ -75,6 +78,13 @@ describe("reviewed exact pair-identity designs",()=>{
       }else if(isHeldPairDesign(design.key)){
         expect(designForPair(asset.key)).toBe((HELD_PAIR_DESIGNS[design.key] ?? null) as never);
         expect(pairForDesign(design.key)).toBeNull();
+      }else if(alternatePairOf(design.key)){
+        // An alternate: its pair keeps its own card as the main design and lists the alternate after it. A retired one
+        // (taken off PAIR_ALTERNATE_DESIGNS) stays installed and bound for its coins, but no pair offers it.
+        expect(designForPair(asset.key)).toBe(`pair-${asset.key}` as never);
+        const listed=((PAIR_ALTERNATE_DESIGNS as Record<string,readonly string[]|undefined>)[asset.key]??[]).includes(design.key);
+        expect(designsForPair(asset.key).includes(design.key as never)).toBe(listed);
+        expect(pairForDesign(design.key)).toBe(listed?asset:null);
       }else{
         expect(designForPair(asset.key)).toBe(design.key);
         expect(pairForDesign(design.key)).toBe(asset);

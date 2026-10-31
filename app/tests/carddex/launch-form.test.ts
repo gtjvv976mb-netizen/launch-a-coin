@@ -63,10 +63,14 @@ describe("the Launch form derives its card from the pair", () => {
     expect(pairFromSearch({ quote: "pepe" })).toEqual({ pair: "pepe", design: null, notice: "" });
     // Another pair's link wins over a design it does not offer, quietly.
     expect(pairFromSearch({ quote: "tslax", design: "pepe" })).toEqual({ pair: "tslax", design: null, notice: "" });
-    expect(pairFromSearch({ quote: "doge", design: "ronin" })).toEqual({ pair: "doge", design: null, notice: "" });
+    // DOGE offers several cards since 1 November 2026, so a card it does not offer, sent with it, says so (as with SOL).
+    expect(pairFromSearch({ quote: "doge", design: "ronin" })).toEqual({ pair: "doge", design: null, notice: "That card is unavailable. DOGE selected." });
+    expect(pairFromSearch({ quote: "tslax", design: "ronin" })).toEqual({ pair: "tslax", design: null, notice: "" });
+    expect(pairFromSearch({ quote: "doge", design: "pair-doge-alt2" })).toEqual({ pair: "doge", design: "pair-doge-alt2", notice: "" });
+    expect(pairFromSearch({ design: "pair-bonk-alt1" })).toEqual({ pair: "bonk", design: "pair-bonk-alt1", notice: "" });
     for (const design of CARD_DESIGNS) {
       const pair = pairForDesign(design.key);
-      if (pair) expect(pairFromSearch({ design: design.key })).toEqual({ pair: pair.key, design: pair.key === "sol" ? design.key : null, notice: "" });
+      if (pair) expect(pairFromSearch({ design: design.key })).toEqual({ pair: pair.key, design: designsForPair(pair.key).length > 1 ? design.key : null, notice: "" });
     }
     // Links from before the identity designs keep their pair ("doge" DOGE's), unless the design is one of SOL's now
     // ("pepe" was TOAD's, "tide" MOODENG's): those open SOL with that design. A pair not offered now opens on SOL and
@@ -101,7 +105,11 @@ describe("the Launch form derives its card from the pair", () => {
     expect(draftDesign({ quoteKey: "sol", designKey: "pair-doge", ...chosen })).toBeNull();
     expect(draftDesign({ quoteKey: "sol", designKey: "doge", ...chosen })).toBeNull();
     expect(draftDesign({ quoteKey: "sol", ...chosen })).toBeNull();
-    expect(draftDesign({ quoteKey: "doge", designKey: "pair-doge", ...chosen })).toBeNull();
+    // DOGE has a chooser too: a draft keeps the DOGE card it chose, never another pair's.
+    expect(draftDesign({ quoteKey: "doge", designKey: "pair-doge", ...chosen })).toBe("pair-doge");
+    expect(draftDesign({ quoteKey: "doge", designKey: "pair-doge-alt1", ...chosen })).toBe("pair-doge-alt1");
+    expect(draftDesign({ quoteKey: "doge", designKey: "pair-bonk-alt1", ...chosen })).toBeNull();
+    expect(draftDesign({ quoteKey: "tslax", designKey: "pair-tslax", ...chosen })).toBeNull();
     expect(draftDesign({ quoteKey: "doge", designKey: "ronin", ...chosen })).toBeNull();
     expect(draftDesign({ quoteKey: "aave", designKey: "ronin", ...chosen })).toBeNull();
     // A design nobody picked is not a choice: the draft reopens on SOL's main card.
@@ -149,8 +157,11 @@ describe("SOL's card design chooser", () => {
       if (asset.key === "sol") continue;
       for (const option of SOL_DESIGN_OPTIONS) expect(formDesign(asset.key, null, true, option)).toBe(designForPair(asset.key)!);
     }
-    // Only SOL has a chooser (more than one design).
-    expect(OFFERED_PAIRS.filter(asset => designsForPair(asset.key).length > 1).map(asset => asset.key)).toEqual(["sol"]);
+    // SOL and the ten meme pairs with alternates (1 November 2026) have a chooser (more than one design).
+    expect(OFFERED_PAIRS.filter(asset => designsForPair(asset.key).length > 1).map(asset => asset.key)).toEqual(["sol", ...OFFERED_PAIRS.map(asset => asset.key).filter(key => ["bonk", "wif", "pengu", "toad", "fartcoin", "doge", "pnut", "moodeng", "michi", "chillguy"].includes(key))]);
+    expect(formDesign("bonk", null, true, "pair-bonk-alt2")).toBe("pair-bonk-alt2");
+    expect(formDesign("bonk", null, true, "pair-wif-alt1")).toBe("pair-bonk");
+    expect(formDesign("wif", null, true, "pair-bonk-alt2")).toBe("pair-wif");
   });
   test("a design pick: one of SOL's, a change, and it ends a saved launch's own design", () => {
     expect(pickDesign({ pair: "sol", chosen: null, savedDesign: null }, "ronin")).toEqual({ chosen: "ronin", savedDesign: null });

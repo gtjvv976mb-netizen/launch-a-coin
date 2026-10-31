@@ -60,9 +60,9 @@ describe("the creator's print reads on every offered identity design", () => {
   test("dark ink on the name, type and text plates of each offered pair-* preview is at least 4.5:1", () => {
     const inkL = lum(...ink);
     let lowest = Infinity;
-    const offered = OFFERED_PAIRS.map(pair => designForPair(pair.key)!).filter(key => key.startsWith("pair-"));
-    // 105: SOL's own card (its main design since 31 October 2026) and 104 other pairs' identity designs.
-    expect(offered).toHaveLength(105);
+    const offered = OFFERED_PAIRS.flatMap(pair => pair.key === "sol" ? [designForPair(pair.key)!] : designsForPair(pair.key)).filter(key => key.startsWith("pair-"));
+    // 125: SOL's own card (its main design since 31 October 2026), 104 other pairs' identity designs and 20 meme alternates.
+    expect(offered).toHaveLength(125);
     for (const key of offered) {
       const atlas = (renderAssets as Record<string, { previewPath: string }>)[key + (CARD_DESIGNS.find(d => d.key === key)!.category === "stocks" ? "--stock" : "")]!;
       const png = readFileSync(file(atlas.previewPath));
@@ -119,9 +119,10 @@ describe("the creator's print reads on every offered identity design", () => {
   });
 });
 
-describe("SOL's design chooser thumbnails (tools/carddex/make_design_thumbs.py)", () => {
-  test("one 128 px card front for each SOL option, and none for any other design", () => {
-    const options = designsForPair("sol");
+describe("design chooser thumbnails (tools/carddex/make_design_thumbs.py)", () => {
+  test("one 128 px card front for each design a chooser shows (SOL's options, each alternate pair's cards), and none for any other design", () => {
+    const options = OFFERED_PAIRS.flatMap(pair => designsForPair(pair.key).length > 1 ? designsForPair(pair.key) : []);
+    expect(options).toHaveLength(32 + 30);
     const dir = file("/assets/carddex/thumbs");
     expect(readdirSync(dir).sort()).toEqual(options.map(key => `${key}-front-128.webp`).sort());
     for (const key of options) expect(webpSize(readFileSync(file(`/assets/carddex/thumbs/${key}-front-128.webp`))).width).toBe(128);

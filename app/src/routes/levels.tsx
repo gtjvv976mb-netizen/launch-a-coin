@@ -36,15 +36,20 @@ function DesignStage({ card }: { card: CardData }) {
 
 /**
  * Every launchable design, with its pair, in the offered pairs' reading order (pair-groups.ts): SOL's designs together
- * (its main one first), then one for each other pair. `of` counts the pair's designs (more than 1 for SOL only).
+ * (its main one first), then each other pair's own card, followed by its alternates where it has some. `of` counts the
+ * pair's designs (more than 1 for SOL and the meme pairs with alternates).
  */
 type PairedDesign = { design: CardDesign; pair: Readonly<PairAsset>; main: boolean; of: number };
 const PAIRED: readonly PairedDesign[] = ORDERED_PAIRS.flatMap((pair) => {
   const keys = designsForPair(pair.key);
   return keys.map((key, i) => ({ pair, design: getCardDesign(key), main: i === 0, of: keys.length }));
 });
-/** SOL's designs, the one pair with a choice. */
-const SOL_DESIGNS = PAIRED.filter((d) => d.of > 1).length;
+/** SOL's designs. */
+const SOL_DESIGNS = designsForPair("sol").length;
+/** The other pairs that offer more than one card (PAIR_ALTERNATE_DESIGNS), and how many cards those offer in all. */
+const MULTI_PAIRS = ORDERED_PAIRS.filter((pair) => pair.key !== "sol" && designsForPair(pair.key).length > 1);
+const MULTI_COUNTS = new Set(MULTI_PAIRS.map((pair) => designsForPair(pair.key).length));
+const MULTI_EACH = MULTI_COUNTS.size === 1 ? `${[...MULTI_COUNTS][0]} each` : "several";
 /** How a design's pair reads in the table, the strip and the caption: "SOL main" and "SOL" for SOL's designs. */
 const pairTag = (d: PairedDesign) => (d.of > 1 && d.main ? `${d.pair.symbol} main` : d.pair.symbol);
 const pairLabel = (d: PairedDesign) => `${d.design.name}, ${d.pair.symbol} pair${d.of > 1 ? (d.main ? ", main design" : `, one of ${d.of} ${d.pair.symbol} designs`) : ""}`;
@@ -63,7 +68,7 @@ export const Route = createFileRoute("/levels")({
     pageHead({
       path: "/levels",
       title: "Card designs | Launch a Card",
-      description: `${PAIRED.length} card designs: one for each pair, and ${SOL_DESIGNS} for SOL. Pick a pair and your coin keeps its card for good.`,
+      description: `${PAIRED.length} card designs: one for each pair, ${SOL_DESIGNS} for SOL${MULTI_PAIRS.length ? ` and more for ${MULTI_PAIRS.length} meme pairs` : ""}. Pick a pair and your coin keeps its card for good.`,
     }),
   component: Designs,
 });
@@ -111,7 +116,8 @@ function Designs() {
   const paired = PAIRED.find((d) => d.design.key === design.key);
   // pair-usdc: an identity design whose pair launches with another card (USDC keeps Duel Masters). An identity whose
   // pair is not offered at all reads as any design no pair has.
-  const unofferedIdentity = !pair && design.key.startsWith("pair-") && isOfferedPair(boundQuoteForDesign(design.key)?.key);
+  // Only a pair's own identity card reads "Not offered" (its pair launches with another): a retired alternate is "Existing coins only".
+  const unofferedIdentity = !pair && design.key === `pair-${boundQuoteForDesign(design.key)?.key}` && isOfferedPair(boundQuoteForDesign(design.key)?.key);
   // The sample card's quote: the design's pair; a design no pair has shows the quote coins made with it read as.
   const quote = pair ?? defaultQuoteForDesign(design.key);
   const index = shown.findIndex((d) => d.design.key === design.key);
@@ -243,7 +249,7 @@ function Designs() {
                   Same coin. {PAIRED.length} designs.
                 </h1>
                 <p className="mt-1 text-[13px] leading-[1.45] text-slate">
-                  Your pair picks your card. SOL has {SOL_DESIGNS}.{" "}
+                  Your pair picks your card. SOL has {SOL_DESIGNS}{MULTI_PAIRS.length ? `, and ${MULTI_PAIRS.length} meme pairs have ${MULTI_EACH}` : ""}.{" "}
                   <TextLink to="/how" hash="cards">
                     Details
                   </TextLink>
