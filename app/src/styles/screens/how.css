@@ -85,3 +85,12 @@
 .cdx-how__section li::marker { color: var(--color-placeholder); }
 .cdx-how__section .cdx-how__safety { color: var(--color-ink); font-weight: 500; }
 .cdx-how__calm { max-width: 320px; margin-top: 12px; }
+
+/* #official: the token's full mint as plain selectable text in the site's address face, wrapping anywhere at 360px;
+ * the account and token links wrap as text, the external glyph after their last word. */
+.cdx-how__mint { overflow-wrap: anywhere; word-break: break-all; color: var(--color-ink); font: 14px/1.6 var(--font-mono); user-select: all; }
+.cdx-how__ext { overflow-wrap: anywhere; }
+.cdx-how__ext > svg { display: inline-block; margin-left: 4px; vertical-align: -1px; }
+/* The X and token rows: 44px a line (22.5px of text plus 11px above and below), so each link's .mdx-hit area (44px
+ * on touch, 40px under a fine pointer) stays inside its own row and the two never overlap. */
+.cdx-how__section li.cdx-how__linkrow { margin-top: 0; padding-block: 11px; }

@@ -26,6 +26,7 @@ import { GyroChip } from "./card3d/GyroChip";
 import "../../carddex-live.css";
 import { useLiveRecoveryOpen } from "../carddex/live/readiness";
 import { LiveLaunchGuide } from "../carddex/live/LiveLaunchGuide";
+import { OfficialPhoneLinks, OfficialRailLinks } from "../carddex/OfficialLinks";
 import {
   CalmSwitch,
   GenIcon,
@@ -424,8 +425,9 @@ function Rail({
         <RailNav pending={pending} />
       </div>
       <div className="mt-auto flex flex-col gap-3 pt-6">
-        {/* Two quiet links, each at least 24px tall (WCAG 2.5.8 target size): the details page (MintDex's "How MintDex
-            works" item, in the same place) and the terms. On a mainnet launch the first lands on the wallet steps. */}
+        {/* Quiet links, each at least 24px tall (WCAG 2.5.8 target size): the details page (MintDex's "How MintDex
+            works" item, in the same place), the terms, then the official X account and token. On a mainnet launch the
+            first lands on the wallet steps. */}
         <div className="flex flex-col items-start gap-0.5">
           <Link
             to="/how"
@@ -440,6 +442,8 @@ function Rail({
           >
             Terms &amp; risks
           </Link>
+          {/* The official X account and token (lib/carddex/official.ts), new tab each. */}
+          <OfficialRailLinks />
         </div>
         <Suspense fallback={null}>
           <LiveWalletButton />
@@ -978,6 +982,8 @@ export function AppShell({ children, devnetSite = false }: { children: ReactNode
             </div>
           ) : null}
           {children}
+          {/* Phones have no rail: its official links close the page instead. */}
+          <OfficialPhoneLinks />
         </main>
         <MobileTabs pending={pending} />
       </div>

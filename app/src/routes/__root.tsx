@@ -26,7 +26,7 @@ import { Button, ToastProvider } from "../components/mintdex/ui";
 import { markHydrated } from "../components/mintdex/card3d/motion3d";
 import { View3DProvider } from "../components/mintdex/card3d/view3d";
 import { ROUTE_ERROR } from "../lib/mintdex/copy";
-import { SITE_DESCRIPTION, SITE_OG_IMAGE, SITE_OG_IMAGE_ALT, absoluteUrl } from "../lib/mintdex/seo";
+import { SITE_DESCRIPTION, SITE_OG_IMAGE, SITE_OG_IMAGE_ALT, TWITTER_ACCOUNT_META, absoluteUrl } from "../lib/mintdex/seo";
 import { readViewport } from "../lib/mintdex/viewport";
 
 declare const __HF_DESIGN_INSPECTOR__: boolean;
@@ -103,6 +103,7 @@ function buildHead(meta: AppMeta, devnetSite = false, notFound = false) {
       { name: "twitter:card", content: ogImage ? "summary_large_image" : "summary" },
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: description },
+      ...TWITTER_ACCOUNT_META,
       ...(ogImage
         ? [
             { property: "og:image", content: ogImage },

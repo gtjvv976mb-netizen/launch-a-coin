@@ -39,6 +39,7 @@ import { getPairAsset } from "../lib/carddex/pairs";
 import { tierForLevel } from "../lib/mintdex/tiers";
 import { EXPLORE_COINS, HOME_COPY, WORDS } from "../lib/mintdex/copy";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_ORIGIN, pageHead } from "../lib/mintdex/seo";
+import { OFFICIAL_SAME_AS } from "../lib/carddex/official";
 import "../home-motion.css";
 import { Card3DView } from "../components/mintdex/card3d/Card3D";
 import { Engine, motionLevel, type Body } from "../components/mintdex/card3d/motion3d";
@@ -62,6 +63,8 @@ const HOME_JSON_LD = JSON.stringify({
       name: SITE_NAME,
       url: `${SITE_ORIGIN}/`,
       logo: `${SITE_ORIGIN}/assets/brand/carddex-512.png`,
+      // The official X account and the site's own pump.fun token page (lib/carddex/official.ts).
+      sameAs: [...OFFICIAL_SAME_AS],
     },
     {
       "@type": "WebSite",
@@ -85,7 +88,7 @@ export const Route = createFileRoute("/")({
       title: "Launch a Card: every coin is a one-of-one card",
       description: SITE_DESCRIPTION,
     }),
-    // SEO-5: what the site is, from facts it already states. No sameAs: it links no social account.
+    // SEO-5: what the site is, from facts it already states. sameAs: its official X account and pump.fun token page.
     scripts: [{ type: "application/ld+json", children: HOME_JSON_LD }],
   }),
   component: Home,

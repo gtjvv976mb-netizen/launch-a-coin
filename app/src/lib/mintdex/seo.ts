@@ -5,12 +5,20 @@
 // request.url on the server is NOT the public origin: always build absolute URLs from SITE_ORIGIN. Once mintdex.fun
 // serves the mainnet build (site-host.ts MAINNET_SITE_LIVE), the devnet build's own links move to devnet.mintdex.fun.
 
+import { OFFICIAL_X_HANDLE } from "../carddex/official";
 import { MODE_COPY } from "./copy";
 import { IS_DEVNET, IS_SIM } from "./mode";
 import { DEVNET_SITE_ORIGIN, MAINNET_SITE_LIVE, MAIN_SITE_ORIGIN } from "./site-host";
 
 export const SITE_ORIGIN = IS_DEVNET && MAINNET_SITE_LIVE ? DEVNET_SITE_ORIGIN : MAIN_SITE_ORIGIN;
 export const SITE_NAME = "Launch a Card";
+
+/** The site's X account (lib/carddex/official.ts) as twitter:site and twitter:creator, on every page (root) and in
+ *  each route's own tags (pageHead). */
+export const TWITTER_ACCOUNT_META = [
+  { name: "twitter:site", content: OFFICIAL_X_HANDLE },
+  { name: "twitter:creator", content: OFFICIAL_X_HANDLE },
+] as const;
 
 /**
  * The site description (root default, Home, og:description). It overrides app-meta.json, which the marketplace
@@ -112,6 +120,7 @@ export function pageHead(input: PageHeadInput): { meta: HeadMeta[]; links: HeadL
     { title: input.title },
     { property: "og:title", content: input.title },
     { name: "twitter:title", content: input.title },
+    ...TWITTER_ACCOUNT_META,
     { property: "og:url", content: url },
   ];
   if (input.description) {

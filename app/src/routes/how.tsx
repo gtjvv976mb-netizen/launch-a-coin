@@ -2,6 +2,7 @@ import { Link, createFileRoute, useRouterState } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
 import { WALLET_NOTICE_COPY, WALLET_NOTICE_TITLE } from "../components/carddex/live/wallet-notice";
+import { OfficialLinksDetails } from "../components/carddex/OfficialLinks";
 import { CalmSwitch, PageFrame, PageHeader, TextLink } from "../components/mintdex/ui";
 import { WORDS } from "../lib/mintdex/copy";
 import { pageHead } from "../lib/mintdex/seo";
@@ -25,7 +26,7 @@ const SOME_DIRECT_HELD = OFFERED_PAIRS.filter(isDirectPair).some((asset) => main
  * carry the fewest words that let someone act, and each links here with one "How it works" or "Details" link).
  * MintDex's reading format, like /legal: the title row, a section list (a column from 1024px, a row on phones)
  * beside one plinth panel. The panel opens with the old guide's three steps, then one anchored section per topic, in
- * the order a newcomer needs them (#launch, #pairs, #cards, #fees, #trading, #wallet, #recovery and #motion). From 1024px the panel scrolls on
+ * the order a newcomer needs them (#launch, #pairs, #cards, #fees, #trading, #wallet, #recovery, #motion and #official). From 1024px the panel scrolls on
  * its own; phones scroll the page. A #hash link lands its section at the top and moves focus to its heading.
  * Terms, privacy and risks stay at /legal. Styles: styles/screens/how.css.
  */
@@ -211,6 +212,12 @@ const SECTIONS: Section[] = [
         <CalmSwitch size="md" className="cdx-how__calm" />
       </>
     ),
+  },
+  {
+    id: "official",
+    nav: "Official",
+    title: "Official links",
+    body: <OfficialLinksDetails />,
   },
 ];
 
