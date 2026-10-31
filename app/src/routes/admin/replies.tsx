@@ -66,6 +66,14 @@ function SignIn() {
 }
 
 const minutes = (ms: number) => Math.max(0, Math.ceil(ms / 60_000));
+/** Why a suggestion came back empty (x-replies.server.ts draftSuggestion), in words for the owner. */
+const MISS_MESSAGE: Record<string, string> = {
+  skip: "Claude skipped this one: it looked like a scam, hate or harassment. Write your own or hide it.",
+  filtered: "The draft talked about prices or buying, so it was dropped. Try again or write your own.",
+  refusal: "Claude declined this post. Write your own or hide it.",
+  cut_off: "The draft ran out of room. Try again.",
+  empty: "No suggestion came back. Try again or write your own.",
+};
 const compact = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
 function age(post: RankedXReplyPost) {
   return post.ageMinutes < 1 ? "just now" : post.ageMinutes < 60 ? `${post.ageMinutes} min ago` : `${Math.floor(post.ageMinutes / 60)} h ago`;
@@ -142,18 +150,18 @@ function Setup() {
 
 function ReplyCard({ post, canSuggest, onDone }: { post: RankedXReplyPost; canSuggest: boolean; onDone: (id: string) => void }) {
   const [text, setText] = useState("");
-  const [busy, setBusy] = useState<"suggest" | "done" | "hidden" | null>(null);
+  const [busy, setBusy] = useState<"suggest" | "promote" | "done" | "hidden" | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const length = replyLength(text);
   const tooLong = length > REPLY_LIMIT;
   const field = `reply-${post.id}`;
-  async function suggest() {
-    setBusy("suggest"); setMessage(null);
-    const result = await suggestReplyText({ data: { tweetId: post.id } }).catch(() => ({ ok: false as const, error: "Suggestions could not be reached." }));
+  async function suggest(mode: "natural" | "promote" = "natural") {
+    setBusy(mode === "promote" ? "promote" : "suggest"); setMessage(null);
+    const result = await suggestReplyText({ data: { tweetId: post.id, mode } }).catch(() => ({ ok: false as const, error: "Suggestions could not be reached." }));
     setBusy(null);
     if (!result.ok) return setMessage(result.error);
     if (result.suggestion) setText(result.suggestion);
-    else setMessage("No suggestion for this post. Write your own or hide it.");
+    else setMessage(MISS_MESSAGE[result.miss ?? "empty"] ?? MISS_MESSAGE.empty);
   }
   async function mark(markAs: "done" | "hidden") {
     setBusy(markAs); setMessage(null);
@@ -182,7 +190,8 @@ function ReplyCard({ post, canSuggest, onDone }: { post: RankedXReplyPost; canSu
       </p>
       {message ? <p role="status" className="cdx-replies__notice">{message}</p> : null}
       <div className="cdx-replies__actions">
-        {canSuggest ? <Button size="sm" variant="outline" pending={busy === "suggest"} pendingLabel="Drafting" disabled={!!busy} onClick={suggest}>Suggest a reply</Button> : null}
+        {canSuggest ? <Button size="sm" variant="outline" pending={busy === "suggest"} pendingLabel="Drafting" disabled={!!busy} onClick={() => suggest("natural")}>Suggest a reply</Button> : null}
+        {canSuggest ? <Button size="sm" variant="outline" pending={busy === "promote"} pendingLabel="Drafting" disabled={!!busy} onClick={() => suggest("promote")}>Suggest a promo reply</Button> : null}
         {text.trim() && !tooLong ? (
           <a className={buttonClass({ size: "sm" })} href={replyIntentUrl(post.id, text.trim())} target="_blank" rel="noopener noreferrer">Reply on X</a>
         ) : (

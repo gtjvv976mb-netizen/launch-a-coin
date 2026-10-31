@@ -35,6 +35,6 @@ export const getReplyFeed = createServerFn({method: "GET"}).handler(() => attemp
 export const markReplyPost = createServerFn({method: "POST"}).validator(z.object({tweetId, mark: z.enum(["done", "hidden"])})).handler(({data}) => attempt("mark", async () => {
   sameSite(); return replies.markReplyPost(session(), data);
 }));
-export const suggestReplyText = createServerFn({method: "POST"}).validator(z.object({tweetId})).handler(({data}) => attempt("suggest", async () => {
+export const suggestReplyText = createServerFn({method: "POST"}).validator(z.object({tweetId, mode: z.enum(["natural", "promote"]).default("natural")})).handler(({data}) => attempt("suggest", async () => {
   sameSite(); return replies.suggestReply(session(), data);
 }));
