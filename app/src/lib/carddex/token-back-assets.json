@@ -443,8 +443,8 @@
   "pair-tslax": {
     "designKey": "pair-tslax",
     "path": "/assets/carddex/token-backs/pair-tslax.png",
-    "sha256": "6c661e7330a5fe1d7a16a29b4ef4dfe23935fa9f71772bfa7da159e9417c1e95",
-    "sourceSha256": "f62c2bba6ec95f7cc059a7d94bd027ab97f0d9b71ed8a6e39beae2c76794ddfb",
+    "sha256": "22f8610697564c0b488d425183d6c65b0b91c2676c80621a4e1c0ce951c51e1f",
+    "sourceSha256": "92300733b8838273460e1ef95c6a02d66ef6c3ff9e46d5a25ad8d86d43b2e3cd",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -479,8 +479,8 @@
   "pair-gmex": {
     "designKey": "pair-gmex",
     "path": "/assets/carddex/token-backs/pair-gmex.png",
-    "sha256": "5d6da3c1d73b58c5bdfa42fbdb6321ef8132e5ca2c89efb49202670a815247d6",
-    "sourceSha256": "376068483f6935146c4c26d5d8862c8b191a28fc02368304ff375799bdcd7a17",
+    "sha256": "180f3e61a9c87afb363b78deab0d2f3c658ee5d4c7f3a10b632ab9b355f58bb2",
+    "sourceSha256": "6fa220e9095ddba268b7af4e67a5cfb6409065c3ca6e533ce196abda154fa2ee",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -488,8 +488,8 @@
   "pair-nvdax": {
     "designKey": "pair-nvdax",
     "path": "/assets/carddex/token-backs/pair-nvdax.png",
-    "sha256": "1ef5185f4789a3de1889dbeebcea28a2e3e229f038215c7443d436adec124824",
-    "sourceSha256": "0c5ce7e0330ee68e739964a2572d7cd13517d39ea2129217359812ae853d0d3f",
+    "sha256": "d45c15db3cba6945d3e833bc2e86c1b00a433ee1bf1a860a88959df211ef57f4",
+    "sourceSha256": "31afcd4b03e25c3c55a59b7d9b07574e17369444faab629398dc305491632f23",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -497,8 +497,8 @@
   "pair-aaplx": {
     "designKey": "pair-aaplx",
     "path": "/assets/carddex/token-backs/pair-aaplx.png",
-    "sha256": "07b0622f53df3e8db4d054bf859dfc26d10482a0652cfad2485603bc5010ab92",
-    "sourceSha256": "ead0438f2c47f85680630157b89bf3b57b1493cb941535f352e76626d4dcbca9",
+    "sha256": "a1bee31dd7dca3914c88bbe66c181cc3fd5054ba695cfd216889f74d8d57cfb1",
+    "sourceSha256": "e626a02056c0c7d5ad41316115eae5430f28e5de520bb638f9b1b0f4c0fbbdb9",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -506,8 +506,8 @@
   "pair-mstrx": {
     "designKey": "pair-mstrx",
     "path": "/assets/carddex/token-backs/pair-mstrx.png",
-    "sha256": "212bc1869181f42a917f72781423dad6288295172a1bf36851ef02c36f59e5b0",
-    "sourceSha256": "ecd3bcfb34a89de8aaa9b5d7b2e58cfe381db19c54a914fcd6ea3db67849714a",
+    "sha256": "a5ea8a355223a18b675d87e804f2cd41223a759a7ea8d376a650dc861f1be2fb",
+    "sourceSha256": "334faad3b51ca25fb0f20cc61e502a97bb00466950fce3f1ac780fad8534886e",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -515,8 +515,8 @@
   "pair-coinx": {
     "designKey": "pair-coinx",
     "path": "/assets/carddex/token-backs/pair-coinx.png",
-    "sha256": "24b74f4db6b913a027b4716733bc5058619be0aa91e27fea5a3102e5ff71f010",
-    "sourceSha256": "b92077f9e74324be4f0598ab3437f88ebadcce7e97c3c6141a57d5d4af028eb3",
+    "sha256": "35921e2428e52fb4a6df0268d9117ce68b3535f8ad5d5c6e05b95e343d3bf84b",
+    "sourceSha256": "469377997986fc123cbc5eae9ed9ce0861dfec37060e18a28ac7d4c8d7805b62",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -524,8 +524,8 @@
   "pair-amc": {
     "designKey": "pair-amc",
     "path": "/assets/carddex/token-backs/pair-amc.png",
-    "sha256": "8f36e24f9d5757ff37fee8aa867a2c8e7e79088e37d5565e21b477279d77df96",
-    "sourceSha256": "a12eaea0a4133823d92d6f3470d5551030bda9175e41bb418f32b284e4778f44",
+    "sha256": "76c488674d0054a8cf8e961f68d8551b3031292b7b2cd60d316cdfc4ebb17278",
+    "sourceSha256": "319bbb56385c278e4de01f1e594e83d8acd43db18685c76b5e44d4d8f757b1a7",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -542,8 +542,8 @@
   "pair-eth": {
     "designKey": "pair-eth",
     "path": "/assets/carddex/token-backs/pair-eth.png",
-    "sha256": "6bb339ffac574e61ebe4973cb4a84379dd28d1273e16536541cab6f0f4b4b6d5",
-    "sourceSha256": "500c73f29b6149b3a8c1a14a94760266004bf47bb92e328ec27a9d50eaff6799",
+    "sha256": "01b85c9606c8ae5a4511cb5a23634ee1419499388903b076be9f7ca1fe8c76e1",
+    "sourceSha256": "a2e9e7144efb5ecaacf43557ef6f3f0f49a2b2a3cbbfabc3cb384ebdb9f1df9a",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -578,8 +578,8 @@
   "pair-zec": {
     "designKey": "pair-zec",
     "path": "/assets/carddex/token-backs/pair-zec.png",
-    "sha256": "cf1fdbaf67b58f9adf0668d5c0e29e772eb47cd067a0e7c9173ac21810c1cb52",
-    "sourceSha256": "130bfae148aebf02093245edddefc3f56e8fdc66381f3c71c67accb3d23b3d75",
+    "sha256": "2ee237b4fcc4291e1e2a617770ff32aa8f6f7ba07e4888d4e352e30f64180662",
+    "sourceSha256": "1dc84333186c692960751a101f57c9b461cecf0ccb042a334565dcb41101eac1",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -587,8 +587,8 @@
   "pair-near": {
     "designKey": "pair-near",
     "path": "/assets/carddex/token-backs/pair-near.png",
-    "sha256": "27d5bd2fc6c43ecf2e87238375343a102e082cf97168a3c1a10b676392e08e67",
-    "sourceSha256": "bb7b5f8395cc28396c1b0ff0c259b088d5e17dbe4d786072ea4f13859cb849fa",
+    "sha256": "165d97af8a1a3e068a8e69a724aa1fc602f5cae71f01020394058d1c7ca0a18e",
+    "sourceSha256": "42c50b5541f184039b08fd08d6c16fd8f75160e1f12edd693bfc3cfb56b808f8",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -596,8 +596,8 @@
   "pair-xrp": {
     "designKey": "pair-xrp",
     "path": "/assets/carddex/token-backs/pair-xrp.png",
-    "sha256": "7ab5e47223711acd69e4f7529fe02e34d48db1ee1e9a7c197b7e8b08ffc7f9e1",
-    "sourceSha256": "8f567a2484d973f9336b0304a3402b9900c4b64ba9ae09c21f85fcd4456f3007",
+    "sha256": "ae55243dceb8f42405ee61eba4d5ebaf9e060f9e8a2bbdbf6e2434282e7802d0",
+    "sourceSha256": "ff95b8f3caf126022b7f5d6ff926605e7c2c7ff717f5f1635afadd8d42e34a37",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -605,8 +605,8 @@
   "pair-xmr": {
     "designKey": "pair-xmr",
     "path": "/assets/carddex/token-backs/pair-xmr.png",
-    "sha256": "898f24929927c55dd07a8afd1532f21b2c68089337fa8079d33e34d0c25b0de0",
-    "sourceSha256": "4401207924f628780d4d6844a603af9b068b366865ea6735bc41eb5726484044",
+    "sha256": "6589847338dfa653d574e3c70fc95b5c0d5b17a3dbdb9f758a370dbe043591f0",
+    "sourceSha256": "6a45f33cd61b24eb87c5262969914fc7a43d27167e40f3046071eff42a09972e",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -614,8 +614,8 @@
   "pair-sui": {
     "designKey": "pair-sui",
     "path": "/assets/carddex/token-backs/pair-sui.png",
-    "sha256": "46c0d52399f21dc76c7125188b93d4d836a477322aff0cf39dd3704c6bd32af4",
-    "sourceSha256": "dbfd52e3a01f271874d31e3172ac8d142684e878f253a48cdc598cca76bdb0bc",
+    "sha256": "9f540208a896c1886e32b362e2cf263d0733a40551fb6126f8d82a2c11c0cbae",
+    "sourceSha256": "3eceae414ee80bc77662f633c81a4563623ceec32b5ac985eeb34d13cc904fe1",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -623,8 +623,8 @@
   "pair-arb": {
     "designKey": "pair-arb",
     "path": "/assets/carddex/token-backs/pair-arb.png",
-    "sha256": "eaa590d63799e73bd8ce9fad576d3ed31f313504116a804bc4c1e7c88131047a",
-    "sourceSha256": "91b11aa2dce8457e1c160cb2b9f0ddc24f377c88ce5f9e9f7574f4d416e57dbc",
+    "sha256": "b19e49354161ab015b193245dd1beec45b17e95242c1d49bd4fcd1bdcc9fb8bf",
+    "sourceSha256": "6b4b773109d27db0791dd800ae8ea1db95eebb6e2a3934f041e10875b76626de",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -650,8 +650,8 @@
   "pair-fartcoin": {
     "designKey": "pair-fartcoin",
     "path": "/assets/carddex/token-backs/pair-fartcoin.png",
-    "sha256": "e44c7278cb7004d7a98f1067cdb9175726e500d5faf64800eedc2cd780f581c3",
-    "sourceSha256": "b6b2ec8728fb2f319eb1e9338dbc1cda6056435b77da010ac1c27c043953d47d",
+    "sha256": "9750b1321f335370f0f4ec4d6cd5b19c59c78d8a19101ccb4d0eb1b02056fed9",
+    "sourceSha256": "73beaebc0f2eaccd7477e00d1a7d6bc11a17a8d170843b090e982378c64512f3",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -695,8 +695,8 @@
   "pair-cashcat": {
     "designKey": "pair-cashcat",
     "path": "/assets/carddex/token-backs/pair-cashcat.png",
-    "sha256": "e24f9f9d16d2617b01ad5451ea9b54782fcf84e500306efe01d49bdeb68b6727",
-    "sourceSha256": "e60845dd439ca4685a54312de3537c663c30472dbbf9ca05ebdcbef4e9727ce8",
+    "sha256": "a495d4a7eca867eb6f4631626df8d59cc5522e70d2f4bf13b2ad3144d1367cfd",
+    "sourceSha256": "4070d10e0609be1bf73a9be648bf2b560b6fcf6a2cc2d8e035c3717edc942909",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -740,8 +740,8 @@
   "pair-claw": {
     "designKey": "pair-claw",
     "path": "/assets/carddex/token-backs/pair-claw.png",
-    "sha256": "688ac645c75888b58dd94f1585a3b6ad3be85014d755d4bd54e24a8694e1c3e1",
-    "sourceSha256": "75c51237015a20697cb71ffdd6c1324f54cc7dbec2143bf9f7cfc3bf02347212",
+    "sha256": "15ddca70b9eef91b0f349cb2088bdf72659d497001a6d0e6464bb2645e88da1a",
+    "sourceSha256": "b49d89853b52adc295fc60685905eff0cb20fac169a5dcde593144e65042f451",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -785,8 +785,8 @@
   "pair-pumpcade": {
     "designKey": "pair-pumpcade",
     "path": "/assets/carddex/token-backs/pair-pumpcade.png",
-    "sha256": "8c1dee1646f0580ff99011700473d746781355a61db68178467a19f38bb3f536",
-    "sourceSha256": "252f19b1f6f6c10f78762b6c94933063f4a7ecd06711c096c843332994bf79df",
+    "sha256": "557b6517e62b21831db88afa26b9f1956e1456222fdf874ae97d8b058450a9a1",
+    "sourceSha256": "6e363a501499388b4f94b9084d3527668d345e15d61436b6efd8b51e42728bc3",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -803,8 +803,8 @@
   "pair-ape": {
     "designKey": "pair-ape",
     "path": "/assets/carddex/token-backs/pair-ape.png",
-    "sha256": "2710b24662f98a44204f10361ab7ff32916376952768cfaececd7c90a305ea32",
-    "sourceSha256": "227db82409d6598593bc8496bc6077558437fb9f04e05283c02daf23ac18c1a3",
+    "sha256": "c53ae0a08ff1742a4b7adb263a87f09913bb39a960cf3ef4006fb2e0a21d26dc",
+    "sourceSha256": "eb3b2e2bfe15b9b265c4e84caa10b31bc6562b27426e7e478acf91e863aa8b40",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -839,8 +839,8 @@
   "pair-cards": {
     "designKey": "pair-cards",
     "path": "/assets/carddex/token-backs/pair-cards.png",
-    "sha256": "264f2dadd94eaf407d6313f9a9fae6b7936c2f01bc6212cb6a6e7cd817a2da1a",
-    "sourceSha256": "b901b5f8852cb0936ae7a7d81438a8cd30817b142e3ba727adb0db8761aeae63",
+    "sha256": "8f65bad4f29a5880dafb6688dc91f7bb08cecfb0e6de2f7aa37b69de80f54485",
+    "sourceSha256": "49727f9d39a58201ff158d8ca7db3eed9602a61c86cb67433453c222de5c7758",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -848,8 +848,8 @@
   "pair-goat": {
     "designKey": "pair-goat",
     "path": "/assets/carddex/token-backs/pair-goat.png",
-    "sha256": "d26d4d91e9462b56cea12aa14abfec6d4bdc052dd0f0b1211d3feac07eb296a3",
-    "sourceSha256": "25dfc002913620177ce4183d75360c8e2d39c680df9972877e9ab6f116045ac4",
+    "sha256": "b7372a0ee494fd46f760890b121fd5da43ecb218df92aa6002190ab7a5fb3ec6",
+    "sourceSha256": "ce3255697c61754460c704bb644aeef590f0050dde32feca8bf85c4f6181586c",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -947,8 +947,8 @@
   "pair-gork": {
     "designKey": "pair-gork",
     "path": "/assets/carddex/token-backs/pair-gork.png",
-    "sha256": "41bfb38c20dedffbcec331a405b1e48880af3f516de8440dae355a3db38aadc0",
-    "sourceSha256": "d65356036aa515e0fe9e8d11738c8f957dde9b2b923f6339f633efb29a027d93",
+    "sha256": "f7033311484a096f00205d7683223019ecda98471d888b024f18fe7a6b043fb9",
+    "sourceSha256": "e0c26e2805ada71844781a9b9ab1fbbdde9b4591668c120ac9ad7a3523c6d3ad",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -992,8 +992,8 @@
   "pair-kins": {
     "designKey": "pair-kins",
     "path": "/assets/carddex/token-backs/pair-kins.png",
-    "sha256": "547347a05b9e0206268f397bcab600785640a9431ed13431d1527ba2e328163f",
-    "sourceSha256": "e2a56c88166ab58ec7124c6792598baba921397b4553a737bf26f18fcc82a13e",
+    "sha256": "2bdb06aac98f2b575340fd2f4be1c12b7b4323c406c43ee5eaeaf6dec314808e",
+    "sourceSha256": "fdae83826281db3e6fe7a506b726125e30ca60560c10fc445f1ad09691cfbb08",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -1037,8 +1037,8 @@
   "pair-useless": {
     "designKey": "pair-useless",
     "path": "/assets/carddex/token-backs/pair-useless.png",
-    "sha256": "86f477b03c06489860c9aa414a93518f53639be0b756d21dc6058f9d847aabf9",
-    "sourceSha256": "ea30c4d9806dfed4559df8ba88eb8b7b279114a17a2d0e3375aec2aaba6f7927",
+    "sha256": "cddbf83504be66fb37756aab6bfc5cff849d858428bfa69a04da3b7bb360da87",
+    "sourceSha256": "d85e72a424e668bd4dc1f58fc10f3c1a9ecd21b3fd5b1e482ba68d39d6f662a1",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -1055,8 +1055,8 @@
   "pair-pippin": {
     "designKey": "pair-pippin",
     "path": "/assets/carddex/token-backs/pair-pippin.png",
-    "sha256": "722b67ad4552bf3b0769492a103dbfb16ef9334a708633daddee3bd3400092d5",
-    "sourceSha256": "ebb3f8374a7bd93c747a63cf05e5243ae1929746fc3353752d4cb24adea74234",
+    "sha256": "3a4b7d1b1a3dc11e62726f41b7db23a428c1aebe12f5d3eae6d1208daaa7b7a1",
+    "sourceSha256": "8efe02c5db423b0ea6fa04c1158caf14efbe81086204f57c96371435749f7187",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -1082,8 +1082,8 @@
   "pair-tao": {
     "designKey": "pair-tao",
     "path": "/assets/carddex/token-backs/pair-tao.png",
-    "sha256": "413f2c4c4791705d9f0280fed583701e5adde998aafedf3d48a74db42030309d",
-    "sourceSha256": "71d29ddcf6a7757e5032aa409ab3e07bda5a31737c8fed408ca3b757c6bf49b2",
+    "sha256": "eee36bbc4007e435b31d13f645f16588870050bdefcf3b2161420f8441d97c26",
+    "sourceSha256": "7c467d411cf749c9b5fa47c8e5ee961e9c9b4c4c6d20e6a786e96184bb5c4c3a",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -1091,8 +1091,8 @@
   "pair-otc": {
     "designKey": "pair-otc",
     "path": "/assets/carddex/token-backs/pair-otc.png",
-    "sha256": "e884d3cabd8aa6e18a497c7a152ab49d79805ebe30cc6f054a458cc13d6731a7",
-    "sourceSha256": "c984d49c44e49038f32eb240bd13c73cd05f786abe2adb1192ab5203dbc37cc5",
+    "sha256": "0605468800eb332221220e9f123226afcc71b14426ad00126bc8cb69bf8b8f24",
+    "sourceSha256": "6585f3555fedd4de8bb86904be2a3c232aae6465c82a4df146f9b9e38a1411b6",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -1118,8 +1118,8 @@
   "pair-manifest": {
     "designKey": "pair-manifest",
     "path": "/assets/carddex/token-backs/pair-manifest.png",
-    "sha256": "8a422e1bcaa13697b4a091488f3b41f0fb4f5b3aa67c1608838494844f790e66",
-    "sourceSha256": "757592d60909574bd0bd90db84cbcda8ac3734873532cbe2ca5deb68ba302202",
+    "sha256": "0146ab2ae20a2a56006a1e6593e80d93d07e697163fd22ae3709cff89b80be62",
+    "sourceSha256": "3b2cdc6dd980ede134668df6559df48c1d6e828a514c886e2f6523f182af2929",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -1127,8 +1127,8 @@
   "pair-zauth": {
     "designKey": "pair-zauth",
     "path": "/assets/carddex/token-backs/pair-zauth.png",
-    "sha256": "b749fcd63964993d0ce300f85dd55a2efdb49f89d83f8cb3da1107e482adcaeb",
-    "sourceSha256": "e90563e77f73d285d0e728b548e8d0963b1f14ae1cb515ef2cf76de7cf41f6c8",
+    "sha256": "3570d4c8f7e7725e50d052651b4ff0bd1d973f2be449e0a6f2c799f03f85d178",
+    "sourceSha256": "633f02448753c8b8f5cbbd7e86e48dfcd2d8cbb59b483ce8f405e1726931511d",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -1136,8 +1136,8 @@
   "pair-stonk": {
     "designKey": "pair-stonk",
     "path": "/assets/carddex/token-backs/pair-stonk.png",
-    "sha256": "eea74713500d8127f2729e248d694d8324079a0e78d820145c71f1df480916e0",
-    "sourceSha256": "9dcb301130f107be6855234b10432c1839514dd4144100b4e270549b94ab73d1",
+    "sha256": "4a33a87a6c578898c3f0346ff0355dc8d8022aa13b777ad8484e7a6e8486860b",
+    "sourceSha256": "8a31a9ab20156662905a6f0487c902fb79d1d16d9800b5aebf532693882b8225",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -1154,8 +1154,8 @@
   "pair-paid": {
     "designKey": "pair-paid",
     "path": "/assets/carddex/token-backs/pair-paid.png",
-    "sha256": "9dbd3b72a92b3c8016a6ff2f0072790f32265d1557dd98b51471af33f8c40226",
-    "sourceSha256": "d98a9a32c4ac2d59c6a74b7e6c741862211d8f9f6394d6d01f697de5aab64fcb",
+    "sha256": "1dcdf8de7b5bfc631060b1bc3a7901182442d9da525a22ab5a436119fd6de52a",
+    "sourceSha256": "60cc913b3caf8743d986142d4dfdafad042e6d388a07ab89639afc0ee5f0899a",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -1163,8 +1163,8 @@
   "pair-pill": {
     "designKey": "pair-pill",
     "path": "/assets/carddex/token-backs/pair-pill.png",
-    "sha256": "3acb28f257ae872ffbdca3828ebe9c71310dd7d970c287c67b956663c83495dc",
-    "sourceSha256": "97d9b89bf2fb229b11bbecb7691e29e437ae5f9ac3bd0fef0e4bd7d7f5d2c6b0",
+    "sha256": "66e8a8ae5166dc6213e1d7cd3e65739c5abe0dcb6d8032335d7ae165e5e560df",
+    "sourceSha256": "bc97db09d8e455418e20a59a528732c56ea1cdacc92ae11d6c73788b3e363e6a",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -1181,8 +1181,8 @@
   "pair-npc": {
     "designKey": "pair-npc",
     "path": "/assets/carddex/token-backs/pair-npc.png",
-    "sha256": "b80c0a24db21283507751b541aeb38d15cb5f95191752d45c8bd98b17b37211b",
-    "sourceSha256": "84d1c37a8f94116c7d8a37c9964580f29e6628307aba68d6f050a64b9788ed02",
+    "sha256": "87e6b4f93aaa356ffbb4fa8f44b7d6af3c5c1d91452d006f7e152edc01f4b08e",
+    "sourceSha256": "c00608f3425e3bf5fa1a9140f0e03d8a6942ccfab8f064dec6c25a8c5bcbbd97",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -1190,8 +1190,8 @@
   "pair-wojak": {
     "designKey": "pair-wojak",
     "path": "/assets/carddex/token-backs/pair-wojak.png",
-    "sha256": "2f4f26e7c10f3f786702dd799ea9e088729df2a455048b700633f8583944ec25",
-    "sourceSha256": "2c05851ffc3ac1361f8f811a0b91621ce6aa3b1dd9c9d6d2a06a5bbe2fdca566",
+    "sha256": "eec86e4b90fd090a6fbcfbfc8a283cecd2e3773458aa655c78526bb47e5c5f0e",
+    "sourceSha256": "b8ee79e8dca13a4ec6d660171679caf2e97dee3bd62328013f43d1c4a40128a2",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
@@ -1253,8 +1253,8 @@
   "pair-percolator": {
     "designKey": "pair-percolator",
     "path": "/assets/carddex/token-backs/pair-percolator.png",
-    "sha256": "0708d44a487477b887bcbe8dad427a54d5a9c7cedbe52e377516290a4c2859ce",
-    "sourceSha256": "5c8bf8460f3409e845a80a6d6dbd41f53ab86e6a268525ae5bbe25f75068aea5",
+    "sha256": "db3d8c3efb06ba3d337e5822398990715cdcc5e7234d6020c0d3b499a342897b",
+    "sourceSha256": "f9f8af39eb5b8f24041ddb49f1c1403f06ef8667f2cde4d3783a2d21ef93d5ef",
     "width": 630,
     "height": 880,
     "conversionVersion": "launchacard-token-back-png-v1"
