@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { CONFIRMED_DIRECT_PAIRS, DEFAULT_PAIR, DIRECT_PAIR_HELD, NOT_OFFERED_PAIR, OFFERED_PAIRS, TRADED_PAIRS, TRANSFER_FEE_PAIR, TRANSFER_FEE_PAIRS, chargesTransferFee, mainnetPairHold, mainnetPairRefusal, PAIR_ASSETS, PAIR_ASSETS_VERIFIED_AT, PAIR_ASSET_KEYS, UNPAIRED_DESIGN, allowedQuotesForDesign, completeLaunchPair, defaultQuoteForDesign, designForPair, designsForPair, getPairAsset, pairDesignProblems, solOnlyDesign, getTradingPair, isDirectPair, isOfferedPair, pairForDesign, resolveLaunchQuote, resolveNewLaunchPair } from "../../src/lib/carddex/pairs";
+import { CONFIRMED_DIRECT_PAIRS, DEFAULT_PAIR, DIRECT_PAIR_HELD, NOT_OFFERED_PAIR, OFFERED_PAIRS, TRADED_PAIRS, TRANSFER_FEE_PAIR, TRANSFER_FEE_PAIRS, chargesTransferFee, mainnetPairHold, mainnetPairRefusal, PAIR_ASSETS, PAIR_ASSETS_VERIFIED_AT, PAIR_ASSET_KEYS, UNPAIRED_DESIGN, allowedQuotesForDesign, completeLaunchPair, defaultQuoteForDesign, designForPair, designsForPair, getPairAsset, pairDesignProblems, solOnlyDesign, otherPairDesign, getTradingPair, isDirectPair, isOfferedPair, pairForDesign, resolveLaunchQuote, resolveNewLaunchPair } from "../../src/lib/carddex/pairs";
 import { DESIGN_QUOTE_KEYS, LEGACY_DESIGN_QUOTE_KEYS, MEME_PAIR_PRESETS, PAIR_DESIGNS, PAIR_DESIGNS_2026_10_30, PAIR_IDENTITY_DESIGNS, SOL_DESIGN_OPTIONS } from "../../src/lib/carddex/design-pairings";
 import { HELD_PAIR_DESIGNS, WITHHELD_PAIR_DESIGNS } from "../../src/lib/carddex/pair-designs";
 import accepted from "./fixtures/launch-quote-acceptance-f603773.json";
@@ -149,7 +149,7 @@ describe("the pair picks the card", () => {
       expect(resolveNewLaunchPair({cardTemplate: design})).toEqual({asset, designKey: design});
       // Any other pair's design with this pair is refused; so is the right design with another asset's mint.
       const other = OFFERED_PAIRS.find(o => o.key !== asset.key && o.key !== "sol")!;
-      expect(() => resolveNewLaunchPair({quoteAssetKey: asset.key, cardTemplate: designForPair(other.key)!})).toThrow(`The ${asset.symbol} pair comes with its own card`);
+      expect(() => resolveNewLaunchPair({quoteAssetKey: asset.key, cardTemplate: designForPair(other.key)!})).toThrow(asset.key === "sol" ? otherPairDesign(other.symbol) : `The ${asset.symbol} pair comes with its own card`);
       expect(() => resolveNewLaunchPair({quoteAssetKey: asset.key, quoteMint: other.mint})).toThrow("quote mint");
       // SOL's options go with SOL only.
       if (asset.key !== "sol") for (const option of SOL_OPTIONS) expect(() => resolveNewLaunchPair({quoteAssetKey: asset.key, cardTemplate: option})).toThrow(solOnlyDesign(asset.symbol));
@@ -166,8 +166,10 @@ describe("the pair picks the card", () => {
       expect(() => resolveNewLaunchPair({cardTemplate: option, quoteAssetKey: "usdc"})).toThrow("for the SOL pair only");
     }
     // Another pair's design with SOL is refused in that pair's words; a design no pair offers, as before.
-    expect(() => resolveNewLaunchPair({quoteAssetKey: "sol", cardTemplate: "pair-doge"})).toThrow("The SOL pair comes with its own card");
-    expect(() => resolveNewLaunchPair({quoteAssetKey: "sol", cardTemplate: "duel-masters"})).toThrow("The SOL pair comes with its own card");
+    expect(() => resolveNewLaunchPair({quoteAssetKey: "sol", cardTemplate: "pair-doge"})).toThrow("That card belongs to the DOGE pair. Pick DOGE for it, or one of SOL's designs.");
+    expect(() => resolveNewLaunchPair({quoteAssetKey: "sol", cardTemplate: "duel-masters"})).toThrow(otherPairDesign("USDC"));
+    // SOL offers many designs, so no refusal on SOL says it has only one card.
+    for (const design of ["pair-doge", "duel-masters", "pokemon-classic", "stock-tsla"]) expect(() => resolveNewLaunchPair({quoteAssetKey: "sol", cardTemplate: design})).not.toThrow("The SOL pair comes with its own card");
     for (const design of ["doge", "bonk", "wif", "gamestop", "coinbase", "strategy", "pair-usdc", "pair-ansem", "pair-67"]) expect(() => resolveNewLaunchPair({quoteAssetKey: "sol", cardTemplate: design})).toThrow(UNPAIRED_DESIGN);
     expect(resolveNewLaunchPair({cardTemplate: "pair-doge"})).toEqual({asset: getPairAsset("doge"), designKey: "pair-doge"});
     expect(() => resolveNewLaunchPair({cardTemplate: "doge"})).toThrow(UNPAIRED_DESIGN);

@@ -163,6 +163,8 @@ export function pairForDesign(designKey?: string | null): Readonly<PairAsset> | 
 export const UNPAIRED_DESIGN = "This card design is no longer offered for new coins. Pick a pair: its card comes with it.";
 /** A SOL option sent with another pair. */
 export const solOnlyDesign = (symbol: string) => `That card design is for the SOL pair only. The ${symbol} pair comes with its own card.`;
+/** Another pair's design sent with SOL (SOL offers many designs, so it does not say SOL has one card). */
+export const otherPairDesign = (symbol: string) => `That card belongs to the ${symbol} pair. Pick ${symbol} for it, or one of SOL's designs.`;
 const unknownDesign = "Choose an available card design.";
 
 /**
@@ -205,7 +207,10 @@ export function resolveNewLaunchPair(input: { cardTemplate?: string; quoteAssetK
   if (!designKey) {
     if (!isCardDesignKey(fields.cardTemplate)) throw new Error(unknownDesign);
     const owner = pairForDesign(fields.cardTemplate);
-    throw new Error(!owner ? UNPAIRED_DESIGN : owner.key === MANY_DESIGNS_PAIR ? solOnlyDesign(asset.symbol) : `The ${asset.symbol} pair comes with its own card. Pick a pair and its card comes with it.`);
+    throw new Error(!owner ? UNPAIRED_DESIGN
+      : owner.key === MANY_DESIGNS_PAIR ? solOnlyDesign(asset.symbol)
+      : asset.key === MANY_DESIGNS_PAIR ? otherPairDesign(owner.symbol)
+      : `The ${asset.symbol} pair comes with its own card. Pick a pair and its card comes with it.`);
   }
   if (fields.quoteMint !== asset.mint) throw new Error("The quote mint does not match the selected asset.");
   return { asset, designKey };

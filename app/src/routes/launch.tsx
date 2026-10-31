@@ -76,6 +76,9 @@ const DRAFT_KEY = "carddex.launch.draft.v1";
 type LaunchDraft = {
   name: string; ticker: string; lore: string; website: string; xUrl: string; devBuy: string;
   designKey: string; quoteKey: string;
+  /** True when the creator picked the design (SOL's chooser or a ?design= link). Drafts written before SOL had a
+   * chooser always hold SOL's old card (one-piece) without this, so they reopen on SOL's main card instead. */
+  designChosen?: boolean;
 };
 function readDraft(): Partial<LaunchDraft> | null {
   try {
@@ -351,8 +354,8 @@ function Launch() {
   useEffect(() => {
     if (justRestored.current) { justRestored.current = false; return; }
     if (!draftReady || liveLocked || recoveryOnly) return;
-    writeDraft(dirty ? { name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey } : null);
-  }, [draftReady, dirty, name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey, liveLocked, recoveryOnly]);
+    writeDraft(dirty ? { name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey, designChosen: chosenDesign !== null } : null);
+  }, [draftReady, dirty, name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey, chosenDesign, liveLocked, recoveryOnly]);
 
   // The description grows with its text (field-sizing in launch.css); browsers without it are sized here, so the
   // box never scrolls on its own.

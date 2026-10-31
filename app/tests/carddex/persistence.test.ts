@@ -334,7 +334,7 @@ describe("CardDex fixed creator cards and token trading", () => {
     await expect(service.launchCoin(user, { ...base, quoteAssetKey: "unsupported" })).rejects.toThrow("supported pump.fun quote");
     await expect(service.launchCoin(user, { ...base, quoteAssetKey: "usdc", quoteMint: PAIR_ASSETS[0].mint })).rejects.toThrow("quote mint");
     // The pair picks the card: a design that is not the pair's own, or has no pair, is refused in plain words.
-    await expect(service.launchCoin(user, { ...base, cardTemplate: "pair-doge", quoteAssetKey: "sol" })).rejects.toThrow("The SOL pair comes with its own card");
+    await expect(service.launchCoin(user, { ...base, cardTemplate: "pair-doge", quoteAssetKey: "sol" })).rejects.toThrow("That card belongs to the DOGE pair. Pick DOGE for it, or one of SOL's designs.");
     await expect(service.launchCoin(user, { ...base, cardTemplate: "doge", quoteAssetKey: "sol" })).rejects.toThrow(UNPAIRED_DESIGN);
     // SOL's design options go with SOL only.
     await expect(service.launchCoin(user, { ...base, cardTemplate: "spark", quoteAssetKey: "doge" })).rejects.toThrow("for the SOL pair only");

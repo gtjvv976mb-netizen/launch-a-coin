@@ -93,15 +93,26 @@ describe("the Launch form derives its card from the pair", () => {
     for (const quote of ["aave", "uni", "popcat", "67", "agency", "alon", "hodl", "jeanphil", "claudia", "biketyson", "neet"]) expect(pairFromSearch({ quote })).toEqual({ pair: "sol", design: null, notice: "That pair is unavailable. SOL selected." });
   });
   test("a kept draft brings back its pair, if it is still offered, and SOL's chosen design", () => {
-    expect(draftDesign({ quoteKey: "sol", designKey: "ronin" })).toBe("ronin");
-    expect(draftDesign({ quoteKey: "sol", designKey: "pair-sol" })).toBe("pair-sol");
-    expect(draftDesign({ quoteKey: "sol", designKey: "pair-doge" })).toBeNull();
-    expect(draftDesign({ quoteKey: "sol", designKey: "doge" })).toBeNull();
-    expect(draftDesign({ quoteKey: "sol" })).toBeNull();
-    expect(draftDesign({ quoteKey: "doge", designKey: "pair-doge" })).toBeNull();
-    expect(draftDesign({ quoteKey: "doge", designKey: "ronin" })).toBeNull();
-    expect(draftDesign({ quoteKey: "aave", designKey: "ronin" })).toBeNull();
+    const chosen = { designChosen: true };
+    expect(draftDesign({ quoteKey: "sol", designKey: "ronin", ...chosen })).toBe("ronin");
+    expect(draftDesign({ quoteKey: "sol", designKey: "pair-sol", ...chosen })).toBe("pair-sol");
+    expect(draftDesign({ quoteKey: "sol", designKey: "one-piece", ...chosen })).toBe("one-piece");
+    expect(draftDesign({ quoteKey: "sol", designKey: "pair-doge", ...chosen })).toBeNull();
+    expect(draftDesign({ quoteKey: "sol", designKey: "doge", ...chosen })).toBeNull();
+    expect(draftDesign({ quoteKey: "sol", ...chosen })).toBeNull();
+    expect(draftDesign({ quoteKey: "doge", designKey: "pair-doge", ...chosen })).toBeNull();
+    expect(draftDesign({ quoteKey: "doge", designKey: "ronin", ...chosen })).toBeNull();
+    expect(draftDesign({ quoteKey: "aave", designKey: "ronin", ...chosen })).toBeNull();
+    // A design nobody picked is not a choice: the draft reopens on SOL's main card.
+    expect(draftDesign({ quoteKey: "sol", designKey: "ronin", designChosen: false })).toBeNull();
+    expect(draftDesign({ quoteKey: "sol", designKey: "ronin", designChosen: "true" })).toBeNull();
     expect(draftDesign(null)).toBeNull();
+    // A SOL draft the live site wrote before SOL had a chooser always holds One Piece, which nobody picked: it reopens
+    // on SOL's own card (pair-sol), not on One Piece.
+    const oldDraft = { name: "Old", ticker: "OLD", lore: "", website: "", xUrl: "", devBuy: "", designKey: "one-piece", quoteKey: "sol" };
+    expect(draftPair(oldDraft)).toBe("sol");
+    expect(draftDesign(oldDraft)).toBeNull();
+    expect(formDesign("sol", null, true, draftDesign(oldDraft))).toBe("pair-sol");
     expect(draftPair({ quoteKey: "bonk" })).toBe("bonk");
     expect(draftPair({ quoteKey: "pepe" })).toBe("pepe");
     expect(draftPair({ quoteKey: "aave" })).toBeNull();

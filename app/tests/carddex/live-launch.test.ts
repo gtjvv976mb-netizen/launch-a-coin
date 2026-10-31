@@ -243,10 +243,10 @@ describe("isolated real-launch server lifecycle", () => {
   // identities (content holds: pair-sv151, pair-tslax...); another pair's design is refused by name; AAVE, UNI and the
   // held-out pairs (67, AGENCY...) are not offered at all.
   const SOL_ONLY = "That card design is for the SOL pair only.";
-  const refusedNew: [string, string, string][] = [["pair-doge", "sol", "The SOL pair comes with its own card"], ["pokemon-classic", "cards", "The CARDS pair comes with its own card"], ["stock-tsla", "gmex", "The GMEX pair comes with its own card"],
-    ["pokemon-classic", "sol", "The SOL pair comes with its own card"],
+  const refusedNew: [string, string, string][] = [["pair-doge", "sol", "That card belongs to the DOGE pair. Pick DOGE for it"], ["pokemon-classic", "cards", "The CARDS pair comes with its own card"], ["stock-tsla", "gmex", "The GMEX pair comes with its own card"],
+    ["pokemon-classic", "sol", "That card belongs to the SV151 pair."],
     ["doge", "doge", UNPAIRED_DESIGN], ["doge", "sol", UNPAIRED_DESIGN], ["pair-sv151", "sv151", UNPAIRED_DESIGN], ["pair-tslax", "tslax", UNPAIRED_DESIGN], ["pair-ansem", "ansem", UNPAIRED_DESIGN],
-    ["pair-usdc", "usdc", UNPAIRED_DESIGN], ["pair-usdc", "sol", UNPAIRED_DESIGN], ["duel-masters", "sol", "The SOL pair comes with its own card"],
+    ["pair-usdc", "usdc", UNPAIRED_DESIGN], ["pair-usdc", "sol", UNPAIRED_DESIGN], ["duel-masters", "sol", "That card belongs to the USDC pair."],
     ["gamestop", "gmex", UNPAIRED_DESIGN], ["coinbase", "coinx", UNPAIRED_DESIGN], ["strategy", "mstrx", UNPAIRED_DESIGN], ["gamestop", "sol", UNPAIRED_DESIGN],
     // SOL's design options go with SOL only.
     ["spark", "doge", SOL_ONLY], ["pair-sol", "usdc", SOL_ONLY], ["one-piece", "usdc", SOL_ONLY], ["pokemon-full-art", "sv151", SOL_ONLY], ["shib", "usdc", SOL_ONLY], ["ronin", "cate", SOL_ONLY], ["pepe", "toad", SOL_ONLY],
@@ -316,7 +316,7 @@ describe("isolated real-launch server lifecycle", () => {
     const {composeLiveAssets} = await import("../../src/lib/carddex/live/composition.server");
     const fields = {tokenMint: mint, name: "Launch Fixture", symbol: "FIX", description: "", cardTemplate: "pair-doge", quoteAssetKey: "sol", quoteMint: getPairAsset("sol").mint};
     const puts = storagePuts;
-    await expect(composeLiveAssets(creator, fields, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow("The SOL pair comes with its own card");
+    await expect(composeLiveAssets(creator, fields, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow("That card belongs to the DOGE pair.");
     await expect(composeLiveAssets(creator, {...fields, cardTemplate: "gamestop"}, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(UNPAIRED_DESIGN);
     await expect(composeLiveAssets(creator, {...fields, cardTemplate: "doge"}, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(UNPAIRED_DESIGN);
     // A SOL design option with another pair is refused; with SOL it is that pair's own (the next test).

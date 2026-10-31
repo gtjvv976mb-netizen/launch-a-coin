@@ -95,10 +95,14 @@ export function draftPair(draft: { quoteKey?: unknown } | null | undefined): Pai
   return typeof draft?.quoteKey === "string" && isOfferedPair(draft.quoteKey) ? draft.quoteKey as PairAssetKey : null;
 }
 
-/** A draft's chosen design: kept when its pair still offers it as a choice (SOL's options), else null (the main card). */
-export function draftDesign(draft: { quoteKey?: unknown; designKey?: unknown } | null | undefined): CardDesignKey | null {
+/**
+ * A draft's chosen design: kept when the creator picked it (designChosen) and its pair still offers it as a choice
+ * (SOL's options), else null (the main card). Drafts from before SOL's chooser carry SOL's old card (one-piece) without
+ * designChosen; they reopen on SOL's main card, since nobody picked One Piece.
+ */
+export function draftDesign(draft: { quoteKey?: unknown; designKey?: unknown; designChosen?: unknown } | null | undefined): CardDesignKey | null {
   const pair = draftPair(draft);
-  return pair && designsForPair(pair).length > 1 && typeof draft?.designKey === "string" ? pairOption(pair, draft.designKey) : null;
+  return pair && draft?.designChosen === true && designsForPair(pair).length > 1 && typeof draft.designKey === "string" ? pairOption(pair, draft.designKey) : null;
 }
 
 /** True when the typed amount is the same number as the quick amount (0.50 is 0.5). Empty and 0 are "None". */
