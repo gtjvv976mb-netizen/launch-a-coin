@@ -24,7 +24,9 @@ const RECOVERY_OFF = "Saved launch recovery is paused in this deployment.";
  * means Phantom only. Every other wallet keeps the earlier order (the page signs first) until it is tested: Backpack's
  * public source rewrites the compute budget of unsigned dApp transactions (so wallet-first would always fall back),
  * MetaMask's snap keeps dApp bytes in both orders, and Solflare, OKX, Jupiter and Coinbase are undocumented. Do not
- * ship "*". A wallet-first wallet whose returned message breaks the shared wallet rule falls back to page-first once.
+ * ship "*". A wallet-first wallet whose returned message breaks the shared wallet rule is asked once more, still wallet
+ * first; it never falls back to page-first, which hands the wallet a transaction this page already signed (the case
+ * Phantom flags as "This dApp could be malicious").
  */
 export const DEFAULT_WALLET_FIRST = ["Phantom"];
 function walletList(value: string | undefined, fallback: string[]): string[] {

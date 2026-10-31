@@ -501,7 +501,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
       // again first (the review shows again only when a reviewed cost moved beyond the priority fee). Wallet first
       // (Phantom's order): the wallet signs, then this page co-signs what it returned, within the shared wallet rule.
       // A message outside that rule is never co-signed; its summary goes to the server log, and the wallet opens once
-      // more in the page-first order.
+      // more with the same unsigned transaction (never page-first: Phantom warns when another signature is already on it).
       const step = await signForLaunch({ plan: coinPlan, receivedAt: coinAt, expected: expectedFor(current, reviewed.kind), signer: key, order,
         refresh: () => refreshPlan(current, reviewed.kind, address, version),
         onPlan: next => acceptPlan(next),

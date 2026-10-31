@@ -220,28 +220,28 @@ describe("one wallet prompt for the coin and its card", () => {
     await expect(signLaunchPair({ plans, receivedAt: 1_000, now: () => 2_000, expected, signers, order: "page-first", refresh: noRefresh, walletSignAll: transactions => signLiveTransactions(transactions, creator) })).rejects.toThrow("User rejected");
     expect(backpack.prompts).toEqual(["connect", "signTransaction"]);
   });
-  test("a wallet-first batch that changes the card is logged per transaction, then asked once more page-first", async () => {
+  test("a wallet-first batch that changes the card is logged per transaction, then asked once more wallet first", async () => {
     let calls = 0;
     wallet({ name: "Rewriter", batch: "one", change: (bytes, index) => index === 1 && calls++ === 0 ? feeChange(bytes) : bytes }); await connectLiveWallet("Rewriter");
     const { plans, expected, signers } = pair(), changed: string[] = [], opened: boolean[] = [];
     const step = await signLaunchPair({ plans, receivedAt: 1_000, now: () => 2_000, expected, signers, order: "wallet-first", refresh: noRefresh,
       onWalletChanged: plan => changed.push(plan.kind), onWalletOpen: retry => opened.push(retry), walletSignAll: transactions => signLiveTransactions(transactions, creator) });
     expect(changed).toEqual(["nft"]); expect(opened).toEqual([false, true]);
-    expect(step).toMatchObject({ status: "signed", order: "page-first", fellBack: true });
+    expect(step).toMatchObject({ status: "signed", order: "wallet-first", retried: true });
     // A page-first batch that changes a message is refused, never retried.
     wallet({ name: "Rewriter2", batch: "one", change: (bytes, index) => index === 1 ? feeChange(bytes) : bytes }); await connectLiveWallet("Rewriter2");
     const refused = await signLaunchPair({ ...pair(), receivedAt: 1_000, now: () => 2_000, order: "page-first", refresh: noRefresh, walletSignAll: transactions => signLiveTransactions(transactions, creator) }).then(() => null, (error: unknown) => error);
     expect(refused).toBeInstanceOf(WalletChangedTransaction);
     expect((refused as WalletChangedTransaction).changes.map(change => change.index)).toEqual([1]);
   });
-  test("a wallet-first batch that changes the coin is logged for the coin, then asked once more page-first", async () => {
+  test("a wallet-first batch that changes the coin is logged for the coin, then asked once more wallet first", async () => {
     let calls = 0;
     wallet({ name: "Rewriter", batch: "one", change: (bytes, index) => index === 0 && calls++ === 0 ? feeChange(bytes) : bytes }); await connectLiveWallet("Rewriter");
     const { plans, expected, signers } = pair(), changed: string[] = [];
     const step = await signLaunchPair({ plans, receivedAt: 1_000, now: () => 2_000, expected, signers, order: "wallet-first", refresh: noRefresh,
       onWalletChanged: plan => changed.push(plan.kind), walletSignAll: transactions => signLiveTransactions(transactions, creator) });
     expect(changed).toEqual(["token"]);
-    expect(step).toMatchObject({ status: "signed", order: "page-first", fellBack: true });
+    expect(step).toMatchObject({ status: "signed", order: "wallet-first", retried: true });
   });
   test("a wallet-first batch whose coin and card both come back with Phantom's appended assertions is co-signed as returned", async () => {
     const guard = (bytes: Uint8Array, index: number) => unsignedTransaction(phantomGuarded(messageOf(bytes), [{ target: creator, data: payerGuardData(1_000_000n) }, ...(index === 0 ? [{ target: mint, data: tokenGuardData(1n) }] : [])]));
@@ -250,7 +250,7 @@ describe("one wallet prompt for the coin and its card", () => {
     const step = await signLaunchPair({ plans, receivedAt: 1_000, now: () => 2_000, expected, signers, order: "wallet-first", refresh: noRefresh,
       onWalletChanged: plan => changed.push(plan.kind), walletSignAll: transactions => signLiveTransactions(transactions, creator) });
     if (step.status !== "signed") throw new Error(`Expected signed, got ${step.status}`);
-    expect(changed).toEqual([]); expect(step).toMatchObject({ order: "wallet-first", fellBack: false });
+    expect(changed).toEqual([]); expect(step).toMatchObject({ order: "wallet-first", retried: false });
     for (const [bytes, plan, guards] of [[step.coinSigned, plans.coin, 2], [step.cardSigned, plans.card, 1]] as const) {
       const wire = parseLiveTransaction(bytes);
       // The returned (guarded) message, not the plan's, signed by both keys.

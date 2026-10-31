@@ -8,8 +8,11 @@ import type { LiveChainCheck, LivePrepareInput } from "../../../lib/carddex/live
 import { liveSignInInputProblem, liveSignInOutputProblem, liveSignInProblem, type LiveSignInInput } from "../../../lib/carddex/live/sign-in";
 import { SignInOtherAccount, SignInWrongSite, walletRejected } from "./wallet-errors";
 
-/** Shown in the review while the wallet opens a second time after it returned a transaction this page refused. */
-export const WALLET_RETRY_NOTICE = "Your wallet returned a different transaction, so nothing was sent. Approve once more: this time this page signs first.";
+/**
+ * Shown in the review while the wallet opens a second time after it returned a transaction this page refused. The
+ * second prompt is the same unsigned transaction (prepared again when stale): this page never signs before the wallet.
+ */
+export const WALLET_RETRY_NOTICE = "Your wallet returned a different transaction from the one you reviewed, so nothing was sent. Approve once more.";
 /** Shown with the card's own review when the card approved with its coin ran out of time before the coin was verified. */
 export const CARD_APPROVAL_EXPIRED = "Your card approval ran out of time while the coin was confirming, so nothing was charged for the card. Approve the card once more.";
 /** The ownership step, said while the wallet is open: the same words for a sign-in and for the plain message. */
@@ -21,7 +24,7 @@ export const CARD_APPROVED_WAITING = "Approved with the coin. Sends once the coi
 export const CARD_APPROVED_READY = "Approved with the coin. Ready to send";
 
 export type WalletStep =
-  | { status: "signed"; plan: TransactionPlan; signed: Uint8Array; order: SigningOrder; fellBack: boolean }
+  | { status: "signed"; plan: TransactionPlan; signed: Uint8Array; order: SigningOrder; retried: boolean }
   /** A re-prepared plan moved a reviewed cost: show the review again before any wallet prompt. */
   | { status: "changed"; plan: TransactionPlan }
   /** The stage no longer needs this transaction (the server already has its result). */
@@ -31,8 +34,10 @@ export type WalletStep =
  * The wallet step for one launch transaction, without UI. A plan older than ~30 s is prepared again first
  * (planForWallet), the wallet signs in `order`, and the page co-signs. When a wallet-first wallet returns a message
  * outside the shared wallet rule, its bytes go only to `onWalletChanged` (the server change log; they cannot land
- * without this page's signature) and the step is retried once in the page-first order, after the same freshness
- * check, with one more wallet prompt. Nothing here signs a changed message, uploads, or sends.
+ * without this page's signature) and the wallet is asked once more, still wallet first, after the same freshness
+ * check. It never falls back to the page signing first: Phantom warns ("This dApp could be malicious") when a
+ * transaction reaches it with another signature already on it. A second refused message stops the step. Nothing
+ * here signs a changed message, uploads, or sends.
  */
 export async function signForLaunch(step: {
   plan: TransactionPlan; receivedAt: number; expected: ExpectedPlan; signer: EphemeralSigner; order: SigningOrder;
@@ -61,20 +66,20 @@ export async function signForLaunch(step: {
   let ready = await fresh();
   if (ready === "gone") return { status: "gone" };
   if (ready === "changed") return { status: "changed", plan };
-  try { return { status: "signed", plan, signed: await sign(step.order, false), order: step.order, fellBack: false }; }
+  try { return { status: "signed", plan, signed: await sign(step.order, false), order: step.order, retried: false }; }
   catch (error) {
     if (!(error instanceof WalletChangedTransaction) || step.order !== "wallet-first") throw error;
   }
   ready = await fresh();
   if (ready === "gone") return { status: "gone" };
   if (ready === "changed") return { status: "changed", plan };
-  return { status: "signed", plan, signed: await sign("page-first", true), order: "page-first", fellBack: true };
+  return { status: "signed", plan, signed: await sign(step.order, true), order: step.order, retried: true };
 }
 
 /** The coin and its card, prepared together for one wallet prompt. `card` is null once a refresh could not include it. */
 export type PairPlans = { coin: TransactionPlan; card: TransactionPlan | null };
 export type PairStep =
-  | { status: "signed"; coin: TransactionPlan; card: TransactionPlan; coinSigned: Uint8Array; cardSigned: Uint8Array; order: SigningOrder; fellBack: boolean }
+  | { status: "signed"; coin: TransactionPlan; card: TransactionPlan; coinSigned: Uint8Array; cardSigned: Uint8Array; order: SigningOrder; retried: boolean }
   /** A re-prepared plan moved a reviewed cost of either: show the review again before any wallet prompt. */
   | { status: "changed"; plans: PairPlans }
   /** The coin stage no longer needs this transaction (the server already has its result). */
@@ -90,7 +95,8 @@ export type PairStep =
  * One wallet prompt for the coin and its card (a multi-input solana:signTransaction), without UI. The pair is prepared
  * again first when older than PAIR_FRESH_MS, so the card's blockhash can outlive the coin's verification. The wallet
  * signs both in `order` and the page co-signs each exactly as for one transaction (signPlansWithWallet). A wallet-first
- * wallet whose messages break the shared wallet rule is logged per transaction and asked once more, page-first. The
+ * wallet whose messages break the shared wallet rule is logged per transaction and asked once more, still wallet
+ * first (never page-first, as for one transaction); a second refusal stops. The
  * caller sends only the coin now; it relays the card (saved with holdLiveCard) once the coin is verified. Nothing here
  * sends, uploads or co-signs a changed message.
  */
@@ -127,7 +133,7 @@ export async function signLaunchPair(step: {
       const [coinSigned, cardSigned] = await signPlansWithWallet([
         { plan: coin, expected: step.expected.coin, signer: step.signers.coin }, { plan: pair, expected: step.expected.card, signer: step.signers.card },
       ], order, step.walletSignAll);
-      return { status: "signed", coin, card: pair, coinSigned, cardSigned, order, fellBack: retry };
+      return { status: "signed", coin, card: pair, coinSigned, cardSigned, order, retried: retry };
     } catch (error) {
       if (error instanceof WalletBatchUnsupported) return { status: "single", coin, receivedAt, prompted: true };
       if (error instanceof WalletChangedTransaction) for (const change of error.changes) step.onWalletChanged?.(change.index === 0 ? coin : pair, change.returned);
@@ -138,7 +144,7 @@ export async function signLaunchPair(step: {
   catch (error) {
     if (!(error instanceof WalletChangedTransaction) || step.order !== "wallet-first") throw error;
   }
-  return attempt("page-first", true);
+  return attempt(step.order, true);
 }
 
 /** What a stage needs next for its card, once the coin is verified (status nft_pending). */

@@ -392,7 +392,7 @@ describe("Phantom's Lighthouse assertions in the browser", () => {
   });
 });
 
-describe("the wallet step with one page-first retry", () => {
+describe("the wallet step with one wallet-first retry", () => {
   const signer = () => ({ address: mint, seed: assetSeed.slice() });
   const feeChange = (unsigned: Uint8Array) => { const out = unsigned.slice(), at = out.findIndex((_, i) => out[i] === 9 && out[i + 1] === 3 && out[i + 2] === 232 && out[i + 3] === 3); out[at + 2] = 233; return out; };
   test("a wallet that appends accepted assertions signs once, wallet first", async () => {
@@ -400,22 +400,32 @@ describe("the wallet step with one page-first retry", () => {
     const changed: Uint8Array[] = [], opened: boolean[] = [];
     const step = await signForLaunch({ plan, receivedAt: 1_000, now: () => 2_000, expected, signer: signer(), order: "wallet-first", refresh: async () => { throw new Error("not stale"); },
       walletSign: wallet.sign, onWalletChanged: (_plan, returned) => changed.push(returned), onWalletOpen: retry => opened.push(retry) });
-    expect(step).toMatchObject({ status: "signed", order: "wallet-first", fellBack: false });
+    expect(step).toMatchObject({ status: "signed", order: "wallet-first", retried: false });
     expect(wallet.shown).toHaveLength(1); expect(changed).toHaveLength(0); expect(opened).toEqual([false]);
   });
-  test("a wallet-first wallet that changes the fee is logged, then asked once more with the page signing first", async () => {
+  test("a wallet-first wallet that changes the fee is logged, then asked once more with the same unsigned transaction", async () => {
     const { plan, expected } = fixture(); let calls = 0;
     const wallet = fakeWallet(unsigned => ++calls === 1 ? feeChange(unsigned) : unsigned);
     const changed: Uint8Array[] = [], opened: boolean[] = [];
     const step = await signForLaunch({ plan, receivedAt: 1_000, now: () => 2_000, expected, signer: signer(), order: "wallet-first", refresh: async () => { throw new Error("not stale"); },
       walletSign: wallet.sign, onWalletChanged: (_plan, returned) => changed.push(returned), onWalletOpen: retry => opened.push(retry) });
-    expect(step).toMatchObject({ status: "signed", order: "page-first", fellBack: true });
+    expect(step).toMatchObject({ status: "signed", order: "wallet-first", retried: true });
     expect(changed).toHaveLength(1); expect(opened).toEqual([false, true]);
-    // The second prompt carried the page's signature already; the result is the reviewed message, both signed.
-    expect(ed25519.verify(parseLiveTransaction(wallet.shown[1]).signatures[1], parseLiveTransaction(wallet.shown[1]).message, fromBase58(mint))).toBe(true);
+    // Neither prompt carried any signature: the wallet always signs first (Phantom warns otherwise).
+    for (const shown of wallet.shown) expect(parseLiveTransaction(shown).signatures.every(sig => sig.every(b => b === 0))).toBe(true);
     if (step.status !== "signed") throw new Error("Expected signed");
-    expect(hexHash(parseLiveTransaction(step.signed).message)).toBe(plan.messageSha256);
+    const final = parseLiveTransaction(step.signed);
+    expect(hexHash(final.message)).toBe(plan.messageSha256);
+    expect(ed25519.verify(final.signatures[1], final.message, fromBase58(mint))).toBe(true);
     expect(WALLET_RETRY_NOTICE).toContain("nothing was sent");
+  });
+  test("a wallet-first wallet that changes the message twice stops with nothing signed by this page", async () => {
+    const { plan, expected } = fixture(), wallet = fakeWallet(feeChange), changed: Uint8Array[] = [];
+    const refused = await signForLaunch({ plan, receivedAt: 1_000, now: () => 2_000, expected, signer: signer(), order: "wallet-first", refresh: async () => { throw new Error("not stale"); },
+      walletSign: wallet.sign, onWalletChanged: (_plan, returned) => changed.push(returned) }).then(() => null, (error: unknown) => error);
+    expect(refused).toBeInstanceOf(WalletChangedTransaction);
+    expect(wallet.shown).toHaveLength(2); expect(changed).toHaveLength(2);
+    for (const shown of wallet.shown) expect(parseLiveTransaction(shown).signatures.every(sig => sig.every(b => b === 0))).toBe(true);
   });
   test("a page-first wallet that changes the message is not retried", async () => {
     const { plan, expected } = fixture(), wallet = fakeWallet(feeChange), changed: Uint8Array[] = [];
