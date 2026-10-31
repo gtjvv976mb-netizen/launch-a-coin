@@ -11,6 +11,7 @@ import { COMPOSITION_VERSION, composeTokenAssets, requireTrustedComposition } fr
 import { BUY_DOES_NOT_FIT, STOCK_BUY_WARNS } from "./copy";
 import { requireLiveConfig } from "./config.server";
 import { normalizeLiveFields, normalizeLiveIdentity, requireNewLaunchPair } from "./validation.server";
+import { cardMintClaim } from "./vanity.server";
 import { LIVE_PACKET_LIMIT, type LiveApprovedCard, type LiveAssets, type LiveChainCheck, type LiveLaunchIntent, type LivePrepareRequest, type LiveStage } from "./types";
 
 type Payload = {input: Omit<LiveLaunchInput, "nftMint">; assets: LiveAssets; fields: ReturnType<typeof normalizeLiveFields>};
@@ -286,6 +287,9 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareRequest)
   // One coin in flight per wallet (REL-5): another device or a cleared browser must recover the submitted coin first.
   const inFlight = await one<{id: string}>("SELECT id FROM live_launch_intents WHERE creator_wallet = ? AND status = 'token_pending' LIMIT 1", wallet);
   if (inFlight) throw new UserError("Finish or discard your saved launch first: its coin transaction was already sent. Find it under Saved launches.");
+  // A pre-ground "card" address must have been issued to this wallet (vanity.server.ts); it is marked used in the batch
+  // that saves this launch. A random address needs nothing.
+  const cardMint = await cardMintClaim(wallet, fields.tokenMint);
   const payload = await preparePayload(wallet, raw);
   // With withCard, the card plan is prepared alongside (prepareCardAhead) and saved in the same batch as the coin's.
   const [transaction, ahead] = await Promise.all([chain(() => sdk.prepareTokenTransaction({...payload.input, nftMint: raw.nftMint}, {connection: connection()})),
@@ -294,6 +298,7 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareRequest)
   const id = crypto.randomUUID(), now = Date.now();
   try {
     await db().batch([
+      ...cardMint,
       stmt("INSERT INTO live_launch_intents (id, idempotency_key, creator_wallet, token_mint, nft_mint, quote_key, quote_mint, design_key, payload_sha256, payload_json, binding_sha256, token_metadata_uri, nft_metadata_uri, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'prepared', ?, ?)", id, raw.idempotencyKey, wallet, fields.tokenMint, raw.nftMint, fields.quoteAssetKey, fields.quoteMint, fields.cardTemplate, requestedHash, JSON.stringify(payload), transaction.bindingSha256, payload.input.tokenMetadataUri, payload.input.card.nftMetadataUri, now, now),
       stmt("INSERT INTO live_launch_transactions (id, intent_id, kind, message_sha256, plan_json, status, created_at, updated_at) VALUES (?, ?, 'token', ?, ?, 'prepared', ?, ?)", crypto.randomUUID(), id, transaction.messageSha256, JSON.stringify(transaction), now, now),
       ...(card ? [insertPlan(id, card, now)] : []),

@@ -6,6 +6,7 @@ import { createSignInChallenge, createWalletChallenge, deleteLiveWalletSession, 
 import { assertLiveOrigin, assertSiteOrigin, liveReadiness } from "./config.server";
 import { clientKey, enforceAddressGate, enforceLimit, LIMITS, type LimitRule } from "./limits.server";
 import * as service from "./service.server";
+import { issueCardMintForSession } from "./vanity.server";
 import type { LiveResult } from "./types";
 export type * from "./types";
 
@@ -74,6 +75,14 @@ export const prepareLiveLaunch = createServerFn({method: "POST"}).validator(z.ob
   initialBuyQuoteBaseUnits: z.string().regex(/^(0|[1-9][0-9]{0,19})$/), slippageBps: z.number().int().min(0).max(1000),
   assets: z.object({artwork: asset, cardImage: asset, caseImage: asset}), termsAcknowledged: z.literal(true), withCard: z.boolean().optional(),
 })).handler(({data}) => attempt("prepare", async () => { await sameOrigin(); await perAddress(LIMITS.prepareIp); return service.prepareLiveLaunch(await signedIn(LIMITS.prepareWallet), data); }));
+// A pre-ground coin address ending in "card" for the signed-in creator's next new launch (vanity.server.ts), or null:
+// not configured, an empty pool, no session, another site, a limit or any error. The page then uses a random address,
+// so this can never block a launch. The response holds a secret key: never cached, never logged.
+export const issueLiveCardMint = createServerFn({method: "POST"}).handler(async () => {
+  noStore();
+  try { await sameOrigin(); return await issueCardMintForSession(getCookie(LIVE_SESSION_COOKIE), clientAddress()); }
+  catch { return null; }
+});
 // Each check reads the chain on the paid RPC, so it is limited per address too: wallets are free to make (SEC-R2).
 export const checkLiveLaunchSize = createServerFn({method: "POST"}).validator(z.object({
   name: z.string().min(1).max(32), symbol: z.string().regex(/^[A-Za-z0-9]{1,13}$/), quoteAssetKey: z.string().max(30),

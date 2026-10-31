@@ -1543,3 +1543,159 @@ describe("platform hardening on the server", () => {
     for (const secret of [creator, "rpc.example", "abab".repeat(8)]) expect(lines[0]).not.toContain(secret);
   });
 });
+
+const {TEST_CARD_MINT, cardAddress} = await import("./card-mint-fixtures");
+const crypto_ = await import("../../src/lib/carddex/live/vanity-crypto");
+const vanity = await import("../../src/lib/carddex/live/vanity.server");
+// A throwaway test key for the pool's encryption (never a real CARDDEX_VANITY_KEY).
+const rawKey = crypto_.toBase64(new Uint8Array(32).map((_, i) => i * 7 + 1));
+const key = await crypto_.importVanityKey(crypto_.vanityKeyBytes(rawKey)!);
+describe("pre-ground card mint addresses on the server (live_vanity_mints)", () => {
+  const limits = import("../../src/lib/carddex/live/limits.server");
+  const wallets = Array.from({length: 12}, (_, i) => base58Encode(ed25519.getPublicKey(new Uint8Array(32).fill(40 + i))));
+  /** The one real "card" keypair (the published fixture), plus rows whose addresses are valid but whose bytes are not a key. */
+  async function fill(bogus = 0) {
+    const sealed = await crypto_.encryptCardMint(key, TEST_CARD_MINT.publicKey, TEST_CARD_MINT.secretKey);
+    sqlite.query("INSERT INTO live_vanity_mints (public_key, secret_ciphertext, secret_iv, status, created_at) VALUES (?, ?, ?, 'available', 1)").run(TEST_CARD_MINT.publicKey, sealed.secretCiphertext, sealed.secretIv);
+    for (let i = 0; i < bogus; i++) sqlite.query("INSERT INTO live_vanity_mints (public_key, secret_ciphertext, secret_iv, status, created_at) VALUES (?, ?, ?, 'available', 2)").run(cardAddress(i), sealed.secretCiphertext, sealed.secretIv);
+  }
+  const rows = () => sqlite.query("SELECT public_key, status, issued_to, issued_at, used_at FROM live_vanity_mints ORDER BY public_key").all() as {public_key: string; status: string; issued_to: string | null; issued_at: number | null; used_at: number | null}[];
+  const captureLogs = () => {
+    const lines: string[] = [], saved = {info: console.info, error: console.error, warn: console.warn, log: console.log};
+    for (const level of ["info", "error", "warn", "log"] as const) console[level] = (...args: unknown[]) => { lines.push(args.map(arg => arg instanceof Error ? `${arg.name} ${arg.message} ${arg.stack}` : typeof arg === "string" ? arg : JSON.stringify(arg)).join(" ")); };
+    return {lines, restore: () => Object.assign(console, saved)};
+  };
+  const secretTexts = [crypto_.toBase64(TEST_CARD_MINT.secretKey), crypto_.toBase64(TEST_CARD_MINT.secretKey.slice(0, 32)), rawKey];
+  const session = async (wallet: string, seed: Uint8Array) => {
+    const challenge = await auth.createWalletChallenge(wallet);
+    return (await auth.verifyWalletChallenge({challengeId: challenge.challengeId, wallet, signatureBase64: btoa(String.fromCharCode(...ed25519.sign(new TextEncoder().encode(challenge.message), seed)))})).token;
+  };
+
+  test("off without CARDDEX_VANITY_KEY (or with a malformed one): null, nothing issued, nothing counted", async () => {
+    await fill();
+    for (const value of [undefined, "", "not-a-key", crypto_.toBase64(new Uint8Array(16))]) {
+      env.CARDDEX_VANITY_KEY = value;
+      expect(await vanity.issueCardMint(creator, "203.0.113.5")).toBeNull();
+    }
+    expect(rows()[0].status).toBe("available");
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM rate_events WHERE scope LIKE 'live:card-mint%'").get()).toEqual({n: 0});
+    expect(await vanity.vanityHealth()).toEqual({configured: false, available: 1});
+  });
+  test("issues one key once to the signed-in wallet, checked, with nothing secret stored or logged", async () => {
+    env.CARDDEX_VANITY_KEY = rawKey; await fill();
+    expect(await vanity.vanityHealth()).toEqual({configured: true, available: 1});
+    const log = captureLogs();
+    let issued: Awaited<ReturnType<typeof vanity.issueCardMint>>, again: typeof issued;
+    try {
+      // No session, a bogus one or an expired one: null, and the pool is untouched.
+      expect(await vanity.issueCardMintForSession(undefined, null)).toBeNull();
+      expect(await vanity.issueCardMintForSession("ab".repeat(32), null)).toBeNull();
+      expect(rows()[0].status).toBe("available");
+      const token = await session(creator, creatorSeed);
+      issued = await vanity.issueCardMintForSession(token, "203.0.113.5");
+      again = await vanity.issueCardMintForSession(token, "203.0.113.5");
+    } finally { log.restore(); }
+    expect(issued!.publicKey).toBe(TEST_CARD_MINT.publicKey);
+    expect(crypto_.fromBase64(issued!.secretKey)).toEqual(TEST_CARD_MINT.secretKey);
+    // Never re-issued, even to the same wallet: the pool is now empty.
+    expect(again!).toBeNull();
+    expect(rows()).toEqual([{public_key: TEST_CARD_MINT.publicKey, status: "issued", issued_to: creator, issued_at: expect.any(Number), used_at: null}]);
+    expect(await vanity.vanityHealth()).toEqual({configured: true, available: 0});
+    // D1 holds only ciphertext; the logs hold outcomes only.
+    const stored = JSON.stringify(sqlite.query("SELECT * FROM live_vanity_mints").all()) + JSON.stringify(sqlite.query("SELECT * FROM live_settings").all()) + JSON.stringify(sqlite.query("SELECT * FROM rate_events").all());
+    const logged = log.lines.join("\n");
+    for (const secret of secretTexts) { expect(stored).not.toContain(secret); expect(logged).not.toContain(secret); }
+    for (const value of [TEST_CARD_MINT.publicKey, creator, "203.0.113"]) expect(logged).not.toContain(value);
+    expect(log.lines.filter(line => line.startsWith("live_card_mint"))).toEqual([
+      'live_card_mint {"event":"skipped","reason":"session"}', 'live_card_mint {"event":"skipped","reason":"session"}',
+      'live_card_mint {"event":"issued"}', 'live_card_mint {"event":"empty"}']);
+  });
+  test("concurrent requests never get the same key, and a row that fails its check is burned, never returned", async () => {
+    env.CARDDEX_VANITY_KEY = rawKey; await fill(4);
+    const log = captureLogs();
+    let results: Awaited<ReturnType<typeof vanity.issueCardMint>>[];
+    try { results = await Promise.all(wallets.map((wallet, i) => vanity.issueCardMint(wallet, `203.0.113.${i}`))); }
+    finally { log.restore(); }
+    const pool = rows();
+    // Five rows, twelve requests: each row went to exactly one wallet, and seven wallets got nothing.
+    expect(pool.every(row => row.status === "issued")).toBe(true);
+    expect(new Set(pool.map(row => row.issued_to)).size).toBe(5);
+    // Only the real keypair comes back; the four rows holding another address's ciphertext are refused (bound to their address).
+    expect(results!.filter(Boolean)).toEqual([{publicKey: TEST_CARD_MINT.publicKey, secretKey: crypto_.toBase64(TEST_CARD_MINT.secretKey)}]);
+    expect(log.lines.filter(line => line.includes('"reason":"decrypt"'))).toHaveLength(4);
+    expect(log.lines.filter(line => line.includes('"event":"empty"'))).toHaveLength(7);
+    for (const secret of secretTexts) expect(log.lines.join("\n")).not.toContain(secret);
+  });
+  test("limits per wallet, per address and site-wide; a limit hit is null and issues nothing", async () => {
+    env.CARDDEX_VANITY_KEY = rawKey; await fill(12);
+    const {LIMITS, SITE, enforceLimit} = await limits;
+    expect(LIMITS.cardMintWallet).toMatchObject({max: 6, windowMs: 60_000});
+    expect(LIMITS.cardMintWalletDay).toMatchObject({max: 30, windowMs: 86_400_000});
+    for (let i = 0; i < 6; i++) await vanity.issueCardMint(creator, null);
+    expect(await vanity.issueCardMint(creator, null)).toBeNull();
+    expect(rows().filter(row => row.issued_to === creator)).toHaveLength(6);
+    // Per address: many fresh wallets behind one address.
+    for (let i = 0; i < LIMITS.cardMintIp.max; i++) await enforceLimit(LIMITS.cardMintIp, "198.51.100.7");
+    expect(await vanity.issueCardMint(wallets[0], "198.51.100.7")).toBeNull();
+    expect(rows().filter(row => row.issued_to === wallets[0])).toHaveLength(0);
+    // Site-wide daily cap (the six issues above already count toward it).
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM rate_events WHERE scope = 'live:card-mint:site'").get()).toEqual({n: 6});
+    for (let i = 6; i < LIMITS.cardMintSite.max; i++) await enforceLimit(LIMITS.cardMintSite, SITE);
+    expect(await vanity.issueCardMint(wallets[1], "198.51.100.8")).toBeNull();
+    expect(rows().filter(row => row.status === "available")).toHaveLength(7);
+  });
+  test("only while new launches are open", async () => {
+    env.CARDDEX_VANITY_KEY = rawKey; await fill();
+    env.CARDDEX_LIVE_LAUNCH_ENABLED = "false";
+    expect(await vanity.issueCardMint(creator, null)).toBeNull();
+    expect(rows()[0].status).toBe("available");
+  });
+  test("a database without migration 0016: null, random addresses, and health reports the missing migration", async () => {
+    env.CARDDEX_VANITY_KEY = rawKey;
+    sqlite.exec("DROP TABLE live_vanity_mints");
+    expect(await vanity.issueCardMint(creator, null)).toBeNull();
+    expect(await vanity.cardMintClaim(creator, TEST_CARD_MINT.publicKey)).toEqual([]);
+    expect(await vanity.vanityHealth()).toEqual({configured: true, available: 0});
+    const {missingMigrations} = await import("../../src/lib/carddex/live/limits.server");
+    expect(await missingMigrations()).toEqual(["0016"]);
+  });
+  test("prepare refuses a pool address issued to another wallet, and marks this wallet's address used when the launch is saved", async () => {
+    env.CARDDEX_VANITY_KEY = rawKey; await fill();
+    const issued = (await vanity.issueCardMint(otherWallet, null))!;
+    expect(issued.publicKey).toBe(TEST_CARD_MINT.publicKey);
+    const request = await input({tokenMint: TEST_CARD_MINT.publicKey});
+    await expect(service.prepareLiveLaunch(creator, request)).rejects.toThrow(vanity.CARD_MINT_NOT_YOURS);
+    expect(prepareCalls).toBe(0); expect(tokenMediaCalls).toBe(0);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 0});
+    // Issued to this creator: the launch is saved and the address is used in the same batch.
+    sqlite.query("UPDATE live_vanity_mints SET issued_to = ? WHERE public_key = ?").run(creator, TEST_CARD_MINT.publicKey);
+    const prepared = await service.prepareLiveLaunch(creator, request);
+    expect(prepared.intent.tokenMint).toBe(TEST_CARD_MINT.publicKey);
+    expect(rows()).toEqual([{public_key: TEST_CARD_MINT.publicKey, status: "used", issued_to: creator, issued_at: expect.any(Number), used_at: expect.any(Number)}]);
+    // The saved launch prepares again with the same key (the found path), and the row stays used.
+    const again = await service.prepareLiveLaunch(creator, request);
+    expect(again.intent.id).toBe(prepared.intent.id);
+    expect(rows()[0].status).toBe("used");
+  });
+  test("prepare refuses a pool address that is still available or already used; random and non-pool addresses are unchanged", async () => {
+    await fill();
+    await expect(service.prepareLiveLaunch(creator, await input({tokenMint: TEST_CARD_MINT.publicKey}))).rejects.toThrow(vanity.CARD_MINT_NOT_YOURS);
+    sqlite.query("UPDATE live_vanity_mints SET status = 'used', issued_to = ?, issued_at = 1, used_at = 2").run(creator);
+    await expect(service.prepareLiveLaunch(creator, await input({tokenMint: TEST_CARD_MINT.publicKey}))).rejects.toThrow(vanity.CARD_MINT_NOT_YOURS);
+    // A "card" address the creator ground themselves (not in the pool) and a random one prepare as before.
+    expect(await vanity.cardMintClaim(creator, cardAddress(9))).toEqual([]);
+    expect(await vanity.cardMintClaim(creator, mint)).toEqual([]);
+    const prepared = await service.prepareLiveLaunch(creator, await input());
+    expect(prepared.intent.tokenMint).toBe(mint);
+  });
+  test("a pool address issued to this wallet is used once even when it was taken between the check and the save", async () => {
+    env.CARDDEX_VANITY_KEY = rawKey; await fill();
+    await vanity.issueCardMint(creator, null);
+    const claim = await vanity.cardMintClaim(creator, TEST_CARD_MINT.publicKey);
+    expect(claim).toHaveLength(3);
+    // Something else used the row first: the batch's guard rolls the whole save back.
+    sqlite.query("UPDATE live_vanity_mints SET status = 'used', used_at = 5").run();
+    await expect(new Promise((resolve, reject) => localD1.batch(claim as never).then(resolve, reject))).rejects.toThrow();
+    expect(rows()[0]).toMatchObject({status: "used", used_at: 5});
+  });
+});

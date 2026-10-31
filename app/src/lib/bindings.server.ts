@@ -36,6 +36,9 @@ type AppEnv = {
   CARDDEX_DEPLOYMENT_ENV?: string;
   CARDDEX_PUBLIC_ORIGIN?: string;
   CARDDEX_MAINNET_RPC_URL?: string;
+  // Secret (wrangler secret put): base64 of the 32-byte AES-256-GCM key the pre-ground "card" mint keys are stored
+  // under (vanity.server.ts). Unset or malformed: the feature is off and launches use a random mint address.
+  CARDDEX_VANITY_KEY?: string;
   // Optional Workers Rate Limiting binding: a coarse per-address gate in front of live actions (limits.server.ts).
   LIVE_IP_LIMIT?: { limit(options: { key: string }): Promise<{ success: boolean }> };
 };

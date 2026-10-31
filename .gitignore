@@ -28,3 +28,12 @@ playwright-report/
 output/
 .playwright-cli/
 .DS_Store
+# Pre-ground "card" coin mint keys (solana-keygen grind writes <ADDRESS>card.json), the pool's encryption key and the
+# generated pool SQL (tools/carddex/vanity-pool.ts): never in this repo. Only D1 migrations are tracked SQL.
+*card.json
+*vanity-key*
+*vanity*key*.txt
+**/vanity-keys/
+**/lac-vanity-keys/
+*.sql
+!app/migrations/*.sql

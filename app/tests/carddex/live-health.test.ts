@@ -42,6 +42,26 @@ describe("sanitized read-only mainnet release health", () => {
     expect(down).toMatchObject({ status: 503, body: { ok: false, schema: { ok: false, status: "unavailable" } } });
     expect(JSON.stringify(down.body)).not.toContain(SECRET);
   });
+  test("reports the card address pool: configured, available and low only, never changing ok or showing a secret", async () => {
+    const answer = async (vanity?: () => Promise<{ configured: boolean; available: number }>) => {
+      const handler = createLiveHealthHandler({ readiness, rpcUrl: () => ENDPOINT, vanity,
+        fetch: async (_url, init) => { const payload = JSON.parse(init.body as string); return Response.json({ jsonrpc: "2.0", id: payload.id, result: payload.method === "getGenesisHash" ? MAINNET_GENESIS_HASH : { absoluteSlot: 20, blockHeight: 10 } }); } });
+      const response = await handler();
+      return { status: response.status, body: await response.json() };
+    };
+    expect((await answer()).body.vanity).toBeUndefined();
+    expect(await answer(async () => ({ configured: true, available: 120 }))).toMatchObject({ status: 200, body: { ok: true, vanity: { configured: true, available: 120, low: false } } });
+    expect((await answer(async () => ({ configured: true, available: 9 }))).body.vanity).toEqual({ configured: true, available: 9, low: true });
+    expect((await answer(async () => ({ configured: true, available: 10 }))).body.vanity).toEqual({ configured: true, available: 10, low: false });
+    // An empty or unconfigured pool is not a failure: launches use random addresses.
+    expect(await answer(async () => ({ configured: false, available: 0 }))).toMatchObject({ status: 200, body: { ok: true, vanity: { configured: false, available: 0, low: true } } });
+    // Extra fields a pool reader might return never reach the response; a failing reader names nothing.
+    const leaky = await answer(async () => ({ configured: true, available: 3, key: SECRET, publicKey: SECRET } as never));
+    expect(Object.keys(leaky.body.vanity)).toEqual(["configured", "available", "low"]);
+    const down = await answer(async () => { throw new Error(`pool down ${SECRET}`); });
+    expect(down).toMatchObject({ status: 200, body: { ok: true, vanity: { configured: false, available: 0, low: true } } });
+    for (const body of [leaky.body, down.body]) expect(JSON.stringify(body)).not.toContain(SECRET);
+  });
   test("reports the new-launch and recovery switches separately", async () => {
     for (const [enabled, recoveryEnabled] of [[false, true], [true, true], [false, false]]) {
       const handler = createLiveHealthHandler({ readiness: () => ({ ...readiness(), enabled, ready: enabled && recoveryEnabled, recoveryEnabled, recoveryReady: recoveryEnabled }), rpcUrl: () => ENDPOINT,

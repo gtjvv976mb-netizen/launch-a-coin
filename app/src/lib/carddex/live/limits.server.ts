@@ -34,6 +34,13 @@ export const LIMITS = {
   submitWallet: { scope: "live:submit:wallet", max: 20, windowMs: MINUTE },
   abandonWallet: { scope: "live:abandon:wallet", max: 20, windowMs: MINUTE },
   reportWallet: { scope: "live:report:wallet", max: 10, windowMs: MINUTE },
+  // Pre-ground "card" coin addresses (vanity.server.ts): each one handed out is gone for good, so they are limited per
+  // wallet, per address (fresh wallets are free) and site-wide per day, so nobody can drain the pool. Past any of them
+  // the launch simply uses a random address.
+  cardMintWallet: { scope: "live:card-mint:wallet", max: 6, windowMs: MINUTE },
+  cardMintWalletDay: { scope: "live:card-mint:wallet:day", max: 30, windowMs: DAY },
+  cardMintIp: { scope: "live:card-mint:ip", max: 30, windowMs: HOUR },
+  cardMintSite: { scope: "live:card-mint:site", max: 300, windowMs: DAY },
 } as const satisfies Record<string, LimitRule>;
 /** The key for a site-wide rule: one bucket for every client. */
 export const SITE = "site";
@@ -146,6 +153,7 @@ export const SCHEMA_PROBES: readonly [migration: string, sql: string][] = [
   ["0014", "SELECT key, value FROM live_settings LIMIT 0"],
   ["0014", "SELECT published_at FROM live_assets LIMIT 0"],
   ["0015", "SELECT public_until FROM live_assets LIMIT 0"],
+  ["0016", "SELECT public_key, secret_ciphertext, secret_iv, status, issued_to, issued_at, used_at FROM live_vanity_mints LIMIT 0"],
 ];
 export async function missingMigrations(): Promise<string[]> {
   const missing = new Set<string>();

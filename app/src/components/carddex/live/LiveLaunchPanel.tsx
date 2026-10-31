@@ -2,7 +2,7 @@ import { useEffect, useImperativeHandle, useRef, useState, type Dispatch, type R
 import { useQueryClient } from "@tanstack/react-query";
 import {
   abandonLiveLaunchIntent, confirmLiveCreatorNft, confirmLiveToken, getLiveLaunchIntent,
-  getLiveWallet, holdLiveCard, listLiveLaunchIntents, prepareLiveCreatorNft,
+  getLiveWallet, holdLiveCard, issueLiveCardMint, listLiveLaunchIntents, prepareLiveCreatorNft,
   prepareLiveLaunch, reportLiveWalletChange, submitLiveTransaction,
   type LiveApprovedCard, type LiveLaunchIntent, type LivePrepareInput, type LiveResult,
 } from "../../../lib/carddex/live/api";
@@ -30,6 +30,7 @@ import {
   WALLET_RETRY_NOTICE, type PairPlans,
 } from "./launch-flow";
 import { connectForLaunch, signInCreator } from "./ownership";
+import { requestCardMintSigner } from "./card-mint";
 import { ONE_APPROVAL_NEXT, PAIR_REVIEW_COPY, SEPARATE_APPROVALS_NEXT, WALLET_NOTICE_COPY, WALLET_OPEN_COPY, WALLET_OPEN_PAIR_COPY, walletNoticePreview } from "./wallet-notice";
 
 export type LiveLaunchDraft = {
@@ -317,7 +318,13 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
         // buyBlocked: a tokenized-stock quote, whose first buy the server refuses (wallets warn on issuer-controlled tokens).
         if (!size.fits) throw new Error(size.buyBlocked ? STOCK_BUY_WARNS : size.createFits ? BUY_DOES_NOT_FIT : "This coin's name and symbol don't fit in one transaction. Use a shorter name or symbol.");
       }
-      if (!tokenKey.current) tokenKey.current = createEphemeralSigner();
+      if (!tokenKey.current) {
+        // A pre-ground address ending in "card", issued to this signed-in wallet and checked here (card-mint.ts), or
+        // a random key exactly as before. Either way it is kept and signed with the same way from here on.
+        const issued = await requestCardMintSigner(() => issueLiveCardMint());
+        try { assertCurrent(version, address); } catch (error) { destroyEphemeralSigner(issued); throw error; }
+        tokenKey.current = issued ?? createEphemeralSigner();
+      }
       if (!nftKey.current) nftKey.current = createEphemeralSigner();
       if (!idempotencyKey.current) idempotencyKey.current = crypto.randomUUID();
       creator.current = address; draftAtPrepare.current = draft;
