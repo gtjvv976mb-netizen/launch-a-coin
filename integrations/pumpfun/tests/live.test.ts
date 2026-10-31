@@ -901,16 +901,16 @@ describe("Phantom's Lighthouse assertions under the shared wallet rule, end to e
     expect(rpc.sent()).toBe(0);
   });
 
-  test("a coin compiled against pump.fun's table must come back with the same lookups", async () => {
+  test("a coin a wallet recompiled without pump.fun's table keeps every key and flag, so it is co-signed and checked", async () => {
     const input = solBuy(), rpc = mockRpc(), plan = await prepareTokenTransaction(input, { connection: rpc.connection });
     const table = pinnedLookupTable(rpc.accounts.get(PUMP_LOOKUP_TABLE.address)!)!;
     const withoutTable = (message: Uint8Array) => {
       const decompiled = TransactionMessage.decompile(VersionedTransaction.deserialize(unsignedTransaction(message)).message, { addressLookupTableAccounts: [table] });
       return new VersionedTransaction(decompiled.compileToV0Message()).message.serialize();
     };
-    const refused = await signPlanWithWallet(plan, expectedPlan(input, plan), { address: input.mint, seed: tokenKey.secretKey.slice(0, 32) }, "wallet-first", walletReturns(withoutTable)).then(() => null, (error: unknown) => error);
-    expect(refused).toBeInstanceOf(WalletChangedTransaction);
-    expect(() => validateSignedWalletTransaction(plan, Buffer.from((refused as WalletChangedTransaction).returned).toString("base64"))).toThrow();
+    const signed = await signPlanWithWallet(plan, expectedPlan(input, plan), { address: input.mint, seed: tokenKey.secretKey.slice(0, 32) }, "wallet-first", walletReturns(withoutTable));
+    expect(VersionedTransaction.deserialize(signed).message.addressTableLookups).toHaveLength(0);
+    expect(validateSignedWalletTransaction(plan, Buffer.from(signed).toString("base64"))).toMatchObject({ messageSha256: plan.messageSha256, walletGuards: 0 });
     expect(rpc.sent()).toBe(0);
   });
 });
