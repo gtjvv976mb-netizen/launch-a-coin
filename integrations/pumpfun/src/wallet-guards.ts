@@ -6,11 +6,12 @@
  * solana:signTransaction. A real Phantom wallet-first two-signer v0 transaction (mainnet 4WC4bx…, 2026-10-28) got five
  * assertions from Lighthouse v2 appended after every app instruction, with the message recompiled: the program key
  * sits mid-way through the readonly section, so indexes shift. So messages are compared decompiled (program, account
- * keys with their signer and writable flags, data), never as bytes or indexes.
+ * keys with their signer and writable flags, data), never as bytes or indexes. A real Phantom wallet-first card
+ * transaction (2026-10-31) placed one of its two assertions between plan instructions, so placement is free.
  *
  * Accepted, and nothing else:
  * - the same decompiled message (a byte-identical one, or the same keys and instructions recompiled), or
- * - that message with read-only Lighthouse assertions appended after the last plan instruction: program exactly
+ * - that message with read-only Lighthouse assertions before, between or after the plan instructions: program exactly
  *   LIGHTHOUSE_PROGRAM_ID, an Assert* discriminator that reads one account (AccountInfo, MintAccount or TokenAccount,
  *   single or Multi), exactly one account that the plan already has, at most MAX_GUARD_DATA_BYTES of data; the only
  *   new key is the Lighthouse program, read-only and unsigned; every plan key keeps its signer and writable flags;
@@ -175,18 +176,18 @@ export function isLighthouseGuard(ix: ResolvedInstruction): boolean {
     LIGHTHOUSE_GUARD_DISCRIMINATORS.includes(ix.data[0]) && ix.accounts.length === 1;
 }
 /**
- * Finalized-transaction form of the rule: the instructions before any trailing Lighthouse assertions. With
+ * Finalized-transaction form of the rule: the instructions without the wallet's Lighthouse assertions. With
  * `allowGuards` false (the landed message was not the one the server validated), any Lighthouse instruction refuses;
- * with it true, Lighthouse instructions must be a suffix of accepted assertion shapes, each reading one of the
- * message's other keys (`keys`: every static and loaded key), exactly as walletMessageChange accepted them.
+ * with it true, every Lighthouse instruction, wherever it sits (Phantom places some between plan instructions), must
+ * be an accepted assertion shape reading one of the message's other keys (`keys`: every static and loaded key),
+ * exactly as walletMessageChange accepted them.
  */
 export function withoutWalletGuards<T extends ResolvedInstruction>(instructions: T[], allowGuards: boolean, keys: readonly string[]): T[] {
-  const first = instructions.findIndex(ix => ix.program === LIGHTHOUSE_PROGRAM_ID);
-  if (first < 0) return instructions;
-  const plan = instructions.slice(0, first), guards = instructions.slice(first);
+  const guards = instructions.filter(ix => ix.program === LIGHTHOUSE_PROGRAM_ID);
+  if (!guards.length) return instructions;
   const known = new Set(keys.filter(key => key !== LIGHTHOUSE_PROGRAM_ID));
   if (!allowGuards || guards.length > MAX_WALLET_GUARDS || !guards.every(ix => isLighthouseGuard(ix) && known.has(ix.accounts[0]))) throw new WalletMessageRefused("guard");
-  return plan;
+  return instructions.filter(ix => ix.program !== LIGHTHOUSE_PROGRAM_ID);
 }
 
 /**
@@ -202,10 +203,18 @@ export function walletMessageChange(plan: MessageView, returned: MessageView, op
     lookup.writable.join() !== plan.lookups[i].writable.join() || lookup.readonly.join() !== plan.lookups[i].readonly.join())) refuse("lookups");
   const blockhashChanged = returned.blockhash !== plan.blockhash;
   if (blockhashChanged && !options.allowBlockhashChange) refuse("blockhash");
-  // Every plan instruction, unchanged and in order (both compute-budget instructions included), then only assertions.
+  // Every plan instruction, unchanged and in order (both compute-budget instructions included); anything else is an
+  // assertion, before, between or after them (Phantom places some between plan instructions).
   const planned = resolveInstructions(plan), actual = resolveInstructions(returned);
-  if (actual.length < planned.length || planned.some((ix, i) => !sameInstruction(ix, actual[i]))) refuse("instructions");
-  const extra = actual.slice(planned.length), planKeys = new Map(plan.keys.map((key, i) => [key, i]));
+  const extra: ResolvedInstruction[] = [];
+  let next = 0;
+  for (const ix of actual) {
+    if (next < planned.length && sameInstruction(planned[next], ix)) next++;
+    else if (ix.program === LIGHTHOUSE_PROGRAM_ID || next === planned.length) extra.push(ix);
+    else refuse("instructions");
+  }
+  if (next !== planned.length) refuse("instructions");
+  const planKeys = new Map(plan.keys.map((key, i) => [key, i]));
   if (extra.length > MAX_WALLET_GUARDS) refuse("guard");
   const guards = extra.map(ix => {
     if (!isLighthouseGuard(ix) || !planKeys.has(ix.accounts[0])) refuse("guard");

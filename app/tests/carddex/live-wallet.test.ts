@@ -368,7 +368,7 @@ describe("Phantom's Lighthouse assertions in the browser", () => {
       (message: Uint8Array) => phantomGuarded(message, [{ ...payer, program: LIGHTHOUSE_V0 }]),
       (message: Uint8Array) => phantomGuarded(message, [{ target: creator, data: Uint8Array.from([0, 0, 0]) }]),
       (message: Uint8Array) => phantomGuarded(message, [payer], { writableProgram: true }),
-      (message: Uint8Array) => phantomGuarded(message, [payer], { at: 1 }),
+      (message: Uint8Array) => phantomGuarded(message, [{ ...payer, program: stranger }], { at: 1 }),
       (message: Uint8Array) => phantomGuarded(message, [{ target: stranger, data: payerGuardData() }], { newKeys: [stranger] }),
       (message: Uint8Array) => phantomGuarded(message, [{ ...payer, extraAccounts: [mint] }]),
     ]) {
@@ -376,6 +376,13 @@ describe("Phantom's Lighthouse assertions in the browser", () => {
       const refused = await signPlanWithWallet(plan, expected, { address: mint, seed: assetSeed.slice() }, "wallet-first", wallet.sign).then(() => null, (error: unknown) => error);
       expect(refused).toBeInstanceOf(WalletChangedTransaction);
       expect(parseLiveTransaction((refused as WalletChangedTransaction).returned).signatures[1].every(byte => byte === 0)).toBe(true);
+    }
+  });
+  test("assertions Phantom places among the plan instructions are co-signed, as on a real card (2026-10-31)", async () => {
+    const { plan, expected } = fixture(), payer = { target: creator, data: payerGuardData() };
+    for (const at of [0, 1, 2]) {
+      const signed = await signPlanWithWallet(plan, expected, { address: mint, seed: assetSeed.slice() }, "wallet-first", walletRewrites(message => phantomGuarded(message, [payer, payer], { at })).sign);
+      expect(parseLiveTransaction(signed).signatures.every(signature => signature.some(Boolean))).toBe(true);
     }
   });
   test("a page-first plan must come back byte for byte: the page's signature covers the exact message", async () => {
