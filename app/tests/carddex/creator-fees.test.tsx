@@ -182,3 +182,21 @@ describe("audit fixes: the creator's own choice is never flipped or dropped", ()
     expect(portfolio).toContain('l.holderReward ? ", Holder rewards" : ""');
   });
 });
+
+// 1 November: the browser's copy of pair-assets.json dropped `admission`, so Launch never offered the rate on any pair
+// while every test (reading the whole file) passed. Read it through the client copy the build actually ships.
+describe("the browser's pair data", () => {
+  test("keeps each pair's admission, so the custom rate is offered on custom pairs and only there", async () => {
+    const { clientRegistryCopy } = await import("../../src/lib/carddex/client-registry-fields");
+    const raw = readFileSync(resolve(import.meta.dir, "../../src/lib/carddex/pair-assets.json"), "utf8");
+    const copy = clientRegistryCopy("pair-assets.json", raw);
+    const rows = JSON.parse(copy!.replace(/^export default /, "").replace(/;\s*$/, "")) as { key: string; admission?: string }[];
+    const on = { holderRewards: true, creatorFeeRate: { maxBps: 300 } };
+    const byKey = new Map(rows.map(row => [row.key, row]));
+    expect(byKey.get("bonk")?.admission).toBe("quoteControl");
+    expect(creatorFeesOffer(on, byKey.get("bonk")!.admission!).rateMax).toBe(300);
+    expect(creatorFeesOffer(on, byKey.get("sol")!.admission!).rateMax).toBeNull();
+    expect(creatorFeesOffer(on, byKey.get("usdc")!.admission!).rateMax).toBeNull();
+    for (const pair of OFFERED_PAIRS) expect([pair.key, typeof byKey.get(pair.key)?.admission]).toEqual([pair.key, "string"]);
+  });
+});
