@@ -1462,9 +1462,9 @@
     "category": "crypto",
     "materialLevel": 14,
     "palette": [
-      "#141a4a",
+      "#071071",
       "#7B5CFF",
-      "#4FD1E8"
+      "#ECE5D5"
     ],
     "finish": "holo",
     "quoteMint": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R"
@@ -1477,9 +1477,9 @@
     "category": "crypto",
     "materialLevel": 14,
     "palette": [
-      "#120c1c",
+      "#1E0D4C",
       "#F2652E",
-      "#C93F9B"
+      "#EBE1D0"
     ],
     "finish": "holo",
     "quoteMint": "METvsvVRapdj9cFLzq4Tr43xK4tAjQfwX76z3n6mWQL"
@@ -1492,9 +1492,9 @@
     "category": "crypto",
     "materialLevel": 14,
     "palette": [
-      "#B3161E",
+      "#78010C",
       "#F4F1EC",
-      "#C9CCD1"
+      "#ECE5D7"
     ],
     "finish": "holo",
     "quoteMint": "BPxxfRCXkUVhig4HS1Lh7kZqV6SPJhzfEk4x6fVBjPCy"
@@ -1507,9 +1507,9 @@
     "category": "crypto",
     "materialLevel": 14,
     "palette": [
-      "#3F2B96",
+      "#3E2395",
       "#8C7FD8",
-      "#EEEAF8"
+      "#EEE7D8"
     ],
     "finish": "holo",
     "quoteMint": "85VBFQZC9TZkfaptBWjvUw7YbZjy52A6mjtPGjstQAmQ"
@@ -1522,9 +1522,9 @@
     "category": "crypto",
     "materialLevel": 14,
     "palette": [
-      "#9E8FE0",
+      "#A9A7D1",
       "#1C1A24",
-      "#EDE8FA"
+      "#EEE7DA"
     ],
     "finish": "holo",
     "quoteMint": "pSo1f9nQXWgXibFtKf7NWYxb5enAM4qfP6UJSiXRQfL"
@@ -1537,9 +1537,9 @@
     "category": "crypto",
     "materialLevel": 14,
     "palette": [
-      "#0D0C0C",
+      "#190D06",
       "#F2541B",
-      "#8A3A1A"
+      "#ECE0C9"
     ],
     "finish": "holo",
     "quoteMint": "he1iusmfkpAdwvxLNGV8Y1iSbj4rUy6yMhEA3fotn9A"
@@ -1552,9 +1552,9 @@
     "category": "crypto",
     "materialLevel": 14,
     "palette": [
-      "#0052FF",
+      "#8797AD",
       "#C7CCD4",
-      "#F6F7F9"
+      "#EDE6DA"
     ],
     "finish": "holo",
     "quoteMint": "cbLTC4T5NpzSUtQ7ekgEMZGaUPVJY1ko6BUikqa4gGf"
@@ -1567,9 +1567,9 @@
     "category": "crypto",
     "materialLevel": 14,
     "palette": [
-      "#0B1640",
+      "#00207D",
       "#1F4FD8",
-      "#D9C48A"
+      "#EBE0CB"
     ],
     "finish": "holo",
     "quoteMint": "cbADAmv9issuPfhFwyQG3xac4DGPd1LDSt1oz7vwJsg"
@@ -1582,9 +1582,9 @@
     "category": "stocks",
     "materialLevel": 14,
     "palette": [
-      "#0E1A3C",
+      "#001964",
       "#F2EBDA",
-      "#C9A24A"
+      "#EBE4D4"
     ],
     "finish": "holo",
     "quoteMint": "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W"
@@ -1597,9 +1597,9 @@
     "category": "stocks",
     "materialLevel": 14,
     "palette": [
-      "#7FB6E6",
+      "#92CCFA",
       "#F7FAFD",
-      "#B9C6D3"
+      "#EFE9E2"
     ],
     "finish": "holo",
     "quoteMint": "Xs8S1uUs1zvS2p7iwtsG3b6fkhpvmwz4GYU3gWAmWHZ"
@@ -1612,9 +1612,9 @@
     "category": "stocks",
     "materialLevel": 14,
     "palette": [
-      "#4285F4",
+      "#BFC3C9",
       "#F8F8F6",
-      "#34A853"
+      "#ECE5D7"
     ],
     "finish": "holo",
     "quoteMint": "XsCPL9dNWBMvFtTmwcCA5v3xWPSMEBCszbQdiLLq6aN"
@@ -1627,9 +1627,9 @@
     "category": "stocks",
     "materialLevel": 14,
     "palette": [
-      "#2B2D31",
+      "#6F7175",
       "#F25022",
-      "#00A4EF"
+      "#EAE1D2"
     ],
     "finish": "holo",
     "quoteMint": "XspzcW1PRtgf6Wj92HCiZdjzKCyFekVD8P5Ueh3dRMX"
@@ -1642,9 +1642,9 @@
     "category": "stocks",
     "materialLevel": 14,
     "palette": [
-      "#0866FF",
+      "#0051C7",
       "#F3F5F8",
-      "#B8C2CC"
+      "#EEE9DD"
     ],
     "finish": "holo",
     "quoteMint": "Xsa62P5mvPszXL1krVUnU5ar38bBSVcWAB6fmPCo5Zu"
@@ -1657,9 +1657,9 @@
     "category": "stocks",
     "materialLevel": 14,
     "palette": [
+      "#7B3D01",
       "#FF9900",
-      "#16120E",
-      "#B88A3E"
+      "#F0EADC"
     ],
     "finish": "holo",
     "quoteMint": "Xs3eBt7uRfJX8QUs4suhyU8p2M6DoUDrJyWBa8LLZsg"
@@ -1672,9 +1672,9 @@
     "category": "stocks",
     "materialLevel": 14,
     "palette": [
-      "#0B0B0D",
+      "#0E0E0E",
       "#5EE0B5",
-      "#8C7BF2"
+      "#EBE4D4"
     ],
     "finish": "holo",
     "quoteMint": "XsueG8BtpquVJX9LVLLEGuViXUungE6WmK5YZ3p3bd1"
@@ -1687,9 +1687,9 @@
     "category": "stocks",
     "materialLevel": 14,
     "palette": [
+      "#0E1901",
       "#CCFF00",
-      "#101310",
-      "#4B5148"
+      "#E8DEC6"
     ],
     "finish": "holo",
     "quoteMint": "XsvNBAYkrDRNhA7wPHQfX3ZUXZyZLdnCQDfHZ56bzpg"
@@ -1702,9 +1702,9 @@
     "category": "stocks",
     "materialLevel": 14,
     "palette": [
-      "#C99A2E",
+      "#785119",
       "#F4ECD6",
-      "#5A4320"
+      "#EAE1C6"
     ],
     "finish": "holo",
     "quoteMint": "Xsv9hRk1z5ystj9MhnA7Lq4vjSsLwzL2nxrwmwtD3re"
@@ -1717,9 +1717,9 @@
     "category": "stocks",
     "materialLevel": 14,
     "palette": [
-      "#111213",
+      "#17191B",
       "#E8E9EA",
-      "#9DA2A8"
+      "#E6DFD3"
     ],
     "finish": "holo",
     "quoteMint": "XsoBhf2ufR8fTyNSjqfU71DYGaE6Z3SUGAidpzriAA4"
@@ -1732,9 +1732,9 @@
     "category": "stocks",
     "materialLevel": 14,
     "palette": [
-      "#FFBC0D",
+      "#C5A252",
       "#DA291C",
-      "#B8862B"
+      "#EDE1C8"
     ],
     "finish": "holo",
     "quoteMint": "XsqE9cRRpzxcGKDXj1BJ7Xmg4GRhZoyY1KpmGSxAWT2"
@@ -1747,9 +1747,9 @@
     "category": "stocks",
     "materialLevel": 14,
     "palette": [
-      "#E61A27",
+      "#7E0109",
       "#FFFFFF",
-      "#C4C8CC"
+      "#EAE1D0"
     ],
     "finish": "holo",
     "quoteMint": "XsaBXg8dU5cPM6ehmVctMkVqoiRG2ZjMo1cyBJ3AykQ"
