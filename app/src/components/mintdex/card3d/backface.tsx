@@ -72,7 +72,7 @@ export function BackFace({
       />
       {/* The design's template (card3d.css): the recolor and motif, all in this plane. */}
       <i className="mdx-card3d__back-tint" />
-      <GeneratedCardReverse cardTemplate={theme?.cardTemplate} eager={eagerPlate} sizes={sizes}>{themed ? <ThemeBack theme={theme} sizes={sizes} /> : <DesignBack cardTemplate={theme?.cardTemplate} />}</GeneratedCardReverse>
+      <GeneratedCardReverse cardTemplate={theme?.cardTemplate} designVersion={theme?.designVersion} eager={eagerPlate} sizes={sizes}>{themed ? <ThemeBack theme={theme} sizes={sizes} /> : <DesignBack cardTemplate={theme?.cardTemplate} />}</GeneratedCardReverse>
       <div className="mdx-card3d__back-lights">
         <div className="mdx-card3d__back-foil" />
         <div className="mdx-card3d__back-seal" />

@@ -1,9 +1,7 @@
 import { Resvg, initWasm } from "@resvg/resvg-wasm";
 import resvgWasm from "virtual:launchacard-resvg-wasm";
 import type { CardData } from "../../../components/mintdex/MintCard";
-import renderAssets from "../render-assets.json";
-import tokenBackAssets from "../token-back-assets.json";
-import { getPairAsset } from "../pairs";
+import { creatorAtlas, creatorTokenBack } from "./compose-assets";
 import { encodeIndexedTurntable, indexTokenFaces, TOKEN_ANIMATION_FORMAT } from "./token-turntable";
 import { creatorCardSvg, creatorCaseSvg, creatorTokenImageSvg, imageDataUri, CREATOR_IMAGE_DIMENSIONS, TOKEN_IMAGE_FORMAT } from "./creator-print";
 export { CREATOR_CARD_RENDERER_VERSION } from "./creator-print";
@@ -19,8 +17,8 @@ type CreatorImageDependencies={loadAsset:(path:string)=>Promise<Uint8Array>};
 async function loadRenderInput(input:CreatorImageInput,dependencies:CreatorImageDependencies) {
  initialized??=initWasm(resvgWasm).catch(error=>{initialized=undefined;throw error;});
  await initialized;
- const key=(input.card.cardTemplate||"")+(getPairAsset(input.card.quoteAssetKey||"sol").kind==="stock"?"--stock":"");
- const atlas=(renderAssets as Record<string,{path:string}>)[key];
+ // The card's pinned design version when it carries one (design-versions.ts), else the current atlas.
+ const atlas=creatorAtlas(input.card);
  if(!atlas)throw new Error("Choose an approved card design before composing the NFT.");
  if(input.mimeType!=="image/png"&&input.mimeType!=="image/jpeg")throw new Error("Convert artwork to PNG or JPEG before composing the card.");
  const [atlasBytes,...fonts]=await Promise.all([dependencies.loadAsset(atlas.path),...FONT_PATHS.map(path=>dependencies.loadAsset(`/fonts/${path}`))]);
@@ -46,7 +44,7 @@ function facePixels(png:Uint8Array) {
  */
 async function tokenFacesAndStill(input:CreatorImageInput,dependencies:CreatorImageDependencies) {
  const {artUri,atlasUri,fonts}=await loadRenderInput(input,dependencies);
- const back=(tokenBackAssets as Record<string,{path:string}>)[input.card.cardTemplate||""];
+ const back=creatorTokenBack(input.card);
  if(!back)throw new Error("This card design has no verified token-image reverse.");
  const backPng=await dependencies.loadAsset(back.path);
  const frontPng=render(creatorCardSvg(input.card,input.tokenMint,input.creator,artUri,atlasUri,{tokenImage:true}),fonts);

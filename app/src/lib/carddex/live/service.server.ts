@@ -4,6 +4,7 @@ import { feeRecipientsProblem, sameFeeSplit } from "../../../../../integrations/
 import { isWalletAddress } from "../../../components/carddex/live/transaction";
 import reviewedDesigns from "../../../../../integrations/pumpfun/src/design-assets.json";
 import { getCardDesign } from "../designs";
+import { recordedDesignVersion } from "../design-versions";
 import { NOT_OFFERED_PAIR, getPairAsset, isOfferedPair, isPairAssetKey, mainnetPairRefusal } from "../pairs";
 import * as runtime from "../../bindings.server";
 import { clearGuard, db, guard, one, q, readBatch, stmt, UserError } from "../../mintdex/server/db.server";
@@ -33,6 +34,7 @@ function publicIntent(row: IntentRow): LiveLaunchIntent {
   return {id: row.id, creatorWallet: row.creator_wallet, tokenMint: row.token_mint, nftMint: row.nft_mint,
     name: payload.fields.name, symbol: payload.fields.symbol, description: payload.fields.description, website: payload.fields.website, xUrl: payload.fields.xUrl,
     quoteAssetKey: row.quote_key, quoteMint: row.quote_mint, cardTemplate: row.design_key, status: row.status,
+    designVersion: recordedDesignVersion(row.design_key, payload.input?.card?.frontSha256, payload.input?.card?.backSha256),
     bindingSha256: row.binding_sha256, initialBuyQuoteBaseUnits: payload.input.initialBuyQuoteBaseUnits ?? "0",
     nftMetadataSha256: payload.input.nftMetadataSha256!,
     tokenMetadataUri: row.token_metadata_uri, nftMetadataUri: row.nft_metadata_uri, assets: payload.assets,

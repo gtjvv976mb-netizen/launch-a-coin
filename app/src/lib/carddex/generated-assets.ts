@@ -1,4 +1,5 @@
 import type { CardDesignKey } from "./designs";
+import { archivedDesignVersion } from "./design-versions";
 
 export type GeneratedCardAssets = { front?: string; back?: string; front320?: string; back320?: string };
 
@@ -152,7 +153,10 @@ export const CARD_GENERATED_ASSETS: Partial<Record<CardDesignKey, GeneratedCardA
   "pair-zcat": {"front":"/assets/carddex/higgsfield/pair-zcat-front.webp","back":"/assets/carddex/higgsfield/pair-zcat-back.webp","front320":"/assets/carddex/higgsfield/pair-zcat-front-320.webp","back320":"/assets/carddex/higgsfield/pair-zcat-back-320.webp"}
 };
 
-export function generatedCardAssets(key?: string): GeneratedCardAssets {
+/** A design's faces: a launch's pinned earlier version (`designVersion`, design-versions.ts) when it has one, else the current. */
+export function generatedCardAssets(key?: string, designVersion?: string): GeneratedCardAssets {
+  const archived = archivedDesignVersion(key, designVersion);
+  if (archived) return archived.generated;
   return key && Object.prototype.hasOwnProperty.call(CARD_GENERATED_ASSETS, key)
     ? CARD_GENERATED_ASSETS[key as CardDesignKey] ?? {}
     : {};

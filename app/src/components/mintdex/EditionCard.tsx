@@ -175,7 +175,7 @@ export function EditionCard({ edition: input, card, compact = false, priority = 
         ) : null}
         {!card.image || failed ? <span className={failed ? "mdx-edition__art-unavailable" : "mdx-edition__art-empty"}>{failed ? "Coin artwork unavailable" : "Your coin art"}</span> : null}
       </div>
-      <GeneratedCardFront cardTemplate={card.cardTemplate} priority={priority} />
+      <GeneratedCardFront cardTemplate={card.cardTemplate} designVersion={card.designVersion} priority={priority} />
       <CardPrint card={card} layout={layout} tier={tier} preview />
       <div className="mdx-card__lights mdx-edition__lights" aria-hidden="true">
         <i className="mdx-edition__reflection" />

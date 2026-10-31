@@ -29,6 +29,11 @@ export type PublicLiveLaunch = {
   designKey: string;
   /** The reviewed design's name, or null for a key this build does not know. */
   designName: string | null;
+  /**
+   * The pinned version of the design's art this launch recorded (its card front/back sha256), when a later redesign
+   * replaced it: the card renders that archived art (design-versions.ts). Null for the current art.
+   */
+  designVersion: string | null;
   /** The pair the coin trades against. */
   quoteAssetKey: string;
   quoteMint: string;
@@ -51,6 +56,7 @@ export function launchCard(l: PublicLiveLaunch): CardData {
     lore: l.lore || undefined,
     image: l.image ?? "",
     cardTemplate: l.designKey,
+    ...(l.designVersion ? { designVersion: l.designVersion } : {}),
     quoteAssetKey: l.quoteAssetKey,
     quoteMint: l.quoteMint,
     tradingPair: getTradingPair(l.ticker, l.quoteAssetKey),

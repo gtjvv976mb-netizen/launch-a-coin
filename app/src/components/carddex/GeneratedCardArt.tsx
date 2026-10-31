@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode, type RefObject, type CSSProperties } from "react";
 import { generatedCardAssets, generatedSrcSet } from "../../lib/carddex/generated-assets";
 import measuredLayouts from "../../lib/carddex/generated-layouts.json";
+import { archivedDesignVersion } from "../../lib/carddex/design-versions";
 import { useImageFailure } from "../mintdex/image-state";
 import { CANONICAL_CARD_LAYOUT } from "../../lib/carddex/card-template";
 
@@ -22,8 +23,8 @@ export function useReadyImage(ref: RefObject<HTMLImageElement | null>, source: s
 }
 
 /** Generated decoration is one clipped plane under the creator's opaque art and readable identity. */
-export function GeneratedCardFront({ cardTemplate, priority = false }: { cardTemplate?: string; priority?: boolean }) {
-  const assets = generatedCardAssets(cardTemplate);
+export function GeneratedCardFront({ cardTemplate, designVersion, priority = false }: { cardTemplate?: string; designVersion?: string; priority?: boolean }) {
+  const assets = generatedCardAssets(cardTemplate, designVersion);
   const source = assets.front ?? null;
   const ref = useRef<HTMLImageElement>(null);
   const image = useReadyImage(ref, source);
@@ -90,8 +91,8 @@ export function useDeferredPlate(ref: RefObject<HTMLElement | null>, start: bool
 const backIdle = () => typeof document !== "undefined" && document.documentElement.dataset.motion !== "calm";
 
 /** A verified wordless reverse replaces the native engraving after decode; errors retain the native back. */
-export function GeneratedCardReverse({ cardTemplate, eager = false, sizes, children }: { cardTemplate?: string; eager?: boolean; sizes?: string; children: ReactNode }) {
-  const assets = generatedCardAssets(cardTemplate);
+export function GeneratedCardReverse({ cardTemplate, designVersion, eager = false, sizes, children }: { cardTemplate?: string; designVersion?: string; eager?: boolean; sizes?: string; children: ReactNode }) {
+  const assets = generatedCardAssets(cardTemplate, designVersion);
   const source = assets.back ?? null;
   const ref = useRef<HTMLImageElement>(null);
   const box = useRef<HTMLDivElement>(null);
@@ -133,10 +134,13 @@ const PRINT_LAYOUTS: Record<string, Record<string, Box>> = {
 
 export type GeneratedSkinSource = { art: Box; mask: {width:number;height:number;path:string}; plates: Record<string,Box>;sourceMaterialGaps?:boolean;canonicalSource?:boolean };
 
-/** Coordinates below select pixels from immutable artwork. They never position live token content. */
-export function generatedSkinSource(key?: string): GeneratedSkinSource | null {
+/**
+ * Coordinates below select pixels from immutable artwork. They never position live token content. `designVersion`
+ * (CardData) reads a launch's pinned earlier version's layout from the archive (design-versions.ts).
+ */
+export function generatedSkinSource(key?: string, designVersion?: string): GeneratedSkinSource | null {
   if (!key) return null;
-  const measured = (measuredLayouts as Record<string,{art:Box;mask:{width:number;height:number;path:string};prints?:Record<string,Box>;sourceMaterialGaps?:boolean;canonicalSource?:boolean}>)[key];
+  const measured = archivedDesignVersion(key, designVersion)?.layout ?? (measuredLayouts as Record<string,{art:Box;mask:{width:number;height:number;path:string};prints?:Record<string,Box>;sourceMaterialGaps?:boolean;canonicalSource?:boolean}>)[key];
   if (!measured) return null;
   // Pair-specific masters have three deliberate content surfaces and a continuous
   // lower ornament. Legacy footer crops must never punch holes in that ornament.

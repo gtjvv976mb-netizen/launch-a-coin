@@ -36,9 +36,9 @@ function creatorRendererWasm(): Plugin {
 }
 
 /**
- * The client copies of render-assets.json, pair-assets.json and pair-logos.json keep only the fields the browser reads
- * (readiness audit PERF-1; src/lib/carddex/client-registry-fields.ts names them). The server bundle and the tests keep
- * all three files whole.
+ * The client copies of render-assets.json, pair-assets.json, pair-logos.json and design-archive.json keep only the fields
+ * the browser reads (readiness audit PERF-1; src/lib/carddex/client-registry-fields.ts names them). The server bundle and
+ * the tests keep every file whole.
  */
 function clientRegistryFields(): Plugin {
   const dir = path.join(fileURLToPath(new URL("./src/lib/carddex/", import.meta.url)));

@@ -1,6 +1,7 @@
 import { useId, useRef } from "react";
 import { getCardDesign, type CardDesign } from "../../lib/carddex/designs";
 import renderAssets from "../../lib/carddex/render-assets.json";
+import { archivedDesignVersion } from "../../lib/carddex/design-versions";
 import { CANONICAL_CARD_LAYOUT, CARD_RENDERER_VERSION } from "../../lib/carddex/card-template";
 import { generatedSkinSource, phoneCopy, useDeferredPlate, useReadyImage, type GeneratedSkinSource } from "./GeneratedCardArt";
 import { defaultQuoteForDesign, getPairAsset } from "../../lib/carddex/pairs";
@@ -31,11 +32,16 @@ function SurfaceSlice({source,from,to,sourceInset,targetInset,center=false}:{sou
   }))}</>;
 }
 
-/** Browser and exported NFTs use the same locally flattened original-art surface. */
-export function canonicalSkinAsset(cardTemplate:string,quoteAssetKey?:string) {
+/**
+ * Browser and exported NFTs use the same locally flattened original-art surface. `designVersion` (CardData) picks a
+ * launch's pinned earlier version from the archive (design-versions.ts); without one, the current atlas.
+ */
+export function canonicalSkinAsset(cardTemplate:string,quoteAssetKey?:string,designVersion?:string) {
   const quote=quoteAssetKey?getPairAsset(quoteAssetKey):defaultQuoteForDesign(cardTemplate);
   const key=cardTemplate+(quote.kind==="stock"?"--stock":"");
-  const candidate=(renderAssets as Record<string,RenderAsset>)[key];
+  const archived=archivedDesignVersion(cardTemplate,designVersion);
+  const atlases=(archived?archived.atlases:renderAssets) as Record<string,RenderAsset>;
+  const candidate=Object.hasOwn(atlases,key)?atlases[key]:undefined;
   return candidate?.rendererVersion===CARD_RENDERER_VERSION?candidate:null;
 }
 
@@ -65,10 +71,10 @@ function smallSkin(atlas:RenderAsset) {
 const stagedIdle=()=>true;
 
 /** `full`: a viewer opened to look closely (Inspect, the 3D turntable) keeps the 1260 px atlas on phones and tablets too. */
-export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,eager=false,lite=false,full=false,sizes}:{cardTemplate:string;quoteAssetKey?:string;priority?:boolean;eager?:boolean;lite?:boolean;full?:boolean;sizes?:string}) {
+export function CanonicalCardSkin({cardTemplate,quoteAssetKey,designVersion,priority=false,eager=false,lite=false,full=false,sizes}:{cardTemplate:string;quoteAssetKey?:string;designVersion?:string;priority?:boolean;eager?:boolean;lite?:boolean;full?:boolean;sizes?:string}) {
   const id=useId().replaceAll(":", "");
   const quote=quoteAssetKey?getPairAsset(quoteAssetKey):defaultQuoteForDesign(cardTemplate);
-  const atlas=canonicalSkinAsset(cardTemplate,quoteAssetKey);
+  const atlas=canonicalSkinAsset(cardTemplate,quoteAssetKey,designVersion);
   const box=useRef<HTMLDivElement>(null);
   // A staged slot (eager: a neighbour the card turns to next) and a lite miniature (the blurred neighbours beside
   // the Home card) wait for the first touch or turn, or load plus idle (PERF-1), and phones take the 480px copy;
@@ -89,16 +95,16 @@ export function CanonicalCardSkin({cardTemplate,quoteAssetKey,priority=false,eag
   const imageSizes=small?undefined:sizes??(priority||eager?"300px":"auto, 300px");
   const skin=atlas&&src?<img ref={imageRef} className="cdx-canonical-skin__image" src={src} srcSet={small?undefined:canonicalSkinSrcSet(atlas)} sizes={imageSizes} style={shown?undefined:{opacity:0}} alt="" hidden={image.failed} draggable={false} loading={priority||eager?"eager":"lazy"} decoding="async" fetchPriority={priority?"high":eager?"low":undefined} onLoad={image.onLoad} onError={image.onError} />:null;
   return <div ref={box} className="cdx-canonical-skin" data-market-finish={quote.kind} data-card-skin-ready={ready?"":undefined} data-card-skin-source={ready?cardTemplate:undefined} aria-hidden>
-    <CanonicalSkinSurface cardTemplate={cardTemplate} quoteAssetKey={quoteAssetKey} id={id} />
+    <CanonicalSkinSurface cardTemplate={cardTemplate} quoteAssetKey={quoteAssetKey} designVersion={designVersion} id={id} />
     {skin&&atlas?(small||full?skin:<picture><source media={SKIN_PHONE_MEDIA} srcSet={canonicalSkinSrcSet(atlas,true)} sizes={imageSizes} />{skin}</picture>):null}
   </div>;
 }
 
 /** Pure SVG surface shared with the trusted PNG compositor; no loading hooks or alternate print geometry. */
-export function CanonicalSkinSurface({cardTemplate,sourceUri,id="canonical",preparedSource}:{cardTemplate:string;quoteAssetKey?:string;sourceUri?:string|null;id?:string;preparedSource?:{design:Pick<CardDesign,"key"|"palette">;source:GeneratedSkinSource}}) {
+export function CanonicalSkinSurface({cardTemplate,designVersion,sourceUri,id="canonical",preparedSource}:{cardTemplate:string;quoteAssetKey?:string;designVersion?:string;sourceUri?:string|null;id?:string;preparedSource?:{design:Pick<CardDesign,"key"|"palette">;source:GeneratedSkinSource}}) {
   // Offline preparation uses explicit reviewed inputs before the complete-install gate can activate a new design.
   const design=preparedSource?.design??getCardDesign(cardTemplate);
-  const source=preparedSource?.source??generatedSkinSource(cardTemplate);
+  const source=preparedSource?.source??generatedSkinSource(cardTemplate,designVersion);
   const ready=!!sourceUri && !!source;
   // A canonical-source face (generated-layouts.json canonicalSource) is already the finished surface: its own
   // geometry and rounded alpha, never warped, patched or clipped a second time.

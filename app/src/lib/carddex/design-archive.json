@@ -1,0 +1,226 @@
+{
+  "pair-aaplx": {
+    "2f04d8465028-ead0438f2c47": {
+      "designKey": "pair-aaplx",
+      "version": "2f04d8465028-ead0438f2c47",
+      "ref": "387fb951e0fe498ea94b77f502e786da3ca0989d",
+      "source": {
+        "front": {
+          "path": "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/higgsfield/pair-aaplx-front.webp",
+          "sha256": "2f04d84650281392d62d139375d4639fae20b4df34d0b1e263a402d4c8dfa0fd"
+        },
+        "back": {
+          "path": "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/higgsfield/pair-aaplx-back.webp",
+          "sha256": "ead0438f2c47f85680630157b89bf3b57b1493cb941535f352e76626d4dcbca9"
+        }
+      },
+      "generated": {
+        "front": "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/higgsfield/pair-aaplx-front.webp",
+        "back": "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/higgsfield/pair-aaplx-back.webp",
+        "front320": "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/higgsfield/pair-aaplx-front-320.webp",
+        "back320": "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/higgsfield/pair-aaplx-back-320.webp"
+      },
+      "layout": {
+        "art": {
+          "x": 0.1,
+          "y": 0.15,
+          "w": 0.8,
+          "h": 0.44
+        },
+        "mask": {
+          "width": 1008,
+          "height": 774,
+          "path": "M0 0H1008V774H0Z"
+        },
+        "prints": {
+          "name": {
+            "x": 0.1,
+            "y": 0.055,
+            "w": 0.8,
+            "h": 0.06
+          },
+          "type": {
+            "x": 0.1,
+            "y": 0.615,
+            "w": 0.8,
+            "h": 0.034
+          },
+          "text": {
+            "x": 0.1,
+            "y": 0.67,
+            "w": 0.8,
+            "h": 0.255
+          }
+        },
+        "canonicalSource": true
+      },
+      "atlases": {
+        "pair-aaplx--stock": {
+          "designKey": "pair-aaplx",
+          "kind": "stock",
+          "path": "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/render/pair-aaplx--stock.png",
+          "sha256": "8bbded74c0062e9f5f51173096e14df060a61d3cdada7178f86a290820943cdc",
+          "previewPath": "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/render/preview/pair-aaplx--stock.png",
+          "previewSha256": "7c7c6e7a264bb57df5d59dd8dc245373f79b8cf46c7a923fd027ca616b38ee9d",
+          "sourceSha256": "2f04d84650281392d62d139375d4639fae20b4df34d0b1e263a402d4c8dfa0fd",
+          "width": 1260,
+          "height": 1760,
+          "rendererVersion": "launchacard-canonical-v2.1"
+        }
+      },
+      "variants": {
+        "pair-aaplx--stock": {
+          "atlasSha256": "8bbded74c0062e9f5f51173096e14df060a61d3cdada7178f86a290820943cdc",
+          "w480": {
+            "path": "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/render/preview/pair-aaplx--stock-480.webp",
+            "width": 480,
+            "height": 670,
+            "sha256": "f81412e4564d72d390439aad86cd7735e6b2e81210922eb2b0f144e258e1ee5a"
+          },
+          "w640": {
+            "path": "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/render/preview/pair-aaplx--stock-640.webp",
+            "width": 640,
+            "height": 894,
+            "sha256": "03312ce5d125de3025f6e288057abe8364421f9c5d8c5e4dc4cffde2be61dea0"
+          }
+        }
+      },
+      "tokenBack": {
+        "designKey": "pair-aaplx",
+        "path": "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/token-backs/pair-aaplx.png",
+        "sha256": "07b0622f53df3e8db4d054bf859dfc26d10482a0652cfad2485603bc5010ab92",
+        "sourceSha256": "ead0438f2c47f85680630157b89bf3b57b1493cb941535f352e76626d4dcbca9",
+        "width": 630,
+        "height": 880,
+        "conversionVersion": "launchacard-token-back-png-v1"
+      },
+      "files": {
+        "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/higgsfield/pair-aaplx-back-320.webp": "6ff829af804e461718a66ea0d179a702b7f2d8933e5f406bf693d58ddae6a183",
+        "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/higgsfield/pair-aaplx-back-480.webp": "15b5356d57100eb7e801362d29e4e523463be8cfd05b94687a4b86ba70270a51",
+        "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/higgsfield/pair-aaplx-back-640.webp": "f00ac29a287454d08fd9da344ba019f89f7c5d080c5da8061005a85e80d7ba13",
+        "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/higgsfield/pair-aaplx-back.webp": "ead0438f2c47f85680630157b89bf3b57b1493cb941535f352e76626d4dcbca9",
+        "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/higgsfield/pair-aaplx-front-320.webp": "8ee5807fa3f09c570f54d8b825d14459d02f697631994e7f02ffe0935fa060f4",
+        "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/higgsfield/pair-aaplx-front-480.webp": "9839a227eff6d105462dc69243f0153521642daa3f0a64176e16bbceeb20cf61",
+        "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/higgsfield/pair-aaplx-front-640.webp": "2eccf2f1c39d2dcad7ae1f840b403edda128a9cec4d9cc84ba7f770e35d0658f",
+        "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/higgsfield/pair-aaplx-front.webp": "2f04d84650281392d62d139375d4639fae20b4df34d0b1e263a402d4c8dfa0fd",
+        "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/render/pair-aaplx--stock.png": "8bbded74c0062e9f5f51173096e14df060a61d3cdada7178f86a290820943cdc",
+        "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/render/preview/pair-aaplx--stock-480.webp": "f81412e4564d72d390439aad86cd7735e6b2e81210922eb2b0f144e258e1ee5a",
+        "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/render/preview/pair-aaplx--stock-640.webp": "03312ce5d125de3025f6e288057abe8364421f9c5d8c5e4dc4cffde2be61dea0",
+        "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/render/preview/pair-aaplx--stock.png": "7c7c6e7a264bb57df5d59dd8dc245373f79b8cf46c7a923fd027ca616b38ee9d",
+        "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/token-backs/pair-aaplx.png": "07b0622f53df3e8db4d054bf859dfc26d10482a0652cfad2485603bc5010ab92"
+      }
+    }
+  },
+  "pair-cards": {
+    "0fab1e5bae07-b901b5f8852c": {
+      "designKey": "pair-cards",
+      "version": "0fab1e5bae07-b901b5f8852c",
+      "ref": "387fb951e0fe498ea94b77f502e786da3ca0989d",
+      "source": {
+        "front": {
+          "path": "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/higgsfield/pair-cards-front.webp",
+          "sha256": "0fab1e5bae070412f65fcf0ddc5c935fdf4e1c06db0f23b1e40cd23b09b5190d"
+        },
+        "back": {
+          "path": "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/higgsfield/pair-cards-back.webp",
+          "sha256": "b901b5f8852cb0936ae7a7d81438a8cd30817b142e3ba727adb0db8761aeae63"
+        }
+      },
+      "generated": {
+        "front": "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/higgsfield/pair-cards-front.webp",
+        "back": "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/higgsfield/pair-cards-back.webp",
+        "front320": "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/higgsfield/pair-cards-front-320.webp",
+        "back320": "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/higgsfield/pair-cards-back-320.webp"
+      },
+      "layout": {
+        "art": {
+          "x": 0.107843,
+          "y": 0.148438,
+          "w": 0.794118,
+          "h": 0.447917
+        },
+        "mask": {
+          "width": 405,
+          "height": 344,
+          "path": "M0 0H405V344H0Z"
+        },
+        "prints": {
+          "name": {
+            "x": 0.107843,
+            "y": 0.0625,
+            "w": 0.794118,
+            "h": 0.052083
+          },
+          "type": {
+            "x": 0.103922,
+            "y": 0.627604,
+            "w": 0.798039,
+            "h": 0.036458
+          },
+          "text": {
+            "x": 0.107843,
+            "y": 0.691406,
+            "w": 0.794118,
+            "h": 0.242188
+          }
+        },
+        "sourceMaterialGaps": true
+      },
+      "atlases": {
+        "pair-cards": {
+          "designKey": "pair-cards",
+          "kind": "plain",
+          "path": "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/render/pair-cards.png",
+          "sha256": "36cae41d86530adacce13ba8aa0174a5ee0815d50abec7cc7b4d78c1e8a3b841",
+          "previewPath": "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/render/preview/pair-cards.png",
+          "previewSha256": "194cd183aceaca468e443a9b902b1d1fdbbd84f7391288dd991a11101823a812",
+          "sourceSha256": "0fab1e5bae070412f65fcf0ddc5c935fdf4e1c06db0f23b1e40cd23b09b5190d",
+          "width": 1260,
+          "height": 1760,
+          "rendererVersion": "launchacard-canonical-v2.1"
+        }
+      },
+      "variants": {
+        "pair-cards": {
+          "atlasSha256": "36cae41d86530adacce13ba8aa0174a5ee0815d50abec7cc7b4d78c1e8a3b841",
+          "w480": {
+            "path": "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/render/preview/pair-cards-480.webp",
+            "width": 480,
+            "height": 670,
+            "sha256": "01e8101b6166f83c60cba88d0135b863d74424818517738640e9465276c91876"
+          },
+          "w640": {
+            "path": "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/render/preview/pair-cards-640.webp",
+            "width": 640,
+            "height": 894,
+            "sha256": "50a2f721b4cc228dc7c24a13fc96eb64510423c0cfe3bf2dfd14ef8cd062752f"
+          }
+        }
+      },
+      "tokenBack": {
+        "designKey": "pair-cards",
+        "path": "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/token-backs/pair-cards.png",
+        "sha256": "264f2dadd94eaf407d6313f9a9fae6b7936c2f01bc6212cb6a6e7cd817a2da1a",
+        "sourceSha256": "b901b5f8852cb0936ae7a7d81438a8cd30817b142e3ba727adb0db8761aeae63",
+        "width": 630,
+        "height": 880,
+        "conversionVersion": "launchacard-token-back-png-v1"
+      },
+      "files": {
+        "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/higgsfield/pair-cards-back-320.webp": "824149c42da5ec354a12c7ba8cead57983ac4acd613dcf6fb9626f0ab267f091",
+        "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/higgsfield/pair-cards-back-480.webp": "a44430e18b211da67b9017207f4036606ded6fcdf74a49155119b501b2d7292c",
+        "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/higgsfield/pair-cards-back-640.webp": "bdff7e7482bdedd1ab05e35ce9022e3d3c06b27906fd332a82c765a0e5cabe3a",
+        "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/higgsfield/pair-cards-back.webp": "b901b5f8852cb0936ae7a7d81438a8cd30817b142e3ba727adb0db8761aeae63",
+        "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/higgsfield/pair-cards-front-320.webp": "dbf562cb8d93cf1061af155feba44127580c824d06cc8fd1cc8c7f328f627c3e",
+        "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/higgsfield/pair-cards-front-480.webp": "d1344eac8489c83c34b56cbec95e646c43cadce3d8782454f526221f3844df2e",
+        "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/higgsfield/pair-cards-front-640.webp": "2f3325c5311ea8804fb91679961e6c6da4e3d35db4059d318f235e079d16ad43",
+        "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/higgsfield/pair-cards-front.webp": "0fab1e5bae070412f65fcf0ddc5c935fdf4e1c06db0f23b1e40cd23b09b5190d",
+        "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/render/pair-cards.png": "36cae41d86530adacce13ba8aa0174a5ee0815d50abec7cc7b4d78c1e8a3b841",
+        "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/render/preview/pair-cards-480.webp": "01e8101b6166f83c60cba88d0135b863d74424818517738640e9465276c91876",
+        "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/render/preview/pair-cards-640.webp": "50a2f721b4cc228dc7c24a13fc96eb64510423c0cfe3bf2dfd14ef8cd062752f",
+        "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/render/preview/pair-cards.png": "194cd183aceaca468e443a9b902b1d1fdbbd84f7391288dd991a11101823a812",
+        "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/token-backs/pair-cards.png": "264f2dadd94eaf407d6313f9a9fae6b7936c2f01bc6212cb6a6e7cd817a2da1a"
+      }
+    }
+  }
+}

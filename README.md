@@ -173,6 +173,32 @@ The original approved Higgsfield batch produced99 completed images:96 card faces
 
 Pair logos: Launch's pair picker shows each offered pair's own token image, a 128px and a 64px WebP in `app/public/assets/pairs/` (83 pairs; GORK, MANIFEST and FARTCOIN keep their letter: their token images hold no logo). `app/src/lib/carddex/pair-logos.json` records each file's sha256 and its source in Codex's verified pair-identity references; `tools/carddex/make_pair_logos.py` (needs that local folder) regenerates them. They are the tokens' own images, cropped and sized only, not card artwork.
 
+### Redesigning a design that coins already use
+
+Every launch records the exact card front and back sha256 it was prepared with (`live_launch_intents.payload_json`, `input.card.frontSha256`/`backSha256`), and its coin and card NFT are bound to that art. A redesign must never strand them: on 31 October 2026 the premium redesign `dc57e17` replaced `pair-cards` and `pair-aaplx` after Testcard (`a965ba32`, card minted) and AAPLX (`ca9a389f`, prepared) had recorded them, so Testcard's pages showed a card different from its NFT and AAPLX's re-prepare was refused ("Card front/back hashes do not match the reviewed design manifest").
+
+Design versions are therefore content-addressed and pinned (`app/src/lib/carddex/design-versions.ts`). A version is `<front sha256 first 12>-<back sha256 first 12>`; earlier versions live in `app/src/lib/carddex/design-archive.json`, each with its files copied byte for byte under `app/public/assets/carddex/archive/<designKey>/<version>/` (fronts, backs and their 320/480/640 copies, every atlas of the key and its preview and 480/640 copies, the token back) and its registry entries (reviewed front/back, generated-assets paths, layout, render-assets, render-variants, token-back-assets) rewritten to those paths. The current art is never archived.
+
+- The launch review (`reviewLaunchInput`, which every coin, card, verify, recovery and fee-split step goes through) accepts the current art or an archived version of the same design; any other hashes refuse with the same error. New launches always record the current art.
+- The public launch list and saved launches carry `designVersion` (null for the current art), and every card of a launch (Home, Discover, search, the coin page, Portfolio, a saved launch on Launch) renders that version's archived files; the compositor and its trusted asset loader take a card's version the same way. Current cards render exactly as before, with no extra request.
+
+Before installing new art for a design key any launch uses, archive the art being replaced from the commit that still has it (default `HEAD`), then install the redesign. Run it from the repo root (from `app/`, `bun ../tools/carddex/archive-design-version.ts ...`):
+
+```
+bun tools/carddex/archive-design-version.ts [--ref <git-ref>] <design-key> [<design-key> ...]
+```
+
+It checks every file against the registries' pins and writes nothing on any mismatch; archiving a version twice changes nothing. `app/tests/carddex/design-versions.test.tsx` holds the archive to its pins (and fails while an archived version is still the current art, i.e. until the redesign is installed). The archive is append-only: never delete or rewrite a version that a launch may have recorded.
+
+## Release checklist
+
+Before any deploy that changes card art (`design-assets.json`, `generated-assets.ts`, `generated-layouts.json`, `render-assets.json`, `render-variants.json`, `token-back-assets.json` or files under `app/public/assets/carddex/`):
+
+1. Export every launch's recorded art from production D1 (read-only), from `app/`:
+   `bun x wrangler@4.147.0 d1 execute launch-a-card --remote -c wrangler.production.jsonc --json --command "SELECT id, status, design_key, json_extract(payload_json, '\$.input.card.frontSha256') AS front_sha256, json_extract(payload_json, '\$.input.card.backSha256') AS back_sha256 FROM live_launch_intents WHERE status <> 'abandoned'" > /tmp/launched-art.json`
+2. Check it against the release tree, from `app/` as in step 1: `bun ../tools/carddex/check-launched-art.ts /tmp/launched-art.json` (from the repo root: `bun tools/carddex/check-launched-art.ts /tmp/launched-art.json`). Every launch must print `ok` (its current art or an archived version, with the files on disk at their pinned hashes). Any `FAIL`: archive that art (above) before deploying.
+3. Run the app and integration checks (AGENTS.md).
+
 ## Sources and QA
 
 Forked from tracked MintDex commit `1c3a567cfe017d73039a5b6fae45def15e18a62d`; MintDex uncommitted work was excluded. See `HANDOFF.md`, `PRODUCT.md`, `DESIGN.md`, `reports/carddex-build-2026-10-28.md` and the quote-pair reports for scope and verification. The reviewed assets are recorded in `reports/pump-pair-assets-2026-10-28.json`; production must revalidate them at preparation time.

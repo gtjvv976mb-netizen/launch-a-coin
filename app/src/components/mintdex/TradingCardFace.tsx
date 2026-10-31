@@ -32,7 +32,7 @@ export function TradingCardFace({ card, design, priority = false, sizes, compact
   const quote = card.mcapLabel ?? marketCapText(card);
   return <div className={`mdx-card cdx-trading-card ${compact ? "cdx-trading-card--compact" : ""} ${className}`} data-classic-layout={design.layout} data-card-template={design.key} data-finish={design.finish} data-carddex-premium="" style={style} role={label ? "img" : undefined} aria-label={label}>
     <div className="cdx-trading-card__stock" aria-hidden />
-    <GeneratedCardFront cardTemplate={design.key} priority={priority} />
+    <GeneratedCardFront cardTemplate={design.key} designVersion={card.designVersion} priority={priority} />
     <svg className="cdx-trading-card__engraving" viewBox="0 0 630 880" preserveAspectRatio="none" aria-hidden>
       <defs><linearGradient id={`${id}metal`} x1="0" y1="0" x2="1" y2="1"><stop stopColor={design.palette[1]} /><stop offset=".18" stopColor={design.palette[2]} /><stop offset=".44" stopColor={design.palette[1]} /><stop offset=".63" stopColor={design.palette[0]} /><stop offset=".82" stopColor={design.palette[2]} /><stop offset="1" stopColor={design.palette[1]} /></linearGradient></defs>
       <rect x="12" y="12" width="606" height="856" rx="24" fill="none" stroke={`url(#${id}metal)`} strokeWidth="11" />

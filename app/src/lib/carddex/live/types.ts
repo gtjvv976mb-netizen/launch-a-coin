@@ -55,6 +55,8 @@ export type LiveLaunchIntent = {
   id: string; creatorWallet: string; tokenMint: string; nftMint: string;
   name: string; symbol: string; description: string; website?: string; xUrl?: string;
   quoteAssetKey: string; quoteMint: string; cardTemplate: string; status: LiveStage;
+  /** The pinned version of cardTemplate's art this launch recorded, when a redesign has since replaced it (design-versions.ts). */
+  designVersion?: string | null;
   bindingSha256: string; initialBuyQuoteBaseUnits: string; nftMetadataSha256: string;
   tokenMetadataUri: string; nftMetadataUri: string; assets: LiveAssets;
   tokenSignature: string | null; nftSignature: string | null;

@@ -20,7 +20,7 @@ export type CardGround = "shadow" | "floor" | "none";
 export type TierLight = { finish: Finish; sheen: string[]; ring: string; key?: string };
 
 /** One face the card can show. `node` is a MintCardFace; `tier` colors the bursts and the light pool. */
-export type CardBackTheme = { cardTemplate?: string; edition?: EditionKey; memeIcon?: MemeIconKey };
+export type CardBackTheme = { cardTemplate?: string; edition?: EditionKey; memeIcon?: MemeIconKey; /** CardData.designVersion. */ designVersion?: string };
 export type FaceSlot = { key: string; node: ReactNode; tier: TierLight; backTheme?: CardBackTheme };
 
 export type Card3DHandle = {

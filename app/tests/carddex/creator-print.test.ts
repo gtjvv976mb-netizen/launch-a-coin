@@ -11,6 +11,9 @@ import { CANONICAL_CARD_LAYOUT, CARD_RENDERER_VERSION } from "../../src/lib/card
 import { CARD_DESIGNS } from "../../src/lib/carddex/designs";
 import { allowedQuotesForDesign, defaultQuoteForDesign } from "../../src/lib/carddex/pairs";
 import type { CardData } from "../../src/components/mintdex/MintCard";
+import { execFileSync } from "node:child_process";
+import { designVersionId } from "../../src/lib/carddex/design-versions";
+import { creatorAtlas, creatorTokenBack } from "../../src/lib/carddex/live/compose-assets";
 
 const wallet="11111111111111111111111111111111";
 const mint="So11111111111111111111111111111111111111112";
@@ -162,6 +165,25 @@ describe("real PNG output",()=>{
   }finally{image.free();}}finally{renderer.free();}
   const caseRenderer=new Resvg(creatorCaseSvg(png!,mint),{font:{fontBuffers:fonts}});
   try{const image=caseRenderer.render();try{expect(image.width).toBe(1440);expect(image.height).toBe(2240);expect(image.pixels[3]).toBe(0);expect(image.asPng().byteLength).toBeGreaterThan(100_000);}finally{image.free();}}finally{caseRenderer.free();}
+ },30_000);
+ // Testcard (launch a965ba32, card NFT minted) recorded pair-cards' art before the 31 October redesign (dc57e17) replaced
+ // it: its pinned version composes on the archived atlas and token back, the same bytes as at dc57e17^ (387fb951).
+ test("a launch's pinned earlier version composes exactly as before the redesign, on its archived files",async()=>{
+  const before="387fb951e0fe498ea94b77f502e786da3ca0989d";
+  const testcard:CardData={...card("pair-cards"),designVersion:designVersionId("0fab1e5bae070412f65fcf0ddc5c935fdf4e1c06db0f23b1e40cd23b09b5190d","b901b5f8852cb0936ae7a7d81438a8cd30817b142e3ba727adb0db8761aeae63")};
+  const atlasPath=creatorAtlas(testcard)!.path,backPath=creatorTokenBack(testcard)!.path;
+  expect(atlasPath).toStartWith("/assets/carddex/archive/pair-cards/");expect(backPath).toStartWith("/assets/carddex/archive/pair-cards/");
+  const atlas=await readFile(`public${atlasPath}`);
+  expect(createHash("sha256").update(atlas).digest("hex")).toBe("36cae41d86530adacce13ba8aa0174a5ee0815d50abec7cc7b4d78c1e8a3b841");
+  expect(createHash("sha256").update(await readFile(`public${backPath}`)).digest("hex")).toBe("264f2dadd94eaf407d6313f9a9fae6b7936c2f01bc6212cb6a6e7cd817a2da1a");
+  const compose=(bytes:Uint8Array)=>{const uri=imageDataUri(bytes,"image/png");const renderer=new Resvg(creatorCardSvg(testcard,mint,wallet,data,uri),{font:{fontBuffers:fonts}});
+   try{const image=renderer.render();try{return createHash("sha256").update(image.asPng()).digest("hex");}finally{image.free();}}finally{renderer.free();}};
+  const archived=compose(atlas);
+  let original:Uint8Array|null=null;
+  try{original=execFileSync("git",["show",`${before}:app/public/assets/carddex/render/pair-cards.png`],{maxBuffer:64<<20,stdio:["ignore","pipe","ignore"]});}catch{/* a shallow checkout: the hash above pins the same bytes */}
+  if(original)expect(compose(original)).toBe(archived);
+  // The current art composes differently: the version is what keeps the minted card's art.
+  expect(compose(await readFile(`public${creatorAtlas(card("pair-cards"))!.path}`))).not.toBe(archived);
  },30_000);
  for(const key of ["pokemon-classic","stock-tsla","doge","neon-circuit"])test(`${key} token image is opaque, square and fully safe inside a circular avatar`,async()=>{
   const assetKey=key==="stock-tsla"?"stock-tsla--stock":key;

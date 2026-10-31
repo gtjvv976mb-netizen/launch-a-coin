@@ -304,7 +304,7 @@ export function MemeIconCard({ icon: input, card, compact = false, priority = fa
       /> : null}
       {!frameSource || frame.failed ? <CraftedFrame icon={icon.key} /> : null}
       {!icon.frameArtSrc || frame.failed ? <ThemePerimeter icon={icon.key} /> : null}
-      <GeneratedCardFront cardTemplate={card.cardTemplate} priority={priority} />
+      <GeneratedCardFront cardTemplate={card.cardTemplate} designVersion={card.designVersion} priority={priority} />
       <CardPrint card={card} layout={layout} tier={tier} preview />
       {icon.mascotCrop && !icon.frameArtSrc ? <div className="mdx-meme-icon__mascot" data-meme-mascot={icon.key} aria-hidden="true">
         <MemeThemePortrait icon={icon} priority={priority} />

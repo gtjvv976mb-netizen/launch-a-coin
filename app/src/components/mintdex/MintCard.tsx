@@ -34,6 +34,11 @@ import type {
 export type CardData = {
   /** The creator-selected permanent print. Price and market cap never change it. */
   cardTemplate?: string;
+  /**
+   * The pinned version of cardTemplate's art a launch recorded, when a later redesign replaced it (design-versions.ts):
+   * the card renders that archived art. Absent for the current art, which renders as it always has.
+   */
+  designVersion?: string;
   quoteAssetKey?: string;
   quoteMint?: string;
   tradingPair?: string;
@@ -75,7 +80,7 @@ export function cardLight(card: CardData): TierLight {
 }
 export function cardBackTheme(card: CardData) {
   const design = cardDesign(card);
-  return { cardTemplate: design.key, edition: design.edition, memeIcon: design.memeIcon };
+  return { cardTemplate: design.key, edition: design.edition, memeIcon: design.memeIcon, ...(card.designVersion ? { designVersion: card.designVersion } : {}) };
 }
 
 const DECODE_CAP_MS = 600;
@@ -100,8 +105,8 @@ export function preloadFrame(key: TierKey, sizes: string): Promise<void> {
 export function preloadCard(card: CardData, sizes: string, level = card.level): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   const design = cardDesign(card);
-  const generated = generatedCardAssets(design.key);
-  const skin = canonicalSkinAsset(design.key,card.quoteAssetKey);
+  const generated = generatedCardAssets(design.key, card.designVersion);
+  const skin = canonicalSkinAsset(design.key,card.quoteAssetKey,card.designVersion);
   const back = generated.back;
   const jobs: Promise<unknown>[] = [{source:skin?.path,srcset:skin?canonicalSkinSrcSet(skin,phoneSkin()):undefined},{source:back,srcset:back&&generated.back320?generatedSrcSet(generated.back320,back):undefined}].filter(asset=>asset.source).map(({source,srcset}) => {
     const image = new Image();

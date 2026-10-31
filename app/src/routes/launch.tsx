@@ -251,6 +251,8 @@ function Launch() {
   const [quoteKey, setQuoteKey] = useState<PairAssetKey>(() => pairFromSearch(search).pair);
   const [chosenDesign, setChosenDesign] = useState<string | null>(() => pairFromSearch(search).design);
   const [savedDesign, setSavedDesign] = useState<string | null>(null);
+  // The pinned art version the saved launch recorded, when a redesign has since replaced it (design-versions.ts).
+  const [savedVersion, setSavedVersion] = useState<string | null>(null);
   const designKey = formDesign(quoteKey, savedDesign, live, chosenDesign);
   const [pairNotice, setPairNotice] = useState("");
   const design = getCardDesign(designKey);
@@ -258,6 +260,7 @@ function Launch() {
   const restoreLiveIntent = useCallback((intent: LiveLaunchIntent | null) => {
     setLiveMint(intent?.tokenMint ?? null); setLiveCreator(intent?.creatorWallet ?? null);
     setSavedDesign(intent ? getCardDesign(intent.cardTemplate).key : null);
+    setSavedVersion(intent?.designVersion ?? null);
     if (!intent) return;
     // A finished launch leaves no draft behind: the next visit starts empty, not with this coin's name and ticker.
     if (intent.status === "complete") writeDraft(null);
@@ -530,6 +533,8 @@ function Launch() {
     image: preview ?? "",
     level: design.materialLevel,
     cardTemplate: designKey,
+    // A saved launch shows the exact art it recorded, while its own design is the one shown.
+    ...(savedVersion && savedDesign === designKey ? { designVersion: savedVersion } : {}),
     // The same live quote and identity fields occupy the same card slots in every finish.
     quoteAssetKey: quoteKey,
     quoteMint: quoteAsset.mint,

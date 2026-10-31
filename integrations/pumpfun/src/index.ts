@@ -13,6 +13,7 @@ import {
 import verifiedCatalog from "../../../reports/pump-pair-assets-2026-10-28.json";
 import { isCardDesignKey } from "../../../app/src/lib/carddex/designs";
 import { resolveLaunchQuote } from "../../../app/src/lib/carddex/pairs";
+import { archivedDesignForHashes } from "../../../app/src/lib/carddex/design-versions";
 import designAssets from "./design-assets.json";
 
 export const SDK_VERSION = "4.1.0";
@@ -109,7 +110,10 @@ export function reviewLaunchInput(input: PrepareLaunchInput) {
   for (const field of ["frontSha256", "backSha256"] as const) {
     if (!/^[a-f0-9]{64}$/.test(input.card[field])) throw new Error(`${field}: lowercase SHA-256 required`);
   }
-  if (input.card.frontSha256 !== reviewedArt.front.sha256 || input.card.backSha256 !== reviewedArt.back.sha256) {
+  // The current reviewed art, or a version of this design that launches recorded before a redesign replaced it
+  // (design-versions.ts): a saved launch keeps, re-prepares and mints exactly the art its creator reviewed.
+  const current = input.card.frontSha256 === reviewedArt.front.sha256 && input.card.backSha256 === reviewedArt.back.sha256;
+  if (!current && !archivedDesignForHashes(input.card.designKey, input.card.frontSha256, input.card.backSha256)) {
     throw new Error("Card front/back hashes do not match the reviewed design manifest");
   }
   const card = {

@@ -8,6 +8,7 @@ import { bindings } from "../../bindings.server";
 import reviewedDesigns from "../../../../../integrations/pumpfun/src/design-assets.json";
 import renderedDesigns from "../render-assets.json";
 import tokenBackAssets from "../token-back-assets.json";
+import { archivedDesignFile, DESIGN_ARCHIVE_ROOT } from "../design-versions";
 import { fetchPublicBytes, putPublicAsset, sniffLiveImage } from "./assets.server";
 import { sha256, walletBytes } from "./auth.server";
 import { requireLiveConfig } from "./config.server";
@@ -30,6 +31,15 @@ export async function loadRendererAsset(path: string): Promise<Uint8Array> {
     const source = tokenBack && reviewedDesigns[tokenBack.designKey as keyof typeof reviewedDesigns];
     if (!tokenBack || tokenBack.conversionVersion !== "launchacard-token-back-png-v1" || tokenBack.width !== 630 || tokenBack.height !== 880 || !source || tokenBack.sourceSha256 !== source.back.sha256) throw new UserError("The token-image reverse does not match its approved Higgsfield design.");
   }
+  // A pinned earlier version of a design (design-versions.ts): only files its archive entry lists, with the same
+  // renderer, size and source checks as the current atlas and token back, and its own pinned bytes.
+  const archived = archivedDesignFile(path);
+  if (path.startsWith(DESIGN_ARCHIVE_ROOT)) {
+    if (!archived) throw new UserError("The card renderer requested an unsupported asset.");
+    const {entry} = archived, atlas = Object.values(entry.atlases).find(asset => asset.path === path);
+    if (atlas && (atlas.rendererVersion !== COMPOSITION_VERSION || atlas.width !== CREATOR_IMAGE_DIMENSIONS.card.width || atlas.height !== CREATOR_IMAGE_DIMENSIONS.card.height || atlas.sourceSha256 !== entry.source.front.sha256)) throw new UserError("The card render atlas does not match the current trusted renderer and approved design.");
+    if (entry.tokenBack.path === path && (entry.tokenBack.conversionVersion !== "launchacard-token-back-png-v1" || entry.tokenBack.width !== 630 || entry.tokenBack.height !== 880 || entry.tokenBack.sourceSha256 !== entry.source.back.sha256)) throw new UserError("The token-image reverse does not match its approved Higgsfield design.");
+  }
   const response = await bindings().ASSETS?.fetch(`${requireLiveConfig("launch").origin}${path}`);
   const bytes = response?.ok ? new Uint8Array(await response.arrayBuffer()) : await fetchPublicBytes(`${requireLiveConfig("launch").origin}${path}`);
   const reviewed = Object.values(reviewedDesigns).flatMap(design => [design.front, design.back]).find(asset => asset.path === path);
@@ -38,6 +48,7 @@ export async function loadRendererAsset(path: string): Promise<Uint8Array> {
     if (!rendered || await sha256(bytes) !== rendered.sha256) throw new UserError("The card render atlas differs from its trusted conversion manifest.");
   }
   if (path.startsWith("/assets/carddex/token-backs/") && (!tokenBack || await sha256(bytes) !== tokenBack.sha256)) throw new UserError("The token-image reverse differs from its trusted conversion manifest.");
+  if (archived && await sha256(bytes) !== archived.sha256) throw new UserError("The archived card design differs from its pinned version.");
   return bytes;
 }
 

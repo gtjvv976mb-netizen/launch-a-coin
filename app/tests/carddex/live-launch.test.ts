@@ -11,6 +11,8 @@ import tokenBackAssets from "../../src/lib/carddex/token-back-assets.json";
 import { CARD_RENDERER_VERSION } from "../../src/lib/carddex/card-template";
 import { CREATOR_CARD_RENDERER_VERSION, TOKEN_IMAGE_FORMAT } from "../../src/lib/carddex/live/creator-print";
 import { TokenAnimationTooLarge, TOKEN_ANIMATION_FORMAT } from "../../src/lib/carddex/live/token-turntable";
+import { archivedDesignVersion, designVersionId } from "../../src/lib/carddex/design-versions";
+import { reviewLaunchInput } from "../../../integrations/pumpfun/src/index";
 
 // Only synthetic in-memory sign-in keys and mocked RPC are used. This test cannot submit a transaction.
 const creatorSeed = new Uint8Array(32).fill(7), creator = base58Encode(ed25519.getPublicKey(creatorSeed));
@@ -195,7 +197,7 @@ async function input(overrides: Partial<{cardTemplate: string; quoteAssetKey: st
  * A launch saved before the pair picked the card, in any combination it allowed then, exactly as its rows were stored
  * (with the coin image GIF and still the token-gif release added). Recovery must take it as it is.
  */
-async function savedBeforePairRule(cardTemplate: string, quoteKey: string) {
+async function savedBeforePairRule(cardTemplate: string, quoteKey: string, recordedArt?: {frontSha256: string; backSha256: string}) {
   const quote = getPairAsset(quoteKey), original = await input({cardTemplate, quoteAssetKey: quote.key, quoteMint: quote.mint}), fields = normalizeLiveFields(original);
   const tokenImage = await assets.putPublicAsset(creator, new Uint8Array([0x47, 0x49, 0x46, 0x38, 0x39, 0x61, ...new Array(40).fill(1)]), "image/gif");
   const tokenPoster = await assets.putPublicAsset(creator, image(1024, 1024), "image/png");
@@ -208,7 +210,7 @@ async function savedBeforePairRule(cardTemplate: string, quoteKey: string) {
     quoteKey: fields.quoteAssetKey, nftName: fields.name, initialBuyQuoteBaseUnits: original.initialBuyQuoteBaseUnits, slippageBps: original.slippageBps,
     renderedCardSha256: original.assets.cardImage.sha256, nftMetadataSha256: nftMetadata.sha256,
     card: {designKey: cardTemplate, frontUri: original.assets.cardImage.url, backUri: original.assets.caseImage.url,
-      frontSha256: original.assets.cardImage.sha256, backSha256: original.assets.caseImage.sha256, nftMetadataUri: nftMetadata.url}}};
+      frontSha256: original.assets.cardImage.sha256, backSha256: original.assets.caseImage.sha256, nftMetadataUri: nftMetadata.url, ...recordedArt}}};
   // The request hash covers the three images the creator composed; the server-made coin images are not part of it.
   const requestedHash = await auth.sha256(JSON.stringify({creator, fields, assets: original.assets, initialBuyQuoteBaseUnits: original.initialBuyQuoteBaseUnits, slippageBps: original.slippageBps}));
   const now = Date.now();
@@ -387,6 +389,52 @@ describe("isolated real-launch server lifecycle", () => {
     await service.prepareLiveCreatorNft(creator, {intentId: "saved-before-pair-rule"});
     expect(nftInputs[0]).toMatchObject({quoteKey: quote.key, card: {designKey: cardTemplate, nftMetadataUri: nftMetadata.url}});
     expect(sendCalls).toBe(0);
+  });
+  // AAPLX (production launch ca9a389f) was prepared with pair-aaplx's art before the 31 October redesign (dc57e17)
+  // replaced it, and re-preparing it was refused ("Card front/back hashes do not match the reviewed design manifest").
+  // Its recorded art is a pinned archived version: it re-prepares, finishes its card and lists with that version.
+  test("a launch saved with art a redesign has since replaced re-prepares, mints and lists with the art it recorded", async () => {
+    const front = "2f04d84650281392d62d139375d4639fae20b4df34d0b1e263a402d4c8dfa0fd", back = "ead0438f2c47f85680630157b89bf3b57b1493cb941535f352e76626d4dcbca9";
+    const version = designVersionId(front, back);
+    const {original, quote} = await savedBeforePairRule("pair-aaplx", "aaplx", {frontSha256: front, backSha256: back});
+    const recovered = await service.prepareLiveLaunch(creator, original);
+    expect(recovered.intent).toMatchObject({id: "saved-before-pair-rule", cardTemplate: "pair-aaplx", designVersion: version});
+    expect(tokenInputs[0]).toMatchObject({quoteKey: quote.key, card: {designKey: "pair-aaplx", frontSha256: front, backSha256: back}});
+    // The real launch review (only the chain adapter is mocked here) takes the recorded art as it is.
+    expect(reviewLaunchInput(tokenInputs[0]).card).toMatchObject({designKey: "pair-aaplx", frontSha256: front, backSha256: back});
+    const other = {...tokenInputs[0], card: {...tokenInputs[0].card, frontSha256: "c".repeat(64)}};
+    expect(() => reviewLaunchInput(other)).toThrow("Card front/back hashes do not match the reviewed design manifest");
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: "saved-before-pair-rule", signature: "s".repeat(88), messageSha256: recovered.transaction!.messageSha256});
+    const nft = await service.prepareLiveCreatorNft(creator, {intentId: "saved-before-pair-rule"});
+    expect(nftInputs[0]).toMatchObject({card: {designKey: "pair-aaplx", frontSha256: front, backSha256: back}});
+    nftVerified = true;
+    await service.confirmLiveCreatorNft(creator, {intentId: "saved-before-pair-rule", signature: "t".repeat(88), messageSha256: nft.transaction!.messageSha256});
+    expect(await service.getLiveLaunchIntent(creator, "saved-before-pair-rule")).toMatchObject({status: "complete", designVersion: version});
+    const {getCompletedLaunch} = await import("../../src/lib/carddex/live/launches.server");
+    expect(await getCompletedLaunch(mint)).toMatchObject({designKey: "pair-aaplx", designVersion: version});
+    expect(sendCalls).toBe(0);
+  });
+  test("a launch with the current art carries no version", async () => {
+    const prepared = await service.prepareLiveLaunch(creator, await input());
+    expect(prepared.intent.designVersion).toBeNull();
+  });
+  test("the trusted renderer loads a pinned version's archived atlas and token back, and only with their pinned bytes", async () => {
+    const entry = archivedDesignVersion("pair-cards", designVersionId("0fab1e5bae070412f65fcf0ddc5c935fdf4e1c06db0f23b1e40cd23b09b5190d", "b901b5f8852cb0936ae7a7d81438a8cd30817b142e3ba727adb0db8761aeae63"))!;
+    const atlas = entry.atlases["pair-cards"]!, original = {...atlas};
+    const disk = (path: string) => new Uint8Array(readFileSync(resolve(import.meta.dir, "../../public", `.${path}`)));
+    try {
+      expect(await loadRendererAsset(atlas.path)).toEqual(disk(atlas.path));
+      expect(await loadRendererAsset(entry.tokenBack.path)).toEqual(disk(entry.tokenBack.path));
+      await expect(loadRendererAsset(entry.tokenBack.path.replace(/[^/]+$/, "unlisted.png"))).rejects.toThrow("unsupported asset");
+      atlas.rendererVersion = "launchacard-canonical-v1";
+      await expect(loadRendererAsset(atlas.path)).rejects.toThrow("current trusted renderer");
+      Object.assign(atlas, original, {sourceSha256: "0".repeat(64)});
+      await expect(loadRendererAsset(atlas.path)).rejects.toThrow("approved design");
+      Object.assign(atlas, original);
+      env.ASSETS = {fetch: async () => new Response(disk(entry.tokenBack.path))};
+      await expect(loadRendererAsset(atlas.path)).rejects.toThrow("archived card design differs from its pinned version");
+    } finally { Object.assign(atlas, original); }
   });
   test("trusted renderer rejects stale atlas metadata and changed bytes", async () => {
     expect(COMPOSITION_VERSION).toBe(CARD_RENDERER_VERSION);

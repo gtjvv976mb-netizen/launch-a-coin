@@ -1,5 +1,6 @@
 import { getCardDesign, isCardDesignKey } from "../designs";
 import { all, one } from "../../mintdex/server/db.server";
+import { recordedDesignVersion } from "../design-versions";
 import { LIVE_LAUNCHES_LIMIT, SOLANA_ADDRESS, type PublicLiveLaunch } from "./launches";
 
 /**
@@ -43,6 +44,7 @@ export function publicLaunchFromRow(row: LaunchRow): PublicLiveLaunch | null {
   if (!SOLANA_ADDRESS.test(row.token_mint)) return null;
   let payload: {
     fields?: { name?: unknown; symbol?: unknown; description?: unknown; quoteAssetKey?: unknown; quoteMint?: unknown };
+    input?: { card?: { frontSha256?: unknown; backSha256?: unknown } };
     assets?: { artwork?: { url?: unknown }; cardImage?: { url?: unknown } };
   };
   try {
@@ -61,6 +63,8 @@ export function publicLaunchFromRow(row: LaunchRow): PublicLiveLaunch | null {
     nftMint: row.nft_mint && SOLANA_ADDRESS.test(row.nft_mint) ? row.nft_mint : null,
     designKey: row.design_key,
     designName: isCardDesignKey(row.design_key) ? getCardDesign(row.design_key).name : null,
+    // The art the launch recorded and minted: an archived version when a redesign has since replaced it.
+    designVersion: recordedDesignVersion(row.design_key, payload.input?.card?.frontSha256, payload.input?.card?.backSha256),
     quoteAssetKey: row.quote_key || text(payload.fields?.quoteAssetKey) || "sol",
     quoteMint: row.quote_mint || text(payload.fields?.quoteMint),
     image: assetPath(payload.assets?.artwork?.url),
