@@ -1,7 +1,8 @@
 /**
  * The browser reads a few fields of three registries the server needs whole (readiness audit PERF-1): the client copy of
  * render-assets.json drops its hashes (CanonicalCardSkin reads the path, preview path and renderer version), the client
- * copy of pair-assets.json drops its provenance (source URLs, evidence, slot, admission) and the client copy of
+ * copy of pair-assets.json drops its provenance (source URLs, evidence, slot; it keeps `admission`, which Launch reads to
+ * offer a custom creator fee rate only on custom pairs) and the client copy of
  * pair-logos.json keeps only `logo` (pair-logos.ts pairLogo reads nothing else). The client copy of design-archive.json
  * keeps, per archived version, only what the card renderers read (CLIENT_ARCHIVE_FIELDS): no pins, file map, source
  * faces, variants or token back, which only the Worker's launch review and compositor read. vite.config.ts applies this
@@ -9,7 +10,7 @@
  */
 export const CLIENT_DROPPED_FIELDS: Readonly<Record<string, readonly string[]>> = Object.freeze({
   "render-assets.json": ["sha256", "previewSha256", "sourceSha256"],
-  "pair-assets.json": ["sourceUrls", "sourceEvidenceArtifact", "verificationSlot", "verifiedDate", "admission"],
+  "pair-assets.json": ["sourceUrls", "sourceEvidenceArtifact", "verificationSlot", "verifiedDate"],
   "pair-logos.json": ["w128", "w64", "source", "derivation", "reason"],
 });
 
