@@ -22,7 +22,7 @@ import { TWITTER_ACCOUNT_META, pageHead } from "../../src/lib/mintdex/seo";
 const APP = resolve(import.meta.dir, "../..");
 const read = (path: string) => readFileSync(resolve(APP, path), "utf8");
 const X = "https://x.com/launchacard";
-const MINT = "LCNcvaC4ozvrhmBi34rVGXjSrkCQ59XyKfzycQipump";
+const MINT = "4fdJZFkHBLZAydpnRAfRscZfRdZiuWqTHZNXjjRnpump";
 const TOKEN = `https://pump.fun/coin/${MINT}`;
 
 /** Every <a> in some markup, as its attributes. */

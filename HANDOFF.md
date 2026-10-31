@@ -1,3 +1,7 @@
+# 1 November official token replaced
+
+The owner named a new official token: "4fdJZFkHBLZAydpnRAfRscZfRdZiuWqTHZNXjjRnpump this is the official token". Read on-chain before publishing: launchacard.fun ($launchcard), Token-2022, created on pump.fun 2026-10-31 17:23 UTC by wallet 3J57tqAJqRmSBn1ZYDu9JpMMyTfBHdcGGwECiPQeiji3 (a plain system wallet, not a sharing-config or holder-rewards PDA), on its bonding curve against CARDS. Its name and ticker match the earlier official token LCNcvaC4ozvrhmBi34rVGXjSrkCQ59XyKfzycQipump (creator D2bk…BiC), so the owner was asked to confirm the creator wallet; the owner confirmed 3J57… is theirs and that the new mint replaces the old one ("Yes, replace it"). `app/src/lib/carddex/official.ts` OFFICIAL_TOKEN_MINT now holds the new mint; the rail, phone links, /how#official and the Home JSON-LD sameAs follow it. The old mint is no longer named anywhere on the site.
+
 # 1 November: 20 new pairs with premium designs on `claude/codex-redesigns` (from production 40a9c85)
 
 - **Owner request:** "add more pairs with new unique, distinct and premium designs". The owner chose 20 of the 130 QuoteControl-admitted mints the app did not offer (no memecoins were among them) and approved about 120 Higgsfield credits; 42 images were made (≈115.5 credits: 40 plus two re-runs, CBADA's front window and a less W-like PSOL front).

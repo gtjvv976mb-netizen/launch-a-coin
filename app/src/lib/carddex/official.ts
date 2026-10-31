@@ -12,7 +12,7 @@ export const OFFICIAL_X_HANDLE = "@launchacard";
 export const OFFICIAL_X_URL = "https://x.com/launchacard";
 
 /** The official token: its on-chain name and symbol exactly as its metadata holds them (Token-2022). */
-export const OFFICIAL_TOKEN_MINT = "LCNcvaC4ozvrhmBi34rVGXjSrkCQ59XyKfzycQipump";
+export const OFFICIAL_TOKEN_MINT = "4fdJZFkHBLZAydpnRAfRscZfRdZiuWqTHZNXjjRnpump";
 export const OFFICIAL_TOKEN_NAME = "launchacard.fun";
 export const OFFICIAL_TOKEN_SYMBOL = "launchcard";
 /** As the site prints any ticker: a dollar sign before the symbol as stored. */
