@@ -34,6 +34,8 @@ import { feeRecipientsProblem, sameFeeSplit } from "../../../../../integrations/
 import { connectForLaunch, signInCreator } from "./ownership";
 import { requestCardMintSigner } from "./card-mint";
 import { ONE_APPROVAL_NEXT, ONE_APPROVAL_NEXT_FEES, PAIR_REVIEW_COPY, SEPARATE_APPROVALS_NEXT, SEPARATE_APPROVALS_NEXT_FEES, WALLET_NOTICE_COPY, WALLET_OPEN_COPY, WALLET_OPEN_PAIR_COPY, walletNoticePreview } from "./wallet-notice";
+import { OFFICIAL_X_HANDLE } from "../../../lib/carddex/official";
+import { X_ANNOUNCE_REVIEW, xAnnounceStatusText, xPostUrl } from "../../../lib/carddex/live/x-announce";
 
 export type LiveLaunchDraft = {
   name: string; symbol: string; description: string; website: string; xUrl: string;
@@ -41,6 +43,8 @@ export type LiveLaunchDraft = {
   initialBuyQuoteBaseUnits: string; artwork: Blob;
   /** The creator fee split chosen in the form (whole basis points), or null to keep pump.fun's default. */
   feeShares: LiveFeeRecipient[] | null;
+  /** "Announce my coin on @launchacard", ticked while announcements are on. */
+  announceOnX?: boolean;
 };
 export type LiveLaunchHandle = { submit(): void; startAnother(): void; /** The terms checkbox, while it shows. */ terms(): HTMLInputElement | null };
 /**
@@ -376,6 +380,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
         name: draft.name, symbol: draft.symbol, description: draft.description, website: draft.website, xUrl: draft.xUrl, cardTemplate: draft.cardTemplate,
         quoteAssetKey: draft.quoteAssetKey, quoteMint: draft.quoteMint, initialBuyQuoteBaseUnits: draft.initialBuyQuoteBaseUnits,
         slippageBps, assets, termsAcknowledged: true, ...(draft.feeShares ? { feeShares: draft.feeShares } : {}),
+        ...(draft.announceOnX ? { announceOnX: true } : {}),
       };
       preparedInput.current = input;
       // withCard: a wallet that approves the coin and its card in one prompt gets the card plan now too.
@@ -800,6 +805,8 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
   const reviewIntent = intent;
   // The split the review names: the saved launch's, or the one this tab is preparing it with.
   const reviewFees = intent?.feeShare?.recipients ?? preparedInput.current?.feeShares ?? null;
+  // The @launchacard announcement the review names: the saved launch's, or the one this tab asked for.
+  const reviewAnnounce = !!intent?.xAnnounce || preparedInput.current?.announceOnX === true;
   const recoveryItems = recoverable.filter(i => !settled(i));
   const savedListShown = canRecover && !intent && (canLaunch || recoveryItems.length > 0);
   const siteHost = readiness.data?.publicOrigin ? new URL(readiness.data.publicOrigin).host : undefined;
@@ -988,6 +995,8 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
         <div><dt>Quote asset</dt><dd>{selected.symbol}</dd></div>
         <div><dt>Initial buy</dt><dd>{intent.initialBuyQuoteBaseUnits === "0" ? "None" : <><span className="num">{formatLiveAmount(intent.initialBuyQuoteBaseUnits, selected.decimals)}</span> <span className="mdx-unit">{selected.symbol}</span></>}</dd></div>
         <div><dt>Card design</dt><dd>{getCardDesign(intent.cardTemplate).name}</dd></div>
+        {intent.xAnnounce ? <div><dt>Announcement on {OFFICIAL_X_HANDLE}</dt><dd>{intent.xAnnounce.status === "posted" && intent.xAnnounce.postId
+          ? <TextLink href={xPostUrl(intent.xAnnounce.postId)} target="_blank">Posted<Icon name="external" size={12} /></TextLink> : xAnnounceStatusText(intent.xAnnounce)}</dd></div> : null}
         {intent.feeShare ? <div><dt>Creator fee split</dt><dd><FeeSplitList recipients={intent.feeShare.status === "set_elsewhere" && intent.feeShare.onChain ? intent.feeShare.onChain : intent.feeShare.recipients} creator={intent.creatorWallet} /></dd></div> : null}
       </dl>
       {intent.feeShare && !["complete", "set_elsewhere", "skipped"].includes(intent.feeShare.status) ? <p className="cdx-live-meta">{FEE_SPLIT_PERMANENT} {FEE_SPLIT_FREE}</p> : null}
@@ -1053,6 +1062,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
           {plan.kind === "token" && reviewFees ? <><h3 className="cdx-live-subhead">Creator fee split, after your card</h3>
             <FeeSplitList recipients={reviewFees} creator={reviewIntent.creatorWallet} />
             <p>Set by its own approval once your coin and card are confirmed. {FEE_SPLIT_PERMANENT} {FEE_SPLIT_FREE}</p></> : null}
+          {plan.kind === "token" && reviewAnnounce ? <><h3 className="cdx-live-subhead">Announcement on {OFFICIAL_X_HANDLE}</h3><p>{X_ANNOUNCE_REVIEW}</p></> : null}
           {plan.kind === "fees" ? <><h3 className="cdx-live-subhead">Who receives your coin's creator fees</h3>
             <FeeSplitList recipients={reviewFees ?? []} creator={reviewIntent.creatorWallet} />
             <p><strong>{FEE_SPLIT_PERMANENT}</strong> {FEE_SPLIT_WALLETS} {FEE_SPLIT_FREE} Fees your coin earned before this split stay yours: they are collected into your own pump.fun creator vault first.</p></> : null}

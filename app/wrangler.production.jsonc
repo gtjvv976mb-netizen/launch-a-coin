@@ -28,7 +28,14 @@
     "CARDDEX_LIVE_RECOVERY_ENABLED": "true",
     // CARDDEX_LIVE_FEE_SHARING ("true" only) offers the optional pump.fun creator fee split after the card.
     "CARDDEX_LIVE_FEE_SHARING": "true"
+    // CARDDEX_X_AUTOPOST ("true" only, with the four X secrets set by `wrangler secret put`) posts opted-in new coins on
+    // @launchacard from the cron below. Off until the owner sets it (README, "Announcements on @launchacard").
+    // CARDDEX_ADMIN_WALLETS (comma list of the owner's wallets) opens the private reply helper, /admin/replies, which
+    // reads X search with the X_BEARER_TOKEN secret (README, "Reply helper"). Unset: the page answers "not found".
   },
+  // The announcement job (server.ts scheduled). `versions upload`/`versions deploy` do not apply triggers: add this
+  // cron in the Cloudflare dashboard (Worker > Settings > Triggers), never with `wrangler deploy` or `triggers deploy`.
+  "triggers": {"crons": ["*/10 * * * *"]},
   "d1_databases": [{"binding": "DB", "database_name": "launch-a-card", "database_id": "ffc8ba69-4d9d-404c-9c3d-e4a7f187cb3a", "migrations_dir": "migrations"}],
   "r2_buckets": [{"binding": "STORAGE", "bucket_name": "launch-a-card"}]
 }

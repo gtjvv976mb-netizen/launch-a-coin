@@ -1,3 +1,5 @@
+import type { LiveXAnnounce } from "./x-announce";
+
 export type LiveStage = "prepared" | "token_pending" | "nft_pending" | "complete" | "abandoned";
 export type LiveAsset = { sha256: string; url: string; mimeType: string; bytes: number };
 // Token media is server-derived on new preparation. Historical immutable intents have only the original three assets.
@@ -18,6 +20,11 @@ export type LivePrepareInput = {
    * (live_fee_shares), never in its payload or binding.
    */
   feeShares?: LiveFeeRecipient[];
+  /**
+   * "Announce my coin on @launchacard": saved beside the launch (live_x_optins) while announcements are on, never in
+   * its payload or binding. The post is made after the card is confirmed.
+   */
+  announceOnX?: boolean;
 };
 export type LiveFeeRecipient = { address: string; bps: number };
 export type LiveFeeShareStatus = "requested" | "prepared" | "pending" | "complete" | "set_elsewhere" | "skipped" | "failed";
@@ -40,6 +47,8 @@ export type LiveReadiness = {
   walletBatch: string[];
   /** The optional creator fee split (CARDDEX_LIVE_FEE_SHARING="true", with recovery ready). Absent means off. */
   feeSharing?: boolean;
+  /** Announcements on @launchacard (CARDDEX_X_AUTOPOST="true" with its secrets, and recovery ready). Absent means off. */
+  xAnnounce?: boolean;
 };
 export type LiveWallet = { wallet: string; expiresAt: number };
 export type LiveLaunchIntent = {
@@ -64,6 +73,8 @@ export type LiveLaunchIntent = {
   chainCheck?: LiveChainCheck;
   /** The creator fee split chosen with this launch; absent when none was chosen. */
   feeShare?: LiveFeeShare;
+  /** The announcement on @launchacard the creator asked for; absent when they did not. */
+  xAnnounce?: LiveXAnnounce;
 };
 /**
  * What the last chain check of a saved launch found. "failed-on-chain": its transaction landed and failed, so nothing

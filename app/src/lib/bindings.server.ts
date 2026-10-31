@@ -35,6 +35,29 @@ type AppEnv = {
   CARDDEX_LIVE_WALLET_BATCH?: string;
   /** "true" opens the optional creator fee split after a launch (config.server.ts feeSharingSwitchOn); unset is off. */
   CARDDEX_LIVE_FEE_SHARING?: string;
+  /** "true" posts opted-in new coins on @launchacard (x-announce.server.ts); unset is off. Needs the four X secrets. */
+  CARDDEX_X_AUTOPOST?: string;
+  /** Optional: most announcements per UTC day (default 20) and minutes between two (default 10). */
+  CARDDEX_X_DAILY_CAP?: string;
+  CARDDEX_X_MIN_GAP_MINUTES?: string;
+  // Secrets (wrangler secret put): @launchacard's OAuth 1.0a user-context values from the X developer portal (an app
+  // with Read and Write). Any one missing: announcements are off. Never logged, never reported.
+  X_API_KEY?: string;
+  X_API_SECRET?: string;
+  X_ACCESS_TOKEN?: string;
+  X_ACCESS_TOKEN_SECRET?: string;
+  /**
+   * The private reply helper (/admin/replies, x-replies.server.ts): a comma list of the owner's Solana wallets. Unset
+   * or empty, the page and its server functions answer "not found".
+   */
+  CARDDEX_ADMIN_WALLETS?: string;
+  /** Optional: most X searches per hour (default 4) and reply suggestions per hour (default 30). */
+  CARDDEX_X_REPLY_READS_PER_HOUR?: string;
+  CARDDEX_X_REPLY_SUGGESTIONS_PER_HOUR?: string;
+  // Secrets: X's app-only bearer token (recent search; read only, it cannot post), and an Anthropic API key for the
+  // optional reply suggestions. Either missing turns its half off. Never logged, never reported.
+  X_BEARER_TOKEN?: string;
+  ANTHROPIC_API_KEY?: string;
   CARDDEX_DEPLOYMENT_ENV?: string;
   CARDDEX_PUBLIC_ORIGIN?: string;
   CARDDEX_MAINNET_RPC_URL?: string;

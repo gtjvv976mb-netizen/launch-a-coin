@@ -21,6 +21,7 @@ import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MDigestRouteImport } from './routes/m/$digest'
 import { Route as CoinIdRouteImport } from './routes/coin/$id'
+import { Route as AdminRepliesRouteImport } from './routes/admin/replies'
 import { Route as ApiLiveLaunchesRouteImport } from './routes/api/live/launches'
 import { Route as ApiLiveHealthRouteImport } from './routes/api/live/health'
 import { Route as ApiLiveComposeRouteImport } from './routes/api/live/compose'
@@ -86,6 +87,11 @@ const CoinIdRoute = CoinIdRouteImport.update({
   path: '/coin/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRepliesRoute = AdminRepliesRouteImport.update({
+  id: '/admin/replies',
+  path: '/admin/replies',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiLiveLaunchesRoute = ApiLiveLaunchesRouteImport.update({
   id: '/api/live/launches',
   path: '/api/live/launches',
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/portfolio': typeof PortfolioRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/replies': typeof AdminRepliesRoute
   '/coin/$id': typeof CoinIdRoute
   '/m/$digest': typeof MDigestRoute
   '/api/live/compose': typeof ApiLiveComposeRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/portfolio': typeof PortfolioRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/replies': typeof AdminRepliesRoute
   '/coin/$id': typeof CoinIdRoute
   '/m/$digest': typeof MDigestRoute
   '/api/live/compose': typeof ApiLiveComposeRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/portfolio': typeof PortfolioRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/replies': typeof AdminRepliesRoute
   '/coin/$id': typeof CoinIdRoute
   '/m/$digest': typeof MDigestRoute
   '/api/live/compose': typeof ApiLiveComposeRoute
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/admin/replies'
     | '/coin/$id'
     | '/m/$digest'
     | '/api/live/compose'
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/admin/replies'
     | '/coin/$id'
     | '/m/$digest'
     | '/api/live/compose'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/portfolio'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/admin/replies'
     | '/coin/$id'
     | '/m/$digest'
     | '/api/live/compose'
@@ -230,6 +242,7 @@ export interface RootRouteChildren {
   PortfolioRoute: typeof PortfolioRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  AdminRepliesRoute: typeof AdminRepliesRoute
   CoinIdRoute: typeof CoinIdRoute
   MDigestRoute: typeof MDigestRoute
   ApiLiveComposeRoute: typeof ApiLiveComposeRoute
@@ -324,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoinIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/replies': {
+      id: '/admin/replies'
+      path: '/admin/replies'
+      fullPath: '/admin/replies'
+      preLoaderRoute: typeof AdminRepliesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/live/launches': {
       id: '/api/live/launches'
       path: '/api/live/launches'
@@ -366,6 +386,7 @@ const rootRouteChildren: RootRouteChildren = {
   PortfolioRoute: PortfolioRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  AdminRepliesRoute: AdminRepliesRoute,
   CoinIdRoute: CoinIdRoute,
   MDigestRoute: MDigestRoute,
   ApiLiveComposeRoute: ApiLiveComposeRoute,

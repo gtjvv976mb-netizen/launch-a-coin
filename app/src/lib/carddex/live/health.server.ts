@@ -16,6 +16,8 @@ type Dependencies = {
   schema?: () => Promise<string[]>;
   /** The pre-ground "card" address pool (vanity.server.ts vanityHealth): whether its key is set and how many are left. */
   vanity?: () => Promise<{ configured: boolean; available: number }>;
+  /** Announcements on @launchacard (config.server.ts xAutopostStatus): the switch and whether its secrets are set. */
+  x?: () => { enabled: boolean; configured: boolean };
 };
 /** Fewer available "card" addresses than this reads as low: time to grind and load more (README runbook). */
 export const VANITY_LOW = 10;
@@ -111,6 +113,12 @@ export function createLiveHealthHandler(dependencies: Dependencies) {
         vanity = { configured: pool.configured === true, available, low: available < VANITY_LOW };
       } catch { vanity = { configured: false, available: 0, low: true }; }
     }
+    // Optional too, and never changes ok: two booleans, never a credential.
+    let x: { enabled: boolean; configured: boolean } | undefined;
+    if (dependencies.x) {
+      try { const status = dependencies.x(); x = { enabled: status.enabled === true, configured: status.configured === true }; }
+      catch { x = { enabled: false, configured: false }; }
+    }
     const ok = configured && rpc.status === "healthy" && (schema?.ok ?? true);
     return Response.json({
       ok,
@@ -120,13 +128,14 @@ export function createLiveHealthHandler(dependencies: Dependencies) {
       rpc,
       ...(schema ? { schema } : {}),
       ...(vanity ? { vanity } : {}),
+      ...(x ? { x } : {}),
     }, { status: ok ? 200 : 503, headers: { "cache-control": "no-store", "x-content-type-options": "nosniff" } });
   };
 }
 
 let productionHandler: Promise<ReturnType<typeof createLiveHealthHandler>> | undefined;
 export async function serveLiveHealth(): Promise<Response> {
-  productionHandler ??= Promise.all([import("../../bindings.server"), import("./config.server"), import("./limits.server"), import("./vanity.server")]).then(([{ bindings }, { liveReadiness }, { missingMigrations }, { vanityHealth }]) =>
-    createLiveHealthHandler({ readiness: liveReadiness, rpcUrl: () => bindings().CARDDEX_MAINNET_RPC_URL, schema: missingMigrations, vanity: vanityHealth }));
+  productionHandler ??= Promise.all([import("../../bindings.server"), import("./config.server"), import("./limits.server"), import("./vanity.server")]).then(([{ bindings }, { liveReadiness, xAutopostStatus }, { missingMigrations }, { vanityHealth }]) =>
+    createLiveHealthHandler({ readiness: liveReadiness, rpcUrl: () => bindings().CARDDEX_MAINNET_RPC_URL, schema: missingMigrations, vanity: vanityHealth, x: xAutopostStatus }));
   return (await productionHandler)();
 }

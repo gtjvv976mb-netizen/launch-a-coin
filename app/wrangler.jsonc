@@ -22,6 +22,9 @@
       "migrations_dir": "migrations"
     }
   ],
+  "triggers": {
+    "crons": ["*/10 * * * *"]
+  },
   "r2_buckets": [
     {
       "binding": "STORAGE",

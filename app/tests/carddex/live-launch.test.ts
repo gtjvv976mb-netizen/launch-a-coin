@@ -1987,3 +1987,85 @@ describe("the creator fee split after the card (CARDDEX_LIVE_FEE_SHARING)", () =
     expect(await missingMigrations()).toEqual(["0017"]);
   });
 });
+
+describe("announcing the coin on @launchacard (CARDDEX_X_AUTOPOST)", () => {
+  const X_ON = {CARDDEX_X_AUTOPOST: "true", X_API_KEY: "k", X_API_SECRET: "s", X_ACCESS_TOKEN: "t", X_ACCESS_TOKEN_SECRET: "ts"};
+  const optins = () => sqlite.query("SELECT intent_id FROM live_x_optins").all() as {intent_id: string}[];
+  const posts = () => sqlite.query("SELECT intent_id, status, attempts FROM live_x_posts").all() as {intent_id: string; status: string; attempts: number}[];
+  /** A launch carried to `complete` (coin and card verified), with or without the box ticked. */
+  async function completed(announceOnX?: boolean) {
+    const prepared = await service.prepareLiveLaunch(creator, {...await input(), ...(announceOnX === undefined ? {} : {announceOnX})});
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: prepared.intent.id, signature: "s".repeat(88), messageSha256: prepared.transaction!.messageSha256});
+    const nft = await service.prepareLiveCreatorNft(creator, {intentId: prepared.intent.id});
+    nftVerified = true;
+    await service.confirmLiveCreatorNft(creator, {intentId: prepared.intent.id, signature: "t".repeat(88), messageSha256: nft.transaction!.messageSha256});
+    return prepared;
+  }
+  const fresh = () => {
+    sqlite.close(); sqlite = new Database(":memory:"); tokenVerified = nftVerified = false;
+    for (const name of readdirSync(migrations).filter(name => name.endsWith(".sql")).sort()) { const sql = readFileSync(resolve(migrations, name), "utf8"); if (sql.replace(/--[^\n]*/g, "").trim()) sqlite.exec(sql); }
+  };
+  test("the choice is saved beside the launch, never in its identity: the request hash, payload and binding are the same with or without it", async () => {
+    Object.assign(env, X_ON);
+    const plain = await service.prepareLiveLaunch(creator, await input());
+    const plainRow = sqlite.query("SELECT payload_sha256, payload_json, binding_sha256 FROM live_launch_intents").get() as Record<string, string>;
+    expect(plain.intent.xAnnounce).toBeUndefined();
+    fresh();
+    const announced = await service.prepareLiveLaunch(creator, {...await input(), announceOnX: true});
+    const row = sqlite.query("SELECT payload_sha256, payload_json, binding_sha256 FROM live_launch_intents").get() as Record<string, string>;
+    expect(row).toEqual(plainRow);
+    expect(tokenInputs[0]).toEqual(tokenInputs[1]);
+    expect(JSON.stringify(JSON.parse(row.payload_json))).not.toContain("announce");
+    expect(announced.intent.xAnnounce).toEqual({status: "requested", postId: null});
+    expect(optins()).toEqual([{intent_id: announced.intent.id}]);
+    // The same saved launch prepared again (with or without the box) is the same launch, and keeps its choice.
+    expect((await service.prepareLiveLaunch(creator, await input())).intent.xAnnounce).toEqual({status: "requested", postId: null});
+    expect((await service.listLiveLaunchIntents(creator))[0].xAnnounce).toEqual({status: "requested", postId: null});
+  });
+  test("added for review when the opted-in launch completes, and only then; never while announcements are off or for a launch without the box", async () => {
+    Object.assign(env, X_ON);
+    const opted = await completed(true);
+    expect(posts()).toEqual([{intent_id: opted.intent.id, status: "review", attempts: 0}]);
+    expect((await service.getLiveLaunchIntent(creator, opted.intent.id)).xAnnounce).toEqual({status: "review", postId: null});
+    // No X call was made by the launch itself: the cron posts it.
+    fresh();
+    await completed(false);
+    expect(optins()).toEqual([]); expect(posts()).toEqual([]);
+    // Off (the default): the box is ignored, nothing is saved or queued, and the launch is unaffected.
+    fresh();
+    delete env.CARDDEX_X_AUTOPOST;
+    const off = await completed(true);
+    expect(off.intent.xAnnounce).toBeUndefined();
+    expect(optins()).toEqual([]); expect(posts()).toEqual([]);
+    expect((await service.getLiveLaunchIntent(creator, off.intent.id)).status).toBe("complete");
+    // Opted in while on, then switched off before the card: not queued at completion.
+    fresh();
+    Object.assign(env, X_ON);
+    const prepared = await service.prepareLiveLaunch(creator, {...await input(), announceOnX: true});
+    delete env.CARDDEX_X_AUTOPOST;
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: prepared.intent.id, signature: "s".repeat(88), messageSha256: prepared.transaction!.messageSha256});
+    const nft = await service.prepareLiveCreatorNft(creator, {intentId: prepared.intent.id});
+    nftVerified = true;
+    await service.confirmLiveCreatorNft(creator, {intentId: prepared.intent.id, signature: "t".repeat(88), messageSha256: nft.transaction!.messageSha256});
+    expect(optins()).toHaveLength(1); expect(posts()).toEqual([]);
+  });
+  test("a card found in the creator's wallet completes the launch and queues it too", async () => {
+    Object.assign(env, X_ON);
+    const prepared = await service.prepareLiveLaunch(creator, {...await input(), announceOnX: true});
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: prepared.intent.id, signature: "s".repeat(88), messageSha256: prepared.transaction!.messageSha256});
+    nftVerified = true;
+    expect((await service.getLiveLaunchIntent(creator, prepared.intent.id)).status).toBe("complete");
+    expect(posts()).toEqual([{intent_id: prepared.intent.id, status: "review", attempts: 0}]);
+  });
+  test("a database without migration 0018 still launches (announcements off) and reads, and health names the migration", async () => {
+    sqlite.exec("DROP TABLE live_x_posts"); sqlite.exec("DROP TABLE live_x_optins");
+    const done = await completed(true);
+    expect((await service.getLiveLaunchIntent(creator, done.intent.id))).toMatchObject({status: "complete"});
+    expect((await service.getLiveLaunchIntent(creator, done.intent.id)).xAnnounce).toBeUndefined();
+    const {missingMigrations} = await import("../../src/lib/carddex/live/limits.server");
+    expect(await missingMigrations()).toEqual(["0018"]);
+  });
+});

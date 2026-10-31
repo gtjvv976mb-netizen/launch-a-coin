@@ -1,0 +1,43 @@
+/* The private reply helper (/admin/replies): the header, one budget line, then the posts, each on a plinth panel with
+ * its reply box and actions. Owner-only and never indexed. Markup: routes/admin/replies.tsx. Unlayered; tokens:
+ * carddex-theme.css. No motion. */
+
+.cdx-replies { display: flex; flex-direction: column; gap: 16px; padding-bottom: 32px; }
+.cdx-replies__signin { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.cdx-replies__budget,
+.cdx-replies__muted,
+.cdx-replies__count { color: var(--color-slate); font-size: var(--text-body); }
+.cdx-replies__notice { color: var(--color-ink); font-size: var(--text-body); }
+.cdx-replies__error { color: var(--color-down); font-size: var(--text-body); }
+.cdx-replies__empty { color: var(--color-slate); padding: 24px 0; }
+.cdx-replies__list { display: grid; gap: 12px; max-width: 760px; margin: 0; padding: 0; list-style: none; }
+.cdx-replies__post,
+.cdx-replies__setup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px 20px;
+  border-radius: var(--radius-panel);
+  background: var(--surface-suede), var(--color-plinth);
+  box-shadow: var(--rim-gold); /* taste-skill-ignore: the site's own 1px panel rim, as Portfolio's plinth */
+}
+.cdx-replies__setup { max-width: 760px; }
+.cdx-replies__setup code { overflow-wrap: anywhere; }
+.cdx-replies__author { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; min-width: 0; }
+.cdx-replies__author > span { min-width: 0; overflow-wrap: anywhere; }
+.cdx-replies__new { color: var(--color-up); }
+.cdx-replies__text { white-space: pre-wrap; overflow-wrap: anywhere; text-wrap: pretty; }
+.cdx-replies__retry { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.cdx-replies__review { display: flex; flex-direction: column; gap: 8px; max-width: 760px; }
+.cdx-replies__preview { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px 16px; min-width: 0; }
+.cdx-replies__preview > p { flex: 1 1 240px; min-width: 0; }
+.cdx-replies__card { flex: none; width: 126px; height: auto; aspect-ratio: 126 / 176; object-fit: cover; border-radius: var(--radius-panel); }
+.cdx-replies__box { min-height: 88px; resize: vertical; }
+.cdx-replies__count { text-align: right; }
+.cdx-replies__count--over { color: var(--color-down); }
+.cdx-replies__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.cdx-replies .num { font-variant-numeric: tabular-nums; }
+@media (max-width: 639px) {
+  .cdx-replies__post, .cdx-replies__setup { padding: 14px 16px; }
+}

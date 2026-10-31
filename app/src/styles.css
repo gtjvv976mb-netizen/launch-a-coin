@@ -59,6 +59,7 @@
 /* How it works (/how): the details the screens link to. */
 @import "./styles/screens/how.css";
 @import "./styles/screens/portfolio.css";
+@import "./styles/screens/replies.css";
 
 @custom-variant dark (&:where([data-theme="default-dark"], [data-theme="default-dark"] *));
 

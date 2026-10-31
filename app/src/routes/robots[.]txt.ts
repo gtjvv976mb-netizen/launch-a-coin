@@ -23,6 +23,8 @@ export const Route = createFileRoute('/robots.txt')({
           'Allow: /api/live/assets/',
           'Disallow: /api/',
           'Disallow: /_serverFn/',
+          // The owner's private tools (/admin/replies): noindex too, and never linked.
+          'Disallow: /admin/',
           '',
           `Sitemap: ${SITE_ORIGIN}/sitemap.xml`,
           '',

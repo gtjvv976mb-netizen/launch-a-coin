@@ -65,6 +65,19 @@ export function launchSwitchOn(value: string | undefined) { return switchValue(v
  * coins and cards are unaffected, and a coin without a split keeps pump.fun's default (the creator keeps 100%).
  */
 export function feeSharingSwitchOn(value: string | undefined) { return switchValue(value) === "true"; }
+/**
+ * Announcements on @launchacard (x-announce.server.ts): CARDDEX_X_AUTOPOST is on only for "true", and only with all
+ * four X secrets set (OAuth 1.0a user context for the account). Unset, the default and every local preview, is off;
+ * missing secrets are off too, never an error. Only these two booleans are ever reported, never a value.
+ */
+export function xAutopostSwitchOn(value: string | undefined) { return switchValue(value) === "true"; }
+export function xCredentialsConfigured(env: {X_API_KEY?: string; X_API_SECRET?: string; X_ACCESS_TOKEN?: string; X_ACCESS_TOKEN_SECRET?: string}) {
+  return [env.X_API_KEY, env.X_API_SECRET, env.X_ACCESS_TOKEN, env.X_ACCESS_TOKEN_SECRET].every(value => typeof value === "string" && value.trim().length > 0 && value.length <= 200);
+}
+export function xAutopostStatus() {
+  const env = bindings();
+  return {enabled: xAutopostSwitchOn(env.CARDDEX_X_AUTOPOST), configured: xCredentialsConfigured(env)};
+}
 const RECOVERY_OFF_VALUES = new Set(["false", "0", "off", "no"]);
 let warnedRecoveryValue: string | undefined;
 export function recoverySwitchOn(value: string | undefined) {
@@ -99,7 +112,8 @@ export function liveReadiness(): LiveReadiness {
   // A new launch must also be able to finish, so it needs recovery (sign-in, confirmation, the card) too.
   return { implemented: true, configured, enabled, ready: recoveryReady && enabled, recoveryEnabled, recoveryReady,
     network: "solana-mainnet-beta", publicOrigin: origin, blockers, walletFirst: walletFirstWallets(env.CARDDEX_LIVE_WALLET_FIRST),
-    walletBatch: walletBatchWallets(env.CARDDEX_LIVE_WALLET_BATCH), feeSharing: recoveryReady && feeSharingSwitchOn(env.CARDDEX_LIVE_FEE_SHARING) };
+    walletBatch: walletBatchWallets(env.CARDDEX_LIVE_WALLET_BATCH), feeSharing: recoveryReady && feeSharingSwitchOn(env.CARDDEX_LIVE_FEE_SHARING),
+    xAnnounce: recoveryReady && xAutopostSwitchOn(env.CARDDEX_X_AUTOPOST) && xCredentialsConfigured(env) };
 }
 /** "launch" starts something new; "recovery" serves a creator's existing launch. */
 export function requireLiveConfig(scope: "launch" | "recovery") {

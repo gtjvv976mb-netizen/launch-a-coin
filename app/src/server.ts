@@ -52,10 +52,13 @@ function applySiteHeaders(response: Response, url: URL): Response {
   // Pages embed the viewer's own session data (the demo account, Portfolio): never kept by a shared cache, including a
   // page whose server function asked only for revalidation (/launch's readiness sets "no-cache").
   const privatize = html && !/\b(?:public|private)\b/i.test(cacheControl ?? "");
-  if (!privatize && !mirror) return response;
+  // The owner's private tools (/admin/*): never indexed on any host, never kept by any cache.
+  const admin = url.pathname.startsWith("/admin/");
+  if (!privatize && !mirror && !admin) return response;
   const headers = new Headers(response.headers);
   if (privatize) headers.set("Cache-Control", cacheControl ? `private, ${cacheControl}` : "private, no-cache");
-  if (mirror) headers.set("X-Robots-Tag", "noindex");
+  if (admin) headers.set("Cache-Control", "private, no-store");
+  if (mirror || admin) headers.set("X-Robots-Tag", "noindex");
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
@@ -78,7 +81,19 @@ function lowerScriptPriority(response: Response): Response {
   return new HTMLRewriter().on('link[rel="modulepreload"]', low).on('script[type="module"][src]', low).transform(response);
 }
 
+/** The parts of workerd's scheduled() arguments this entry uses (the Worker types are not in tsconfig). */
+type ScheduledController = { cron: string; scheduledTime: number };
+type ScheduledContext = { waitUntil(promise: Promise<unknown>): void };
+
 export default {
+  /**
+   * The cron trigger (wrangler `triggers.crons`, added in the Cloudflare dashboard for production: README "Announcements
+   * on @launchacard"): posts at most one approved new-coin announcement per run, on the cron's scheduled time. Off
+   * unless CARDDEX_X_AUTOPOST is "true" with its secrets; loaded lazily so page requests never load it.
+   */
+  async scheduled(controller: ScheduledController, _env: unknown, ctx: ScheduledContext) {
+    ctx.waitUntil(import("./lib/carddex/live/x-announce.server").then(m => m.runXAutoPost({scheduledAt: controller.scheduledTime})).catch(error => console.error("x_announce_cron_failed", error instanceof Error ? error.name : "error")));
+  },
   async fetch(request: Request, env: unknown, ctx: unknown) {
     // One canonical hop also keeps www wallet pages on the configured origin.
     const url = new URL(request.url);

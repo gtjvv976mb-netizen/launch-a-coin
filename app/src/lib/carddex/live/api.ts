@@ -77,7 +77,7 @@ export const prepareLiveLaunch = createServerFn({method: "POST"}).validator(z.ob
   cardTemplate: z.string().max(50).optional(), quoteAssetKey: z.string().max(30).optional(), quoteMint: publicKey.optional(),
   initialBuyQuoteBaseUnits: z.string().regex(/^(0|[1-9][0-9]{0,19})$/), slippageBps: z.number().int().min(0).max(1000),
   assets: z.object({artwork: asset, cardImage: asset, caseImage: asset}), termsAcknowledged: z.literal(true), withCard: z.boolean().optional(),
-  feeShares: feeShares.optional(),
+  feeShares: feeShares.optional(), announceOnX: z.boolean().optional(),
 })).handler(({data}) => attempt("prepare", async () => { await sameOrigin(); await perAddress(LIMITS.prepareIp); return service.prepareLiveLaunch(await signedIn(LIMITS.prepareWallet), data); }));
 // A pre-ground coin address ending in "card" for the signed-in creator's next new launch (vanity.server.ts), or null:
 // not configured, an empty pool, no session, another site, a limit or any error. The page then uses a random address,

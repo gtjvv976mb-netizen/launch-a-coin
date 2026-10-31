@@ -21,7 +21,13 @@
     // Optional CARDDEX_LIVE_WALLET_BATCH: wallets that approve the coin and its card in one prompt. Unset is no wallet
     // (opt in a wallet, e.g. "Backpack", only after a test on the live site); "none" is the same. Phantom is never batched.
     // Optional CARDDEX_LIVE_FEE_SHARING: "true" offers the pump.fun creator fee split after the card. Unset is off.
+    // Optional CARDDEX_X_AUTOPOST: "true" posts opted-in new coins on @launchacard from the cron below. Unset is off, and
+    // it stays off until the secrets X_API_KEY, X_API_SECRET, X_ACCESS_TOKEN and X_ACCESS_TOKEN_SECRET are all set.
+    // CARDDEX_ADMIN_WALLETS (comma list of the owner's wallets) opens the private reply helper, /admin/replies, which
+    // reads X search with the X_BEARER_TOKEN secret (README, "Reply helper"). Unset: the page answers "not found".
+    // Optional CARDDEX_X_DAILY_CAP (default 20 posts per UTC day) and CARDDEX_X_MIN_GAP_MINUTES (default 10).
   },
+  "triggers": {"crons": ["*/10 * * * *"]},
   "d1_databases": [{"binding": "DB", "database_name": "launch-a-card", "database_id": "REPLACE_WITH_OWN_D1_ID", "migrations_dir": "migrations"}],
   "r2_buckets": [{"binding": "STORAGE", "bucket_name": "launch-a-card"}]
 }

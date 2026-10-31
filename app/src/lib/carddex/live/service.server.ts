@@ -14,6 +14,7 @@ import { BUY_DOES_NOT_FIT, STOCK_BUY_WARNS } from "./copy";
 import { FEE_SHARING_OFF, liveReadiness, requireFeeSharing, requireLiveConfig } from "./config.server";
 import { normalizeLiveFields, normalizeLiveIdentity, requireNewLaunchPair } from "./validation.server";
 import { cardMintClaim } from "./vanity.server";
+import { keepXOptin, queueXAnnouncement, xAnnounceFor, xOptinStatement } from "./x-announce.server";
 import { LIVE_PACKET_LIMIT, type LiveApprovedCard, type LiveAssets, type LiveChainCheck, type LiveFeeRecipient, type LiveFeeShare, type LiveFeeShareStatus, type LiveLaunchIntent, type LivePrepareRequest, type LiveStage } from "./types";
 
 type Payload = {input: Omit<LiveLaunchInput, "nftMint">; assets: LiveAssets; fields: ReturnType<typeof normalizeLiveFields>};
@@ -272,6 +273,8 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareRequest)
   // The creator fee split, when chosen: checked before anything is made, saved beside the launch (never in its identity).
   const feeShares = requestedFeeShares(raw, fields);
   const feesOpen = liveReadiness().feeSharing === true;
+  // "Announce my coin on @launchacard": saved beside the launch while announcements are on (ignored while off).
+  const announce = raw.announceOnX === true && liveReadiness().xAnnounce === true;
   const requestedHash = await sha256(JSON.stringify({creator: wallet, fields, assets: raw.assets, initialBuyQuoteBaseUnits: raw.initialBuyQuoteBaseUnits, slippageBps: raw.slippageBps}));
   const found = await one<IntentRow>("SELECT * FROM live_launch_intents WHERE token_mint = ? OR (creator_wallet = ? AND idempotency_key = ?)", fields.tokenMint, wallet, raw.idempotencyKey);
   if (found) {
@@ -281,6 +284,7 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareRequest)
     // A saved launch can always be prepared again: with the switch off its split is only checked against the saved one
     // (never saved now), and a saved split stays "requested" until sharing opens again.
     if (feeShares) await keepFeeShares(found, feeShares, feesOpen);
+    if (announce) await keepXOptin(found.id);
     // A submitted coin that failed on Solana or expired without landing is prepared again with the same mint, once
     // nothing it signed can still land (retireUnlandedCoin). The mint is fixed, so this can never make a second coin.
     const existing = found.status === "token_pending" ? await retireUnlandedCoin(wallet, found) : found;
@@ -316,6 +320,7 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareRequest)
       stmt("INSERT INTO live_launch_transactions (id, intent_id, kind, message_sha256, plan_json, status, created_at, updated_at) VALUES (?, ?, 'token', ?, ?, 'prepared', ?, ?)", crypto.randomUUID(), id, transaction.messageSha256, JSON.stringify(transaction), now, now),
       ...(card ? [insertPlan(id, card, now)] : []),
       ...(feeShares ? [insertFeeShares(id, feeShares, await sha256(feeSharesJson(feeShares)), now)] : []),
+      ...(announce ? [xOptinStatement(id, now)] : []),
       // From here the coin and card metadata URIs are fixed. What they point to is public for the approval window, so
       // the wallet prompt can show it, and permanently once the signed coin is saved (submitLiveTransaction).
       previewLaunchAssets(launchAssetShas(payload), now),
@@ -329,6 +334,7 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareRequest)
     const concurrent = await one<IntentRow>("SELECT * FROM live_launch_intents WHERE token_mint = ? AND creator_wallet = ?", fields.tokenMint, wallet);
     if (!concurrent || concurrent.payload_sha256 !== requestedHash) throw new UserError("This launch mint or request identifier is already reserved.");
     if (feeShares) await keepFeeShares(concurrent, feeShares, feesOpen);
+    if (announce) await keepXOptin(concurrent.id);
     await savePlan(concurrent, transaction, card); return {intent: await withFeeShare(publicIntent(concurrent)), transaction, card};
   }
   logTransactionSize("prepared", id, "token", transaction.messageSha256, transaction.transactionBase64);
@@ -405,7 +411,7 @@ export async function confirmLiveCreatorNft(wallet: string, input: {intentId: st
     stmt("UPDATE live_launch_transactions SET signature = ?, status = ?, updated_at = ? WHERE id = ?", input.signature, receipt.status === "verified" ? "confirmed" : "pending", Date.now(), plan.id),
     stmt("UPDATE live_launch_intents SET nft_signature = ?, nft_receipt_json = ?, status = CASE WHEN status = 'complete' THEN status ELSE ? END, updated_at = ? WHERE id = ?", input.signature, JSON.stringify(receipt), receipt.status === "verified" ? "complete" : "nft_pending", Date.now(), row.id),
   ]);
-  if (receipt.status === "verified") logLaunchEvent("verified", {intentId: row.id, kind: "nft"});
+  if (receipt.status === "verified") { logLaunchEvent("verified", {intentId: row.id, kind: "nft"}); await queueXAnnouncement(row.id); }
   const delivery = receipt.status === "pending" ? await resendPending(row, plan) : null;
   return {intent: publicIntent(await ownedIntent(wallet, row.id)), receipt, ...(delivery ? {delivery} : {})};
 }
@@ -413,6 +419,8 @@ async function completeExistingNft(row: IntentRow, receipt: Awaited<ReturnType<t
   verifyReceipt(row, receipt);
   if (receipt.status !== "verified") return false;
   await guardedBatch([snapshotGuard(row), clearGuard(), stmt("UPDATE live_launch_intents SET status = 'complete', nft_receipt_json = ?, updated_at = ? WHERE id = ?", JSON.stringify(receipt), Date.now(), row.id)]);
+  // The creator's @launchacard announcement, when they asked for one (never throws).
+  await queueXAnnouncement(row.id);
   return true;
 }
 export async function prepareLiveCreatorNft(wallet: string, input: {intentId: string; nftMint?: string}) {
@@ -526,7 +534,11 @@ export async function listLiveLaunchIntents(wallet: string) {
   const [rows] = await readBatch(q<IntentRow>("SELECT * FROM live_launch_intents WHERE creator_wallet = ? ORDER BY created_at DESC LIMIT 50", wallet));
   const fees = await withoutFeeSchema(async () => (await readBatch(q<FeeShareRow>("SELECT f.* FROM live_fee_shares f JOIN live_launch_intents i ON i.id = f.intent_id WHERE i.creator_wallet = ?", wallet)))[0], [] as FeeShareRow[]);
   const feeShares = new Map(fees.map(fee => [fee.intent_id, publicFeeShare(fee)]));
-  return rows.map(row => { const intent = publicIntent(row), feeShare = feeShares.get(row.id); return feeShare ? {...intent, feeShare} : intent; });
+  const announcements = await xAnnounceFor(rows.map(row => row.id));
+  return rows.map(row => {
+    const intent = publicIntent(row), feeShare = feeShares.get(row.id), xAnnounce = announcements.get(row.id);
+    return {...intent, ...(feeShare ? {feeShare} : {}), ...(xAnnounce ? {xAnnounce} : {})};
+  });
 }
 export async function abandonLiveLaunchIntent(wallet: string, input: {intentId: string}) {
   const row = await ownedIntent(wallet, input.intentId);
@@ -729,10 +741,14 @@ function publicFeeShare(row: FeeShareRow): LiveFeeShare {
   return {status: row.status, recipients: JSON.parse(row.recipients_json), signature: row.signature, error: row.error,
     ...(row.status === "set_elsewhere" && receipt?.shareholders ? {onChain: receipt.shareholders} : {})};
 }
-/** The launch with its fee split, when one was chosen (absent otherwise, so launches without one read exactly as before). */
+/**
+ * The launch with its fee split and its @launchacard announcement, each when one was chosen (absent otherwise, so
+ * launches without them read exactly as before).
+ */
 async function withFeeShare(intent: LiveLaunchIntent): Promise<LiveLaunchIntent> {
-  const row = await feeShareRow(intent.id);
-  return row ? {...intent, feeShare: publicFeeShare(row)} : intent;
+  const [row, announce] = await Promise.all([feeShareRow(intent.id), xAnnounceFor([intent.id])]);
+  const xAnnounce = announce.get(intent.id);
+  return {...intent, ...(row ? {feeShare: publicFeeShare(row)} : {}), ...(xAnnounce ? {xAnnounce} : {})};
 }
 async function ownedFeeShare(wallet: string, intentId: string) {
   const row = await ownedIntent(wallet, intentId);

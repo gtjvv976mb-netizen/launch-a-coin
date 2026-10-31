@@ -128,6 +128,16 @@ export async function enforceLimit(rule: LimitRule, key: string | null, message 
   // About one request in fifty also clears old rows, a bounded batch at a time.
   if (Math.random() < 0.02) await purgeRateEvents(now).catch(() => undefined);
 }
+/** How many requests `rule` has counted for `key` in its current window (0 before migration 0014). */
+export async function limitUsed(rule: LimitRule, key: string, now = Date.now()): Promise<number> {
+  try {
+    const row = await one<{n: number}>("SELECT COUNT(*) AS n FROM rate_events WHERE scope = ? AND key_hash = ? AND at > ?", rule.scope, await clientHash(rule.scope, key), now - rule.windowMs);
+    return row?.n ?? 0;
+  } catch (error) {
+    if (missingSchema(error)) return 0;
+    throw error;
+  }
+}
 export async function purgeRateEvents(now = Date.now()) {
   await stmt("DELETE FROM rate_events WHERE rowid IN (SELECT rowid FROM rate_events WHERE at < ? LIMIT 500)", now - KEEP_MS).run();
 }
@@ -159,6 +169,10 @@ export const SCHEMA_PROBES: readonly [migration: string, sql: string][] = [
   ["0016", "SELECT public_key, secret_ciphertext, secret_iv, status, issued_to, issued_at, used_at FROM live_vanity_mints LIMIT 0"],
   ["0017", "SELECT intent_id, recipients_json, recipients_sha256, status, signature, receipt_json, error FROM live_fee_shares LIMIT 0"],
   ["0017", "SELECT id, intent_id, message_sha256, plan_json, signature, signed_transaction_base64, signed_message_sha256, effective_last_valid_block_height FROM live_fee_share_transactions LIMIT 0"],
+  ["0018", "SELECT intent_id, created_at FROM live_x_optins LIMIT 0"],
+  ["0018", "SELECT intent_id, status, attempts, next_attempt_at, claim_id, claimed_at, reviewed_by, reviewed_at, tweet_id, error, posted_at FROM live_x_posts LIMIT 0"],
+  ["0019", "SELECT id, query, fetched_at, posts_json FROM x_reply_cache LIMIT 0"],
+  ["0019", "SELECT tweet_id, mark, wallet, created_at FROM x_reply_marks LIMIT 0"],
 ];
 export async function missingMigrations(): Promise<string[]> {
   const missing = new Set<string>();
