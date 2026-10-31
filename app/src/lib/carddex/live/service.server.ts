@@ -1,5 +1,7 @@
 import * as sdk from "../../../../../integrations/pumpfun/src/live";
-import type { LiveLaunchInput, WalletTransactionPlan } from "../../../../../integrations/pumpfun/src/live";
+import type { FeeSharePlan, LiveLaunchInput, WalletTransactionPlan } from "../../../../../integrations/pumpfun/src/live";
+import { feeRecipientsProblem, sameFeeSplit } from "../../../../../integrations/pumpfun/src/fee-share-rules";
+import { isWalletAddress } from "../../../components/carddex/live/transaction";
 import reviewedDesigns from "../../../../../integrations/pumpfun/src/design-assets.json";
 import { getCardDesign } from "../designs";
 import { NOT_OFFERED_PAIR, getPairAsset, isOfferedPair, isPairAssetKey, mainnetPairRefusal } from "../pairs";
@@ -9,10 +11,10 @@ import { fetchPublicBytes, metadataShaFromUri, metadataUriPlaceholder, previewLa
 import { sha256, walletBytes } from "./auth.server";
 import { COMPOSITION_VERSION, composeTokenAssets, requireTrustedComposition } from "./composition.server";
 import { BUY_DOES_NOT_FIT, STOCK_BUY_WARNS } from "./copy";
-import { requireLiveConfig } from "./config.server";
+import { FEE_SHARING_OFF, liveReadiness, requireFeeSharing, requireLiveConfig } from "./config.server";
 import { normalizeLiveFields, normalizeLiveIdentity, requireNewLaunchPair } from "./validation.server";
 import { cardMintClaim } from "./vanity.server";
-import { LIVE_PACKET_LIMIT, type LiveApprovedCard, type LiveAssets, type LiveChainCheck, type LiveLaunchIntent, type LivePrepareRequest, type LiveStage } from "./types";
+import { LIVE_PACKET_LIMIT, type LiveApprovedCard, type LiveAssets, type LiveChainCheck, type LiveFeeRecipient, type LiveFeeShare, type LiveFeeShareStatus, type LiveLaunchIntent, type LivePrepareRequest, type LiveStage } from "./types";
 
 type Payload = {input: Omit<LiveLaunchInput, "nftMint">; assets: LiveAssets; fields: ReturnType<typeof normalizeLiveFields>};
 type IntentRow = {id: string; creator_wallet: string; token_mint: string; nft_mint: string; quote_key: string; quote_mint: string; design_key: string; payload_sha256: string; payload_json: string; binding_sha256: string; token_metadata_uri: string; nft_metadata_uri: string; status: LiveStage; token_signature: string | null; nft_signature: string | null; token_receipt_json: string | null; nft_receipt_json: string | null; created_at: number; updated_at: number};
@@ -37,10 +39,11 @@ function publicIntent(row: IntentRow): LiveLaunchIntent {
 }
 /** A launch transaction that landed and failed on Solana: nothing it would have created exists. */
 export class LaunchFailedOnChain extends UserError {
-  constructor(readonly kind: "token" | "nft") { super(kind === "token" ? COIN_FAILED : CARD_FAILED); }
+  constructor(readonly kind: "token" | "nft" | "fees") { super(kind === "token" ? COIN_FAILED : kind === "nft" ? CARD_FAILED : FEES_FAILED); }
 }
 const COIN_FAILED = "Your coin transaction failed on Solana, so no coin was created (only its network fee was charged). Prepare it again with the same details once it expires, or discard it.";
 const CARD_FAILED = "Your card transaction failed on Solana, so no card was created (only its network fee was charged). Prepare the card again.";
+const FEES_FAILED = "Your fee split transaction failed on Solana, so the split was not set (only its network fee was charged). Prepare it again, or keep 100%.";
 const STILL_VALID = "Your previous transaction can still land for up to about a minute. Wait a moment, then try again.";
 export const PROVIDER_UNAVAILABLE = "The Solana network provider didn't answer. Try again in a moment.";
 /**
@@ -53,14 +56,14 @@ const PROVIDER_FAILURE = /\b[1-5]\d\d [A-Z][A-Za-z ]*:|jsonrpc|fetch failed|fail
  * Provider and SDK failures as a creator reads them: no URLs, plain words for the expiry gates, and one plain
  * sentence for a provider that did not answer (its own text goes to the log, redacted). SDK checks keep their words.
  */
-export function plainChainError(error: unknown, kind: "token" | "nft") {
+export function plainChainError(error: unknown, kind: "token" | "nft" | "fees") {
   if (error instanceof Error && error.name === "TransactionFailedOnChain") return new LaunchFailedOnChain(kind);
   const message = (error instanceof Error ? error.message : "The mainnet provider could not verify this launch.").replace(/https?:\/\/\S+/g, "[provider]");
   if (/can still land/.test(message)) return new UserError(STILL_VALID);
   if (PROVIDER_FAILURE.test(message)) { logLaunchEvent("provider_unavailable", {kind, reason: message}); return new UserError(PROVIDER_UNAVAILABLE); }
   return new UserError(message.slice(0, 500));
 }
-async function chain<T>(fn: () => Promise<T>, kind: "token" | "nft" = "token"): Promise<T> {
+async function chain<T>(fn: () => Promise<T>, kind: "token" | "nft" | "fees" = "token"): Promise<T> {
   try { return await fn(); }
   catch (error) { throw plainChainError(error, kind); }
 }
@@ -70,7 +73,7 @@ const redact = (text: string) => text.replace(/https?:\/\/\S+/g, "[provider]").r
  * One structured line per launch stage change and refusal (REL-6), so a failed mainnet launch can be traced after the
  * fact by its intent id (the support reference is its first 8 characters). Never addresses, keys, signatures or URLs.
  */
-export function logLaunchEvent(event: string, fields: {intentId?: string; kind?: "token" | "nft"; reason?: string} & Record<string, string | number | boolean | undefined>) {
+export function logLaunchEvent(event: string, fields: {intentId?: string; kind?: "token" | "nft" | "fees"; reason?: string} & Record<string, string | number | boolean | undefined>) {
   console.info("live_launch_event", JSON.stringify({event, ...fields, ...(fields.reason ? {reason: redact(fields.reason)} : {})}));
 }
 /**
@@ -119,7 +122,7 @@ function wireBytes(transactionBase64: string) {
  * One server log line per launch transaction: stage, size and headroom under Solana's packet limit. Ids and hashes
  * only: no keys, signatures or wallet addresses. Prepare already refuses anything over the limit.
  */
-function logTransactionSize(event: "prepared" | "signed", intentId: string, kind: "token" | "nft", messageSha256: string, transactionBase64: string, extra: Record<string, string> = {}) {
+function logTransactionSize(event: "prepared" | "signed", intentId: string, kind: "token" | "nft" | "fees", messageSha256: string, transactionBase64: string, extra: Record<string, string> = {}) {
   const bytes = wireBytes(transactionBase64);
   console.info(`Live launch transaction ${event}`, JSON.stringify({intentId, kind, messageSha256, bytes, limit: LIVE_PACKET_LIMIT, headroom: LIVE_PACKET_LIMIT - bytes, ...extra}));
 }
@@ -266,12 +269,18 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareRequest)
   requireLiveConfig("launch");
   if (!/^[a-zA-Z0-9_-]{8,100}$/.test(raw.idempotencyKey)) throw new UserError("Use a stable launch request identifier.");
   const fields = normalizeLiveFields(raw);
+  // The creator fee split, when chosen: checked before anything is made, saved beside the launch (never in its identity).
+  const feeShares = requestedFeeShares(raw, fields);
+  const feesOpen = liveReadiness().feeSharing === true;
   const requestedHash = await sha256(JSON.stringify({creator: wallet, fields, assets: raw.assets, initialBuyQuoteBaseUnits: raw.initialBuyQuoteBaseUnits, slippageBps: raw.slippageBps}));
   const found = await one<IntentRow>("SELECT * FROM live_launch_intents WHERE token_mint = ? OR (creator_wallet = ? AND idempotency_key = ?)", fields.tokenMint, wallet, raw.idempotencyKey);
   if (found) {
     if (found.creator_wallet !== wallet || found.payload_sha256 !== requestedHash) throw new UserError("This mint or request identifier is already bound to different launch details.");
     if (found.status === "abandoned") throw new UserError("This unused draft was safely abandoned. Start with a fresh mint and request identifier.");
-    if (found.status === "nft_pending" || found.status === "complete") return {intent: publicIntent(found), transaction: null, card: null};
+    if (found.status === "nft_pending" || found.status === "complete") return {intent: await withFeeShare(publicIntent(found)), transaction: null, card: null};
+    // A saved launch can always be prepared again: with the switch off its split is only checked against the saved one
+    // (never saved now), and a saved split stays "requested" until sharing opens again.
+    if (feeShares) await keepFeeShares(found, feeShares, feesOpen);
     // A submitted coin that failed on Solana or expired without landing is prepared again with the same mint, once
     // nothing it signed can still land (retireUnlandedCoin). The mint is fixed, so this can never make a second coin.
     const existing = found.status === "token_pending" ? await retireUnlandedCoin(wallet, found) : found;
@@ -279,17 +288,21 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareRequest)
     await assertPlanRoom(existing.id, "token");
     const [transaction, ahead] = await Promise.all([chain(() => sdk.prepareTokenTransaction(adapterInput(existing), {connection: connection()})), raw.withCard ? prepareCardAhead(adapterInput(existing)) : null]);
     const card = cardFits(transaction, ahead);
-    await savePlan(existing, transaction, card); return {intent: publicIntent(existing), transaction, card};
+    await savePlan(existing, transaction, card); return {intent: await withFeeShare(publicIntent(existing)), transaction, card};
   }
   // A new launch from here on (a saved one returned above, whatever design and pair it was saved with): the pair picks
   // the card, and a design that is not the pair's own is refused before any artwork, metadata or plan is made.
   requireNewLaunchPair(fields);
+  if (feeShares && !feesOpen) throw new UserError(FEE_SHARING_OFF);
   // One coin in flight per wallet (REL-5): another device or a cleared browser must recover the submitted coin first.
   const inFlight = await one<{id: string}>("SELECT id FROM live_launch_intents WHERE creator_wallet = ? AND status = 'token_pending' LIMIT 1", wallet);
   if (inFlight) throw new UserError("Finish or discard your saved launch first: its coin transaction was already sent. Find it under Saved launches.");
   // A pre-ground "card" address must have been issued to this wallet (vanity.server.ts); it is marked used in the batch
   // that saves this launch. A random address needs nothing.
   const cardMint = await cardMintClaim(wallet, fields.tokenMint);
+  // A recipient that is a program or holds data is refused now, while nothing is uploaded (the live read is repeated
+  // when the split is prepared).
+  if (feeShares) await chain(() => sdk.checkFeeRecipientAccounts(feeShares, {connection: connection()}));
   const payload = await preparePayload(wallet, raw);
   // With withCard, the card plan is prepared alongside (prepareCardAhead) and saved in the same batch as the coin's.
   const [transaction, ahead] = await Promise.all([chain(() => sdk.prepareTokenTransaction({...payload.input, nftMint: raw.nftMint}, {connection: connection()})),
@@ -302,6 +315,7 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareRequest)
       stmt("INSERT INTO live_launch_intents (id, idempotency_key, creator_wallet, token_mint, nft_mint, quote_key, quote_mint, design_key, payload_sha256, payload_json, binding_sha256, token_metadata_uri, nft_metadata_uri, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'prepared', ?, ?)", id, raw.idempotencyKey, wallet, fields.tokenMint, raw.nftMint, fields.quoteAssetKey, fields.quoteMint, fields.cardTemplate, requestedHash, JSON.stringify(payload), transaction.bindingSha256, payload.input.tokenMetadataUri, payload.input.card.nftMetadataUri, now, now),
       stmt("INSERT INTO live_launch_transactions (id, intent_id, kind, message_sha256, plan_json, status, created_at, updated_at) VALUES (?, ?, 'token', ?, ?, 'prepared', ?, ?)", crypto.randomUUID(), id, transaction.messageSha256, JSON.stringify(transaction), now, now),
       ...(card ? [insertPlan(id, card, now)] : []),
+      ...(feeShares ? [insertFeeShares(id, feeShares, await sha256(feeSharesJson(feeShares)), now)] : []),
       // From here the coin and card metadata URIs are fixed. What they point to is public for the approval window, so
       // the wallet prompt can show it, and permanently once the signed coin is saved (submitLiveTransaction).
       previewLaunchAssets(launchAssetShas(payload), now),
@@ -314,11 +328,13 @@ export async function prepareLiveLaunch(wallet: string, raw: LivePrepareRequest)
     }
     const concurrent = await one<IntentRow>("SELECT * FROM live_launch_intents WHERE token_mint = ? AND creator_wallet = ?", fields.tokenMint, wallet);
     if (!concurrent || concurrent.payload_sha256 !== requestedHash) throw new UserError("This launch mint or request identifier is already reserved.");
-    await savePlan(concurrent, transaction, card); return {intent: publicIntent(concurrent), transaction, card};
+    if (feeShares) await keepFeeShares(concurrent, feeShares, feesOpen);
+    await savePlan(concurrent, transaction, card); return {intent: await withFeeShare(publicIntent(concurrent)), transaction, card};
   }
   logTransactionSize("prepared", id, "token", transaction.messageSha256, transaction.transactionBase64);
   if (card) logTransactionSize("prepared", id, "nft", card.messageSha256, card.transactionBase64, {ahead: "coin"});
-  return {intent: publicIntent(await ownedIntent(wallet, id)), transaction, card};
+  if (feeShares) logLaunchEvent("fee_split_saved", {intentId: id, kind: "fees", recipients: feeShares.length});
+  return {intent: await withFeeShare(publicIntent(await ownedIntent(wallet, id))), transaction, card};
 }
 
 async function confirmationPlan(row: IntentRow, kind: "token" | "nft", input: {signature: string; messageSha256?: string}): Promise<PlanRow> {
@@ -491,15 +507,26 @@ export async function getLiveLaunchIntent(wallet: string, id: string): Promise<L
     } catch (error) { chainCheck ??= uncheckedLaunch(error, "nft", id); }
     row = await ownedIntent(wallet, id);
   }
+  // A sent creator fee split is checked like a pending coin or card (and sent again while it can land). Its problems
+  // never stop the launch from loading: the split keeps its saved status.
+  if (row.status === "complete") {
+    const fee = await feeShareRow(id);
+    if (fee?.status === "pending" && fee.signature) {
+      try { await confirmLiveFeeShare(wallet, {intentId: id, signature: fee.signature}); }
+      catch (error) { logLaunchEvent("check_unavailable", {intentId: id, kind: "fees", reason: error instanceof Error ? error.message : "unknown"}); }
+    }
+  }
   // A resumed page (a closed tab) reads the approved card here and sends it once the coin is verified. A finished or
   // abandoned launch has none to send, so it reads exactly as listed.
-  return {...publicIntent(row), ...(["prepared", "token_pending", "nft_pending"].includes(row.status) ? {approvedCard: await approvedCard(row)} : {}),
-    ...(chainCheck ? {chainCheck} : {})};
+  return withFeeShare({...publicIntent(row), ...(["prepared", "token_pending", "nft_pending"].includes(row.status) ? {approvedCard: await approvedCard(row)} : {}),
+    ...(chainCheck ? {chainCheck} : {})});
 }
 export async function listLiveLaunchIntents(wallet: string) {
   requireLiveConfig("recovery");
   const [rows] = await readBatch(q<IntentRow>("SELECT * FROM live_launch_intents WHERE creator_wallet = ? ORDER BY created_at DESC LIMIT 50", wallet));
-  return rows.map(publicIntent);
+  const fees = await withoutFeeSchema(async () => (await readBatch(q<FeeShareRow>("SELECT f.* FROM live_fee_shares f JOIN live_launch_intents i ON i.id = f.intent_id WHERE i.creator_wallet = ?", wallet)))[0], [] as FeeShareRow[]);
+  const feeShares = new Map(fees.map(fee => [fee.intent_id, publicFeeShare(fee)]));
+  return rows.map(row => { const intent = publicIntent(row), feeShare = feeShares.get(row.id); return feeShare ? {...intent, feeShare} : intent; });
 }
 export async function abandonLiveLaunchIntent(wallet: string, input: {intentId: string}) {
   const row = await ownedIntent(wallet, input.intentId);
@@ -530,7 +557,7 @@ function notSent(saved: boolean, unsaved: string, retry: string, unsendable = tr
   if (saved) return new UserError(`This retry was not sent because ${retry}. Check this launch's saved transaction before preparing another.`);
   return unsendable ? new UnsendableTransaction(`${unsaved} Prepare again for a fresh transaction.`, expired) : new UserError(`${unsaved} Send again to retry with the same wallet approval.`);
 }
-async function checkBeforeSend(plan: WalletTransactionPlan, transactionBase64: string, saved: boolean) {
+async function checkBeforeSend(plan: WalletTransactionPlan | FeeSharePlan, transactionBase64: string, saved: boolean) {
   try { return await sdk.checkSignedWalletTransaction({plan, transactionBase64}, {connection: connection()}); }
   catch (error) {
     if (!(error instanceof sdk.SignedTransactionNotSent)) throw notSent(saved, "The final mainnet check could not finish, so this transaction was not sent yet.", "the final mainnet check could not finish", false);
@@ -644,4 +671,245 @@ export async function reportLiveWalletChange(wallet: string, input: {intentId: s
   const plan = JSON.parse(prepared.plan_json) as WalletTransactionPlan; checkPlan(row, plan);
   console.warn("Live wallet changed the prepared transaction", JSON.stringify({intentId: row.id, kind: input.kind, messageSha256: input.messageSha256, wallet: input.walletName, ...sdk.describeWalletChange(plan, input.transactionBase64)}));
   return {};
+}
+
+
+// ---------------------------------------------------------------- the creator fee split (optional, after the card)
+
+type FeeShareRow = {intent_id: string; recipients_json: string; recipients_sha256: string; status: LiveFeeShareStatus; signature: string | null; receipt_json: string | null; error: string | null; created_at: number; updated_at: number};
+type FeePlanRow = {id: string; intent_id: string; message_sha256: string; plan_json: string; signature: string | null; signed_transaction_base64: string | null; signed_message_sha256: string | null; effective_last_valid_block_height: number | null; status: "prepared" | "pending" | "confirmed"};
+/** A split that can never change from here: verified, locked with other recipients on pump.fun, or declined. */
+const FEE_SPLIT_FINAL: readonly LiveFeeShareStatus[] = ["complete", "set_elsewhere", "skipped"];
+/** Program ids and system accounts are never fee recipients (keypair addresses, so the wallet check alone passes them). */
+const NOT_RECIPIENTS = ["6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P", "pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ", "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA",
+  "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL", "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA", "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+  "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d", "11111111111111111111111111111111", "ComputeBudget111111111111111111111111111111"];
+const FEE_EXPIRED = "Your fee split transaction expired before it landed, so the split was not set and nothing was charged. Prepare it again, or keep 100%.";
+const FEE_STILL_PENDING = "Your fee split transaction was sent. Check its confirmation before preparing another.";
+/**
+ * The fee split a launch request carries, checked as the page checks it (fee-share-rules.ts), or null when none was
+ * chosen. A new launch with one is refused while the switch is off (prepareLiveLaunch), so nothing is saved that could
+ * not be set. Launch a Card adds nothing to it.
+ */
+function requestedFeeShares(raw: LivePrepareRequest, fields: {tokenMint: string; quoteMint: string}): LiveFeeRecipient[] | null {
+  if (!raw.feeShares?.length) return null;
+  const shares = raw.feeShares.map(entry => ({address: entry.address, bps: entry.bps}));
+  const problem = feeRecipientsProblem(shares, {isWallet: isWalletAddress, forbidden: [fields.tokenMint, raw.nftMint, fields.quoteMint, ...NOT_RECIPIENTS]});
+  if (problem) throw new UserError(problem);
+  return shares;
+}
+const feeSharesJson = (shares: readonly LiveFeeRecipient[]) => JSON.stringify(shares.map(entry => ({address: entry.address, bps: entry.bps})));
+const insertFeeShares = (intentId: string, shares: readonly LiveFeeRecipient[], sha: string, now: number) =>
+  stmt("INSERT OR IGNORE INTO live_fee_shares (intent_id, recipients_json, recipients_sha256, status, created_at, updated_at) VALUES (?, ?, ?, 'requested', ?, ?)", intentId, feeSharesJson(shares), sha, now, now);
+/**
+ * A saved launch prepared again with a split: the same split is kept, a different one is refused (it is frozen once
+ * saved), and one chosen before the coin was sent is saved now (only while sharing is open; `open` false saves nothing).
+ */
+async function keepFeeShares(row: IntentRow, shares: readonly LiveFeeRecipient[], open: boolean) {
+  const saved = await feeShareRow(row.id);
+  if (saved) {
+    if (!sameFeeSplit(JSON.parse(saved.recipients_json), shares)) throw new UserError("This launch's creator fee split is already saved with other wallets or shares. It can't be changed.");
+    return;
+  }
+  if (!open) return;
+  if (row.status !== "prepared" && row.status !== "token_pending") throw new UserError("A creator fee split can only be chosen before the coin is created.");
+  await db().batch([insertFeeShares(row.id, shares, await sha256(feeSharesJson(shares)), Date.now())]);
+}
+/**
+ * A database without migration 0017 (a deploy that skipped it; health reports it) reads as no fee splits, so saved
+ * launches still load. Writes are never guarded this way: they fail and say so.
+ */
+async function withoutFeeSchema<T>(read: () => Promise<T>, fallback: T): Promise<T> {
+  try { return await read(); }
+  catch (error) { if (/no such table/i.test(error instanceof Error ? error.message : String(error))) return fallback; throw error; }
+}
+const feeShareRow = (intentId: string) => withoutFeeSchema(() => one<FeeShareRow>("SELECT * FROM live_fee_shares WHERE intent_id = ?", intentId), null);
+function publicFeeShare(row: FeeShareRow): LiveFeeShare {
+  const receipt = row.receipt_json ? JSON.parse(row.receipt_json) as {shareholders?: LiveFeeRecipient[]} : null;
+  return {status: row.status, recipients: JSON.parse(row.recipients_json), signature: row.signature, error: row.error,
+    ...(row.status === "set_elsewhere" && receipt?.shareholders ? {onChain: receipt.shareholders} : {})};
+}
+/** The launch with its fee split, when one was chosen (absent otherwise, so launches without one read exactly as before). */
+async function withFeeShare(intent: LiveLaunchIntent): Promise<LiveLaunchIntent> {
+  const row = await feeShareRow(intent.id);
+  return row ? {...intent, feeShare: publicFeeShare(row)} : intent;
+}
+async function ownedFeeShare(wallet: string, intentId: string) {
+  const row = await ownedIntent(wallet, intentId);
+  const fee = await one<FeeShareRow>("SELECT * FROM live_fee_shares WHERE intent_id = ?", row.id);
+  if (!fee) throw new UserError("This launch has no creator fee split to set.");
+  return {row, fee, recipients: JSON.parse(fee.recipients_json) as LiveFeeRecipient[]};
+}
+const feeIntent = async (wallet: string, id: string) => withFeeShare(publicIntent(await ownedIntent(wallet, id)));
+/** The fee row exactly as read: a batch that finds it changed (another tab) refuses (guardedBatch). */
+const feeGuard = (fee: FeeShareRow) => guard("EXISTS (SELECT 1 FROM live_fee_shares WHERE intent_id = ? AND status = ? AND signature IS ? AND updated_at = ?)", fee.intent_id, fee.status, fee.signature, fee.updated_at);
+/** Records a split read from the chain: "complete" when it is this one, "set_elsewhere" when pump.fun holds another. */
+async function settleFeeShare(fee: FeeShareRow, recipients: LiveFeeRecipient[], shareholders: LiveFeeRecipient[], receipt: object, signature: string | null = null) {
+  const matches = sameFeeSplit(shareholders, recipients);
+  await guardedBatch([feeGuard(fee), clearGuard(),
+    stmt("UPDATE live_fee_shares SET status = ?, signature = COALESCE(?, signature), receipt_json = ?, error = NULL, updated_at = ? WHERE intent_id = ?",
+      matches ? "complete" : "set_elsewhere", signature, JSON.stringify({...receipt, shareholders}), Date.now(), fee.intent_id)]);
+  logLaunchEvent(matches ? "verified" : "fee_split_set_elsewhere", {intentId: fee.intent_id, kind: "fees"});
+}
+async function assertFeePlanRoom(intentId: string, now = Date.now()) {
+  const plans = await one<{n: number; newest: number | null}>("SELECT COUNT(*) AS n, MAX(created_at) AS newest FROM live_fee_share_transactions WHERE intent_id = ?", intentId);
+  if ((plans?.n ?? 0) < MAX_PLANS_PER_STAGE || now - (plans?.newest ?? 0) >= PLAN_SLOW_LANE_MS) return;
+  throw new UserError("This fee split was prepared many times in a row. Wait a few minutes, then prepare it again. Your coin and card are not affected.");
+}
+function checkFeePlan(row: IntentRow, recipients: LiveFeeRecipient[], plan: FeeSharePlan) {
+  try { sdk.verifyFeeSharePlan(plan, adapterInput(row), recipients); }
+  catch (error) { throw new UserError(`The prepared fee split does not match this launch (${error instanceof Error ? error.message.slice(0, 200) : "invalid"}).`); }
+}
+/**
+ * Prepares the creator-only fee split for a finished launch (status complete) and returns its plan, or settles it
+ * with no transaction when the coin's split is already locked (this split: complete; another: set_elsewhere). A split
+ * that was sent is checked first and never prepared over while it can still land.
+ */
+export async function prepareLiveFeeShare(wallet: string, input: {intentId: string}) {
+  requireFeeSharing();
+  let {row, fee, recipients} = await ownedFeeShare(wallet, input.intentId);
+  if (row.status !== "complete") throw new UserError("Your creator fee split is set after your coin and card are confirmed.");
+  if (FEE_SPLIT_FINAL.includes(fee.status)) return {intent: await feeIntent(wallet, row.id), transaction: null};
+  if (fee.status === "pending" && fee.signature) {
+    const checked = await confirmLiveFeeShare(wallet, {intentId: row.id, signature: fee.signature});
+    if (checked.intent.feeShare?.status !== "failed") {
+      if (checked.intent.feeShare?.status === "pending") throw new UserError(FEE_STILL_PENDING);
+      return {intent: checked.intent, transaction: null};
+    }
+    ({row, fee, recipients} = await ownedFeeShare(wallet, row.id));
+  }
+  await assertFeePlanRoom(row.id);
+  const result = await chain(() => sdk.prepareFeeShareTransaction(adapterInput(row), recipients, {connection: connection()}), "fees");
+  if ("status" in result && result.status === "already-set") {
+    await settleFeeShare(fee, recipients, result.shareholders, {status: "already-set"});
+    return {intent: await feeIntent(wallet, row.id), transaction: null};
+  }
+  const plan = result as FeeSharePlan;
+  checkFeePlan(row, recipients, plan);
+  const now = Date.now();
+  await guardedBatch([feeGuard(fee), clearGuard(),
+    stmt("INSERT INTO live_fee_share_transactions (id, intent_id, message_sha256, plan_json, status, created_at, updated_at) VALUES (?, ?, ?, ?, 'prepared', ?, ?)", crypto.randomUUID(), row.id, plan.messageSha256, JSON.stringify(plan), now, now),
+    stmt("UPDATE live_fee_shares SET status = 'prepared', signature = NULL, error = NULL, updated_at = ? WHERE intent_id = ? AND status IN ('requested','prepared','failed')", now, row.id)]);
+  logTransactionSize("prepared", row.id, "fees", plan.messageSha256, plan.transactionBase64);
+  return {intent: await feeIntent(wallet, row.id), transaction: plan};
+}
+/**
+ * Relays the creator's signed fee split: the stored plan is checked again (pre-relay), the signed bytes must be that
+ * plan within the shared wallet rule and carry the creator's valid signature, the read-only pre-send checks run, and the
+ * signature and exact bytes are saved before the broadcast, as for the coin and card.
+ */
+export async function submitLiveFeeShare(wallet: string, input: {intentId: string; messageSha256: string; transactionBase64: string} & SigningContext) {
+  requireFeeSharing();
+  const {row, fee, recipients} = await ownedFeeShare(wallet, input.intentId);
+  if (row.status !== "complete" || !["prepared", "pending"].includes(fee.status)) throw new UserError("This fee split has already advanced beyond that wallet transaction.");
+  const prepared = await one<FeePlanRow>("SELECT * FROM live_fee_share_transactions WHERE intent_id = ? AND message_sha256 = ?", row.id, input.messageSha256);
+  if (!prepared) throw new UserError("This fee split transaction was not prepared for this launch.");
+  const plan = JSON.parse(prepared.plan_json) as FeeSharePlan; checkFeePlan(row, recipients, plan);
+  let signed: ReturnType<typeof sdk.validateSignedWalletTransaction>;
+  try { signed = sdk.validateSignedWalletTransaction(plan, input.transactionBase64); }
+  catch (error) {
+    const detail = error instanceof Error ? error.message.slice(0, 200) : "invalid signature";
+    throw notSent(!!fee.signature, `The signed fee split differs from the one you reviewed, so it was not sent (${detail}).`, `it differs from the fee split you reviewed (${detail})`);
+  }
+  if (fee.signature && fee.signature !== signed.signature) throw new UserError("A different fee split transaction is already pending. Check it before authorizing another.");
+  if (prepared.signature && (prepared.signature !== signed.signature || prepared.signed_transaction_base64 !== signed.transactionBase64)) throw new UserError("This prepared fee split already has different submitted bytes.");
+  logTransactionSize("signed", row.id, "fees", plan.messageSha256, signed.transactionBase64, {...(input.walletName ? {wallet: input.walletName} : {}),
+    ...(signed.signedMessageSha256 !== plan.messageSha256 ? {signedMessageSha256: signed.signedMessageSha256, walletGuards: String(signed.walletGuards), blockhash: signed.blockhashChanged ? "refreshed" : "plan"} : {})});
+  const checked = await checkBeforeSend(plan, signed.transactionBase64, !!fee.signature);
+  const now = Date.now();
+  await guardedBatch([
+    guard("EXISTS (SELECT 1 FROM live_fee_shares WHERE intent_id = ? AND (status = 'prepared' OR (status = 'pending' AND signature = ?)))", row.id, signed.signature), clearGuard(),
+    guard("EXISTS (SELECT 1 FROM live_fee_share_transactions WHERE id = ? AND (signature IS NULL OR (signature = ? AND signed_transaction_base64 = ?)))", prepared.id, signed.signature, signed.transactionBase64), clearGuard(),
+    stmt("UPDATE live_fee_share_transactions SET signature = ?, signed_transaction_base64 = ?, signed_message_sha256 = ?, effective_last_valid_block_height = COALESCE(effective_last_valid_block_height, ?), status = 'pending', updated_at = ? WHERE id = ?", signed.signature, signed.transactionBase64, checked.signedMessageSha256, checked.lastValidBlockHeight, now, prepared.id),
+    stmt("UPDATE live_fee_shares SET status = 'pending', signature = ?, error = NULL, updated_at = ? WHERE intent_id = ? AND status IN ('prepared','pending')", signed.signature, now, row.id),
+  ]);
+  try {
+    if (checked.status === "landed") { logLaunchEvent("landed_before_send", {intentId: row.id, kind: "fees"}); return {intent: await feeIntent(wallet, row.id), signature: signed.signature, submission: "submitted" as const}; }
+    const result = await kept(sdk.broadcastSignedWalletTransaction({plan, transactionBase64: signed.transactionBase64}, {connection: connection()}));
+    if (result.signature !== signed.signature) throw new UserError("The provider returned another transaction signature.");
+    logLaunchEvent(result.status === "submitted" ? "sent" : result.status === "refused" ? "send_refused" : "send_uncertain", {intentId: row.id, kind: "fees",
+      ...(result.status !== "submitted" ? {reason: result.reason} : {}), ...(input.walletName ? {wallet: input.walletName} : {})});
+    return {intent: await feeIntent(wallet, row.id), signature: signed.signature, submission: result.status === "submitted" ? "submitted" as const : "unknown" as const,
+      ...(result.status !== "submitted" ? {warning: "The provider did not confirm the send yet. The saved fee split is checked and sent again while it can still land."} : {})};
+  } catch {
+    return {intent: await feeIntent(wallet, row.id), signature: signed.signature, submission: "unknown" as const,
+      warning: "The provider did not return a definitive submission result. The saved fee split is checked and sent again while it can still land."};
+  }
+}
+/**
+ * The sent fee split's finalized check. Verified: complete. Still pending: its saved bytes are sent again while they
+ * can land. Failed on Solana, or expired unlanded: the chain is read, and the split is complete (it is locked with
+ * these wallets after all), set_elsewhere (another split is locked) or failed (prepare again or keep 100%). Read-only
+ * otherwise; it needs recovery only, so a sent split is always recorded.
+ */
+export async function confirmLiveFeeShare(wallet: string, input: {intentId: string; signature: string}) {
+  const {row, fee, recipients} = await ownedFeeShare(wallet, input.intentId);
+  if (fee.status === "complete" && fee.receipt_json) return {intent: await feeIntent(wallet, row.id), receipt: JSON.parse(fee.receipt_json) as object};
+  const plan = await one<FeePlanRow>("SELECT * FROM live_fee_share_transactions WHERE intent_id = ? AND signature = ?", row.id, input.signature);
+  if (!plan) throw new UserError("Confirm a signature from a fee split prepared for this launch.");
+  const current = fee.status === "pending" && fee.signature === input.signature;
+  let receipt: Awaited<ReturnType<typeof sdk.verifyFeeShareLanded>>;
+  try { receipt = await chain(() => sdk.verifyFeeShareLanded(adapterInput(row), recipients, {connection: connection(), signature: input.signature, expectedMessageSha256: plan.signed_message_sha256 ?? plan.message_sha256}), "fees"); }
+  catch (error) {
+    if (error instanceof LaunchFailedOnChain && current) {
+      logLaunchEvent("landed_failed", {intentId: row.id, kind: "fees"});
+      await reconcileFeeShare(fee, row, recipients, FEES_FAILED);
+      return {intent: await feeIntent(wallet, row.id), receipt: {status: "failed" as const}};
+    }
+    throw error;
+  }
+  if (receipt.status === "verified") {
+    await guardedBatch([feeGuard(fee), clearGuard(),
+      stmt("UPDATE live_fee_share_transactions SET status = 'confirmed', updated_at = ? WHERE id = ?", Date.now(), plan.id),
+      stmt("UPDATE live_fee_shares SET status = 'complete', signature = ?, receipt_json = ?, error = NULL, updated_at = ? WHERE intent_id = ?", input.signature, JSON.stringify(receipt), Date.now(), row.id)]);
+    logLaunchEvent("verified", {intentId: row.id, kind: "fees"});
+    return {intent: await feeIntent(wallet, row.id), receipt};
+  }
+  if (!current || !plan.signed_transaction_base64) return {intent: await feeIntent(wallet, row.id), receipt};
+  let delivery: Delivery | null = null;
+  const expiry = Math.max((JSON.parse(plan.plan_json) as FeeSharePlan).lastValidBlockHeight, plan.effective_last_valid_block_height ?? 0);
+  try {
+    const sent = await sdk.resendSignedWalletTransaction({plan: JSON.parse(plan.plan_json) as FeeSharePlan, transactionBase64: plan.signed_transaction_base64,
+      lastValidBlockHeight: expiry}, {connection: connection()});
+    delivery = sent.status;
+    if (sent.status !== "landed") logLaunchEvent(sent.status === "expired" ? "expired_unlanded" : sent.status, {intentId: row.id, kind: "fees"});
+  } catch (error) { logLaunchEvent("resend_unchecked", {intentId: row.id, kind: "fees", reason: error instanceof Error ? error.message : "unknown"}); }
+  if (delivery === "expired") await reconcileFeeShare(fee, row, recipients, FEE_EXPIRED, expiry);
+  return {intent: await feeIntent(wallet, row.id), receipt, ...(delivery ? {delivery} : {})};
+}
+/**
+ * After a split that failed or expired: what the chain holds decides complete, set_elsewhere or failed (with `reason`).
+ * An expired one (`expiry`, its saved last valid block height) is read only once finalized height is past it, at that
+ * finalized bank or newer (readFeeSplit afterBlockHeight); until then it stays pending, so a late landing read from a
+ * lagging node is never recorded as failed.
+ */
+async function reconcileFeeShare(fee: FeeShareRow, row: IntentRow, recipients: LiveFeeRecipient[], reason: string, expiry?: number) {
+  const state = await chain(() => sdk.readFeeSplit(adapterInput(row), {connection: connection(), ...(expiry !== undefined ? {afterBlockHeight: expiry} : {})}), "fees");
+  if (state.state === "unexpired") return;
+  if (state.state === "locked" && state.shareholders) return settleFeeShare(fee, recipients, state.shareholders, {status: "read", slot: state.slot});
+  await guardedBatch([feeGuard(fee), clearGuard(),
+    stmt("UPDATE live_fee_shares SET status = 'failed', error = ?, updated_at = ? WHERE intent_id = ? AND status = 'pending'", reason, Date.now(), fee.intent_id)]);
+}
+/**
+ * "Skip, keep 100%": the creator keeps pump.fun's default (all creator fees to the creator wallet). Nothing is sent. Not
+ * while a sent split can still land; final once recorded (pump.fun itself can still set a split later).
+ */
+export async function skipLiveFeeShare(wallet: string, input: {intentId: string}) {
+  requireFeeSharing();
+  const {row, fee, recipients} = await ownedFeeShare(wallet, input.intentId);
+  if (fee.status === "skipped") return {intent: await feeIntent(wallet, row.id)};
+  if (fee.status === "pending") throw new UserError(FEE_STILL_PENDING);
+  if (FEE_SPLIT_FINAL.includes(fee.status)) throw new UserError("This coin's creator fee split is already settled.");
+  if (row.status !== "complete") throw new UserError("Your creator fee split is set after your coin and card are confirmed.");
+  // Never recorded as kept while the coin's split is locked (one of its sent transactions landed after all, or it was
+  // set on pump.fun): the chain is read first, at confirmed, and a locked split settles as complete or set_elsewhere.
+  const state = await chain(() => sdk.readFeeSplit(adapterInput(row), {connection: connection(), commitment: "confirmed"}), "fees");
+  if (state.state === "locked" && state.shareholders) {
+    await settleFeeShare(fee, recipients, state.shareholders, {status: "read", slot: state.slot});
+    return {intent: await feeIntent(wallet, row.id)};
+  }
+  await guardedBatch([feeGuard(fee), clearGuard(),
+    stmt("UPDATE live_fee_shares SET status = 'skipped', updated_at = ? WHERE intent_id = ? AND status IN ('requested','prepared','failed')", Date.now(), row.id)]);
+  logLaunchEvent("fee_split_skipped", {intentId: row.id, kind: "fees"});
+  return {intent: await feeIntent(wallet, row.id)};
 }

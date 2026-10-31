@@ -33,6 +33,8 @@ type AppEnv = {
   CARDDEX_LIVE_RECOVERY_ENABLED?: string;
   CARDDEX_LIVE_WALLET_FIRST?: string;
   CARDDEX_LIVE_WALLET_BATCH?: string;
+  /** "true" opens the optional creator fee split after a launch (config.server.ts feeSharingSwitchOn); unset is off. */
+  CARDDEX_LIVE_FEE_SHARING?: string;
   CARDDEX_DEPLOYMENT_ENV?: string;
   CARDDEX_PUBLIC_ORIGIN?: string;
   CARDDEX_MAINNET_RPC_URL?: string;

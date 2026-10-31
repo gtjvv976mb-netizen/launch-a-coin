@@ -395,3 +395,53 @@ describe("a launch that outlives the page view, and its confirmation (REL-4, REL
     for (const status of ["prepared", "token_pending", "nft_pending"]) expect(flow.launchSettled({ status })).toBe(false);
   });
 });
+
+describe("the creator fee split: its own approval after the card", () => {
+  test("Phantom asks four times for a launch with a fee split (sign-in, coin, card, split), and sees the split unsigned", async () => {
+    const { feeSplitFixture } = await import("../../../integrations/pumpfun/tests/fee-fixture");
+    const { signFeeShare } = await import("../../src/components/carddex/live/launch-flow");
+    const phantom = wallet({ name: "Phantom", signIn: true });
+    await ownership("Phantom", null).run();
+    const coin = fixture(), card = nftFixture();
+    const coinStep = await signForLaunch({ plan: coin.plan, receivedAt: 1_000, now: () => 2_000, expected: coin.expected, signer: signer(mint, assetSeed), order: "wallet-first", refresh: noRefresh, walletSign: transaction => signLiveTransaction(transaction, creator) });
+    const cardStep = await signForLaunch({ plan: card.plan, receivedAt: 1_000, now: () => 2_000, expected: card.expected, signer: signer(nft, nftSeed), order: "wallet-first", refresh: noRefresh, walletSign: transaction => signLiveTransaction(transaction, creator) });
+    const fees = await feeSplitFixture({ creator, mint, quoteKey: "sol", recipients: [{ address: creator, bps: 6000 }, { address: nft, bps: 4000 }] });
+    const feeStep = await signFeeShare({ plan: fees, receivedAt: 1_000, now: () => 2_000, expected: fees.expected, refresh: noRefresh, walletSign: transaction => signLiveTransaction(transaction, creator) });
+    expect([coinStep.status, cardStep.status, feeStep.status]).toEqual(["signed", "signed", "signed"]);
+    expect(phantom.prompts).toEqual(["signIn", "signTransaction", "signTransaction", "signTransaction"]);
+    // The split reached the wallet with its one signature slot empty, and came back signed by the creator alone.
+    const shown = phantom.shown.at(-1)![0];
+    expect(shown[0]).toBe(1);
+    expect(shown.slice(1, 65).every(byte => byte === 0)).toBe(true);
+    if (feeStep.status !== "signed") throw new Error("Expected signed");
+    expect(ed25519.verify(feeStep.signed.slice(1, 65), feeStep.signed.slice(65), fromBase58(creator))).toBe(true);
+  });
+  test("a wallet that changes the split is asked once more, and a second change stops with nothing signed by the page", async () => {
+    const { feeSplitFixture } = await import("../../../integrations/pumpfun/tests/fee-fixture");
+    const { signFeeShare } = await import("../../src/components/carddex/live/launch-flow");
+    const fees = await feeSplitFixture({ creator, mint, quoteKey: "usdc", recipients: [{ address: nft, bps: 10_000 }] });
+    const changed: Uint8Array[] = [];
+    // A wallet that raises the priority fee: the shared wallet rule refuses any change to the plan's instructions.
+    const odd = wallet({ name: "Odd", change: feeChange });
+    await connectLiveWallet("Odd");
+    await expect(signFeeShare({ plan: fees, receivedAt: 1_000, now: () => 2_000, expected: fees.expected, refresh: noRefresh,
+      onWalletChanged: (_plan, returned) => changed.push(returned), walletSign: transaction => signLiveTransaction(transaction, creator) })).rejects.toBeInstanceOf(WalletChangedTransaction);
+    expect(odd.prompts).toEqual(["connect", "signTransaction", "signTransaction"]);
+    expect(changed).toHaveLength(2);
+  });
+  test("what is next after the card: the split's review, a sent split's check, or nothing; a launch with a split to set is not settled", () => {
+    expect(flow.feeShareNext({ status: "nft_pending", feeShare: { status: "requested", signature: null } })).toBe("none");
+    expect(flow.feeShareNext({ status: "complete", feeShare: { status: "requested", signature: null } })).toBe("prepare");
+    expect(flow.feeShareNext({ status: "complete", feeShare: { status: "failed", signature: "x" } })).toBe("prepare");
+    expect(flow.feeShareNext({ status: "complete", feeShare: { status: "pending", signature: "x" } })).toBe("confirm");
+    for (const status of ["complete", "set_elsewhere", "skipped"]) expect(flow.feeShareNext({ status: "complete", feeShare: { status, signature: null } })).toBe("none");
+    expect(flow.feeShareNext({ status: "complete" })).toBe("none");
+    expect(flow.launchSettled({ status: "complete" })).toBe(true);
+    expect(flow.launchSettled({ status: "complete", feeShare: { status: "requested", signature: null } })).toBe(false);
+    expect(flow.launchSettled({ status: "complete", feeShare: { status: "skipped", signature: null } })).toBe(true);
+    // Switched off: only a sent split keeps the launch open (it can still be confirmed).
+    expect(flow.launchSettled({ status: "complete", feeShare: { status: "requested", signature: null } }, false)).toBe(true);
+    expect(flow.launchSettled({ status: "complete", feeShare: { status: "pending", signature: "x" } }, false)).toBe(false);
+    expect(flow.launchSettled({ status: "abandoned" })).toBe(true);
+  });
+});

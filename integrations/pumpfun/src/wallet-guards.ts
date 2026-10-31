@@ -52,15 +52,24 @@ export const WALLET_SIZE_TARGET = PACKET_LIMIT - WALLET_GUARD_RESERVE_BYTES;
  * closes, and a closed address cannot be created again), so a pinned index always means the same address. The server
  * re-reads the table before each use (owner, never deactivated, every pinned entry) and otherwise builds the
  * transaction without it; the browser resolves lookups only through these pinned entries and refuses any other.
+ *
+ * Indexes 5, 6, 13 and 151 (31 October 2026, read on mainnet) serve the creator fee-sharing transaction, whose
+ * pump-fees instructions list the AMM program, its event authority and the ATA program as accounts. An invoked program
+ * is always a static key, so pinning one never moves it into the table. Saved messages only reference older indexes,
+ * so they decode exactly as before; a create-only coin prepared from now on is 31 bytes smaller (the ATA program is a
+ * create_v2 account there). The pump-fees program itself (index 15) is invoked and is never pinned.
  */
 export const PUMP_LOOKUP_TABLE = {
   address: "Hyif6eWb8x88RVrvjPfabsgRYnwkVnyByEXTVTXbUcyP",
   entries: [
     [1, "4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf"], // Pump global
     [3, "Ce6TQqeHC9p8KetsN6JsjHK7UTZk7nasjjnr7XxXp9F1"], // Pump event authority
+    [5, "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"], // Pump AMM program (pump-fees account)
+    [6, "GS4CU59F31iL7aR2Q8zVS8DRrcRnXX1yjQ66TqNVQnaR"], // Pump AMM event authority
     [10, "11111111111111111111111111111111"], // System program
     [11, "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"], // Token-2022
     [12, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"], // SPL Token
+    [13, "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"], // Associated token program
     [14, "8Wf5TiAheLUqBrKXeYg2JtAFFMWtKdG2BSFgqUcPVwTt"], // Pump fee config
     [16, "MAyhSmzXzV1pTf7LsNkrNwkWKTo4ougAJ1PPg47MD4e"], // Mayhem program (create_v2 account)
     [18, "13ec7XdrjF3h3YcqBTFDSReRcUFwbCnJaAQspM4j6DDJ"], // Pump global params
@@ -69,6 +78,7 @@ export const PUMP_LOOKUP_TABLE = {
     [71, "6oCkp6gpyjxVTeL6ahMYcekN2x2pzt1KY8g2LqemaTNE"], // that recipient's USDC account
     [124, "So11111111111111111111111111111111111111112"], // wrapped SOL
     [125, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"], // USDC
+    [151, "D6QxXDt6hhcCpto4HiZKkN2YQ2iZRF5R7S3caCHpUsML"], // pump-fees event authority
     [158, "TSLvdd1pWpHVjahSpsvCXUbgwsL3JAcvokwaKt1eokM"], // Pump mint authority
   ] as ReadonlyArray<readonly [number, string]>,
 } as const;

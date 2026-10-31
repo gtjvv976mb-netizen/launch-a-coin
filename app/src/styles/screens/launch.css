@@ -113,6 +113,24 @@
   .cdx-launch-buy .cdx-launch-note { padding-bottom: 4px; }
 }
 
+/* Share creator fees (inside More options): the switch, then rows of wallet, share and Remove, the total and its notes.
+ * The wallet takes the row's width on phones (the share and Remove share the line under it). */
+.cdx-launch-fees { display: grid; min-width: 0; gap: 12px; margin: 0; padding: 0; border: 0; }
+.cdx-launch-fees__title { font-weight: 500; color: var(--color-ink); }
+.cdx-launch-fees__hint { font-size: 13px; line-height: 1.45; color: var(--color-slate); }
+.cdx-launch-fees__rows { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
+.cdx-launch-fees__row { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 8px 12px; align-items: start; }
+.cdx-launch-fees__wallet { grid-column: 1 / -1; min-width: 0; }
+/* Level with the inputs whatever error sits under them: past the label line (20px) and its 6px gap. */
+.cdx-launch-fees__remove { justify-self: start; min-height: var(--hit); margin-top: calc(26px + (44px - var(--hit)) / 2); font-size: 13px; font-weight: 500; color: var(--color-ink); }
+.cdx-launch-fees__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: var(--hit); }
+.cdx-launch-fees__total { font-size: 14px; line-height: 20px; color: var(--color-down); }
+.cdx-launch-fees__total[data-ok] { color: var(--color-ink); }
+@media (min-width: 640px) {
+  .cdx-launch-fees__row { grid-template-columns: minmax(0, 1fr) 128px auto; }
+  .cdx-launch-fees__wallet { grid-column: auto; }
+}
+
 /* Focus moved to a field that needs something lands clear of the screen's edges. */
 .cdx-launch :is(button, [tabindex="-1"]) { scroll-margin-block: 16px; }
 .cdx-launch :is(input, textarea, select) { scroll-margin-block: 48px 16px; }
@@ -546,6 +564,12 @@
 .cdx-live-actions { display: grid; gap: 8px; }
 /* Progress: two transactions, each a row with its stage in words (Preparing, Waiting for your wallet, Sending,
  * Confirmed) and its links once there is something to open. */
+/* A creator fee split, read back (saved launch, reviews): each wallet and its share on one line. */
+.cdx-live-fee-list { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.cdx-live-fee-list > li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+/* Each recipient in full: it wraps inside the row, and the share keeps its own width. */
+.cdx-live-fee-list > li > .cdx-live-address { min-width: 0; }
+.cdx-live-fee-list > li > .num { flex: none; }
 .cdx-live-stages { display: grid; gap: 0; }
 .cdx-live-stage { display: flex; gap: 12px; padding-block: 12px; border-bottom: 1px solid var(--color-rule); } /* taste-skill-ignore: mintdex.fun table rule */
 .cdx-live-stage:last-child { border-bottom: 0; }

@@ -8,13 +8,13 @@ import {
   type VersionedTransactionResponse,
 } from "@solana/web3.js";
 import {
-  getAssociatedTokenAddressSync, getTokenMetadata, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID,
+  createAssociatedTokenAccountIdempotentInstruction, getAssociatedTokenAddressSync, getTokenMetadata, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID,
   unpackAccount, unpackMint,
 } from "@solana/spl-token";
 import {
-  bondingCurvePda, GLOBAL_PDA, PUMP_FEE_CONFIG_PDA, PUMP_FEE_PROGRAM_ID, PUMP_PROGRAM_ID,
+  bondingCurvePda, creatorVaultPda, feeSharingConfigPda, GLOBAL_PDA, isSharingConfigEditable, PUMP_FEE_CONFIG_PDA, PUMP_FEE_PROGRAM_ID, PUMP_PROGRAM_ID,
   PUMP_SDK, QUOTE_CONTROL_PDA, getBuyV3TokenAmountFromQuoteAmount,
-  newBondingCurve,
+  newBondingCurve, type SharingConfig,
 } from "@pump-fun/pump-sdk";
 import {
   create as createCoreAsset, deserializeAssetV1, mplCore, updateV1,
@@ -32,10 +32,13 @@ import {
 } from "./index.ts";
 import {
   LIGHTHOUSE_PROGRAM_ID, PACKET_LIMIT, PUMP_LOOKUP_TABLE, WALLET_GUARD_RESERVE_BYTES, WALLET_SIZE_TARGET, WalletMessageRefused,
-  decodeV0Message, walletMessageChange, withoutWalletGuards,
+  decodeV0Message, resolveInstructions, walletMessageChange, withoutWalletGuards,
 } from "./wallet-guards.ts";
+import {
+  MAX_FEE_RECIPIENTS, feeRecipientsProblem, feeShareInstructionsProblem, sameFeeSplit, type FeeRecipient, type FeeShareExpected,
+} from "./fee-share-rules.ts";
 
-export { LIGHTHOUSE_PROGRAM_ID, PACKET_LIMIT, PUMP_LOOKUP_TABLE, WALLET_GUARD_RESERVE_BYTES, WALLET_SIZE_TARGET };
+export { LIGHTHOUSE_PROGRAM_ID, MAX_FEE_RECIPIENTS, PACKET_LIMIT, PUMP_LOOKUP_TABLE, WALLET_GUARD_RESERVE_BYTES, WALLET_SIZE_TARGET, type FeeRecipient };
 
 export const CORE_PROGRAM_ID = new PublicKey("CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d");
 export interface LiveLaunchInput extends PrepareLaunchInput {
@@ -183,8 +186,10 @@ function shortOfSol(err: unknown): string | null {
   const rent = (err as { InsufficientFundsForRent?: { account_index?: unknown } } | null)?.InsufficientFundsForRent;
   return rent && rent.account_index === 0 ? SHORT_OF_SOL : null;
 }
-function oversizeError(kind: "token" | "nft", bytes: number, advice: string[] = []) {
-  return new Error(`${kind === "token" ? "Launch" : "Card"} transaction is ${bytes} bytes and exceeds the ${WALLET_SIZE_TARGET}-byte wallet limit (Solana's ${PACKET_LIMIT}-byte packet limit less ${WALLET_GUARD_RESERVE_BYTES} bytes for wallet safety checks)${advice.length ? `; ${advice.join(", or ")}` : ""}`);
+/** The three wallet transactions: the coin, its card, and the optional creator fee split after both. */
+export type PlanKind = "token" | "nft" | "fees";
+function oversizeError(kind: PlanKind, bytes: number, advice: string[] = []) {
+  return new Error(`${kind === "token" ? "Launch" : kind === "nft" ? "Card" : "Fee split"} transaction is ${bytes} bytes and exceeds the ${WALLET_SIZE_TARGET}-byte wallet limit (Solana's ${PACKET_LIMIT}-byte packet limit less ${WALLET_GUARD_RESERVE_BYTES} bytes for wallet safety checks)${advice.length ? `; ${advice.join(", or ")}` : ""}`);
 }
 const shortVec = (length: number) => length < 0x80 ? 1 : length < 0x4000 ? 2 : 3;
 /** Exact signed wire size, also past the packet limit where web3.js serialization overruns. */
@@ -214,14 +219,15 @@ export function simulatedPayerOutflow(inner: ParsedInnerInstruction[] | null | u
   return total;
 }
 
-async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", instructions: TransactionInstruction[],
-  minimumTokensOut: string, options: LiveOptions) {
+async function makeWalletPlan<K extends PlanKind>(input: LiveLaunchInput, kind: K, instructions: TransactionInstruction[],
+  minimumTokensOut: string, options: LiveOptions, extra: { feeRecipients?: readonly FeeRecipient[] } = {}) {
   const id = identity(input), connection = options.connection;
   const [latest, payerAccount, prioritySamples, preparedBlockHeight] = await Promise.all([
     connection.getLatestBlockhash("confirmed"),
     connection.getAccountInfoAndContext(id.creator, "confirmed"),
-    // The coin competes for the write locks every pump.fun create takes; the card has none, so its creator alone.
-    connection.getRecentPrioritizationFees({ lockedWritableAccounts: kind === "token" ? [...PUMP_SHARED_WRITE_LOCKS] : [id.creator] }),
+    // The coin competes for the write locks every pump.fun create takes; the card has none, so its creator alone. The
+    // fee split also write-locks the coin's curve, which its trades write.
+    connection.getRecentPrioritizationFees({ lockedWritableAccounts: kind === "token" ? [...PUMP_SHARED_WRITE_LOCKS] : kind === "fees" ? [id.creator, bondingCurvePda(id.mint)] : [id.creator] }),
     connection.getBlockHeight("confirmed"),
   ]);
   const payerBefore = safeLamports(payerAccount.value?.lamports ?? 0, "Wallet balance");
@@ -229,15 +235,17 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
   const microLamports = Math.min(MAX_MICRO_LAMPORTS, Math.max(MIN_MICRO_LAMPORTS, fees[Math.floor(fees.length * 0.75)] ?? MIN_MICRO_LAMPORTS));
   // Every coin transaction is compiled against pump.fun's own create lookup table, as pump.fun's own creates are (WW-4):
   // it keeps the coin far from the packet limit, with room for wallet assertions. The table is read fresh and checked
-  // first; when anything differs the transaction is built without it. Never used for the card.
-  const table = kind === "token" ? await readPinnedTable(connection) : null;
+  // first; when anything differs the transaction is built without it. Never used for the card. The fee split uses it too:
+  // without it no split with the config create fits under the wallet size target.
+  const table = kind !== "nft" ? await readPinnedTable(connection) : null;
   const sized = (ixs: TransactionInstruction[]) => transactionBytes(compileWalletTransaction(id.creator, latest.blockhash, 1_400_000, microLamports, ixs, table).message);
   const compile = (limit: number) => compileWalletTransaction(id.creator, latest.blockhash, limit, microLamports, instructions, table);
   const first = compile(1_400_000);
   // The final guard. measureTokenTransaction lets the app refuse a non-fitting buy before anything is uploaded.
   const packetBytes = transactionBytes(first.message);
   if (packetBytes > WALLET_SIZE_TARGET) {
-    if (kind !== "token") throw oversizeError("nft", packetBytes);
+    if (kind === "nft") throw oversizeError("nft", packetBytes);
+    if (kind === "fees") throw oversizeError("fees", packetBytes, ["choose fewer wallets"]);
     // Advice only where it can work: the coin alone (the create is the first instruction), or this transaction with
     // the shortest name and symbol (1 byte each).
     throw oversizeError("token", packetBytes, [
@@ -278,8 +286,9 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
   const reserveBuffer = RENT_EXEMPT_MINIMUM_LAMPORTS;
   if (balance < totalDebit + reserveBuffer) throw new Error(`Insufficient SOL: keep at least ${(totalDebit + reserveBuffer).toString()} lamports for this transaction and the minimum Solana requires the wallet to keep`);
   const requiredSigners = transaction.message.staticAccountKeys.slice(0, transaction.message.header.numRequiredSignatures).map((key) => key.toBase58());
-  const expectedSigner = kind === "token" ? input.mint : input.nftMint;
-  if (requiredSigners.length !== 2 || !requiredSigners.includes(input.creator) || !requiredSigners.includes(expectedSigner)) throw new Error("Unexpected transaction signer set");
+  // The fee split is the creator's alone: no new address, so nothing for this page to co-sign.
+  if (kind === "fees" ? requiredSigners.length !== 1 || requiredSigners[0] !== input.creator
+    : requiredSigners.length !== 2 || !requiredSigners.includes(input.creator) || !requiredSigners.includes(kind === "token" ? input.mint : input.nftMint)) throw new Error("Unexpected transaction signer set");
   const serialized = transaction.serialize();
   return immutable({
     kind, network: "solana:mainnet" as const, status: "wallet-signature-required" as const,
@@ -292,7 +301,9 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
     verifiedSlot: Math.max(payerAccount.context.slot, simulation.context.slot),
     preparedAt: (options.now?.() ?? new Date()).toISOString(),
     instructionPrograms: [...new Set(transaction.message.compiledInstructions.map((ix) => transaction.message.staticAccountKeys[ix.programIdIndex].toBase58()))],
-    instructionSummary: kind === "token" ? ["Create pump.fun Token-2022 coin", ...(id.buy > 0n ? ["Buy with the selected quote asset"] : [])] : ["Create separate Core NFT owned by creator", "Permanently remove metadata update authority"],
+    instructionSummary: kind === "token" ? ["Create pump.fun Token-2022 coin", ...(id.buy > 0n ? ["Buy with the selected quote asset"] : [])]
+      : kind === "nft" ? ["Create separate Core NFT owned by creator", "Permanently remove metadata update authority"]
+        : ["Collect creator fees earned so far into your own pump.fun creator vault", "Set this coin's permanent pump.fun creator fee split"],
     review: {
       quoteKey: id.asset.key, quoteMint: id.asset.mint, quoteDecimals: id.asset.decimals, tokenDecimals: 6,
       initialBuyQuoteBaseUnits: kind === "token" ? id.buy.toString() : "0",
@@ -304,10 +315,16 @@ async function makeWalletPlan(input: LiveLaunchInput, kind: "token" | "nft", ins
       // The signed wire size equals this unsigned one: both signature slots are already in the bytes.
       transactionBytes: serialized.length, packetLimit: PACKET_LIMIT, walletSizeTarget: WALLET_SIZE_TARGET,
       lookupTable: transaction.message.addressTableLookups.length ? PUMP_LOOKUP_TABLE.address : null,
+      ...(extra.feeRecipients ? { feeRecipients: extra.feeRecipients.map((entry) => ({ address: entry.address, bps: entry.bps })) } : {}),
     },
   });
 }
-export type WalletTransactionPlan = Awaited<ReturnType<typeof makeWalletPlan>>;
+/** A coin or card plan (two signers: the creator and the new address this page holds). */
+export type WalletTransactionPlan = Awaited<ReturnType<typeof makeWalletPlan<"token" | "nft">>>;
+/** The creator fee split plan (one signer: the creator). */
+export type FeeSharePlan = Awaited<ReturnType<typeof makeWalletPlan<"fees">>>;
+/** Any plan the shared signature, pre-send and relay checks take. */
+export type AnyWalletPlan = WalletTransactionPlan | FeeSharePlan;
 
 type PumpGlobal = ReturnType<typeof PUMP_SDK.decodeGlobal>;
 type PumpQuoteControl = ReturnType<typeof PUMP_SDK.decodeQuoteControl>;
@@ -478,6 +495,15 @@ async function finalizedTransaction(connection: LiveConnection, signature: strin
   return transaction && state?.confirmationStatus === "finalized" ? transaction : null;
 }
 
+/** The coin's sharing config as finalized at or after `minContextSlot`, when it is pump-fees' own, for this coin and administered by its creator; else null. */
+async function creatorSharingConfig(connection: LiveConnection, id: { mint: PublicKey; creator: PublicKey }, minContextSlot: number): Promise<SharingConfig | null> {
+  const account = await connection.getAccountInfoAndContext(feeSharingConfigPda(id.mint), { commitment: "finalized", minContextSlot });
+  if (!account.value || account.value.executable || !account.value.owner.equals(PUMP_FEE_PROGRAM_ID)) return null;
+  let config: SharingConfig;
+  try { config = PUMP_SDK.decodeSharingConfig(account.value); } catch { return null; }
+  return config.mint.equals(id.mint) && config.admin.equals(id.creator) ? config : null;
+}
+
 export async function verifyTokenLaunch(input: LiveLaunchInput, options: VerifyOptions) {
   const id = identity(input), connection = options.connection;
   await assertMainnet(connection);
@@ -510,7 +536,11 @@ export async function verifyTokenLaunch(input: LiveLaunchInput, options: VerifyO
   const mintState = unpackMint(id.mint, mintInfo, TOKEN_2022_PROGRAM_ID);
   const curve = PUMP_SDK.decodeBondingCurve(curveInfo);
   const expectedStoredQuote = id.asset.key === "sol" ? PublicKey.default : id.quoteMint;
-  if (!mintState.isInitialized || mintState.decimals !== 6 || !curve.creator.equals(id.creator) || !curve.quoteMint.equals(expectedStoredQuote) || curve.isMayhemMode || curve.isHolderReward) {
+  // After the creator's fee split the curve's creator is the coin's sharing config, never anyone else's: accepted only
+  // when that config exists, is pump-fees' own, is for this coin and keeps the creator as its admin (it stays the
+  // admin after the split locks, verified by mainnet simulation).
+  const creatorOk = curve.creator.equals(id.creator) || curve.creator.equals(feeSharingConfigPda(id.mint)) && !!await creatorSharingConfig(connection, id, transaction.slot);
+  if (!mintState.isInitialized || mintState.decimals !== 6 || !creatorOk || !curve.quoteMint.equals(expectedStoredQuote) || curve.isMayhemMode || curve.isHolderReward) {
     throw new Error("Finalized token state differs from the creator and selected pair");
   }
   const metadata = await getTokenMetadata(connection as Connection, id.mint, "finalized", TOKEN_2022_PROGRAM_ID);
@@ -583,6 +613,193 @@ export async function recoverCreatorLaunch(input: LiveLaunchInput, options: Live
   return nft.status === "verified" ? { status: "complete" as const, token, nft } : { status: "token-created-nft-pending" as const, token, nft };
 }
 
+// ---------------------------------------------------------------- the creator fee split (optional, after the card)
+
+/**
+ * Rent the creator's wallet pays for the split, read on mainnet on 31 October 2026: pump-fees' 1,024-byte sharing
+ * config, and on a token quote the sharing vault's 165-byte quote token account. Used only for the balance check before
+ * simulation; the review shows what the simulation charged.
+ */
+export const SHARING_CONFIG_RENT_LAMPORTS = 5_852_160n, QUOTE_ACCOUNT_RENT_LAMPORTS = 1_488_440n;
+/** Network and priority fees allowed for in that balance check (a fee split costs well under this). */
+const FEE_SPLIT_FEE_ALLOWANCE = 100_000n;
+export const GRADUATED_FEE_SPLIT = "This coin has left its pump.fun bonding curve, so its creator fee split can only be set on pump.fun itself.";
+export const FEE_SPLIT_NOT_CREATOR = "This coin's creator fees are managed by another wallet, so its split can't be set here.";
+const SYSTEM_PROGRAM_ID = new PublicKey("11111111111111111111111111111111");
+const shortAddress = (address: string) => `${address.slice(0, 4)}…${address.slice(-4)}`;
+
+function feeShareKeys(id: ReturnType<typeof identity>) {
+  const sol = id.asset.key === "sol", quoteTokenProgram = new PublicKey(id.asset.tokenProgram);
+  const sharingConfig = feeSharingConfigPda(id.mint), sharingVault = creatorVaultPda(sharingConfig);
+  return { sol, quoteMint: id.quoteMint, quoteTokenProgram, sharingConfig, sharingVault, bondingCurve: bondingCurvePda(id.mint),
+    sharingVaultQuoteAccount: sol ? null : getAssociatedTokenAddressSync(id.quoteMint, sharingVault, true, quoteTokenProgram) };
+}
+/** What the fee split transaction must say for this launch and these recipients (fee-share-rules.ts). */
+export function feeShareExpected(input: LiveLaunchInput, recipients: readonly FeeRecipient[]): FeeShareExpected {
+  const keys = feeShareKeys(identity(input));
+  return { creator: input.creator, mint: input.mint, quoteMint: keys.quoteMint.toBase58(), quoteTokenProgram: keys.quoteTokenProgram.toBase58(),
+    sol: keys.sol, recipients: recipients.map((entry) => ({ address: entry.address, bps: entry.bps })), bondingCurve: keys.bondingCurve.toBase58(),
+    sharingConfig: keys.sharingConfig.toBase58(), sharingVault: keys.sharingVault.toBase58(), sharingVaultQuoteAccount: keys.sharingVaultQuoteAccount?.toBase58() ?? null };
+}
+/**
+ * The recipients as this site accepts them (fee-share-rules.ts feeRecipientsProblem): 1 to MAX_FEE_RECIPIENTS distinct
+ * Solana wallet addresses (on the ed25519 curve, so never a PDA or program address), never one of this launch's own
+ * accounts or a program, whole basis points above 0 adding up to exactly 10,000. Launch a Card adds itself nowhere.
+ */
+export function reviewFeeRecipients(input: LiveLaunchInput, recipients: readonly FeeRecipient[]): FeeRecipient[] {
+  const id = identity(input), keys = feeShareKeys(id);
+  const forbidden = [id.mint, id.nftMint, id.quoteMint, keys.bondingCurve, keys.sharingConfig, keys.sharingVault, PUMP_PROGRAM_ID, PUMP_FEE_PROGRAM_ID,
+    TOKEN_2022_PROGRAM_ID, keys.quoteTokenProgram, ASSOCIATED_TOKEN_PROGRAM_ID, SYSTEM_PROGRAM_ID, CORE_PROGRAM_ID].map((key) => key.toBase58());
+  const problem = feeRecipientsProblem(recipients, { forbidden, isWallet: (address) => { try { return PublicKey.isOnCurve(new PublicKey(address).toBytes()); } catch { return false; } } });
+  if (problem) throw new Error(problem);
+  return recipients.map((entry) => ({ address: entry.address, bps: entry.bps }));
+}
+/**
+ * A live read of each recipient. Refused: a program (pump.fun's payout then fails 6052 for everyone in the split, and the
+ * split can never change) and an account that holds data or belongs to another program (a token account or PDA: what it
+ * is paid is stranded). Allowed, and returned in `unfunded`: an address with no account or no SOL yet; pump.fun holds
+ * its share until it covers the account's rent (mainnet simulation, 31 October 2026).
+ */
+export async function checkFeeRecipientAccounts(recipients: readonly FeeRecipient[], options: { connection: Pick<LiveConnection, "getMultipleAccountsInfoAndContext"> }) {
+  const snapshot = await options.connection.getMultipleAccountsInfoAndContext(recipients.map((entry) => new PublicKey(entry.address)), "confirmed");
+  const unfunded: string[] = [];
+  recipients.forEach((entry, index) => {
+    const account = snapshot.value[index];
+    if (account?.executable) throw new Error(`${shortAddress(entry.address)} is a program, not a wallet. pump.fun could never pay this split, so choose a Solana wallet.`);
+    if (account && (!account.owner.equals(SYSTEM_PROGRAM_ID) || account.data.length)) throw new Error(`${shortAddress(entry.address)} is not a plain Solana wallet, so fees sent to it would be stuck. Recipients must be Solana wallets.`);
+    if (!account || account.lamports === 0) unfunded.push(entry.address);
+  });
+  return { unfunded };
+}
+async function feeSplitSnapshot(input: LiveLaunchInput, connection: LiveConnection, commitment: "confirmed" | "finalized", minContextSlot?: number) {
+  const id = identity(input), keys = feeShareKeys(id);
+  const snapshot = await connection.getMultipleAccountsInfoAndContext([keys.bondingCurve, keys.sharingConfig, id.creator], { commitment, ...(minContextSlot ? { minContextSlot } : {}) });
+  const [curveInfo, configInfo, creatorInfo] = snapshot.value;
+  if (!curveInfo?.owner.equals(PUMP_PROGRAM_ID)) throw new Error("This coin's pump.fun curve is unavailable");
+  const curve = PUMP_SDK.decodeBondingCurve(curveInfo);
+  if (curve.isMayhemMode || curve.isHolderReward) throw new Error(FEE_SPLIT_NOT_CREATOR);
+  let config: SharingConfig | null = null;
+  if (configInfo) {
+    if (configInfo.executable || !configInfo.owner.equals(PUMP_FEE_PROGRAM_ID)) throw new Error("This coin's fee-sharing account is not pump.fun's");
+    config = PUMP_SDK.decodeSharingConfig(configInfo);
+    if (!config.mint.equals(id.mint)) throw new Error("This coin's fee-sharing account is for another coin");
+  }
+  return { id, keys, curve, config, slot: snapshot.context.slot, creatorLamports: BigInt(creatorInfo?.lamports ?? 0),
+    shareholders: config ? config.shareholders.map((entry) => ({ address: entry.address.toBase58(), bps: entry.shareBps })) : null,
+    locked: !!config && !isSharingConfigEditable({ sharingConfig: config }) };
+}
+/**
+ * The coin's fee split as finalized on mainnet (or at `commitment`): "unset" (no config, the creator keeps 100%),
+ * "editable" (a config whose split was never set) or "locked" (set for good), with its shareholders, and whether the
+ * curve has graduated. With `afterBlockHeight` (a sent split's saved expiry), the read is bound to the chain as the
+ * mint replacement checks are: finalized block height must be past it ("unexpired" otherwise: the split can still
+ * land), and the config is read at that finalized bank or newer, so a lagging node never reads a late landing as unset.
+ */
+export async function readFeeSplit(input: LiveLaunchInput, options: { connection: LiveConnection; commitment?: "confirmed" | "finalized"; afterBlockHeight?: number }) {
+  await assertMainnet(options.connection);
+  let minContextSlot: number | undefined;
+  if (options.afterBlockHeight !== undefined) {
+    const epoch = await options.connection.getEpochInfo("finalized");
+    if (typeof epoch.blockHeight !== "number" || !Number.isSafeInteger(epoch.blockHeight) || !Number.isSafeInteger(epoch.absoluteSlot) || epoch.absoluteSlot <= 0) throw new Error("RPC did not return a valid finalized expiry context");
+    if (!Number.isSafeInteger(options.afterBlockHeight) || epoch.blockHeight <= options.afterBlockHeight) return { state: "unexpired" as const, shareholders: null, graduated: false, slot: epoch.absoluteSlot };
+    minContextSlot = epoch.absoluteSlot;
+  }
+  const snapshot = await feeSplitSnapshot(input, options.connection, options.commitment ?? "finalized", minContextSlot);
+  if (minContextSlot !== undefined && snapshot.slot < minContextSlot) throw new Error("RPC fee split context predates the finalized expiry check");
+  return { state: !snapshot.config ? "unset" as const : snapshot.locked ? "locked" as const : "editable" as const,
+    shareholders: snapshot.shareholders, graduated: snapshot.curve.complete, slot: snapshot.slot };
+}
+async function feeShareInstructions(snapshot: Awaited<ReturnType<typeof feeSplitSnapshot>>, recipients: readonly FeeRecipient[], current: PublicKey[]) {
+  const { id, keys } = snapshot;
+  const newShareholders = recipients.map((entry) => ({ address: new PublicKey(entry.address), shareBps: entry.bps }));
+  return [
+    // The curve's earned creator fees go to its current creator's own vault first (6095 otherwise): they stay the creator's.
+    await PUMP_SDK.sweepCreatorFeeInstruction({ payer: id.creator, mint: id.mint, creator: snapshot.curve.creator, quoteMint: keys.quoteMint, quoteTokenProgram: keys.quoteTokenProgram }),
+    ...(snapshot.config ? [] : [await PUMP_SDK.createFeeSharingConfig({ creator: id.creator, mint: id.mint, pool: null })]),
+    ...(keys.sol ? [] : [createAssociatedTokenAccountIdempotentInstruction(id.creator, keys.sharingVaultQuoteAccount!, keys.sharingVault, keys.quoteMint, keys.quoteTokenProgram)]),
+    keys.sol
+      ? await PUMP_SDK.updateFeeShares({ authority: id.creator, mint: id.mint, currentShareholders: current, newShareholders, bondingCurveComplete: false })
+      : await PUMP_SDK.updateFeeSharesV2({ authority: id.creator, mint: id.mint, currentShareholders: current, newShareholders,
+        quoteMint: keys.quoteMint, quoteTokenProgram: keys.quoteTokenProgram, bondingCurveComplete: false }),
+  ];
+}
+/** Throws unless a fee split plan is exactly the creator-only transaction for these recipients (prepare and pre-relay). */
+export function verifyFeeSharePlan(plan: Pick<FeeSharePlan, "transactionBase64" | "requiredSigners" | "feePayer" | "kind">, input: LiveLaunchInput, recipients: readonly FeeRecipient[]) {
+  const transaction = VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64"));
+  const view = decodeV0Message(transaction.message.serialize());
+  if (plan.kind !== "fees" || view.header.required !== 1 || view.header.readonlySigned !== 0 || view.staticKeys[0] !== input.creator ||
+    plan.feePayer !== input.creator || plan.requiredSigners.length !== 1 || plan.requiredSigners[0] !== input.creator) throw new Error("The fee split must be signed by the creator wallet alone");
+  const problem = feeShareInstructionsProblem(resolveInstructions(view), feeShareExpected(input, recipients));
+  if (problem) throw new Error(problem);
+}
+/**
+ * Real unsigned creator-only fee split transaction for a finished launch. Never signs or sends. "already-set" when the
+ * coin's split is already locked (here or on pump.fun), with whether it equals these recipients.
+ */
+export async function prepareFeeShareTransaction(input: LiveLaunchInput, recipients: readonly FeeRecipient[], options: LiveOptions) {
+  const shares = reviewFeeRecipients(input, recipients), connection = options.connection;
+  await assertMainnet(connection);
+  const snapshot = await feeSplitSnapshot(input, connection, "confirmed");
+  if (snapshot.locked) return { status: "already-set" as const, shareholders: snapshot.shareholders!, matches: sameFeeSplit(snapshot.shareholders!, shares) };
+  if (snapshot.curve.complete) throw new Error(GRADUATED_FEE_SPLIT);
+  const { id, keys, config, curve } = snapshot;
+  if (config ? !config.admin.equals(id.creator) || !curve.creator.equals(keys.sharingConfig) : !curve.creator.equals(id.creator)) throw new Error(FEE_SPLIT_NOT_CREATOR);
+  await checkFeeRecipientAccounts(shares, { connection });
+  const current = config ? config.shareholders.map((entry) => entry.address) : [id.creator];
+  let vaultAccountMissing = false;
+  if (!keys.sol) {
+    // update_fee_shares_v2 pays any pending fees out through each current shareholder's quote account, so it must exist.
+    const accounts = current.map((owner) => getAssociatedTokenAddressSync(keys.quoteMint, owner, true, keys.quoteTokenProgram));
+    const read = await connection.getMultipleAccountsInfoAndContext([...accounts, keys.sharingVaultQuoteAccount!], "confirmed");
+    if (accounts.some((_, index) => !read.value[index]?.owner.equals(keys.quoteTokenProgram))) throw new Error(`Your wallet needs a ${id.asset.symbol} token account before the split can be set. Receive any amount of ${id.asset.symbol} in this wallet, then try again`);
+    vaultAccountMissing = !read.value[accounts.length];
+  }
+  const need = (config ? 0n : SHARING_CONFIG_RENT_LAMPORTS) + (vaultAccountMissing ? QUOTE_ACCOUNT_RENT_LAMPORTS : 0n) + FEE_SPLIT_FEE_ALLOWANCE + RENT_EXEMPT_MINIMUM_LAMPORTS;
+  if (snapshot.creatorLamports < need) throw new Error(`Insufficient SOL: setting the split needs about ${(Number(need) / 1e9).toFixed(4)} SOL in this wallet for pump.fun's fee-sharing account rent and the network fee. Add SOL, then try again`);
+  const plan = await makeWalletPlan(input, "fees", await feeShareInstructions(snapshot, shares, current), "0", options, { feeRecipients: shares });
+  verifyFeeSharePlan(plan, input, shares);
+  return plan;
+}
+/**
+ * Exact wire size of the fee split transaction prepareFeeShareTransaction builds, with the config create (a coin with
+ * no config yet), against the same pinned lookup table read. No blockhash, signing or send.
+ */
+export async function measureFeeShareTransaction(input: { creator: string; mint: string; quoteKey: PairKey; recipients: number }, options: { connection: Pick<LiveConnection, "getMultipleAccountsInfoAndContext"> }) {
+  const asset = PAIR_ASSETS.find((candidate) => candidate.key === input.quoteKey);
+  if (!asset) throw new Error("Choose a verified CardDex pair asset");
+  const creator = publicKey(input.creator, "creator"), mint = publicKey(input.mint, "mint");
+  const id = { asset, mint, creator, quoteMint: new PublicKey(asset.mint) } as ReturnType<typeof identity>;
+  const keys = feeShareKeys(id);
+  const recipients = Array.from({ length: input.recipients }, (_, index) => ({ address: new PublicKey(new Uint8Array(32).fill(index + 1)).toBase58(),
+    bps: index === 0 ? TOTAL_BPS - Math.floor(TOTAL_BPS / input.recipients) * (input.recipients - 1) : Math.floor(TOTAL_BPS / input.recipients) }));
+  const snapshot = { id, keys, config: null, curve: { creator } } as unknown as Awaited<ReturnType<typeof feeSplitSnapshot>>;
+  const instructions = await feeShareInstructions(snapshot, recipients, [creator]);
+  const table = pinnedLookupTable((await options.connection.getMultipleAccountsInfoAndContext([TABLE_ADDRESS], "confirmed")).value[0] ?? null);
+  return { limit: WALLET_SIZE_TARGET, lookupTable: !!table, bytes: transactionBytes(compileWalletTransaction(creator, SIZE_BLOCKHASH, 1_400_000, 1_000, instructions, table).message) };
+}
+const TOTAL_BPS = 10_000;
+/**
+ * Finalized verification of the fee split: the landed transaction is exactly the approved one (wallet assertions
+ * allowed only inside the message the server validated), and the coin's sharing config, read at that slot or newer, is
+ * locked with exactly these recipients, administered by the creator and named as the curve's creator.
+ */
+export async function verifyFeeShareLanded(input: LiveLaunchInput, recipients: readonly FeeRecipient[], options: VerifyOptions) {
+  const shares = recipients.map((entry) => ({ address: entry.address, bps: entry.bps })), connection = options.connection;
+  await assertMainnet(connection);
+  if (!options.signature) return { status: "pending" as const, creatorWallet: input.creator, tokenMint: input.mint };
+  const transaction = await finalizedTransaction(connection, options.signature);
+  if (!transaction) return { status: "pending" as const, signature: options.signature, creatorWallet: input.creator, tokenMint: input.mint };
+  const details = signedTransactionDetails(transaction, options.expectedMessageSha256);
+  const signers = details.message.staticAccountKeys.slice(0, details.message.header.numRequiredSignatures).map((key) => key.toBase58());
+  const problem = feeShareInstructionsProblem(details.instructions.map((ix) => ({ program: ix.program, accounts: ix.accounts.map((key) => key.toBase58()), data: new Uint8Array(ix.data) })), feeShareExpected(input, shares));
+  if (problem || signers.length !== 1 || signers[0] !== input.creator) throw new Error(`Finalized fee split transaction differs from the approved one${problem ? ` (${problem})` : ""}`);
+  const snapshot = await feeSplitSnapshot(input, connection, "finalized", transaction.slot);
+  if (!snapshot.config || !snapshot.locked || !sameFeeSplit(snapshot.shareholders!, shares) || !snapshot.config.admin.equals(snapshot.id.creator) ||
+    !snapshot.curve.creator.equals(snapshot.keys.sharingConfig)) throw new Error("The coin's finalized fee split differs from the approved one");
+  return { status: "verified" as const, signature: options.signature, slot: transaction.slot, messageSha256: details.messageSha256,
+    creatorWallet: input.creator, tokenMint: input.mint, sharingConfig: snapshot.keys.sharingConfig.toBase58(), shareholders: snapshot.shareholders! };
+}
+
 async function expiredMintSnapshot(mint: PublicKey, options: LiveOptions & { lastValidBlockHeight?: number }, label: "NFT" | "token") {
   await assertMainnet(options.connection);
   // Epoch info binds finalized block height to its bank slot. The absence read
@@ -617,12 +834,12 @@ function messageBytesOf(raw: Uint8Array) {
   return raw.subarray(1 + 64 * count);
 }
 /**
- * Verifies wallet+ephemeral signatures without producing any signature itself. The returned message must be the
+ * Verifies wallet+ephemeral signatures (the creator's alone for a fee split) without producing any signature itself. The returned message must be the
  * plan's message, or that message with only the changes the shared wallet rule accepts (appended read-only Lighthouse
  * assertions, and a refreshed blockhash that checkSignedWalletTransaction confirms is still valid). Both signatures are
  * checked over the returned message. `signedMessageSha256` is the hash every later finalization check expects.
  */
-export function validateSignedWalletTransaction(plan: WalletTransactionPlan, transactionBase64: string) {
+export function validateSignedWalletTransaction(plan: AnyWalletPlan, transactionBase64: string) {
   if (typeof transactionBase64 !== "string" || transactionBase64.length > 2000) throw new Error("Invalid signed transaction payload");
   const raw = Buffer.from(transactionBase64, "base64");
   if (raw.length > PACKET_LIMIT || raw.length === 0 || raw.toString("base64") !== transactionBase64) throw new Error("Invalid signed transaction encoding or size");
@@ -651,7 +868,7 @@ export function validateSignedWalletTransaction(plan: WalletTransactionPlan, tra
  * refusal reason). It never signs, sends or trusts the returned bytes, which cannot land without the new asset
  * signature that only the page holds.
  */
-export function describeWalletChange(plan: WalletTransactionPlan, transactionBase64: string) {
+export function describeWalletChange(plan: AnyWalletPlan, transactionBase64: string) {
   const before = VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64"));
   const raw = Buffer.from(transactionBase64, "base64");
   const summary = { bytesBefore: Buffer.from(plan.transactionBase64, "base64").length, bytesAfter: raw.length, limit: PACKET_LIMIT };
@@ -690,7 +907,7 @@ export function describeWalletChange(plan: WalletTransactionPlan, transactionBas
 export class SignedTransactionNotSent extends Error {
   constructor(readonly reason: "expired" | "simulation", message: string) { super(message); this.name = "SignedTransactionNotSent"; }
 }
-type SignedInput = { plan: WalletTransactionPlan; transactionBase64: string };
+type SignedInput = { plan: AnyWalletPlan; transactionBase64: string };
 /**
  * Blocks added to the RPC's newest last valid block height to bound a wallet-refreshed blockhash: it covers an RPC
  * node behind the one the wallet asked. Any blockhash that exists was produced at or before the newest block, so it

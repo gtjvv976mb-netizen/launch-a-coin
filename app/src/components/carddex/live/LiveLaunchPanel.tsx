@@ -1,10 +1,10 @@
 import { useEffect, useImperativeHandle, useRef, useState, type Dispatch, type ReactNode, type Ref, type SetStateAction } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  abandonLiveLaunchIntent, confirmLiveCreatorNft, confirmLiveToken, getLiveLaunchIntent,
-  getLiveWallet, holdLiveCard, issueLiveCardMint, listLiveLaunchIntents, prepareLiveCreatorNft,
-  prepareLiveLaunch, reportLiveWalletChange, submitLiveTransaction,
-  type LiveApprovedCard, type LiveLaunchIntent, type LivePrepareInput, type LiveResult,
+  abandonLiveLaunchIntent, confirmLiveCreatorNft, confirmLiveFeeShare, confirmLiveToken, getLiveLaunchIntent,
+  getLiveWallet, holdLiveCard, issueLiveCardMint, listLiveLaunchIntents, prepareLiveCreatorNft, prepareLiveFeeShare,
+  prepareLiveLaunch, reportLiveWalletChange, skipLiveFeeShare, submitLiveFeeShare, submitLiveTransaction,
+  type LiveApprovedCard, type LiveFeeRecipient, type LiveLaunchIntent, type LivePrepareInput, type LiveResult,
 } from "../../../lib/carddex/live/api";
 import { composeCreatorCard } from "../../../lib/carddex/live/compose-client";
 import { getCardDesign } from "../../../lib/carddex/designs";
@@ -22,21 +22,25 @@ import { useLiveReadiness } from "./readiness";
 import { connectLiveWallet, getLiveWalletSnapshot, signLiveTransaction, signLiveTransactions, useLiveWallet, walletSupportsSignIn } from "./wallet";
 import {
   createEphemeralSigner, destroyEphemeralSigner, signingOrderFor, signsBothFor, toBase64, unsentStageNext,
-  validateLivePlan, type EphemeralSigner, type ExpectedPlan, type SigningOrder, type TransactionPlan,
+  isWalletAddress, validateFeeSharePlan, validateLivePlan, type EphemeralSigner, type ExpectedFeePlan, type ExpectedPlan, type SigningOrder, type TransactionPlan,
 } from "./transaction";
 import {
-  CARD_APPROVAL_EXPIRED, CARD_APPROVED_READY, CARD_APPROVED_WAITING, cardNext, coinRetryable, confirmUntilSettled, dropLaunchSession, keepLaunchSession,
-  keptLaunchSession, launchSettled, PAIR_SINGLE_NOTICE, PREPARED_WITHOUT_KEY, signForLaunch, signLaunchPair, SIGN_IN_COPY, STILL_CONFIRMING,
+  CARD_APPROVAL_EXPIRED, CARD_APPROVED_READY, CARD_APPROVED_WAITING, cardNext, coinRetryable, confirmUntilSettled, dropLaunchSession, feeShareNext, keepLaunchSession,
+  keptLaunchSession, launchSettled, PAIR_SINGLE_NOTICE, PREPARED_WITHOUT_KEY, signFeeShare, signForLaunch, signLaunchPair, SIGN_IN_COPY, STILL_CONFIRMING,
   WALLET_RETRY_NOTICE, type PairPlans,
 } from "./launch-flow";
+import { FEE_SPLIT_FREE, FEE_SPLIT_PERMANENT, FEE_SPLIT_WALLETS, formatShare } from "./fee-split";
+import { feeRecipientsProblem, sameFeeSplit } from "../../../../../integrations/pumpfun/src/fee-share-rules";
 import { connectForLaunch, signInCreator } from "./ownership";
 import { requestCardMintSigner } from "./card-mint";
-import { ONE_APPROVAL_NEXT, PAIR_REVIEW_COPY, SEPARATE_APPROVALS_NEXT, WALLET_NOTICE_COPY, WALLET_OPEN_COPY, WALLET_OPEN_PAIR_COPY, walletNoticePreview } from "./wallet-notice";
+import { ONE_APPROVAL_NEXT, ONE_APPROVAL_NEXT_FEES, PAIR_REVIEW_COPY, SEPARATE_APPROVALS_NEXT, SEPARATE_APPROVALS_NEXT_FEES, WALLET_NOTICE_COPY, WALLET_OPEN_COPY, WALLET_OPEN_PAIR_COPY, walletNoticePreview } from "./wallet-notice";
 
 export type LiveLaunchDraft = {
   name: string; symbol: string; description: string; website: string; xUrl: string;
   cardTemplate: string; quoteAssetKey: string; quoteMint: string;
   initialBuyQuoteBaseUnits: string; artwork: Blob;
+  /** The creator fee split chosen in the form (whole basis points), or null to keep pump.fun's default. */
+  feeShares: LiveFeeRecipient[] | null;
 };
 export type LiveLaunchHandle = { submit(): void; startAnother(): void; /** The terms checkbox, while it shows. */ terms(): HTMLInputElement | null };
 /**
@@ -77,8 +81,20 @@ function unwrap<T extends object>(result: LiveResult<T>): T {
   return result;
 }
 const brief = (value: string) => `${value.slice(0, 5)}…${value.slice(-5)}`;
+// The server's split differs from the one the creator chose in this tab: nothing is reviewed or signed.
+const SPLIT_CHANGED = "The fee split the server returned differs from the wallets and shares you chose, so nothing was prepared for your wallet. Check your saved launch before continuing.";
+/**
+ * A refusal that names one recipient (its first and last 4 characters, as fee-share-rules and the server write them)
+ * says which wallet row it means, and that row's field takes focus when it shows.
+ */
+function feeRowRefusal(message: string, shares: readonly LiveFeeRecipient[]): Error {
+  const index = shares.findIndex(entry => message.includes(`${entry.address.slice(0, 4)}…${entry.address.slice(-4)}`));
+  if (index < 0) return new Error(message);
+  requestAnimationFrame(() => document.getElementById(`fee-wallet-${index}`)?.focus());
+  return new Error(`Wallet ${index + 1}: ${message}`);
+}
 
-export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, initialBuy = null, slippageBps = 100, ready, onInvalid, onLockedChange, onBusyChange, onTermsNeeded, onIntentLoaded, onStartAnother, onPrimary, ref }: {
+export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, initialBuy = null, slippageBps = 100, ready, onInvalid, onLockedChange, onBusyChange, onTermsNeeded, onIntentLoaded, onStartAnother, onPrimary, onWalletChange, ref }: {
   draft: LiveLaunchDraft | null; card: CardData; launchesOpen: boolean; notice?: string | null; onInvalid(): void;
   /** Changes whenever a draft field does (the page's string of them): a connect that was waiting to launch stops. */
   draftKey: string;
@@ -98,6 +114,8 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
   onStartAnother?(): void;
   /** The page's state setter for its phone action bar; called only when the primary changes. */
   onPrimary?: Dispatch<SetStateAction<LivePrimary | null>>;
+  /** The connected wallet's address (or null), for the fee split's first row. */
+  onWalletChange?(address: string | null): void;
   ref?: Ref<LiveLaunchHandle>;
 }) {
   const wallet = useLiveWallet();
@@ -112,11 +130,11 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
   const [recoverable, setRecoverable] = useState<LiveLaunchIntent[]>([]);
   const [uncertain, setUncertain] = useState(false);
   // A stage whose signed transaction the server definitely did not send: it can be prepared again with the same keys.
-  const [notSent, setNotSent] = useState<"token" | "nft" | null>(null);
+  const [notSent, setNotSent] = useState<"token" | "nft" | "fees" | null>(null);
   // A stage whose signed transaction the server did not send for another reason (a check that could not finish):
   // the same signed bytes, held below, can be sent again without a new wallet approval.
-  const [resend, setResend] = useState<"token" | "nft" | null>(null);
-  const held = useRef<{ intentId: string; kind: "token" | "nft"; messageSha256: string; transactionBase64: string; walletName?: string; signingOrder?: SigningOrder } | null>(null);
+  const [resend, setResend] = useState<"token" | "nft" | "fees" | null>(null);
+  const held = useRef<{ intentId: string; kind: "token" | "nft" | "fees"; messageSha256: string; transactionBase64: string; walletName?: string; signingOrder?: SigningOrder } | null>(null);
   // When this page received the current plan: an older one is prepared again before the wallet opens.
   const planAt = useRef(0);
   const [reviewNotice, setReviewNotice] = useState<string | null>(null);
@@ -152,6 +170,10 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
   // New launches and recovery are separate switches: a saved launch stays reachable while new ones are off.
   const canLaunch = launchesOpen && readiness.data?.ready === true;
   const canRecover = canLaunch || readiness.data?.recoveryReady === true;
+  // The creator fee split after the card (CARDDEX_LIVE_FEE_SHARING): off hides it and leaves pump.fun's default.
+  const feesOpen = readiness.data?.feeSharing === true;
+  const settled = (saved: LiveLaunchIntent) => launchSettled(saved, feesOpen);
+  useEffect(() => { onWalletChange?.(wallet.address ?? null); }, [wallet.address, onWalletChange]);
   useEffect(() => { onLockedChange(!!intent); }, [intent, onLockedChange]);
   useEffect(() => { onBusyChange?.(!!busy); }, [busy, onBusyChange]);
   useEffect(() => () => onBusyChange?.(false), [onBusyChange]);
@@ -182,6 +204,15 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
     const current = getLiveWalletSnapshot();
     if (current.address !== address || !current.mainnet) throw new Error("The connected wallet changed. Reconnect the creator wallet to resume safely.");
   };
+  /**
+   * The split the server names for this launch must be the one the creator chose in this tab (its frozen prepared
+   * input, for the same coin), so a changed response can never be reviewed or signed as theirs. A launch resumed with
+   * no input here shows every recipient in full instead.
+   */
+  const assertOwnSplit = (current: LiveLaunchIntent) => {
+    const own = preparedInput.current?.tokenMint === current.tokenMint ? preparedInput.current.feeShares : undefined;
+    if (own && current.feeShare && !sameFeeSplit(current.feeShare.recipients, own)) throw new Error(SPLIT_CHANGED);
+  };
   const retain = (next: LiveLaunchIntent) => {
     // The server's saved approval is adopted; one held only here (its save failed) stays until the card no longer needs it.
     if (next.approvedCard) keepApproved(next.approvedCard);
@@ -197,8 +228,9 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
     }
     pendingIntent.current = next;
     creator.current = next.creatorWallet;
-    // A finished launch stays on this page until Start another launch, but a later visit starts from a new draft.
-    rememberIntent(next.creatorWallet, next.status === "complete" ? null : next.id);
+    // A finished launch stays on this page until Start another launch, but a later visit starts from a new draft (one
+    // with a creator fee split still to set is remembered until the split is settled).
+    rememberIntent(next.creatorWallet, settled(next) ? null : next.id);
     if (mounted.current) setIntent(next);
     if (next.status === "nft_pending" || next.status === "complete") {
       destroyEphemeralSigner(tokenKey.current); tokenKey.current = null;
@@ -239,12 +271,12 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
       if (id) {
         const found = unwrap(await getLiveLaunchIntent({ data: { intentId: id } })).intent;
         assertCurrent(version, address);
-        if (launchSettled(found)) rememberIntent(address, null);
+        if (settled(found)) rememberIntent(address, null);
         else { retain(found); setPlan(null); setUncertain(false); restored = true; }
       }
       const found = unwrap(await listLiveLaunchIntents()); assertCurrent(version, address);
       setRecoverable(found.intents);
-      if (!restored && !found.intents.some(i => !launchSettled(i))) setRecoverNote(NO_SAVED_LAUNCHES);
+      if (!restored && !found.intents.some(i => !settled(i))) setRecoverNote(NO_SAVED_LAUNCHES);
     });
   }
   // A connected wallet may already have a valid ownership session. These reads never open a signing prompt.
@@ -262,12 +294,12 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
         const response = await getLiveLaunchIntent({ data: { intentId: saved } });
         if (canceled || !response.ok) return;
         // A finished or discarded launch is forgotten; the creator's new draft stays as typed.
-        if (launchSettled(response.intent)) rememberIntent(wallet.address!, null);
+        if (settled(response.intent)) rememberIntent(wallet.address!, null);
         else { retain(response.intent); if (response.intent.chainCheck) setError(response.intent.chainCheck.reason); }
       }
     }).catch(() => undefined);
     return () => { canceled = true; };
-  }, [wallet.address, canRecover]);
+  }, [wallet.address, canRecover, feesOpen]);
 
   async function prepareDraft() {
     // Wiring: a saved launch this tab still holds (prepared, or a coin that can be prepared again: launch-flow
@@ -292,7 +324,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
         const previous = unwrap(await getLiveLaunchIntent({ data: { intentId: saved } })).intent;
         assertCurrent(version, address);
         // Only an unfinished launch is restored; a finished or discarded one is forgotten and this draft goes on.
-        if (launchSettled(previous)) rememberIntent(address, null);
+        if (settled(previous)) rememberIntent(address, null);
         else {
           retain(previous);
           setError("Your saved launch was restored. Finish or verify it before starting another coin.");
@@ -308,6 +340,12 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
       // measuring or uploading.
       const held = mainnetPairRefusal(draft.quoteAssetKey);
       if (held) throw new Error(held);
+      // A creator fee split: wallets only (on the curve: never a program address), checked before anything is uploaded.
+      if (draft.feeShares) {
+        if (!feesOpen) throw new Error("Creator fee sharing is not open right now. Turn it off in More options to launch; you keep 100% of creator fees.");
+        const problem = feeRecipientsProblem(draft.feeShares, { isWallet: isWalletAddress, forbidden: [draft.quoteMint] });
+        if (problem) throw feeRowRefusal(problem, draft.feeShares);
+      }
       await authenticate(address, version);
       if (draft.initialBuyQuoteBaseUnits !== "0") {
         // Nothing is uploaded for a buy that cannot fit the one coin transaction.
@@ -337,11 +375,14 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
         idempotencyKey: idempotencyKey.current, tokenMint: tokenKey.current.address, nftMint: nftKey.current.address,
         name: draft.name, symbol: draft.symbol, description: draft.description, website: draft.website, xUrl: draft.xUrl, cardTemplate: draft.cardTemplate,
         quoteAssetKey: draft.quoteAssetKey, quoteMint: draft.quoteMint, initialBuyQuoteBaseUnits: draft.initialBuyQuoteBaseUnits,
-        slippageBps, assets, termsAcknowledged: true,
+        slippageBps, assets, termsAcknowledged: true, ...(draft.feeShares ? { feeShares: draft.feeShares } : {}),
       };
       preparedInput.current = input;
       // withCard: a wallet that approves the coin and its card in one prompt gets the card plan now too.
-      const response = unwrap(await prepareLiveLaunch({ data: { ...input, withCard: pairMode() } }));
+      const result = await prepareLiveLaunch({ data: { ...input, withCard: pairMode() } });
+      // The server's recipient checks (a program or an account holding data) name the wallet row they mean.
+      if (!result.ok && draft.feeShares) throw feeRowRefusal(result.error, draft.feeShares);
+      const response = unwrap(result);
       assertCurrent(version, address); retain(response.intent);
       const prepared = acceptPrepared(response);
       if (prepared) { showPlan(prepared.coin); setPairCard(prepared.card); }
@@ -351,6 +392,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
   function acceptPrepared(response: { intent: LiveLaunchIntent; transaction: unknown; card?: unknown }): PairPlans | null {
     if (!response.transaction) return null;
     const coin = response.transaction as TransactionPlan, card = response.card ? response.card as TransactionPlan : null;
+    assertOwnSplit(response.intent);
     validateLivePlan(coin, expectedFor(response.intent, "token"));
     if (card) validateLivePlan(card, expectedFor(response.intent, "nft"));
     return { coin, card };
@@ -398,7 +440,92 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
     if (next === "send-approved" && card) {
       held.current = { intentId: stage.id, kind: "nft", messageSha256: card.messageSha256, transactionBase64: card.transactionBase64, walletName: getLiveWalletSnapshot().name?.slice(0, 64) };
       await submitHeld(stage, address, version, CARD_APPROVAL_EXPIRED);
+      await continueWithFees(address, version);
     } else if (next === "prepare") await prepareCard(address, version);
+  }
+  // ------------------------------------------------ the creator fee split: its own creator-only transaction after the card
+  function expectedFee(current: LiveLaunchIntent): ExpectedFeePlan {
+    assertOwnSplit(current);
+    const quote = getPairAsset(current.quoteAssetKey);
+    return { creator: current.creatorWallet, tokenMint: current.tokenMint, quoteKey: current.quoteAssetKey, quoteMint: current.quoteMint,
+      quoteTokenProgram: quote.tokenProgram, recipients: current.feeShare?.recipients ?? [] };
+  }
+  /** The fee split prepared (again) and validated; null when the split needs no transaction now (already settled). */
+  async function freshFeePlan(address: string, version: number, phase: "preparing" | "refreshing"): Promise<TransactionPlan | null> {
+    const current = pendingIntent.current;
+    if (!current || feeShareNext(current) !== "prepare" || !feesOpen) return null;
+    setBusy(phase);
+    const response = unwrap(await prepareLiveFeeShare({ data: { intentId: current.id } }));
+    assertCurrent(version, address); retain(response.intent);
+    if (!response.transaction) return null;
+    const next = response.transaction as TransactionPlan;
+    validateFeeSharePlan(next, expectedFee(response.intent));
+    return next;
+  }
+  /** Prepares the fee split's own review and opens it (its wallet prompt follows the creator's Continue). */
+  async function prepareFees(address: string, version: number): Promise<TransactionPlan | null> {
+    const next = await freshFeePlan(address, version, "preparing");
+    if (next) showPlan(next);
+    return next;
+  }
+  /** Once the card is confirmed (or on resume): the fee split's review opens, or a sent split is checked. */
+  async function continueWithFees(address: string, version: number) {
+    const stage = pendingIntent.current;
+    if (!stage) return;
+    const next = feeShareNext(stage);
+    if (next === "prepare" && feesOpen) await prepareFees(address, version);
+    else if (next === "confirm" && stage.feeShare?.signature) await confirmFees(stage.feeShare.signature, address, version);
+  }
+  /** Polls the sent fee split until it is verified (or set elsewhere); a failed or expired one says why and can be prepared again. */
+  async function confirmFees(signature: string, address: string, version: number) {
+    const current = pendingIntent.current;
+    if (!current) return;
+    setBusy("confirming");
+    const outcome = await confirmUntilSettled({ check: async () => {
+      assertCurrent(version, address);
+      const response = unwrap(await confirmLiveFeeShare({ data: { intentId: current.id, signature } }));
+      assertCurrent(version, address); retain(response.intent);
+      const fee = response.intent.feeShare;
+      if (fee?.status === "failed") { setUncertain(false); throw new Error(fee.error ?? "Your fee split was not set. Prepare it again, or keep 100%."); }
+      const done = fee?.status === "complete" || fee?.status === "set_elsewhere";
+      if (done) { held.current = null; setUncertain(false); setPlan(null); }
+      return { done, delivery: "delivery" in response ? response.delivery : undefined };
+    } });
+    if (outcome === "pending") setError(STILL_CONFIRMING);
+  }
+  async function prepareFeesPress() {
+    const current = pendingIntent.current;
+    if (!current || current.status !== "complete") return;
+    await operate(async (address, version) => {
+      if (current.creatorWallet !== address) throw new Error("Connect the creator wallet to set this coin's fee split.");
+      await authenticate(address, version); await prepareFees(address, version);
+    });
+  }
+  async function checkFees() {
+    const current = pendingIntent.current;
+    if (!current) return;
+    await operate(async (address, version) => {
+      await authenticate(address, version); setBusy("recovering");
+      const found = unwrap(await getLiveLaunchIntent({ data: { intentId: current.id } })).intent;
+      assertCurrent(version, address); retain(found);
+      if (feeShareNext(found) === "confirm" && found.feeShare?.signature) await confirmFees(found.feeShare.signature, address, version);
+      else { setUncertain(false); if (found.feeShare?.status === "failed" && found.feeShare.error) setError(found.feeShare.error); }
+    });
+  }
+  // "Skip, keep 100%" asks first: once recorded it is final here.
+  const [skipAsk, setSkipAsk] = useState(false);
+  /** "Skip, keep 100%": recorded on the server; nothing is signed or sent. */
+  async function skipFees() {
+    setSkipAsk(false);
+    const current = pendingIntent.current;
+    if (!current) return;
+    await operate(async (address, version) => {
+      if (current.creatorWallet !== address) throw new Error("Connect the creator wallet to keep 100% of this coin's creator fees.");
+      await authenticate(address, version); setBusy("recovering");
+      const response = unwrap(await skipLiveFeeShare({ data: { intentId: current.id } }));
+      assertCurrent(version, address); retain(response.intent);
+      held.current = null; setPlan(null); setReviewOpen(false); setNotSent(null); setResend(null); setUncertain(false);
+    });
   }
   async function confirmCurrent(kind: "token" | "nft", signature: string, address: string, version: number, messageSha256?: string) {
     const current = pendingIntent.current;
@@ -458,12 +585,31 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
     await operate(async (address, version) => {
       if (current.creatorWallet !== address) throw new Error("Reconnect the creator wallet before signing.");
       await authenticate(address, version);
-      const key = reviewed.kind === "token" ? tokenKey.current : nftKey.current;
+      if (reviewed.kind === "fees") {
+        // Wiring only; the step is launch-flow.ts signFeeShare. The creator alone signs the unsigned split: this page adds
+        // no signature, so the wallet never sees one already on it.
+        const walletName = getLiveWalletSnapshot().name ?? undefined;
+        setReviewNotice(null);
+        const step = await signFeeShare({ plan: reviewed, receivedAt: planAt.current, expected: expectedFee(current),
+          refresh: () => freshFeePlan(address, version, "refreshing"),
+          onPlan: next => acceptPlan(next),
+          onWalletOpen: retry => { if (retry) setReviewNotice(WALLET_RETRY_NOTICE); setBusy("wallet"); },
+          walletSign: async transaction => { const out = await signLiveTransaction(transaction, address); assertCurrent(version, address); return out; } });
+        assertCurrent(version, address);
+        if (step.status === "gone") { setReviewOpen(false); setPlan(null); return; }
+        if (step.status === "changed") { setReviewNotice(REVIEW_COSTS_UPDATED); reviewTop(); return; }
+        const stage = pendingIntent.current ?? current;
+        setReviewOpen(false);
+        held.current = { intentId: stage.id, kind: "fees", messageSha256: step.plan.messageSha256, transactionBase64: toBase64(step.signed), walletName: walletName?.slice(0, 64) };
+        await submitHeld(stage, address, version);
+        return;
+      }
+      const stageKind = reviewed.kind, key = stageKind === "token" ? tokenKey.current : nftKey.current;
       if (!key) throw new Error("This page no longer holds the new asset key. Resume the saved launch to recover safely.");
       const walletName = getLiveWalletSnapshot().name ?? undefined;
       const order = signingOrderFor(walletName, readiness.data?.walletFirst);
       setReviewNotice(null);
-      const report = (changed: TransactionPlan, returned: Uint8Array) => void reportLiveWalletChange({ data: { intentId: current.id, kind: changed.kind, messageSha256: changed.messageSha256, walletName: (walletName ?? "unknown").slice(0, 64), transactionBase64: toBase64(returned) } }).catch(() => undefined);
+      const report = (changed: TransactionPlan, returned: Uint8Array) => changed.kind !== "fees" && void reportLiveWalletChange({ data: { intentId: current.id, kind: changed.kind, messageSha256: changed.messageSha256, walletName: (walletName ?? "unknown").slice(0, 64), transactionBase64: toBase64(returned) } }).catch(() => undefined);
       let coinPlan = reviewed, coinAt = planAt.current;
       // Wiring only; the step is launch-flow.ts signLaunchPair. One prompt signs the coin and its card; the card's signed
       // bytes are saved on the server before the coin is sent and relayed once the coin is verified. "single" (the
@@ -503,7 +649,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
       // A message outside that rule is never co-signed; its summary goes to the server log, and the wallet opens once
       // more with the same unsigned transaction (never page-first: Phantom warns when another signature is already on it).
       const step = await signForLaunch({ plan: coinPlan, receivedAt: coinAt, expected: expectedFor(current, reviewed.kind), signer: key, order,
-        refresh: () => refreshPlan(current, reviewed.kind, address, version),
+        refresh: () => refreshPlan(current, stageKind, address, version),
         onPlan: next => acceptPlan(next),
         onWalletOpen: retry => { if (retry) setReviewNotice(WALLET_RETRY_NOTICE); setBusy("wallet"); },
         onWalletChanged: report,
@@ -515,8 +661,10 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
       setReviewOpen(false);
       held.current = { intentId: stage.id, kind: active.kind, messageSha256: active.messageSha256, transactionBase64: toBase64(step.signed), walletName: walletName?.slice(0, 64), signingOrder: step.order };
       await submitHeld(stage, address, version);
-      // A verified coin moves straight on to its card (an approved card is sent; otherwise its review opens).
+      // A verified coin moves straight on to its card (an approved card is sent; otherwise its review opens), and a
+      // confirmed card to the creator fee split when one was chosen.
       if (active.kind === "token") await continueWithCard(address, version);
+      else if (pendingIntent.current?.status === "complete") await continueWithFees(address, version);
     });
   }
   /** `expiredNotice`: the review's line when these bytes ran out of time and their stage is prepared again. */
@@ -525,6 +673,30 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
     if (!signed || signed.intentId !== current.id) return;
     // From this point the outcome may be uncertain after a network interruption. Recover before rebuilding.
     setBusy("submitting"); setResend(null); setUncertain(true);
+    if (signed.kind === "fees") {
+      const sent = await submitLiveFeeShare({ data: { intentId: signed.intentId, messageSha256: signed.messageSha256, transactionBase64: signed.transactionBase64, ...(signed.walletName ? { walletName: signed.walletName } : {}) } });
+      if (!sent.ok) {
+        // Not broadcast. With nothing saved, an unsendable split is prepared again (an approval that only ran out of time
+        // opens its fresh review); any other refusal keeps the same signed bytes for another send.
+        const found = await getLiveLaunchIntent({ data: { intentId: signed.intentId } }).catch(() => null);
+        assertCurrent(version, address);
+        if (found?.ok) {
+          retain(found.intent);
+          if (found.intent.feeShare?.status === "prepared") {
+            setUncertain(false);
+            if (sent.unsendable) {
+              held.current = null; setPlan(null); setNotSent("fees");
+              if (sent.expired && await prepareFees(address, version).catch(() => null)) { setReviewNotice(expiredNotice); return; }
+            } else setResend("fees");
+          }
+        }
+        throw new Error(sent.error);
+      }
+      held.current = null;
+      assertCurrent(version, address); retain(sent.intent);
+      await confirmFees(sent.signature, address, version);
+      return;
+    }
     const result = await submitLiveTransaction({ data: { intentId: signed.intentId, kind: signed.kind, messageSha256: signed.messageSha256, transactionBase64: signed.transactionBase64,
       ...(signed.walletName ? { walletName: signed.walletName } : {}), ...(signed.signingOrder ? { signingOrder: signed.signingOrder } : {}) } });
     if (!result.ok) {
@@ -575,16 +747,22 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
       assertCurrent(version, address); retain(found);
       // Wiring: a check that found a failed, expired or unreachable transaction says so (the saved launch's chain check).
       if (found.chainCheck) { setUncertain(false); setError(found.chainCheck.reason); return; }
+      if (found.status === "complete") {
+        if (feeShareNext(found) === "confirm" && found.feeShare?.signature) await confirmFees(found.feeShare.signature, address, version);
+        else setUncertain(false);
+        return;
+      }
       const kind = found.status === "token_pending" ? "token" : found.status === "nft_pending" && found.nftSignature ? "nft" : null;
       const signature = kind === "token" ? found.tokenSignature : kind === "nft" ? found.nftSignature : null;
       if (kind && signature) {
         await confirmCurrent(kind, signature, address, version);
         if (kind === "token") await continueWithCard(address, version);
+        else if (pendingIntent.current?.status === "complete") await continueWithFees(address, version);
       } else {
         // Nothing is saved for this stage, so the server never sent it: signed bytes this page holds can go again.
         setUncertain(false);
         const signed = held.current;
-        if (signed?.intentId === found.id && unsentStageNext(found, signed.kind, false) === "resend") setResend(signed.kind);
+        if (signed?.intentId === found.id && signed.kind !== "fees" && unsentStageNext(found, signed.kind, false) === "resend") setResend(signed.kind);
         else if (found.status === "prepared" && !tokenKey.current) setError(PREPARED_WITHOUT_KEY);
       }
     });
@@ -614,11 +792,15 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
   // A prepared launch whose new coin key this browser no longer holds (PREPARED_WITHOUT_KEY): it can never be signed
   // here, so its one way on is to discard it once it expires; that is the primary.
   const unsignable = intent?.status === "prepared" && !tokenKey.current && !uncertain && !resend;
-  useImperativeHandle(ref, () => ({ startAnother, terms: () => termsRef.current, submit: () => { if (resend) void sendAgain(); else if (intent?.status === "nft_pending" && cardApproved && !intent.nftSignature) void sendApprovedCard(); else if (intent?.status === "nft_pending") void prepareNft(); else if (coinRetryable(intent, !!tokenKey.current && !!preparedInput.current)) void prepareDraft(); else if (unsignable) void discardExpiredDraft(); else if (intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current) void checkConfirmation(); else if (!intent && !canLaunch && canRecover) findSaved(); else if (intent?.status !== "complete") void prepareDraft(); } }));
+  // The creator fee split's next step once the coin and card are complete ("none" while fee sharing is off and nothing was sent).
+  const feesNext = intent ? (() => { const next = feeShareNext(intent); return next === "prepare" && !feesOpen ? "none" : next; })() : "none";
+  useImperativeHandle(ref, () => ({ startAnother, terms: () => termsRef.current, submit: () => { if (resend) void sendAgain(); else if (intent?.status === "complete" && feesNext === "prepare") void prepareFeesPress(); else if (intent?.status === "complete" && feesNext === "confirm") void checkFees(); else if (intent?.status === "nft_pending" && cardApproved && !intent.nftSignature) void sendApprovedCard(); else if (intent?.status === "nft_pending") void prepareNft(); else if (coinRetryable(intent, !!tokenKey.current && !!preparedInput.current)) void prepareDraft(); else if (unsignable) void discardExpiredDraft(); else if (intent?.status === "token_pending" || uncertain || intent?.status === "prepared" && !tokenKey.current) void checkConfirmation(); else if (!intent && !canLaunch && canRecover) findSaved(); else if (intent?.status !== "complete") void prepareDraft(); } }));
   const selected = intent ? getPairAsset(intent.quoteAssetKey) : getPairAsset(card.quoteAssetKey);
-  const currentTitle = intent?.status === "complete" ? "Your coin and card are on mainnet" : intent?.status === "nft_pending" ? "Coin verified. Your card is next." : intent?.status === "token_pending" ? "Coin transaction submitted" : "Create through your wallet";
+  const currentTitle = intent?.status === "complete" && feesNext !== "none" ? "Coin and card confirmed. Your fee split is next." : intent?.status === "complete" ? "Your coin and card are on mainnet" : intent?.status === "nft_pending" ? "Coin verified. Your card is next." : intent?.status === "token_pending" ? "Coin transaction submitted" : "Create through your wallet";
   const reviewIntent = intent;
-  const recoveryItems = recoverable.filter(i => !launchSettled(i));
+  // The split the review names: the saved launch's, or the one this tab is preparing it with.
+  const reviewFees = intent?.feeShare?.recipients ?? preparedInput.current?.feeShares ?? null;
+  const recoveryItems = recoverable.filter(i => !settled(i));
   const savedListShown = canRecover && !intent && (canLaunch || recoveryItems.length > 0);
   const siteHost = readiness.data?.publicOrigin ? new URL(readiness.data.publicOrigin).host : undefined;
   // The connected wallet signs the coin and its card in one prompt (pairMode once the keys exist): the ticket says so.
@@ -640,7 +822,24 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
         : error ? { state: "stopped", text: "Stopped. Nothing more is sent until you choose what to do." }
           : intent?.nftSignature ? { state: "active", text: "Sent. Check its confirmation." }
             : { state: "active", text: cardApproved ? CARD_APPROVED_READY : "Ready to issue" };
+  // Third row, when a split was chosen (or is in the draft): its own creator-only transaction after the card.
+  const fee = intent?.feeShare;
+  const feeOnBusy = !!busy && status === "complete";
+  const feeStage: Stage | null = !fee && !(!intent && draft?.feeShares) ? null
+    : status !== "complete" || !fee ? { state: "todo", text: "Starts after the card is confirmed" }
+      : fee.status === "complete" ? { state: "done", text: "Set on pump.fun" }
+        : fee.status === "skipped" ? { state: "done", text: "Skipped. You keep 100% of creator fees" }
+          : fee.status === "set_elsewhere" ? { state: "stopped", text: "A different split was already set on pump.fun" }
+            : feeOnBusy ? { state: "active", text: PHASE[busy!] }
+              : !feesOpen && fee.status !== "pending" ? { state: "stopped", text: "Paused. You keep 100% of creator fees for now" }
+                : error ? { state: "stopped", text: fee.status === "failed" && fee.error ? fee.error : "Stopped. Nothing more is sent until you choose what to do." }
+                  : fee.status === "pending" ? { state: "active", text: "Sent. Check its confirmation." }
+                    : fee.status === "failed" ? { state: "stopped", text: fee.error ?? "Not set. Prepare it again, or keep 100%." }
+                      : { state: "active", text: reviewOpen && plan?.kind === "fees" ? "Waiting for your review" : "Ready to sign" };
+  const feeSkippable = status === "complete" && !!fee && ["requested", "prepared", "failed"].includes(fee.status) && feesOpen;
   const showFresh = !intent && canLaunch;
+  // The draft carries a creator fee split: the ticket names its approval too.
+  const draftFees = !!draft?.feeShares && feesOpen;
   useEffect(() => { onTermsNeeded?.(showFresh && !terms); }, [showFresh, terms, onTermsNeeded]);
   useEffect(() => () => onTermsNeeded?.(false), [onTermsNeeded]);
   // The progress rows show from the first press on: sign-in, the artwork upload and the preparing all run before a
@@ -648,7 +847,10 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
   const showProgress = !!(busy || intent || error && attempted);
 
   // ------------------------------------------------ the one primary (inline from 1024px, in the page's action bar below)
-  const primary: LivePrimary = intent?.status === "complete" ? { kind: "startAnother", label: "Start another launch", pending: false, disabled: false, blockedByPair: false }
+  const primary: LivePrimary = resend ? { kind: "submit", label: "Send again", pending: !!busy, disabled: !canRecover, blockedByPair: false }
+    : intent?.status === "complete" && feesNext === "prepare" ? { kind: "submit", label: notSent === "fees" || fee?.status === "failed" ? "Prepare fee split again" : "Review fee split", pending: !!busy, disabled: !canRecover, blockedByPair: false }
+    : intent?.status === "complete" && feesNext === "confirm" ? { kind: "submit", label: "Check fee split", pending: !!busy, disabled: !canRecover, blockedByPair: false }
+    : intent?.status === "complete" ? { kind: "startAnother", label: "Start another launch", pending: false, disabled: false, blockedByPair: false }
     : resend ? { kind: "submit", label: "Send again", pending: !!busy, disabled: !canRecover, blockedByPair: false }
       : intent?.status === "nft_pending" && cardApproved && !intent.nftSignature ? { kind: "submit", label: "Send your approved card", pending: !!busy, disabled: !canRecover, blockedByPair: false }
         : intent?.status === "nft_pending" ? { kind: "submit", label: notSent === "nft" ? "Prepare again" : "Review card issuance", pending: !!busy, disabled: !canRecover, blockedByPair: false }
@@ -731,7 +933,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
 
     {showFresh ? <section className="cdx-live-block cdx-live-terms" aria-label="Terms">
       {ready}
-      <p>Coin creation and card issuance are two paid mainnet transactions. Exact costs appear before your wallet asks for approval. Your selected quote funds only the optional initial buy.</p>
+      <p>Coin creation and card issuance are two paid mainnet transactions. Exact costs appear before your wallet asks for approval. Your selected quote funds only the optional initial buy.{draftFees ? " Sharing creator fees adds a third, after the card, with its own approval." : ""}</p>
       <label className="cdx-live-check"><input ref={termsRef} type="checkbox" checked={terms} onChange={e => { setTerms(e.target.checked); if (e.target.checked && error === TERMS_NEEDED) setError(""); }} /><span>I have the rights to this artwork and accept paid mainnet transactions.</span></label>
     </section> : null}
 
@@ -761,16 +963,20 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
           {status === "complete" && intent ? <><TextLink href={`https://solscan.io/account/${intent.nftMint}`} target="_blank">Card on Solscan<Icon name="external" size={12} /></TextLink><TextLink href={intent.nftMetadataUri} target="_blank">Metadata<Icon name="external" size={12} /></TextLink></> : null}
           {intent?.nftSignature ? <TextLink href={`https://solscan.io/tx/${intent.nftSignature}`} target="_blank">Card transaction<Icon name="external" size={12} /></TextLink> : null}
         </StageRow>
+        {feeStage ? <StageRow n={3} title="Share creator fees" stage={feeStage}>
+          {fee?.signature && fee.status !== "skipped" ? <TextLink href={`https://solscan.io/tx/${fee.signature}`} target="_blank">Fee split transaction<Icon name="external" size={12} /></TextLink> : null}
+          {feeSkippable && !busy ? <button type="button" className="mdx-link mdx-hit" onClick={() => setSkipAsk(true)}>Skip, keep 100%</button> : null}
+        </StageRow> : null}
       </ol>
       {intent?.status === "nft_pending" && !busy && !error ? <p>The coin is verified. Issue its separate one-of-one card to the same creator wallet.</p> : null}
-    </section> : showFresh ? <p className="cdx-live-next">{oneApproval ? ONE_APPROVAL_NEXT : SEPARATE_APPROVALS_NEXT}</p> : null}
+    </section> : showFresh ? <p className="cdx-live-next">{oneApproval ? draftFees ? ONE_APPROVAL_NEXT_FEES : ONE_APPROVAL_NEXT : draftFees ? SEPARATE_APPROVALS_NEXT_FEES : SEPARATE_APPROVALS_NEXT}</p> : null}
     {/* The page's initial-buy notice, unless the alert above already says the same words. */}
     {notice && !intent && notice !== error ? <p role="status">{notice}</p> : null}
 
     {/* What the coin's wallet prompt will carry, before anything is prepared (the review shows the exact list). */}
     {showFresh ? <section className="cdx-live-wallet-notice" aria-labelledby="cdx-live-notice">
       <h3 id="cdx-live-notice" className="cdx-live-wallet-notice-title">{oneApproval ? "What your wallet will show for your coin and card" : "What your wallet will show for your coin"}</h3>
-      <ul className="cdx-live-wallet-notice-list">{walletNoticePreview({ hasBuy: !!initialBuy, siteHost, oneApproval }).map(item => <li key={item.key} data-notice={item.key}>{item.text}</li>)}</ul>
+      <ul className="cdx-live-wallet-notice-list">{walletNoticePreview({ hasBuy: !!initialBuy, siteHost, oneApproval, feesNext: draftFees }).map(item => <li key={item.key} data-notice={item.key}>{item.text}</li>)}</ul>
       <p className="cdx-live-wallet-notice-safety">{WALLET_NOTICE_COPY.safety} <TextLink to="/how" hash="wallet">Details</TextLink></p>
     </section> : null}
 
@@ -782,7 +988,10 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
         <div><dt>Quote asset</dt><dd>{selected.symbol}</dd></div>
         <div><dt>Initial buy</dt><dd>{intent.initialBuyQuoteBaseUnits === "0" ? "None" : <><span className="num">{formatLiveAmount(intent.initialBuyQuoteBaseUnits, selected.decimals)}</span> <span className="mdx-unit">{selected.symbol}</span></>}</dd></div>
         <div><dt>Card design</dt><dd>{getCardDesign(intent.cardTemplate).name}</dd></div>
+        {intent.feeShare ? <div><dt>Creator fee split</dt><dd><FeeSplitList recipients={intent.feeShare.status === "set_elsewhere" && intent.feeShare.onChain ? intent.feeShare.onChain : intent.feeShare.recipients} creator={intent.creatorWallet} /></dd></div> : null}
       </dl>
+      {intent.feeShare && !["complete", "set_elsewhere", "skipped"].includes(intent.feeShare.status) ? <p className="cdx-live-meta">{FEE_SPLIT_PERMANENT} {FEE_SPLIT_FREE}</p> : null}
+      {intent.feeShare?.status === "set_elsewhere" ? <p className="cdx-live-meta">This coin's split was already set on pump.fun, so the one above is what pump.fun pays. Yours was not applied.</p> : null}
       <p className="cdx-live-meta">These launch details are locked to this saved request. Reference {intent.id.slice(0, 8)}.</p>
       {/* A launch this browser cannot sign any more says why; its primary is the discard, so no second control. */}
       {intent.status === "prepared" || intent.status === "token_pending" ? <div className="cdx-live-discard">
@@ -801,19 +1010,28 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
         {/* While new launches are off the primary is Find saved launch, so this second control would repeat it. */}
         {canLaunch ? <button type="button" className="mdx-link mdx-hit cdx-live-find" disabled={!!busy} onClick={() => void recover(savedIntent(wallet.address!) ?? undefined)}>Find or resume a saved launch</button> : null}
         {recoverNote ? <p className="cdx-live-meta" role="status">{recoverNote}</p> : null}
-        {recoveryItems.length ? <ul className="cdx-live-saved__list" aria-label="Saved launches for this wallet">{recoveryItems.map(i => <li key={i.id}><Button variant="outline" block disabled={!!busy} onClick={() => void recover(i.id)}><span className="cdx-live-address">{brief(i.tokenMint)}</span>{i.status === "nft_pending" ? "Card pending" : "Check launch"}</Button></li>)}</ul> : null}
+        {recoveryItems.length ? <ul className="cdx-live-saved__list" aria-label="Saved launches for this wallet">{recoveryItems.map(i => <li key={i.id}><Button variant="outline" block disabled={!!busy} onClick={() => void recover(i.id)}><span className="cdx-live-address">{brief(i.tokenMint)}</span>{i.status === "nft_pending" ? "Card pending" : i.status === "complete" && feeShareNext(i) === "prepare" ? "Fee split next" : i.status === "complete" && feeShareNext(i) === "confirm" ? "Check fee split" : "Check launch"}</Button></li>)}</ul> : null}
       </> : <EmptyState compact title="Connect the creator wallet to find a saved launch." action={<button type="button" className="mdx-link mdx-hit" onClick={() => { launchPending.current = "recover"; setConnectOpen(true); }}>Connect wallet</button>} />}
     </section> : null}
 
     <WalletConnectDialog open={connectOpen} onOpenChange={connectChange} connect={connectInPanel} busyCopy={connectCopy} />
 
-    <Modal open={reviewOpen} onOpenChange={value => { if (!busy) setReviewOpen(value); }} width={520} title={plan?.kind === "nft" ? "Review your card NFT" : "Review your coin launch"} description="Check the total, then approve in your wallet. Nothing is sent until you approve there.">
+    <Modal open={skipAsk} onOpenChange={setSkipAsk} width={420} title="Keep 100% of creator fees?" description="Your coin keeps pump.fun's default: every creator fee goes to your wallet.">
+      <div className="cdx-live-review-modal">
+        <p>This is final here: Launch a Card will not prepare this split again. You could still set a split yourself on pump.fun. Nothing is signed or sent.</p>
+        <div className="cdx-live-review-actions">
+          <Button block onClick={() => void skipFees()}>Keep 100%, skip the split</Button>
+          <Button variant="ghost" block onClick={() => setSkipAsk(false)}>Back</Button>
+        </div>
+      </div>
+    </Modal>
+    <Modal open={reviewOpen} onOpenChange={value => { if (!busy) setReviewOpen(value); }} width={520} title={plan?.kind === "nft" ? "Review your card NFT" : plan?.kind === "fees" ? "Review your creator fee split" : "Review your coin launch"} description="Check the total, then approve in your wallet. Nothing is sent until you approve there.">
       {plan && reviewIntent ? <div className="cdx-live-review-modal">
         {/* One page: the costs, what the wallet will show, then the addresses. It scrolls inside the dialog when the
             screen is short, and Continue stays under it. */}
         <div ref={reviewBody} tabIndex={-1} role="region" aria-label="Transaction review" className="cdx-live-review-page">
           {reviewNotice ? <p className="cdx-live-callout" role="status">{reviewNotice}</p> : null}
-          <p className="cdx-live-network"><strong>Solana mainnet · real funds</strong><span>{plan.kind === "token" ? getTradingPair(draftAtPrepare.current?.symbol ?? card.ticker, reviewIntent.quoteAssetKey) : "One-of-one creator card · no NFT royalties"}</span></p>
+          <p className="cdx-live-network"><strong>Solana mainnet · real funds</strong><span>{plan.kind === "token" ? getTradingPair(draftAtPrepare.current?.symbol ?? card.ticker, reviewIntent.quoteAssetKey) : plan.kind === "fees" ? "Creator fee split on pump.fun · permanent" : "One-of-one creator card · no NFT royalties"}</span></p>
           {/* The coin's permanent image, before the wallet opens (the server made it from this card; nothing to choose). */}
           {plan.kind === "token" ? <LiveTokenImage intent={reviewIntent} /> : null}
           <dl className="cdx-launch-cost cdx-live-review">
@@ -829,10 +1047,18 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
             {plan.kind === "token" && pairCard ? <div><dt>Card NFT, in the same approval</dt><dd><span className="num">{formatLiveAmount(pairCard.review.totalDebitLamports, 9)}</span> <span className="mdx-unit">SOL</span></dd></div> : null}
             {typeof plan.review.walletBalanceLamports === "string" ? <div><dt>Wallet SOL available</dt><dd><span className="num">{formatLiveAmount(plan.review.walletBalanceLamports, 9)}</span> <span className="mdx-unit">SOL</span></dd></div> : null}
           </dl>
-          {plan.kind === "token" ? <p>{selected.key === "sol" ? "Any SOL initial buy is included in the SOL total. " : `Any ${selected.symbol} initial buy is separate from the SOL total. `}{pairCard ? PAIR_REVIEW_COPY : "Card NFT issuance is a separate paid transaction after coin verification."}</p> : <p>This issues the card for your existing coin. It does not launch or buy another coin.</p>}
-          <LiveWalletNotice plan={plan} card={plan.kind === "token" ? pairCard : null} quote={selected} siteHost={siteHost} />
+          {plan.kind === "token" ? <p>{selected.key === "sol" ? "Any SOL initial buy is included in the SOL total. " : `Any ${selected.symbol} initial buy is separate from the SOL total. `}{pairCard ? PAIR_REVIEW_COPY : "Card NFT issuance is a separate paid transaction after coin verification."}</p>
+            : plan.kind === "fees" ? null : <p>This issues the card for your existing coin. It does not launch or buy another coin.</p>}
+          {/* The split chosen with the launch: set by its own approval after the card, never inside the coin or card. */}
+          {plan.kind === "token" && reviewFees ? <><h3 className="cdx-live-subhead">Creator fee split, after your card</h3>
+            <FeeSplitList recipients={reviewFees} creator={reviewIntent.creatorWallet} />
+            <p>Set by its own approval once your coin and card are confirmed. {FEE_SPLIT_PERMANENT} {FEE_SPLIT_FREE}</p></> : null}
+          {plan.kind === "fees" ? <><h3 className="cdx-live-subhead">Who receives your coin's creator fees</h3>
+            <FeeSplitList recipients={reviewFees ?? []} creator={reviewIntent.creatorWallet} />
+            <p><strong>{FEE_SPLIT_PERMANENT}</strong> {FEE_SPLIT_WALLETS} {FEE_SPLIT_FREE} Fees your coin earned before this split stay yours: they are collected into your own pump.fun creator vault first.</p></> : null}
+          <LiveWalletNotice plan={plan} card={plan.kind === "token" ? pairCard : null} quote={selected} siteHost={siteHost} feesNext={plan.kind !== "fees" && !!reviewFees && feesOpen} />
           <h3 className="cdx-live-subhead">Addresses</h3>
-          <dl className="cdx-launch-cost cdx-live-review" data-stack><div><dt>Creator / fee payer</dt><dd className="cdx-live-address">{reviewIntent.creatorWallet}</dd></div><div><dt>{plan.kind === "token" ? "New coin mint" : "New NFT asset"}</dt><dd className="cdx-live-address">{plan.kind === "token" ? reviewIntent.tokenMint : reviewIntent.nftMint}</dd></div><div><dt>Quote mint</dt><dd className="cdx-live-address">{reviewIntent.quoteMint}</dd></div></dl>
+          <dl className="cdx-launch-cost cdx-live-review" data-stack><div><dt>Creator / fee payer</dt><dd className="cdx-live-address">{reviewIntent.creatorWallet}</dd></div><div><dt>{plan.kind === "token" ? "New coin mint" : plan.kind === "fees" ? "Coin mint" : "New NFT asset"}</dt><dd className="cdx-live-address">{plan.kind === "nft" ? reviewIntent.nftMint : reviewIntent.tokenMint}</dd></div><div><dt>Quote mint</dt><dd className="cdx-live-address">{reviewIntent.quoteMint}</dd></div></dl>
           <p>Verified at slot <span className="num">{plan.verifiedSlot.toLocaleString()}</span>. If this review stays open longer than 30 seconds, continuing prepares a fresh transaction first.</p>
         </div>
         {/* While the wallet prompt is open, the dialog says what it shows (the panel's line is behind the overlay). */}
@@ -863,6 +1089,12 @@ const PHASE: Record<NonNullable<Busy>, string> = {
   confirming: "Confirming on Solana",
   recovering: "Checking your saved launch",
 };
+/** A fee split as a plain list: each wallet in full (a look-alike address can't hide behind a shortened one; the creator's marked) and its share. */
+function FeeSplitList({ recipients, creator }: { recipients: readonly LiveFeeRecipient[]; creator: string }) {
+  return <ul className="cdx-live-fee-list" aria-label="Fee split">
+    {recipients.map(entry => <li key={entry.address}><span className="cdx-live-address">{entry.address}{entry.address === creator ? " (you)" : ""}</span><span className="num">{formatShare(entry.bps)}</span></li>)}
+  </ul>;
+}
 function StageRow({ n, title, stage, children }: { n: number; title: string; stage: Stage; children?: ReactNode }) {
   const links = Array.isArray(children) ? children.some(Boolean) : !!children;
   return <li className="cdx-live-stage" data-state={stage.state}>

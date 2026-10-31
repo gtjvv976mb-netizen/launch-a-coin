@@ -8,6 +8,7 @@ import { clientKey, enforceAddressGate, enforceLimit, LIMITS, type LimitRule } f
 import * as service from "./service.server";
 import { issueCardMintForSession } from "./vanity.server";
 import type { LiveResult } from "./types";
+import { MAX_FEE_RECIPIENTS } from "../../../../../integrations/pumpfun/src/fee-share-rules";
 export type * from "./types";
 
 /**
@@ -44,6 +45,8 @@ const intentId = z.string().uuid();
 const sha256 = z.string().regex(/^[a-f0-9]{64}$/);
 const asset = z.object({sha256, url: z.string().max(2048), mimeType: z.string().max(40), bytes: z.number().int().positive().max(12 * 1024 * 1024)});
 const signature = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{64,90}$/);
+// The creator fee split: 1 to MAX_FEE_RECIPIENTS wallets with whole basis points (the service checks wallets and the 100% total).
+const feeShares = z.array(z.object({address: publicKey, bps: z.number().int().min(1).max(10_000)})).min(1).max(MAX_FEE_RECIPIENTS);
 // Readiness is site-wide configuration, not per-user data, and /launch reads it during page SSR: revalidate it on every
 // use (no-cache) rather than no-store, which would also keep the /launch page out of the back/forward cache.
 export const getLiveLaunchReadiness = createServerFn({method: "GET"}).handler(() => { revalidate(); return liveReadiness(); });
@@ -74,6 +77,7 @@ export const prepareLiveLaunch = createServerFn({method: "POST"}).validator(z.ob
   cardTemplate: z.string().max(50).optional(), quoteAssetKey: z.string().max(30).optional(), quoteMint: publicKey.optional(),
   initialBuyQuoteBaseUnits: z.string().regex(/^(0|[1-9][0-9]{0,19})$/), slippageBps: z.number().int().min(0).max(1000),
   assets: z.object({artwork: asset, cardImage: asset, caseImage: asset}), termsAcknowledged: z.literal(true), withCard: z.boolean().optional(),
+  feeShares: feeShares.optional(),
 })).handler(({data}) => attempt("prepare", async () => { await sameOrigin(); await perAddress(LIMITS.prepareIp); return service.prepareLiveLaunch(await signedIn(LIMITS.prepareWallet), data); }));
 // A pre-ground coin address ending in "card" for the signed-in creator's next new launch (vanity.server.ts), or null:
 // not configured, an empty pool, no session, another site, a limit or any error. The page then uses a random address,
@@ -115,4 +119,18 @@ export const holdLiveCard = createServerFn({method: "POST"}).validator(z.object(
 }));
 export const reportLiveWalletChange = createServerFn({method: "POST"}).validator(z.object({intentId, kind: z.enum(["token", "nft"]), messageSha256: sha256, walletName, transactionBase64: z.string().min(1).max(4000)})).handler(({data}) => attempt("report", async () => {
   await sameOrigin(); return service.reportLiveWalletChange(await signedIn(LIMITS.reportWallet), data);
+}));
+// The creator fee split after the card: its own creator-only transaction (CARDDEX_LIVE_FEE_SHARING), or "keep 100%".
+export const prepareLiveFeeShare = createServerFn({method: "POST"}).validator(z.object({intentId})).handler(({data}) => attempt("prepare-fees", async () => {
+  await sameOrigin(); return service.prepareLiveFeeShare(await signedIn(LIMITS.prepareCardWallet), data);
+}));
+export const submitLiveFeeShare = createServerFn({method: "POST"}).validator(z.object({intentId, messageSha256: sha256, transactionBase64: z.string().min(80).max(4000),
+  walletName: walletName.optional()})).handler(({data}) => attempt("submit-fees", async () => {
+  await sameOrigin(); return service.submitLiveFeeShare(await signedIn(LIMITS.submitWallet), data);
+}));
+export const confirmLiveFeeShare = createServerFn({method: "POST"}).validator(z.object({intentId, signature})).handler(({data}) => attempt("confirm-fees", async () => {
+  await sameOrigin(); return service.confirmLiveFeeShare(await signedIn(LIMITS.confirmWallet), data);
+}));
+export const skipLiveFeeShare = createServerFn({method: "POST"}).validator(z.object({intentId})).handler(({data}) => attempt("skip-fees", async () => {
+  await sameOrigin(); return service.skipLiveFeeShare(await signedIn(LIMITS.abandonWallet), data);
 }));

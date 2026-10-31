@@ -139,6 +139,13 @@ const SECTIONS: Section[] = [
                   </td>
                 </tr>
                 <tr>
+                  <th scope="row">Creator fee split (optional)</th>
+                  <td>
+                    Rent for pump.fun's fee-sharing account (about 0.006 SOL, plus about 0.0015 SOL on a token pair) and
+                    the Solana network fee, paid from your wallet. Launch a Card takes none and is never a recipient.
+                  </td>
+                </tr>
+                <tr>
                   <th scope="row">pump.fun creation and trading fees</th>
                   <td>
                     Set and charged by pump.fun.

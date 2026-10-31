@@ -1,6 +1,6 @@
 import { ed25519 } from "@noble/curves/ed25519.js";
 import { getWallets } from "@wallet-standard/app";
-import { base58, parseLiveTransaction } from "../../src/components/carddex/live/transaction";
+import { base58, parseFeeTransaction, parseLiveTransaction } from "../../src/components/carddex/live/transaction";
 
 /**
  * Stand-in Wallet Standard wallets, registered in the real registry the page reads (@wallet-standard/app). Each keeps a
@@ -38,7 +38,8 @@ export function mockWallet(options: MockWalletOptions) {
   let accounts: (typeof account)[] = [];
   const ask = (prompt: Prompt) => { prompts.push(prompt); if (options.reject?.includes(prompt)) throw REJECTED(); };
   const sign = (bytes: Uint8Array, index: number) => {
-    const out = options.change ? options.change(bytes.slice(), index) : bytes.slice(), wire = parseLiveTransaction(out);
+    // A creator fee split has one signature slot (the creator's); a coin or card has two.
+    const out = options.change ? options.change(bytes.slice(), index) : bytes.slice(), wire = out[0] === 1 ? parseFeeTransaction(out) : parseLiveTransaction(out);
     out.set(ed25519.sign(wire.message, options.seed), wire.signatureOffset);
     return { signedTransaction: out };
   };
