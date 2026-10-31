@@ -23,6 +23,12 @@ import { CHART_RANGES, isChartRange, type Candle, type CandleAnswer, type ChartR
 
 export const GECKO_API = "https://api.geckoterminal.com/api/v2";
 const GECKO_ACCEPT = "application/json;version=20230302";
+/** Workers send no User-Agent of their own, and GeckoTerminal's firewall refuses requests without one. */
+const USER_AGENT = "LaunchACard/1.0 (+https://launchacard.fun)";
+/** A GeckoTerminal answer that was not a success: its HTTP status only. */
+class GeckoError extends Error {
+  constructor(readonly status: number | null) { super(`GeckoTerminal ${status ?? "unreachable"}`); this.name = "GeckoError"; }
+}
 const TIMEOUT_MS = 6_000, MAX_BYTES = 768 * 1024;
 const SECOND = 1_000, MINUTE = 60 * SECOND;
 /** How long each part is reused before it is read again. */
@@ -80,7 +86,7 @@ async function part<T>(mint: string, kind: string, ttl: number, rule: LimitRule,
     } catch (error) {
       // A spent budget is not a miss: the next request may refresh. An upstream failure waits out the window.
       if (!(error instanceof UserError)) await writeRow(mint, `${kind}~miss`, now, true);
-      console.log(JSON.stringify({ event: "market_refresh_failed", kind: kind.split(":")[0], reason: error instanceof Error ? error.name : "error" }));
+      console.log(JSON.stringify({ event: "market_refresh_failed", kind: kind.split(":")[0], reason: error instanceof Error ? error.name : "error", status: error instanceof GeckoError ? error.status : undefined }));
     }
   }
   // Stale means an older answer is shown; a part never read shows as missing (a dash), not as stale.
@@ -99,8 +105,10 @@ async function readCapped(response: Response): Promise<string> {
 async function gecko(send: Fetch, path: string): Promise<Record<string, unknown>> {
   const controller = new AbortController(), timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
-    const response = await send(`${GECKO_API}${path}`, { method: "GET", headers: { accept: GECKO_ACCEPT }, redirect: "manual", signal: controller.signal });
-    if (!response.ok) throw new Error(`GeckoTerminal ${response.status}`);
+    let response: Response;
+    try { response = await send(`${GECKO_API}${path}`, { method: "GET", headers: { accept: GECKO_ACCEPT, "user-agent": USER_AGENT }, redirect: "manual", signal: controller.signal }); }
+    catch { throw new GeckoError(null); }
+    if (!response.ok) throw new GeckoError(response.status);
     return JSON.parse(await readCapped(response)) as Record<string, unknown>;
   } finally { clearTimeout(timer); }
 }
