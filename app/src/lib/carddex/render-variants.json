@@ -2668,5 +2668,305 @@
       "height": 894,
       "sha256": "6db33276c0a16a8e3f973df5b487b128d1641109981c6976e8b03eade41deac8"
     }
+  },
+  "pair-ray": {
+    "atlasSha256": "2368af6da7a994dc2baeda32085db485f50d14b63d353734b53f45a1111aa4a0",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-ray-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "c3f13fc7618efb68408f4ea8ce0d3c45d4e86fd07a8d241234e1b0494f18d70d"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-ray-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "651aceeda5e06b1be5f7632989bd6bafae167fde8d557cde7c9935c417be317e"
+    }
+  },
+  "pair-met": {
+    "atlasSha256": "70139996f51646f956c78113e782dcdfbc00a099a8f26efc2b623abda4abac6f",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-met-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "f669cfbf50b150eb7fdf0a3d12bb48c7b81391ad7dbe1e43219f13d417fd9800"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-met-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "7c9edbcac41826a03437fc182dbad5fd82bd8d554a8c5c47c5ada27c51b7abd8"
+    }
+  },
+  "pair-bp": {
+    "atlasSha256": "a368f098a97d2af70a7b36c8959266c5d32593615f3f5ea00461c1150b0fdfed",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-bp-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "30e8dc102543ecd1547a8e97679abe3cce7a7bb779ef4794fe4960b13d4abbca"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-bp-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "3f63a4e9a2f9bd61bd1008dee96d5439455813d72da8f7517282acd42875ae3b"
+    }
+  },
+  "pair-w": {
+    "atlasSha256": "6ee754b83fd5adea9b4c726627c4a1049b969e465c7f719374ddcfaa86089f00",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-w-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "75c8a0d99aa767466a356c64565cd7f6bf8de9542d5738dfd02c2ea3ab31753b"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-w-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "9373f032a2df6f2fc23bc54d919c916c336c54d4170cc78033098c787a68c37a"
+    }
+  },
+  "pair-psol": {
+    "atlasSha256": "816fd49e531b1a133d616f805c7e09ef25b2bc4d77f5ea65459b92a5ba1c9f7d",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-psol-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "fdaf2f7c75d3532e44ba6a26ad5f008cfdb362cfdc30f4c3378b23cd231be4ee"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-psol-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "7bb430ee1ce0e06196a1f02af6470b5e7b0eb0088996cb617bfc2d0909a83229"
+    }
+  },
+  "pair-hsol": {
+    "atlasSha256": "9fad2cd06c6ea0f56f13a16da439281ab9eeb3c627ada3bfa2cb1ce7413aad61",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-hsol-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "f7776bb3c16cc13a552309b9300b6968a4edf071104be3777a784b04a46db867"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-hsol-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "3c412477b7df46291f88029ebb6c9be29696881ee8426e529a285d468b09c89c"
+    }
+  },
+  "pair-cbltc": {
+    "atlasSha256": "29264e8c4cc5e9b3388df1d63138bc465988026fdf49e704452e381e9a9386b1",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-cbltc-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "5e5e1bdc3bfdc768d5436f838572711028ef9227294d1750d4b95c6d8c54e162"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-cbltc-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "35ce6b57c52ac550fc86ff029ccb730bf8f91021cdcc434474b2eed6cbac332c"
+    }
+  },
+  "pair-cbada": {
+    "atlasSha256": "f63cacda9851834ed68099de88b5228d9b966dde8e62a4af549b3a52e9469b2c",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-cbada-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "204725b1b05485ea42f1e049f445366444f79e8ce7f7d74846351e910f42aee9"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-cbada-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "f022c058bca561f6a79e77f8f02dd249ea1eb4c5345717bcfaa5a8e3fa67fc93"
+    }
+  },
+  "pair-spyx--stock": {
+    "atlasSha256": "acde028de6b03f3de11652fe0a7d12477a602118941c950f7ac157f40fd24491",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-spyx--stock-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "3841e27fb8070bd5f6110c6c8b263d8258a9287e95a9a86a0135c800fdbb95e3"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-spyx--stock-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "74902ab06134bc4a3a9721c0bfe16797beac76f49ff12c86e869f807dbacd7cc"
+    }
+  },
+  "pair-qqqx--stock": {
+    "atlasSha256": "50f3608202c4add54ac6fc7129a71ecc2b48418bfacbfe39e9fdfaf322cd1e8f",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-qqqx--stock-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "93a48dd2a39f31da940660500a060d47a8cc2850d0cee44860285d685da1d46a"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-qqqx--stock-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "fb8d1a322d115ff504b42b49efb2719a20d2f5915ecc89decbe74466e311896a"
+    }
+  },
+  "pair-googlx--stock": {
+    "atlasSha256": "989030c32ee5a73664ff041268cb25809e89e8b37406f2835d11d39bb6159343",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-googlx--stock-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "d0002064c257d390aa83cb46ae3085a8954effce9b6a0815e106ece88c363f50"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-googlx--stock-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "21c028dd6f9aecf9efd68cc62809173451bbce5af979d108d311fdcfaa129d6d"
+    }
+  },
+  "pair-msftx--stock": {
+    "atlasSha256": "5ec1dff05991cb7cd0c0408ca2eb530794daae4dc3f0d6008ebccd8d13be90ad",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-msftx--stock-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "55ac0556aa88fb85ba4593e4203e59dfa17159216b668c9b4671ec2441958243"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-msftx--stock-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "80cbdd4d0a6614f3576f9f4217076ee63db536f41619be14da5d991e8d2d1390"
+    }
+  },
+  "pair-metax--stock": {
+    "atlasSha256": "bb44666df95999b087813aa4d047687b74eea5f0682b162cf59f05a30d4c621d",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-metax--stock-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "af319a0da92933235d7bf11e478e8ad9fe2785163e963ebeada192068568b885"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-metax--stock-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "0751912f3c49f95e76d15c6e3b326f9c4a67f825a60496e9021682861b98af2d"
+    }
+  },
+  "pair-amznx--stock": {
+    "atlasSha256": "6f0a980c668a58062632a5d3f4ea37ad6c04812ce60a79ab729630c65543424e",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-amznx--stock-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "861793f4f7e5216e8e18121459efa614e2150180e44ee9722cf4fdfefc879c78"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-amznx--stock-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "40c71175f45eca64fe68ceea8d23077425b9fa9b719d900db36fed2c6280ecc2"
+    }
+  },
+  "pair-crclx--stock": {
+    "atlasSha256": "a0a5ab98e3952ee6a1d3fb96b48b5bda3134ddb487d493c5b78c4c23e804e288",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-crclx--stock-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "6cb0f7433ffaaed80f929f6045f71745ff1632ab889c133366253edfa7d4b501"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-crclx--stock-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "4df58c4ce2d0b3800d600ee38858d68f66b02bc2aaa7f43e0d72ca87eeaafd02"
+    }
+  },
+  "pair-hoodx--stock": {
+    "atlasSha256": "aef88a3c4981f47beab2b547a40462cef07a7cbdc05d3af3f1238807b28b4612",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-hoodx--stock-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "2c8c5ae3270ae57204237fcf64efbd99bb042cf13d7d74108ab94b6c7d1aef5a"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-hoodx--stock-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "ccb536036a011913a6f2bce84445a33fdd9704a0b4edc987733ac6b2d663c9cd"
+    }
+  },
+  "pair-gldx--stock": {
+    "atlasSha256": "a4aaf55d124d7d3a090e2ea53cbfd299d9384e2b83bfa7520e96bf61d9bd17cd",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-gldx--stock-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "a077c3222c14611d55323a0aac09b2f39cf20917aec69938ab020059bd9ad701"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-gldx--stock-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "4dc27c378af8280b81b296099ef0b11605e750bb6bbeb46b735daf0a13f94bab"
+    }
+  },
+  "pair-pltrx--stock": {
+    "atlasSha256": "49b819cbb588ef7b4eb96a628ab1d8e2b9eaff514a211df11c2070bdd6cf2c73",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-pltrx--stock-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "0ca8b1b718629822329f6949170dba8a4a043f120b3afec12a009bad9ccc5707"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-pltrx--stock-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "d7c97c9a7520f4df029053f83d8b33903c305802d6380a88be5b6eff35bda6b0"
+    }
+  },
+  "pair-mcdx--stock": {
+    "atlasSha256": "f932641156be2bd307c253318916f9b067101815a25898acc032a054436c301a",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-mcdx--stock-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "d52f967ec24da5152c0cad7afba0ab8cbf987db1b43d7ab83a2987ab53e97cfd"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-mcdx--stock-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "bb02dde9dadb9724ff019e0dd286b134b2279a358afd4b6ab5184fe4abfab609"
+    }
+  },
+  "pair-kox--stock": {
+    "atlasSha256": "d9c30a545548e8d79b21e6aaca1c074b5e21eda32894696d0c9adffdf14e4317",
+    "w480": {
+      "path": "/assets/carddex/render/preview/pair-kox--stock-480.webp",
+      "width": 480,
+      "height": 670,
+      "sha256": "046d0c0edbb9190c45f087790ff669c58aad1f365da3db46ed6ca59596e280fb"
+    },
+    "w640": {
+      "path": "/assets/carddex/render/preview/pair-kox--stock-640.webp",
+      "width": 640,
+      "height": 894,
+      "sha256": "eb9ba408f72ad77fdf09e51d6e8860896f3e023521f24c4480a15caf5005af28"
+    }
   }
 }

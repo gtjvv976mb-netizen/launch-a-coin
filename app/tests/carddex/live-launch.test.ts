@@ -325,7 +325,7 @@ describe("isolated real-launch server lifecycle", () => {
   test("a direct pair the owner has not confirmed is refused for mainnet before any upload, coin image, size check, plan or row", async () => {
     const {composeLiveAssets} = await import("../../src/lib/carddex/live/composition.server");
     const direct = OFFERED_PAIRS.filter(asset => mainnetPairHold(asset.key) && asset.key !== "zcat");
-    expect(direct.map(asset => asset.key)).toEqual(["gork", "stonk", "paid", "pepe", "pill", "npc", "wojak", "eacc", "shib", "swordcat", "plague", "ape", "link"]);
+    expect(direct.map(asset => asset.key)).toEqual(["gork", "stonk", "paid", "pepe", "pill", "npc", "wojak", "eacc", "shib", "swordcat", "plague", "ape", "link", "w", "psol", "cbltc", "cbada"]);
     for (const quote of direct) {
       const original = {...await input(), cardTemplate: designForPair(quote.key)!, quoteAssetKey: quote.key, quoteMint: quote.mint}, puts = storagePuts;
       const {cardTemplate: _design, ...pairOnly} = original;

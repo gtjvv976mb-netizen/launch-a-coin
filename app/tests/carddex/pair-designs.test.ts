@@ -9,7 +9,7 @@ import {CARD_RENDERER_VERSION} from "../../src/lib/carddex/card-template";
 describe("reviewed exact pair-identity designs",()=>{
   test("the active designs are exactly the installed ones: every staged design but the two without finished art",()=>{
     expect(WITHHELD_PAIR_DESIGNS).toEqual(["pair-aave","pair-uni"]);
-    expect(ACTIVE_PAIR_DESIGNS).toHaveLength(95);
+    expect(ACTIVE_PAIR_DESIGNS).toHaveLength(115);
     // A missing or mismatched asset or hash fails here (the gates), not on the page: the manifests stay off the client.
     expect(ACTIVE_PAIR_DESIGNS.map(d=>d.key)).toEqual(installedPairDesignKeys());
     expect(STAGED_PAIR_DESIGNS.filter(d=>!installedPairDesignKeys().includes(d.key)).map(d=>d.key)).toEqual([...WITHHELD_PAIR_DESIGNS]);

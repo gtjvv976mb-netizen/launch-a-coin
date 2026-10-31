@@ -3326,5 +3326,765 @@
    "luminance": 0.263,
    "encoder": "chrome-headless-shell 153.0.8010.12 (playwright build 1243) canvas image/webp q0.9"
   }
+ },
+ "ray": {
+  "logo": "/assets/pairs/ray.webp",
+  "w128": {
+   "path": "/assets/pairs/ray.webp",
+   "sha256": "7261a4e8b11129f5c777b006493151b90fd481c5c3db2ded177a74caf8b309ed",
+   "bytes": 2738
+  },
+  "w64": {
+   "path": "/assets/pairs/ray-64.webp",
+   "sha256": "8ccebd9ce46e464021ca063f6c7baa8e02d1286dc1461136ed1dc98d86b090f6",
+   "bytes": 1378
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "ray-4f19e48447cf.png",
+   "sha256": "4f19e48447cfb97915021bfa277349d9aa784198261f777a00d8fdf8a1d43fe1",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#ray.logoSourceSha256",
+   "url": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R/logo.png"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -28.09,
+    -28.09,
+    709.18
+   ],
+   "plate": "#f3e7cf",
+   "sourcePx": [
+    653,
+    653
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.808,
+   "luminance": 0.235,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "met": {
+  "logo": "/assets/pairs/met.webp",
+  "w128": {
+   "path": "/assets/pairs/met.webp",
+   "sha256": "a10d18cc46818811f3365961eb51d14dcfcb38800bfb80029ed4dcbfbd7357e3",
+   "bytes": 3736
+  },
+  "w64": {
+   "path": "/assets/pairs/met-64.webp",
+   "sha256": "e5e6b593912af39bf5a96dd7fb49fff8bd026d635fb94a404decd7615837e2af",
+   "bytes": 1728
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "met-bd8e448414c0.png",
+   "sha256": "bd8e448414c0d45ecd6db889589d59f8abd5a2c37e20acf53d6e2096359954be",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#met.logoSourceSha256",
+   "url": "https://assets.meteora.ag/met-token.svg"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0.0,
+    0.0,
+    512
+   ],
+   "plate": null,
+   "sourcePx": [
+    512,
+    512
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.0,
+   "luminance": 0.261,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "bp": {
+  "logo": "/assets/pairs/bp.webp",
+  "w128": {
+   "path": "/assets/pairs/bp.webp",
+   "sha256": "caf08d357acf43943edb6f7ab1494b2612ba2b3108819ee94d47488ea9e15bdb",
+   "bytes": 2516
+  },
+  "w64": {
+   "path": "/assets/pairs/bp-64.webp",
+   "sha256": "74709d3db3a579ead9f7a156e64a6adb3185a9f5fba5023c7afb8cefa07a1d7f",
+   "bytes": 1330
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "bp-23821cb057e5.png",
+   "sha256": "23821cb057e5e096f5829d761a2ea6e4a4b9f75c11a363b2b44d74dec8d2d9f2",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#bp.logoSourceSha256",
+   "url": "https://trek-labs.github.io/heart-metadata/bp/bp.png"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -22.7,
+    -22.7,
+    557.41
+   ],
+   "plate": "#26120b",
+   "sourcePx": [
+    512,
+    512
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.217,
+   "luminance": 0.759,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "w": {
+  "logo": "/assets/pairs/w.webp",
+  "w128": {
+   "path": "/assets/pairs/w.webp",
+   "sha256": "aea932c4ca01b0efd465ab8d9ae57254eca0dde5b717a3f9e3dcd729036ed3f8",
+   "bytes": 2150
+  },
+  "w64": {
+   "path": "/assets/pairs/w-64.webp",
+   "sha256": "fd385ed06bf324c05157b3a41d0556ffbd93c1a1bd8bb93cab926e8b7a516cc7",
+   "bytes": 1160
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "w-e04a3757e5ec.png",
+   "sha256": "e04a3757e5ecc876f90e7a59de98e1a268b4d1ee171a04b0d1f507d274e136fe",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#w.logoSourceSha256",
+   "url": "https://coin-images.coingecko.com/coins/images/35087/large/W_Token_%283%29.png?1758122686"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -2.51,
+    -2.51,
+    255.01
+   ],
+   "plate": "#26120b",
+   "sourcePx": [
+    250,
+    250
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.324,
+   "luminance": 0.411,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "psol": {
+  "logo": "/assets/pairs/psol.webp",
+  "w128": {
+   "path": "/assets/pairs/psol.webp",
+   "sha256": "3080e1671429c69b19c31a1cbeb7f5368f4c7e94ac8993e067b1d9cfa028c2fc",
+   "bytes": 3226
+  },
+  "w64": {
+   "path": "/assets/pairs/psol-64.webp",
+   "sha256": "5b2b690631af3b6f0ceaa4a519e7637dbdeaefd727e0408c9d983b534ad3bf56",
+   "bytes": 1492
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "psol-c34d56b65bbd.png",
+   "sha256": "c34d56b65bbd73ef608f4e8fd57d8e4fc92547d9850724af91add72f6e98260b",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#psol.logoSourceSha256",
+   "url": "https://assets.phantom.app/assets/metadata/PSOL.png"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -22.76,
+    -22.76,
+    557.52
+   ],
+   "plate": "#f3e7cf",
+   "sourcePx": [
+    512,
+    512
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.218,
+   "luminance": 0.207,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "hsol": {
+  "logo": "/assets/pairs/hsol.webp",
+  "w128": {
+   "path": "/assets/pairs/hsol.webp",
+   "sha256": "642998d741b80d34942da18907fcc9bae21827c656bf62b59bfdd4c1ce02292f",
+   "bytes": 2348
+  },
+  "w64": {
+   "path": "/assets/pairs/hsol-64.webp",
+   "sha256": "578e784b35bb59cb08c50a5aac88cdbaba7a883d14f2f59889e620aef9519064",
+   "bytes": 1072
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "hsol-de137cba2286.png",
+   "sha256": "de137cba2286df82130df5ab2ed382a2f605399fdb2e1860a5ef4f43a169bbf4",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#hsol.logoSourceSha256",
+   "url": "https://raw.githubusercontent.com/igneous-labs/lst-offchain-metadata/master/hSOL/hSOL.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0.0,
+    0.0,
+    2000
+   ],
+   "plate": null,
+   "sourcePx": [
+    2000,
+    2000
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.0,
+   "luminance": 0.047,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "cbltc": {
+  "logo": "/assets/pairs/cbltc.webp",
+  "w128": {
+   "path": "/assets/pairs/cbltc.webp",
+   "sha256": "38ee92fb37491873a3aaf52f4f591e737a13a8302ccdcb738dbad47d2a184ba4",
+   "bytes": 3446
+  },
+  "w64": {
+   "path": "/assets/pairs/cbltc-64.webp",
+   "sha256": "93338fbba83e608233524fb07770d0241d394931208419107d2594fa20d45c9f",
+   "bytes": 1672
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "cbltc-a80a3ecaabf5.png",
+   "sha256": "a80a3ecaabf5bb9eb336df64e2350118a29f1e8b6e170736d65a46d212491539",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#cbltc.logoSourceSha256",
+   "url": "https://gateway.pinata.cloud/ipfs/QmSVXVXWv8Z3gGZg5LcF4gdQWjKeBRxiyrsEJyKkcEUanx"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -28.26,
+    -28.26,
+    696.52
+   ],
+   "plate": "#26120b",
+   "sourcePx": [
+    640,
+    640
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.217,
+   "luminance": 0.695,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "cbada": {
+  "logo": "/assets/pairs/cbada.webp",
+  "w128": {
+   "path": "/assets/pairs/cbada.webp",
+   "sha256": "2ca0e146c1b547d11477fdfa50c4cbd6df8cecd27ed4fe74a4fd3998a619dd8e",
+   "bytes": 5060
+  },
+  "w64": {
+   "path": "/assets/pairs/cbada-64.webp",
+   "sha256": "7a05a8172d0357d00a5cfcd2e8033c50c913500adbebdbe0a8036da4015685d4",
+   "bytes": 2224
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "cbada-f56cc49b6cee.png",
+   "sha256": "f56cc49b6ceef1fdc1ec244234069ed12d7e5f05a3c5f352bd615e3c6aa362de",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#cbada.logoSourceSha256",
+   "url": "https://gateway.pinata.cloud/ipfs/QmQHPc2oP1f2AABQ9PwkCrDKiGr1deNbBWt3GagLToKTJi"
+  },
+  "derivation": {
+   "mode": "alpha-circle",
+   "crop": [
+    -28.26,
+    -28.26,
+    696.52
+   ],
+   "plate": "#26120b",
+   "sourcePx": [
+    640,
+    640
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.217,
+   "luminance": 0.76,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "spyx": {
+  "logo": "/assets/pairs/spyx.webp",
+  "w128": {
+   "path": "/assets/pairs/spyx.webp",
+   "sha256": "a858ad0280ba37cb22114c64f1e6fe808e7b2d534a36b3605b18a3d174c83bd0",
+   "bytes": 2226
+  },
+  "w64": {
+   "path": "/assets/pairs/spyx-64.webp",
+   "sha256": "526ce2fa54b595bbc1ed42c8a39cced6aed16edc3fae017d8c153e2b09c70302",
+   "bytes": 1210
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "spyx-83c5db1a3c9d.png",
+   "sha256": "83c5db1a3c9d82482b9422bf1f850f1efe8af0ca9ed9455cb71f7830ad16b5c4",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#spyx.logoSourceSha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/SPYx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0.0,
+    0.0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.0,
+   "luminance": 0.183,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "qqqx": {
+  "logo": "/assets/pairs/qqqx.webp",
+  "w128": {
+   "path": "/assets/pairs/qqqx.webp",
+   "sha256": "65071b8d817f71f7110cac5ca5a22a3b87fb89a84d82247aea0a03d27064523f",
+   "bytes": 2344
+  },
+  "w64": {
+   "path": "/assets/pairs/qqqx-64.webp",
+   "sha256": "c7a6a13c17985e52723db19507677826bb67fff22d90cb166344704b62ddcbf6",
+   "bytes": 1164
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "qqqx-ef8778ce76e2.png",
+   "sha256": "ef8778ce76e2300a44cc6bd6a263336d9dac6acbfff4f09da1e8a419e7c87ee6",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#qqqx.logoSourceSha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/QQQx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0.0,
+    0.0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.0,
+   "luminance": 0.136,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "googlx": {
+  "logo": "/assets/pairs/googlx.webp",
+  "w128": {
+   "path": "/assets/pairs/googlx.webp",
+   "sha256": "ec28aee8be41a9960a4decd79ab4ed2012047e5f8b80d108f08882e796f94ab3",
+   "bytes": 2178
+  },
+  "w64": {
+   "path": "/assets/pairs/googlx-64.webp",
+   "sha256": "4fde430423246abac8daa8dd63065d6d5172c36f4869e362763690df097aea06",
+   "bytes": 1192
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "googlx-b9240e1eb8a5.png",
+   "sha256": "b9240e1eb8a5174f437d82eb7852e54f318ae05f55409be38df3b851f9a8e876",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#googlx.logoSourceSha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/GOOGLx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0.0,
+    0.0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.0,
+   "luminance": 0.767,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "msftx": {
+  "logo": "/assets/pairs/msftx.webp",
+  "w128": {
+   "path": "/assets/pairs/msftx.webp",
+   "sha256": "77313f518b59e7c7030063bf17f9239cb1298c9b54bad0b7e8b399dc4fa235b8",
+   "bytes": 1070
+  },
+  "w64": {
+   "path": "/assets/pairs/msftx-64.webp",
+   "sha256": "dec34bb84240cfeb9fa8774784afb6729fff09244a3eb0a1e3159a611c5063d9",
+   "bytes": 722
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "msftx-254e57a4c746.png",
+   "sha256": "254e57a4c746213c9773c00933ab360ff81ba023c3cc7ed9f2a3fd5224e4e3c2",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#msftx.logoSourceSha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/MSFTx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0.0,
+    0.0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.0,
+   "luminance": 0.812,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "metax": {
+  "logo": "/assets/pairs/metax.webp",
+  "w128": {
+   "path": "/assets/pairs/metax.webp",
+   "sha256": "02783bf67055f10dd1626cecb2f90360ae5130d66027ab01e7ef9c93db6d9f02",
+   "bytes": 2386
+  },
+  "w64": {
+   "path": "/assets/pairs/metax-64.webp",
+   "sha256": "77dedd2b3449701e8d84614e0e91ead4b272caf6526cc52143891874d4ec8735",
+   "bytes": 1264
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "metax-52cb2a0719cd.png",
+   "sha256": "52cb2a0719cdc068ccccc28ba2f6451d4db43e48734a2e7832da7e66b0d7e806",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#metax.logoSourceSha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/METAx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0.0,
+    0.0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.0,
+   "luminance": 0.862,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "amznx": {
+  "logo": "/assets/pairs/amznx.webp",
+  "w128": {
+   "path": "/assets/pairs/amznx.webp",
+   "sha256": "9361e4de3a0cd8e14a626664ef5376bfd70fc538431fd9bf28045de44cf6861a",
+   "bytes": 2574
+  },
+  "w64": {
+   "path": "/assets/pairs/amznx-64.webp",
+   "sha256": "656d442bf4a5ed362ae8111b4ac444c721a47a703ab064efd29b8196afde8612",
+   "bytes": 1342
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "amznx-dbf6bfee7c8c.png",
+   "sha256": "dbf6bfee7c8cd38e53a9191a5a3df6bbd69690c84a39330228b8cbe203f0d478",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#amznx.logoSourceSha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/AMZNx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0.0,
+    0.0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.0,
+   "luminance": 0.498,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "crclx": {
+  "logo": "/assets/pairs/crclx.webp",
+  "w128": {
+   "path": "/assets/pairs/crclx.webp",
+   "sha256": "2c4d9dde903e8804fcad0311dd60e30f39d82a3585440156715d7bc8ede66a54",
+   "bytes": 2524
+  },
+  "w64": {
+   "path": "/assets/pairs/crclx-64.webp",
+   "sha256": "544177fa9afad457e1cec18c44d30710c323d74fa29a3efd053add965868edd9",
+   "bytes": 1204
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "crclx-fbd0e3067888.png",
+   "sha256": "fbd0e30678880d808e69193523f84de0e02b1d1ba487447d5777a698aa4cec8c",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#crclx.logoSourceSha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/CRCLx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0.0,
+    0.0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.0,
+   "luminance": 0.081,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "hoodx": {
+  "logo": "/assets/pairs/hoodx.webp",
+  "w128": {
+   "path": "/assets/pairs/hoodx.webp",
+   "sha256": "e6e4f09024d69c1b8d8717ad4d7dafd6c75e9406506524e599de06b499ae3bb9",
+   "bytes": 2400
+  },
+  "w64": {
+   "path": "/assets/pairs/hoodx-64.webp",
+   "sha256": "5e160e06270e0b811f467a43c5910105729f52ee12b481fa6a8f692f05f89ef2",
+   "bytes": 1232
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "hoodx-aa5cb6f961da.png",
+   "sha256": "aa5cb6f961da95ca81791268e5c0f7e5e309c8156303920c6c45b74aa1e49d2a",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#hoodx.logoSourceSha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/HOODx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0.0,
+    0.0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.0,
+   "luminance": 0.686,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "gldx": {
+  "logo": "/assets/pairs/gldx.webp",
+  "w128": {
+   "path": "/assets/pairs/gldx.webp",
+   "sha256": "bd34fc79ab5f0479c9e2f1843c915a46578e06ccb83d133fad8661e9f1b0bb02",
+   "bytes": 3010
+  },
+  "w64": {
+   "path": "/assets/pairs/gldx-64.webp",
+   "sha256": "a2d2598299a85aef6de96d72681f2543cb2d931442054ad05e9511fdef9e978f",
+   "bytes": 1336
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "gldx-76ee29e811b2.png",
+   "sha256": "76ee29e811b22b2a2f8082d780c8c93442219a6a95d4db189bcf06343cbde448",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#gldx.logoSourceSha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/GLDx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0.0,
+    0.0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.0,
+   "luminance": 0.639,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "pltrx": {
+  "logo": "/assets/pairs/pltrx.webp",
+  "w128": {
+   "path": "/assets/pairs/pltrx.webp",
+   "sha256": "128c5045913ae8771463b83f29e2aa2dfd2a97c25282dcdc45dc4601a09b00e2",
+   "bytes": 1512
+  },
+  "w64": {
+   "path": "/assets/pairs/pltrx-64.webp",
+   "sha256": "38fc36ecbdc974bfe6574b96e8c97785d34e21aaa5d1fd89cce97ee1c635da2e",
+   "bytes": 858
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "pltrx-edada1087693.png",
+   "sha256": "edada1087693ec0de61c5386c0a166617b8b140658d6532326133a563441fd6e",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#pltrx.logoSourceSha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/PLTRx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0.0,
+    0.0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.0,
+   "luminance": 0.119,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "mcdx": {
+  "logo": "/assets/pairs/mcdx.webp",
+  "w128": {
+   "path": "/assets/pairs/mcdx.webp",
+   "sha256": "1922ccb6d05926561bb9db72b8a814643345b2d61b4951bd83ac3b2188e4340a",
+   "bytes": 2354
+  },
+  "w64": {
+   "path": "/assets/pairs/mcdx-64.webp",
+   "sha256": "63eadc1d754623090f10b941702e4ce8391307dbf92b8c4dff65571cb25763e8",
+   "bytes": 1222
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "mcdx-fd9f9b59bf59.png",
+   "sha256": "fd9f9b59bf59e57ef526d30e1dc46e10aa7451067849bc37fa5d96ce90570762",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#mcdx.logoSourceSha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/MCDx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0.0,
+    0.0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.0,
+   "luminance": 0.206,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
+ },
+ "kox": {
+  "logo": "/assets/pairs/kox.webp",
+  "w128": {
+   "path": "/assets/pairs/kox.webp",
+   "sha256": "c63f10a18439485841e16d01513559be1aac48260272efd58eaf337bd2a177d3",
+   "bytes": 3144
+  },
+  "w64": {
+   "path": "/assets/pairs/kox-64.webp",
+   "sha256": "7cbf773b3ff505bd3efe5882ba299a5312b4470499f847012c674fdfe4f26391",
+   "bytes": 1316
+  },
+  "source": {
+   "folder": "reports/pair-expansion-2026-10-31/logo-sources",
+   "file": "kox-389e72a18b8e.png",
+   "sha256": "389e72a18b8e1f84392b517d4b5926685f6eac9e6db7841888246a151887f39a",
+   "record": "reports/pair-expansion-2026-10-31/token-identities.json#kox.logoSourceSha256",
+   "url": "https://xstocks-metadata.backed.fi/logos/tokens/KOx.png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0.0,
+    0.0,
+    400
+   ],
+   "plate": null,
+   "sourcePx": [
+    400,
+    400
+   ],
+   "upscaled": false,
+   "resample": "lanczos",
+   "transparentFraction": 0.0,
+   "luminance": 0.219,
+   "encoder": "Pillow 12.3.0 libwebp 1.6.0 image/webp q90"
+  }
  }
 }

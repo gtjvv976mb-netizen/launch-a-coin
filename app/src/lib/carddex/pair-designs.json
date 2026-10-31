@@ -1453,5 +1453,305 @@
     ],
     "finish": "holo",
     "quoteMint": "SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3"
+  },
+  {
+    "key": "pair-ray",
+    "quoteKey": "ray",
+    "name": "Raydium Signature",
+    "description": "Raydium details in space-navy ceramic, iridescent violet-to-cyan titanium and faceted hexagonal crystal.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#141a4a",
+      "#7B5CFF",
+      "#4FD1E8"
+    ],
+    "finish": "holo",
+    "quoteMint": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R"
+  },
+  {
+    "key": "pair-met",
+    "quoteKey": "met",
+    "name": "Meteora Signature",
+    "description": "Meteora details in midnight lacquer, sunset-to-magenta enamel and polished rose gold.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#120c1c",
+      "#F2652E",
+      "#C93F9B"
+    ],
+    "finish": "holo",
+    "quoteMint": "METvsvVRapdj9cFLzq4Tr43xK4tAjQfwX76z3n6mWQL"
+  },
+  {
+    "key": "pair-bp",
+    "quoteKey": "bp",
+    "name": "Backpack Signature",
+    "description": "Backpack details in crimson enamel, white porcelain and polished silver stitching.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#B3161E",
+      "#F4F1EC",
+      "#C9CCD1"
+    ],
+    "finish": "holo",
+    "quoteMint": "BPxxfRCXkUVhig4HS1Lh7kZqV6SPJhzfEk4x6fVBjPCy"
+  },
+  {
+    "key": "pair-w",
+    "quoteKey": "w",
+    "name": "Wormhole Signature",
+    "description": "Wormhole details in lavender-violet enamel, pearl ceramic and spiralling polished silver.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#3F2B96",
+      "#8C7FD8",
+      "#EEEAF8"
+    ],
+    "finish": "holo",
+    "quoteMint": "85VBFQZC9TZkfaptBWjvUw7YbZjy52A6mjtPGjstQAmQ"
+  },
+  {
+    "key": "pair-psol",
+    "quoteKey": "psol",
+    "name": "Phantom Staked SOL Signature",
+    "description": "Phantom staked-SOL details in lavender porcelain, frosted lilac glass and polished silver.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#9E8FE0",
+      "#1C1A24",
+      "#EDE8FA"
+    ],
+    "finish": "holo",
+    "quoteMint": "pSo1f9nQXWgXibFtKf7NWYxb5enAM4qfP6UJSiXRQfL"
+  },
+  {
+    "key": "pair-hsol",
+    "quoteKey": "hsol",
+    "name": "Helius Staked SOL Signature",
+    "description": "Helius staked-SOL details in black obsidian, ember-orange enamel and blackened copper.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#0D0C0C",
+      "#F2541B",
+      "#8A3A1A"
+    ],
+    "finish": "holo",
+    "quoteMint": "he1iusmfkpAdwvxLNGV8Y1iSbj4rUy6yMhEA3fotn9A"
+  },
+  {
+    "key": "pair-cbltc",
+    "quoteKey": "cbltc",
+    "name": "Coinbase Wrapped LTC Signature",
+    "description": "Litecoin details in brushed sterling silver, white porcelain and bright blue enamel.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#0052FF",
+      "#C7CCD4",
+      "#F6F7F9"
+    ],
+    "finish": "holo",
+    "quoteMint": "cbLTC4T5NpzSUtQ7ekgEMZGaUPVJY1ko6BUikqa4gGf"
+  },
+  {
+    "key": "pair-cbada",
+    "quoteKey": "cbada",
+    "name": "Coinbase Wrapped ADA Signature",
+    "description": "Cardano details in deep navy lacquer, royal-blue enamel and pale-gold dot constellations.",
+    "category": "crypto",
+    "materialLevel": 14,
+    "palette": [
+      "#0B1640",
+      "#1F4FD8",
+      "#D9C48A"
+    ],
+    "finish": "holo",
+    "quoteMint": "cbADAmv9issuPfhFwyQG3xac4DGPd1LDSt1oz7vwJsg"
+  },
+  {
+    "key": "pair-spyx",
+    "quoteKey": "spyx",
+    "name": "S&P 500 Signature",
+    "description": "SP500 xStock details in deep navy lacquer, ivory porcelain and polished-gold columns.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#0E1A3C",
+      "#F2EBDA",
+      "#C9A24A"
+    ],
+    "finish": "holo",
+    "quoteMint": "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W"
+  },
+  {
+    "key": "pair-qqqx",
+    "quoteKey": "qqqx",
+    "name": "Nasdaq Signature",
+    "description": "Nasdaq xStock details in glacier ice-blue glass, snow-white enamel and polished silver.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#7FB6E6",
+      "#F7FAFD",
+      "#B9C6D3"
+    ],
+    "finish": "holo",
+    "quoteMint": "Xs8S1uUs1zvS2p7iwtsG3b6fkhpvmwz4GYU3gWAmWHZ"
+  },
+  {
+    "key": "pair-googlx",
+    "quoteKey": "googlx",
+    "name": "Alphabet Signature",
+    "description": "Alphabet xStock details in white porcelain with four-colour enamel and polished silver.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#4285F4",
+      "#F8F8F6",
+      "#34A853"
+    ],
+    "finish": "holo",
+    "quoteMint": "XsCPL9dNWBMvFtTmwcCA5v3xWPSMEBCszbQdiLLq6aN"
+  },
+  {
+    "key": "pair-msftx",
+    "quoteKey": "msftx",
+    "name": "Microsoft Signature",
+    "description": "Microsoft xStock details in matte graphite, four-colour glass tiles and brushed aluminium.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#2B2D31",
+      "#F25022",
+      "#00A4EF"
+    ],
+    "finish": "holo",
+    "quoteMint": "XspzcW1PRtgf6Wj92HCiZdjzKCyFekVD8P5Ueh3dRMX"
+  },
+  {
+    "key": "pair-metax",
+    "quoteKey": "metax",
+    "name": "Meta Signature",
+    "description": "Meta xStock details in pearl ceramic, gradient blue glass and polished chrome.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#0866FF",
+      "#F3F5F8",
+      "#B8C2CC"
+    ],
+    "finish": "holo",
+    "quoteMint": "Xsa62P5mvPszXL1krVUnU5ar38bBSVcWAB6fmPCo5Zu"
+  },
+  {
+    "key": "pair-amznx",
+    "quoteKey": "amznx",
+    "name": "Amazon Signature",
+    "description": "Amazon xStock details in amber-orange enamel, black lacquer and polished brass.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#FF9900",
+      "#16120E",
+      "#B88A3E"
+    ],
+    "finish": "holo",
+    "quoteMint": "Xs3eBt7uRfJX8QUs4suhyU8p2M6DoUDrJyWBa8LLZsg"
+  },
+  {
+    "key": "pair-crclx",
+    "quoteKey": "crclx",
+    "name": "Circle Signature",
+    "description": "Circle xStock details in jet-black ceramic, mint-to-violet enamel and brushed palladium.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#0B0B0D",
+      "#5EE0B5",
+      "#8C7BF2"
+    ],
+    "finish": "holo",
+    "quoteMint": "XsueG8BtpquVJX9LVLLEGuViXUungE6WmK5YZ3p3bd1"
+  },
+  {
+    "key": "pair-hoodx",
+    "quoteKey": "hoodx",
+    "name": "Robinhood Signature",
+    "description": "Robinhood xStock details in chartreuse enamel, matte black lacquer and blackened steel.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#CCFF00",
+      "#101310",
+      "#4B5148"
+    ],
+    "finish": "holo",
+    "quoteMint": "XsvNBAYkrDRNhA7wPHQfX3ZUXZyZLdnCQDfHZ56bzpg"
+  },
+  {
+    "key": "pair-gldx",
+    "quoteKey": "gldx",
+    "name": "Gold Signature",
+    "description": "Gold xStock details in polished gold, ivory enamel and stamped bullion textures.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#C99A2E",
+      "#F4ECD6",
+      "#5A4320"
+    ],
+    "finish": "holo",
+    "quoteMint": "Xsv9hRk1z5ystj9MhnA7Lq4vjSsLwzL2nxrwmwtD3re"
+  },
+  {
+    "key": "pair-pltrx",
+    "quoteKey": "pltrx",
+    "name": "Palantir Signature",
+    "description": "Palantir xStock details in matte black ceramic, brushed white steel and pale silver.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#111213",
+      "#E8E9EA",
+      "#9DA2A8"
+    ],
+    "finish": "holo",
+    "quoteMint": "XsoBhf2ufR8fTyNSjqfU71DYGaE6Z3SUGAidpzriAA4"
+  },
+  {
+    "key": "pair-mcdx",
+    "quoteKey": "mcdx",
+    "name": "McDonald's Signature",
+    "description": "McDonald's xStock details in golden-yellow enamel, red lacquer and polished gold.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#FFBC0D",
+      "#DA291C",
+      "#B8862B"
+    ],
+    "finish": "holo",
+    "quoteMint": "XsqE9cRRpzxcGKDXj1BJ7Xmg4GRhZoyY1KpmGSxAWT2"
+  },
+  {
+    "key": "pair-kox",
+    "quoteKey": "kox",
+    "name": "Coca-Cola Signature",
+    "description": "Coca-Cola xStock details in cherry-red enamel, white ribbon waves and polished chrome.",
+    "category": "stocks",
+    "materialLevel": 14,
+    "palette": [
+      "#E61A27",
+      "#FFFFFF",
+      "#C4C8CC"
+    ],
+    "finish": "holo",
+    "quoteMint": "XsaBXg8dU5cPM6ehmVctMkVqoiRG2ZjMo1cyBJ3AykQ"
   }
 ]

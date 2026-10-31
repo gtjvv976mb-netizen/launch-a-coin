@@ -55,7 +55,7 @@ function webpSize(buf: Buffer): [number, number] {
 
 describe("pair logos", () => {
   test("one entry per full-release pair, and every offered pair has one", () => {
-    expect(RELEASE.length).toBe(89);
+    expect(RELEASE.length).toBe(109);
     expect(Object.keys(ROWS).sort()).toEqual([...RELEASE].sort());
     for (const asset of OFFERED_PAIRS) expect(Object.hasOwn(ROWS, asset.key)).toBe(true);
   });
@@ -67,7 +67,7 @@ describe("pair logos", () => {
       expect(row.reason!.length).toBeGreaterThan(20);
       expect(row.w128 ?? row.w64 ?? row.source ?? row.derivation).toBeUndefined();
     }
-    expect(withLogo.length).toBe(86);
+    expect(withLogo.length).toBe(106);
   });
 
   test("each logo is a 128 px and a 64 px WebP matching its recorded sha256", () => {
@@ -87,7 +87,7 @@ describe("pair logos", () => {
     const expected = withLogo.flatMap(([key]) => [`${key}.webp`, `${key}-64.webp`]).sort();
     const files = readdirSync(DIR).sort();
     expect(files).toEqual(expected);
-    expect(files.length).toBe(172);
+    expect(files.length).toBe(212);
     const offered = new Set(OFFERED_PAIRS.map(asset => asset.key as string));
     const notOffered = PAIR_ASSET_KEYS.filter(key => !Object.hasOwn(ROWS, key));
     expect(notOffered.sort()).toEqual(["aave", "agency", "alon", "biketyson", "claudia", "jeanphil", "neet", "uni"]);
@@ -97,13 +97,23 @@ describe("pair logos", () => {
     expect(total).toBeLessThanOrEqual(600 * 1024);
   });
 
-  test("each logo records its source: Codex's file for that pair, its sha256, the record and the URL", () => {
+  test("each logo records its source: Codex's file (or, for the 31 October pairs, the committed token image), its sha256, the record and the URL", () => {
+    const EXPANSION = "reports/pair-expansion-2026-10-31";
+    const expansion = withLogo.filter(([, row]) => row.source!.folder === `${EXPANSION}/logo-sources`);
+    expect(expansion.map(([key]) => key)).toEqual(["ray", "met", "bp", "w", "psol", "hsol", "cbltc", "cbada", "spyx", "qqqx", "googlx", "msftx", "metax", "amznx", "crclx", "hoodx", "gldx", "pltrx", "mcdx", "kox"]);
     for (const [key, row] of withLogo) {
       const source = row.source!;
-      expect(source.folder).toBe("creative/higgsfield/pair-identities-2026-10-30");
       expect(path.basename(source.file).startsWith(`${key}-`)).toBe(true);
       expect(source.sha256).toMatch(/^[a-f0-9]{64}$/);
-      expect(source.record).toMatch(/^research\/[a-z0-9-]+\.json#[A-Za-z0-9.]+$/);
+      if (source.folder === `${EXPANSION}/logo-sources`) {
+        // The token's own image is in the repository: its bytes must still hash to the recorded value.
+        const bytes = readFileSync(path.join(import.meta.dir, "../../..", source.folder, source.file));
+        expect(createHash("sha256").update(bytes).digest("hex")).toBe(source.sha256);
+        expect(source.record).toBe(`${EXPANSION}/token-identities.json#${key}.logoSourceSha256`);
+      } else {
+        expect(source.folder).toBe("creative/higgsfield/pair-identities-2026-10-30");
+        expect(source.record).toMatch(/^research\/[a-z0-9-]+\.json#[A-Za-z0-9.]+$/);
+      }
       expect(source.url).toMatch(/^https:\/\//);
       expect(["whole", "cover", "alpha-circle"]).toContain(row.derivation!.mode);
       expect(row.derivation!.plate === null).toBe(row.derivation!.mode !== "alpha-circle");

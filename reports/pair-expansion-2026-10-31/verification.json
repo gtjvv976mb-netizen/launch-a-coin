@@ -1,0 +1,167 @@
+{
+  "slot": 463747004,
+  "createV2Enabled": true,
+  "quoteControlMintCount": 225,
+  "assets": {
+    "ray": {
+      "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "decimals": 6,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "1992728549",
+      "inGlobal": false
+    },
+    "met": {
+      "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "decimals": 6,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "11494131670",
+      "inGlobal": false
+    },
+    "bp": {
+      "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "decimals": 9,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "3506487895535",
+      "inGlobal": false
+    },
+    "w": {
+      "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "decimals": 6,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "263356040270",
+      "inGlobal": false
+    },
+    "psol": {
+      "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "decimals": 9,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "28708543750",
+      "inGlobal": false
+    },
+    "hsol": {
+      "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "decimals": 9,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "28789777208",
+      "inGlobal": false
+    },
+    "cbltc": {
+      "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "decimals": 8,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "5925903525",
+      "inGlobal": false
+    },
+    "cbada": {
+      "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "decimals": 6,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "17096118714",
+      "inGlobal": false
+    },
+    "spyx": {
+      "owner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "decimals": 8,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "437554859",
+      "inGlobal": false
+    },
+    "qqqx": {
+      "owner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "decimals": 8,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "476979651",
+      "inGlobal": false
+    },
+    "googlx": {
+      "owner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "decimals": 8,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "1164328199",
+      "inGlobal": false
+    },
+    "msftx": {
+      "owner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "decimals": 8,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "631398923",
+      "inGlobal": false
+    },
+    "metax": {
+      "owner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "decimals": 8,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "535905624",
+      "inGlobal": false
+    },
+    "amznx": {
+      "owner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "decimals": 8,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "1365156282",
+      "inGlobal": false
+    },
+    "crclx": {
+      "owner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "decimals": 8,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "4514800039",
+      "inGlobal": false
+    },
+    "hoodx": {
+      "owner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "decimals": 8,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "3846714149",
+      "inGlobal": false
+    },
+    "gldx": {
+      "owner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "decimals": 8,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "918560506",
+      "inGlobal": false
+    },
+    "pltrx": {
+      "owner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "decimals": 8,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "1783305342",
+      "inGlobal": false
+    },
+    "mcdx": {
+      "owner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "decimals": 8,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "1272116192",
+      "inGlobal": false
+    },
+    "kox": {
+      "owner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "decimals": 8,
+      "initialized": true,
+      "inQuoteControl": true,
+      "initialVirtualQuoteReserves": "3490738722",
+      "inGlobal": false
+    }
+  }
+}

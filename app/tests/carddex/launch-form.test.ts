@@ -170,21 +170,21 @@ describe("SOL's card design chooser", () => {
 
 describe("the pair HUD", () => {
   test("All holds every offered pair once: SOL and USDC, the stocks, memes, other crypto, then collector tokens", () => {
-    expect(ORDERED_PAIRS).toHaveLength(89);
-    expect(new Set(ORDERED_PAIRS.map(pair => pair.key)).size).toBe(89);
+    expect(ORDERED_PAIRS).toHaveLength(109);
+    expect(new Set(ORDERED_PAIRS.map(pair => pair.key)).size).toBe(109);
     expect(ORDERED_PAIRS.map(pair => pair.key).sort()).toEqual(OFFERED_PAIRS.map(pair => pair.key).sort());
     expect(ORDERED_PAIRS.slice(0, 4).map(pair => pair.key)).toEqual(["sol", "usdc", "gmex", "tslax"]);
     expect(ORDERED_PAIRS.findIndex(pair => pair.key === "tslax")).toBe(3);
     expect(ORDERED_PAIRS.some(pair => ["aave", "uni", "agency", "alon", "jeanphil", "claudia", "biketyson", "neet"].includes(pair.key))).toBe(false);
     expect(PAIR_GROUPS.map(group => group.name)).toEqual(["All", "Memes", "Stocks", "Crypto", "Collector"]);
     expect(pairsInGroup("crypto").slice(0, 2).map(pair => pair.key)).toEqual(["sol", "usdc"]);
-    expect(pairsInGroup("crypto")).toHaveLength(22);
+    expect(pairsInGroup("crypto")).toHaveLength(30);
     expect(pairsInGroup("collector").map(pair => pair.key)).toEqual(["cards", "sv151"]);
-    expect(pairsInGroup("stocks").map(pair => pair.key)).toEqual(["gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc"]);
+    expect(pairsInGroup("stocks").map(pair => pair.key)).toEqual(["gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc", "spyx", "qqqx", "googlx", "msftx", "metax", "amznx", "crclx", "hoodx", "gldx", "pltrx", "mcdx", "kox"]);
     expect(pairsInGroup("memes")).toHaveLength(58);
     expect(pairsInGroup("memes").every(pair => pairGroupOf(pair) === "memes" && pair.kind === "meme")).toBe(true);
     const sizes = PAIR_GROUPS.filter(group => group.key !== "all").map(group => pairsInGroup(group.key).length);
-    expect(sizes.reduce((a, b) => a + b, 0)).toBe(89);
+    expect(sizes.reduce((a, b) => a + b, 0)).toBe(109);
     // Old links named the base group (SOL and USDC): it is part of Crypto now.
     expect(groupAlias("base")).toBe("crypto");
     expect(groupAlias("memes")).toBe("memes");

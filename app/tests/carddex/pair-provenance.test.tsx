@@ -7,10 +7,10 @@ import {STAGED_PAIR_DESIGNS} from "../../src/lib/carddex/pair-designs";
 const DIRECT_LINE = "Not on pump.fun's public pairs list; admitted on-chain";
 
 describe("pair catalogue provenance",()=>{
-  test("the 19 direct quotes say so under the pair HUD, before wallet review; the 78 others do not",()=>{
+  test("the 23 direct quotes say so under the pair HUD, before wallet review; the 94 others do not",()=>{
     const direct=PAIR_ASSETS.filter(isDirectPair);
-    expect(direct).toHaveLength(19);
-    expect(PAIR_ASSETS.length-direct.length).toBe(78);
+    expect(direct).toHaveLength(23);
+    expect(PAIR_ASSETS.length-direct.length).toBe(94);
     for(const asset of PAIR_ASSETS){
       for(const live of [false,true]){
         const meta=renderToStaticMarkup(<QuoteAssetMeta quoteAssetKey={asset.key} live={live} />).replaceAll("&#x27;","'");
@@ -35,7 +35,7 @@ describe("pair catalogue provenance",()=>{
     }
   });
   test("staged descriptions are concise identity/material copy without production instructions",()=>{
-    expect(STAGED_PAIR_DESIGNS).toHaveLength(97);
+    expect(STAGED_PAIR_DESIGNS).toHaveLength(117);
     for(const design of STAGED_PAIR_DESIGNS){
       expect(design.description.length).toBeGreaterThan(15);
       expect(design.description.length).toBeLessThan(140);

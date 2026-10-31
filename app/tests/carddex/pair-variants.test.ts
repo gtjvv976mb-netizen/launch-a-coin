@@ -61,8 +61,8 @@ describe("the creator's print reads on every offered identity design", () => {
     const inkL = lum(...ink);
     let lowest = Infinity;
     const offered = OFFERED_PAIRS.map(pair => designForPair(pair.key)!).filter(key => key.startsWith("pair-"));
-    // 85: SOL's own card (its main design since 31 October 2026) and 84 other pairs' identity designs.
-    expect(offered).toHaveLength(85);
+    // 105: SOL's own card (its main design since 31 October 2026) and 104 other pairs' identity designs.
+    expect(offered).toHaveLength(105);
     for (const key of offered) {
       const atlas = (renderAssets as Record<string, { previewPath: string }>)[key + (CARD_DESIGNS.find(d => d.key === key)!.category === "stocks" ? "--stock" : "")]!;
       const png = readFileSync(file(atlas.previewPath));

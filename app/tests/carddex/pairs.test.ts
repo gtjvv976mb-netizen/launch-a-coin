@@ -32,19 +32,19 @@ const HELD_KEYS = [...HELD_OUT, ...Object.keys(HELD_LIVE)].map(key => `pair-${ke
 const UNPAIRED = [...UNPAIRED_BEFORE, ...EARLIER_PAIRED.filter(design => !Object.values(HELD_LIVE).includes(design)), "pair-usdc", ...HELD_KEYS].filter(design => !SOL_OPTIONS.includes(design));
 
 describe("the pair picks the card", () => {
-  test("the main map is one-to-one: 89 offered pairs, 89 distinct main designs, the map equals the owner's rule", () => {
+  test("the main map is one-to-one: 109 offered pairs, 109 distinct main designs, the map equals the owner's rule", () => {
     expect({...PAIR_DESIGNS}).toEqual(EXPECTED_PAIR_DESIGNS);
-    expect(Object.keys(PAIR_DESIGNS)).toHaveLength(89);
+    expect(Object.keys(PAIR_DESIGNS)).toHaveLength(109);
     expect({...PAIR_IDENTITY_DESIGNS}).toEqual(Object.fromEntries(PAIR_ASSET_KEYS.filter(key => !WITHHELD.includes(key)).map(key => [key, key === "usdc" ? "duel-masters" : `pair-${key}`])));
     expect(PAIR_ASSETS.map(asset => asset.key).sort()).toEqual([...PAIR_ASSET_KEYS].sort());
     const designs = Object.values(PAIR_DESIGNS);
-    expect(new Set(designs).size).toBe(89);
+    expect(new Set(designs).size).toBe(109);
     for (const design of designs) expect(isCardDesignKey(design)).toBe(true);
     expect(Object.isFrozen(PAIR_DESIGNS)).toBe(true);
     expect(PAIR_DESIGNS.sol).toBe("pair-sol");
     expect(designForPair("sol")).toBe("pair-sol");
     expect(PAIR_DESIGNS.usdc).toBe("duel-masters");
-    expect(designs.filter(design => design!.startsWith("pair-"))).toHaveLength(85);
+    expect(designs.filter(design => design!.startsWith("pair-"))).toHaveLength(105);
     expect(OFFERED_PAIRS.map(asset => asset.key)).toEqual(PAIR_ASSETS.filter(asset => !NOT_OFFERED.includes(asset.key)).map(asset => asset.key));
     for (const asset of OFFERED_PAIRS) {
       const design = designForPair(asset.key)!;
@@ -61,7 +61,7 @@ describe("the pair picks the card", () => {
   });
   test("the demo funds every pair a coin can trade in: offered now or before", () => {
     expect(TRADED_PAIRS.map(asset => asset.key)).toEqual(PAIR_ASSETS.filter(asset => isOfferedPair(asset.key) || asset.key in PAIR_DESIGNS_2026_10_30).map(asset => asset.key));
-    expect(TRADED_PAIRS).toHaveLength(89);
+    expect(TRADED_PAIRS).toHaveLength(109);
     for (const key of ["ansem", "spx", "tslax", "sv151"]) expect(TRADED_PAIRS.map(asset => asset.key)).toContain(key);
     for (const key of NOT_OFFERED) expect(TRADED_PAIRS.map(asset => asset.key)).not.toContain(key);
   });
@@ -107,7 +107,7 @@ describe("the pair picks the card", () => {
     expect([...CONFIRMED_DIRECT_PAIRS]).toEqual(["hodl", "solangeles"]);
     for (const key of CONFIRMED_DIRECT_PAIRS) { expect(isDirectPair(getPairAsset(key))).toBe(true); expect(mainnetPairRefusal(key)).toBeNull(); }
     const held = OFFERED_PAIRS.filter(asset => mainnetPairHold(asset.key)).map(asset => asset.key);
-    expect(held).toEqual(["zcat", "gork", "stonk", "paid", "pepe", "pill", "npc", "wojak", "eacc", "shib", "swordcat", "plague", "ape", "link"]);
+    expect(held).toEqual(["zcat", "gork", "stonk", "paid", "pepe", "pill", "npc", "wojak", "eacc", "shib", "swordcat", "plague", "ape", "link", "w", "psol", "cbltc", "cbada"]);
     expect(mainnetPairRefusal("zcat")).toBe(TRANSFER_FEE_PAIR);
     for (const key of held.slice(1)) {
       expect(isDirectPair(getPairAsset(key))).toBe(true);
@@ -125,7 +125,7 @@ describe("the pair picks the card", () => {
     expect(Object.values(PAIR_DESIGNS_2026_10_30).filter(design => !["one-piece", "duel-masters"].includes(design)).sort()).toEqual([...EARLIER_PAIRED].sort());
   });
   test("23 designs no pair offers leave new launches (gamestop, coinbase, strategy, doge, bonk, wif, amc, the six stock-* finishes, pair-usdc and 9 held); every other has one pair", () => {
-    expect(CARD_DESIGNS).toHaveLength(143);
+    expect(CARD_DESIGNS).toHaveLength(163);
     expect(LEGACY_CARD_DESIGNS).toHaveLength(48);
     expect(CARD_DESIGNS.filter(design => !pairForDesign(design.key)).map(design => design.key).sort()).toEqual([...UNPAIRED].sort());
     expect(UNPAIRED).toHaveLength(23);
@@ -135,7 +135,7 @@ describe("the pair picks the card", () => {
   });
   test("the bindings existing coins read agree with the map wherever a bound design still has a pair", () => {
     expect({...DESIGN_QUOTE_KEYS}).toMatchObject({...LEGACY_DESIGN_QUOTE_KEYS});
-    expect(Object.keys(DESIGN_QUOTE_KEYS)).toHaveLength(13 + 95);
+    expect(Object.keys(DESIGN_QUOTE_KEYS)).toHaveLength(13 + 115);
     for (const [design, quote] of Object.entries(DESIGN_QUOTE_KEYS)) {
       const pair = pairForDesign(design);
       if (pair) expect(pair.key).toBe(quote);
@@ -209,10 +209,10 @@ describe("the pair picks the card", () => {
     expect(completeLaunchPair({cardTemplate: "kraken"})).toEqual({cardTemplate: "kraken", quoteAssetKey: "sol", quoteMint: getPairAsset("sol").mint});
     expect(() => completeLaunchPair({quoteAssetKey: "uni"})).toThrow(NOT_OFFERED_PAIR);
   });
-  test("the 19 direct pairs are marked; the other 78 come from pump.fun's public table", () => {
+  test("the 23 direct pairs are marked; the other 94 come from pump.fun's public table", () => {
     const direct = PAIR_ASSETS.filter(isDirectPair).map(asset => asset.key);
-    expect(direct).toEqual(["gork", "stonk", "solangeles", "paid", "pepe", "jeanphil", "pill", "biketyson", "npc", "wojak", "eacc", "hodl", "agency", "claudia", "shib", "swordcat", "plague", "ape", "link"]);
-    expect(PAIR_ASSETS.length - direct.length).toBe(78);
+    expect(direct).toEqual(["gork", "stonk", "solangeles", "paid", "pepe", "jeanphil", "pill", "biketyson", "npc", "wojak", "eacc", "hodl", "agency", "claudia", "shib", "swordcat", "plague", "ape", "link", "w", "psol", "cbltc", "cbada"]);
+    expect(PAIR_ASSETS.length - direct.length).toBe(94);
     expect(PAIR_ASSETS_VERIFIED_AT).toBe("2026-10-30");
   });
 });
@@ -251,13 +251,13 @@ describe("stored coins and saved launches keep their reviewed quote identity", (
     for (const key of ["doge","bonk","wif"]) expect(defaultQuoteForDesign(key).key).toBe(key);
     for (const design of ["pepe","shib","blackberry","nokia"]) {
       expect(defaultQuoteForDesign(design).key).toBe("sol");
-      expect(allowedQuotesForDesign(design)).toHaveLength(97);
+      expect(allowedQuotesForDesign(design)).toHaveLength(117);
     }
     expect(resolveLaunchQuote("pokemon-classic",{quoteAssetKey:"fartcoin"}).mint).toBe("9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump");
   });
   test("unknown assets and mint substitution fail closed", () => {
-    expect(PAIR_ASSETS).toHaveLength(97);
-    expect(new Set(PAIR_ASSETS.map(a=>a.mint)).size).toBe(97);
+    expect(PAIR_ASSETS).toHaveLength(117);
+    expect(new Set(PAIR_ASSETS.map(a=>a.mint)).size).toBe(117);
     expect(()=>getPairAsset("PEPE")).toThrow();
     expect(()=>resolveLaunchQuote("pokemon-classic",{quoteAssetKey:"usdc",quoteMint:getPairAsset("sol").mint})).toThrow();
     expect(getTradingPair("$CREATOR","tslax")).toBe("CREATOR / TSLAX");
@@ -289,8 +289,8 @@ describe("stored coins and saved launches keep their reviewed quote identity", (
   });
   test("stock references come from bound quote identity rather than decorative stock/SOL strings", () => {
     const stockDesigns=CARD_DESIGNS.filter(d=>d.stock);
-    expect(stockDesigns).toHaveLength(17);
-    expect(stockDesigns.filter(d=>d.key.startsWith("pair-"))).toHaveLength(7);
+    expect(stockDesigns).toHaveLength(29);
+    expect(stockDesigns.filter(d=>d.key.startsWith("pair-"))).toHaveLength(19);
     for(const design of stockDesigns){
       const quote=defaultQuoteForDesign(design.key);
       expect(quote.kind).toBe("stock");
@@ -307,7 +307,7 @@ describe("stored coins and saved launches keep their reviewed quote identity", (
     for (const [designKey,quoteKey] of Object.entries(presets)) {
       const asset=getPairAsset(quoteKey);
       expect(defaultQuoteForDesign(designKey).key).toBe("sol");
-      expect(allowedQuotesForDesign(designKey)).toHaveLength(97);
+      expect(allowedQuotesForDesign(designKey)).toHaveLength(117);
       expect(pairForDesign(designKey)?.key ?? null).toBe(HELD_LIVE[quoteKey] === designKey ? quoteKey : SOL_OPTIONS.includes(designKey) ? "sol" : null);
       expect(PAIR_DESIGNS_2026_10_30[quoteKey as keyof typeof PAIR_DESIGNS_2026_10_30]).toBe(designKey);
       expect(designForPair(quoteKey)).toBe(EXPECTED_PAIR_DESIGNS[quoteKey] as never);
@@ -341,7 +341,7 @@ describe("stored coins and saved launches keep their reviewed quote identity", (
       expect(designForPair(key)).toBe(EXPECTED_PAIR_DESIGNS[key] as never);
       expect(pairForDesign(design)?.key ?? null).toBe(HELD_LIVE[key] === design ? key : SOL_OPTIONS.includes(design) ? "sol" : null);
       expect(defaultQuoteForDesign(design).key).toBe("sol");
-      expect(allowedQuotesForDesign(design)).toHaveLength(97);
+      expect(allowedQuotesForDesign(design)).toHaveLength(117);
       for(const original of ["sol","tslax","cards"]){
         expect(resolveLaunchQuote(design,{quoteAssetKey:original}).key).toBe(original);
       }
@@ -415,7 +415,7 @@ describe("SOL's designs (owner, 31 October 2026)", () => {
         owner.set(design, asset.key);
       }
     }
-    expect(owner.size).toBe(88 + 32);
+    expect(owner.size).toBe(108 + 32);
     // No option is held, withheld, pair-usdc or bound to another quote for good.
     for (const option of SOL_OPTIONS) {
       expect(Object.hasOwn(HELD_PAIR_DESIGNS, option)).toBe(false);

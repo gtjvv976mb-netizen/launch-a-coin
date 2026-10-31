@@ -1,0 +1,204 @@
+{
+  "ray": {
+    "mint": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+    "symbol": "RAY",
+    "name": "Raydium",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "icon": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R/logo.png",
+    "iconSha256": "4f19e48447cfb97915021bfa277349d9aa784198261f777a00d8fdf8a1d43fe1",
+    "logoSourceSha256": "4f19e48447cfb97915021bfa277349d9aa784198261f777a00d8fdf8a1d43fe1"
+  },
+  "met": {
+    "mint": "METvsvVRapdj9cFLzq4Tr43xK4tAjQfwX76z3n6mWQL",
+    "symbol": "MET",
+    "name": "Meteora",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "icon": "https://assets.meteora.ag/met-token.svg",
+    "iconSha256": "f15c75f0c01a3dd7658f697909bff5a3b990951aaed653441ac238c1ac9a7025",
+    "logoSourceSha256": "bd8e448414c0d45ecd6db889589d59f8abd5a2c37e20acf53d6e2096359954be",
+    "logoSourceNote": "Rendered from the SVG at icon (sha256 iconSha256) by macOS Quick Look and cropped to the disc."
+  },
+  "bp": {
+    "mint": "BPxxfRCXkUVhig4HS1Lh7kZqV6SPJhzfEk4x6fVBjPCy",
+    "symbol": "BP",
+    "name": "Backpack",
+    "decimals": 9,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "icon": "https://trek-labs.github.io/heart-metadata/bp/bp.png",
+    "iconSha256": "23821cb057e5e096f5829d761a2ea6e4a4b9f75c11a363b2b44d74dec8d2d9f2",
+    "logoSourceSha256": "23821cb057e5e096f5829d761a2ea6e4a4b9f75c11a363b2b44d74dec8d2d9f2"
+  },
+  "w": {
+    "mint": "85VBFQZC9TZkfaptBWjvUw7YbZjy52A6mjtPGjstQAmQ",
+    "symbol": "W",
+    "name": "Wormhole Token",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "icon": "https://coin-images.coingecko.com/coins/images/35087/large/W_Token_%283%29.png?1758122686",
+    "iconSha256": "e04a3757e5ecc876f90e7a59de98e1a268b4d1ee171a04b0d1f507d274e136fe",
+    "logoSourceSha256": "e04a3757e5ecc876f90e7a59de98e1a268b4d1ee171a04b0d1f507d274e136fe",
+    "logoSourceNote": "The on-chain metadata image (https://wormhole.com/token.png) returned 404 on 31 October 2026; this is CoinGecko's image for the same token (its Solana platform address is this mint)."
+  },
+  "psol": {
+    "mint": "pSo1f9nQXWgXibFtKf7NWYxb5enAM4qfP6UJSiXRQfL",
+    "symbol": "PSOL",
+    "name": "Phantom Staked SOL",
+    "decimals": 9,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "icon": "https://assets.phantom.app/assets/metadata/PSOL.png",
+    "iconSha256": "c34d56b65bbd73ef608f4e8fd57d8e4fc92547d9850724af91add72f6e98260b",
+    "logoSourceSha256": "c34d56b65bbd73ef608f4e8fd57d8e4fc92547d9850724af91add72f6e98260b"
+  },
+  "hsol": {
+    "mint": "he1iusmfkpAdwvxLNGV8Y1iSbj4rUy6yMhEA3fotn9A",
+    "symbol": "hSOL",
+    "name": "Helius Staked SOL",
+    "decimals": 9,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "icon": "https://raw.githubusercontent.com/igneous-labs/lst-offchain-metadata/master/hSOL/hSOL.png",
+    "iconSha256": "de137cba2286df82130df5ab2ed382a2f605399fdb2e1860a5ef4f43a169bbf4",
+    "logoSourceSha256": "de137cba2286df82130df5ab2ed382a2f605399fdb2e1860a5ef4f43a169bbf4"
+  },
+  "cbltc": {
+    "mint": "cbLTC4T5NpzSUtQ7ekgEMZGaUPVJY1ko6BUikqa4gGf",
+    "symbol": "cbLTC",
+    "name": "Coinbase Wrapped LTC",
+    "decimals": 8,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "icon": "https://gateway.pinata.cloud/ipfs/QmSVXVXWv8Z3gGZg5LcF4gdQWjKeBRxiyrsEJyKkcEUanx",
+    "iconSha256": "a80a3ecaabf5bb9eb336df64e2350118a29f1e8b6e170736d65a46d212491539",
+    "logoSourceSha256": "a80a3ecaabf5bb9eb336df64e2350118a29f1e8b6e170736d65a46d212491539"
+  },
+  "cbada": {
+    "mint": "cbADAmv9issuPfhFwyQG3xac4DGPd1LDSt1oz7vwJsg",
+    "symbol": "cbADA",
+    "name": "Coinbase Wrapped ADA",
+    "decimals": 6,
+    "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "icon": "https://gateway.pinata.cloud/ipfs/QmQHPc2oP1f2AABQ9PwkCrDKiGr1deNbBWt3GagLToKTJi",
+    "iconSha256": "f56cc49b6ceef1fdc1ec244234069ed12d7e5f05a3c5f352bd615e3c6aa362de",
+    "logoSourceSha256": "f56cc49b6ceef1fdc1ec244234069ed12d7e5f05a3c5f352bd615e3c6aa362de"
+  },
+  "spyx": {
+    "mint": "XsoCS1TfEyfFhfvj8EtZ528L3CaKBDBRqRapnBbDF2W",
+    "symbol": "SPYx",
+    "name": "SP500 xStock",
+    "decimals": 8,
+    "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "icon": "https://xstocks-metadata.backed.fi/logos/tokens/SPYx.png",
+    "iconSha256": "83c5db1a3c9d82482b9422bf1f850f1efe8af0ca9ed9455cb71f7830ad16b5c4",
+    "logoSourceSha256": "83c5db1a3c9d82482b9422bf1f850f1efe8af0ca9ed9455cb71f7830ad16b5c4"
+  },
+  "qqqx": {
+    "mint": "Xs8S1uUs1zvS2p7iwtsG3b6fkhpvmwz4GYU3gWAmWHZ",
+    "symbol": "QQQx",
+    "name": "Nasdaq xStock",
+    "decimals": 8,
+    "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "icon": "https://xstocks-metadata.backed.fi/logos/tokens/QQQx.png",
+    "iconSha256": "ef8778ce76e2300a44cc6bd6a263336d9dac6acbfff4f09da1e8a419e7c87ee6",
+    "logoSourceSha256": "ef8778ce76e2300a44cc6bd6a263336d9dac6acbfff4f09da1e8a419e7c87ee6"
+  },
+  "googlx": {
+    "mint": "XsCPL9dNWBMvFtTmwcCA5v3xWPSMEBCszbQdiLLq6aN",
+    "symbol": "GOOGLx",
+    "name": "Alphabet xStock",
+    "decimals": 8,
+    "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "icon": "https://xstocks-metadata.backed.fi/logos/tokens/GOOGLx.png",
+    "iconSha256": "b9240e1eb8a5174f437d82eb7852e54f318ae05f55409be38df3b851f9a8e876",
+    "logoSourceSha256": "b9240e1eb8a5174f437d82eb7852e54f318ae05f55409be38df3b851f9a8e876"
+  },
+  "msftx": {
+    "mint": "XspzcW1PRtgf6Wj92HCiZdjzKCyFekVD8P5Ueh3dRMX",
+    "symbol": "MSFTx",
+    "name": "Microsoft xStock",
+    "decimals": 8,
+    "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "icon": "https://xstocks-metadata.backed.fi/logos/tokens/MSFTx.png",
+    "iconSha256": "254e57a4c746213c9773c00933ab360ff81ba023c3cc7ed9f2a3fd5224e4e3c2",
+    "logoSourceSha256": "254e57a4c746213c9773c00933ab360ff81ba023c3cc7ed9f2a3fd5224e4e3c2"
+  },
+  "metax": {
+    "mint": "Xsa62P5mvPszXL1krVUnU5ar38bBSVcWAB6fmPCo5Zu",
+    "symbol": "METAx",
+    "name": "Meta xStock",
+    "decimals": 8,
+    "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "icon": "https://xstocks-metadata.backed.fi/logos/tokens/METAx.png",
+    "iconSha256": "52cb2a0719cdc068ccccc28ba2f6451d4db43e48734a2e7832da7e66b0d7e806",
+    "logoSourceSha256": "52cb2a0719cdc068ccccc28ba2f6451d4db43e48734a2e7832da7e66b0d7e806"
+  },
+  "amznx": {
+    "mint": "Xs3eBt7uRfJX8QUs4suhyU8p2M6DoUDrJyWBa8LLZsg",
+    "symbol": "AMZNx",
+    "name": "Amazon xStock",
+    "decimals": 8,
+    "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "icon": "https://xstocks-metadata.backed.fi/logos/tokens/AMZNx.png",
+    "iconSha256": "dbf6bfee7c8cd38e53a9191a5a3df6bbd69690c84a39330228b8cbe203f0d478",
+    "logoSourceSha256": "dbf6bfee7c8cd38e53a9191a5a3df6bbd69690c84a39330228b8cbe203f0d478"
+  },
+  "crclx": {
+    "mint": "XsueG8BtpquVJX9LVLLEGuViXUungE6WmK5YZ3p3bd1",
+    "symbol": "CRCLx",
+    "name": "Circle xStock",
+    "decimals": 8,
+    "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "icon": "https://xstocks-metadata.backed.fi/logos/tokens/CRCLx.png",
+    "iconSha256": "fbd0e30678880d808e69193523f84de0e02b1d1ba487447d5777a698aa4cec8c",
+    "logoSourceSha256": "fbd0e30678880d808e69193523f84de0e02b1d1ba487447d5777a698aa4cec8c"
+  },
+  "hoodx": {
+    "mint": "XsvNBAYkrDRNhA7wPHQfX3ZUXZyZLdnCQDfHZ56bzpg",
+    "symbol": "HOODx",
+    "name": "Robinhood xStock",
+    "decimals": 8,
+    "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "icon": "https://xstocks-metadata.backed.fi/logos/tokens/HOODx.png",
+    "iconSha256": "aa5cb6f961da95ca81791268e5c0f7e5e309c8156303920c6c45b74aa1e49d2a",
+    "logoSourceSha256": "aa5cb6f961da95ca81791268e5c0f7e5e309c8156303920c6c45b74aa1e49d2a"
+  },
+  "gldx": {
+    "mint": "Xsv9hRk1z5ystj9MhnA7Lq4vjSsLwzL2nxrwmwtD3re",
+    "symbol": "GLDx",
+    "name": "Gold xStock",
+    "decimals": 8,
+    "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "icon": "https://xstocks-metadata.backed.fi/logos/tokens/GLDx.png",
+    "iconSha256": "76ee29e811b22b2a2f8082d780c8c93442219a6a95d4db189bcf06343cbde448",
+    "logoSourceSha256": "76ee29e811b22b2a2f8082d780c8c93442219a6a95d4db189bcf06343cbde448"
+  },
+  "pltrx": {
+    "mint": "XsoBhf2ufR8fTyNSjqfU71DYGaE6Z3SUGAidpzriAA4",
+    "symbol": "PLTRx",
+    "name": "Palantir xStock",
+    "decimals": 8,
+    "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "icon": "https://xstocks-metadata.backed.fi/logos/tokens/PLTRx.png",
+    "iconSha256": "edada1087693ec0de61c5386c0a166617b8b140658d6532326133a563441fd6e",
+    "logoSourceSha256": "edada1087693ec0de61c5386c0a166617b8b140658d6532326133a563441fd6e"
+  },
+  "mcdx": {
+    "mint": "XsqE9cRRpzxcGKDXj1BJ7Xmg4GRhZoyY1KpmGSxAWT2",
+    "symbol": "MCDx",
+    "name": "McDonald's xStock",
+    "decimals": 8,
+    "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "icon": "https://xstocks-metadata.backed.fi/logos/tokens/MCDx.png",
+    "iconSha256": "fd9f9b59bf59e57ef526d30e1dc46e10aa7451067849bc37fa5d96ce90570762",
+    "logoSourceSha256": "fd9f9b59bf59e57ef526d30e1dc46e10aa7451067849bc37fa5d96ce90570762"
+  },
+  "kox": {
+    "mint": "XsaBXg8dU5cPM6ehmVctMkVqoiRG2ZjMo1cyBJ3AykQ",
+    "symbol": "KOx",
+    "name": "Coca-Cola xStock",
+    "decimals": 8,
+    "tokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "icon": "https://xstocks-metadata.backed.fi/logos/tokens/KOx.png",
+    "iconSha256": "389e72a18b8e1f84392b517d4b5926685f6eac9e6db7841888246a151887f39a",
+    "logoSourceSha256": "389e72a18b8e1f84392b517d4b5926685f6eac9e6db7841888246a151887f39a"
+  }
+}
