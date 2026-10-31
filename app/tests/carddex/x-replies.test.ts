@@ -148,14 +148,14 @@ describe("the search and the ranking", () => {
     expect(call.body).toBeNull();
     expect(`${url.origin}${url.pathname}`).toBe("https://api.x.com/2/tweets/search/recent");
     expect(url.searchParams.get("query")).toBe(rules.xReplyQuery());
-    expect(url.searchParams.get("max_results")).toBe("25");
-    expect(url.searchParams.get("sort_order")).toBe("recency");
+    expect(url.searchParams.get("max_results")).toBe("100");
+    expect(url.searchParams.get("sort_order")).toBe("relevancy");
     expect(url.searchParams.get("expansions")).toBe("author_id");
     expect(call.url).not.toContain("test-bearer");
     expect(call.headers.authorization).toBe("Bearer test-bearer-0001");
     expect(posts.find(post => post.id === "1002")).toMatchObject({username: "bigaccount", followers: 90_000, verified: true, likes: 40, reposts: 5});
   });
-  test("drops our own account, spam, marked and day-old posts; new and bigger authors first", () => {
+  test("drops our own account, spam, marked and day-old posts; most likely reach first", () => {
     const posts = helper.parseSearch(searchAnswer());
     const stale = {...posts[0], id: "1006", createdAt: NOW - 25 * 3_600_000};
     const ranked = rules.rankReplyPosts([...posts, stale, posts[0]], {now: NOW, marked: new Set(["1005"])});
@@ -166,6 +166,19 @@ describe("the search and the ranking", () => {
     expect(rules.spammyPost("see https://a.example and https://b.example")).toBe(true);
     expect(rules.spammyPost("#a #b #c #d #e")).toBe(true);
     expect(rules.spammyPost("I like $SOL and $BONK")).toBe(false);
+  });
+  test("popular posts rank first: engagement scaled by audience, fading with age; small quiet accounts drop out unless brand new", () => {
+    const base = helper.parseSearch(searchAnswer())[0];
+    const at = (id: string, minutes: number, followers: number, likes: number) => ({...base, id, username: `u${id}`, createdAt: NOW - minutes * 60_000, followers, likes, replies: 0, reposts: 0, quotes: 0});
+    const ranked = rules.rankReplyPosts([
+      at("2001", 50, 200, 1),        // small and quiet, past 30 minutes: dropped
+      at("2002", 5, 50, 0),          // brand new: kept, it may still grow
+      at("2003", 120, 120_000, 900), // big and busy, two hours old
+      at("2004", 40, 3_000, 40),     // mid-sized, recent
+    ], {now: NOW, marked: new Set()});
+    expect(ranked.map(post => post.id)).toEqual(["2003", "2004", "2002"]);
+    expect(rules.engagement({likes: 10, replies: 2, reposts: 3, quotes: 1})).toBe(20);
+    expect(rules.xReplyQuery().length).toBeLessThanOrEqual(rules.X_QUERY_MAX);
   });
   test("Done and Hide keep a post out of the list for good", async () => {
     const token = await session(OWNER), net = fakeNetwork();
@@ -302,6 +315,20 @@ describe("suggested replies", () => {
     expect(await helper.suggestReply(token, {tweetId: "1001"}, {fetch: fakeNetwork({suggestion: "This is going 100x for sure"}).fetch})).toMatchObject({suggestion: null, miss: "filtered"});
     expect(await helper.suggestReply(token, {tweetId: "1001"}, {fetch: fakeNetwork({suggestion: ""}).fetch})).toMatchObject({suggestion: null, miss: "empty"});
     expect(await helper.suggestReply(token, {tweetId: "1001"}, {fetch: fakeNetwork({suggestion: "Love the card art on this one."}).fetch})).toMatchObject({suggestion: "Love the card art on this one.", miss: null});
+  });
+  test("promote mode works in Launch a Card and may keep $launchcard; natural mode never does; money talk is still dropped", async () => {
+    const promote = helper.suggestionRequest({username: "dev", text: "launching my first coin"}, "promote");
+    expect(promote.system).toContain("Promote mode");
+    expect(promote.system).toContain("launchacard.fun");
+    expect(helper.suggestionRequest({username: "dev", text: "launching my first coin"}).system).not.toContain("Promote mode");
+    expect(rules.cleanSuggestion("Nice! Cards for every coin on launchacard.fun, and $launchcard is ours. $SOL #pump", {promote: true})).toBe("Nice! Cards for every coin on launchacard.fun, and $launchcard is ours. SOL pump");
+    expect(rules.cleanSuggestion("Try $launchcard")).toBe("Try launchcard");
+    expect(rules.cleanSuggestion("$launchcard to the moon", {promote: true})).toBeNull();
+    const token = await session(OWNER), net = fakeNetwork({suggestion: "Great question! We put a 3D card on every coin at launchacard.fun with $launchcard."});
+    await helper.replyFeed(token, {fetch: net.fetch, now: NOW});
+    const result = await helper.suggestReply(token, {tweetId: "1001", mode: "promote"}, {fetch: net.fetch, now: NOW});
+    expect(result.suggestion).toBe("Great question! We put a 3D card on every coin at launchacard.fun with $launchcard.");
+    expect(JSON.parse(net.calls.at(-1)!.body!).system).toContain("Promote mode");
   });
   test("off without a key, and capped per hour", async () => {
     const token = await session(OWNER);

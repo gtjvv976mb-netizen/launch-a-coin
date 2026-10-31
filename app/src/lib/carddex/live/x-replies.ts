@@ -18,6 +18,7 @@ export const X_REPLY_TOPICS = [
   '"pump.fun"', "pumpfun", '"pump fun"',
   '"solana memecoin"', '"solana memecoins"', '"solana meme coin"',
   '"launch a coin"', '"launched a coin"', '"new solana token"',
+  "memecoin", "memecoins", '"solana nft"', '"sol meme"',
 ] as const;
 /** Our own account, never shown (its handle without the @). */
 export const X_REPLY_OWN_USERNAME = OFFICIAL_X_HANDLE.replace(/^@/, "").toLowerCase();
@@ -30,8 +31,8 @@ export function xReplyQuery(topics: readonly string[] = X_REPLY_TOPICS): string 
   if (query.length > X_QUERY_MAX) throw new Error(`The reply helper's search query is ${query.length} characters; X allows ${X_QUERY_MAX}.`);
   return query;
 }
-/** Posts per search read (X bills each post returned). */
-export const X_REPLY_PAGE = 25;
+/** Posts per search read (X bills each post returned). The most X returns in one read, ranked by X's relevancy. */
+export const X_REPLY_PAGE = 100;
 
 // ---------------------------------------------------------------- posts and ranking
 
@@ -52,9 +53,22 @@ const CASHTAG = /(?:^|[^\w$])\$[A-Za-z][A-Za-z0-9_]{0,14}\b/g, LINK = /https?:\/
 export function spammyPost(text: string): boolean {
   return (text.match(CASHTAG)?.length ?? 0) >= 3 || (text.match(LINK)?.length ?? 0) >= 2 || (text.match(HASHTAG)?.length ?? 0) >= 5;
 }
+/** Below these a post is skipped: a reply under it reaches almost no one (unless it is brand new and may still grow). */
+export const MIN_FOLLOWERS = 500, MIN_ENGAGEMENT = 5;
+/** Likes, plus reposts and quotes (which spread a post) twice, plus replies. */
+export const engagement = (post: Pick<XReplyPost, "likes" | "replies" | "reposts" | "quotes">) =>
+  post.likes + 2 * (post.reposts + post.quotes) + post.replies;
 /**
- * The posts worth a look, best first: our own account, spam, posts already marked done or hidden, and posts older than
- * a day are dropped; then new before recent before older, and within each, bigger authors first, then the newest.
+ * How many people a reply under this post is likely to reach: its engagement, scaled by the author's audience, discounted
+ * as the post ages (a reply on a fresh popular post is seen most).
+ */
+export function replyReach(post: XReplyPost, ageMinutes: number): number {
+  return (engagement(post) + 1) * Math.sqrt(1 + post.followers / 1000) / (1 + ageMinutes / 180);
+}
+/**
+ * The posts worth a look, best first: our own account, spam, posts already marked done or hidden, posts older than a
+ * day, and posts from small accounts with little engagement (unless under 30 minutes old) are dropped; the rest are
+ * ordered by likely reach (replyReach), the newest first on a tie.
  */
 export function rankReplyPosts(posts: readonly XReplyPost[], options: { now: number; marked: ReadonlySet<string> }): RankedXReplyPost[] {
   const seen = new Set<string>();
@@ -65,10 +79,10 @@ export function rankReplyPosts(posts: readonly XReplyPost[], options: { now: num
     if (post.username.toLowerCase() === X_REPLY_OWN_USERNAME || spammyPost(post.text)) continue;
     const ageMinutes = Math.max(0, Math.floor((options.now - post.createdAt) / 60_000));
     if (ageMinutes > MAX_AGE_MINUTES) continue;
+    if (ageMinutes >= FRESH_MINUTES && post.followers < MIN_FOLLOWERS && engagement(post) < MIN_ENGAGEMENT) continue;
     kept.push({ ...post, ageMinutes, fresh: ageMinutes < FRESH_MINUTES ? "new" : ageMinutes < RECENT_MINUTES ? "recent" : "older" });
   }
-  const tier = { new: 0, recent: 1, older: 2 } as const;
-  return kept.sort((a, b) => tier[a.fresh] - tier[b.fresh] || b.followers - a.followers || b.createdAt - a.createdAt);
+  return kept.sort((a, b) => replyReach(b, b.ageMinutes) - replyReach(a, a.ageMinutes) || b.createdAt - a.createdAt);
 }
 
 // ---------------------------------------------------------------- the human's reply
@@ -93,9 +107,14 @@ export const REPLY_LIMIT = X_TEXT_LIMIT;
  * price, a return, a "buy", a holding): those are thrown away rather than shown.
  */
 const MONEY_TALK = /\b(?:\d+(?:\.\d+)?\s*x\b|to the moon|moon(?:ing|shot)?|price target|financial advice|guarantee[ds]?|not financial|nfa|dyor|ape[ds]?|aping|buy(?:ing)? (?:now|it|in|this)|i (?:just )?(?:bought|sold|hold|own)|my bags?|bagholder|100x|1000x)\b/i;
-export function cleanSuggestion(raw: string): string | null {
+/** The one cashtag a promote-mode draft may keep: the site's own official token. */
+export const PROMOTE_CASHTAG = "$launchcard";
+export function cleanSuggestion(raw: string, options: { promote?: boolean } = {}): string | null {
   let text = raw.normalize("NFKC").trim().replace(/^["'“”‘’]+|["'“”‘’]+$/g, "");
-  text = text.replace(/https?:\/\/\S+|www\.\S+/gi, " ").replace(/@\w+/g, " ").replace(/[#$＃＄](?=\w)/g, "").replace(/\s+/g, " ").trim();
+  text = text.replace(/https?:\/\/\S+|www\.\S+/gi, " ").replace(/@\w+/g, " ");
+  // Every other cashtag and hashtag loses its sign; in promote mode the official $launchcard keeps it.
+  text = text.replace(/[#$＃＄](?=(\w+))/g, (sign, word: string) => options.promote && sign === "$" && word.toLowerCase() === PROMOTE_CASHTAG.slice(1) ? "$" : "");
+  text = text.replace(/\s+/g, " ").trim();
   if (!text || /^skip\.?$/i.test(text) || MONEY_TALK.test(text)) return null;
   while (xTextLength(text) > X_TEXT_LIMIT) text = Array.from(text).slice(0, -1).join("");
   return text.trim() || null;
