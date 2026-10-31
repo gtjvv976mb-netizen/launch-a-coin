@@ -100,6 +100,9 @@ export function CanonicalSkinSurface({cardTemplate,sourceUri,id="canonical",prep
   const design=preparedSource?.design??getCardDesign(cardTemplate);
   const source=preparedSource?.source??generatedSkinSource(cardTemplate);
   const ready=!!sourceUri && !!source;
+  // A canonical-source face (generated-layouts.json canonicalSource) is already the finished surface: its own
+  // geometry and rounded alpha, never warped, patched or clipped a second time.
+  if(ready&&source.canonicalSource)return <svg className="cdx-canonical-skin__surface" viewBox="0 0 1000 1000" preserveAspectRatio="none" focusable="false"><image href={sourceUri} x="0" y="0" width="1000" height="1000" preserveAspectRatio="none" /></svg>;
   const dark=design.key==="neon-circuit";
   const raster=`${id}raster`,material=`${id}material`,mask=`${id}material-mask`,edge=`${id}edge`;
   const paper=dark?"#102b30":design.palette[2];
