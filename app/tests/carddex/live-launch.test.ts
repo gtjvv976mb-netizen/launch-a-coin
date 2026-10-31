@@ -1597,8 +1597,10 @@ describe("pre-ground card mint addresses on the server (live_vanity_mints)", () 
     } finally { log.restore(); }
     expect(issued!.publicKey).toBe(TEST_CARD_MINT.publicKey);
     expect(crypto_.fromBase64(issued!.secretKey)).toEqual(TEST_CARD_MINT.secretKey);
-    // Never re-issued, even to the same wallet: the pool is now empty.
-    expect(again!).toBeNull();
+    // Asking again before a launch is saved hands back this wallet's same key (one unused key per wallet, SEC-VANITY-1);
+    // no other wallet ever gets it: the pool is now empty for everyone else.
+    expect(again!).toEqual(issued!);
+    expect(await vanity.issueCardMint(otherWallet, "203.0.113.6")).toBeNull();
     expect(rows()).toEqual([{public_key: TEST_CARD_MINT.publicKey, status: "issued", issued_to: creator, issued_at: expect.any(Number), used_at: null}]);
     expect(await vanity.vanityHealth()).toEqual({configured: true, available: 0});
     // D1 holds only ciphertext; the logs hold outcomes only.
@@ -1608,7 +1610,7 @@ describe("pre-ground card mint addresses on the server (live_vanity_mints)", () 
     for (const value of [TEST_CARD_MINT.publicKey, creator, "203.0.113"]) expect(logged).not.toContain(value);
     expect(log.lines.filter(line => line.startsWith("live_card_mint"))).toEqual([
       'live_card_mint {"event":"skipped","reason":"session"}', 'live_card_mint {"event":"skipped","reason":"session"}',
-      'live_card_mint {"event":"issued"}', 'live_card_mint {"event":"empty"}']);
+      'live_card_mint {"event":"issued"}', 'live_card_mint {"event":"returned"}']);
   });
   test("concurrent requests never get the same key, and a row that fails its check is burned, never returned", async () => {
     env.CARDDEX_VANITY_KEY = rawKey; await fill(4);
@@ -1617,8 +1619,10 @@ describe("pre-ground card mint addresses on the server (live_vanity_mints)", () 
     try { results = await Promise.all(wallets.map((wallet, i) => vanity.issueCardMint(wallet, `203.0.113.${i}`))); }
     finally { log.restore(); }
     const pool = rows();
-    // Five rows, twelve requests: each row went to exactly one wallet, and seven wallets got nothing.
-    expect(pool.every(row => row.status === "issued")).toBe(true);
+    // Five rows, twelve requests: each row went to exactly one wallet, and seven wallets got nothing. The four rows that
+    // failed their check are retired ('used' with no launch), so they are never handed back either.
+    expect(pool.filter(row => row.status === "issued")).toEqual([expect.objectContaining({public_key: TEST_CARD_MINT.publicKey})]);
+    expect(pool.filter(row => row.status === "used")).toHaveLength(4);
     expect(new Set(pool.map(row => row.issued_to)).size).toBe(5);
     // Only the real keypair comes back; the four rows holding another address's ciphertext are refused (bound to their address).
     expect(results!.filter(Boolean)).toEqual([{publicKey: TEST_CARD_MINT.publicKey, secretKey: crypto_.toBase64(TEST_CARD_MINT.secretKey)}]);
@@ -1626,23 +1630,74 @@ describe("pre-ground card mint addresses on the server (live_vanity_mints)", () 
     expect(log.lines.filter(line => line.includes('"event":"empty"'))).toHaveLength(7);
     for (const secret of secretTexts) expect(log.lines.join("\n")).not.toContain(secret);
   });
+  test("one wallet's concurrent asks take one row, and a wallet gets a new key only after its launch is saved", async () => {
+    env.CARDDEX_VANITY_KEY = rawKey;
+    const sealed = await crypto_.encryptCardMint(key, TEST_CARD_MINT.publicKey, TEST_CARD_MINT.secretKey);
+    sqlite.query("INSERT INTO live_vanity_mints (public_key, secret_ciphertext, secret_iv, status, created_at) VALUES (?, ?, ?, 'available', 1)").run(TEST_CARD_MINT.publicKey, sealed.secretCiphertext, sealed.secretIv);
+    for (let i = 0; i < 3; i++) sqlite.query("INSERT INTO live_vanity_mints (public_key, secret_ciphertext, secret_iv, status, created_at) VALUES (?, ?, ?, 'available', 2)").run(cardAddress(i), sealed.secretCiphertext, sealed.secretIv);
+    const log = captureLogs();
+    let results: Awaited<ReturnType<typeof vanity.issueCardMint>>[];
+    try { results = await Promise.all(Array.from({length: 5}, () => vanity.issueCardMint(creator, null))); }
+    finally { log.restore(); }
+    expect(results!.every(result => result?.publicKey === TEST_CARD_MINT.publicKey)).toBe(true);
+    expect(rows().filter(row => row.status !== "available")).toEqual([expect.objectContaining({public_key: TEST_CARD_MINT.publicKey, status: "issued", issued_to: creator})]);
+    // Its launch is saved (the row is used): the next ask draws a new row (a bogus one here, retired, so null), and
+    // the one after that the next row again: never the used key.
+    sqlite.query("UPDATE live_vanity_mints SET status = 'used', used_at = 5 WHERE public_key = ?").run(TEST_CARD_MINT.publicKey);
+    expect(await vanity.issueCardMint(creator, "203.0.113.30")).toBeNull();
+    expect(rows().filter(row => row.status === "available")).toHaveLength(2);
+    expect(rows().filter(row => row.status === "issued")).toHaveLength(0);
+  });
   test("limits per wallet, per address and site-wide; a limit hit is null and issues nothing", async () => {
     env.CARDDEX_VANITY_KEY = rawKey; await fill(12);
     const {LIMITS, SITE, enforceLimit} = await limits;
     expect(LIMITS.cardMintWallet).toMatchObject({max: 6, windowMs: 60_000});
-    expect(LIMITS.cardMintWalletDay).toMatchObject({max: 30, windowMs: 86_400_000});
-    for (let i = 0; i < 6; i++) await vanity.issueCardMint(creator, null);
+    expect(LIMITS.cardMintWalletDay).toMatchObject({max: 10, windowMs: 86_400_000});
+    expect(LIMITS.cardMintIp).toMatchObject({max: 4, windowMs: 3_600_000});
+    expect(LIMITS.cardMintIpDay).toMatchObject({max: 10, windowMs: 86_400_000});
+    // No single address can come near the site-wide cap (SEC-VANITY-1).
+    expect(LIMITS.cardMintIpDay.max * 10).toBeLessThanOrEqual(LIMITS.cardMintSite.max);
+    // One wallet: one key, handed back on each ask, and a burst past the per-minute rule is null.
+    const first = await vanity.issueCardMint(creator, null);
+    for (let i = 1; i < 6; i++) expect(await vanity.issueCardMint(creator, null)).toEqual(first);
     expect(await vanity.issueCardMint(creator, null)).toBeNull();
-    expect(rows().filter(row => row.issued_to === creator)).toHaveLength(6);
+    expect(rows().filter(row => row.issued_to === creator)).toHaveLength(1);
     // Per address: many fresh wallets behind one address.
     for (let i = 0; i < LIMITS.cardMintIp.max; i++) await enforceLimit(LIMITS.cardMintIp, "198.51.100.7");
     expect(await vanity.issueCardMint(wallets[0], "198.51.100.7")).toBeNull();
+    for (let i = 0; i < LIMITS.cardMintIpDay.max; i++) await enforceLimit(LIMITS.cardMintIpDay, "198.51.100.9");
+    expect(await vanity.issueCardMint(wallets[0], "198.51.100.9")).toBeNull();
     expect(rows().filter(row => row.issued_to === wallets[0])).toHaveLength(0);
-    // Site-wide daily cap (the six issues above already count toward it).
-    expect(sqlite.query("SELECT COUNT(*) AS n FROM rate_events WHERE scope = 'live:card-mint:site'").get()).toEqual({n: 6});
-    for (let i = 6; i < LIMITS.cardMintSite.max; i++) await enforceLimit(LIMITS.cardMintSite, SITE);
+    // Site-wide daily cap (the one new issue above already counts toward it; hand-backs do not).
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM rate_events WHERE scope = 'live:card-mint:site'").get()).toEqual({n: 1});
+    for (let i = 1; i < LIMITS.cardMintSite.max; i++) await enforceLimit(LIMITS.cardMintSite, SITE);
     expect(await vanity.issueCardMint(wallets[1], "198.51.100.8")).toBeNull();
-    expect(rows().filter(row => row.status === "available")).toHaveLength(7);
+    expect(rows().filter(row => row.status === "available")).toHaveLength(12);
+  });
+  test("one address with free throwaway wallets takes at most cardMintIpDay keys a day, and real creators still get one (SEC-VANITY-1)", async () => {
+    env.CARDDEX_VANITY_KEY = rawKey;
+    const {LIMITS} = await limits;
+    // Exactly cardMintIpDay rows the attacker draws first, then the one real keypair, then 30 more: if one address got
+    // even one more key, the real creator below would not get the real one.
+    const sealed = await crypto_.encryptCardMint(key, TEST_CARD_MINT.publicKey, TEST_CARD_MINT.secretKey);
+    const add = (address: string) => sqlite.query("INSERT INTO live_vanity_mints (public_key, secret_ciphertext, secret_iv, status, created_at) VALUES (?, ?, ?, 'available', 2)").run(address, sealed.secretCiphertext, sealed.secretIv);
+    for (let i = 0; i < LIMITS.cardMintIpDay.max; i++) add(cardAddress(i));
+    add(TEST_CARD_MINT.publicKey);
+    for (let i = LIMITS.cardMintIpDay.max; i < LIMITS.cardMintIpDay.max + 30; i++) add(cardAddress(i));
+    const log = captureLogs();
+    try {
+      // A fresh wallet every attempt, from one address, every ten minutes for a whole day.
+      const start = Date.now();
+      for (let i = 0; i < 144; i++) {
+        const sybil = base58Encode(ed25519.getPublicKey(new Uint8Array(32).map((_, j) => (i * 31 + j * 7 + 3) & 255)));
+        await vanity.issueCardMint(sybil, "198.51.100.66", start + i * 10 * 60_000);
+      }
+      const taken = (sqlite.query("SELECT COUNT(*) AS n FROM live_vanity_mints WHERE status != 'available'").get() as {n: number}).n;
+      expect(taken).toBe(LIMITS.cardMintIpDay.max);
+      // A real creator elsewhere still gets the real key.
+      const legit = await vanity.issueCardMint(creator, "203.0.113.20", start + 144 * 10 * 60_000);
+      expect(legit?.publicKey).toBe(TEST_CARD_MINT.publicKey);
+    } finally { log.restore(); }
   });
   test("only while new launches are open", async () => {
     env.CARDDEX_VANITY_KEY = rawKey; await fill();

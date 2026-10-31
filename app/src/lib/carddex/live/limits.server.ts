@@ -35,11 +35,14 @@ export const LIMITS = {
   abandonWallet: { scope: "live:abandon:wallet", max: 20, windowMs: MINUTE },
   reportWallet: { scope: "live:report:wallet", max: 10, windowMs: MINUTE },
   // Pre-ground "card" coin addresses (vanity.server.ts): each one handed out is gone for good, so they are limited per
-  // wallet, per address (fresh wallets are free) and site-wide per day, so nobody can drain the pool. Past any of them
-  // the launch simply uses a random address.
+  // wallet, per address and site-wide per day, so nobody can drain the pool. A wallet holds at most one issued, unused
+  // address (asking again hands back that same one), and fresh wallets are free, so the per-address rules are the real
+  // bound: one address takes at most cardMintIpDay a day, far below the site cap (SEC-VANITY-1). Past any of them the
+  // launch simply uses a random address.
   cardMintWallet: { scope: "live:card-mint:wallet", max: 6, windowMs: MINUTE },
-  cardMintWalletDay: { scope: "live:card-mint:wallet:day", max: 30, windowMs: DAY },
-  cardMintIp: { scope: "live:card-mint:ip", max: 30, windowMs: HOUR },
+  cardMintWalletDay: { scope: "live:card-mint:wallet:day", max: 10, windowMs: DAY },
+  cardMintIp: { scope: "live:card-mint:ip", max: 4, windowMs: HOUR },
+  cardMintIpDay: { scope: "live:card-mint:ip:day", max: 10, windowMs: DAY },
   cardMintSite: { scope: "live:card-mint:site", max: 300, windowMs: DAY },
 } as const satisfies Record<string, LimitRule>;
 /** The key for a site-wide rule: one bucket for every client. */

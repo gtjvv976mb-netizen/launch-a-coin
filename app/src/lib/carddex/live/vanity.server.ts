@@ -11,8 +11,9 @@ import { CARD_MINT_SUFFIX, decryptCardMint, importVanityKey, toBase64, vanityKey
  * from local solana-keygen grind output (tools/carddex/vanity-pool.ts, README runbook); each secret key is stored only
  * as AES-256-GCM ciphertext under the Worker secret CARDDEX_VANITY_KEY.
  *
- * One key is handed to one signed-in creator wallet for one new launch (issueCardMint), never again; the browser
- * checks it and then uses it exactly like the random key it makes today. Prepare accepts a pool address only from the
+ * One key is handed to one signed-in creator wallet for one new launch (issueCardMint), never to anyone else, and a
+ * wallet holds at most one unused key at a time; the browser checks it and then uses it exactly like the random key it
+ * makes today. Prepare accepts a pool address only from the
  * wallet it was issued to and marks it used in the batch that saves the launch (cardMintClaim). Whenever anything is
  * off (no key, an empty pool, a limit, any error) the browser silently uses a random address: this never blocks a
  * launch. A plaintext secret key leaves this module only in the issue response; it is never logged, stored or put in
@@ -33,32 +34,54 @@ export function vanityConfigured() { return vanityKeyBytes(bindings().CARDDEX_VA
 /** A database this build's migrations have not reached yet (0016 creates the pool). */
 const missingPool = (error: unknown) => /no such table/i.test(error instanceof Error ? error.message : String(error));
 /** One line per issue, with an outcome and a fixed reason only: never an address, a key, a wallet or an error text. */
-function logCardMint(event: "issued" | "empty" | "skipped" | "failed", reason?: string) {
+function logCardMint(event: "issued" | "returned" | "empty" | "skipped" | "failed", reason?: string) {
   console.info("live_card_mint", JSON.stringify(reason ? {event, reason} : {event}));
 }
 
 export type IssuedCardMint = {publicKey: string; secretKey: string};
+type PoolRow = {public_key: string; secret_ciphertext: string; secret_iv: string};
+/** This wallet's one issued, unused pool row (it asked before and has not saved a launch with it yet), or null. */
+const outstanding = (wallet: string) => one<PoolRow>(
+  "SELECT public_key, secret_ciphertext, secret_iv FROM live_vanity_mints WHERE status = 'issued' AND issued_to = ? ORDER BY issued_at LIMIT 1", wallet);
 /**
- * Hands one never-issued pool key to `wallet` (already signed in: the caller checked the live session), or null.
- * One UPDATE moves exactly one 'available' row to 'issued' and returns it, so two concurrent requests can never get the
- * same key, and a key once issued is never issued again (even if its launch never happens). secretKey is base64 of
- * the 64-byte Solana secret key (seed, then public key), checked here against its address before it is returned.
+ * Hands `wallet` (already signed in: the caller checked the live session) its pool key, or null. A wallet holds at most
+ * one issued, unused key (SEC-VANITY-1): while it has one, asking again hands back that same key to that same wallet
+ * (a reload loses the page's copy) and takes nothing from the pool. Otherwise one UPDATE moves exactly one 'available'
+ * row to 'issued' and returns it, only while the wallet still has no issued row, so two concurrent requests can never
+ * get the same key, one wallet can never hold two, and a key once issued never goes to anyone else (even if its launch
+ * never happens). secretKey is base64 of the 64-byte Solana secret key (seed, then public key), checked here against
+ * its address before it is returned.
  */
 export async function issueCardMint(wallet: string, client: string | null, now = Date.now()): Promise<IssuedCardMint | null> {
   try {
     const key = await vanityKey();
     if (!key) return null;
     requireLiveConfig("launch");
-    await enforceLimit(LIMITS.cardMintWallet, wallet);
-    await enforceLimit(LIMITS.cardMintWalletDay, wallet);
-    await enforceLimit(LIMITS.cardMintIp, client);
-    await enforceLimit(LIMITS.cardMintSite, SITE);
-    const row = await one<{public_key: string; secret_ciphertext: string; secret_iv: string}>(
-      "UPDATE live_vanity_mints SET status = 'issued', issued_to = ?, issued_at = ? WHERE status = 'available' AND public_key = (SELECT public_key FROM live_vanity_mints WHERE status = 'available' LIMIT 1) RETURNING public_key, secret_ciphertext, secret_iv",
-      wallet, now);
+    await enforceLimit(LIMITS.cardMintWallet, wallet, undefined, now);
+    let row = await outstanding(wallet), event: "issued" | "returned" = "returned";
+    if (!row) {
+      // Only a new key draws on the daily, per-address and site-wide budgets.
+      await enforceLimit(LIMITS.cardMintWalletDay, wallet, undefined, now);
+      await enforceLimit(LIMITS.cardMintIp, client, undefined, now);
+      await enforceLimit(LIMITS.cardMintIpDay, client, undefined, now);
+      await enforceLimit(LIMITS.cardMintSite, SITE, undefined, now);
+      row = await one<PoolRow>(
+        "UPDATE live_vanity_mints SET status = 'issued', issued_to = ?, issued_at = ? WHERE status = 'available' AND public_key = (SELECT public_key FROM live_vanity_mints WHERE status = 'available' LIMIT 1) AND NOT EXISTS (SELECT 1 FROM live_vanity_mints WHERE status = 'issued' AND issued_to = ?) RETURNING public_key, secret_ciphertext, secret_iv",
+        wallet, now, wallet);
+      event = "issued";
+      // A concurrent request from this same wallet issued its key first: hand back that one.
+      if (!row) { row = await outstanding(wallet); event = "returned"; }
+    }
     if (!row) { logCardMint("empty"); return null; }
-    const secret = await decryptCardMint(key, row);
-    try { logCardMint("issued"); return {publicKey: row.public_key, secretKey: toBase64(secret)}; }
+    let secret: Uint8Array;
+    try { secret = await decryptCardMint(key, row); }
+    catch (error) {
+      // A row that fails its check (another key, a moved or changed ciphertext) is retired, so it is never handed back
+      // and this wallet's next request draws a fresh one. 'used' with no launch: it can never be prepared either.
+      await stmt("UPDATE live_vanity_mints SET status = 'used', used_at = ? WHERE public_key = ? AND status = 'issued' AND issued_to = ?", now, row.public_key, wallet).run().catch(() => undefined);
+      throw error;
+    }
+    try { logCardMint(event); return {publicKey: row.public_key, secretKey: toBase64(secret)}; }
     finally { secret.fill(0); }
   } catch (error) {
     if (error instanceof UserError) logCardMint("skipped", "refused");

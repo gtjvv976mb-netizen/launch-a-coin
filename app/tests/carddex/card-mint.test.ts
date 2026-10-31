@@ -114,6 +114,9 @@ describe("pre-ground card mint addresses: the page's check", () => {
     const pos = (text: string) => { const index = draft.indexOf(text); expect(index).toBeGreaterThan(-1); return index; };
     expect(pos("await authenticate(address, version);\n      if (draft.initialBuyQuoteBaseUnits")).toBeLessThan(pos("requestCardMintSigner(() => issueLiveCardMint())"));
     expect(pos("requestCardMintSigner(() => issueLiveCardMint())")).toBeLessThan(pos("tokenKey.current = issued ?? createEphemeralSigner();"));
+    // The request can take seconds: the button shows it is busy before it starts, with or without a first buy (C2).
+    const keyStep = draft.slice(pos("if (!tokenKey.current) {"), pos("requestCardMintSigner(() => issueLiveCardMint())"));
+    expect(keyStep).toContain('setBusy("preparing");');
     expect(pos("tokenKey.current = issued ?? createEphemeralSigner();")).toBeLessThan(pos("composeCreatorCard("));
     // Only a launch with no coin key yet asks: a saved launch keeps its key.
     expect(draft.slice(pos("if (!tokenKey.current) {"), pos("tokenKey.current = issued ?? createEphemeralSigner();"))).toContain("requestCardMintSigner");
@@ -199,7 +202,9 @@ describe("pre-ground card mint addresses: the refill tool", () => {
       expect(printed).toContain("Wrote 1 \"card\" address row");
     } finally { console.log = log; console.error = error; }
   });
-  test("the repo ignores grind output, key files and generated SQL, but keeps migrations", async () => {
+  // Needs a git checkout: an archive or tarball of the repo has no .git to ask (C1), so the check is skipped there.
+  const inGit = Bun.spawnSync(["git", "rev-parse", "--is-inside-work-tree"], {cwd: REPO_ROOT}).stdout.toString().trim() === "true";
+  test.skipIf(!inGit)("the repo ignores grind output, key files and generated SQL, but keeps migrations", async () => {
     const proc = Bun.spawnSync(["git", "check-ignore", "--no-index", "x/9abcdcard.json", "x/vanity-key", "x/pool.sql", "app/migrations/0016_live_vanity_mints.sql"], {cwd: REPO_ROOT});
     expect(proc.stdout.toString().trim().split("\n")).toEqual(["x/9abcdcard.json", "x/vanity-key", "x/pool.sql"]);
   });

@@ -21,3 +21,5 @@ CREATE TABLE live_vanity_mints (
   CHECK ((status = 'used') = (used_at IS NOT NULL))
 );
 CREATE INDEX live_vanity_mint_status ON live_vanity_mints(status);
+-- A wallet's one issued, unused address (issueCardMint hands it back instead of issuing a second one).
+CREATE INDEX live_vanity_mint_issued ON live_vanity_mints(issued_to) WHERE status = 'issued';

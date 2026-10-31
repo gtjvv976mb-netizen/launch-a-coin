@@ -320,7 +320,9 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
       }
       if (!tokenKey.current) {
         // A pre-ground address ending in "card", issued to this signed-in wallet and checked here (card-mint.ts), or
-        // a random key exactly as before. Either way it is kept and signed with the same way from here on.
+        // a random key exactly as before. Either way it is kept and signed with the same way from here on. The request
+        // can take a few seconds, so the button shows it is working even for a launch with no first buy (C2).
+        setBusy("preparing");
         const issued = await requestCardMintSigner(() => issueLiveCardMint());
         try { assertCurrent(version, address); } catch (error) { destroyEphemeralSigner(issued); throw error; }
         tokenKey.current = issued ?? createEphemeralSigner();
