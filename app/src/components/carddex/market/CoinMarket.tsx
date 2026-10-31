@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import { Change, CurveTrack, Icon, KpiGroup, Num, SectionHead, Skeleton, Tabs, useClientMount } from "../../mintdex/ui";
+import { Change, CurveTrack, Icon, KpiGroup, Num, SectionHead, Skeleton, Tabs } from "../../mintdex/ui";
 import {
   CHART_RANGE_LABEL,
   CHART_RANGES,
@@ -48,6 +48,17 @@ function External({ href, children, label }: { href: string; children: ReactNode
 }
 
 // ---------------------------------------------------------------- the price panel
+
+/** Where each figure came from, said only for the figures the page has. */
+function sourceLine(data: CoinMarket): string {
+  const chain = [data.priceSource === "chain" ? "price" : null, data.progress !== null ? "curve" : null, data.holders !== null ? "holders" : null].filter(Boolean) as string[];
+  const gecko = [data.priceSource === "geckoterminal" ? "price" : null, data.volumeUsd24h !== null ? "volume" : null, data.change.h24 !== null ? "change" : null, data.trades !== null ? "trades" : null].filter(Boolean) as string[];
+  const list = (items: string[]) => (items.length > 1 ? `${items.slice(0, -1).join(", ")} and ${items.at(-1)}` : items[0]);
+  const parts = [chain.length ? `${list(chain)} from Solana` : null, gecko.length ? `${list(gecko)} from GeckoTerminal` : null].filter(Boolean) as string[];
+  if (!parts.length) return "";
+  const text = parts.join("; ");
+  return `${text[0].toUpperCase()}${text.slice(1)}.`;
+}
 
 export function MarketPanel({ mint, pair, data, failed }: { mint: string; pair: Readonly<PairAsset>; data: CoinMarket | undefined; failed: boolean }) {
   const now = useNow();
@@ -122,13 +133,15 @@ export function MarketPanel({ mint, pair, data, failed }: { mint: string; pair: 
           </div>
         ))}
       </dl>
-      <p className="cdx-mkt__source" role="status">
+      <p className="cdx-mkt__source">
         {failed && !data
           ? "Market data is unavailable right now. It will try again shortly."
           : data
-            ? <>Updated {ageShort(data.asOf, Math.max(now, data.asOf))} ago{data.stale ? " (some figures are older than usual)" : ""}. Price and holders from Solana; volume and change from GeckoTerminal.</>
+            ? <>{data.asOf !== null ? <>Updated {ageShort(data.asOf, Math.max(now, data.asOf))} ago{data.stale ? " (some figures are older than usual)" : ""}. </> : "Market data is not available yet. "}{sourceLine(data)}</>
             : "Reading the market…"}
       </p>
+      {/* Screen readers hear only a change of state (loading, unavailable), never the ticking age. */}
+      <p className="sr-only" role="status">{failed && !data ? "Market data is unavailable right now." : data ? "" : "Reading the market."}</p>
     </div>
   );
 }
@@ -137,7 +150,9 @@ export function MarketPanel({ mint, pair, data, failed }: { mint: string; pair: 
 
 export function ChartSection({ mint, name }: { mint: string; name: string }) {
   const [range, setRange] = useState<ChartRange>("5m");
-  const mounted = useClientMount();
+  // The canvas chart draws in the browser only; the server and the first paint keep its frame.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const query = useQuery({ ...coinCandlesQuery(mint, range), enabled: mounted });
   const candles = query.data?.candles ?? [];
   const last = candles[candles.length - 1];

@@ -1,6 +1,6 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { LaunchCardPreview } from "../../components/carddex/live/LaunchCardPreview";
 import { ChartSection, HoldersSection, MarketPanel, TradesSection, useCoinMarket } from "../../components/carddex/market/CoinMarket";
@@ -85,20 +85,37 @@ const short = (address: string) => `${address.slice(0, 4)}…${address.slice(-4)
 
 function CopyAddress({ address }: { address: string }) {
   const [state, setState] = useState<"idle" | "copied" | "blocked">("idle");
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const field = useRef<HTMLInputElement>(null);
+  useEffect(() => () => clearTimeout(timer.current), []);
+  useEffect(() => {
+    if (state === "blocked") field.current?.select();
+  }, [state]);
   return (
-    <button
-      type="button"
-      className="cdx-coin-launched__copy"
-      onClick={async () => {
-        setState(await copyText(address));
-        setTimeout(() => setState("idle"), 2_000);
-      }}
-    >
-      <span className="num">{short(address)}</span>
-      <span className="cdx-coin-launched__copied" aria-live="polite">
-        {state === "copied" ? "Copied" : state === "blocked" ? "Select and copy" : "Copy"}
-      </span>
-    </button>
+    <span className="cdx-coin-launched__ca">
+      <button
+        type="button"
+        className="cdx-coin-launched__copy"
+        aria-label={`Copy contract address ${address}`}
+        onClick={async () => {
+          const result = await copyText(address);
+          clearTimeout(timer.current);
+          setState(result);
+          // A blocked copy keeps the full address on screen, selected, until the visitor is done with it.
+          if (result === "copied") timer.current = setTimeout(() => setState("idle"), 2_000);
+        }}
+      >
+        <span className="num">{short(address)}</span>
+        <span className="cdx-coin-launched__copied" aria-hidden="true">{state === "copied" ? "Copied" : "Copy"}</span>
+      </button>
+      <span className="sr-only" role="status">{state === "copied" ? "Contract address copied" : ""}</span>
+      {state === "blocked" ? (
+        <label className="cdx-coin-launched__manual">
+          <span>Copying is blocked here. Select the address and copy it:</span>
+          <input ref={field} readOnly value={address} className="num" onFocus={(e) => e.currentTarget.select()} />
+        </label>
+      ) : null}
+    </span>
   );
 }
 

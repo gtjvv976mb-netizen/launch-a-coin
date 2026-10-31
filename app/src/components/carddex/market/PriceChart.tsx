@@ -12,7 +12,7 @@ import {
 } from "lightweight-charts";
 
 import type { Candle } from "../../../lib/carddex/live/market";
-import { priceFigure, usdShort } from "./format";
+import { axisPrice, priceFigure, usdShort } from "./format";
 
 /*
  * The coin's candlestick chart (TradingView's lightweight-charts, Apache-2.0, its attribution kept): price candles over
@@ -51,11 +51,11 @@ export default function PriceChart({ candles, resetKey }: { candles: Candle[]; r
       rightPriceScale: { borderColor: hairline },
       timeScale: { borderColor: hairline, timeVisible: true, secondsVisible: false, rightOffset: 4 },
       crosshair: { mode: CrosshairMode.Normal },
-      localization: { priceFormatter: (p: number) => `$${priceFigure(p)}` },
+      localization: { priceFormatter: (p: number) => `$${axisPrice(p)}` },
     });
     const candlesSeries = api.addSeries(CandlestickSeries, {
       upColor: up, downColor: down, borderUpColor: up, borderDownColor: down, wickUpColor: up, wickDownColor: down,
-      priceFormat: { type: "custom", formatter: (p: number) => `$${priceFigure(p)}`, minMove: 1e-12 },
+      priceFormat: { type: "custom", formatter: (p: number) => `$${axisPrice(p)}`, minMove: 1e-12 },
     });
     candlesSeries.priceScale().applyOptions({ scaleMargins: { top: 0.08, bottom: 0.26 } });
     const volumeSeries = api.addSeries(HistogramSeries, { priceFormat: { type: "volume" }, priceScaleId: "volume", lastValueVisible: false, priceLineVisible: false });
@@ -82,8 +82,10 @@ export default function PriceChart({ candles, resetKey }: { candles: Candle[]; r
     p.setData(candles.map((c) => ({ time: c.t as UTCTimestamp, open: c.o, high: c.h, low: c.l, close: c.c })));
     v.setData(candles.map((c) => ({ time: c.t as UTCTimestamp, value: c.v, color: c.c >= c.o ? colors.up : colors.down })));
     // A new range starts zoomed to fit; a refresh of the same range keeps the visitor's zoom and scroll.
+    // A thin coin has few candles: the view still spans about 90 candle widths, the newest at the right.
     if (fitted.current !== resetKey && candles.length) {
-      api.timeScale().fitContent();
+      if (candles.length >= 90) api.timeScale().fitContent();
+      else api.timeScale().setVisibleLogicalRange({ from: candles.length - 90, to: candles.length + 3 });
       fitted.current = resetKey;
     }
   }, [candles, resetKey]);

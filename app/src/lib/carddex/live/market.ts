@@ -26,8 +26,10 @@ export type MarketHolder = { owner: string; amount: number; share: number; creat
 
 export type CoinMarket = {
   mint: string;
-  /** When the freshest part was read (ms). */
-  asOf: number;
+  /** When the freshest part was read (ms); null when nothing could be read yet. */
+  asOf: number | null;
+  /** Where the dollar price came from: the curve on Solana (with GeckoTerminal's quote price), or GeckoTerminal alone. */
+  priceSource: "chain" | "geckoterminal" | null;
   status: MarketStatus | null;
   /** One token, in the quote asset and in US dollars. */
   priceQuote: number | null;
@@ -61,7 +63,8 @@ export type CoinMarket = {
 export const CHART_RANGES = ["1m", "5m", "15m", "1h", "4h", "1d"] as const;
 export type ChartRange = (typeof CHART_RANGES)[number];
 export const isChartRange = (value: string): value is ChartRange => (CHART_RANGES as readonly string[]).includes(value);
-export const CHART_RANGE_LABEL: Record<ChartRange, string> = { "1m": "1 minute", "5m": "5 minutes", "15m": "15 minutes", "1h": "1 hour", "4h": "4 hours", "1d": "1 day" };
+/** Each range as an adjective ("5-minute candles"). */
+export const CHART_RANGE_LABEL: Record<ChartRange, string> = { "1m": "1-minute", "5m": "5-minute", "15m": "15-minute", "1h": "1-hour", "4h": "4-hour", "1d": "1-day" };
 
 /** One candle: time in seconds (the chart's unit), prices in US dollars, volume in US dollars. */
 export type Candle = { t: number; o: number; h: number; l: number; c: number; v: number };

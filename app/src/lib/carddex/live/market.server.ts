@@ -11,7 +11,7 @@
  * invented, and no upstream error, URL or key leaves this file.
  */
 import { bindings } from "../../bindings.server";
-import { one, stmt } from "../../mintdex/server/db.server";
+import { one, stmt, UserError } from "../../mintdex/server/db.server";
 import { edgeCached } from "../../edge-cache";
 import { createMainnetConnection } from "../../../../../integrations/pumpfun/src/live";
 import { readCurveMarket, readTopHolders, type CurveMarket, type MarketConnection, type TopHolder } from "../../../../../integrations/pumpfun/src/market";
@@ -26,7 +26,7 @@ const GECKO_ACCEPT = "application/json;version=20230302";
 const TIMEOUT_MS = 6_000, MAX_BYTES = 768 * 1024;
 const SECOND = 1_000, MINUTE = 60 * SECOND;
 /** How long each part is reused before it is read again. */
-export const TTL = { curve: 10 * SECOND, pool: 30 * SECOND, trades: 30 * SECOND, holders: MINUTE, holderCount: 10 * MINUTE } as const;
+export const TTL = { curve: 10 * SECOND, pool: 30 * SECOND, trades: 30 * SECOND, holders: MINUTE, holderCount: 10 * MINUTE, poolLookup: 10 * MINUTE } as const;
 export const CANDLE_TTL: Record<ChartRange, number> = { "1m": 45 * SECOND, "5m": 45 * SECOND, "15m": 2 * MINUTE, "1h": 2 * MINUTE, "4h": 5 * MINUTE, "1d": 5 * MINUTE };
 const CANDLE_PATH: Record<ChartRange, [timeframe: "minute" | "hour" | "day", aggregate: number]> = {
   "1m": ["minute", 1], "5m": ["minute", 5], "15m": ["minute", 15], "1h": ["hour", 1], "4h": ["hour", 4], "1d": ["day", 1],
@@ -61,18 +61,30 @@ async function writeRow(mint: string, kind: string, at: number, value: unknown) 
   try { await stmt("INSERT OR REPLACE INTO live_market_cache (mint, kind, fetched_at, json) VALUES (?, ?, ?, ?)", mint, kind, at, JSON.stringify(value)).run(); }
   catch (error) { console.error("market_cache_write_failed", JSON.stringify({ kind: kind.split(":")[0] }), error instanceof Error ? error.name : "error"); }
 }
-/** The cached part when fresh; else one refresh within `rule`; else the last answer marked stale (or null). */
-async function part<T>(mint: string, kind: string, ttl: number, rule: LimitRule, now: number, load: () => Promise<T | null>): Promise<Part<T>> {
+/**
+ * The cached part when fresh; else one refresh within `rule`; else the last answer marked stale, or null. A refresh
+ * that finds nothing or fails is remembered (a `<kind>~miss` row) and not tried again within the part's window, so a
+ * coin GeckoTerminal has not indexed yet, or an RPC without DAS, never spends the site budget on every request. With
+ * `load` null (no upstream to ask, such as no RPC here), only the cache is read and nothing is counted.
+ */
+async function part<T>(mint: string, kind: string, ttl: number, rule: LimitRule, now: number, load: (() => Promise<T | null>) | null): Promise<Part<T>> {
   const cached = await readRow<T>(mint, kind);
   if (cached && now - cached.at < ttl) return { value: cached.value, at: cached.at, stale: false };
-  try {
-    await enforceLimit(rule, SITE, "Market budget used", now);
-    const value = await load();
-    if (value !== null) { await writeRow(mint, kind, now, value); return { value, at: now, stale: false }; }
-  } catch (error) {
-    console.log(JSON.stringify({ event: "market_refresh_failed", kind: kind.split(":")[0], reason: error instanceof Error ? error.name : "error" }));
+  const missed = load ? await readRow<true>(mint, `${kind}~miss`) : null;
+  if (load && !(missed && now - missed.at < ttl)) {
+    try {
+      await enforceLimit(rule, SITE, "Market budget used", now);
+      const value = await load();
+      if (value !== null) { await writeRow(mint, kind, now, value); return { value, at: now, stale: false }; }
+      await writeRow(mint, `${kind}~miss`, now, true);
+    } catch (error) {
+      // A spent budget is not a miss: the next request may refresh. An upstream failure waits out the window.
+      if (!(error instanceof UserError)) await writeRow(mint, `${kind}~miss`, now, true);
+      console.log(JSON.stringify({ event: "market_refresh_failed", kind: kind.split(":")[0], reason: error instanceof Error ? error.name : "error" }));
+    }
   }
-  return cached ? { value: cached.value, at: cached.at, stale: true } : { value: null, at: null, stale: true };
+  // Stale means an older answer is shown; a part never read shows as missing (a dash), not as stale.
+  return cached ? { value: cached.value, at: cached.at, stale: true } : { value: null, at: null, stale: false };
 }
 
 // ---------------------------------------------------------------- GeckoTerminal (read only)
@@ -100,7 +112,7 @@ const count = (value: unknown) => { const n = num(value); return n !== null && n
 const record = (value: unknown): Record<string, unknown> => (value && typeof value === "object" ? value as Record<string, unknown> : {});
 
 export type PoolStats = {
-  priceUsd: number | null; quoteUsd: number | null; reserveUsd: number | null;
+  priceUsd: number | null; quoteUsd: number | null; reserveUsd: number | null; fdvUsd: number | null;
   change: CoinMarket["change"]; volumeUsd24h: number | null; txns24h: CoinMarket["txns24h"];
 };
 /** GeckoTerminal's pool answer as the page's stats; the coin may be either side of the pool. */
@@ -117,6 +129,7 @@ export function parsePool(json: unknown, mint: string): PoolStats | null {
     priceUsd: num(coinIsBase ? attributes.base_token_price_usd : attributes.quote_token_price_usd),
     quoteUsd: num(coinIsBase ? attributes.quote_token_price_usd : attributes.base_token_price_usd),
     reserveUsd: num(attributes.reserve_in_usd),
+    fdvUsd: coinIsBase ? num(attributes.fdv_usd) : null,
     change: { m5: pct("m5"), h1: pct("h1"), h6: pct("h6"), h24: pct("h24") },
     volumeUsd24h: num(volume.h24),
     txns24h: Object.keys(h24).length ? { buys: count(h24.buys), sells: count(h24.sells), buyers: count(h24.buyers), sellers: count(h24.sellers) } : null,
@@ -129,12 +142,13 @@ export function parseTrades(json: unknown, mint: string): MarketTrade[] {
   const trades: MarketTrade[] = [];
   for (const row of rows) {
     const a = record(record(row).attributes);
-    const kind = a.kind === "buy" || a.kind === "sell" ? a.kind : null;
     const at = Date.parse(String(a.block_timestamp ?? ""));
     const tx = String(a.tx_hash ?? ""), wallet = String(a.tx_from_address ?? "");
-    if (!kind || !Number.isFinite(at) || !/^[1-9A-HJ-NP-Za-km-z]{64,90}$/.test(tx) || !SOLANA_ADDRESS.test(wallet)) continue;
-    // A buy sends the quote and receives the coin; a sell the reverse.
-    const coinIn = String(a.to_token_address ?? "") === mint;
+    if (!Number.isFinite(at) || !/^[1-9A-HJ-NP-Za-km-z]{64,90}$/.test(tx) || !SOLANA_ADDRESS.test(wallet)) continue;
+    // The side follows the coin, whichever side of the pool it is: receiving it is a buy, sending it a sell.
+    const coinIn = String(a.to_token_address ?? "") === mint, coinOut = String(a.from_token_address ?? "") === mint;
+    if (coinIn === coinOut) continue;
+    const kind = coinIn ? "buy" as const : "sell" as const;
     const tokens = num(coinIn ? a.to_token_amount : a.from_token_amount), quote = num(coinIn ? a.from_token_amount : a.to_token_amount);
     if (tokens === null || quote === null || tokens <= 0) continue;
     trades.push({ at, kind, wallet, tokens, quote, usd: num(a.volume_in_usd), tx });
@@ -157,6 +171,14 @@ export function parseCandles(json: unknown): Candle[] {
     candles.push({ t, o, h: Math.max(h, o, c), l: Math.min(l, o, c), c, v: v ?? 0 });
   }
   return candles.sort((a, b) => a.t - b.t);
+}
+
+/** The coin's busiest pool as GeckoTerminal lists it: used only when the curve cannot be read. */
+export function parseTopPool(json: unknown): string | null {
+  const pools = record(record(record(record(json).data).relationships).top_pools).data;
+  const id = Array.isArray(pools) ? String(record(pools[0]).id ?? "") : "";
+  const address = id.replace(/^solana_/, "");
+  return SOLANA_ADDRESS.test(address) ? address : null;
 }
 
 // ---------------------------------------------------------------- holders (RPC)
@@ -210,8 +232,8 @@ function defaults(deps: MarketDeps) {
 
 async function curvePart(mint: string, coin: Coin, d: ReturnType<typeof defaults>, now: number) {
   const connection = d.connection();
-  return part<CurveMarket>(mint, "curve", TTL.curve, LIMITS.marketRpcSite, now, async () => connection
-    ? readCurveMarket(connection, { mint, quoteMint: coin.quoteMint, quoteDecimals: getPairAsset(coin.quoteKey).decimals, nowSec: Math.floor(now / 1000) })
+  return part<CurveMarket>(mint, "curve", TTL.curve, LIMITS.marketRpcSite, now, connection
+    ? () => readCurveMarket(connection, { mint, quoteMint: coin.quoteMint, quoteDecimals: getPairAsset(coin.quoteKey).decimals, nowSec: Math.floor(now / 1000) })
     : null);
 }
 
@@ -221,7 +243,8 @@ export async function readCoinMarket(mint: string, deps: MarketDeps = {}): Promi
   if (!coin) return null;
   const d = defaults(deps), now = d.now();
   const curve = await curvePart(mint, coin, d, now);
-  const c = curve.value, pool = c?.pool ?? null, connection = d.connection(), rpcUrl = d.rpcUrl();
+  const c = curve.value, connection = d.connection(), rpcUrl = d.rpcUrl();
+  const pool = c?.pool ?? (await poolLookup(mint, d, now));
   const [stats, trades, top, holderCount] = await Promise.all([
     pool ? part<PoolStats>(mint, "pool", TTL.pool, LIMITS.marketGeckoSite, now, async () => parsePool(await gecko(d.send, `/networks/solana/pools/${pool}`), mint)) : null,
     pool ? part<MarketTrade[]>(mint, "trades", TTL.trades, LIMITS.marketGeckoSite, now, async () => parseTrades(await gecko(d.send, `/networks/solana/pools/${pool}/trades`), mint)) : null,
@@ -232,7 +255,8 @@ export async function readCoinMarket(mint: string, deps: MarketDeps = {}): Promi
   // The quote's dollar price comes from GeckoTerminal; the coin's own price from the curve, so it is current.
   const quoteUsd = s?.quoteUsd ?? null;
   const priceQuote = c?.priceQuote ?? null;
-  const priceUsd = priceQuote !== null && quoteUsd !== null ? priceQuote * quoteUsd : s?.priceUsd ?? null;
+  const chainPrice = priceQuote !== null && quoteUsd !== null;
+  const priceUsd = chainPrice ? priceQuote * quoteUsd : s?.priceUsd ?? null;
   const supply = c?.supply ?? null;
   const holders: MarketHolder[] | null = top?.value
     ? top.value.filter(h => !h.market).slice(0, HOLDERS_SHOWN).map(h => ({ owner: h.owner, amount: h.amount, share: h.share, creator: h.owner === coin.creator }))
@@ -242,12 +266,13 @@ export async function readCoinMarket(mint: string, deps: MarketDeps = {}): Promi
   const reservesUsd = c?.status === "migrated" ? s?.reserveUsd ?? null : c?.reservesQuote != null && quoteUsd !== null ? c.reservesQuote * quoteUsd : null;
   return {
     mint,
-    asOf: Math.max(0, ...parts.map(p => p.at ?? 0)),
+    asOf: parts.some(p => p.at !== null) ? Math.max(...parts.map(p => p.at ?? 0)) : null,
+    priceSource: priceUsd === null ? null : chainPrice ? "chain" : "geckoterminal",
     status: c?.status ?? null,
     priceQuote,
     priceUsd,
     marketCapQuote: c?.marketCapQuote ?? null,
-    marketCapUsd: priceUsd !== null && supply !== null ? priceUsd * supply : null,
+    marketCapUsd: priceUsd !== null && supply !== null ? priceUsd * supply : s?.fdvUsd ?? null,
     progress: c?.progress ?? null,
     reservesQuote: c?.status === "migrated" ? null : c?.reservesQuote ?? null,
     reservesUsd,
@@ -264,12 +289,17 @@ export async function readCoinMarket(mint: string, deps: MarketDeps = {}): Promi
   };
 }
 
+/** Without the curve (no RPC, or it failed): GeckoTerminal's own record of the coin's pool. */
+async function poolLookup(mint: string, d: ReturnType<typeof defaults>, now: number): Promise<string | null> {
+  return (await part<string>(mint, "pool-lookup", TTL.poolLookup, LIMITS.marketGeckoSite, now, async () => parseTopPool(await gecko(d.send, `/networks/solana/tokens/${mint}`)))).value;
+}
+
 /** One range's candles for the coin's pool, in US dollars. */
 export async function readCoinCandles(mint: string, range: ChartRange, deps: MarketDeps = {}): Promise<CandleAnswer | null> {
   const coin = await launchedCoin(mint);
   if (!coin) return null;
   const d = defaults(deps), now = d.now();
-  const pool = (await curvePart(mint, coin, d, now)).value?.pool;
+  const pool = (await curvePart(mint, coin, d, now)).value?.pool ?? (await poolLookup(mint, d, now));
   if (!pool) return { range, candles: [], asOf: now, stale: true };
   const [timeframe, aggregate] = CANDLE_PATH[range];
   const candles = await part<Candle[]>(mint, `ohlcv:${range}`, CANDLE_TTL[range], LIMITS.marketGeckoSite, now, async () =>
