@@ -101,7 +101,8 @@ export const PAIR_DESIGNS: Readonly<Partial<Record<PairAssetKey, CardDesignKey>>
  * a real person, a child, or another company's logo or wordmark, so none was left out for its art. For the owner's
  * review, as with the pairs' own cards: One Piece's back is the Straw Hat jolly roger, Pokemon Prism's back a Poke
  * Ball, Jade Reliquary's back Pepe the Frog, Noir Terminal and Nordic Signal show unbranded phones in the style of a
- * BlackBerry and a Nokia 3310 (no mark on either). A visual check, not legal advice.
+ * BlackBerry and a Nokia 3310 (no mark on either). A visual check, not legal advice. The owner reviewed these on
+ * 31 October 2026 and kept One Piece and Pokemon Prism as SOL options.
  */
 export const SOL_DESIGN_OPTIONS: readonly CardDesignKey[] = Object.freeze([
   "pair-sol", "one-piece",
