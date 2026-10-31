@@ -182,13 +182,13 @@ describe("the X client", () => {
 });
 
 describe("the switch, the secrets and the opt-in", () => {
-  test("off unless CARDDEX_X_AUTOPOST is \"true\" and all four secrets are set; health reports two booleans only", async () => {
+  test("off unless CARDDEX_X_AUTOPOST is \"true\" and all four secrets are set; health reports booleans only", async () => {
     expect(liveReadiness().xAnnounce).toBe(true);
     for (const [value, on] of [["true", true], [" TRUE ", true], ["1", false], ["yes", false], ["", false], [undefined, false]] as const) { env.CARDDEX_X_AUTOPOST = value; expect(liveReadiness().xAnnounce).toBe(on); }
     env.CARDDEX_X_AUTOPOST = "true";
     for (const key of Object.keys(SECRETS)) {
       env = {...env, [key]: undefined};
-      expect(liveReadiness().xAnnounce).toBe(false); expect(xAutopostStatus()).toEqual({enabled: true, configured: false});
+      expect(liveReadiness().xAnnounce).toBe(false); expect(xAutopostStatus()).toEqual({enabled: true, configured: false, autoApprove: false});
       env = {...env, [key]: "  "}; expect(liveReadiness().xAnnounce).toBe(false);
       env = {...env, ...SECRETS};
     }
@@ -196,7 +196,19 @@ describe("the switch, the secrets and the opt-in", () => {
     env.CARDDEX_LIVE_RECOVERY_ENABLED = "false"; expect(liveReadiness().xAnnounce).toBe(false); delete env.CARDDEX_LIVE_RECOVERY_ENABLED;
     const health = createLiveHealthHandler({readiness: liveReadiness, rpcUrl: () => undefined, x: xAutopostStatus});
     const body = await (await health()).text();
-    expect(JSON.parse(body).x).toEqual({enabled: true, configured: true});
+    expect(JSON.parse(body).x).toEqual({enabled: true, configured: true, autoApprove: false});
+    env.CARDDEX_X_AUTO_APPROVE = "true";
+    expect(JSON.parse(await (await health()).text()).x).toEqual({enabled: true, configured: true, autoApprove: true});
+    expect(liveReadiness().xAutoApprove).toBe(true);
+    for (const value of ["1", "yes", "", undefined]) { env.CARDDEX_X_AUTO_APPROVE = value; expect(liveReadiness().xAutoApprove).toBe(false); }
+    // Auto-approve means nothing while announcements are off.
+    env.CARDDEX_X_AUTO_APPROVE = "true"; env.CARDDEX_X_AUTOPOST = "false"; expect(liveReadiness().xAutoApprove).toBe(false);
+    // Health reports auto-approve only when it takes effect, matching readiness, never the bare switch.
+    expect(xAutopostStatus()).toEqual({enabled: false, configured: true, autoApprove: false});
+    expect(JSON.parse(await (await health()).text()).x).toEqual({enabled: false, configured: true, autoApprove: false});
+    env.CARDDEX_X_AUTOPOST = "true"; env = {...env, X_API_KEY: undefined};
+    expect(xAutopostStatus()).toEqual({enabled: true, configured: false, autoApprove: false});
+    env = {...env, ...SECRETS}; expect(xAutopostStatus().autoApprove).toBe(true); env.CARDDEX_X_AUTOPOST = "false";
     for (const secret of Object.values(SECRETS)) expect(body).not.toContain(secret);
   });
   test("off, the job does nothing: no claim, no X call, and a completed launch is never queued", async () => {
@@ -418,7 +430,10 @@ describe("the cron job", () => {
     expect(queue[1]).toMatchObject({text: null, reason: expect.stringContaining("blocked")});
     await job.reviewXAnnouncement({intentId: "a", decision: "approve"}, "owner-wallet", clock);
     await job.reviewXAnnouncement({intentId: "b", decision: "skip"}, "owner-wallet", clock);
-    await expect(job.reviewXAnnouncement({intentId: "a", decision: "skip"}, "owner-wallet", clock)).rejects.toThrow("no longer waiting");
+    // Approved once; a skipped coin can be neither approved nor skipped again. (A queued coin can still be skipped: see auto-approve.)
+    await expect(job.reviewXAnnouncement({intentId: "a", decision: "approve"}, "owner-wallet", clock)).rejects.toThrow("no longer waiting");
+    await expect(job.reviewXAnnouncement({intentId: "b", decision: "approve"}, "owner-wallet", clock)).rejects.toThrow("no longer waiting");
+    await expect(job.reviewXAnnouncement({intentId: "b", decision: "skip"}, "owner-wallet", clock)).rejects.toThrow("no longer waiting");
     expect(sqlite.query("SELECT status, reviewed_by, reviewed_at FROM live_x_posts WHERE intent_id IN ('a','b') ORDER BY intent_id").all())
       .toEqual([{status: "queued", reviewed_by: "owner-wallet", reviewed_at: clock}, {status: "skipped", reviewed_by: "owner-wallet", reviewed_at: clock}]);
     expect((await job.xReviewQueue(clock)).map(item => item.intentId)).toEqual(["c"]);
@@ -445,5 +460,134 @@ describe("the cron job", () => {
     expect(post("c")).toMatchObject({status: "skipped"});
     await job.reviewXAnnouncement({intentId: "b", decision: "approve"}, "owner-wallet", clock);
     expect(await job.runXAutoPost({fetch: x.fetch, now})).toEqual({state: "posted", intentId: "b", postId: "1990000000000000001"});
+  });
+});
+
+describe("auto-approve (CARDDEX_X_AUTO_APPROVE)", () => {
+  const MIN = 60_000;
+  let clock = Date.UTC(2026, 10, 1, 9, 0, 0);
+  const now = () => clock;
+  beforeEach(() => { clock = Date.UTC(2026, 10, 1, 9, 0, 0); });
+  const reviewer = (id: string) => sqlite.query("SELECT reviewed_by, reviewed_at FROM live_x_posts WHERE intent_id = ?").get(id) as {reviewed_by: string | null; reviewed_at: number | null};
+  test("off: unchanged, a finished launch waits for review and nothing is posted", async () => {
+    await launch("a", {completedAt: clock});
+    for (const value of [undefined, "false", "1"]) {
+      sqlite.exec("DELETE FROM live_x_posts");
+      env.CARDDEX_X_AUTO_APPROVE = value;
+      expect(await job.queueXAnnouncement("a", clock)).toBe(true);
+      expect(post("a")).toMatchObject({status: "review"});
+      expect(reviewer("a")).toEqual({reviewed_by: null, reviewed_at: null});
+      const x = fakeX();
+      expect(await job.runXAutoPost({fetch: x.fetch, now})).toEqual({state: "idle"});
+      expect(x.calls).toHaveLength(0);
+    }
+  });
+  test("on: a coin that passes the filters is queued as auto-approved and posted by the cron, once", async () => {
+    env.CARDDEX_X_AUTO_APPROVE = "true";
+    await launch("a", {completedAt: clock});
+    expect(await job.queueXAnnouncement("a", clock)).toBe(true);
+    expect(post("a")).toMatchObject({status: "queued", attempts: 0, next_attempt_at: clock + job.AUTO_HOLD_MS, error: null});
+    expect(reviewer("a")).toEqual({reviewed_by: job.AUTO_REVIEWER, reviewed_at: clock});
+    expect(await job.xReviewQueue(clock)).toEqual([]);
+    expect(await job.xUpcomingAnnouncements(clock)).toMatchObject([{intentId: "a", status: "queued", autoApproved: true, postId: null}]);
+    const x = fakeX();
+    // Held so an owner can look at the card image (no filter checks it) and Skip it: no run claims it before the hold ends.
+    expect(job.AUTO_HOLD_MS).toBeGreaterThan(10 * MIN);
+    expect(await job.runXAutoPost({fetch: x.fetch, now})).toEqual({state: "idle"});
+    clock += job.AUTO_HOLD_MS - 1; expect(await job.runXAutoPost({fetch: x.fetch, now})).toEqual({state: "idle"});
+    expect(x.calls).toHaveLength(0);
+    clock += 1;
+    expect(await job.runXAutoPost({fetch: x.fetch, now})).toMatchObject({state: "posted", intentId: "a"});
+    expect(x.calls.filter(call => call.url.endsWith("/2/tweets"))).toHaveLength(1);
+    expect(await job.xUpcomingAnnouncements(clock)).toMatchObject([{intentId: "a", status: "posted", autoApproved: true, postId: "1990000000000000001", postedAt: clock}]);
+    // Never twice: queueing again, later runs and auto-approve passes leave the posted row alone.
+    expect(await job.queueXAnnouncement("a", clock)).toBe(false);
+    expect(await job.autoApproveXReviews(clock)).toBe(0);
+    for (let i = 0; i < 4; i++) { clock += 10 * MIN; expect(await job.runXAutoPost({fetch: x.fetch, now})).toEqual({state: "idle"}); }
+    expect(x.calls.filter(call => call.url.endsWith("/2/tweets"))).toHaveLength(1);
+    expect(logs.some(line => line.includes("x_announce_auto_approved"))).toBe(true);
+  });
+  test("on: names and tickers the filters block still wait for an owner and are never posted", async () => {
+    env.CARDDEX_X_AUTO_APPROVE = "true";
+    await launch("a", {name: "FREE SOL giveaway", completedAt: clock});
+    await launch("b", {symbol: "AIRDROP", completedAt: clock});
+    await launch("c", {name: "@#$ https://x.com", completedAt: clock});
+    for (const id of ["a", "b", "c"]) { expect(await job.queueXAnnouncement(id, clock)).toBe(true); expect(post(id)).toMatchObject({status: "review"}); }
+    const x = fakeX();
+    expect(await job.runXAutoPost({fetch: x.fetch, now})).toEqual({state: "idle"});
+    expect(x.calls).toHaveLength(0);
+    expect((await job.xReviewQueue(clock)).map(item => [item.intentId, item.text])).toEqual([["a", null], ["b", null], ["c", null]]);
+    // An owner skips one; the rest are skipped after a day, never posted.
+    await job.reviewXAnnouncement({intentId: "a", decision: "skip"}, "owner-wallet", clock);
+    clock += job.MAX_AGE_MS + 10 * MIN;
+    expect(await job.runXAutoPost({fetch: x.fetch, now})).toEqual({state: "idle"});
+    for (const id of ["a", "b", "c"]) expect(post(id)?.status).toBe("skipped");
+    expect(x.calls).toHaveLength(0);
+  });
+  test("turned on: rows already waiting are approved on the next cron run, unless filtered or older than a day", async () => {
+    await launch("a", {completedAt: clock}); await launch("b", {name: "Official Launch a Card", completedAt: clock});
+    await launch("old", {completedAt: clock - job.MAX_AGE_MS - MIN});
+    await job.queueXAnnouncement("a", clock); await job.queueXAnnouncement("b", clock);
+    sqlite.query("INSERT INTO live_x_posts (intent_id, status, attempts, next_attempt_at, created_at, updated_at) VALUES ('old', 'review', 0, ?1, ?1, ?1)").run(clock - job.MAX_AGE_MS - MIN);
+    expect(post("a")?.status).toBe("review");
+    env.CARDDEX_X_AUTO_APPROVE = "true";
+    // The old row is past the expiry: never approved, even directly.
+    expect(await job.autoApproveXReviews(clock, "old")).toBe(0);
+    const x = fakeX(), approvedAt = clock;
+    expect(await job.runXAutoPost({fetch: x.fetch, now})).toEqual({state: "idle"});
+    expect(post("a")).toMatchObject({status: "queued", next_attempt_at: approvedAt + job.AUTO_HOLD_MS});
+    clock += job.AUTO_HOLD_MS;
+    expect(await job.runXAutoPost({fetch: x.fetch, now})).toMatchObject({state: "posted", intentId: "a"});
+    expect(reviewer("a")).toEqual({reviewed_by: job.AUTO_REVIEWER, reviewed_at: approvedAt});
+    expect(post("b")).toMatchObject({status: "review"});
+    expect(post("old")).toMatchObject({status: "skipped"});
+    clock += 10 * MIN;
+    expect(await job.runXAutoPost({fetch: x.fetch, now})).toEqual({state: "idle"});
+    expect(x.calls.filter(call => call.url.endsWith("/2/tweets"))).toHaveLength(1);
+  });
+  test("a missed queue write is picked up by the cron and auto-approved", async () => {
+    env.CARDDEX_X_AUTO_APPROVE = "true";
+    await launch("a", {completedAt: clock});
+    const x = fakeX();
+    expect(await job.runXAutoPost({fetch: x.fetch, now})).toEqual({state: "idle"});
+    expect(post("a")?.status).toBe("queued");
+    clock += job.AUTO_HOLD_MS;
+    expect(await job.runXAutoPost({fetch: x.fetch, now})).toMatchObject({state: "posted", intentId: "a"});
+    expect(reviewer("a").reviewed_by).toBe(job.AUTO_REVIEWER);
+  });
+  test("an owner can skip a queued coin until a run claims it: skipped is never posted", async () => {
+    env.CARDDEX_X_AUTO_APPROVE = "true";
+    await launch("a", {completedAt: clock}); await launch("b", {completedAt: clock + 1});
+    await job.queueXAnnouncement("a", clock); await job.queueXAnnouncement("b", clock);
+    await job.reviewXAnnouncement({intentId: "a", decision: "skip"}, "owner-wallet", clock);
+    expect(post("a")).toMatchObject({status: "skipped", error: "Skipped before posting."});
+    expect(reviewer("a")).toEqual({reviewed_by: "owner-wallet", reviewed_at: clock});
+    // Approve never applies to a queued row, and a skipped one cannot be skipped again.
+    await expect(job.reviewXAnnouncement({intentId: "b", decision: "approve"}, "owner-wallet", clock)).rejects.toThrow("no longer waiting");
+    await expect(job.reviewXAnnouncement({intentId: "a", decision: "skip"}, "owner-wallet", clock)).rejects.toThrow("no longer waiting");
+    const x = fakeX();
+    clock += job.AUTO_HOLD_MS;
+    expect(await job.runXAutoPost({fetch: x.fetch, now})).toMatchObject({state: "posted", intentId: "b"});
+    expect(JSON.parse(x.calls.at(-1)!.init.body as string).text).toContain("/coin/");
+    expect(x.calls.filter(call => call.url.endsWith("/2/tweets"))).toHaveLength(1);
+    // Once claimed (posting) or posted, Skip is refused.
+    await expect(job.reviewXAnnouncement({intentId: "b", decision: "skip"}, "owner-wallet", clock)).rejects.toThrow("no longer waiting");
+    await launch("c", {completedAt: clock}); await job.queueXAnnouncement("c", clock);
+    clock += job.AUTO_HOLD_MS;
+    expect(await job.claimNextXPost(clock, job.xAutopostLimits())).toMatchObject({intent_id: "c", status: "posting"});
+    await expect(job.reviewXAnnouncement({intentId: "c", decision: "skip"}, "owner-wallet", clock)).rejects.toThrow("no longer waiting");
+    expect(post("c")?.status).toBe("posting");
+    clock += 10 * MIN;
+    expect(await job.runXAutoPost({fetch: x.fetch, now})).toEqual({state: "idle"});
+    expect(post("a")?.status).toBe("skipped");
+    expect(x.calls.filter(call => call.url.endsWith("/2/tweets"))).toHaveLength(1);
+  });
+  test("the admin page shows auto-approve and keeps Skip on queued coins", () => {
+    const page = readFileSync(resolve(APP, "src/routes/admin/replies.tsx"), "utf8");
+    expect(page).toContain("Auto-approve is on");
+    expect(page).toContain("never the card image");
+    expect(page).toContain('upcoming.status === "queued"');
+    const api = readFileSync(resolve(APP, "src/lib/carddex/live/x-announce-api.ts"), "utf8");
+    expect(api).toContain("autoApprove: liveReadiness().xAutoApprove === true");
   });
 });

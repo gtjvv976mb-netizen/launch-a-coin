@@ -17,7 +17,7 @@ type Dependencies = {
   /** The pre-ground "card" address pool (vanity.server.ts vanityHealth): whether its key is set and how many are left. */
   vanity?: () => Promise<{ configured: boolean; available: number }>;
   /** Announcements on @launchacard (config.server.ts xAutopostStatus): the switch and whether its secrets are set. */
-  x?: () => { enabled: boolean; configured: boolean };
+  x?: () => { enabled: boolean; configured: boolean; autoApprove?: boolean };
 };
 /** Fewer available "card" addresses than this reads as low: time to grind and load more (README runbook). */
 export const VANITY_LOW = 10;
@@ -113,11 +113,11 @@ export function createLiveHealthHandler(dependencies: Dependencies) {
         vanity = { configured: pool.configured === true, available, low: available < VANITY_LOW };
       } catch { vanity = { configured: false, available: 0, low: true }; }
     }
-    // Optional too, and never changes ok: two booleans, never a credential.
-    let x: { enabled: boolean; configured: boolean } | undefined;
+    // Optional too, and never changes ok: three booleans, never a credential.
+    let x: { enabled: boolean; configured: boolean; autoApprove: boolean } | undefined;
     if (dependencies.x) {
-      try { const status = dependencies.x(); x = { enabled: status.enabled === true, configured: status.configured === true }; }
-      catch { x = { enabled: false, configured: false }; }
+      try { const status = dependencies.x(); x = { enabled: status.enabled === true, configured: status.configured === true, autoApprove: status.autoApprove === true }; }
+      catch { x = { enabled: false, configured: false, autoApprove: false }; }
     }
     const ok = configured && rpc.status === "healthy" && (schema?.ok ?? true);
     return Response.json({

@@ -74,7 +74,7 @@ const SECTIONS: Section[] = [
         <li>The pair panel filters by Memes, Stocks, Crypto and Collector, and searches by symbol or name.</li>
         <li>More options holds your website, X link, an optional initial buy and its slippage.</li>
         <li>The exact initial buy and slippage show before your wallet opens.</li>
-        <li>Tick "Announce my coin on {OFFICIAL_X_HANDLE}" in More options and, once your card is confirmed and reviewed, {OFFICIAL_X_HANDLE} may post it once from its X account: name, ticker, pair, page link and the card image when it fits. It never posts prices. Posts are limited per day and a coin may be skipped. Nothing else is posted for you.</li>
+        <li>Tick "Announce my coin on {OFFICIAL_X_HANDLE}" in More options and, once your card is confirmed, {OFFICIAL_X_HANDLE} may post it once from its X account: name, ticker, pair, page link and the card image when it fits. It never posts prices. Posts are limited per day and a coin may be skipped. Nothing else is posted for you.</li>
         <li>
           Creating a coin means you accept the <TextLink to="/legal" hash="content-rules">content rules</TextLink>: {WORDS.contentRule}
         </li>

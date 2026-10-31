@@ -37,6 +37,8 @@ type AppEnv = {
   CARDDEX_LIVE_FEE_SHARING?: string;
   /** "true" posts opted-in new coins on @launchacard (x-announce.server.ts); unset is off. Needs the four X secrets. */
   CARDDEX_X_AUTOPOST?: string;
+  /** "true" queues opted-in coins that pass the post filters without an owner's approval (x-announce.server.ts); unset is off. */
+  CARDDEX_X_AUTO_APPROVE?: string;
   /** Optional: most announcements per UTC day (default 20) and minutes between two (default 10). */
   CARDDEX_X_DAILY_CAP?: string;
   CARDDEX_X_MIN_GAP_MINUTES?: string;

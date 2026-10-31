@@ -74,9 +74,17 @@ export function xAutopostSwitchOn(value: string | undefined) { return switchValu
 export function xCredentialsConfigured(env: {X_API_KEY?: string; X_API_SECRET?: string; X_ACCESS_TOKEN?: string; X_ACCESS_TOKEN_SECRET?: string}) {
   return [env.X_API_KEY, env.X_API_SECRET, env.X_ACCESS_TOKEN, env.X_ACCESS_TOKEN_SECRET].every(value => typeof value === "string" && value.trim().length > 0 && value.length <= 200);
 }
+/**
+ * CARDDEX_X_AUTO_APPROVE ("true" only; unset is off): an opted-in coin whose name and ticker pass the post filters is
+ * queued for the cron without waiting for an owner on /admin/replies (recorded as reviewed by "auto"). Coins the
+ * filters block still wait for review. It only matters while announcements are on.
+ */
+export function xAutoApproveSwitchOn(value: string | undefined) { return switchValue(value) === "true"; }
 export function xAutopostStatus() {
   const env = bindings();
-  return {enabled: xAutopostSwitchOn(env.CARDDEX_X_AUTOPOST), configured: xCredentialsConfigured(env)};
+  const enabled = xAutopostSwitchOn(env.CARDDEX_X_AUTOPOST), configured = xCredentialsConfigured(env);
+  // autoApprove is true only when it takes effect (announcements on and configured), never for the bare switch.
+  return {enabled, configured, autoApprove: enabled && configured && xAutoApproveSwitchOn(env.CARDDEX_X_AUTO_APPROVE)};
 }
 const RECOVERY_OFF_VALUES = new Set(["false", "0", "off", "no"]);
 let warnedRecoveryValue: string | undefined;
@@ -109,11 +117,12 @@ export function liveReadiness(): LiveReadiness {
   if (!recoveryEnabled) blockers.push(RECOVERY_OFF);
   if (!enabled) blockers.push(LAUNCHES_OFF);
   const recoveryReady = configured && recoveryEnabled;
+  const xAnnounce = recoveryReady && xAutopostSwitchOn(env.CARDDEX_X_AUTOPOST) && xCredentialsConfigured(env);
   // A new launch must also be able to finish, so it needs recovery (sign-in, confirmation, the card) too.
   return { implemented: true, configured, enabled, ready: recoveryReady && enabled, recoveryEnabled, recoveryReady,
     network: "solana-mainnet-beta", publicOrigin: origin, blockers, walletFirst: walletFirstWallets(env.CARDDEX_LIVE_WALLET_FIRST),
     walletBatch: walletBatchWallets(env.CARDDEX_LIVE_WALLET_BATCH), feeSharing: recoveryReady && feeSharingSwitchOn(env.CARDDEX_LIVE_FEE_SHARING),
-    xAnnounce: recoveryReady && xAutopostSwitchOn(env.CARDDEX_X_AUTOPOST) && xCredentialsConfigured(env) };
+    xAnnounce, xAutoApprove: xAnnounce && xAutoApproveSwitchOn(env.CARDDEX_X_AUTO_APPROVE) };
 }
 /** "launch" starts something new; "recovery" serves a creator's existing launch. */
 export function requireLiveConfig(scope: "launch" | "recovery") {

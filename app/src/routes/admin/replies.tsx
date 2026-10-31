@@ -6,7 +6,8 @@ import { signInCreator } from "../../components/carddex/live/ownership";
 import { useLiveWallet } from "../../components/carddex/live/wallet";
 import { Button, buttonClass, Icon, PageFrame, PageHeader, TextLink } from "../../components/mintdex/ui";
 import { getXReviewQueue, reviewXAnnouncement } from "../../lib/carddex/live/x-announce-api";
-import type { XReviewItem } from "../../lib/carddex/live/x-announce.server";
+import type { XReviewItem, XUpcomingItem } from "../../lib/carddex/live/x-announce.server";
+import { xPostUrl } from "../../lib/carddex/live/x-announce";
 import { getReplyFeed, getReplyHelperAccess, markReplyPost, suggestReplyText } from "../../lib/carddex/live/x-replies-api";
 import { REPLY_LIMIT, replyIntentUrl, replyLength, xPostLink, type RankedXReplyPost } from "../../lib/carddex/live/x-replies";
 
@@ -16,7 +17,9 @@ import { REPLY_LIMIT, replyIntentUrl, replyLength, xPostLink, type RankedXReplyP
  * the list, gets the site's "not found". Never in the nav or the sitemap, noindex, and robots.txt disallows /admin/.
  * The page only reads: "Reply on X" opens X's own reply composer in a new tab with the text prefilled, and the owner
  * presses Post there. Nothing is posted for them. Above the replies, opted-in coins wait for the owner's approval
- * before @launchacard announces them (the cron posts approved ones). Styles: styles/screens/replies.css.
+ * before @launchacard announces them (the cron posts approved ones); with auto-approve on (CARDDEX_X_AUTO_APPROVE)
+ * coins that pass the filters are queued at once, and the owner can still skip any queued one before it is posted.
+ * Styles: styles/screens/replies.css.
  */
 export const Route = createFileRoute("/admin/replies")({
   loader: async () => {
@@ -193,38 +196,70 @@ function ReplyCard({ post, canSuggest, onDone }: { post: RankedXReplyPost; canSu
 }
 
 /**
- * Coins whose creators asked for an announcement, waiting for the owner: the exact text and the card image that would
- * be posted. Approve queues it for the cron (still within the daily cap and gap); Skip means it is never posted.
- * Hidden while nothing waits.
+ * @launchacard announcements. Waiting for the owner: the exact text and the card image that would be posted; Approve
+ * queues it for the cron (still within the daily cap and gap), Skip means it is never posted. Then what is queued
+ * (Skip still ends it until the cron claims it) and what was posted in the last day. With auto-approve on, a line says
+ * so and only coins the filters block wait for review. Hidden while nothing waits and auto-approve is off.
  */
 function Announcements() {
   const queryClient = useQueryClient();
   const queue = useQuery({ queryKey: ["x-review"], queryFn: () => getXReviewQueue(), staleTime: 60_000, retry: false });
-  const items = queue.data?.ok ? queue.data.items : [];
   if (queue.data && !queue.data.ok) return <p role="alert" className="cdx-replies__error">{queue.data.error}</p>;
-  if (!items.length) return null;
-  const remove = (id: string) => queryClient.setQueryData(["x-review"], (old: typeof queue.data) => old?.ok ? { ...old, items: old.items.filter((item) => item.intentId !== id) } : old);
+  const data = queue.data?.ok ? queue.data : null;
+  const items = data?.items ?? [], upcoming = data?.upcoming ?? [], autoApprove = data?.autoApprove === true;
+  if (!items.length && !upcoming.length && !autoApprove) return null;
+  const remove = (id: string) => queryClient.setQueryData(["x-review"], (old: typeof queue.data) => old?.ok
+    ? { ...old, items: old.items.filter((item) => item.intentId !== id), upcoming: old.upcoming.filter((item) => item.intentId !== id) } : old);
+  // An approved coin moves to the queue: read both lists again.
+  const approved = (id: string) => { remove(id); void queryClient.invalidateQueries({ queryKey: ["x-review"] }); };
   return (
     <section className="cdx-replies__review" aria-labelledby="replies-review">
-      <h2 id="replies-review" className="mdx-h2">Announcements to approve</h2>
-      <p className="cdx-replies__muted">Each is posted once from @launchacard after you approve it. Check the name and the card image first.</p>
-      <ol className="cdx-replies__list">
-        {items.map((item) => <li key={item.intentId}><ReviewCard item={item} onDone={remove} /></li>)}
-      </ol>
+      <h2 id="replies-review" className="mdx-h2">Announcements on @launchacard</h2>
+      {autoApprove ? (
+        <p role="status" className="cdx-replies__notice">
+          Auto-approve is on: a coin whose name and ticker pass the filters is queued without review and posted once by the cron after a 15-minute hold. The filters check the text only, never the card image: look at each queued card and Skip any you do not want posted.
+        </p>
+      ) : null}
+      {items.length ? (
+        <>
+          <h3 className="cdx-replies__subhead">To approve</h3>
+          <p className="cdx-replies__muted">{autoApprove
+            ? "These did not pass the filters, or were added before auto-approve. Check the name and the card image first."
+            : "Each is posted once from @launchacard after you approve it. Check the name and the card image first."}</p>
+          <ol className="cdx-replies__list">
+            {items.map((item) => <li key={item.intentId}><ReviewCard item={item} onDone={remove} onApproved={approved} /></li>)}
+          </ol>
+        </>
+      ) : null}
+      {upcoming.length ? (
+        <>
+          <h3 className="cdx-replies__subhead">Queued and recently posted</h3>
+          <ol className="cdx-replies__list">
+            {upcoming.map((item) => <li key={item.intentId}><ReviewCard item={item} onDone={remove} onApproved={approved} /></li>)}
+          </ol>
+        </>
+      ) : autoApprove && !items.length ? <p className="cdx-replies__empty">Nothing queued or posted in the last day.</p> : null}
     </section>
   );
 }
 
-function ReviewCard({ item, onDone }: { item: XReviewItem; onDone: (id: string) => void }) {
+function upcomingLabel(item: XUpcomingItem) {
+  if (item.status === "posting") return "Posting now";
+  if (item.status === "posted") return "Posted";
+  return item.autoApproved ? "Queued, auto-approved" : "Queued, approved";
+}
+
+function ReviewCard({ item, onDone, onApproved }: { item: XReviewItem | XUpcomingItem; onDone: (id: string) => void; onApproved: (id: string) => void }) {
   const [busy, setBusy] = useState<"approve" | "skip" | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const field = `review-${item.intentId}`;
+  const upcoming = "status" in item ? item : null;
   async function decide(decision: "approve" | "skip") {
     setBusy(decision); setMessage(null);
     const result = await reviewXAnnouncement({ data: { intentId: item.intentId, decision } }).catch(() => ({ ok: false as const, error: "Could not save. Try again." }));
     setBusy(null);
     if (!result.ok) return setMessage(result.error);
-    onDone(item.intentId);
+    if (decision === "approve") onApproved(item.intentId); else onDone(item.intentId);
   }
   return (
     <article className="cdx-replies__post" aria-labelledby={`${field}-name`}>
@@ -232,15 +267,24 @@ function ReviewCard({ item, onDone }: { item: XReviewItem; onDone: (id: string) 
         <span id={`${field}-name`}><strong>{item.name || "Unnamed coin"}</strong> <span className="cdx-replies__muted">{item.symbol}</span></span>
         <TextLink href={`/coin/${item.tokenMint}`} target="_blank">Coin page<Icon name="external" size={12} /></TextLink>
       </header>
+      {upcoming ? (
+        <p className="cdx-replies__muted">
+          {upcoming.status === "posted" && upcoming.postId
+            ? <TextLink href={xPostUrl(upcoming.postId)} target="_blank">{upcomingLabel(upcoming)}<Icon name="external" size={12} /></TextLink>
+            : upcomingLabel(upcoming)}
+        </p>
+      ) : null}
       <div className="cdx-replies__preview">
         {item.imagePath ? <img src={item.imagePath} alt={`Card image for ${item.name || "this coin"}`} width={126} height={176} loading="lazy" decoding="async" className="cdx-replies__card" /> : <p className="cdx-replies__muted">No card image: posted as text.</p>}
         {item.text ? <p className="cdx-replies__text">{item.text}</p> : <p className="cdx-replies__error">{item.reason}</p>}
       </div>
       {message ? <p role="status" className="cdx-replies__notice">{message}</p> : null}
-      <div className="cdx-replies__actions">
-        {item.text ? <Button size="sm" pending={busy === "approve"} pendingLabel="Approving" disabled={!!busy} onClick={() => decide("approve")}>Approve</Button> : null}
-        <Button size="sm" variant="ghost" pending={busy === "skip"} disabled={!!busy} onClick={() => decide("skip")}>Skip</Button>
-      </div>
+      {!upcoming || upcoming.status === "queued" ? (
+        <div className="cdx-replies__actions">
+          {!upcoming && item.text ? <Button size="sm" pending={busy === "approve"} pendingLabel="Approving" disabled={!!busy} onClick={() => decide("approve")}>Approve</Button> : null}
+          <Button size="sm" variant="ghost" pending={busy === "skip"} disabled={!!busy} onClick={() => decide("skip")}>Skip</Button>
+        </div>
+      ) : null}
     </article>
   );
 }

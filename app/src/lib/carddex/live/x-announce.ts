@@ -1,6 +1,6 @@
 /**
  * Announcements of new coins on @launchacard (owner, 31 October 2026): one original post from the site's own account
- * per opted-in launch an owner approved on /admin/replies, made by the cron job in x-announce.server.ts. Never a reply, a mention, a like, a repost or a
+ * per opted-in launch an owner approved on /admin/replies (or, with CARDDEX_X_AUTO_APPROVE, that passed the filters), made by the cron job in x-announce.server.ts. Never a reply, a mention, a like, a repost or a
  * follow, and never triggered by anyone else's posts (X's automation rules). This module is client-safe: the form's
  * copy and the post text, built only from fields made safe here.
  */
@@ -11,8 +11,9 @@ export type LiveXPostStatus = "review" | "queued" | "posting" | "posted" | "fail
 export type LiveXAnnounce = { status: "requested" | LiveXPostStatus; postId: string | null };
 
 export const X_ANNOUNCE_LABEL = `Announce my coin on ${OFFICIAL_X_HANDLE}`;
-export const X_ANNOUNCE_HINT = `${OFFICIAL_X_HANDLE} may post it once, after your card is confirmed and reviewed. Nothing else is posted.`;
-export const X_ANNOUNCE_REVIEW = `After your card is confirmed and reviewed, ${OFFICIAL_X_HANDLE} may post it once: name, ticker, pair, link and, when it fits, the card image. Never prices. Posts can be skipped. Nothing else is posted.`;
+// Honest whether or not auto-approve is on: a post is never promised, and the site may skip it.
+export const X_ANNOUNCE_HINT = `${OFFICIAL_X_HANDLE} may post it once after your card is confirmed. Nothing else is posted.`;
+export const X_ANNOUNCE_REVIEW = `After your card is confirmed, ${OFFICIAL_X_HANDLE} may post it once: name, ticker, pair, link and, when it fits, the card image. Never prices. Posts can be skipped. Nothing else is posted.`;
 export const xPostUrl = (postId: string) => `${OFFICIAL_X_URL}/status/${postId}`;
 /** The saved launch's line, by status. */
 export function xAnnounceStatusText(announce: LiveXAnnounce): string {

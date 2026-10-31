@@ -4,7 +4,11 @@
  * A creator opts in at launch (live_x_optins, saved in the launch's own batch). When that launch is complete and
  * CARDDEX_X_AUTOPOST is on, one row is added to live_x_posts for review (queueXAnnouncement, from service.server.ts).
  * An owner looks at its name, text and card image on /admin/replies and approves or skips it (reviewXAnnouncement):
- * the creator's image and name never reach @launchacard without a human seeing them first. The Worker's cron
+ * while CARDDEX_X_AUTO_APPROVE is off, the creator's image and name never reach @launchacard without a human seeing them
+ * first. With it on, a row whose post text passes the filters is approved at once as reviewed by "auto"
+ * (autoApproveXReviews) and held for AUTO_HOLD_MS before a run may claim it; only rows the filters block wait for an
+ * owner. The filters read the text only (name, ticker, mint, length): the card image is never checked, so the hold is
+ * the owner's window to Skip a queued row on /admin/replies before it is claimed. The Worker's cron
  * (server.ts scheduled) calls runXAutoPost, which posts at most one approved coin per run:
  *   - one claim at a time: a single UPDATE moves one queued row to "posting" only while no other row is posting, the
  *     UTC day's posts are under the cap and the last claim is older than the gap, so two isolates never post twice;
@@ -65,21 +69,61 @@ export async function keepXOptin(intentId: string): Promise<void> {
 }
 const queueSql = (where: string) => `INSERT OR IGNORE INTO live_x_posts (intent_id, status, attempts, next_attempt_at, created_at, updated_at)
   SELECT o.intent_id, 'review', 0, ?1, ?1, ?1 FROM live_x_optins o JOIN live_launch_intents i ON i.id = o.intent_id WHERE i.status = 'complete' AND ${where}`;
+/** The reviewer recorded on a row approved by CARDDEX_X_AUTO_APPROVE rather than by an owner's wallet. */
+export const AUTO_REVIEWER = "auto";
+/**
+ * How long an auto-approved row waits before a cron run may claim it, so an owner always has a window to look at the
+ * card image (which no filter checks) and Skip it. Longer than one cron interval (10 minutes).
+ */
+export const AUTO_HOLD_MS = 15 * 60_000;
 /**
  * Adds the announcement of a launch that just completed for an owner's review, when its creator opted in and
- * announcements are on. Never throws: an announcement can never stop a launch from finishing. True when a row was added.
+ * announcements are on; with auto-approve on, a row whose text passes the filters is queued for the cron at once.
+ * Never throws: an announcement can never stop a launch from finishing. True when a row was added.
  */
 export async function queueXAnnouncement(intentId: string, now = Date.now()): Promise<boolean> {
+  let queued = false;
   try {
     if (!liveReadiness().xAnnounce) return false;
     const result = await stmt(queueSql("o.intent_id = ?2"), now, intentId).run();
-    const queued = (result.meta?.changes ?? 0) > 0;
+    queued = (result.meta?.changes ?? 0) > 0;
     if (queued) logX("review", {intentId});
-    return queued;
   } catch (error) {
     logX("queue_failed", {intentId, reason: noTable(error) ? "schema" : "error"});
     return false;
   }
+  // A failed approval leaves the row in review: the next cron run approves it.
+  if (queued) await autoApproveXReviews(now, intentId).catch(() => logX("auto_approve_failed", {intentId}));
+  return queued;
+}
+/**
+ * CARDDEX_X_AUTO_APPROVE: approves rows waiting for review (one launch, or every one younger than a day) whose post
+ * text the filters accept, as reviewed by "auto", held for AUTO_HOLD_MS before a claim (the filters never see the card
+ * image, so this is the owner's window to Skip it). Rows the filters block stay in review for an owner (and are skipped
+ * after a day). Does nothing while the switch, or announcements, are off. The number of rows approved.
+ */
+export async function autoApproveXReviews(now = Date.now(), intentId?: string): Promise<number> {
+  const readiness = liveReadiness();
+  if (!readiness.xAutoApprove || !readiness.publicOrigin) return 0;
+  const rows = (await stmt(`SELECT i.id, i.token_mint, i.quote_key, i.payload_json, i.status FROM live_x_posts p JOIN live_launch_intents i ON i.id = p.intent_id
+    WHERE p.status = 'review' AND p.created_at >= ?1 AND (?2 IS NULL OR p.intent_id = ?2) ORDER BY p.created_at, p.intent_id LIMIT 100`,
+  now - MAX_AGE_MS, intentId ?? null).all<IntentRow>()).results ?? [];
+  let approved = 0;
+  for (const row of rows) {
+    if (row.status !== "complete" || !builtText(row, readiness.publicOrigin).ok) continue;
+    const result = await stmt(`UPDATE live_x_posts SET status = 'queued', error = NULL, next_attempt_at = ?4, reviewed_by = ?2, reviewed_at = ?1, updated_at = ?1
+      WHERE intent_id = ?3 AND status = 'review'`, now, AUTO_REVIEWER, row.id, now + AUTO_HOLD_MS).run();
+    if ((result.meta?.changes ?? 0) > 0) { approved++; logX("auto_approved", {intentId: row.id}); }
+  }
+  return approved;
+}
+/** The post text of a launch row, as the cron would build it. */
+function builtText(row: IntentRow, origin: string) {
+  let payload: Payload | null = null;
+  try { payload = JSON.parse(row.payload_json) as Payload; } catch { /* Not postable. */ }
+  return payload
+    ? xAnnouncementText({name: payload.fields.name, symbol: payload.fields.symbol, pairSymbol: getPairAsset(row.quote_key).symbol, origin, tokenMint: row.token_mint})
+    : {ok: false as const, reason: "The launch could not be read."};
 }
 
 /** A launch's announcement as its creator sees it, by launch id. A database without migration 0018 has none. */
@@ -121,6 +165,9 @@ async function sweep(now: number) {
     stmt("UPDATE live_x_posts SET status = 'skipped', error = 'Not posted within a day of the launch.', updated_at = ? WHERE status IN ('review','queued') AND created_at < ?", now, now - MAX_AGE_MS),
     stmt(queueSql("i.updated_at >= ?2"), now, now - MAX_AGE_MS),
   ]);
+  // Auto-approve: rows that were waiting (added before the switch was on, or whose approval write failed). Its failure
+  // never stops the run.
+  await autoApproveXReviews(now).catch(() => logX("auto_approve_failed", {}));
 }
 
 async function sha256Hex(bytes: Uint8Array<ArrayBuffer>) {
@@ -272,27 +319,57 @@ export async function xReviewQueue(now = Date.now()): Promise<XReviewItem[]> {
     if (noTable(error)) return [];
     throw error;
   }
-  return rows.map(row => {
-    let payload: Payload | null = null;
-    try { payload = JSON.parse(row.payload_json) as Payload; } catch { /* Shown with its reason. */ }
-    const built = payload && origin
-      ? xAnnouncementText({name: payload.fields.name, symbol: payload.fields.symbol, pairSymbol: getPairAsset(row.quote_key).symbol, origin, tokenMint: row.token_mint})
-      : {ok: false as const, reason: "The launch could not be read."};
-    const image = postableImages(payload?.assets)[0];
-    return {
-      intentId: row.id, tokenMint: row.token_mint, createdAt: row.created_at,
-      name: (payload?.fields.name ?? "").slice(0, 80), symbol: (payload?.fields.symbol ?? "").slice(0, 20),
-      text: built.ok ? built.text : null, reason: built.ok ? null : built.reason,
-      imagePath: image ? `/api/live/assets/${image.sha256}.${IMAGE_EXT[image.mimeType]}` : null,
-    };
-  });
+  return rows.map(row => reviewItem(row, origin));
 }
-/** An owner's decision on one announcement (the caller checks the owner): approve queues it now, skip ends it. */
+function reviewItem(row: IntentRow & {created_at: number}, origin: string): XReviewItem {
+  let payload: Payload | null = null;
+  try { payload = JSON.parse(row.payload_json) as Payload; } catch { /* Shown with its reason. */ }
+  const built = origin ? builtText(row, origin) : {ok: false as const, reason: "The launch could not be read."};
+  const image = postableImages(payload?.assets)[0];
+  return {
+    intentId: row.id, tokenMint: row.token_mint, createdAt: row.created_at,
+    name: (payload?.fields.name ?? "").slice(0, 80), symbol: (payload?.fields.symbol ?? "").slice(0, 20),
+    text: built.ok ? built.text : null, reason: built.ok ? null : built.reason,
+    imagePath: image ? `/api/live/assets/${image.sha256}.${IMAGE_EXT[image.mimeType]}` : null,
+  };
+}
+/** An approved announcement: queued (Skip still ends it), being posted, or posted in the last day. */
+export type XUpcomingItem = XReviewItem & {status: "queued" | "posting" | "posted"; autoApproved: boolean; postId: string | null; postedAt: number | null};
+/**
+ * What the cron will post or just posted, for /admin/replies (the caller checks the owner): queued and posting rows
+ * younger than a day (older ones the sweep skips), then posts of the last day, newest first.
+ */
+export async function xUpcomingAnnouncements(now = Date.now()): Promise<XUpcomingItem[]> {
+  const origin = liveReadiness().publicOrigin ?? "";
+  type Row = IntentRow & {created_at: number; post_status: XUpcomingItem["status"]; reviewed_by: string | null; tweet_id: string | null; posted_at: number | null};
+  let rows: Row[];
+  try {
+    rows = (await stmt(`SELECT i.id, i.token_mint, i.quote_key, i.payload_json, i.status, p.created_at, p.status AS post_status, p.reviewed_by, p.tweet_id, p.posted_at
+      FROM live_x_posts p JOIN live_launch_intents i ON i.id = p.intent_id
+      WHERE (p.status IN ('queued','posting') AND p.created_at >= ?1) OR (p.status = 'posted' AND p.posted_at >= ?1)
+      ORDER BY CASE p.status WHEN 'posting' THEN 0 WHEN 'queued' THEN 1 ELSE 2 END, CASE WHEN p.status = 'posted' THEN -p.posted_at ELSE p.next_attempt_at END, p.created_at, p.intent_id LIMIT ?2`,
+    now - MAX_AGE_MS, REVIEW_LIST_MAX).all<Row>()).results ?? [];
+  } catch (error) {
+    if (noTable(error)) return [];
+    throw error;
+  }
+  return rows.map(row => ({...reviewItem(row, origin), status: row.post_status, autoApproved: row.reviewed_by === AUTO_REVIEWER,
+    postId: row.post_status === "posted" ? row.tweet_id : null, postedAt: row.post_status === "posted" ? row.posted_at : null}));
+}
+/**
+ * An owner's decision on one announcement (the caller checks the owner): approve queues a row waiting for review; skip
+ * ends a row waiting for review or queued (auto-approved or approved), until a run claims it. One statement each, so a
+ * skip and the cron's claim never both win.
+ */
 export async function reviewXAnnouncement(input: {intentId: string; decision: "approve" | "skip"}, wallet: string, now = Date.now()) {
-  const result = await stmt(`UPDATE live_x_posts SET status = ?, error = ?, next_attempt_at = ?, reviewed_by = ?, reviewed_at = ?, updated_at = ?
-    WHERE intent_id = ? AND status = 'review'`,
-  input.decision === "approve" ? "queued" : "skipped", input.decision === "approve" ? null : "Not approved for posting.", now, wallet, now, now, input.intentId).run();
-  if ((result.meta?.changes ?? 0) === 0) throw new UserError("That announcement is no longer waiting for review.");
+  const result = input.decision === "approve"
+    ? await stmt(`UPDATE live_x_posts SET status = 'queued', error = NULL, next_attempt_at = ?1, reviewed_by = ?2, reviewed_at = ?1, updated_at = ?1
+      WHERE intent_id = ?3 AND status = 'review'`, now, wallet, input.intentId).run()
+    : await stmt(`UPDATE live_x_posts SET status = 'skipped', error = CASE status WHEN 'queued' THEN 'Skipped before posting.' ELSE 'Not approved for posting.' END,
+      reviewed_by = ?2, reviewed_at = ?1, updated_at = ?1 WHERE intent_id = ?3 AND status IN ('review','queued')`, now, wallet, input.intentId).run();
+  if ((result.meta?.changes ?? 0) === 0) throw new UserError(input.decision === "approve"
+    ? "That announcement is no longer waiting for review."
+    : "That announcement is no longer waiting: it is being posted or has ended.");
   logX(input.decision === "approve" ? "approved" : "declined", {intentId: input.intentId});
   return {intentId: input.intentId, decision: input.decision};
 }

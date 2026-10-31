@@ -60,6 +60,8 @@ export type LiveReadiness = {
   feeSharing?: boolean;
   /** Announcements on @launchacard (CARDDEX_X_AUTOPOST="true" with its secrets, and recovery ready). Absent means off. */
   xAnnounce?: boolean;
+  /** Announcements that pass the post filters are queued without an owner's approval (CARDDEX_X_AUTO_APPROVE="true", with xAnnounce). */
+  xAutoApprove?: boolean;
 };
 export type LiveWallet = { wallet: string; expiresAt: number };
 export type LiveLaunchIntent = {
