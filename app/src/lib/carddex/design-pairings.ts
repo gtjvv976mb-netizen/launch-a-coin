@@ -102,12 +102,14 @@ export const PAIR_DESIGNS: Readonly<Partial<Record<PairAssetKey, CardDesignKey>>
  * review, as with the pairs' own cards: One Piece's back is the Straw Hat jolly roger, Pokemon Prism's back a Poke
  * Ball, Jade Reliquary's back Pepe the Frog, Noir Terminal and Nordic Signal show unbranded phones in the style of a
  * BlackBerry and a Nokia 3310 (no mark on either). A visual check, not legal advice. The owner reviewed these on
- * 31 October 2026 and kept One Piece and Pokemon Prism as SOL options.
+ * 31 October 2026 and kept One Piece and Pokemon Prism as SOL options. Regal, Mythic, Ember and Pokemon Classic joined
+ * the same day, when the owner released the content holds whose pairs had launched with them (Pokemon Classic's back
+ * is a Poke Ball, as Pokemon Prism's); AMC and the six stock-* finishes stay bound to their own stocks.
  */
 export const SOL_DESIGN_OPTIONS: readonly CardDesignKey[] = Object.freeze([
   "pair-sol", "one-piece",
-  "pokemon-full-art", "yugioh-monster", "yugioh-spell", "obsidian-archive",
-  "spark", "surge", "nova", "tide", "apex", "bloom", "aurora", "relic", "frost", "legend",
+  "pokemon-classic", "pokemon-full-art", "yugioh-monster", "yugioh-spell", "obsidian-archive",
+  "spark", "surge", "nova", "tide", "apex", "ember", "bloom", "mythic", "aurora", "relic", "frost", "regal", "legend",
   "pepe", "shib", "popcat", "blackberry", "nokia", "binance", "kraken",
   "wildtype", "ronin", "astral", "neon-circuit", "abyssal",
 ] as CardDesignKey[]);

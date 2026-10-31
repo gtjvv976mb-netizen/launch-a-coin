@@ -20,7 +20,7 @@ import { type CardData } from "../components/mintdex/MintCard";
 import { Field, Icon, Input, TextLink, useToast } from "../components/mintdex/ui";
 import { TICKER_RE } from "../lib/mintdex/constants";
 import { pageHead, sentences } from "../lib/mintdex/seo";
-import { oneOf, searchSchema, text } from "../lib/mintdex/search";
+import { key, oneOf, searchSchema, text } from "../lib/mintdex/search";
 import { LaunchCardPreview } from "../components/carddex/live/LaunchCardPreview";
 import { PairHud } from "../components/carddex/PairHud";
 import { getCardDesign } from "../lib/carddex/designs";
@@ -42,7 +42,7 @@ const LiveLaunchPanel = lazy(() => import("../components/carddex/live/LiveLaunch
 
 export const Route = createFileRoute("/launch")({
   // ?mode= is accepted from older links and ignored: every launch is a mainnet launch.
-  validateSearch: searchSchema({ design: text(), quote: text(), mode: oneOf(["live", "demo"]) }),
+  validateSearch: searchSchema({ design: text(), quote: key(), mode: oneOf(["live", "demo"]) }),
   // Readiness is read on the server, so the HTML is drawn in the state the page will keep (open, recovery only, or
   // paused) with no swap after hydration. It is shared with every readiness reader through the query cache.
   loaderDeps: () => ({}),

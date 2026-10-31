@@ -21,8 +21,9 @@ describe("the Launch form derives its card from the pair", () => {
       expect(launchDesign(asset.key, null)).toBe(designForPair(asset.key)!);
     }
     expect(launchDesign("doge")).toBe("pair-doge");
-    // TSLAX's identity is held (content holds): the pair keeps the design production gives it.
-    expect(launchDesign("tslax")).toBe("stock-tsla");
+    // TSLAX's identity hold was released (31 October 2026); ANSEM's identity is still held, so ANSEM keeps its live design.
+    expect(launchDesign("tslax")).toBe("pair-tslax");
+    expect(launchDesign("ansem")).toBe("sovereign");
     expect(launchDesign("agency")).toBe("pair-sol");
     expect(launchDesign("cards")).toBe("pair-cards");
     expect(launchDesign("unknown")).toBe("pair-sol");
@@ -42,7 +43,7 @@ describe("the Launch form derives its card from the pair", () => {
     expect(formDesign("sol", "pokemon-classic", false)).toBe("pair-sol");
     expect(formDesign("sol", "pokemon-classic", true, "ronin")).toBe("pokemon-classic");
     expect(formDesign("sol", "pokemon-classic", false, "ronin")).toBe("ronin");
-    expect(formDesign("gmex", "gamestop", false)).toBe("stock-gme");
+    expect(formDesign("gmex", "gamestop", false)).toBe("pair-gmex");
     expect(formDesign("tslax", "stock-tsla", true)).toBe("stock-tsla");
     for (const asset of OFFERED_PAIRS) {
       expect(formDesign(asset.key, null, true)).toBe(designForPair(asset.key)!);
@@ -85,12 +86,12 @@ describe("the Launch form derives its card from the pair", () => {
     expect(pairFromSearch({ design: "pair-usdc" })).toEqual({ pair: "usdc", design: null, notice: "" });
     expect(pairFromSearch({ design: "gamestop" })).toEqual({ pair: "gmex", design: null, notice: "" });
     expect(pairFromSearch({ design: "pokemon-full-art" })).toEqual({ pair: "sol", design: "pokemon-full-art", notice: "" });
-    // A held identity whose pair is still offered opens on that pair (and its live card), quietly.
+    // A held identity whose pair is still offered opens on that pair (and its live card), quietly; so does a released one.
     expect(pairFromSearch({ design: "pair-ansem" })).toEqual({ pair: "ansem", design: null, notice: "" });
     expect(pairFromSearch({ design: "pair-tslax" })).toEqual({ pair: "tslax", design: null, notice: "" });
     // An unknown, withheld or held-out design says so.
-    for (const design of ["nope", "pair-aave", "pair-uni", "pair-67", "pair-agency", "pair-alon", "pair-hodl", "pair-jeanphil", "pair-claudia", "pair-biketyson", "pair-neet"]) expect(pairFromSearch({ design })).toEqual({ pair: "sol", design: null, notice: cardGone });
-    for (const quote of ["aave", "uni", "popcat", "67", "agency", "alon", "hodl", "jeanphil", "claudia", "biketyson", "neet"]) expect(pairFromSearch({ quote })).toEqual({ pair: "sol", design: null, notice: "That pair is unavailable. SOL selected." });
+    for (const design of ["nope", "pair-aave", "pair-uni", "pair-agency", "pair-alon", "pair-jeanphil", "pair-claudia", "pair-biketyson", "pair-neet"]) expect(pairFromSearch({ design })).toEqual({ pair: "sol", design: null, notice: cardGone });
+    for (const quote of ["aave", "uni", "popcat", "agency", "alon", "jeanphil", "claudia", "biketyson", "neet"]) expect(pairFromSearch({ quote })).toEqual({ pair: "sol", design: null, notice: "That pair is unavailable. SOL selected." });
   });
   test("a kept draft brings back its pair, if it is still offered, and SOL's chosen design", () => {
     const chosen = { designChosen: true };
@@ -169,21 +170,21 @@ describe("SOL's card design chooser", () => {
 
 describe("the pair HUD", () => {
   test("All holds every offered pair once: SOL and USDC, the stocks, memes, other crypto, then collector tokens", () => {
-    expect(ORDERED_PAIRS).toHaveLength(86);
-    expect(new Set(ORDERED_PAIRS.map(pair => pair.key)).size).toBe(86);
+    expect(ORDERED_PAIRS).toHaveLength(89);
+    expect(new Set(ORDERED_PAIRS.map(pair => pair.key)).size).toBe(89);
     expect(ORDERED_PAIRS.map(pair => pair.key).sort()).toEqual(OFFERED_PAIRS.map(pair => pair.key).sort());
     expect(ORDERED_PAIRS.slice(0, 4).map(pair => pair.key)).toEqual(["sol", "usdc", "gmex", "tslax"]);
     expect(ORDERED_PAIRS.findIndex(pair => pair.key === "tslax")).toBe(3);
-    expect(ORDERED_PAIRS.some(pair => ["aave", "uni", "67", "agency", "alon", "hodl", "jeanphil", "claudia", "biketyson", "neet"].includes(pair.key))).toBe(false);
+    expect(ORDERED_PAIRS.some(pair => ["aave", "uni", "agency", "alon", "jeanphil", "claudia", "biketyson", "neet"].includes(pair.key))).toBe(false);
     expect(PAIR_GROUPS.map(group => group.name)).toEqual(["All", "Memes", "Stocks", "Crypto", "Collector"]);
     expect(pairsInGroup("crypto").slice(0, 2).map(pair => pair.key)).toEqual(["sol", "usdc"]);
     expect(pairsInGroup("crypto")).toHaveLength(22);
     expect(pairsInGroup("collector").map(pair => pair.key)).toEqual(["cards", "sv151"]);
     expect(pairsInGroup("stocks").map(pair => pair.key)).toEqual(["gmex", "tslax", "nvdax", "aaplx", "mstrx", "coinx", "amc"]);
-    expect(pairsInGroup("memes")).toHaveLength(55);
+    expect(pairsInGroup("memes")).toHaveLength(58);
     expect(pairsInGroup("memes").every(pair => pairGroupOf(pair) === "memes" && pair.kind === "meme")).toBe(true);
     const sizes = PAIR_GROUPS.filter(group => group.key !== "all").map(group => pairsInGroup(group.key).length);
-    expect(sizes.reduce((a, b) => a + b, 0)).toBe(86);
+    expect(sizes.reduce((a, b) => a + b, 0)).toBe(89);
     // Old links named the base group (SOL and USDC): it is part of Crypto now.
     expect(groupAlias("base")).toBe("crypto");
     expect(groupAlias("memes")).toBe("memes");
@@ -203,7 +204,7 @@ describe("the pair HUD", () => {
     expect(filterPairs("all", "ape")[0]!.key).toBe("ape");
     expect(filterPairs("all", "aave")).toEqual([]);
     expect(filterPairs("all", "spx")[0]!.key).toBe("spx");
-    for (const query of ["67", "agency", "hodl", "claudia"]) expect(filterPairs("all", query).map(pair => pair.key)).not.toContain(query);
+    for (const query of ["agency", "alon", "claudia"]) expect(filterPairs("all", query).map(pair => pair.key)).not.toContain(query);
   });
   test("ranked search: typing any offered pair's symbol puts it first, 84 or more within 4 characters", () => {
     let quick = 0;

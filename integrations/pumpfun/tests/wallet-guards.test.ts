@@ -77,9 +77,13 @@ describe("the shared wallet rule", () => {
     // A Memory account a MemoryWrite would need: a new key plus a signer and writable payer.
     expect(refusal(phantomGuarded(plan, [{ target: creator, data: Uint8Array.from([0, 0, 0]), extraAccounts: [stranger, SYSTEM] }], { newKeys: [stranger] }))).toBe("guard");
   });
-  test("an assertion placed among or before the plan instructions is refused", () => {
-    expect(refusal(phantomGuarded(plan, phantom, { at: 0 }))).toBe("instructions");
-    expect(refusal(phantomGuarded(plan, phantom, { at: 3 }))).toBe("instructions");
+  test("assertions placed before or among the plan instructions are accepted, as Phantom did on a real card (2026-10-31)", () => {
+    for (const at of [0, 2, 3]) expect(change(phantomGuarded(plan, phantom, { at }))).toMatchObject({ recompiled: true, guards: [{ discriminator: 6 }, { discriminator: 10 }] });
+  });
+  test("an instruction from any other program among the plan instructions is refused, as is a plan instruction moved", () => {
+    expect(refusal(phantomGuarded(plan, [{ ...phantom[0], program: key(90) }], { at: 2 }))).toBe("instructions");
+    expect(refusal(encodeV0Message({ ...parts, instructions: [parts.instructions[0], parts.instructions[2], parts.instructions[1], parts.instructions[3]] }))).toBe("instructions");
+    expect(refusal(encodeV0Message({ ...parts, instructions: parts.instructions.slice(0, 3) }))).toBe("instructions");
   });
   test("a writable Lighthouse key, or any plan key whose flags move, is refused", () => {
     expect(refusal(phantomGuarded(plan, phantom, { writableProgram: true }))).toBe("flags");
@@ -132,15 +136,16 @@ describe("the strict v0 decoder", () => {
 
 describe("the finalized-transaction form of the rule", () => {
   const instructions = (message: Uint8Array) => resolveInstructions(decodeV0Message(message));
-  test("a trailing assertion suffix is stripped only when the landed message is the validated one", () => {
+  test("trailing assertions are stripped only when the landed message is the validated one", () => {
     const landed = phantomGuarded(plan, phantom), keys = decodeV0Message(landed).keys;
     expect(withoutWalletGuards(instructions(landed), true, keys)).toHaveLength(4);
     expect(() => withoutWalletGuards(instructions(landed), false, keys)).toThrow(WalletMessageRefused);
     expect(withoutWalletGuards(instructions(plan), false, planView.keys)).toHaveLength(4);
   });
-  test("interleaved or misshapen Lighthouse instructions are refused even with a validated hash", () => {
-    const interleaved = phantomGuarded(plan, phantom, { at: 2 });
-    expect(() => withoutWalletGuards(instructions(interleaved), true, decodeV0Message(interleaved).keys)).toThrow(WalletMessageRefused);
+  test("interleaved assertions are stripped like a suffix; misshapen Lighthouse instructions are refused even with a validated hash", () => {
+    const interleaved = phantomGuarded(plan, phantom, { at: 2 }), kept = withoutWalletGuards(instructions(interleaved), true, decodeV0Message(interleaved).keys);
+    expect(kept.map(ix => ix.program)).toEqual([COMPUTE, COMPUTE, PUMP, ATA]);
+    expect(() => withoutWalletGuards(instructions(interleaved), false, decodeV0Message(interleaved).keys)).toThrow(WalletMessageRefused);
     const memory = phantomGuarded(plan, [{ target: creator, data: Uint8Array.from([0, 0, 0]) }]);
     expect(() => withoutWalletGuards(instructions(memory), true, decodeV0Message(memory).keys)).toThrow(WalletMessageRefused);
   });

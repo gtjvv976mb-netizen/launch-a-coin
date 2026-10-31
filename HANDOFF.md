@@ -1,4 +1,4 @@
-# 31 October creator fee sharing on `claude/fee-sharing` (from 137c9a0; not committed, not deployed)
+# 31 October creator fee sharing on `claude/fee-sharing` (8d9688e, merged with 387fb95)
 
 **What changed (the owner's words: "in creating a token, also integrate what pump.fun offers, like sharing creator fees").** A creator may share the coin's pump.fun creator fees with 1 to 7 Solana wallets. The split is chosen in Launch's More options ("Share creator fees", off by default), saved beside the launch, and set after the coin and card are complete by a separate creator-only transaction (Phantom 3 to 4 prompts). It is permanent once set. Launch a Card is never a recipient ("Launch a Card charges no platform fee" stays true). Full description: README.md, "Creator fee sharing".
 
@@ -8,6 +8,16 @@
 - **Verified by unsigned mainnet simulation (31 October):** sweep + create + update succeed for SOL (1, 5, 10 recipients) and USDC (with the sharing-vault ATA create); the first update locks the split (second: 6009); executable recipients block payouts (6052); a third party cannot create the config (6016).
 - **Gates.** app: `tsc` clean, `bun test tests/chain tests/carddex` 808 pass / 0 fail (36 files; was 788), `vite build` ok. integrations/pumpfun: `tsc` clean, `bun test` 143 pass / 0 fail (was 127). Local production build with all 17 migrations applied on local D1; `/api/live/health` schema ok; the group checked in the browser at 1024 and 375 px (switch off locally, so it was shown by injecting its server-rendered markup).
 - **Not verified:** how Phantom and Blockaid present a pump-fees transaction (real wallet test needed before switching on); a Token-2022 stock-quote split on mainnet (only offline sizes: every stock-quote curve found was a holder-reward coin); a non-mayhem USDC curve; a creator whose own quote token account is missing (preflight refuses it); the whole flow end to end in a real browser with the switch on.
+
+# 31 October Codex redesigns and released holds on `claude/codex-redesigns`
+
+**Codex's redesigns (3716e3a, live as 00a036de).** Codex's receipt (`creative/higgsfield/identity-corrections-2026-10-31/integration-completion-premium43.json` in its folder) lists 43 redesigned pair designs (the owner said 47). Their fronts, backs, atlases (incl. seven `--stock`), previews and token backs are taken byte for byte, with Codex's entries for exactly those keys in `generated-layouts.json`, `render-assets.json`, `token-back-assets.json` and `integrations/pumpfun/src/design-assets.json` (the install gate drops a design whose pins disagree, so all four must move together). 480/640 copies rebuilt with `scripts/generated-face-variants.ts --missing` and `scripts/card-skin-variants.ts --missing`. `CanonicalSkinSurface` gained Codex's `canonicalSource` branch.
+
+**Holds released (the owner, after reviewing the 14 held redesigns: "all should go live").** 67, HODL, SOLANGELES, TRUMP, GIGA, GMEx, TSLAx, NVDAx, AAPLx, MSTRx, COINx, AMC, SV151 and FARTCOIN left `HELD_PAIR_DESIGNS` and `public/.assetsignore`; their art still shows what held them (a child's likeness, real people, other companies' logos, FARTCOIN's garbled back wordmark), and the owner was told so. Six holds remain (AGENCY, ALON, JEANPHIL, CLAUDIA, BIKETYSON, NEET not offered) and three live-design holds (ANSEM sovereign, SPX celestial, VINE magic-etched).
+- 89 pairs offered (Memes 58). HODL and SOLANGELES are direct pairs (admitted on-chain, missing from pump.fun's public list); the owner confirmed both for mainnet the same day ("Confirm both", `CONFIRMED_DIRECT_PAIRS`), so all 14 are open on mainnet. Neither has had a real mainnet create; the server's unsigned simulation runs before the wallet opens. The other 13 direct pairs stay held; How it works now says only confirmed ones can launch.
+- Pair logos for 67, HODL, SOLANGELES from Codex's verified intake files (`tools/carddex/make_pair_logos.py`, 89 sources; the other 83 logos came out byte for byte).
+- Freed designs: Regal, Mythic, Ember and Pokemon Classic are SOL options now (32; no person, child or company mark; Pokemon Classic's back is a Poke Ball like Pokemon Prism's). AMC and the six `stock-*` finishes stay bound to their stocks and leave new launches. Coins that carry any of them keep them. Four new 128 px thumbnails.
+- Tests updated for the counts and the released keys (796 pass).
 
 # 31 October card mint fix pass on `claude/pair-identities` (not deployed)
 

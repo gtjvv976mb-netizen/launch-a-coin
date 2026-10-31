@@ -131,12 +131,12 @@ const PRINT_LAYOUTS: Record<string, Record<string, Box>> = {
   "neon-circuit": { name:{x:.12,y:.045,w:.76,h:.045}, type:{x:.12,y:.529,w:.76,h:.04}, text:{x:.11,y:.615,w:.78,h:.255}, "foot-a":{x:.13,y:.907,w:.30,h:.028}, "foot-b":{x:.57,y:.907,w:.30,h:.028}, footer:{x:.13,y:.907,w:.74,h:.028} },
 };
 
-export type GeneratedSkinSource = { art: Box; mask: {width:number;height:number;path:string}; plates: Record<string,Box>;sourceMaterialGaps?:boolean };
+export type GeneratedSkinSource = { art: Box; mask: {width:number;height:number;path:string}; plates: Record<string,Box>;sourceMaterialGaps?:boolean;canonicalSource?:boolean };
 
 /** Coordinates below select pixels from immutable artwork. They never position live token content. */
 export function generatedSkinSource(key?: string): GeneratedSkinSource | null {
   if (!key) return null;
-  const measured = (measuredLayouts as Record<string,{art:Box;mask:{width:number;height:number;path:string};prints?:Record<string,Box>;sourceMaterialGaps?:boolean}>)[key];
+  const measured = (measuredLayouts as Record<string,{art:Box;mask:{width:number;height:number;path:string};prints?:Record<string,Box>;sourceMaterialGaps?:boolean;canonicalSource?:boolean}>)[key];
   if (!measured) return null;
   // Pair-specific masters have three deliberate content surfaces and a continuous
   // lower ornament. Legacy footer crops must never punch holes in that ornament.
@@ -151,7 +151,7 @@ export function generatedSkinSource(key?: string): GeneratedSkinSource | null {
   // companion bar supplies the same parchment/metal without covering the live token name.
   if (key === "obsidian-archive") plates.name = plates.type;
   if (key === "relic" && !measured.prints?.name) plates.name = measured.prints?.type ?? DEFAULT_PRINT_LAYOUT.name;
-  return {art:measured.art,mask:measured.mask,plates,...(measured.sourceMaterialGaps?{sourceMaterialGaps:true}:{})};
+  return {art:measured.art,mask:measured.mask,plates,...(measured.sourceMaterialGaps?{sourceMaterialGaps:true}:{}),...(measured.canonicalSource?{canonicalSource:true}:{})};
 }
 
 function svgUrl(source:string) { return `url("data:image/svg+xml,${encodeURIComponent(source)}")`; }

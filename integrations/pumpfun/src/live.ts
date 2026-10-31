@@ -467,7 +467,7 @@ function signedTransactionDetails(transaction: VersionedTransactionResponse, exp
     accounts: ix.accountKeyIndexes.map((index) => keys.get(index)!), data: Buffer.from(ix.data),
   }));
   // Wallet assertions count only inside the message the server validated before relaying (its hash is the expected
-  // one): then they must be a trailing suffix of read-only Lighthouse assertions, and the rest is checked as planned.
+  // one): then each must be a read-only Lighthouse assertion, wherever it sits, and the rest is checked as planned.
   let instructions: typeof all;
   const keyList = Array.from({ length: keys.length }, (_, index) => keys.get(index)!.toBase58());
   try { instructions = withoutWalletGuards(all.map((ix) => ({ ...ix, accounts: ix.accounts.map((key) => key.toBase58()), source: ix })), !!expectedMessageSha256, keyList).map((ix) => ix.source); }

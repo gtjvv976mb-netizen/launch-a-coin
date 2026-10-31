@@ -250,7 +250,7 @@ export class WalletBatchUnsupported extends Error {
 }
 /**
  * Wallet-first: the wallet must return the reviewed message, or that message with only what the shared wallet rule
- * accepts (wallet-guards.ts: read-only Lighthouse assertions appended after every plan instruction, a recompiled key
+ * accepts (wallet-guards.ts: read-only Lighthouse assertions anywhere around the plan instructions, a recompiled key
  * order, a refreshed blockhash that the server re-checks before it relays anything), signed by the creator (the fee
  * payer) in the first slot over the returned message, with the new asset's slot still empty. Anything else is
  * refused, never co-signed.

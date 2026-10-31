@@ -120,9 +120,10 @@ export const chargesTransferFee = (key?: string | null) => !!key && (TRANSFER_FE
  * Direct pairs (isDirectPair) whose mainnet launches the owner has confirmed. Until a key is added here a mainnet launch
  * on a direct pair is refused before anything is uploaded (readiness audit, 30 October 2026: pump.fun's dated public
  * table leaves them out, so its site support can't be checked from the chain, and none has had a real mainnet create).
- * One key opens one pair. The demo is unaffected.
+ * One key opens one pair. The demo is unaffected. HODL and SOLANGELES: the owner confirmed both on 31 October 2026
+ * ("Confirm both"), when their content holds were released; neither has had a real mainnet create yet.
  */
-export const CONFIRMED_DIRECT_PAIRS: readonly PairAssetKey[] = Object.freeze([] as PairAssetKey[]);
+export const CONFIRMED_DIRECT_PAIRS: readonly PairAssetKey[] = Object.freeze(["hodl", "solangeles"] as PairAssetKey[]);
 const FEE_HOLD = "Mainnet launches can't use this pair yet: its mint charges a transfer fee.";
 const DIRECT_HOLD = "Mainnet launches can't use this pair yet: it isn't on pump.fun's public pairs list.";
 export const DIRECT_PAIR_HELD = `${DIRECT_HOLD} Pick another pair.`;

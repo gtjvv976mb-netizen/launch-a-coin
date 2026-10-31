@@ -172,7 +172,7 @@ describe("unsigned official Pump custom-pair preparer", () => {
   });
 
   test("every offered pair prepares with its own design's reviewed art hashes (the pair picks the card)", async () => {
-    expect(OFFERED_PAIRS).toHaveLength(86);
+    expect(OFFERED_PAIRS).toHaveLength(89);
     for (const asset of OFFERED_PAIRS) {
       const designKey = designForPair(asset.key)!, request = input(designKey, asset.key);
       expect(art[designKey as keyof typeof art]).toBeDefined();

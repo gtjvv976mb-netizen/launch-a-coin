@@ -823,7 +823,28 @@ describe("Phantom's Lighthouse assertions under the shared wallet rule, end to e
     expect(rpc.sent()).toBe(0);
   });
 
-  test("assertions that write, add accounts or signers, use another program, sit among the plan, or change the compute budget are refused", async () => {
+  test("a card whose assertions Phantom placed between the Core instructions is co-signed, relayed and verified (2026-10-31)", async () => {
+    const input = solBuy(), rpc = mockRpc();
+    const token = await prepareTokenTransaction(input, { connection: rpc.connection });
+    const signed = await signPlanWithWallet(token, expectedPlan(input, token), { address: input.mint, seed: tokenKey.secretKey.slice(0, 32) }, "wallet-first", walletReturns((message) => message));
+    const validated = validateSignedWalletTransaction(token, Buffer.from(signed).toString("base64"));
+    rpc.remember({ transactionBase64: Buffer.from(signed).toString("base64") }, validated.signature); await rpc.addToken(input);
+    await verifyTokenLaunch(input, { connection: rpc.connection, signature: validated.signature, expectedMessageSha256: validated.signedMessageSha256 });
+    const nft = await prepareCreatorNftTransaction(input, { connection: rpc.connection, tokenSignature: validated.signature, tokenMessageSha256: validated.signedMessageSha256 });
+    if (nft.status !== "wallet-signature-required") throw new Error("Expected a fresh NFT plan");
+    // The real shape: four plan instructions became six, both assertions sitting between the Core create and update.
+    const guards = [{ target: input.creator, data: payerGuardData(9_000_000_000n) }, { target: input.creator, data: payerGuardData(8_000_000_000n) }];
+    const card = await signPlanWithWallet(nft, expectedPlan(input, nft), { address: input.nftMint, seed: nftKey.secretKey.slice(0, 32) }, "wallet-first", walletReturns((message) => phantomGuarded(message, guards, { at: 3 })));
+    const cardBase64 = Buffer.from(card).toString("base64"), cardValidated = validateSignedWalletTransaction(nft, cardBase64);
+    expect(cardValidated.walletGuards).toBe(2);
+    expect(describeWalletChange(nft, cardBase64)).toMatchObject({ instructionsBefore: 4, instructionsAfter: 6, planInstructionsKept: true, rule: { accepted: true } });
+    rpc.remember({ transactionBase64: cardBase64 }, cardValidated.signature); rpc.addNft(input);
+    expect(await verifyCreatorNft(input, { connection: rpc.connection, signature: cardValidated.signature, expectedMessageSha256: cardValidated.signedMessageSha256 })).toMatchObject({ status: "verified" });
+    await expect(verifyCreatorNft(input, { connection: rpc.connection, signature: cardValidated.signature })).rejects.toThrow("unexpected wallet instructions");
+    expect(rpc.sent()).toBe(0);
+  });
+
+  test("assertions that write, add accounts or signers, use another program, or change the compute budget are refused", async () => {
     const input = defaultInput(), rpc = mockRpc(), plan = await prepareTokenTransaction(input, { connection: rpc.connection });
     const seed = { address: input.mint, seed: tokenKey.secretKey.slice(0, 32) };
     const global = GLOBAL_PDA.toBase58(), payer = { target: input.creator, data: payerGuardData() };
@@ -840,7 +861,7 @@ describe("Phantom's Lighthouse assertions under the shared wallet rule, end to e
       ["MemoryWrite with a new memory account", recompiled(assertion([{ pubkey: creatorKey.publicKey, isSigner: true, isWritable: true }, { pubkey: Keypair.generate().publicKey, isSigner: false, isWritable: true }], Uint8Array.from([0, 0, 0])))],
       ["the old Lighthouse program", (message) => phantomGuarded(message, [{ ...payer, program: "L1TEVtgA75k273wWz1s6XMmDhQY5i3MwcvKb4VbZzfK" }])],
       ["a non-Lighthouse program", (message) => phantomGuarded(message, [{ ...payer, program: "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr" }])],
-      ["an assertion among the plan instructions", (message) => phantomGuarded(message, [payer], { at: 2 })],
+      ["another program among the plan instructions", (message) => phantomGuarded(message, [{ ...payer, program: "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr" }], { at: 2 })],
       ["an assertion on an account the plan lacks", (message) => phantomGuarded(message, [{ target: getAssociatedTokenAddressSync(new PublicKey(PAIR_ASSETS[1].mint), creatorKey.publicKey).toBase58(), data: payerGuardData() }], { newKeys: [getAssociatedTokenAddressSync(new PublicKey(PAIR_ASSETS[1].mint), creatorKey.publicKey).toBase58()] })],
       ["an added compute-budget instruction", recompiled(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 2_500_000 }))],
       // Phantom's own fee insertion: the reviewed price replaced by 2,500,000 micro-lamports, plus a payer assertion.

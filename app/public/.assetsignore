@@ -2,26 +2,12 @@
 # but are never uploaded or served (wrangler reads this file in the assets folder; vite copies it from public/).
 # No release offered these designs, so no stored coin carries one; never list a design a release has offered. One line
 # per held design: delete it with its HELD_PAIR_DESIGNS line to publish the design again (tests/carddex/held-assets.test.ts).
-pair-67[-.]*
 pair-agency[-.]*
 pair-alon[-.]*
-pair-hodl[-.]*
 pair-jeanphil[-.]*
 pair-claudia[-.]*
 pair-biketyson[-.]*
 pair-neet[-.]*
-pair-solangeles[-.]*
 pair-ansem[-.]*
 pair-spx[-.]*
-pair-trump[-.]*
-pair-giga[-.]*
-pair-gmex[-.]*
-pair-tslax[-.]*
-pair-nvdax[-.]*
-pair-aaplx[-.]*
-pair-mstrx[-.]*
-pair-coinx[-.]*
-pair-amc[-.]*
-pair-sv151[-.]*
 pair-vine[-.]*
-pair-fartcoin[-.]*

@@ -61,13 +61,16 @@ SOURCES = {
     "lmao": "expansion-references/lmao-5a57ab0ec5d1.jpg", "bobo": "expansion-references/bobo-064db424e413.png",
     "tokabu": "expansion-references/tokabu-511a368112d4.jpg", "manifest": None,
     "baton": "expansion-references/baton-45d46d18d4a6.webp", "claw": "expansion-references/claw-f5546a3e2e71.png",
+    "67": "expansion-references/67-00e3a88121fa.jpg",
     "zauth": "expansion-references/zauth-3add66529015.png", "kins": "expansion-references/kins-fd8bdc66f477.png",
     "percolator": "expansion-references/percolator-fd19ec09ef1b.jpg", "jotchua": "expansion-references/jotchua-c3c31b4fd97d.jpg",
     "zcat": "expansion-references/zcat-og-identity-crop.png", "gork": None,
-    "stonk": "expansion-direct-references/stonk-primary-7417b870b953.svg", "paid": "expansion-direct-references/paid-primary-7fe42e316e42.svg",
+    "stonk": "expansion-direct-references/stonk-primary-7417b870b953.svg",
+    "solangeles": "expansion-direct-references/solangeles-552769df67a1.png", "paid": "expansion-direct-references/paid-primary-7fe42e316e42.svg",
     "pepe": "expansion-direct-references/pepe-ec537de040a7.png", "pill": "expansion-direct-references/pill-primary-b90d439fa4d9.jpg",
     "npc": "expansion-direct-references/npc-fcdab23761ce.png", "wojak": "expansion-direct-references/wojak-c7064f9b7d48.jpg",
-    "eacc": "expansion-direct-references/eacc-4f83e5b63bcd.webp", "shib": "expansion-direct-references/shib-primary-emblem-crop.svg",
+    "eacc": "expansion-direct-references/eacc-4f83e5b63bcd.webp",
+    "hodl": "expansion-direct-references/hodl-56f9bf8d2d0a.jpg", "shib": "expansion-direct-references/shib-primary-emblem-crop.svg",
     "swordcat": "expansion-direct-references/swordcat-9b3a8b914ce0.webp", "plague": "expansion-direct-references/plague-68bb5af167cd.jpg",
     "pump": "expansion-final-references/pump-380ece26fcc6.png", "alch": "expansion-final-references/alch-d8434afffbae.jpg",
     "pumpcade": "expansion-final-references/pumpcade-7986d3ba9bc6.jpg", "codec": "expansion-final-references/codec-84b41e87625c.png",
@@ -175,7 +178,7 @@ def main():
     for target in (out, manifest):
         if repo not in target.parents or root == target or root in target.parents:
             sys.exit(f"refusing to write outside the repo or into the source folder: {target}")
-    if set(SOURCES) - set(MONOGRAMS) != {k for k, v in SOURCES.items() if v} or len(SOURCES) != 86:
+    if set(SOURCES) - set(MONOGRAMS) != {k for k, v in SOURCES.items() if v} or len(SOURCES) != 89:
         sys.exit("source table and monogram list disagree")
 
     from playwright.sync_api import sync_playwright
