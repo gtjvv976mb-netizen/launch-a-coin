@@ -37,8 +37,11 @@ export const CACHE_MS = 5 * 60_000;
 export const SEARCH_WINDOW_MS = 12 * 3_600_000;
 /** The most posts the pool keeps (newest first); a post leaves it after MAX_AGE_MINUTES too. */
 export const POOL_MAX = 400;
-/** The cron's 6 reads an hour plus the open page's checks (owner request 1 November 2026: search constantly). */
-export const DEFAULT_READS_PER_HOUR = 12, DEFAULT_SUGGESTIONS_PER_HOUR = 30;
+/**
+ * Reads: the cron's 6 an hour plus the open page's checks (owner request 1 November 2026: search constantly).
+ * Suggestions: the most the cap allows (owner, 1 November 2026: 30 an hour ran out in three minutes; credits are no concern).
+ */
+export const DEFAULT_READS_PER_HOUR = 12, DEFAULT_SUGGESTIONS_PER_HOUR = 500;
 const HOUR = 3_600_000, TIMEOUT_MS = 60_000, MAX_RESPONSE_BYTES = 512 * 1024;
 /** The one answer every refused access gets, so the page's existence is not confirmed to anyone else. */
 export const NOT_FOUND = "Not found.";
