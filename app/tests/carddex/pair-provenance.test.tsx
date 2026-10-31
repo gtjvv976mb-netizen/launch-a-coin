@@ -16,12 +16,12 @@ describe("pair catalogue provenance",()=>{
         const meta=renderToStaticMarkup(<QuoteAssetMeta quoteAssetKey={asset.key} live={live} />).replaceAll("&#x27;","'");
         expect(meta).toContain(asset.mint);
         expect(meta).toContain("pump.fun pairs");
-        if(isDirectPair(asset)&&live){
+        if(isDirectPair(asset)&&live&&!(CONFIRMED_DIRECT_PAIRS as readonly string[]).includes(asset.key)){
           // Mainnet mode: an unconfirmed direct pair says only that mainnet can't use it yet, and why.
-          expect(CONFIRMED_DIRECT_PAIRS).toHaveLength(0);
           expect(meta).toContain("Mainnet launches can't use this pair yet: it isn't on pump.fun's public pairs list.");
           expect(meta).not.toContain(DIRECT_LINE);
         }else if(isDirectPair(asset)){
+          // The demo, or a direct pair the owner confirmed for mainnet (HODL, SOLANGELES): the plain provenance line.
           expect(meta).toContain(`${DIRECT_LINE} (checked ${asset.verifiedAt}).`);
           expect(meta.match(/admitted on-chain/g)).toHaveLength(1);
           expect(meta).not.toContain("Mainnet launches");

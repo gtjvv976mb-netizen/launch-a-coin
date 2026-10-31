@@ -103,9 +103,11 @@ describe("the pair picks the card", () => {
     for (const key of ["sol", "usdc", "doge", "pepe", null, undefined, ""]) expect(chargesTransferFee(key)).toBe(false);
   });
   test("mainnet holds: ZCAT's transfer fee and every direct pair the owner has not confirmed; the demo keeps them", () => {
-    expect([...CONFIRMED_DIRECT_PAIRS]).toEqual([]);
+    // The owner confirmed HODL and SOLANGELES on 31 October 2026.
+    expect([...CONFIRMED_DIRECT_PAIRS]).toEqual(["hodl", "solangeles"]);
+    for (const key of CONFIRMED_DIRECT_PAIRS) { expect(isDirectPair(getPairAsset(key))).toBe(true); expect(mainnetPairRefusal(key)).toBeNull(); }
     const held = OFFERED_PAIRS.filter(asset => mainnetPairHold(asset.key)).map(asset => asset.key);
-    expect(held).toEqual(["zcat", "gork", "stonk", "solangeles", "paid", "pepe", "pill", "npc", "wojak", "eacc", "hodl", "shib", "swordcat", "plague", "ape", "link"]);
+    expect(held).toEqual(["zcat", "gork", "stonk", "paid", "pepe", "pill", "npc", "wojak", "eacc", "shib", "swordcat", "plague", "ape", "link"]);
     expect(mainnetPairRefusal("zcat")).toBe(TRANSFER_FEE_PAIR);
     for (const key of held.slice(1)) {
       expect(isDirectPair(getPairAsset(key))).toBe(true);

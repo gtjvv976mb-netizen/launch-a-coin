@@ -18,6 +18,7 @@ const OFFERS_CRYPTO = OFFERED_PAIRS.some((asset) => asset.kind === "crypto");
 const OFFERS_DIRECT = OFFERED_PAIRS.some(isDirectPair);
 // Direct pairs wait for the owner's confirmation before mainnet launches (pairs.ts CONFIRMED_DIRECT_PAIRS).
 const DIRECT_HELD = OFFERED_PAIRS.filter(isDirectPair).every((asset) => mainnetPairHold(asset.key));
+const SOME_DIRECT_HELD = OFFERED_PAIRS.filter(isDirectPair).some((asset) => mainnetPairHold(asset.key));
 
 /*
  * How it works (/how): the one page that holds every explanation the screens leave out (the words rule: screens
@@ -89,7 +90,7 @@ const SECTIONS: Section[] = [
         <li>The pair picks the card. Every pair but SOL has exactly one design of its own, so choosing the pair is choosing the design. DOGE gets {DOGE_DESIGN}.</li>
         <li>SOL is pump.fun's default pair. Its own card, {SOL_MAIN}, is its main design, and it offers {SOL_MORE} more designs no other pair uses. Pick one under the pair panel. USDC gets Duel Masters.</li>
         {OFFERS_CRYPTO ? <li>Crypto pairs are Solana tokens or Solana versions of other coins; the panel names the bridge where one is listed.</li> : null}
-        {OFFERS_DIRECT ? <li>Some pairs are admitted on-chain but missing from pump.fun's dated public list; their panel says so.{DIRECT_HELD ? " Mainnet launches can't use them yet." : ""}</li> : null}
+        {OFFERS_DIRECT ? <li>Some pairs are admitted on-chain but missing from pump.fun's dated public list; their panel says so.{DIRECT_HELD ? " Mainnet launches can't use them yet." : SOME_DIRECT_HELD ? " Mainnet launches can use only the ones confirmed so far." : ""}</li> : null}
         <li>Under the pair panel: the exact mint, its issuer and when it was reviewed. The mint is checked again before wallet review.</li>
         <li>The pair funds the optional initial buy, so changing the pair clears it. SOL also pays network and account costs.</li>
         <li>Stock pairs use tokenized quote assets. They grant no equity: your coin is not company shares.</li>
