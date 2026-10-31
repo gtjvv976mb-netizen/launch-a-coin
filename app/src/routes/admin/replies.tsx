@@ -82,8 +82,9 @@ function age(post: RankedXReplyPost) {
 function Feed() {
   const queryClient = useQueryClient();
   const router = useRouter();
-  // Only loading the page and the button search: X bills every read, so focus and reconnect never refetch.
-  const feed = useQuery({ queryKey: ["x-replies"], queryFn: () => getReplyFeed(), staleTime: 60_000, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
+  // Checked every minute while the page is open (owner request: search constantly). The server reads X at most once per
+  // five minutes and within the hourly cap; the other minutes return the pool, which the cron also fills every 10 minutes.
+  const feed = useQuery({ queryKey: ["x-replies"], queryFn: () => getReplyFeed(), staleTime: 60_000, refetchInterval: 60_000, retry: false, refetchOnWindowFocus: false, refetchOnReconnect: false });
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => { const id = setInterval(() => setNow(Date.now()), 30_000); return () => clearInterval(id); }, []);
   // A failed refresh keeps the last list on screen, with the error and a way to try again.

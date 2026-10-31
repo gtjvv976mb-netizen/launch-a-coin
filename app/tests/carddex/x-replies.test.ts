@@ -150,6 +150,7 @@ describe("the search and the ranking", () => {
     expect(url.searchParams.get("query")).toBe(rules.xReplyQuery());
     expect(url.searchParams.get("max_results")).toBe("100");
     expect(url.searchParams.get("sort_order")).toBe("relevancy");
+    expect(url.searchParams.get("start_time")).toBeNull();
     expect(url.searchParams.get("expansions")).toBe("author_id");
     expect(call.url).not.toContain("test-bearer");
     expect(call.headers.authorization).toBe("Bearer test-bearer-0001");
@@ -188,6 +189,33 @@ describe("the search and the ranking", () => {
     expect((await helper.replyFeed(token, {fetch: net.fetch, now: NOW + 60_000})).posts.map(post => post.id)).toEqual(["1001"]);
     expect(sqlite.query("SELECT tweet_id, mark, wallet FROM x_reply_marks ORDER BY tweet_id").all()).toEqual([{tweet_id: "1002", mark: "done", wallet: OWNER}, {tweet_id: "1005", mark: "hidden", wallet: OWNER}]);
     await expect(helper.markReplyPost(token, {tweetId: "12x", mark: "done"})).rejects.toThrow("Not an X post id.");
+  });
+});
+
+describe("searching constantly", () => {
+  test("each read covers the last 12 hours and adds to the pool instead of replacing it", async () => {
+    const token = await session(OWNER), net = fakeNetwork();
+    await helper.replyFeed(token, {fetch: net.fetch, now: NOW});
+    expect(new URL(net.calls[0].url).searchParams.get("start_time")).toBe(new Date(NOW - helper.SEARCH_WINDOW_MS).toISOString().replace(/\.\d{3}Z$/, "Z"));
+    const first = helper.parseSearch(searchAnswer());
+    const old = {...first[0], id: "3001", createdAt: NOW - 25 * 3_600_000};
+    const pool = helper.mergePool([...first, old], [{...first[0], likes: 99}], NOW);
+    expect(pool.map(post => post.id).sort()).toEqual(first.map(post => post.id).sort());
+    expect(pool.find(post => post.id === first[0].id)?.likes).toBe(99);
+    expect(helper.mergePool([], Array.from({length: helper.POOL_MAX + 5}, (_, i) => ({...first[0], id: String(4000 + i), createdAt: NOW - i})), NOW)).toHaveLength(helper.POOL_MAX);
+  });
+  test("the cron reads into the pool on its own, and the page shows it without another read", async () => {
+    const net = fakeNetwork();
+    await helper.runReplySearch({fetch: net.fetch, now: NOW});
+    expect(net.calls).toHaveLength(1);
+    const token = await session(OWNER);
+    const feed = await helper.replyFeed(token, {fetch: net.fetch, now: NOW + 60_000});
+    expect(net.calls).toHaveLength(1);
+    expect(feed.posts.length).toBeGreaterThan(0);
+    expect(read("src/server.ts")).toContain("runReplySearch");
+    delete env.X_BEARER_TOKEN;
+    await helper.runReplySearch({fetch: net.fetch, now: NOW + helper.CACHE_MS * 2});
+    expect(net.calls).toHaveLength(1);
   });
 });
 
