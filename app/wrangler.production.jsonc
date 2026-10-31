@@ -29,7 +29,7 @@
     // CARDDEX_LIVE_FEE_SHARING ("true" only) offers the optional pump.fun creator fee split after the card.
     "CARDDEX_LIVE_FEE_SHARING": "true",
     "CARDDEX_X_AUTOPOST": "true",
-    "CARDDEX_ADMIN_WALLETS": "48G9GNHNRTQZQGBxvXuEEendXEcFTJCXfita9hVAh7EP,D2bkDa8ZFYAbdYtJFBLhc5Fzuvmvc5RxHNTG7mk9QBiC"
+    "CARDDEX_ADMIN_WALLETS": "48G9GNHNRTQZQGBxvXuEEendXEcFTJCXfita9hVAh7EP,D2bkDa8ZFYAbdYtJFBLhc5Fzuvmvc5RxHNTG7mk9QBiC,3J57tqAJqRmSBn1ZYDu9JpMMyTfBHdcGGwECiPQeiji3"
     // CARDDEX_X_AUTOPOST ("true" only, with the four X secrets set by `wrangler secret put`) posts opted-in new coins on
     // @launchacard from the cron below. Off until the owner sets it (README, "Announcements on @launchacard").
     // CARDDEX_ADMIN_WALLETS (comma list of the owner's wallets) opens the private reply helper, /admin/replies, which
