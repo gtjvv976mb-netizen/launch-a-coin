@@ -20,6 +20,7 @@
     // Optional CARDDEX_LIVE_WALLET_FIRST: wallets that sign before the page co-signs. Unset is Phantom only; "none" restores page-first.
     // Optional CARDDEX_LIVE_WALLET_BATCH: wallets that approve the coin and its card in one prompt. Unset is no wallet
     // (opt in a wallet, e.g. "Backpack", only after a test on the live site); "none" is the same. Phantom is never batched.
+    // Optional CARDDEX_LIVE_FEE_SHARING: "true" offers the pump.fun creator fee split after the card. Unset is off.
   },
   "d1_databases": [{"binding": "DB", "database_name": "launch-a-card", "database_id": "REPLACE_WITH_OWN_D1_ID", "migrations_dir": "migrations"}],
   "r2_buckets": [{"binding": "STORAGE", "bucket_name": "launch-a-card"}]
