@@ -121,9 +121,13 @@ export const chargesTransferFee = (key?: string | null) => !!key && (TRANSFER_FE
  * on a direct pair is refused before anything is uploaded (readiness audit, 30 October 2026: pump.fun's dated public
  * table leaves them out, so its site support can't be checked from the chain, and none has had a real mainnet create).
  * One key opens one pair. The demo is unaffected. HODL and SOLANGELES: the owner confirmed both on 31 October 2026
- * ("Confirm both"), when their content holds were released; neither has had a real mainnet create yet.
+ * ("Confirm both"), when their content holds were released; neither has had a real mainnet create yet. W, PSOL, cbLTC
+ * and cbADA: the owner confirmed all four on 1 November 2026 ("Confirm all four"), the day they were added; none has had
+ * a real mainnet create yet. All four are plain SPL Token mints (no Token-2022 extensions: no transfer fee, hook or
+ * permanent delegate). cbLTC and cbADA keep a Coinbase mint authority and a freeze authority, as USDC does; PSOL keeps
+ * its stake pool's mint authority; W has neither (mainnet read, slot 463754358).
  */
-export const CONFIRMED_DIRECT_PAIRS: readonly PairAssetKey[] = Object.freeze(["hodl", "solangeles"] as PairAssetKey[]);
+export const CONFIRMED_DIRECT_PAIRS: readonly PairAssetKey[] = Object.freeze(["hodl", "solangeles", "w", "psol", "cbltc", "cbada"] as PairAssetKey[]);
 const FEE_HOLD = "Mainnet launches can't use this pair yet: its mint charges a transfer fee.";
 const DIRECT_HOLD = "Mainnet launches can't use this pair yet: it isn't on pump.fun's public pairs list.";
 export const DIRECT_PAIR_HELD = `${DIRECT_HOLD} Pick another pair.`;

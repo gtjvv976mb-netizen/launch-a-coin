@@ -21,7 +21,7 @@ describe("pair catalogue provenance",()=>{
           expect(meta).toContain("Mainnet launches can't use this pair yet: it isn't on pump.fun's public pairs list.");
           expect(meta).not.toContain(DIRECT_LINE);
         }else if(isDirectPair(asset)){
-          // The demo, or a direct pair the owner confirmed for mainnet (HODL, SOLANGELES): the plain provenance line.
+          // The demo, or a direct pair the owner confirmed for mainnet (HODL, SOLANGELES, W, PSOL, cbLTC, cbADA): the plain provenance line.
           expect(meta).toContain(`${DIRECT_LINE} (checked ${asset.verifiedAt}).`);
           expect(meta.match(/admitted on-chain/g)).toHaveLength(1);
           expect(meta).not.toContain("Mainnet launches");
