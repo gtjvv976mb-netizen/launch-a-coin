@@ -44,6 +44,10 @@ export const LIMITS = {
   cardMintIp: { scope: "live:card-mint:ip", max: 4, windowMs: HOUR },
   cardMintIpDay: { scope: "live:card-mint:ip:day", max: 10, windowMs: DAY },
   cardMintSite: { scope: "live:card-mint:site", max: 300, windowMs: DAY },
+  // A coin page's market data (market.server.ts), site-wide: GeckoTerminal's free API allows about 30 calls a minute,
+  // and the mainnet RPC also serves launches. Past either cap the pages show their last answer.
+  marketGeckoSite: { scope: "live:market:gecko:site", max: 24, windowMs: MINUTE },
+  marketRpcSite: { scope: "live:market:rpc:site", max: 120, windowMs: MINUTE },
 } as const satisfies Record<string, LimitRule>;
 /** The key for a site-wide rule: one bucket for every client. */
 export const SITE = "site";
@@ -173,6 +177,7 @@ export const SCHEMA_PROBES: readonly [migration: string, sql: string][] = [
   ["0018", "SELECT intent_id, status, attempts, next_attempt_at, claim_id, claimed_at, reviewed_by, reviewed_at, tweet_id, error, posted_at FROM live_x_posts LIMIT 0"],
   ["0019", "SELECT id, query, fetched_at, posts_json FROM x_reply_cache LIMIT 0"],
   ["0019", "SELECT tweet_id, mark, wallet, created_at FROM x_reply_marks LIMIT 0"],
+  ["0020", "SELECT mint, kind, fetched_at, json FROM live_market_cache LIMIT 0"],
 ];
 export async function missingMigrations(): Promise<string[]> {
   const missing = new Set<string>();
