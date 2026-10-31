@@ -400,7 +400,9 @@
  * sideways strip that runs to the well's edges. The chosen tile wears the pair tile's gold rim and check, at once (no
  * motion); SOL's own card carries a "Main" tag. Under the well, the chosen design's name. */
 .cdx-design-pick { display: grid; min-width: 0; gap: 10px; }
-.cdx-design-pick__grid { display: grid; min-width: 0; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; }
+/* Rows take their tiles' whole height (max-content): with the 44px minimum on each tile, auto rows would shrink to fit
+ * the scroller's max-height and cut the names off. */
+.cdx-design-pick__grid { display: grid; min-width: 0; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); grid-auto-rows: max-content; gap: 8px; }
 @media (min-width: 1024px) {
   .cdx-design-pick__grid { max-height: 388px; margin: -4px; padding: 6px 4px 4px; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-width: thin; }
 }
@@ -438,7 +440,9 @@
     background-color var(--t-fast) var(--ease-room),
     transform var(--t-press) var(--ease-out);
 }
-.cdx-design-pick__img { display: block; width: 100%; max-width: 64px; height: auto; aspect-ratio: 128 / 193; border-radius: 4px; background: var(--color-track); }
+/* A fixed width (the 76px track less the tile's padding), not a percentage, so each grid row keeps the picture's
+ * height: a percentage-sized image adds nothing to the row's minimum and the rows would crush it. */
+.cdx-design-pick__img { display: block; width: 64px; height: auto; aspect-ratio: 128 / 193; border-radius: 4px; background: var(--color-track); }
 .cdx-design-pick__name {
   display: -webkit-box;
   width: 100%;
@@ -460,7 +464,7 @@
   border-radius: var(--radius-pill);
   background: var(--color-neon);
   color: var(--color-neon-ink);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   line-height: 16px;
 }
