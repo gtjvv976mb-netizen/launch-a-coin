@@ -89,21 +89,23 @@ export function creatorFeesView({ options, admission, draft, locked, seen }: {
   return { offer, holdersShown, holdersOffered, holdersActive, rateMax, rateCheck, rateNote, holdersNote };
 }
 
-export const FEE_RATE_UNCHECKED = "Launch a Card couldn't confirm yet that pump.fun accepts custom rates. Your rate is kept and checked when you launch; clear it to use pump.fun's standard rate.";
+export const FEE_RATE_UNCHECKED = "Not yet confirmed that pump.fun accepts custom rates. It's checked at launch; clear it for the standard rate.";
 export const FEE_RATE_NOT_USED = "Your typed creator fee rate is not sent with this pair.";
-export const HOLDERS_NOT_OFFERED = "pump.fun isn't offering holder rewards right now. A launch with them is refused until you choose \"Creator keeps fees\".";
+export const HOLDERS_NOT_OFFERED = "pump.fun isn't offering holder rewards now. Choose \"Creator keeps fees\" to launch.";
 
 export const CREATOR_FEES_TITLE = "Creator fees";
 export const CREATOR_KEEPS_LABEL = "Creator keeps fees";
-export const CREATOR_KEEPS_HINT = "Creator fees build up for you on pump.fun, where you claim them, as on any pump.fun coin (or for the wallets in your split, below).";
+export const CREATOR_KEEPS_HINT = "You claim them on pump.fun.";
 export const HOLDERS_LABEL = "Holders get the fees";
-export const HOLDERS_HINT = "pump.fun holder rewards: the creator fee from every trade of this coin goes to its holders instead of you.";
+export const HOLDERS_HINT = "pump.fun pays the creator fee from each trade to holders instead of you.";
 /** Shown with the choice, in the review and in the docs: what is permanent, who pays, and that nothing is promised. */
-export const HOLDERS_PERMANENT = "Permanent: you earn no creator fees from this coin, it can never go back, and it can't share fees with wallets.";
+export const HOLDERS_PERMANENT = "Permanent: you earn no creator fees, it can't be undone, and fees can't be shared with wallets.";
 export const HOLDERS_WHO_PAYS = "pump.fun alone decides and sends the payouts, from time to time, in the pair's asset, net of its costs, and only to wallets holding at least its minimum (about US$20 worth today). Payouts are not guaranteed; Launch a Card never holds or sends them.";
+/** The form's short form of HOLDERS_WHO_PAYS (the review and the coin page keep the full one; /how#fees has the rest). */
+export const HOLDERS_WHO_PAYS_SHORT = "pump.fun pays holders; payouts are not guaranteed.";
 export const FEE_RATE_LABEL = "Creator fee rate";
-export const FEE_RATE_HINT = "Optional, on custom pairs only. Empty keeps pump.fun's standard rate.";
-export const FEE_RATE_PERMANENT = "A custom rate replaces pump.fun's standard creator fee on every trade on this coin's bonding curve and is fixed for its life. A higher rate costs every trader more.";
+export const FEE_RATE_HINT = "Empty keeps pump.fun's standard rate.";
+export const FEE_RATE_PERMANENT = "Fixed for your coin's life. A higher rate costs every trader more.";
 
 /** The holder-rewards model as one short line (saved launch, coin page). */
 export const HOLDERS_LINE = "pump.fun holder rewards (paid by pump.fun, not guaranteed)";

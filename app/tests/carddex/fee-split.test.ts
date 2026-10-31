@@ -71,7 +71,7 @@ describe("the form's fee split rows", () => {
     expect(off).toContain(html(FEE_SPLIT_DEFAULT));
     expect(off).not.toContain("fee-wallet-0");
     const on = renderToStaticMarkup(createElement(FeeSplitFields, { value: { on: true, rows: [{ wallet: creator, percent: "60" }, { wallet: "abc", percent: "" }] }, onChange: () => undefined, connected: creator, disabled: false, showErrors: true }));
-    for (const text of ['for="fee-wallet-0"', 'for="fee-share-1"', 'aria-label="Remove wallet 2"', "Add recipient", ">60%<", FEE_SPLIT_PERMANENT, FEE_SPLIT_WALLETS, FEE_SPLIT_FREE, FEE_SPLIT_STEP])
+    for (const text of ['for="fee-wallet-0"', 'for="fee-share-1"', 'aria-label="Remove wallet 2"', "Add recipient", ">60%<", FEE_SPLIT_PERMANENT, FEE_SPLIT_FREE, FEE_SPLIT_STEP])
       expect(on).toContain(html(text));
     // Each error is under its own field and named by it; the total's error is announced.
     expect(on).toMatch(/id="fee-wallet-1"[^>]*aria-invalid="true" aria-describedby="fee-wallet-1-help"/);
@@ -98,7 +98,7 @@ describe("the form's fee split rows", () => {
 
 describe("the copy is plain and honest", () => {
   test("permanent and set once, wallets only, pump.fun pays and Launch a Card takes none", () => {
-    expect(FEE_SPLIT_PERMANENT).toBe("The split is permanent. pump.fun allows it to be set once, and it can't be changed afterward.");
+    expect(FEE_SPLIT_PERMANENT).toBe("Permanent: pump.fun lets it be set once, never changed.");
     expect(FEE_SPLIT_WALLETS).toBe("Recipients must be Solana wallets.");
     expect(FEE_SPLIT_FREE).toBe("pump.fun pays creator fees; Launch a Card takes none.");
     for (const text of [FEE_SPLIT_PERMANENT, FEE_SPLIT_WALLETS, FEE_SPLIT_FREE, FEE_SPLIT_STEP, FEE_SPLIT_DEFAULT, SEPARATE_APPROVALS_NEXT_FEES, ONE_APPROVAL_NEXT_FEES, ...Object.values(WALLET_NOTICE_COPY).filter(v => typeof v === "string")])
@@ -113,15 +113,17 @@ describe("the copy is plain and honest", () => {
     // Unchanged: no platform fee, and the site is never in a split.
     expect(panel).toContain("Launch a Card charges no platform fee.");
     expect(panel).toContain("{FEE_SPLIT_PERMANENT}");
+    // The form leaves "wallets only" to its field and error; the split's own review still says it.
+    expect(panel).toContain("<p><strong>{FEE_SPLIT_PERMANENT}</strong> {FEE_SPLIT_WALLETS} {FEE_SPLIT_FREE}");
     expect(panel).toContain('title="Share creator fees"');
     expect(panel).toContain("Skip, keep 100%");
   });
   test("the ticket and the wallet notices count the split's own approval", () => {
-    expect(SEPARATE_APPROVALS_NEXT_FEES).toBe("Your wallet opens for a sign-in message that spends nothing, then your coin, then its card, then your creator fee split.");
-    expect(ONE_APPROVAL_NEXT_FEES).toBe("Your wallet opens for a sign-in message that spends nothing, then your coin and its card in one approval, then your creator fee split.");
-    // Without a split, word for word as before.
-    expect(SEPARATE_APPROVALS_NEXT).toBe("Your wallet opens for a sign-in message that spends nothing, then your coin, then its card.");
-    expect(ONE_APPROVAL_NEXT).toBe("Your wallet opens for a sign-in message that spends nothing, then your coin and its card in one approval.");
+    expect(SEPARATE_APPROVALS_NEXT_FEES).toBe("Your wallet asks 4 times: a free sign-in, then 3 paid approvals: your coin, its card, then your fee split.");
+    expect(ONE_APPROVAL_NEXT_FEES).toBe("Your wallet asks 3 times: a free sign-in, then 2 paid approvals: your coin and card together, then your fee split.");
+    // Without a split.
+    expect(SEPARATE_APPROVALS_NEXT).toBe("Your wallet asks 3 times: a free sign-in, your coin (paid), then its card (paid).");
+    expect(ONE_APPROVAL_NEXT).toBe("Your wallet asks twice: a free sign-in, then your coin and card together (paid).");
     expect(walletNoticePreview({ hasBuy: false, feesNext: true }).map(item => item.key)).toEqual(["approvalsCoinThenFees", "networkFeeLater", "coinSigner", "newSite"]);
     expect(walletNoticePreview({ hasBuy: false, oneApproval: true, feesNext: true })[0].key).toBe("approvalsPairThenFees");
     const quote = { symbol: "SOL", decimals: 9, kind: "native" };

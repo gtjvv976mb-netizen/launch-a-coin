@@ -312,7 +312,7 @@ describe("what your wallet will show, before anything is prepared", () => {
     });
   }
   test("is plain: no dashes, and the fee line points at the review", () => {
-    expect(WALLET_NOTICE_COPY.networkFeeLater).toBe("A network fee. The exact amount is in your review.");
+    expect(WALLET_NOTICE_COPY.networkFeeLater).toBe("A network fee, exact in your review.");
     for (const item of walletNoticePreview({ hasBuy: true, siteHost: "launchacard.fun", oneApproval: true })) expect(item.text).not.toMatch(/[–—]/);
   });
 });

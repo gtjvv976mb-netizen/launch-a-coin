@@ -4,7 +4,7 @@ import {QuoteAssetMeta} from "../../src/components/carddex/QuoteAssetMeta";
 import {CONFIRMED_DIRECT_PAIRS,PAIR_ASSETS,chargesTransferFee,isDirectPair} from "../../src/lib/carddex/pairs";
 import {STAGED_PAIR_DESIGNS} from "../../src/lib/carddex/pair-designs";
 
-const DIRECT_LINE = "Not on pump.fun's public pairs list; admitted on-chain";
+const DIRECT_LINE = "Admitted on-chain; not on pump.fun's public pairs list";
 
 describe("pair catalogue provenance",()=>{
   test("the 23 direct quotes say so under the pair HUD, before wallet review; the 94 others do not",()=>{
@@ -22,8 +22,9 @@ describe("pair catalogue provenance",()=>{
           expect(meta).not.toContain(DIRECT_LINE);
         }else if(isDirectPair(asset)){
           // The demo, or a direct pair the owner confirmed for mainnet (HODL, SOLANGELES, W, PSOL, cbLTC, cbADA): the plain provenance line.
-          expect(meta).toContain(`${DIRECT_LINE} (checked ${asset.verifiedAt}).`);
-          expect(meta.match(/admitted on-chain/g)).toHaveLength(1);
+          expect(meta).toContain(`${DIRECT_LINE}.`);
+          expect(meta).toContain(`Mint reviewed ${asset.verifiedAt}.`);
+          expect(meta.match(/admitted on-chain/gi)).toHaveLength(1);
           expect(meta).not.toContain("Mainnet launches");
         }else{
           expect(meta).not.toContain(DIRECT_LINE);

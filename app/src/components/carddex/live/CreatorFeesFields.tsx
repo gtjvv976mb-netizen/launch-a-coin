@@ -1,9 +1,9 @@
 import { useId, type ReactNode } from "react";
-import { Field, Input } from "../../mintdex/ui";
+import { Field, Icon, Input, TextLink } from "../../mintdex/ui";
 import { decimalText } from "./FeeSplitFields";
 import {
   CREATOR_FEES_TITLE, CREATOR_KEEPS_HINT, CREATOR_KEEPS_LABEL, FEE_RATE_HINT, FEE_RATE_LABEL, FEE_RATE_PERMANENT, HOLDERS_HINT, HOLDERS_LABEL,
-  HOLDERS_PERMANENT, HOLDERS_WHO_PAYS, type CreatorFeesDraft,
+  HOLDERS_PERMANENT, HOLDERS_WHO_PAYS_SHORT, type CreatorFeesDraft,
 } from "./creator-fees";
 
 /**
@@ -44,7 +44,7 @@ export function CreatorFeesFields({ value, onChange, holders, holdersOffered = t
     {holders && holdersNote ? <p className="cdx-launch-note" role="status">{holdersNote}</p> : null}
     {value.holders && holders ? <div className="cdx-launch-note">
       <p><strong>{HOLDERS_PERMANENT}</strong></p>
-      <p>{HOLDERS_WHO_PAYS}</p>
+      <p>{HOLDERS_WHO_PAYS_SHORT} <TextLink href="/how#fees" target="_blank" aria-label="How payouts work, opens in a new tab">How payouts work<Icon name="external" size={12} /></TextLink></p>
     </div> : split}
     {rateMax !== null ? <div className="cdx-launch-creator-fees__rate">
       <Field label={FEE_RATE_LABEL} htmlFor="creator-fee-rate" error={rateError} className="cdx-launch-f">

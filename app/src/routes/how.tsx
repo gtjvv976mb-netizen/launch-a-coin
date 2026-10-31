@@ -5,6 +5,7 @@ import { WALLET_NOTICE_COPY, WALLET_NOTICE_TITLE } from "../components/carddex/l
 import { OfficialLinksDetails } from "../components/carddex/OfficialLinks";
 import { CalmSwitch, PageFrame, PageHeader, TextLink } from "../components/mintdex/ui";
 import { WORDS } from "../lib/mintdex/copy";
+import { OFFICIAL_X_HANDLE } from "../lib/carddex/official";
 import { pageHead } from "../lib/mintdex/seo";
 import { getCardDesign } from "../lib/carddex/designs";
 import { OFFERED_PAIRS, designForPair, designsForPair, isDirectPair, mainnetPairHold } from "../lib/carddex/pairs";
@@ -73,6 +74,7 @@ const SECTIONS: Section[] = [
         <li>The pair panel filters by Memes, Stocks, Crypto and Collector, and searches by symbol or name.</li>
         <li>More options holds your website, X link, an optional initial buy and its slippage.</li>
         <li>The exact initial buy and slippage show before your wallet opens.</li>
+        <li>Tick "Announce my coin on {OFFICIAL_X_HANDLE}" in More options and, once your card is confirmed and reviewed, {OFFICIAL_X_HANDLE} may post it once from its X account: name, ticker, pair, page link and the card image when it fits. It never posts prices. Posts are limited per day and a coin may be skipped. Nothing else is posted for you.</li>
         <li>
           Creating a coin means you accept the <TextLink to="/legal" hash="content-rules">content rules</TextLink>: {WORDS.contentRule}
         </li>

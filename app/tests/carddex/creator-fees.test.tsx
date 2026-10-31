@@ -5,7 +5,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
   CREATOR_KEEPS_HINT, createOptionsChanged, creatorFeesOffer, creatorFeesView, EMPTY_CREATOR_FEES, FEE_RATE_PERMANENT, FEE_RATE_UNCHECKED,
-  HOLDERS_LINE, HOLDERS_NOT_OFFERED, HOLDERS_PERMANENT, HOLDERS_WHO_PAYS, parseFeeRate, readCreatorFeesDraft,
+  HOLDERS_LINE, HOLDERS_NOT_OFFERED, HOLDERS_PERMANENT, HOLDERS_WHO_PAYS, HOLDERS_WHO_PAYS_SHORT, parseFeeRate, readCreatorFeesDraft,
 } from "../../src/components/carddex/live/creator-fees";
 import { CreatorFeesFields } from "../../src/components/carddex/live/CreatorFeesFields";
 import {
@@ -69,7 +69,11 @@ describe("the Launch form's Creator fees group", () => {
     const holders = render({ value: { holders: true, rate: "" } });
     expect(holders).not.toContain("split-marker");
     expect(holders).toContain(HOLDERS_PERMANENT.replace(/'/g, "&#x27;"));
-    expect(holders).toContain(HOLDERS_WHO_PAYS.replace(/'/g, "&#x27;"));
+    expect(holders).toContain(HOLDERS_WHO_PAYS_SHORT);
+    expect(HOLDERS_WHO_PAYS_SHORT).toMatch(/not guaranteed/);
+    expect(holders).toContain('href="/how#fees"');
+    // The review, where the coin is approved, keeps who pays in full.
+    expect(read("src/components/carddex/live/LiveLaunchPanel.tsx")).toContain("<p><strong>{HOLDERS_PERMANENT}</strong> {HOLDERS_WHO_PAYS}</p>");
     // Both radios share one group name, so one choice excludes the other.
     const names = [...keeps.matchAll(/type="radio"[^>]*name="([^"]+)"/g)].map(match => match[1]);
     expect(names).toHaveLength(2); expect(new Set(names).size).toBe(1);
@@ -103,8 +107,8 @@ describe("the Launch form's Creator fees group", () => {
     expect(panel).toContain("Creator fees go to holders");
     expect(panel).toContain("<dt>Creator fees</dt>");
     expect(read("src/routes/coin/$id.tsx")).toContain("HOLDERS_LINE");
-    for (const copy of [HOLDERS_WHO_PAYS, read("src/routes/how.tsx"), read("src/routes/legal.tsx")]) expect(copy).toMatch(/not guarantee/);
-    expect([HOLDERS_PERMANENT, HOLDERS_WHO_PAYS, FEE_RATE_PERMANENT].join(" ")).not.toMatch(/earn passive|guaranteed (income|returns|payouts)|profit|yield/i);
+    for (const copy of [HOLDERS_WHO_PAYS, HOLDERS_WHO_PAYS_SHORT, read("src/routes/how.tsx"), read("src/routes/legal.tsx")]) expect(copy).toMatch(/not guarantee/);
+    expect([HOLDERS_PERMANENT, HOLDERS_WHO_PAYS, HOLDERS_WHO_PAYS_SHORT, FEE_RATE_PERMANENT].join(" ")).not.toMatch(/earn passive|guaranteed (income|returns|payouts)|profit|yield/i);
   });
 });
 

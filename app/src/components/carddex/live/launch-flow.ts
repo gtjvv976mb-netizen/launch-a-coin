@@ -12,15 +12,15 @@ import { SignInOtherAccount, SignInWrongSite, walletRejected } from "./wallet-er
  * Shown in the review while the wallet opens a second time after it returned a transaction this page refused. The
  * second prompt is the same unsigned transaction (prepared again when stale): this page never signs before the wallet.
  */
-export const WALLET_RETRY_NOTICE = "Your wallet returned a different transaction from the one you reviewed, so nothing was sent. Approve once more.";
+export const WALLET_RETRY_NOTICE = "Your wallet returned a different transaction, so nothing was sent. Approve once more.";
 /** Shown with the card's own review when the card approved with its coin ran out of time before the coin was verified. */
-export const CARD_APPROVAL_EXPIRED = "Your card approval ran out of time while the coin was confirming, so nothing was charged for the card. Approve the card once more.";
+export const CARD_APPROVAL_EXPIRED = "The card approval timed out while the coin confirmed, so nothing was charged for the card. Approve it again.";
 /** The ownership step, said while the wallet is open: the same words for a sign-in and for the plain message. */
-export const SIGN_IN_COPY = "Sign in with your wallet. Signing in proves you own it and spends no funds.";
+export const SIGN_IN_COPY = "Sign in with your wallet. It proves you own it and spends nothing.";
 /** Shown while the wallet opens for the coin alone after it did not sign the coin and its card in one approval. */
-export const PAIR_SINGLE_NOTICE = "Your wallet signs one transaction at a time, so nothing was sent. Approve the coin now; its card follows once the coin is confirmed.";
+export const PAIR_SINGLE_NOTICE = "Your wallet signs one at a time, so nothing was sent. Approve the coin now; its card follows.";
 /** The card row's words while the card the wallet approved with its coin waits for the coin, then once it can go. */
-export const CARD_APPROVED_WAITING = "Approved with the coin. Sends once the coin is confirmed";
+export const CARD_APPROVED_WAITING = "Approved. Sends once the coin confirms";
 export const CARD_APPROVED_READY = "Approved with the coin. Ready to send";
 
 export type WalletStep =
@@ -295,7 +295,7 @@ export function dropLaunchSession() {
 
 /** About how long a sent transaction can take to land and finalize before its ~150-block approval runs out. */
 export const CONFIRM_POLL_MS = 2_000, CONFIRM_MAX_POLLS = 45;
-export const STILL_CONFIRMING = "Sent. Solana is still finalizing it, which usually takes under a minute. Check again in a moment; nothing more is sent or charged.";
+export const STILL_CONFIRMING = "Sent. Solana is still finalizing, usually under a minute. Check again soon; nothing more is sent or charged.";
 /**
  * A saved launch with nothing left to do (finished with its creator fee split settled or none, or discarded). The page forgets it rather than restoring it over
  * a new draft: a later visit, a connect or Launch starts from the creator's fields, never the finished coin's.

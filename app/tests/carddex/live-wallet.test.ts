@@ -303,7 +303,7 @@ describe("what your wallet will show", () => {
     const items = walletNoticeItems(buy, sol, "launchacard.fun");
     expect(items.map(item => item.key)).toEqual(["approvalsCoin", "networkFee", "initialBuy", "tokenAccount", "unverified", "coinSigner", "newSite"]);
     expect(items[2].text).toBe("Your initial buy: 0.1 SOL.");
-    expect(items.at(-1)!.text).toBe("Phantom may show a notice that this site is new. Check that the address bar reads launchacard.fun.");
+    expect(items.at(-1)!.text).toBe("Phantom may say this site is new. Check the address bar reads launchacard.fun.");
     expect(walletNoticeItems(buy, stock).map(item => item.key)).toContain("stockQuote");
     expect(walletNoticeItems(nftFixture().plan, sol).map(item => item.key)).toEqual(["approvalsCard", "networkFee", "cardSigner", "cardLock", "newSite"]);
     expect(WALLET_NOTICE_COPY.coinSigner).toContain("A second signer for the new coin's address");

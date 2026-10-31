@@ -6,11 +6,11 @@ import { MAX_FEE_RECIPIENTS, TOTAL_FEE_BPS, type FeeRecipient } from "../../../.
  * before anything is uploaded, and the server checks everything again.
  */
 export { MAX_FEE_RECIPIENTS };
-export const FEE_SPLIT_PERMANENT = "The split is permanent. pump.fun allows it to be set once, and it can't be changed afterward.";
+export const FEE_SPLIT_PERMANENT = "Permanent: pump.fun lets it be set once, never changed.";
 export const FEE_SPLIT_WALLETS = "Recipients must be Solana wallets.";
 export const FEE_SPLIT_FREE = "pump.fun pays creator fees; Launch a Card takes none.";
 /** What sharing adds: its own approval after the card, and pump.fun's account rent. */
-export const FEE_SPLIT_STEP = "Your wallet approves the split separately, after your coin and card are confirmed. It costs a network fee and about 0.006 SOL of rent for pump.fun's fee-sharing account (about 0.0075 SOL on a token pair).";
+export const FEE_SPLIT_STEP = "Approved separately after your card: a network fee plus about 0.006 SOL rent (0.0075 SOL on a token pair).";
 /** Off: pump.fun's default. */
 export const FEE_SPLIT_DEFAULT = "Off: you keep 100% of your coin's creator fees, pump.fun's default.";
 

@@ -8,42 +8,42 @@ import type { TransactionPlan } from "./transaction";
  */
 export const WALLET_NOTICE_TITLE = "What your wallet will show";
 export const WALLET_NOTICE_COPY = {
-  approvalsPair: "One wallet approval creates your coin and its card. The card is sent as soon as the coin is confirmed.",
-  approvalsCoin: "This approval creates your coin. Your wallet asks once more, for its card, after the coin is confirmed.",
+  approvalsPair: "One approval creates your coin and card. The card sends once the coin confirms.",
+  approvalsCoin: "This creates your coin. Its card needs one more approval after.",
   approvalsCard: "This approval issues your card. It's the last one.",
-  approvalsPairThenFees: "One wallet approval creates your coin and its card. Your wallet asks once more, for your creator fee split, after both are confirmed.",
-  approvalsCoinThenFees: "This approval creates your coin. Your wallet asks again for its card, then for your creator fee split.",
-  approvalsCardThenFees: "This approval issues your card. Your wallet asks once more, for your creator fee split.",
-  approvalsFees: "This approval sets your creator fee split on pump.fun. It's the last one, and the split can't be changed afterward.",
-  feeProgram: "pump.fun's fee-sharing program. pump.fun pays creator fees; Launch a Card takes none and is not in your split.",
+  approvalsPairThenFees: "One approval for your coin and card, then one more for your fee split.",
+  approvalsCoinThenFees: "This creates your coin. Then one approval for its card, one for your fee split.",
+  approvalsCardThenFees: "This issues your card. One more approval follows, for your fee split.",
+  approvalsFees: "This sets your fee split on pump.fun. It's the last approval and can't be changed afterward.",
+  feeProgram: "pump.fun's fee-sharing program. Launch a Card takes none and isn't in your split.",
   feeRent: "Rent for pump.fun's fee-sharing account, paid from your wallet.",
   networkFee: (sol: string) => `A network fee of about ${sol} SOL.`,
-  networkFeeLater: "A network fee. The exact amount is in your review.",
+  networkFeeLater: "A network fee, exact in your review.",
   initialBuy: (amount: string, symbol: string) => `Your initial buy: ${amount} ${symbol}.`,
-  tokenAccount: "A new token account that holds your coin.",
-  unverified: "Your new coin marked as unverified. That's normal for a coin created seconds ago.",
-  stockQuote: "A note that tokenized stocks have issuer controls. It comes from the stock token, not from this site.",
-  coinSigner: "A second signer for the new coin's address. This page created that address, and it can't move your other funds.",
-  cardSigner: "A second signer for the new card's address. This page created that address, and it can't move your other funds.",
-  cardLock: "The card's artwork and details locked for good. Some wallets call this an authority change.",
-  newSite: (host?: string) => `Phantom may show a notice that this site is new.${host ? ` Check that the address bar reads ${host}.` : ""}`,
-  safety: "If your wallet warns that this site could be malicious, don't approve. Reject it there; nothing is sent or charged.",
+  tokenAccount: "A new token account for your coin.",
+  unverified: "Your coin marked unverified, normal for a brand-new coin.",
+  stockQuote: "A note that tokenized stocks have issuer controls, from the stock token.",
+  coinSigner: "A second signer for the new coin's address. This site made it; it can't move your funds.",
+  cardSigner: "A second signer for the new card's address. This site made it; it can't move your funds.",
+  cardLock: "Card art and details locked for good. Some wallets call this an authority change.",
+  newSite: (host?: string) => `Phantom may say this site is new.${host ? ` Check the address bar reads ${host}.` : ""}`,
+  safety: "If your wallet warns this site may be malicious, don't approve. Reject it; nothing is sent or charged.",
 } as const;
 /** Shown while the wallet prompt is open. */
-export const WALLET_OPEN_COPY = "Approve or reject in your wallet. It shows the costs you reviewed and a second signer for the new address this page created.";
+export const WALLET_OPEN_COPY = "Approve or reject in your wallet. It shows the costs you reviewed and a second signer.";
 /** Shown while the wallet prompt with the coin and its card is open. */
-export const WALLET_OPEN_PAIR_COPY = "Approve or reject in your wallet. It shows your coin and its card together, with the costs you reviewed and a second signer for each new address this page created.";
+export const WALLET_OPEN_PAIR_COPY = "Approve or reject in your wallet. It shows your coin and card together, each with a second signer.";
 /**
  * What the wallet asks for, in order, under the fresh Launch ticket's primary: one prompt for the coin and its card
  * when the connected wallet is on the server's batch list (signsBothFor), else the card's own prompt after the coin.
  */
-export const SEPARATE_APPROVALS_NEXT = "Your wallet opens for a sign-in message that spends nothing, then your coin, then its card.";
-export const ONE_APPROVAL_NEXT = "Your wallet opens for a sign-in message that spends nothing, then your coin and its card in one approval.";
+export const SEPARATE_APPROVALS_NEXT = "Your wallet asks 3 times: a free sign-in, your coin (paid), then its card (paid).";
+export const ONE_APPROVAL_NEXT = "Your wallet asks twice: a free sign-in, then your coin and card together (paid).";
 /** The same lines when the creator chose to share creator fees: the split is its own approval after the card. */
-export const SEPARATE_APPROVALS_NEXT_FEES = "Your wallet opens for a sign-in message that spends nothing, then your coin, then its card, then your creator fee split.";
-export const ONE_APPROVAL_NEXT_FEES = "Your wallet opens for a sign-in message that spends nothing, then your coin and its card in one approval, then your creator fee split.";
+export const SEPARATE_APPROVALS_NEXT_FEES = "Your wallet asks 4 times: a free sign-in, then 3 paid approvals: your coin, its card, then your fee split.";
+export const ONE_APPROVAL_NEXT_FEES = "Your wallet asks 3 times: a free sign-in, then 2 paid approvals: your coin and card together, then your fee split.";
 /** The review's line under the costs when the card comes in the same approval (the coin-only line is the panel's). */
-export const PAIR_REVIEW_COPY = "Your wallet approves the coin and its card together. The card is sent once the coin is confirmed on Solana, with no second approval.";
+export const PAIR_REVIEW_COPY = "One approval covers your coin and card. The card sends once the coin confirms.";
 
 export type WalletNoticeQuote = { symbol: string; decimals: number; kind: string };
 export type WalletNoticeItem = { key: keyof typeof WALLET_NOTICE_COPY; text: string };

@@ -33,7 +33,7 @@ import { FEE_SPLIT_FREE, FEE_SPLIT_PERMANENT, FEE_SPLIT_WALLETS, formatShare } f
 import { feeRecipientsProblem, sameFeeSplit } from "../../../../../integrations/pumpfun/src/fee-share-rules";
 import { connectForLaunch, signInCreator } from "./ownership";
 import { requestCardMintSigner } from "./card-mint";
-import { ONE_APPROVAL_NEXT, ONE_APPROVAL_NEXT_FEES, PAIR_REVIEW_COPY, SEPARATE_APPROVALS_NEXT, SEPARATE_APPROVALS_NEXT_FEES, WALLET_NOTICE_COPY, WALLET_OPEN_COPY, WALLET_OPEN_PAIR_COPY, walletNoticePreview } from "./wallet-notice";
+import { ONE_APPROVAL_NEXT, ONE_APPROVAL_NEXT_FEES, PAIR_REVIEW_COPY, SEPARATE_APPROVALS_NEXT, SEPARATE_APPROVALS_NEXT_FEES, WALLET_NOTICE_COPY, WALLET_NOTICE_TITLE, WALLET_OPEN_COPY, WALLET_OPEN_PAIR_COPY, walletNoticePreview } from "./wallet-notice";
 import { OFFICIAL_X_HANDLE } from "../../../lib/carddex/official";
 import { X_ANNOUNCE_REVIEW, xAnnounceStatusText, xPostUrl } from "../../../lib/carddex/live/x-announce";
 import { createOptionsChanged, FEE_RATE_PERMANENT, feeRateLine, HOLDER_REWARDS_NO_SPLIT, HOLDERS_LINE, HOLDERS_PERMANENT, HOLDERS_WHO_PAYS } from "./creator-fees";
@@ -63,20 +63,20 @@ export type LivePrimary = { kind: "submit" | "startAnother"; label: string; pend
 type Busy = "ownership" | "artwork" | "coinImage" | "preparing" | "refreshing" | "wallet" | "submitting" | "confirming" | "recovering" | null;
 const BUSY_COPY: Record<NonNullable<Busy>, string> = {
   ownership: SIGN_IN_COPY,
-  artwork: "Preparing your artwork and complete card image…",
-  coinImage: "Making your turning coin image and checking the quote asset, balances and exact transaction costs…",
-  preparing: "Checking the current quote asset, balances and exact transaction costs…",
-  refreshing: "Getting a fresh transaction so your wallet sees current costs…",
+  artwork: "Preparing your art…",
+  coinImage: "Making your coin image and checking costs…",
+  preparing: "Checking balances and exact costs…",
+  refreshing: "Getting fresh costs for your wallet…",
   wallet: WALLET_OPEN_COPY,
   submitting: "Submitting the transaction you approved…",
   confirming: "Waiting for finalized on-chain verification…",
-  recovering: "Checking your saved launch before any new transaction…",
+  recovering: "Checking your saved launch…",
 };
 // Shown in the review, above Continue to wallet review, after the page prepared the transaction again.
-const REVIEW_COSTS_UPDATED = "Costs changed since you opened this review. Check the new total, then continue to your wallet.";
-const REVIEW_EXPIRED = "Your wallet approval ran out of time before it was sent, so nothing was sent or charged. This is a fresh transaction: continue to approve it once more.";
-const TERMS_NEEDED = "Confirm the mainnet launch terms before continuing.";
-const RECOVERY_ONLY = "New mainnet launches are not open right now. Connect the creator wallet to check a saved launch and issue its card.";
+const REVIEW_COSTS_UPDATED = "Costs changed. Check the new total, then continue.";
+const REVIEW_EXPIRED = "Your approval timed out before sending, so nothing was sent or charged. Approve this fresh transaction.";
+const TERMS_NEEDED = "Tick the mainnet terms to continue.";
+const RECOVERY_ONLY = "New launches are closed. Connect the creator wallet to finish a saved launch.";
 const INTENT_KEY = "carddex.live.intent.v1";
 function savedIntent(wallet: string): string | null {
   try { const all = JSON.parse(localStorage.getItem(INTENT_KEY) ?? "{}"); return typeof all[wallet] === "string" ? all[wallet] : null; } catch { return null; }
@@ -92,8 +92,8 @@ function unwrap<T extends object>(result: LiveResult<T>): T {
 const brief = (value: string) => `${value.slice(0, 5)}…${value.slice(-5)}`;
 // The server's split differs from the one the creator chose in this tab: nothing is reviewed or signed.
 // The server's create options differ from the ones chosen in this tab: nothing is reviewed or signed.
-const OPTIONS_CHANGED = "The creator fee choice the server returned differs from the one you made, so nothing was prepared for your wallet. Check your saved launch before continuing.";
-const SPLIT_CHANGED = "The fee split the server returned differs from the wallets and shares you chose, so nothing was prepared for your wallet. Check your saved launch before continuing.";
+const OPTIONS_CHANGED = "The server's creator fee choice doesn't match yours, so nothing was prepared. Check your saved launch.";
+const SPLIT_CHANGED = "The server's fee split doesn't match yours, so nothing was prepared. Check your saved launch.";
 /**
  * A refusal that names one recipient (its first and last 4 characters, as fee-share-rules and the server write them)
  * says which wallet row it means, and that row's field takes focus when it shows.
@@ -363,7 +363,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
       // A creator fee split: wallets only (on the curve: never a program address), checked before anything is uploaded.
       if (draft.holderReward && draft.feeShares) throw new Error(HOLDER_REWARDS_NO_SPLIT);
       if (draft.feeShares) {
-        if (!feesOpen) throw new Error("Creator fee sharing is not open right now. Turn it off in More options to launch; you keep 100% of creator fees.");
+        if (!feesOpen) throw new Error("Fee sharing is closed now. Turn it off in More options to launch; you keep 100%.");
         const problem = feeRecipientsProblem(draft.feeShares, { isWallet: isWalletAddress, forbidden: [draft.quoteMint] });
         if (problem) throw feeRowRefusal(problem, draft.feeShares);
       }
@@ -842,28 +842,28 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
   const coinDone = status === "nft_pending" || status === "complete";
   const coinStage: Stage = coinDone ? { state: "done", text: "Confirmed on Solana" }
     : busy ? { state: "active", text: PHASE[busy] }
-      : error && status ? { state: "stopped", text: "Stopped. Nothing more is sent until you choose what to do." }
+      : error && status ? { state: "stopped", text: "Stopped. Nothing is sent until you choose." }
         : status === "token_pending" ? { state: "active", text: "Sent. Check its confirmation." }
           : status === "prepared" ? { state: "active", text: reviewOpen ? "Waiting for your review" : "Prepared, not sent" }
             : error ? { state: "stopped", text: "Stopped before anything was sent." }
               : { state: "todo", text: "Not started" };
   const cardStage: Stage = status === "complete" ? { state: "done", text: "Confirmed on Solana" }
-    : status !== "nft_pending" ? { state: "todo", text: cardApproved ? CARD_APPROVED_WAITING : "Starts after the coin is confirmed" }
+    : status !== "nft_pending" ? { state: "todo", text: cardApproved ? CARD_APPROVED_WAITING : "After the coin" }
       : busy ? { state: "active", text: PHASE[busy] }
-        : error ? { state: "stopped", text: "Stopped. Nothing more is sent until you choose what to do." }
+        : error ? { state: "stopped", text: "Stopped. Nothing is sent until you choose." }
           : intent?.nftSignature ? { state: "active", text: "Sent. Check its confirmation." }
             : { state: "active", text: cardApproved ? CARD_APPROVED_READY : "Ready to issue" };
   // Third row, when a split was chosen (or is in the draft): its own creator-only transaction after the card.
   const fee = intent?.feeShare;
   const feeOnBusy = !!busy && status === "complete";
   const feeStage: Stage | null = !fee && !(!intent && draft?.feeShares) ? null
-    : status !== "complete" || !fee ? { state: "todo", text: "Starts after the card is confirmed" }
+    : status !== "complete" || !fee ? { state: "todo", text: "After the card" }
       : fee.status === "complete" ? { state: "done", text: "Set on pump.fun" }
-        : fee.status === "skipped" ? { state: "done", text: "Skipped. You keep 100% of creator fees" }
+        : fee.status === "skipped" ? { state: "done", text: "Skipped. You keep 100%" }
           : fee.status === "set_elsewhere" ? { state: "stopped", text: "A different split was already set on pump.fun" }
             : feeOnBusy ? { state: "active", text: PHASE[busy!] }
-              : !feesOpen && fee.status !== "pending" ? { state: "stopped", text: "Paused. You keep 100% of creator fees for now" }
-                : error ? { state: "stopped", text: fee.status === "failed" && fee.error ? fee.error : "Stopped. Nothing more is sent until you choose what to do." }
+              : !feesOpen && fee.status !== "pending" ? { state: "stopped", text: "Paused. You keep 100% for now" }
+                : error ? { state: "stopped", text: fee.status === "failed" && fee.error ? fee.error : "Stopped. Nothing is sent until you choose." }
                   : fee.status === "pending" ? { state: "active", text: "Sent. Check its confirmation." }
                     : fee.status === "failed" ? { state: "stopped", text: fee.error ?? "Not set. Prepare it again, or keep 100%." }
                       : { state: "active", text: reviewOpen && plan?.kind === "fees" ? "Waiting for your review" : "Ready to sign" };
@@ -951,20 +951,23 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
     {showFresh ? <section className="cdx-live-block" aria-labelledby="cdx-live-cost">
       <div className="cdx-launch-ticket__head">
         <h2 id="cdx-live-cost" className="cdx-launch-section">Cost</h2>
-        <span className="cdx-live-net">Solana mainnet</span>
+        <span className="cdx-live-net">Solana mainnet · real funds</span>
       </div>
       {/* The network costs are exact only once the transaction is built; the review shows them before the wallet. */}
       <dl className="cdx-launch-cost">
-        <div><dt>Network fees and rent for new accounts</dt><dd className="cdx-live-later">Exact amounts before your wallet opens</dd></div>
+        <div><dt>Network fees and rent (SOL)</dt><dd className="cdx-live-later">Exact before your wallet opens</dd></div>
         <div><dt>Initial buy</dt><dd>{initialBuy ? <span className="num">{initialBuy}</span> : "None"}</dd></div>
-        <div data-total><dt>Total</dt><dd className="cdx-live-later">Shown before your wallet opens</dd></div>
       </dl>
-      <p className="cdx-launch-fee-note">Launch a Card charges no platform fee. You pay Solana network and priority fees, account rent for the new accounts, the Metaplex NFT fee for the card, and pump.fun's protocol and creator fees inside any initial buy.</p>
+      <p className="cdx-launch-fee-note">Launch a Card charges no platform fee.</p>
+      {/* The full list in its own disclosure, styled like More options (also on /how#fees and /legal). */}
+      <details className="cdx-launch-more">
+        <summary><Icon name="chevron-right" size={16} className="cdx-launch-more__chev" /><span className="cdx-launch-more__title">What you pay</span></summary>
+        <p className="cdx-launch-fee-note cdx-launch-more__body">You pay Solana network and priority fees, account rent for the new accounts, the Metaplex NFT fee for the card, and pump.fun's protocol and creator fees inside any initial buy.</p>
+      </details>
     </section> : null}
 
     {showFresh ? <section className="cdx-live-block cdx-live-terms" aria-label="Terms">
       {ready}
-      <p>Coin creation and card issuance are two paid mainnet transactions. Exact costs appear before your wallet asks for approval. Your selected quote funds only the optional initial buy.{draftFees ? " Sharing creator fees adds a third, after the card, with its own approval." : ""}</p>
       <label className="cdx-live-check"><input ref={termsRef} type="checkbox" checked={terms} onChange={e => { setTerms(e.target.checked); if (e.target.checked && error === TERMS_NEEDED) setError(""); }} /><span>I have the rights to this artwork and accept paid mainnet transactions.</span></label>
     </section> : null}
 
@@ -999,15 +1002,17 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
           {feeSkippable && !busy ? <button type="button" className="mdx-link mdx-hit" onClick={() => setSkipAsk(true)}>Skip, keep 100%</button> : null}
         </StageRow> : null}
       </ol>
-      {intent?.status === "nft_pending" && !busy && !error ? <p>The coin is verified. Issue its separate one-of-one card to the same creator wallet.</p> : null}
     </section> : showFresh ? <p className="cdx-live-next">{oneApproval ? draftFees ? ONE_APPROVAL_NEXT_FEES : ONE_APPROVAL_NEXT : draftFees ? SEPARATE_APPROVALS_NEXT_FEES : SEPARATE_APPROVALS_NEXT}</p> : null}
     {/* The page's initial-buy notice, unless the alert above already says the same words. */}
     {notice && !intent && notice !== error ? <p role="status">{notice}</p> : null}
 
     {/* What the coin's wallet prompt will carry, before anything is prepared (the review shows the exact list). */}
-    {showFresh ? <section className="cdx-live-wallet-notice" aria-labelledby="cdx-live-notice">
-      <h3 id="cdx-live-notice" className="cdx-live-wallet-notice-title">{oneApproval ? "What your wallet will show for your coin and card" : "What your wallet will show for your coin"}</h3>
-      <ul className="cdx-live-wallet-notice-list">{walletNoticePreview({ hasBuy: !!initialBuy, siteHost, oneApproval, feesNext: draftFees }).map(item => <li key={item.key} data-notice={item.key}>{item.text}</li>)}</ul>
+    {showFresh ? <section className="cdx-live-wallet-notice" aria-label="Wallet notices">
+      {/* The list in its own disclosure, styled like More options: the review shows the exact one again before the wallet opens. */}
+      <details className="cdx-launch-more">
+        <summary><Icon name="chevron-right" size={16} className="cdx-launch-more__chev" /><span className="cdx-launch-more__title">{WALLET_NOTICE_TITLE}</span></summary>
+        <ul className="cdx-live-wallet-notice-list cdx-launch-more__body">{walletNoticePreview({ hasBuy: !!initialBuy, siteHost, oneApproval, feesNext: draftFees }).map(item => <li key={item.key} data-notice={item.key}>{item.text}</li>)}</ul>
+      </details>
       <p className="cdx-live-wallet-notice-safety">{WALLET_NOTICE_COPY.safety} <TextLink to="/how" hash="wallet">Details</TextLink></p>
     </section> : null}
 
@@ -1026,13 +1031,13 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
         {intent.feeShare ? <div><dt>Creator fee split</dt><dd><FeeSplitList recipients={intent.feeShare.status === "set_elsewhere" && intent.feeShare.onChain ? intent.feeShare.onChain : intent.feeShare.recipients} creator={intent.creatorWallet} /></dd></div> : null}
       </dl>
       {intent.feeShare && !["complete", "set_elsewhere", "skipped"].includes(intent.feeShare.status) ? <p className="cdx-live-meta">{FEE_SPLIT_PERMANENT} {FEE_SPLIT_FREE}</p> : null}
-      {intent.feeShare?.status === "set_elsewhere" ? <p className="cdx-live-meta">This coin's split was already set on pump.fun, so the one above is what pump.fun pays. Yours was not applied.</p> : null}
-      <p className="cdx-live-meta">These launch details are locked to this saved request. Reference {intent.id.slice(0, 8)}.</p>
+      {intent.feeShare?.status === "set_elsewhere" ? <p className="cdx-live-meta">A split was already set on pump.fun, so yours wasn't applied. pump.fun pays the one above.</p> : null}
+      <p className="cdx-live-meta">Locked to this launch. Ref {intent.id.slice(0, 8)}.</p>
       {/* A launch this browser cannot sign any more says why; its primary is the discard, so no second control. */}
       {intent.status === "prepared" || intent.status === "token_pending" ? <div className="cdx-live-discard">
         {unsignable ? <p>{PREPARED_WITHOUT_KEY}</p> : <>
-          <p>An unused launch can be discarded only after every prepared transaction expires and the server verifies no coin exists.</p>
-          <button type="button" className="mdx-link mdx-hit" disabled={!!busy} onClick={() => void discardExpiredDraft()}>Discard expired unused draft</button>
+          <p>You can discard it once every prepared transaction expires and no coin exists.</p>
+          <button type="button" className="mdx-link mdx-hit" disabled={!!busy} onClick={() => void discardExpiredDraft()}>Discard expired draft</button>
         </>}
       </div> : null}
     </section> : null}
@@ -1051,16 +1056,16 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
 
     <WalletConnectDialog open={connectOpen} onOpenChange={connectChange} connect={connectInPanel} busyCopy={connectCopy} />
 
-    <Modal open={skipAsk} onOpenChange={setSkipAsk} width={420} title="Keep 100% of creator fees?" description="Your coin keeps pump.fun's default: every creator fee goes to your wallet.">
+    <Modal open={skipAsk} onOpenChange={setSkipAsk} width={420} title="Keep 100% of creator fees?" description="Every creator fee goes to your wallet, pump.fun's default.">
       <div className="cdx-live-review-modal">
-        <p>This is final here: Launch a Card will not prepare this split again. You could still set a split yourself on pump.fun. Nothing is signed or sent.</p>
+        <p>Launch a Card won't offer this split again; you can still set one on pump.fun. Nothing is signed or sent.</p>
         <div className="cdx-live-review-actions">
           <Button block onClick={() => void skipFees()}>Keep 100%, skip the split</Button>
           <Button variant="ghost" block onClick={() => setSkipAsk(false)}>Back</Button>
         </div>
       </div>
     </Modal>
-    <Modal open={reviewOpen} onOpenChange={value => { if (!busy) setReviewOpen(value); }} width={520} title={plan?.kind === "nft" ? "Review your card NFT" : plan?.kind === "fees" ? "Review your creator fee split" : "Review your coin launch"} description="Check the total, then approve in your wallet. Nothing is sent until you approve there.">
+    <Modal open={reviewOpen} onOpenChange={value => { if (!busy) setReviewOpen(value); }} width={520} title={plan?.kind === "nft" ? "Review your card NFT" : plan?.kind === "fees" ? "Review your creator fee split" : "Review your coin launch"} description="Nothing is sent until you approve in your wallet.">
       {plan && reviewIntent ? <div className="cdx-live-review-modal">
         {/* One page: the costs, what the wallet will show, then the addresses. It scrolls inside the dialog when the
             screen is short, and Continue stays under it. */}
@@ -1072,7 +1077,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
           <dl className="cdx-launch-cost cdx-live-review">
             <div><dt>Network fee</dt><dd><span className="num">{formatLiveAmount(plan.review.networkFeeLamports, 9)}</span> <span className="mdx-unit">SOL</span></dd></div>
             <div><dt>Priority fee</dt><dd><span className="num">{formatLiveAmount(plan.review.priorityFeeLamports, 9)}</span> <span className="mdx-unit">SOL</span></dd></div>
-            <div><dt>Rent for new accounts and program costs</dt><dd><span className="num">{formatLiveAmount(plan.review.rentAndProgramCostLamports, 9)}</span> <span className="mdx-unit">SOL</span></dd></div>
+            <div><dt>Rent and program costs</dt><dd><span className="num">{formatLiveAmount(plan.review.rentAndProgramCostLamports, 9)}</span> <span className="mdx-unit">SOL</span></dd></div>
             {plan.kind === "token" && plan.review.initialBuyQuoteBaseUnits !== "0" ? <>
               <div><dt>Initial buy</dt><dd><span className="num">{formatLiveAmount(plan.review.initialBuyQuoteBaseUnits, selected.decimals)}</span> <span className="mdx-unit">{selected.symbol}</span></dd></div>
               <div><dt>Minimum coins received</dt><dd><span className="num">{formatLiveAmount(plan.review.minimumTokensOut, typeof plan.review.tokenDecimals === "number" ? plan.review.tokenDecimals : 6)}</span></dd></div>
@@ -1082,12 +1087,12 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
             {plan.kind === "token" && pairCard ? <div><dt>Card NFT, in the same approval</dt><dd><span className="num">{formatLiveAmount(pairCard.review.totalDebitLamports, 9)}</span> <span className="mdx-unit">SOL</span></dd></div> : null}
             {typeof plan.review.walletBalanceLamports === "string" ? <div><dt>Wallet SOL available</dt><dd><span className="num">{formatLiveAmount(plan.review.walletBalanceLamports, 9)}</span> <span className="mdx-unit">SOL</span></dd></div> : null}
           </dl>
-          {plan.kind === "token" ? <p>{selected.key === "sol" ? "Any SOL initial buy is included in the SOL total. " : `Any ${selected.symbol} initial buy is separate from the SOL total. `}{pairCard ? PAIR_REVIEW_COPY : "Card NFT issuance is a separate paid transaction after coin verification."}</p>
-            : plan.kind === "fees" ? null : <p>This issues the card for your existing coin. It does not launch or buy another coin.</p>}
+          {plan.kind === "token" ? <p>{selected.key === "sol" ? "Any SOL buy is in this total. " : `Your ${selected.symbol} buy is paid separately from this SOL total. `}{pairCard ? PAIR_REVIEW_COPY : "Your card is a second paid approval after the coin confirms."}</p>
+            : plan.kind === "fees" ? null : <p>Issues the card for your existing coin. No new coin or buy.</p>}
           {/* The split chosen with the launch: set by its own approval after the card, never inside the coin or card. */}
           {plan.kind === "token" && reviewFees ? <><h3 className="cdx-live-subhead">Creator fee split, after your card</h3>
             <FeeSplitList recipients={reviewFees} creator={reviewIntent.creatorWallet} />
-            <p>Set by its own approval once your coin and card are confirmed. {FEE_SPLIT_PERMANENT} {FEE_SPLIT_FREE}</p></> : null}
+            <p>Its own approval after your card. {FEE_SPLIT_PERMANENT} {FEE_SPLIT_FREE}</p></> : null}
           {/* The coin's creator fee model and rate: in its create bytes, so permanent from this approval. */}
           {plan.kind === "token" && reviewHolders ? <><h3 className="cdx-live-subhead">Creator fees go to holders</h3>
             <p><strong>{HOLDERS_PERMANENT}</strong> {HOLDERS_WHO_PAYS}</p></> : null}
@@ -1096,16 +1101,15 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
           {plan.kind === "token" && reviewAnnounce ? <><h3 className="cdx-live-subhead">Announcement on {OFFICIAL_X_HANDLE}</h3><p>{X_ANNOUNCE_REVIEW}</p></> : null}
           {plan.kind === "fees" ? <><h3 className="cdx-live-subhead">Who receives your coin's creator fees</h3>
             <FeeSplitList recipients={reviewFees ?? []} creator={reviewIntent.creatorWallet} />
-            <p><strong>{FEE_SPLIT_PERMANENT}</strong> {FEE_SPLIT_WALLETS} {FEE_SPLIT_FREE} Fees your coin earned before this split stay yours: they are collected into your own pump.fun creator vault first.</p></> : null}
+            <p><strong>{FEE_SPLIT_PERMANENT}</strong> {FEE_SPLIT_WALLETS} {FEE_SPLIT_FREE} Fees earned before the split stay yours.</p></> : null}
           <LiveWalletNotice plan={plan} card={plan.kind === "token" ? pairCard : null} quote={selected} siteHost={siteHost} feesNext={plan.kind !== "fees" && !!reviewFees && feesOpen} />
           <h3 className="cdx-live-subhead">Addresses</h3>
           <dl className="cdx-launch-cost cdx-live-review" data-stack><div><dt>Creator / fee payer</dt><dd className="cdx-live-address">{reviewIntent.creatorWallet}</dd></div><div><dt>{plan.kind === "token" ? "New coin mint" : plan.kind === "fees" ? "Coin mint" : "New NFT asset"}</dt><dd className="cdx-live-address">{plan.kind === "nft" ? reviewIntent.nftMint : reviewIntent.tokenMint}</dd></div><div><dt>Quote mint</dt><dd className="cdx-live-address">{reviewIntent.quoteMint}</dd></div></dl>
-          <p>Verified at slot <span className="num">{plan.verifiedSlot.toLocaleString()}</span>. If this review stays open longer than 30 seconds, continuing prepares a fresh transaction first.</p>
+          <p>Checked at slot <span className="num">{plan.verifiedSlot.toLocaleString()}</span>. Open over 30 seconds? Continue refreshes the costs first.</p>
         </div>
         {/* While the wallet prompt is open, the dialog says what it shows (the panel's line is behind the overlay). */}
         {busy === "wallet" ? <PagedMessage text={pairCard ? WALLET_OPEN_PAIR_COPY : WALLET_OPEN_COPY} /> : null}
         {error ? <PagedMessage text={error} alert /> : null}
-        <p className="cdx-live-meta">Opening your wallet does not approve payment. Approve there, or reject. Closing this review submits nothing.</p>
         <div className="cdx-live-review-actions">
           <Button block pending={!!busy} pendingLabel={busy === "wallet" ? "Waiting for wallet…" : busy === "submitting" ? "Submitting…" : busy === "refreshing" ? "Refreshing…" : "Checking…"} onClick={() => void approveInWallet()}>Continue to wallet review</Button>
           <Button variant="ghost" block disabled={!!busy} onClick={() => setReviewOpen(false)}>Back without signing</Button>

@@ -171,7 +171,6 @@ export function PairHud({ value, onChange, ticker, live = false, disabled = fals
       <div className="cdx-pair-hud__picked">
         <p className="cdx-pair-hud__line">
           <strong><PairLogo asset={asset} size={20} className="cdx-pair-hud__logo" />{getTradingPair(ticker || "TICKER", asset.key)}</strong>
-          {live ? <span>Real assets</span> : null}
         </p>
         <QuoteAssetMeta quoteAssetKey={asset.key} live={live} />
         {/* Always in the page, so a change is announced when its words arrive. */}

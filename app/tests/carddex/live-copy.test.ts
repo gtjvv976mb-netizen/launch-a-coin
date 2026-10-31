@@ -40,16 +40,22 @@ describe("the Launch ticket says what the wallet will ask", () => {
   const panel = () => read("src/components/carddex/live/LiveLaunchPanel.tsx");
   test("one approval for the coin and its card when the connected wallet signs both, else the card after the coin (ML-2)", async () => {
     const notice = await import("../../src/components/carddex/live/wallet-notice");
-    expect(notice.ONE_APPROVAL_NEXT).toBe("Your wallet opens for a sign-in message that spends nothing, then your coin and its card in one approval.");
-    expect(notice.SEPARATE_APPROVALS_NEXT).toBe("Your wallet opens for a sign-in message that spends nothing, then your coin, then its card.");
+    expect(notice.ONE_APPROVAL_NEXT).toBe("Your wallet asks twice: a free sign-in, then your coin and card together (paid).");
+    expect(notice.SEPARATE_APPROVALS_NEXT).toBe("Your wallet asks 3 times: a free sign-in, your coin (paid), then its card (paid).");
     // The preview mirrors the review's list (walletNoticeItems): its approvals line first, the card's signer and lock
     // only in one approval, and no tokenized-stock note (that quote never carries a first buy).
     expect(notice.walletNoticePreview({ hasBuy: false }).map(item => item.key)).toEqual(["approvalsCoin", "networkFeeLater", "coinSigner", "newSite"]);
     expect(notice.walletNoticePreview({ hasBuy: true, siteHost: "launchacard.fun" }).map(item => item.key)).toEqual(["approvalsCoin", "networkFeeLater", "tokenAccount", "unverified", "coinSigner", "newSite"]);
     expect(notice.walletNoticePreview({ hasBuy: false, oneApproval: true }).map(item => item.key)).toEqual(["approvalsPair", "networkFeeLater", "coinSigner", "cardSigner", "cardLock", "newSite"]);
     expect(notice.walletNoticePreview({ hasBuy: true }).some(item => item.key === "stockQuote")).toBe(false);
-    // The terms line promises no separate approval for the card.
-    expect(panel()).toContain("Coin creation and card issuance are two paid mainnet transactions. Exact costs appear before your wallet asks for approval.");
+    // The line beside the primary counts the paid approvals (the terms paragraph it replaced said "two paid mainnet
+    // transactions"), and the terms box still names paid mainnet transactions.
+    for (const line of [notice.SEPARATE_APPROVALS_NEXT, notice.ONE_APPROVAL_NEXT, notice.SEPARATE_APPROVALS_NEXT_FEES, notice.ONE_APPROVAL_NEXT_FEES]) expect(line).toMatch(/\(paid\)|\d paid approvals/);
+    expect(panel()).toContain("oneApproval ? draftFees ? ONE_APPROVAL_NEXT_FEES : ONE_APPROVAL_NEXT : draftFees ? SEPARATE_APPROVALS_NEXT_FEES : SEPARATE_APPROVALS_NEXT");
+    expect(panel()).toContain("I have the rights to this artwork and accept paid mainnet transactions.");
+    expect(panel()).toContain('<span className="cdx-live-net">Solana mainnet · real funds</span>');
+    // The wallet warning stays visible beside the primary; only the preview list folds away.
+    expect(panel()).toContain('<p className="cdx-live-wallet-notice-safety">{WALLET_NOTICE_COPY.safety}');
     expect(panel()).not.toContain("before each wallet approval");
   });
   test("a saved launch this browser cannot sign names the one control that goes on (MW-5)", async () => {

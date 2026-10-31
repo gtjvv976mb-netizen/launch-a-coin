@@ -46,7 +46,7 @@ export function FeeSplitFields({ value, onChange, connected, disabled, showError
     <legend className="sr-only">Share creator fees</legend>
     <label className="cdx-live-check cdx-launch-fees__toggle">
       <input id="fee-split-on" type="checkbox" checked={value.on} onChange={e => toggle(e.target.checked)} />
-      <span><span className="cdx-launch-fees__title">Share creator fees</span> <span className="cdx-launch-fees__hint">With up to {MAX_FEE_RECIPIENTS} Solana wallets, set on pump.fun after your card.</span></span>
+      <span><span className="cdx-launch-fees__title">Share creator fees</span> <span className="cdx-launch-fees__hint">Up to {MAX_FEE_RECIPIENTS} wallets, set after your card.</span></span>
     </label>
     {value.on ? <>
       <ol className="cdx-launch-fees__rows" aria-label="Fee split recipients">
@@ -79,9 +79,9 @@ export function FeeSplitFields({ value, onChange, connected, disabled, showError
         {/* Not an alert: it changes on every keystroke, and the Total line above is already announced politely. */}
         {totalShown ? <p id="fee-split-total" className="cdx-launch-note__error">{check.total}</p> : null}
         <p>{FEE_SPLIT_PERMANENT}</p>
-        <p>{FEE_SPLIT_WALLETS} {FEE_SPLIT_FREE}</p>
+        <p>{FEE_SPLIT_FREE}</p>
         <p>{FEE_SPLIT_STEP}</p>
-      </> : <p>{FEE_SPLIT_DEFAULT}</p>}
+      </> : <p className="sr-only">{FEE_SPLIT_DEFAULT}</p>}
     </div>
   </fieldset>;
 }

@@ -317,7 +317,7 @@ describe("the card after its coin", () => {
     const { plan } = fixture(), card = nftFixture().plan, sol = { symbol: "SOL", decimals: 9, kind: "native" };
     const items = walletNoticeItems(plan, sol, "launchacard.fun", card);
     expect(items.map(item => item.key)).toEqual(["approvalsPair", "networkFee", "coinSigner", "cardSigner", "cardLock", "newSite"]);
-    expect(items[0].text).toBe("One wallet approval creates your coin and its card. The card is sent as soon as the coin is confirmed.");
+    expect(items[0].text).toBe("One approval creates your coin and card. The card sends once the coin confirms.");
     expect(items[1].text).toBe("A network fee of about 0.000021 SOL.");
     expect(walletNoticeItems(plan, sol)[0].text).toBe(WALLET_NOTICE_COPY.approvalsCoin);
     // A card plan never becomes a pair with another card.

@@ -784,7 +784,7 @@ function Launch() {
               {preview && !locked && !uploading ? <button type="button" className="mdx-link mdx-hit cdx-launch-art__remove" aria-label="Remove artwork" onClick={removeArt}>Remove</button> : null}
               <input disabled={locked} ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="sr-only" tabIndex={-1} aria-hidden onChange={(e) => { handleFile(e.target.files?.[0]); e.target.value = ""; }} />
             </Field>
-            <Field label="Description" htmlFor="lore" className="cdx-launch-f cdx-launch-f--lore" right={<span className="num" aria-hidden>{lore.length}/280</span>} help="Permanent once your coin is created.">
+            <Field label="Description" htmlFor="lore" className="cdx-launch-f cdx-launch-f--lore" right={<span className="num" aria-hidden>{lore.length}/280</span>} help="Permanent after launch, like your card.">
               <textarea ref={loreRef} disabled={locked} id="lore" rows={3} maxLength={280} value={lore} onChange={e => setLore(e.target.value)} placeholder="King of the swamp. Jiggles under pressure, never breaks." aria-describedby="lore-help" className="mdx-input cdx-launch-description" />
             </Field>
           </div>
@@ -794,7 +794,7 @@ function Launch() {
             <summary>
               <Icon name="chevron-right" size={16} className="cdx-launch-more__chev" />
               <span className="cdx-launch-more__title">More options</span>
-              <span className="cdx-launch-more__sub">{["Links, initial buy", feesOpen || offer.holders || offer.rateMax !== null ? "creator fees" : "", xOpen ? "announcement" : ""].filter(Boolean).join(", ")}</span>
+              <span className="cdx-launch-more__sub">{["Links, first buy", feesOpen || offer.holders || offer.rateMax !== null ? "fees" : "", xOpen ? "X post" : ""].filter(Boolean).join(", ")}</span>
             </summary>
             <div className="cdx-launch-more__body">
               <div className="cdx-launch-links">
@@ -861,7 +861,7 @@ function Launch() {
                   ) : buyBlocked ? (
                     <p role="status">{buyOffText}</p>
                   ) : (
-                    <p>{`Paid in real ${quoteAsset.symbol} with your coin's creation.${buyFits === null ? ` ${BUY_FIT_AFTER_SIGN_IN}` : ""}`}</p>
+                    <p>{`Paid in real ${quoteAsset.symbol} at launch.${buyFits === null ? ` ${BUY_FIT_AFTER_SIGN_IN}` : ""}`}</p>
                   )}
                 </div>
               </div>

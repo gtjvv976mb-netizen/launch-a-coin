@@ -11,8 +11,8 @@ export type LiveXPostStatus = "review" | "queued" | "posting" | "posted" | "fail
 export type LiveXAnnounce = { status: "requested" | LiveXPostStatus; postId: string | null };
 
 export const X_ANNOUNCE_LABEL = `Announce my coin on ${OFFICIAL_X_HANDLE}`;
-export const X_ANNOUNCE_HINT = "After your card is confirmed and we review it, we may post it once from our X account: name, ticker, pair, page link and the card image when it fits. Posts are limited per day and may be skipped. Nothing else is posted for you.";
-export const X_ANNOUNCE_REVIEW = `After your card is confirmed, we review it and ${OFFICIAL_X_HANDLE} may post one announcement of your coin: its name, ticker, pair, page link and the card image when it fits. It never posts prices. Posts are limited per day, and a coin may be skipped (not approved, a name it cannot post safely, or not posted within a day).`;
+export const X_ANNOUNCE_HINT = `${OFFICIAL_X_HANDLE} may post it once, after your card is confirmed and reviewed. Nothing else is posted.`;
+export const X_ANNOUNCE_REVIEW = `After your card is confirmed and reviewed, ${OFFICIAL_X_HANDLE} may post it once: name, ticker, pair, link and, when it fits, the card image. Never prices. Posts can be skipped. Nothing else is posted.`;
 export const xPostUrl = (postId: string) => `${OFFICIAL_X_URL}/status/${postId}`;
 /** The saved launch's line, by status. */
 export function xAnnounceStatusText(announce: LiveXAnnounce): string {
