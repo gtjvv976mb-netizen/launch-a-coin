@@ -24,10 +24,11 @@ import { oneOf, searchSchema, text } from "../lib/mintdex/search";
 import { LaunchCardPreview } from "../components/carddex/live/LaunchCardPreview";
 import { PairHud } from "../components/carddex/PairHud";
 import { getCardDesign } from "../lib/carddex/designs";
-import { getPairAsset, isPairAssetKey, type PairAssetKey } from "../lib/carddex/pairs";
+import { designsForPair, getPairAsset, isPairAssetKey, type PairAssetKey } from "../lib/carddex/pairs";
 import { CREATION_MCAP_LABEL } from "../lib/carddex/card-template";
 import type { LiveLaunchHandle, LivePrimary } from "../components/carddex/live/LiveLaunchPanel";
-import { draftPair, firstProblem, enterTarget, formDesign, pairFromSearch, pickPair as nextPick, type FormCheck } from "../components/carddex/launch-form";
+import { draftDesign, draftPair, firstProblem, enterTarget, formDesign, pairFromSearch, pickDesign as nextDesign, pickPair as nextPick, type FormCheck } from "../components/carddex/launch-form";
+import { DesignChooser } from "../components/carddex/DesignChooser";
 import { liveReadinessQuery, useLiveLaunchOpen, useLiveRecoveryOpen } from "../components/carddex/live/readiness";
 import { formatLiveAmount, parseLiveAmount } from "../components/carddex/live/amounts";
 import { BUY_FIT_AFTER_SIGN_IN, liveBuyOff, useLiveBuyFit, useLiveBuyRefusal } from "../components/carddex/live/buy-fit";
@@ -50,7 +51,7 @@ export const Route = createFileRoute("/launch")({
       path: "/launch",
       title: "Launch a coin | Launch a Card",
       description: sentences(
-        "Pick your coin's pair and its card design comes with it. Add your coin details and preview its one-of-one card",
+        `Pick your coin's pair and its card design comes with it, or one of SOL's ${designsForPair("sol").length} designs. Add your coin details and preview its one-of-one card`,
         "Launch it on pump.fun from your Solana wallet",
       ),
     }),
@@ -171,9 +172,10 @@ function useSettledValue<T>(value: T, ms: number): T {
 // ---------------------------------------------------------------- view
 
 /**
- * mintdex.fun's one-page Launch: the form panel (Name | Ticker, the pair HUD, Card art | Description, More options,
- * then the ticket with the one primary at its foot) beside the live card. The pair picks the card: choosing a pair
- * shows its design on the live card, and there is no separate design choice. No steps and no separate review; Enter
+ * mintdex.fun's one-page Launch: the form panel (Name | Ticker, the pair HUD, SOL's design chooser, Card art |
+ * Description, More options, then the ticket with the one primary at its foot) beside the live card. The pair picks
+ * the card: choosing a pair shows its design on the live card. SOL alone offers a choice (its own card first, the
+ * main one), in the chooser right under the pair HUD. No steps and no separate review; Enter
  * never submits (it moves on to the next field that needs something, or to the primary).
  */
 function Launch() {
@@ -223,12 +225,13 @@ function Launch() {
   const recoveryOnly = live && !liveOpen;
   const liveRef = useRef<LiveLaunchHandle>(null);
   // The pair picks the card (launch-form.ts): ?quote= opens on that pair, an older ?design= link on that design's pair,
-  // anything else on SOL. The card's design always follows the pair, except that a saved launch keeps the design it
-  // was saved with (one prepared before this rule may carry another); any pair tap ends that, the checked pair's
-  // included.
+  // anything else on SOL. The card's design follows the pair: its main design, or for SOL the design picked in the
+  // chooser under the pair HUD (?quote=sol&design= opens on one). A saved launch keeps the design it was saved with
+  // (one prepared before this rule may carry another); any pair or design tap ends that, the checked pair's included.
   const [quoteKey, setQuoteKey] = useState<PairAssetKey>(() => pairFromSearch(search).pair);
+  const [chosenDesign, setChosenDesign] = useState<string | null>(() => pairFromSearch(search).design);
   const [savedDesign, setSavedDesign] = useState<string | null>(null);
-  const designKey = formDesign(quoteKey, savedDesign, live);
+  const designKey = formDesign(quoteKey, savedDesign, live, chosenDesign);
   const [pairNotice, setPairNotice] = useState("");
   const design = getCardDesign(designKey);
   const quoteAsset = getPairAsset(quoteKey);
@@ -249,6 +252,7 @@ function Launch() {
   useEffect(() => {
     const next = pairFromSearch(search);
     setQuoteKey(next.pair);
+    setChosenDesign(next.design);
     setSavedDesign(null);
     setDevBuy("");
     setPairNotice(next.notice);
@@ -271,9 +275,9 @@ function Launch() {
     if (d) {
       setName(str(d.name).slice(0, 24)); setTicker(str(d.ticker).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8));
       setLore(str(d.lore).slice(0, 280)); setWebsite(str(d.website)); setXUrl(str(d.xUrl));
-      // The draft's pair comes back (its card follows); an older draft's separate design is not used.
+      // The draft's pair comes back (its card follows), and for SOL the design picked in its chooser.
       const savedPair = draftPair(d);
-      if (!search.design && !search.quote && savedPair) { setQuoteKey(savedPair); setDevBuy(str(d.devBuy)); }
+      if (!search.design && !search.quote && savedPair) { setQuoteKey(savedPair); setChosenDesign(draftDesign(d)); setDevBuy(str(d.devBuy)); }
     }
     setDraftReady(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -518,6 +522,14 @@ function Launch() {
     if (pick.changed && devBuy) { setDevBuy(""); setPairNotice("Initial buy cleared."); }
     else setPairNotice("");
   };
+  /** A design pick in SOL's chooser: the preview shows it at once. It ends a saved launch's own design, as a pair tap does. */
+  const pickDesign = (next: string) => {
+    if (liveLocked) return;
+    const pick = nextDesign({ pair: quoteKey, chosen: chosenDesign, savedDesign }, next);
+    if (!pick) return;
+    setSavedDesign(pick.savedDesign);
+    setChosenDesign(pick.chosen);
+  };
 
   // Recovery only: the fields wait for a saved launch to fill them, and stay locked once it does. They also hold
   // still while a launch step runs, since the press already captured them.
@@ -662,6 +674,15 @@ function Launch() {
           <div className="cdx-launch-f cdx-launch-f--pair">
             <PairHud value={quoteKey} onChange={pickPair} ticker={ticker} live disabled={locked} notice={pairNotice} />
           </div>
+          {/* SOL alone offers more than one design: its chooser sits right under the pair HUD (DesignChooser). */}
+          {designsForPair(quoteKey).length > 1 ? (
+            <>
+              {spacer}
+              <div className="cdx-launch-f cdx-launch-f--design">
+                <DesignChooser pair={quoteKey} value={designKey} onChange={pickDesign} disabled={locked} />
+              </div>
+            </>
+          ) : null}
           {spacer}
 
           {/* Card art and Description side by side, as on MintDex. */}

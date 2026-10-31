@@ -1,6 +1,6 @@
 /* Launch (/launch) in mintdex.fun's one-page Launch format (routes/launch.tsx). Unlayered, like the other restored
  * MintDex sheets. Tokens: carddex-theme.css. Also styles the live launch panel and the pair HUD (PairHud: the pair
- * picks the card, so there is no separate design choice).
+ * picks the card) and SOL's design chooser under it (DesignChooser: SOL alone offers more than one design).
  *   desktop (>=1024): the form panel (it scrolls on its own) | the preview column: the live card on its ledge and its
  *     controls row. The form reads Name | Ticker, the pair HUD, Card art | Description, the More options disclosure,
  *     then the ticket at its foot (content rules, the total, the fee line, the one primary).
@@ -393,6 +393,96 @@
   :root:not([data-motion-pref="full"]) .cdx-pair-tile:active:not(:disabled) { transform: none; }
 }
 :root[data-motion="calm"] .cdx-pair-tile:active:not(:disabled) { transform: none; }
+
+/* SOL's card design chooser (DesignChooser), right under the pair HUD while SOL is picked: the HUD's label row and
+ * suede well, holding every SOL design as a small card front with its name (a radio group). From 1024px a grid of
+ * 76px tracks that scrolls down past two rows (2 x 152 + 8, plus half a row that says it scrolls); below it one
+ * sideways strip that runs to the well's edges. The chosen tile wears the pair tile's gold rim and check, at once (no
+ * motion); SOL's own card carries a "Main" tag. Under the well, the chosen design's name. */
+.cdx-design-pick { display: grid; min-width: 0; gap: 10px; }
+.cdx-design-pick__grid { display: grid; min-width: 0; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; }
+@media (min-width: 1024px) {
+  .cdx-design-pick__grid { max-height: 388px; margin: -4px; padding: 6px 4px 4px; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-width: thin; }
+}
+@media (max-width: 1023.98px) {
+  .cdx-design-pick__grid {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 76px;
+    margin-inline: -12px;
+    padding: 6px 12px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 12px;
+    scrollbar-width: none;
+    touch-action: pan-x pan-y;
+  }
+  .cdx-design-pick__grid::-webkit-scrollbar { display: none; }
+  .cdx-design-pick__grid > .cdx-design-pick__tile { scroll-snap-align: center; }
+}
+.cdx-design-pick__tile {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 44px;
+  align-content: start;
+  justify-items: center;
+  gap: 4px;
+  padding: 6px 6px 5px;
+  border-radius: var(--radius-row);
+  background: var(--color-plinth);
+  box-shadow: inset 0 0 0 1px var(--color-hairline); /* taste-skill-ignore: mintdex.fun ring/selected mark */
+  color: var(--color-ink);
+  transition:
+    background-color var(--t-fast) var(--ease-room),
+    transform var(--t-press) var(--ease-out);
+}
+.cdx-design-pick__img { display: block; width: 100%; max-width: 64px; height: auto; aspect-ratio: 128 / 193; border-radius: 4px; background: var(--color-track); }
+.cdx-design-pick__name {
+  display: -webkit-box;
+  width: 100%;
+  min-height: 30px;
+  overflow: hidden;
+  font-size: var(--text-caption);
+  line-height: 15px;
+  text-align: center;
+  color: var(--color-slate);
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.cdx-design-pick__main {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--color-neon);
+  color: var(--color-neon-ink);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+}
+.cdx-design-pick__tile[aria-checked="true"] {
+  background: var(--color-sheet);
+  box-shadow: 0 0 0 1.5px var(--color-neon); /* taste-skill-ignore: mintdex.fun ring/selected mark (the gold rim, no glow) */
+}
+.cdx-design-pick__tile[aria-checked="true"] .cdx-design-pick__name { color: var(--color-ink); }
+.cdx-design-pick__tile:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; }
+.cdx-design-pick__tile:active:not(:disabled) { transform: scale(0.96); }
+.cdx-design-pick__tile:disabled { cursor: not-allowed; opacity: 0.55; }
+.cdx-design-pick__tile[aria-checked="true"]:disabled { opacity: 0.8; }
+@media (hover: hover) and (pointer: fine) {
+  .cdx-design-pick__tile:not([aria-checked="true"]):hover:not(:disabled) { background: var(--color-tint); }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion-pref="full"]) .cdx-design-pick__tile:active:not(:disabled) { transform: none; }
+}
+:root[data-motion="calm"] .cdx-design-pick__tile:active:not(:disabled) { transform: none; }
+.cdx-design-pick__line { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; font-size: var(--text-body); line-height: 20px; }
+.cdx-design-pick__line strong { min-width: 0; color: var(--color-ink); font-weight: 600; overflow-wrap: anywhere; }
+.cdx-design-pick__line > span { color: var(--color-slate); }
 
 .cdx-pair-mint { display: inline-flex; max-width: 100%; align-items: flex-start; gap: 4px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
 .cdx-pair-mint > span { min-width: 0; }

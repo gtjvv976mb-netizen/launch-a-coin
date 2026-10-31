@@ -8,7 +8,7 @@ import { ButtonLink, Tabs, TextLink } from "../components/mintdex/ui";
 import { DesignMini } from "../components/carddex/GalleryTile";
 import { getCardDesign, isCardDesignKey, type CardDesign } from "../lib/carddex/designs";
 import { pageHead } from "../lib/mintdex/seo";
-import { boundQuoteForDesign, defaultQuoteForDesign, designForPair, isOfferedPair, pairForDesign, type PairAsset } from "../lib/carddex/pairs";
+import { boundQuoteForDesign, defaultQuoteForDesign, designForPair, designsForPair, isOfferedPair, pairForDesign, type PairAsset } from "../lib/carddex/pairs";
 import { isHeldPairDesign } from "../lib/carddex/pair-designs";
 import { ORDERED_PAIRS, PAIR_GROUPS, groupAlias, isPairGroup, pairGroupOf, shortPairName, type PairGroup } from "../components/carddex/pair-groups";
 import { CREATION_MCAP_LABEL } from "../lib/carddex/card-template";
@@ -17,8 +17,8 @@ import { CREATION_MCAP_LABEL } from "../lib/carddex/card-template";
  * Designs (/levels), in mintdex.fun's Designs format: the pair groups as segmented tabs, the selected design at the
  * centre of a coverflow (its neighbours fanned back on either side), its name, its pair and the one primary under the
  * ledge, and the design table in a full-height aside that scrolls on its own (on phones: a strip of design chips, then
- * the selected design's plinth). The pair picks the card, so this shows the one design of each launchable pair, and
- * its primary opens Launch on that pair. A design no pair has (kept by coins made with it) still opens from a link,
+ * the selected design's plinth). The pair picks the card, so this shows each launchable pair's designs: one for every
+ * pair, and all of SOL's (its own card, the main one, first), and its primary opens Launch on that pair and design. A design no pair has (kept by coins made with it) still opens from a link,
  * with no launch action. Styles: styles/screens/designs.css. Every explanation lives at /how#cards and /how#pairs.
  */
 
@@ -34,9 +34,20 @@ function DesignStage({ card }: { card: CardData }) {
   );
 }
 
-/** Every launchable design, with its pair, in the offered pairs' reading order (pair-groups.ts). */
-type PairedDesign = { design: CardDesign; pair: Readonly<PairAsset> };
-const PAIRED: readonly PairedDesign[] = ORDERED_PAIRS.map((pair) => ({ pair, design: getCardDesign(designForPair(pair.key)!) }));
+/**
+ * Every launchable design, with its pair, in the offered pairs' reading order (pair-groups.ts): SOL's designs together
+ * (its main one first), then one for each other pair. `of` counts the pair's designs (more than 1 for SOL only).
+ */
+type PairedDesign = { design: CardDesign; pair: Readonly<PairAsset>; main: boolean; of: number };
+const PAIRED: readonly PairedDesign[] = ORDERED_PAIRS.flatMap((pair) => {
+  const keys = designsForPair(pair.key);
+  return keys.map((key, i) => ({ pair, design: getCardDesign(key), main: i === 0, of: keys.length }));
+});
+/** SOL's designs, the one pair with a choice. */
+const SOL_DESIGNS = PAIRED.filter((d) => d.of > 1).length;
+/** How a design's pair reads in the table, the strip and the caption: "SOL main" and "SOL" for SOL's designs. */
+const pairTag = (d: PairedDesign) => (d.of > 1 && d.main ? `${d.pair.symbol} main` : d.pair.symbol);
+const pairLabel = (d: PairedDesign) => `${d.design.name}, ${d.pair.symbol} pair${d.of > 1 ? (d.main ? ", main design" : `, one of ${d.of} ${d.pair.symbol} designs`) : ""}`;
 const pairedIn = (group: PairGroup) => PAIRED.filter(({ pair }) => group === "all" || pairGroupOf(pair) === group);
 
 export const Route = createFileRoute("/levels")({
@@ -52,7 +63,7 @@ export const Route = createFileRoute("/levels")({
     pageHead({
       path: "/levels",
       title: "Card designs | Launch a Card",
-      description: `${PAIRED.length} card designs, one for each pair. Pick a pair and your coin keeps its card for good.`,
+      description: `${PAIRED.length} card designs: one for each pair, and ${SOL_DESIGNS} for SOL. Pick a pair and your coin keeps its card for good.`,
     }),
   component: Designs,
 });
@@ -97,8 +108,9 @@ function Designs() {
     : isOfferedPair(search.quote) ? getCardDesign(designForPair(search.quote)!) : null;
   const design = linked ?? shown[0]?.design ?? PAIRED[0]!.design;
   const pair = pairForDesign(design.key);
-  // pair-sol and pair-usdc: identity designs whose pair launches with another card (SOL keeps One Piece, USDC Duel
-  // Masters). An identity whose pair is not offered at all reads as any design no pair has.
+  const paired = PAIRED.find((d) => d.design.key === design.key);
+  // pair-usdc: an identity design whose pair launches with another card (USDC keeps Duel Masters). An identity whose
+  // pair is not offered at all reads as any design no pair has.
   const unofferedIdentity = !pair && design.key.startsWith("pair-") && isOfferedPair(boundQuoteForDesign(design.key)?.key);
   // The sample card's quote: the design's pair; a design no pair has shows the quote coins made with it read as.
   const quote = pair ?? defaultQuoteForDesign(design.key);
@@ -131,7 +143,7 @@ function Designs() {
   // selected.
   const [announce, setAnnounce] = useState("");
   const go = (d: PairedDesign, say = true) => {
-    if (say) setAnnounce(`${d.design.name} selected, ${d.pair.symbol} pair.`);
+    if (say) setAnnounce(`${pairLabel(d)} selected.`);
     void navigate({ search: { ...search, design: d.design.key, quote: undefined, icon: undefined, edition: undefined }, replace: true, resetScroll: false });
   };
   const setGroup = (next: string) => {
@@ -200,8 +212,8 @@ function Designs() {
 
   // The one primary: Launch on this design's pair (its card comes with it). A design no pair has offers none.
   const primary = pair ? (
-    <ButtonLink to="/launch" search={{ quote: pair.key }}>
-      Use this pair
+    <ButtonLink to="/launch" search={{ quote: pair.key, design: paired && paired.of > 1 ? design.key : undefined }}>
+      {paired && paired.of > 1 ? "Use this design" : "Use this pair"}
     </ButtonLink>
   ) : null;
   const fan = index === -1 ? [] : shown.map((d, i) => ({ d, n: i - index })).filter(({ n }) => n !== 0 && Math.abs(n) <= FAN_REACH);
@@ -231,7 +243,7 @@ function Designs() {
                   Same coin. {PAIRED.length} designs.
                 </h1>
                 <p className="mt-1 text-[13px] leading-[1.45] text-slate">
-                  Your pair picks your card.{" "}
+                  Your pair picks your card. SOL has {SOL_DESIGNS}.{" "}
                   <TextLink to="/how" hash="cards">
                     Details
                   </TextLink>
@@ -266,7 +278,7 @@ function Designs() {
                 <span className="cdx-cf-cap__name">{design.name}</span>
                 <span data-chip="" className="cdx-cf-cap__chip">
                   <DesignMini design={design} />
-                  <span>{pair ? `${pair.symbol} pair` : unofferedIdentity ? "Not offered" : "Existing coins only"}</span>
+                  <span>{paired ? (paired.of > 1 ? (paired.main ? `${paired.pair.symbol} main design` : `${paired.pair.symbol} design`) : `${paired.pair.symbol} pair`) : unofferedIdentity ? "Not offered" : "Existing coins only"}</span>
                 </span>
                 {primary ? <span className="cdx-cf-cap__go">{primary}</span> : null}
               </div>
@@ -287,12 +299,12 @@ function Designs() {
                     data-design={d.design.key}
                     tabIndex={tabStop(i, d.design.key)}
                     aria-pressed={d.design.key === design.key}
-                    aria-label={`${d.design.name}, ${d.pair.symbol} pair`}
+                    aria-label={pairLabel(d)}
                     className="cdx-design-chip"
                     onClick={() => go(d)}
                   >
                     <DesignMini design={d.design} />
-                    <span className="cdx-design-chip__pair num">{d.pair.symbol}</span>
+                    <span className="cdx-design-chip__pair num">{pairTag(d)}</span>
                   </button>
                 ))}
               </div>
@@ -322,7 +334,7 @@ function Designs() {
                     data-design={d.design.key}
                     tabIndex={tabStop(i, d.design.key)}
                     aria-pressed={pressed}
-                    aria-label={`${d.design.name}, ${d.pair.symbol} pair`}
+                    aria-label={pairLabel(d)}
                     className="mdx-ladrow cdx-ladrow"
                     onClick={() => go(d)}
                   >
@@ -331,7 +343,7 @@ function Designs() {
                     </span>
                     <DesignMini design={d.design} className="mdx-mini" />
                     <span className="cdx-ladrow__name">{d.design.name}</span>
-                    <span className="cdx-ladrow__pair num">{d.pair.symbol}</span>
+                    <span className="cdx-ladrow__pair num">{pairTag(d)}</span>
                   </button>
                 );
               })}
@@ -348,6 +360,7 @@ function Designs() {
                 {pair ? (
                   <>
                     <strong>{pair.symbol}</strong> <span>{shortPairName(pair)}</span>
+                    {paired && paired.of > 1 ? <span>{paired.main ? ` · Its main design, ${paired.of} in all` : ` · One of ${paired.of} ${pair.symbol} designs`}</span> : null}
                   </>
                 ) : (
                   <span>{unofferedIdentity ? "Not offered. Its pair launches with another card." : "Existing coins only. No pair offers this design."}</span>

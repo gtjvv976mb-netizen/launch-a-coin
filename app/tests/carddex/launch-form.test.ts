@@ -1,18 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { draftPair, enterTarget, firstProblem, formDesign, launchDesign, pairFromSearch, pickPair, sameAmount } from "../../src/components/carddex/launch-form";
+import { draftDesign, draftPair, enterTarget, firstProblem, formDesign, launchDesign, pairFromSearch, pairOption, pickDesign, pickPair, sameAmount } from "../../src/components/carddex/launch-form";
 import { ORDERED_PAIRS, PAIR_GROUPS, filterPairs, gridStep, groupAlias, isPairGroup, pairGroupOf, pairMonogram, pairsInGroup, shortPairName, tileName } from "../../src/components/carddex/pair-groups";
-import { PAIR_DESIGNS_2026_10_30 } from "../../src/lib/carddex/design-pairings";
+import { PAIR_DESIGNS_2026_10_30, SOL_DESIGN_OPTIONS } from "../../src/lib/carddex/design-pairings";
 import { walletNoticeItems, walletNoticePreview, WALLET_NOTICE_COPY } from "../../src/components/carddex/live/wallet-notice";
 import { CARD_DESIGNS } from "../../src/lib/carddex/designs";
-import { OFFERED_PAIRS, designForPair, getPairAsset, isOfferedPair, pairForDesign } from "../../src/lib/carddex/pairs";
+import { OFFERED_PAIRS, designForPair, designsForPair, getPairAsset, isOfferedPair, pairForDesign } from "../../src/lib/carddex/pairs";
 
 // The one-page Launch form (routes/launch.tsx): the pair it opens on and the card it shows (the pair picks the card),
 // the pair HUD's groups, search and arrow keys, the quick initial-buy amounts, and where focus goes when something is
 // missing. Enter never submits; only the primary does.
 describe("the Launch form derives its card from the pair", () => {
-  test("a fresh Launch opens on SOL with the One Piece card", () => {
-    expect(pairFromSearch({})).toEqual({ pair: "sol", notice: "" });
-    expect(launchDesign("sol")).toBe("one-piece");
+  test("a fresh Launch opens on SOL with SOL's own card", () => {
+    expect(pairFromSearch({})).toEqual({ pair: "sol", design: null, notice: "" });
+    expect(launchDesign("sol")).toBe("pair-sol");
     expect(launchDesign("usdc")).toBe("duel-masters");
   });
   test("every offered pair shows its own design, and the design changes only with the pair", () => {
@@ -23,21 +23,25 @@ describe("the Launch form derives its card from the pair", () => {
     expect(launchDesign("doge")).toBe("pair-doge");
     // TSLAX's identity is held (content holds): the pair keeps the design production gives it.
     expect(launchDesign("tslax")).toBe("stock-tsla");
-    expect(launchDesign("agency")).toBe("one-piece");
+    expect(launchDesign("agency")).toBe("pair-sol");
     expect(launchDesign("cards")).toBe("pair-cards");
-    expect(launchDesign("unknown")).toBe("one-piece");
-    expect(launchDesign("aave")).toBe("one-piece");
+    expect(launchDesign("unknown")).toBe("pair-sol");
+    expect(launchDesign("aave")).toBe("pair-sol");
   });
   test("a saved mainnet launch keeps the design it was saved with, even one its pair would not pick now", () => {
     expect(launchDesign("sol", "pokemon-classic")).toBe("pokemon-classic");
     expect(launchDesign("gmex", "gamestop")).toBe("gamestop");
     expect(launchDesign("doge", "doge")).toBe("doge");
-    expect(launchDesign("sol", "not-a-design")).toBe("one-piece");
+    expect(launchDesign("sol", "not-a-design")).toBe("pair-sol");
+    // The saved launch's design wins over a design picked in SOL's chooser.
+    expect(launchDesign("sol", "pokemon-classic", "ronin")).toBe("pokemon-classic");
   });
   test("a saved launch's own design stays in mainnet mode: Demo shows and sends the pair's own card", () => {
     // Review finding 2: a pre-change SOL launch (Pokemon Classic) loaded in mainnet mode, then Demo with ?quote=sol.
     expect(formDesign("sol", "pokemon-classic", true)).toBe("pokemon-classic");
-    expect(formDesign("sol", "pokemon-classic", false)).toBe("one-piece");
+    expect(formDesign("sol", "pokemon-classic", false)).toBe("pair-sol");
+    expect(formDesign("sol", "pokemon-classic", true, "ronin")).toBe("pokemon-classic");
+    expect(formDesign("sol", "pokemon-classic", false, "ronin")).toBe("ronin");
     expect(formDesign("gmex", "gamestop", false)).toBe("stock-gme");
     expect(formDesign("tslax", "stock-tsla", true)).toBe("stock-tsla");
     for (const asset of OFFERED_PAIRS) {
@@ -51,38 +55,53 @@ describe("the Launch form derives its card from the pair", () => {
     expect(pickPair({ pair: "sol", savedDesign: null }, "doge")).toEqual({ pair: "doge", savedDesign: null, changed: true });
     expect(pickPair({ pair: "gmex", savedDesign: "gamestop" }, "doge")).toEqual({ pair: "doge", savedDesign: null, changed: true });
     const back = pickPair({ pair: "sol", savedDesign: "pokemon-classic" }, "sol")!;
-    expect(formDesign(back.pair, back.savedDesign, true)).toBe("one-piece");
+    expect(formDesign(back.pair, back.savedDesign, true)).toBe("pair-sol");
   });
   test("?quote= preselects an offered pair; an old ?design= link opens on its pair (today's, then the 30 October one)", () => {
-    expect(pairFromSearch({ quote: "doge" })).toEqual({ pair: "doge", notice: "" });
-    expect(pairFromSearch({ quote: "pepe" })).toEqual({ pair: "pepe", notice: "" });
-    expect(pairFromSearch({ quote: "tslax", design: "pepe" })).toEqual({ pair: "tslax", notice: "" });
+    expect(pairFromSearch({ quote: "doge" })).toEqual({ pair: "doge", design: null, notice: "" });
+    expect(pairFromSearch({ quote: "pepe" })).toEqual({ pair: "pepe", design: null, notice: "" });
+    // Another pair's link wins over a design it does not offer, quietly.
+    expect(pairFromSearch({ quote: "tslax", design: "pepe" })).toEqual({ pair: "tslax", design: null, notice: "" });
+    expect(pairFromSearch({ quote: "doge", design: "ronin" })).toEqual({ pair: "doge", design: null, notice: "" });
     for (const design of CARD_DESIGNS) {
       const pair = pairForDesign(design.key);
-      if (pair) expect(pairFromSearch({ design: design.key })).toEqual({ pair: pair.key, notice: "" });
+      if (pair) expect(pairFromSearch({ design: design.key })).toEqual({ pair: pair.key, design: pair.key === "sol" ? design.key : null, notice: "" });
     }
-    // Links from before the identity designs keep their pair: design "pepe" was TOAD's card, "doge" DOGE's.
-    // A pair not offered now opens on SOL and says so.
+    // Links from before the identity designs keep their pair ("doge" DOGE's), unless the design is one of SOL's now
+    // ("pepe" was TOAD's, "tide" MOODENG's): those open SOL with that design. A pair not offered now opens on SOL and
+    // says so.
     const cardGone = "That card is unavailable. SOL selected.";
-    for (const [pair, design] of Object.entries(PAIR_DESIGNS_2026_10_30)) expect(pairFromSearch({ design })).toEqual(isOfferedPair(pair) ? { pair, notice: "" } : { pair: "sol", notice: cardGone });
-    expect(pairFromSearch({ design: "sovereign" })).toEqual({ pair: "ansem", notice: "" });
-    expect(pairFromSearch({ design: "celestial" })).toEqual({ pair: "spx", notice: "" });
-    expect(pairFromSearch({ design: "pepe" })).toEqual({ pair: "toad", notice: "" });
-    expect(pairFromSearch({ design: "doge" })).toEqual({ pair: "doge", notice: "" });
-    expect(pairFromSearch({ design: "stock-tsla" })).toEqual({ pair: "tslax", notice: "" });
-    // pair-sol and pair-usdc are bound to their pairs but never offered: their links open on SOL and USDC.
-    expect(pairFromSearch({ design: "pair-sol" })).toEqual({ pair: "sol", notice: "" });
-    expect(pairFromSearch({ design: "pair-usdc" })).toEqual({ pair: "usdc", notice: "" });
-    expect(pairFromSearch({ design: "gamestop" })).toEqual({ pair: "gmex", notice: "" });
-    expect(pairFromSearch({ design: "pokemon-full-art" })).toEqual({ pair: "sol", notice: "" });
+    for (const [pair, design] of Object.entries(PAIR_DESIGNS_2026_10_30)) {
+      const sol = (SOL_DESIGN_OPTIONS as readonly string[]).includes(design);
+      expect(pairFromSearch({ design })).toEqual(sol ? { pair: "sol", design, notice: "" } : isOfferedPair(pair) ? { pair, design: null, notice: "" } : { pair: "sol", design: null, notice: cardGone });
+    }
+    expect(pairFromSearch({ design: "sovereign" })).toEqual({ pair: "ansem", design: null, notice: "" });
+    expect(pairFromSearch({ design: "celestial" })).toEqual({ pair: "spx", design: null, notice: "" });
+    expect(pairFromSearch({ design: "pepe" })).toEqual({ pair: "sol", design: "pepe", notice: "" });
+    expect(pairFromSearch({ design: "doge" })).toEqual({ pair: "doge", design: null, notice: "" });
+    expect(pairFromSearch({ design: "stock-tsla" })).toEqual({ pair: "tslax", design: null, notice: "" });
+    // pair-sol is SOL's main card; pair-usdc is bound to USDC but never offered: its link opens on USDC.
+    expect(pairFromSearch({ design: "pair-sol" })).toEqual({ pair: "sol", design: "pair-sol", notice: "" });
+    expect(pairFromSearch({ design: "pair-usdc" })).toEqual({ pair: "usdc", design: null, notice: "" });
+    expect(pairFromSearch({ design: "gamestop" })).toEqual({ pair: "gmex", design: null, notice: "" });
+    expect(pairFromSearch({ design: "pokemon-full-art" })).toEqual({ pair: "sol", design: "pokemon-full-art", notice: "" });
     // A held identity whose pair is still offered opens on that pair (and its live card), quietly.
-    expect(pairFromSearch({ design: "pair-ansem" })).toEqual({ pair: "ansem", notice: "" });
-    expect(pairFromSearch({ design: "pair-tslax" })).toEqual({ pair: "tslax", notice: "" });
-    // An unknown, withheld or held-out design says so; a known design no pair ever had (pokemon-full-art) stays quiet.
-    for (const design of ["nope", "pair-aave", "pair-uni", "pair-67", "pair-agency", "pair-alon", "pair-hodl", "pair-jeanphil", "pair-claudia", "pair-biketyson", "pair-neet"]) expect(pairFromSearch({ design })).toEqual({ pair: "sol", notice: cardGone });
-    for (const quote of ["aave", "uni", "popcat", "67", "agency", "alon", "hodl", "jeanphil", "claudia", "biketyson", "neet"]) expect(pairFromSearch({ quote })).toEqual({ pair: "sol", notice: "That pair is unavailable. SOL selected." });
+    expect(pairFromSearch({ design: "pair-ansem" })).toEqual({ pair: "ansem", design: null, notice: "" });
+    expect(pairFromSearch({ design: "pair-tslax" })).toEqual({ pair: "tslax", design: null, notice: "" });
+    // An unknown, withheld or held-out design says so.
+    for (const design of ["nope", "pair-aave", "pair-uni", "pair-67", "pair-agency", "pair-alon", "pair-hodl", "pair-jeanphil", "pair-claudia", "pair-biketyson", "pair-neet"]) expect(pairFromSearch({ design })).toEqual({ pair: "sol", design: null, notice: cardGone });
+    for (const quote of ["aave", "uni", "popcat", "67", "agency", "alon", "hodl", "jeanphil", "claudia", "biketyson", "neet"]) expect(pairFromSearch({ quote })).toEqual({ pair: "sol", design: null, notice: "That pair is unavailable. SOL selected." });
   });
-  test("a kept draft brings back its pair only, if it is still offered (an older draft's separate design is not used)", () => {
+  test("a kept draft brings back its pair, if it is still offered, and SOL's chosen design", () => {
+    expect(draftDesign({ quoteKey: "sol", designKey: "ronin" })).toBe("ronin");
+    expect(draftDesign({ quoteKey: "sol", designKey: "pair-sol" })).toBe("pair-sol");
+    expect(draftDesign({ quoteKey: "sol", designKey: "pair-doge" })).toBeNull();
+    expect(draftDesign({ quoteKey: "sol", designKey: "doge" })).toBeNull();
+    expect(draftDesign({ quoteKey: "sol" })).toBeNull();
+    expect(draftDesign({ quoteKey: "doge", designKey: "pair-doge" })).toBeNull();
+    expect(draftDesign({ quoteKey: "doge", designKey: "ronin" })).toBeNull();
+    expect(draftDesign({ quoteKey: "aave", designKey: "ronin" })).toBeNull();
+    expect(draftDesign(null)).toBeNull();
     expect(draftPair({ quoteKey: "bonk" })).toBe("bonk");
     expect(draftPair({ quoteKey: "pepe" })).toBe("pepe");
     expect(draftPair({ quoteKey: "aave" })).toBeNull();
@@ -90,6 +109,50 @@ describe("the Launch form derives its card from the pair", () => {
     expect(draftPair({ quoteKey: "popcat" })).toBeNull();
     expect(draftPair({})).toBeNull();
     expect(draftPair(null)).toBeNull();
+  });
+});
+
+describe("SOL's card design chooser", () => {
+  test("?quote=sol&design= and an older ?design= open SOL with that design; anything else SOL's own card", () => {
+    for (const design of SOL_DESIGN_OPTIONS) {
+      expect(pairFromSearch({ quote: "sol", design })).toEqual({ pair: "sol", design, notice: "" });
+      expect(pairFromSearch({ design })).toEqual({ pair: "sol", design, notice: "" });
+      expect(formDesign("sol", null, true, pairFromSearch({ quote: "sol", design }).design)).toBe(design);
+    }
+    expect(pairFromSearch({ quote: "sol", design: "ronin" })).toEqual({ pair: "sol", design: "ronin", notice: "" });
+    expect(pairFromSearch({ quote: "sol", design: "pair-doge" })).toEqual({ pair: "sol", design: null, notice: "That card is unavailable. SOL selected." });
+    expect(pairFromSearch({ quote: "sol", design: "nope" })).toEqual({ pair: "sol", design: null, notice: "That card is unavailable. SOL selected." });
+    expect(pairFromSearch({ quote: "sol" })).toEqual({ pair: "sol", design: null, notice: "" });
+  });
+  test("the chosen design shows only while SOL is the pair; another pair shows its one design", () => {
+    expect(pairOption("sol", "ronin")).toBe("ronin");
+    expect(pairOption("doge", "ronin")).toBeNull();
+    expect(pairOption("doge", "pair-doge")).toBe("pair-doge");
+    expect(pairOption("sol", null)).toBeNull();
+    expect(formDesign("sol", null, true, "ronin")).toBe("ronin");
+    expect(formDesign("doge", null, true, "ronin")).toBe("pair-doge");
+    expect(formDesign("sol", null, true, "pair-doge")).toBe("pair-sol");
+    expect(formDesign("sol", null, true, null)).toBe("pair-sol");
+    for (const asset of OFFERED_PAIRS) {
+      if (asset.key === "sol") continue;
+      for (const option of SOL_DESIGN_OPTIONS) expect(formDesign(asset.key, null, true, option)).toBe(designForPair(asset.key)!);
+    }
+    // Only SOL has a chooser (more than one design).
+    expect(OFFERED_PAIRS.filter(asset => designsForPair(asset.key).length > 1).map(asset => asset.key)).toEqual(["sol"]);
+  });
+  test("a design pick: one of SOL's, a change, and it ends a saved launch's own design", () => {
+    expect(pickDesign({ pair: "sol", chosen: null, savedDesign: null }, "ronin")).toEqual({ chosen: "ronin", savedDesign: null });
+    expect(pickDesign({ pair: "sol", chosen: "ronin", savedDesign: null }, "ronin")).toBeNull();
+    expect(pickDesign({ pair: "sol", chosen: null, savedDesign: null }, "pair-sol")).toBeNull();
+    expect(pickDesign({ pair: "sol", chosen: "ronin", savedDesign: null }, "pair-sol")).toEqual({ chosen: "pair-sol", savedDesign: null });
+    expect(pickDesign({ pair: "sol", chosen: null, savedDesign: null }, "pair-doge")).toBeNull();
+    expect(pickDesign({ pair: "doge", chosen: null, savedDesign: null }, "ronin")).toBeNull();
+    expect(pickDesign({ pair: "sol", chosen: "ronin", savedDesign: "pokemon-classic" }, "ronin")).toEqual({ chosen: "ronin", savedDesign: null });
+    // Picking another pair and back keeps SOL's choice; the other pair shows its own card meanwhile.
+    const away = pickPair({ pair: "sol", savedDesign: null }, "doge")!;
+    expect(formDesign(away.pair, away.savedDesign, true, "ronin")).toBe("pair-doge");
+    const back = pickPair({ pair: "doge", savedDesign: null }, "sol")!;
+    expect(formDesign(back.pair, back.savedDesign, true, "ronin")).toBe("ronin");
   });
 });
 

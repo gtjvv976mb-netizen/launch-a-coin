@@ -1,12 +1,12 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { Resvg, initWasm } from "@resvg/resvg-wasm";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { CARD_GENERATED_ASSETS } from "../../src/lib/carddex/generated-assets";
 import { CANONICAL_CARD_LAYOUT } from "../../src/lib/carddex/card-template";
 import renderAssets from "../../src/lib/carddex/render-assets.json";
 import { CARD_DESIGNS } from "../../src/lib/carddex/designs";
-import { OFFERED_PAIRS, designForPair } from "../../src/lib/carddex/pairs";
+import { OFFERED_PAIRS, designForPair, designsForPair } from "../../src/lib/carddex/pairs";
 
 /** A WebP's pixel size from its header (VP8X, VP8 or VP8L). */
 function webpSize(bytes: Uint8Array): { width: number; height: number } {
@@ -40,7 +40,7 @@ describe("phone and tablet copies of every card face (the srcsets ask for them)"
       }
     }
     expect(designs).toBe(CARD_DESIGNS.length);
-    // 95 installed identity designs (72 offered or SOL's and USDC's, 23 held) with both faces, plus the earlier designs' faces (a few of them have no back).
+    // 95 installed identity designs (72 offered or USDC's, 23 held) with both faces, plus the earlier designs' faces (a few of them have no back).
     expect(copies).toBeGreaterThanOrEqual(95 * 4);
   });
   test("every card skin has its 480 and 640 px copies", () => {
@@ -61,7 +61,8 @@ describe("the creator's print reads on every offered identity design", () => {
     const inkL = lum(...ink);
     let lowest = Infinity;
     const offered = OFFERED_PAIRS.map(pair => designForPair(pair.key)!).filter(key => key.startsWith("pair-"));
-    expect(offered).toHaveLength(70);
+    // 71: SOL's own card (its main design since 31 October 2026) and 70 other pairs' identity designs.
+    expect(offered).toHaveLength(71);
     for (const key of offered) {
       const atlas = (renderAssets as Record<string, { previewPath: string }>)[key + (CARD_DESIGNS.find(d => d.key === key)!.category === "stocks" ? "--stock" : "")]!;
       const png = readFileSync(file(atlas.previewPath));
@@ -85,5 +86,44 @@ describe("the creator's print reads on every offered identity design", () => {
       image.free(); page.free();
     }
     console.log(`lowest plate contrast ${lowest.toFixed(2)}:1`);
+  });
+  test("the print reads on every SOL design option too (Neon Circuit's light ink on its dark plates)", () => {
+    const light = [0xe2, 0xf4, 0xf0] as const;
+    const options = designsForPair("sol");
+    expect(options).toHaveLength(28);
+    let lowest = Infinity;
+    for (const key of options) {
+      const design = CARD_DESIGNS.find(d => d.key === key)!;
+      const atlas = (renderAssets as Record<string, { previewPath: string }>)[key + (design.category === "stocks" ? "--stock" : "")]!;
+      expect(atlas, key).toBeTruthy();
+      const page = new Resvg(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="320" height="447"><image width="320" height="447" preserveAspectRatio="none" xlink:href="data:image/png;base64,${readFileSync(file(atlas.previewPath)).toString("base64")}"/></svg>`);
+      const image = page.render(), px = image.pixels, W = image.width, H = image.height;
+      // creator-print.tsx: Neon Circuit prints light ink, every other design dark ink.
+      const lightInk = key === "neon-circuit", inkL = lightInk ? lum(...light) : lum(...ink);
+      for (const plate of ["name", "type", "text"] as const) {
+        const b = CANONICAL_CARD_LAYOUT[plate], values: number[] = [];
+        for (let y = Math.floor((b.y + 0.008) * H); y < Math.ceil((b.y + b.h - 0.008) * H); y++) {
+          for (let x = Math.floor((b.x + 0.02) * W); x < Math.ceil((b.x + b.w - 0.02) * W); x++) {
+            const i = (y * W + x) * 4;
+            values.push(lum(px[i]!, px[i + 1]!, px[i + 2]!));
+          }
+        }
+        values.sort((a, c) => a - c);
+        const ratio = lightInk ? (inkL + 0.05) / (values[Math.floor(values.length * 0.9)]! + 0.05) : (values[Math.floor(values.length / 10)]! + 0.05) / (inkL + 0.05);
+        lowest = Math.min(lowest, ratio);
+        expect(ratio, `${key} ${plate}`).toBeGreaterThanOrEqual(4.5);
+      }
+      image.free(); page.free();
+    }
+    console.log(`lowest SOL option plate contrast ${lowest.toFixed(2)}:1`);
+  });
+});
+
+describe("SOL's design chooser thumbnails (tools/carddex/make_design_thumbs.py)", () => {
+  test("one 128 px card front for each SOL option, and none for any other design", () => {
+    const options = designsForPair("sol");
+    const dir = file("/assets/carddex/thumbs");
+    expect(readdirSync(dir).sort()).toEqual(options.map(key => `${key}-front-128.webp`).sort());
+    for (const key of options) expect(webpSize(readFileSync(file(`/assets/carddex/thumbs/${key}-front-128.webp`))).width).toBe(128);
   });
 });

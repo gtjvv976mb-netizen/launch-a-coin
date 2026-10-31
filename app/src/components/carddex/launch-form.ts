@@ -1,6 +1,6 @@
 import { isCardDesignKey, type CardDesignKey } from "../../lib/carddex/designs";
 import { PAIR_DESIGNS_2026_10_30 } from "../../lib/carddex/design-pairings";
-import { DEFAULT_PAIR, boundQuoteForDesign, designForPair, getPairAsset, isOfferedPair, pairForDesign, type PairAssetKey } from "../../lib/carddex/pairs";
+import { DEFAULT_PAIR, boundQuoteForDesign, designForPair, designsForPair, getPairAsset, isOfferedPair, pairForDesign, type PairAssetKey } from "../../lib/carddex/pairs";
 
 /**
  * Pure helpers for the one-page Launch form (routes/launch.tsx): which pair the page opens on and which card it shows
@@ -11,42 +11,70 @@ import { DEFAULT_PAIR, boundQuoteForDesign, designForPair, getPairAsset, isOffer
 /** Where an older ?design= link's pair came from before the identity designs: design -> pair (30 October 2026). */
 const EARLIER_DESIGN_PAIR = new Map<string, string>(Object.entries(PAIR_DESIGNS_2026_10_30).map(([pair, design]) => [design, pair]));
 
-/**
- * The pair a Launch address opens on: ?quote= names it (an offered pair only). An older ?design= link opens on that
- * design's pair: today's, else the pair it had before the identity designs ("doge" DOGE, "pepe" TOAD), else its
- * permanent binding; a design with none of these, or nothing, opens on SOL without a word. A ?quote= that is unknown
- * or not offered (AAVE, UNI), a ?design= whose pair is not offered ("sovereign", ANSEM's earlier card) and an unknown
- * or withheld ?design= ("pair-aave") open on SOL and say so.
- */
-export function pairFromSearch(search: { quote?: string; design?: string }): { pair: PairAssetKey; notice: string } {
-  if (search.quote) {
-    if (isOfferedPair(search.quote)) return { pair: search.quote as PairAssetKey, notice: "" };
-    return { pair: DEFAULT_PAIR, notice: `That pair is unavailable. ${getPairAsset(DEFAULT_PAIR).symbol} selected.` };
-  }
-  const design = search.design;
-  if (!design) return { pair: DEFAULT_PAIR, notice: "" };
-  const candidates = [pairForDesign(design)?.key, EARLIER_DESIGN_PAIR.get(design), boundQuoteForDesign(design)?.key];
-  const pair = candidates.find((key) => isOfferedPair(key));
-  if (pair) return { pair: pair as PairAssetKey, notice: "" };
-  const unavailable = !isCardDesignKey(design) || candidates.some(Boolean);
-  return { pair: DEFAULT_PAIR, notice: unavailable ? `That card is unavailable. ${getPairAsset(DEFAULT_PAIR).symbol} selected.` : "" };
+/** A design the pair offers for a new launch (SOL: any of its options), else null. */
+export function pairOption(pair: string, design?: string | null): CardDesignKey | null {
+  return design ? designsForPair(pair).find((key) => key === design) ?? null : null;
 }
 
 /**
- * The card the form launches with and the preview shows: the pair's own design. A saved mainnet launch keeps the
- * design it was saved with (one prepared before the pair picked the card may carry another), until a pair is picked.
+ * The pair a Launch address opens on, and the design when the link names one of that pair's (SOL's options): ?quote=
+ * names the pair (an offered pair only), and ?design= with it the design (`?quote=sol&design=ronin`). An older
+ * ?design= link alone opens on that design's pair: today's (any SOL option opens SOL with that design), else the pair
+ * it had before the identity designs ("doge" DOGE), else its permanent binding; a design with none of these, or
+ * nothing, opens on SOL without a word. A ?quote= that is unknown or not offered (AAVE, UNI), a ?design= whose pair
+ * is not offered ("sovereign", ANSEM's earlier card), an unknown or withheld ?design= ("pair-aave") and
+ * ?quote=sol with a design SOL does not offer open on SOL's main card and say so. `design` is null for the pair's main card.
  */
-export function launchDesign(pair: string, savedDesign?: string | null): CardDesignKey {
+export function pairFromSearch(search: { quote?: string; design?: string }): { pair: PairAssetKey; design: CardDesignKey | null; notice: string } {
+  const sol = getPairAsset(DEFAULT_PAIR).symbol;
+  if (search.quote) {
+    if (!isOfferedPair(search.quote)) return { pair: DEFAULT_PAIR, design: null, notice: `That pair is unavailable. ${sol} selected.` };
+    const pair = search.quote as PairAssetKey;
+    const design = pairOption(pair, search.design);
+    // A design another pair owns, sent with this pair, is dropped without a word: the pair wins. A design SOL does
+    // not offer, sent with SOL, says so (SOL is the one pair with a choice).
+    const refused = !design && !!search.design && designsForPair(pair).length > 1;
+    return { pair, design: designsForPair(pair).length > 1 ? design : null, notice: refused ? `That card is unavailable. ${getPairAsset(pair).symbol} selected.` : "" };
+  }
+  const design = search.design;
+  if (!design) return { pair: DEFAULT_PAIR, design: null, notice: "" };
+  const candidates = [pairForDesign(design)?.key, EARLIER_DESIGN_PAIR.get(design), boundQuoteForDesign(design)?.key];
+  const pair = candidates.find((key) => isOfferedPair(key));
+  if (pair) return { pair: pair as PairAssetKey, design: designsForPair(pair).length > 1 ? pairOption(pair, design) : null, notice: "" };
+  const unavailable = !isCardDesignKey(design) || candidates.some(Boolean);
+  return { pair: DEFAULT_PAIR, design: null, notice: unavailable ? `That card is unavailable. ${sol} selected.` : "" };
+}
+
+/**
+ * The card the form launches with and the preview shows: the creator's choice when the pair offers it (a SOL option),
+ * else the pair's main design. A saved mainnet launch keeps the design it was saved with (one prepared before the pair
+ * picked the card may carry another), until a pair or a design is picked.
+ */
+export function launchDesign(pair: string, savedDesign?: string | null, chosen?: string | null): CardDesignKey {
   if (savedDesign && isCardDesignKey(savedDesign)) return savedDesign;
-  return designForPair(pair) ?? designForPair(DEFAULT_PAIR)!;
+  return pairOption(pair, chosen) ?? designForPair(pair) ?? designForPair(DEFAULT_PAIR)!;
 }
 
 /**
  * The card the Launch page shows and sends. A saved launch keeps its own design while the panel is open (`live`);
- * otherwise the pair's own card.
+ * otherwise the chosen design when the pair offers it (SOL's options), else the pair's main card.
  */
-export function formDesign(pair: string, savedDesign: string | null, live: boolean): CardDesignKey {
-  return launchDesign(pair, live ? savedDesign : null);
+export function formDesign(pair: string, savedDesign: string | null, live: boolean, chosen: string | null = null): CardDesignKey {
+  return launchDesign(pair, live ? savedDesign : null, chosen);
+}
+
+/**
+ * A tap on a design in SOL's chooser: the form's next chosen design, or null when nothing changes (a design the pair
+ * does not offer, or the one already shown). It ends a saved launch's own design, as a pair tap does.
+ */
+export function pickDesign(
+  current: { pair: string; chosen: string | null; savedDesign: string | null },
+  next: string,
+): { chosen: CardDesignKey; savedDesign: null } | null {
+  const design = pairOption(current.pair, next);
+  if (!design) return null;
+  if (!current.savedDesign && launchDesign(current.pair, null, current.chosen) === design) return null;
+  return { chosen: design, savedDesign: null };
 }
 
 /**
@@ -65,6 +93,12 @@ export function pickPair(
 /** A draft this browser kept: its pair, if it is still offered (an older draft's separate design is not used). */
 export function draftPair(draft: { quoteKey?: unknown } | null | undefined): PairAssetKey | null {
   return typeof draft?.quoteKey === "string" && isOfferedPair(draft.quoteKey) ? draft.quoteKey as PairAssetKey : null;
+}
+
+/** A draft's chosen design: kept when its pair still offers it as a choice (SOL's options), else null (the main card). */
+export function draftDesign(draft: { quoteKey?: unknown; designKey?: unknown } | null | undefined): CardDesignKey | null {
+  const pair = draftPair(draft);
+  return pair && designsForPair(pair).length > 1 && typeof draft?.designKey === "string" ? pairOption(pair, draft.designKey) : null;
 }
 
 /** True when the typed amount is the same number as the quick amount (0.50 is 0.5). Empty and 0 are "None". */

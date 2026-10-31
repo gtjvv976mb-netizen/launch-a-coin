@@ -15,7 +15,7 @@ export const LEGACY_DESIGN_QUOTE_KEYS = Object.freeze({
 
 /**
  * Every permanent design binding: the legacy ones above, plus each installed pair identity design (Codex, 30 October
- * 2026) bound to its own pair for good (pair-sol, pair-usdc and the held ones included, though no pair offers them).
+ * 2026) bound to its own pair for good (pair-usdc and the held ones included, though no pair offers them).
  */
 export const DESIGN_QUOTE_KEYS: Readonly<Record<string, PairAssetKey>> = Object.freeze({
   ...LEGACY_DESIGN_QUOTE_KEYS,
@@ -42,12 +42,13 @@ export const PAIR_DESIGNS_2026_10_30 = Object.freeze({
 } as const satisfies Readonly<Partial<Record<PairAssetKey, CardDesignKey>>>);
 
 /**
- * The owner's identity rule (30 October 2026), before the content holds: SOL keeps One Piece and USDC keeps Duel
- * Masters (the owner's choice); every other pair with a finished identity design takes its own. AAVE and UNI are
- * missing: Codex left them no finished card (pair-designs.ts WITHHELD_PAIR_DESIGNS).
+ * The owner's identity rule (30 October 2026), before the content holds: USDC keeps Duel Masters (the owner's choice);
+ * every other pair with a finished identity design takes its own. SOL's own card, pair-sol, is its main design since
+ * 31 October 2026 (SOL_DESIGN_OPTIONS below lists the others it offers). AAVE and UNI are missing: Codex left them no
+ * finished card (pair-designs.ts WITHHELD_PAIR_DESIGNS).
  */
 export const PAIR_IDENTITY_DESIGNS: Readonly<Partial<Record<PairAssetKey, CardDesignKey>>> = Object.freeze({
-  sol: "one-piece", usdc: "duel-masters", gmex: "pair-gmex", tslax: "pair-tslax", nvdax: "pair-nvdax",
+  sol: "pair-sol", usdc: "duel-masters", gmex: "pair-gmex", tslax: "pair-tslax", nvdax: "pair-nvdax",
   aaplx: "pair-aaplx", mstrx: "pair-mstrx", coinx: "pair-coinx", amc: "pair-amc", doge: "pair-doge",
   fartcoin: "pair-fartcoin", pnut: "pair-pnut", moodeng: "pair-moodeng", troll: "pair-troll",
   bonk: "pair-bonk", wif: "pair-wif", cards: "pair-cards", sv151: "pair-sv151", toad: "pair-toad",
@@ -71,11 +72,12 @@ export const PAIR_IDENTITY_DESIGNS: Readonly<Partial<Record<PairAssetKey, CardDe
 });
 
 /**
- * The pair picks the card (owner, 30 October 2026): every offered pair has exactly one design, and a new launch always
- * takes its pair's design. This map is the one source of truth for that (pairs.ts designForPair and pairForDesign read
- * it): the identity rule above with the content holds applied (pair-designs.ts HELD_PAIR_DESIGNS), so a held identity's
+ * The pair picks the card (owner, 30 October 2026): every offered pair has one design of its own, and a new launch
+ * takes its pair's design (SOL alone offers more: SOL_DESIGN_OPTIONS). This map gives each pair's main design (pairs.ts
+ * designForPair, designsForPair and pairForDesign read it): the identity rule above with the content holds applied (pair-designs.ts HELD_PAIR_DESIGNS), so a held identity's
  * pair launches with the design the hold names, or is not offered when it names none. A pair missing here is not
- * offered for new launches. Designs no pair names here are not offered either; coins that already have one keep it.
+ * offered for new launches. Designs no pair names here, and SOL_DESIGN_OPTIONS leaves out, are not offered either;
+ * coins that already have one keep it.
  */
 export const PAIR_DESIGNS: Readonly<Partial<Record<PairAssetKey, CardDesignKey>>> = Object.freeze(Object.fromEntries(
   Object.entries(PAIR_IDENTITY_DESIGNS).flatMap(([pair, design]) => {
@@ -84,6 +86,30 @@ export const PAIR_DESIGNS: Readonly<Partial<Record<PairAssetKey, CardDesignKey>>
     return live ? [[pair, live as CardDesignKey]] : [];
   }),
 ));
+
+/**
+ * SOL's designs (owner, 31 October 2026: "the SOL pair card designs would be many, but the main design is the SOL card
+ * design, so every token pair will have their own distinct and unique design, except for SOL, with many designs").
+ * SOL's own card first (its main design, PAIR_DESIGNS.sol), then One Piece (SOL's design until then), then every
+ * installed design no other pair uses, in the catalogue's order. A new SOL launch may take any of them; no other pair
+ * may. pairs.ts checks at module load that they are installed design keys, that none is held, withheld or bound to
+ * another quote, and that no other pair uses one.
+ *
+ * Left out: the held and withheld identity designs (pair-designs.ts), pair-usdc (USDC keeps Duel Masters and its own
+ * card is not offered), and the legacy finishes bound to another quote for good: doge, bonk, wif, gamestop, coinbase,
+ * strategy (LEGACY_DESIGN_QUOTE_KEYS). Content check (31 October 2026, every front and back looked at): no option shows
+ * a real person, a child, or another company's logo or wordmark, so none was left out for its art. For the owner's
+ * review, as with the pairs' own cards: One Piece's back is the Straw Hat jolly roger, Pokemon Prism's back a Poke
+ * Ball, Jade Reliquary's back Pepe the Frog, Noir Terminal and Nordic Signal show unbranded phones in the style of a
+ * BlackBerry and a Nokia 3310 (no mark on either). A visual check, not legal advice.
+ */
+export const SOL_DESIGN_OPTIONS: readonly CardDesignKey[] = Object.freeze([
+  "pair-sol", "one-piece",
+  "pokemon-full-art", "yugioh-monster", "yugioh-spell", "obsidian-archive",
+  "spark", "surge", "nova", "tide", "apex", "bloom", "aurora", "relic", "frost", "legend",
+  "pepe", "shib", "popcat", "blackberry", "nokia", "binance", "kraken",
+  "wildtype", "ronin", "astral", "neon-circuit", "abyssal",
+] as CardDesignKey[]);
 
 /**
  * Historical: the design and pair combinations the earlier separate chooser offered (before 30 October 2026). Coins

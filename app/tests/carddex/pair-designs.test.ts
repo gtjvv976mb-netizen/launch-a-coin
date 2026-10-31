@@ -62,15 +62,15 @@ describe("reviewed exact pair-identity designs",()=>{
     expect(isPairDesignInstalled(design,{...install,reverse:{...install.reverse!,sourceSha256:"f".repeat(64)}})).toBe(false);
     expect(isPairDesignInstalled(design,{...install,atlas:{...install.atlas!,rendererVersion:"stale"}})).toBe(false);
   });
-  test("installed exact identities bind only their own pair, and are their pair's card except SOL's and USDC's",()=>{
+  test("installed exact identities bind only their own pair, and are their pair's card except USDC's",()=>{
     for(const design of ACTIVE_PAIR_DESIGNS){
       const asset=getPairAsset(design.quoteKey);
       expect(defaultQuoteForDesign(design.key)).toBe(asset);
       expect(allowedQuotesForDesign(design.key)).toEqual([asset]);
-      // The owner keeps One Piece on SOL and Duel Masters on USDC: pair-sol and pair-usdc render but are never offered.
-      // A held identity renders too; its pair launches with the design the hold names, or is not offered.
-      if(asset.key==="sol"||asset.key==="usdc"){
-        expect(designForPair(asset.key)).toBe(asset.key==="sol"?"one-piece":"duel-masters");
+      // The owner keeps Duel Masters on USDC: pair-usdc renders but is never offered. SOL's own card is its main design
+      // (31 October 2026). A held identity renders too; its pair launches with the design the hold names, or is not offered.
+      if(asset.key==="usdc"){
+        expect(designForPair(asset.key)).toBe("duel-masters");
         expect(pairForDesign(design.key)).toBeNull();
       }else if(isHeldPairDesign(design.key)){
         expect(designForPair(asset.key)).toBe((HELD_PAIR_DESIGNS[design.key] ?? null) as never);

@@ -6,10 +6,14 @@ import { CalmSwitch, PageFrame, PageHeader, TextLink } from "../components/mintd
 import { WORDS } from "../lib/mintdex/copy";
 import { pageHead } from "../lib/mintdex/seo";
 import { getCardDesign } from "../lib/carddex/designs";
-import { OFFERED_PAIRS, designForPair, isDirectPair, mainnetPairHold } from "../lib/carddex/pairs";
+import { OFFERED_PAIRS, designForPair, designsForPair, isDirectPair, mainnetPairHold } from "../lib/carddex/pairs";
 
 /** The Pairs lines that follow the offered set (pairs.ts): DOGE's card, and whether any crypto or direct pair is offered. */
 const DOGE_DESIGN = getCardDesign(designForPair("doge") ?? undefined).name;
+/** SOL's designs (pairs.ts designsForPair): its own card, the main one, then the ones no other pair uses. */
+const SOL_DESIGNS = designsForPair("sol");
+const SOL_MAIN = getCardDesign(SOL_DESIGNS[0]).name;
+const SOL_MORE = SOL_DESIGNS.length - 1;
 const OFFERS_CRYPTO = OFFERED_PAIRS.some((asset) => asset.kind === "crypto");
 const OFFERS_DIRECT = OFFERED_PAIRS.some(isDirectPair);
 // Direct pairs wait for the owner's confirmation before mainnet launches (pairs.ts CONFIRMED_DIRECT_PAIRS).
@@ -44,7 +48,7 @@ const STEPS: Step[] = [
   },
   {
     title: "The pair picks its card",
-    body: "Each pair has one card design, shown as you pick. After the coin is verified, approve its one-of-one card to your wallet.",
+    body: `Each pair has its own card design, shown as you pick. SOL also offers ${SOL_MORE} more. After the coin is verified, approve its one-of-one card to your wallet.`,
   },
   {
     title: "Trade the coin. Keep the card.",
@@ -82,8 +86,8 @@ const SECTIONS: Section[] = [
     body: (
       <ul>
         <li>The pair is what your coin is priced and bought in: SOL, USDC, a crypto, meme or collector token, or a tokenized stock.</li>
-        <li>The pair picks the card. Each pair has exactly one design, so choosing the pair and the design is one choice. DOGE gets {DOGE_DESIGN}.</li>
-        <li>SOL is pump.fun's default pair and gets the One Piece design. USDC gets Duel Masters.</li>
+        <li>The pair picks the card. Every pair but SOL has exactly one design of its own, so choosing the pair is choosing the design. DOGE gets {DOGE_DESIGN}.</li>
+        <li>SOL is pump.fun's default pair. Its own card, {SOL_MAIN}, is its main design, and it offers {SOL_MORE} more designs no other pair uses. Pick one under the pair panel. USDC gets Duel Masters.</li>
         {OFFERS_CRYPTO ? <li>Crypto pairs are Solana tokens or Solana versions of other coins; the panel names the bridge where one is listed.</li> : null}
         {OFFERS_DIRECT ? <li>Some pairs are admitted on-chain but missing from pump.fun's dated public list; their panel says so.{DIRECT_HELD ? " Mainnet launches can't use them yet." : ""}</li> : null}
         <li>Under the pair panel: the exact mint, its issuer and when it was reviewed. The mint is checked again before wallet review.</li>
@@ -102,8 +106,9 @@ const SECTIONS: Section[] = [
         <li>The design is printed on the card and kept for good. Market cap never changes it.</li>
         <li>The token trades. Its creator holds the separate one-of-one card made at launch.</li>
         <li>Picking another pair keeps your coin details and artwork; only the pair and its card change.</li>
-        <li>Designs shows one sample coin in each pair's design, grouped as Memes, Stocks, Crypto and Collector.</li>
-        <li>Designs with no pair are kept by the coins already made with them. They are not offered for new coins.</li>
+        <li>SOL's own card is its main design. SOL also offers {SOL_MORE} more designs no other pair uses. Every other pair has exactly one design of its own.</li>
+        <li>Designs shows one sample coin in each pair's design and in all of SOL's, grouped as Memes, Stocks, Crypto and Collector.</li>
+        <li>Designs no pair offers are kept by the coins already made with them. They are not offered for new coins.</li>
         <li>The card is permanent once your coin is created.</li>
         <li>There are no card sales, bids, auctions or royalties. The card NFT gives no token ownership or stock rights.</li>
       </ul>
@@ -150,7 +155,7 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <ol className="cdx-how__ol">
-          <li>Pick your coin's pair: its card design comes with it. Add your token name, ticker and artwork.</li>
+          <li>Pick your coin's pair: its card design comes with it (with SOL, pick one of its designs). Add your token name, ticker and artwork.</li>
           <li>Connect your creator wallet and sign an ownership message. It starts your launch session and spends nothing.</li>
           <li>Review the token creation costs and any initial buy, then approve the pump.fun transaction in your wallet.</li>
           <li>After the token is verified, approve its one-of-one card NFT to that same wallet. Some wallets sign both in one approval.</li>

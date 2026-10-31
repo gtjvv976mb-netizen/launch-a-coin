@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { ed25519 } from "@noble/curves/ed25519";
 import { base58Encode } from "../../../chain/sdk/src/bytes";
-import { DIRECT_PAIR_HELD, NOT_OFFERED_PAIR, OFFERED_PAIRS, TRANSFER_FEE_PAIR, UNPAIRED_DESIGN, boundQuoteForDesign, designForPair, getPairAsset, mainnetPairHold } from "../../src/lib/carddex/pairs";
+import { DIRECT_PAIR_HELD, NOT_OFFERED_PAIR, OFFERED_PAIRS, TRANSFER_FEE_PAIR, UNPAIRED_DESIGN, boundQuoteForDesign, designForPair, designsForPair, getPairAsset, mainnetPairHold } from "../../src/lib/carddex/pairs";
 import { MEME_PAIR_PRESETS } from "../../src/lib/carddex/design-pairings";
 import renderAssets from "../../src/lib/carddex/render-assets.json";
 import tokenBackAssets from "../../src/lib/carddex/token-back-assets.json";
@@ -166,7 +166,7 @@ beforeEach(() => {
 afterAll(() => { globalThis.fetch = nativeFetch; sqlite.close(); });
 function image(width: number, height: number) { const bytes = new Uint8Array(40); bytes.set([0x89, 0x50, 0x4e, 0x47]); new DataView(bytes.buffer).setUint32(16, width); new DataView(bytes.buffer).setUint32(20, height); return bytes; }
 async function input(overrides: Partial<{cardTemplate: string; quoteAssetKey: string; quoteMint: string; tokenMint: string}> = {}) {
-  // SOL's own design (the pair picks the card). Overrides may name another pair with its design, or an old combination.
+  // One of SOL's designs (One Piece; the pair picks the card). Overrides may name another pair with its design, or an old combination.
   const fields = {tokenMint: mint, name: "Launch Fixture", symbol: "FIX", description: "Creator token with a separate card.", website: "https://creator.example/", xUrl: "https://x.com/creator", cardTemplate: "one-piece", quoteAssetKey: "sol", quoteMint: "So11111111111111111111111111111111111111112", ...overrides};
   const refs = {artwork: await assets.putPublicAsset(creator, image(128,128), "image/png"), cardImage: await assets.putPublicAsset(creator, image(1260,1760), "image/png"), caseImage: await assets.putPublicAsset(creator, image(1440,2240), "image/png")};
   await new Prepared("INSERT OR IGNORE INTO live_compositions (wallet, binding_sha256, artwork_sha256, card_sha256, case_sha256, renderer_version, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)", [creator, await compositionBinding(creator, fields), refs.artwork.sha256, refs.cardImage.sha256, refs.caseImage.sha256, COMPOSITION_VERSION, Date.now()]).run();
@@ -242,11 +242,14 @@ describe("isolated real-launch server lifecycle", () => {
   // Designs that pairs offered until the identity designs (spark, doge...) are unpaired now, and so are the held
   // identities (content holds: pair-sv151, pair-tslax...); another pair's design is refused by name; AAVE, UNI and the
   // held-out pairs (67, AGENCY...) are not offered at all.
+  const SOL_ONLY = "That card design is for the SOL pair only.";
   const refusedNew: [string, string, string][] = [["pair-doge", "sol", "The SOL pair comes with its own card"], ["pokemon-classic", "cards", "The CARDS pair comes with its own card"], ["stock-tsla", "gmex", "The GMEX pair comes with its own card"],
     ["pokemon-classic", "sol", "The SOL pair comes with its own card"],
-    ["spark", "sol", UNPAIRED_DESIGN], ["doge", "doge", UNPAIRED_DESIGN], ["pair-sv151", "sv151", UNPAIRED_DESIGN], ["pair-tslax", "tslax", UNPAIRED_DESIGN], ["pair-ansem", "ansem", UNPAIRED_DESIGN],
-    ["pair-sol", "sol", UNPAIRED_DESIGN], ["pair-usdc", "usdc", UNPAIRED_DESIGN],
-    ["pokemon-full-art", "sv151", UNPAIRED_DESIGN], ["gamestop", "gmex", UNPAIRED_DESIGN], ["coinbase", "coinx", UNPAIRED_DESIGN], ["strategy", "mstrx", UNPAIRED_DESIGN], ["shib", "sol", UNPAIRED_DESIGN],
+    ["doge", "doge", UNPAIRED_DESIGN], ["doge", "sol", UNPAIRED_DESIGN], ["pair-sv151", "sv151", UNPAIRED_DESIGN], ["pair-tslax", "tslax", UNPAIRED_DESIGN], ["pair-ansem", "ansem", UNPAIRED_DESIGN],
+    ["pair-usdc", "usdc", UNPAIRED_DESIGN], ["pair-usdc", "sol", UNPAIRED_DESIGN], ["duel-masters", "sol", "The SOL pair comes with its own card"],
+    ["gamestop", "gmex", UNPAIRED_DESIGN], ["coinbase", "coinx", UNPAIRED_DESIGN], ["strategy", "mstrx", UNPAIRED_DESIGN], ["gamestop", "sol", UNPAIRED_DESIGN],
+    // SOL's design options go with SOL only.
+    ["spark", "doge", SOL_ONLY], ["pair-sol", "usdc", SOL_ONLY], ["one-piece", "usdc", SOL_ONLY], ["pokemon-full-art", "sv151", SOL_ONLY], ["shib", "usdc", SOL_ONLY], ["ronin", "cate", SOL_ONLY], ["pepe", "toad", SOL_ONLY],
     ["one-piece", "aave", NOT_OFFERED_PAIR], ["one-piece", "uni", NOT_OFFERED_PAIR], ["pair-67", "67", NOT_OFFERED_PAIR], ["pair-agency", "agency", NOT_OFFERED_PAIR]];
   for (const [cardTemplate, quoteKey, message] of refusedNew) test(`a new ${cardTemplate}/${quoteKey} launch is refused: ${message}`, async () => {
     // The request names the old combination; the fixture's own composition is SOL's, so nothing else could pass.
@@ -314,9 +317,27 @@ describe("isolated real-launch server lifecycle", () => {
     const fields = {tokenMint: mint, name: "Launch Fixture", symbol: "FIX", description: "", cardTemplate: "pair-doge", quoteAssetKey: "sol", quoteMint: getPairAsset("sol").mint};
     const puts = storagePuts;
     await expect(composeLiveAssets(creator, fields, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow("The SOL pair comes with its own card");
-    await expect(composeLiveAssets(creator, {...fields, cardTemplate: "kraken"}, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(UNPAIRED_DESIGN);
-    await expect(composeLiveAssets(creator, {...fields, cardTemplate: "spark"}, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(UNPAIRED_DESIGN);
+    await expect(composeLiveAssets(creator, {...fields, cardTemplate: "gamestop"}, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(UNPAIRED_DESIGN);
+    await expect(composeLiveAssets(creator, {...fields, cardTemplate: "doge"}, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(UNPAIRED_DESIGN);
+    // A SOL design option with another pair is refused; with SOL it is that pair's own (the next test).
+    const usdc = getPairAsset("usdc");
+    await expect(composeLiveAssets(creator, {...fields, cardTemplate: "kraken", quoteAssetKey: usdc.key, quoteMint: usdc.mint}, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow("for the SOL pair only");
+    await expect(composeLiveAssets(creator, {...fields, cardTemplate: "pair-sol", quoteAssetKey: usdc.key, quoteMint: usdc.mint}, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow("for the SOL pair only");
     expect(storagePuts).toBe(puts);
+  });
+  // SOL's design options (owner, 31 October 2026): each launches with SOL through the live path (composition checks,
+  // prepare, metadata, the stored intent) and keeps its design; an option alone (an older ?design= client) brings SOL.
+  for (const option of designsForPair("sol")) test(`SOL launches with its ${option} design option through prepare and saved reads`, async () => {
+    const sol = getPairAsset("sol");
+    const original = await input({cardTemplate: option, quoteAssetKey: sol.key, quoteMint: sol.mint});
+    const {quoteAssetKey: _key, quoteMint: _mint, ...designOnly} = original;
+    const prepared = await service.prepareLiveLaunch(creator, option === "ronin" ? designOnly : original);
+    expect(tokenInputs[0]).toMatchObject({quoteKey: "sol", card: {designKey: option}});
+    expect(prepared.intent).toMatchObject({quoteAssetKey: "sol", quoteMint: sol.mint, cardTemplate: option});
+    const metadata = await (await fetch(prepared.intent.nftMetadataUri)).json() as any;
+    expect(metadata.attributes).toContainEqual({trait_type: "Card design", value: option});
+    expect(sqlite.query("SELECT quote_key, design_key FROM live_launch_intents WHERE id = ?").get(prepared.intent.id)).toEqual({quote_key: "sol", design_key: option});
+    expect((await service.getLiveLaunchIntent(creator, prepared.intent.id))).toMatchObject({cardTemplate: option, quoteAssetKey: "sol"});
   });
   // Saved before the pair picked the card: every earlier chooser preset (six are their pair's design again under the
   // content holds), neutral designs on SOL or a stock, and designs no pair has. Each recovers byte for byte and
