@@ -17,7 +17,7 @@
  *   new key is the Lighthouse program, read-only and unsigned; every plan key keeps its signer and writable flags;
  * - with `allowBlockhashChange`, a different recentBlockhash. The server accepts it only after its RPC confirms the
  *   blockhash is still valid, and then bounds every expiry gate by an effective last valid block height.
- * The signer header, the signer keys and their order (the creator first), the lookup tables and every plan
+ * The signer header, the signer keys and their order (the creator first), the lookup tables used (which keys load through them, and their order, may change) and every plan
  * instruction, both compute-budget instructions included, stay exactly as prepared.
  */
 
@@ -53,15 +53,24 @@ export const WALLET_SIZE_TARGET = PACKET_LIMIT - WALLET_GUARD_RESERVE_BYTES;
  * closes, and a closed address cannot be created again), so a pinned index always means the same address. The server
  * re-reads the table before each use (owner, never deactivated, every pinned entry) and otherwise builds the
  * transaction without it; the browser resolves lookups only through these pinned entries and refuses any other.
+ *
+ * Indexes 5, 6, 13 and 151 (31 October 2026, read on mainnet) serve the creator fee-sharing transaction, whose
+ * pump-fees instructions list the AMM program, its event authority and the ATA program as accounts. An invoked program
+ * is always a static key, so pinning one never moves it into the table. Saved messages only reference older indexes,
+ * so they decode exactly as before; a create-only coin prepared from now on is 31 bytes smaller (the ATA program is a
+ * create_v2 account there). The pump-fees program itself (index 15) is invoked and is never pinned.
  */
 export const PUMP_LOOKUP_TABLE = {
   address: "Hyif6eWb8x88RVrvjPfabsgRYnwkVnyByEXTVTXbUcyP",
   entries: [
     [1, "4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf"], // Pump global
     [3, "Ce6TQqeHC9p8KetsN6JsjHK7UTZk7nasjjnr7XxXp9F1"], // Pump event authority
+    [5, "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"], // Pump AMM program (pump-fees account)
+    [6, "GS4CU59F31iL7aR2Q8zVS8DRrcRnXX1yjQ66TqNVQnaR"], // Pump AMM event authority
     [10, "11111111111111111111111111111111"], // System program
     [11, "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"], // Token-2022
     [12, "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"], // SPL Token
+    [13, "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"], // Associated token program
     [14, "8Wf5TiAheLUqBrKXeYg2JtAFFMWtKdG2BSFgqUcPVwTt"], // Pump fee config
     [16, "MAyhSmzXzV1pTf7LsNkrNwkWKTo4ougAJ1PPg47MD4e"], // Mayhem program (create_v2 account)
     [18, "13ec7XdrjF3h3YcqBTFDSReRcUFwbCnJaAQspM4j6DDJ"], // Pump global params
@@ -70,6 +79,7 @@ export const PUMP_LOOKUP_TABLE = {
     [71, "6oCkp6gpyjxVTeL6ahMYcekN2x2pzt1KY8g2LqemaTNE"], // that recipient's USDC account
     [124, "So11111111111111111111111111111111111111112"], // wrapped SOL
     [125, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"], // USDC
+    [151, "D6QxXDt6hhcCpto4HiZKkN2YQ2iZRF5R7S3caCHpUsML"], // pump-fees event authority
     [158, "TSLvdd1pWpHVjahSpsvCXUbgwsL3JAcvokwaKt1eokM"], // Pump mint authority
   ] as ReadonlyArray<readonly [number, string]>,
 } as const;
@@ -199,8 +209,11 @@ export function walletMessageChange(plan: MessageView, returned: MessageView, op
   const refuse = (reason: WalletChangeRefusal): never => { throw new WalletMessageRefused(reason); };
   if (returned.header.required !== plan.header.required || returned.header.readonlySigned !== plan.header.readonlySigned) refuse("header");
   for (let i = 0; i < plan.header.required; i++) if (returned.staticKeys[i] !== plan.staticKeys[i]) refuse("signers");
-  if (returned.lookups.length !== plan.lookups.length || returned.lookups.some((lookup, i) => lookup.table !== plan.lookups[i].table ||
-    lookup.writable.join() !== plan.lookups[i].writable.join() || lookup.readonly.join() !== plan.lookups[i].readonly.join())) refuse("lookups");
+  // The same tables, each once; which keys a wallet's recompile loads through them, and in what order, may differ
+  // (Phantom's compiler orders a Token-2022 stock coin's table entries differently, 2026-10-31). The key set and every
+  // key's signer and writable flags are checked below, so where a key sits never changes what the message does.
+  const planTables = plan.lookups.map(lookup => lookup.table), returnedTables = returned.lookups.map(lookup => lookup.table);
+  if (new Set(returnedTables).size !== returnedTables.length || returnedTables.some(table => !planTables.includes(table))) refuse("lookups");
   const blockhashChanged = returned.blockhash !== plan.blockhash;
   if (blockhashChanged && !options.allowBlockhashChange) refuse("blockhash");
   // Every plan instruction, unchanged and in order (both compute-budget instructions included); anything else is an
@@ -220,11 +233,12 @@ export function walletMessageChange(plan: MessageView, returned: MessageView, op
     if (!isLighthouseGuard(ix) || !planKeys.has(ix.accounts[0])) refuse("guard");
     return { discriminator: ix.data[0], target: planKeys.get(ix.accounts[0])!, dataBytes: ix.data.length };
   });
-  // Keys: the plan's static keys, plus only the Lighthouse program when assertions were appended, read-only and unsigned.
-  const added = returned.staticKeys.filter(key => !planKeys.has(key));
+  // Keys: exactly the plan's keys, static or loaded, plus only the Lighthouse program (a static key, as every invoked
+  // program is) when assertions were added; each once.
+  const added = returned.keys.filter(key => !planKeys.has(key));
   const expectedAdded = guards.length ? [LIGHTHOUSE_PROGRAM_ID] : [];
-  if (returned.staticKeys.length !== plan.staticKeys.length + expectedAdded.length || added.join() !== expectedAdded.join() ||
-    returned.keys.length !== plan.keys.length + expectedAdded.length || plan.staticKeys.some(key => !returned.staticKeys.includes(key))) refuse("accounts");
+  if (new Set(returned.keys).size !== returned.keys.length || added.join() !== expectedAdded.join() ||
+    returned.keys.length !== plan.keys.length + expectedAdded.length || (guards.length && !returned.staticKeys.includes(LIGHTHOUSE_PROGRAM_ID))) refuse("accounts");
   const returnedIndex = new Map(returned.keys.map((key, i) => [key, i]));
   for (const [key, index] of planKeys) {
     const before = keyFlags(plan, index), at = returnedIndex.get(key);
@@ -236,6 +250,5 @@ export function walletMessageChange(plan: MessageView, returned: MessageView, op
     const flags = keyFlags(returned, returnedIndex.get(LIGHTHOUSE_PROGRAM_ID)!);
     if (flags.signer || flags.writable) refuse("flags");
   }
-  if (returned.header.readonlyUnsigned !== plan.header.readonlyUnsigned + expectedAdded.length) refuse("flags");
   return { identical: false, recompiled: true, blockhashChanged, guards };
 }

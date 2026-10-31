@@ -73,6 +73,15 @@ let preSend: "ready" | "landed" | "expired" | "simulation" | "error" = "ready", 
 // answers, and what it was asked to send; whether the RPC refused the first broadcast.
 let tokenFailed = false, verifyThrows: string | null = null, resendAnswer: "resent" | "expired" | "landed" = "resent", resends: any[] = [], refusedSend = false;
 class SignedTransactionNotSent extends Error { constructor(readonly reason: string, message: string) { super(message); } }
+// The creator fee split: what its prepare and checks saw, and how the chain answers.
+let feeInputs: any[] = [], feeChecks: any[] = [], feeRecipientRefusal: string | null = null, feeAlready: {shareholders: any[]; matches: boolean} | null = null;
+let feeVerified = false, feeFailed = false, feeRead: {state: string; shareholders: any[] | null; slot?: number} = {state: "unset", shareholders: null}, feePlans = 0, feeReads: any[] = [];
+function feePlan(input: any, recipients: any[]) {
+  const counter = ++feePlans;
+  return {kind: "fees", transactionBase64: `fees-unsigned-${counter}`, messageSha256: "f".repeat(62) + String(counter).padStart(2, "0"), blockhash: "fixture", lastValidBlockHeight: 100,
+    requiredSigners: [input.creator], feePayer: input.creator, bindingSha256: binding, verifiedSlot: 50,
+    review: {quoteKey: input.quoteKey, initialBuyQuoteBaseUnits: "0", walletBalanceLamports: walletLamports, totalDebitLamports: "6000000", reserveBufferLamports: "890880", feeRecipients: recipients}};
+}
 let tokenVerifyHook: (() => Promise<void>) | undefined, nftVerifyHook: (() => Promise<void>) | undefined, nftPrepareHook: (() => Promise<void>) | undefined, nftReplaceHook: (() => Promise<void>) | undefined;
 const binding = "b".repeat(64);
 function identity(input: any) { return {creatorWallet: receiptCreator ?? input.creator, tokenMint: input.mint, quoteMint: getPairAsset(input.quoteKey).mint, nftMint: input.nftMint}; }
@@ -111,8 +120,17 @@ mock.module("../../../integrations/pumpfun/src/live", () => ({
   },
   SignedTransactionNotSent,
   describeWalletChange: (prepared: any, bytes: string) => ({bytesBefore: 900, bytesAfter: 944, limit: 1232, parsed: true, blockhashChanged: false, programsAdded: ["L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95"], planned: prepared.messageSha256, returnedLength: bytes.length}),
+  checkFeeRecipientAccounts: async (recipients: any[]) => { feeChecks.push(recipients); if (feeRecipientRefusal) throw new Error(feeRecipientRefusal); return {unfunded: []}; },
+  prepareFeeShareTransaction: async (input: any, recipients: any[]) => { feeInputs.push({input, recipients}); return feeAlready ? {status: "already-set", ...feeAlready} : feePlan(input, recipients); },
+  verifyFeeSharePlan: (prepared: any, _input: any, recipients: any[]) => { if (prepared.kind !== "fees" || JSON.stringify(prepared.review.feeRecipients) !== JSON.stringify(recipients)) throw new Error("The fee split differs from the wallets and shares you chose."); },
+  verifyFeeShareLanded: async (input: any, recipients: any[], options: any) => {
+    verifyHashes.push(options.expectedMessageSha256);
+    if (feeFailed && options.signature) throw Object.assign(new Error('Transaction failed: {"InstructionError":[3,{"Custom":6009}]}'), {name: "TransactionFailedOnChain"});
+    return {status: feeVerified ? "verified" : "pending", signature: options.signature, creatorWallet: input.creator, tokenMint: input.mint, shareholders: recipients};
+  },
+  readFeeSplit: async (_input: any, options: any) => { feeReads.push({commitment: options.commitment, afterBlockHeight: options.afterBlockHeight}); return feeRead; },
   checkSignedWalletTransaction: async ({plan: prepared, transactionBase64: bytes}: any) => {
-    savedAtCheck.push((sqlite.query("SELECT signature FROM live_launch_transactions WHERE message_sha256 = ?").get(prepared.messageSha256) as {signature: string | null}).signature);
+    savedAtCheck.push((sqlite.query("SELECT signature FROM live_launch_transactions WHERE message_sha256 = ?1 UNION ALL SELECT signature FROM live_fee_share_transactions WHERE message_sha256 = ?1").get(prepared.messageSha256) as {signature: string | null}).signature);
     if (preSend === "expired") throw new SignedTransactionNotSent("expired", "The signed transaction blockhash expired before it was sent; prepare a fresh transaction");
     if (preSend === "simulation") throw new SignedTransactionNotSent("simulation", 'Signed transaction simulation failed: {"InstructionError":[2,"InsufficientFunds"]}');
     if (preSend === "error") throw new Error("429 Too Many Requests from https://rpc.example.test");
@@ -121,7 +139,7 @@ mock.module("../../../integrations/pumpfun/src/live", () => ({
   },
   broadcastSignedWalletTransaction: async ({plan: prepared, transactionBase64}: any) => {
     sendCalls++;
-    const persisted = sqlite.query("SELECT signature, signed_transaction_base64 FROM live_launch_transactions WHERE message_sha256 = ?").get(prepared.messageSha256) as {signature: string; signed_transaction_base64: string};
+    const persisted = sqlite.query("SELECT signature, signed_transaction_base64 FROM live_launch_transactions WHERE message_sha256 = ?1 UNION ALL SELECT signature, signed_transaction_base64 FROM live_fee_share_transactions WHERE message_sha256 = ?1").get(prepared.messageSha256) as {signature: string; signed_transaction_base64: string};
     expect(persisted.signature).toBe(signatureFor(prepared, transactionBase64));
     expect(persisted.signed_transaction_base64).toBe(transactionBase64);
     if (refusedSend) return {status: "refused", signature: persisted.signature, reason: "Transaction simulation failed: Error processing Instruction 2: custom program error: 0x1 (https://rpc.example.test)"};
@@ -162,6 +180,7 @@ beforeEach(() => {
   verifyHashes = []; nftTokenHashes = []; expiryGates = []; checkedHeight = null;
   aheadInputs = []; aheadFails = false; walletLamports = "10000000000"; storagePuts = 0; keptAlive = 0;
   tokenFailed = false; verifyThrows = null; resendAnswer = "resent"; resends = []; refusedSend = false;
+  feeInputs = []; feeChecks = []; feeRecipientRefusal = null; feeAlready = null; feeVerified = feeFailed = false; feeRead = {state: "unset", shareholders: null}; feePlans = 0; feeReads = [];
 });
 afterAll(() => { globalThis.fetch = nativeFetch; sqlite.close(); });
 function image(width: number, height: number) { const bytes = new Uint8Array(40); bytes.set([0x89, 0x50, 0x4e, 0x47]); new DataView(bytes.buffer).setUint32(16, width); new DataView(bytes.buffer).setUint32(20, height); return bytes; }
@@ -1752,5 +1771,219 @@ describe("pre-ground card mint addresses on the server (live_vanity_mints)", () 
     sqlite.query("UPDATE live_vanity_mints SET status = 'used', used_at = 5").run();
     await expect(new Promise((resolve, reject) => localD1.batch(claim as never).then(resolve, reject))).rejects.toThrow();
     expect(rows()[0]).toMatchObject({status: "used", used_at: 5});
+  });
+});
+
+describe("the creator fee split after the card (CARDDEX_LIVE_FEE_SHARING)", () => {
+  // Synthetic wallets on the ed25519 curve; never funded, never used to sign anything that could be sent.
+  const wallets = Array.from({length: 8}, (_, i) => base58Encode(ed25519.getPublicKey(new Uint8Array(32).fill(40 + i))));
+  const split = [{address: creator, bps: 2500}, {address: wallets[0], bps: 5000}, {address: wallets[1], bps: 2500}];
+  const feeRow = (id: string) => sqlite.query("SELECT status, recipients_json, signature, error FROM live_fee_shares WHERE intent_id = ?").get(id) as {status: string; recipients_json: string; signature: string | null; error: string | null} | null;
+  /** A launch with this split, carried to `complete` (coin and card verified), exactly as the first lifecycle test does. */
+  async function completed(feeShares = split) {
+    const prepared = await service.prepareLiveLaunch(creator, {...await input(), feeShares});
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: prepared.intent.id, signature: "s".repeat(88), messageSha256: prepared.transaction!.messageSha256});
+    const nft = await service.prepareLiveCreatorNft(creator, {intentId: prepared.intent.id});
+    nftVerified = true;
+    await service.confirmLiveCreatorNft(creator, {intentId: prepared.intent.id, signature: "t".repeat(88), messageSha256: nft.transaction!.messageSha256});
+    return prepared.intent.id;
+  }
+  test("off unless the switch says \"true\": readiness hides it and the server refuses a launch that carries a split, before anything is made", async () => {
+    expect(liveReadiness().feeSharing).toBe(false);
+    for (const [value, on] of [["true", true], [" TRUE ", true], ["1", false], ["yes", false], ["", false]] as const) { env.CARDDEX_LIVE_FEE_SHARING = value; expect(liveReadiness().feeSharing).toBe(on); }
+    // It follows a finished launch, so it also needs recovery.
+    env.CARDDEX_LIVE_FEE_SHARING = "true"; env.CARDDEX_LIVE_RECOVERY_ENABLED = "false"; expect(liveReadiness().feeSharing).toBe(false);
+    delete env.CARDDEX_LIVE_RECOVERY_ENABLED; delete env.CARDDEX_LIVE_FEE_SHARING;
+    const puts = storagePuts;
+    await expect(service.prepareLiveLaunch(creator, {...await input(), feeShares: split})).rejects.toThrow("Creator fee sharing is not open");
+    expect(prepareCalls).toBe(0); expect(storagePuts).toBe(puts + 3);
+    expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 0});
+  });
+  test("the split is saved beside the launch, never in its identity: the request hash and binding are the same with or without it", async () => {
+    env.CARDDEX_LIVE_FEE_SHARING = "true";
+    const plain = await service.prepareLiveLaunch(creator, await input());
+    const plainRow = sqlite.query("SELECT payload_sha256, payload_json, binding_sha256 FROM live_launch_intents").get() as Record<string, string>;
+    expect(plain.intent.feeShare).toBeUndefined();
+    sqlite.close(); sqlite = new Database(":memory:");
+    for (const name of readdirSync(migrations).filter(name => name.endsWith(".sql")).sort()) { const sql = readFileSync(resolve(migrations, name), "utf8"); if (sql.replace(/--[^\n]*/g, "").trim()) sqlite.exec(sql); }
+    const shared = await service.prepareLiveLaunch(creator, {...await input(), feeShares: split});
+    const sharedRow = sqlite.query("SELECT payload_sha256, payload_json, binding_sha256 FROM live_launch_intents").get() as Record<string, string>;
+    expect(sharedRow.payload_sha256).toBe(plainRow.payload_sha256);
+    expect(sharedRow.binding_sha256).toBe(plainRow.binding_sha256);
+    expect(JSON.parse(sharedRow.payload_json).input).toEqual(JSON.parse(plainRow.payload_json).input);
+    expect(tokenInputs[0]).toEqual(tokenInputs[1]);
+    expect(shared.intent.feeShare).toEqual({status: "requested", recipients: split, signature: null, error: null});
+    expect(feeChecks).toEqual([split]);
+    expect(JSON.parse(feeRow(shared.intent.id)!.recipients_json)).toEqual(split);
+    // Frozen once saved: a database write cannot change it, and the same launch prepared again with another split is refused.
+    expect(() => sqlite.query("UPDATE live_fee_shares SET recipients_json = '[]' WHERE intent_id = ?").run(shared.intent.id)).toThrow("immutable");
+    await expect(service.prepareLiveLaunch(creator, {...await input(), feeShares: [{address: wallets[0], bps: 10_000}]})).rejects.toThrow("already saved with other wallets or shares");
+    expect((await service.prepareLiveLaunch(creator, {...await input(), feeShares: split})).intent.feeShare?.recipients).toEqual(split);
+  });
+  test("recipient rules: wallets only, never this coin's accounts or a program, whole shares adding to exactly 100%, no duplicates", async () => {
+    env.CARDDEX_LIVE_FEE_SHARING = "true";
+    const refuse = async (feeShares: {address: string; bps: number}[], message: string) => {
+      await expect(service.prepareLiveLaunch(creator, {...await input(), feeShares})).rejects.toThrow(message);
+      expect(sqlite.query("SELECT COUNT(*) AS n FROM live_launch_intents").get()).toEqual({n: 0});
+    };
+    await refuse([{address: wallets[0], bps: 6000}, {address: wallets[1], bps: 3000}], "add up to 90.00%");
+    await refuse([{address: wallets[0], bps: 5000}, {address: wallets[0], bps: 5000}], "only once");
+    await refuse([{address: wallets[0], bps: 10_000}, {address: wallets[1], bps: 0}], "more than 0%");
+    await refuse(wallets.map(address => ({address, bps: 1250})), "at most 7 wallets");
+    await refuse([{address: mint, bps: 10_000}], "coin's own account");
+    await refuse([{address: nftMint, bps: 10_000}], "coin's own account");
+    await refuse([{address: "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P", bps: 10_000}], "coin's own account");
+    // An address off the ed25519 curve (a program-derived address) is never a wallet.
+    const offCurve = "HyNQ4aeHcvPKF3YTrDw9VZoxdG4qjVYiMtrJZFSYJZjn";
+    expect((await import("../../src/components/carddex/live/transaction")).isWalletAddress(offCurve)).toBe(false);
+    await refuse([{address: offCurve, bps: 10_000}], "not a Solana wallet");
+    // A live account that is a program is refused by the chain read before anything is uploaded.
+    feeRecipientRefusal = "Abcd…wxyz is a program, not a wallet. pump.fun could never pay this split, so choose a Solana wallet.";
+    const puts = storagePuts;
+    await refuse([{address: wallets[0], bps: 10_000}], "is a program, not a wallet");
+    // Nothing new was uploaded (the fixture's own images were already stored).
+    expect(storagePuts).toBe(puts);
+  });
+  test("set after the card: prepared, signed by the creator alone, sent once, then verified and final", async () => {
+    env.CARDDEX_LIVE_FEE_SHARING = "true";
+    const id = await completed();
+    // The card's own confirmation leaves the split waiting; it is never part of the coin or card.
+    expect((await service.getLiveLaunchIntent(creator, id))).toMatchObject({status: "complete", feeShare: {status: "requested", recipients: split}});
+    const prepared = await service.prepareLiveFeeShare(creator, {intentId: id});
+    expect(feeInputs.map(entry => entry.recipients)).toEqual([split]);
+    expect(feeInputs[0].input).toMatchObject({creator, mint, nftMint});
+    expect(prepared.transaction).toMatchObject({kind: "fees", requiredSigners: [creator]});
+    expect(feeRow(id)?.status).toBe("prepared");
+    const sends = sendCalls;
+    const sent = await service.submitLiveFeeShare(creator, {intentId: id, messageSha256: prepared.transaction!.messageSha256, transactionBase64: `${prepared.transaction!.transactionBase64}-signed`});
+    expect(sendCalls).toBe(sends + 1);
+    expect(sent.intent.feeShare).toMatchObject({status: "pending", signature: sent.signature});
+    // The signature and exact bytes were saved before the broadcast.
+    expect(savedAtCheck.at(-1)).toBeNull();
+    expect(sqlite.query("SELECT signature, signed_transaction_base64, status FROM live_fee_share_transactions WHERE intent_id = ?").get(id)).toEqual({signature: sent.signature, signed_transaction_base64: `${prepared.transaction!.transactionBase64}-signed`, status: "pending"});
+    // A changed message is refused before any send.
+    await expect(service.submitLiveFeeShare(creator, {intentId: id, messageSha256: prepared.transaction!.messageSha256, transactionBase64: "fees-unsigned-9-signed"})).rejects.toThrow();
+    expect(sendCalls).toBe(sends + 1);
+    // Pending: checked and sent again while it can land; then verified.
+    expect((await service.confirmLiveFeeShare(creator, {intentId: id, signature: sent.signature})).intent.feeShare?.status).toBe("pending");
+    expect(resends.at(-1)?.transactionBase64).toBe(`${prepared.transaction!.transactionBase64}-signed`);
+    feeVerified = true;
+    const confirmed = await service.confirmLiveFeeShare(creator, {intentId: id, signature: sent.signature});
+    expect(confirmed.intent.feeShare).toEqual({status: "complete", recipients: split, signature: sent.signature, error: null});
+    expect(verifyHashes.at(-1)).toBe(prepared.transaction!.messageSha256);
+    // Final: no new transaction, no skip, and the row cannot be rewritten.
+    expect((await service.prepareLiveFeeShare(creator, {intentId: id})).transaction).toBeNull();
+    await expect(service.skipLiveFeeShare(creator, {intentId: id})).rejects.toThrow("already settled");
+    expect(() => sqlite.query("UPDATE live_fee_shares SET status = 'failed' WHERE intent_id = ?").run(id)).toThrow("final");
+    expect((await service.listLiveLaunchIntents(creator))[0].feeShare?.status).toBe("complete");
+  });
+  test("never before the card, never for another wallet, and never while the switch is off; a sent split is still recorded", async () => {
+    env.CARDDEX_LIVE_FEE_SHARING = "true";
+    const early = await service.prepareLiveLaunch(creator, {...await input(), feeShares: split});
+    await expect(service.prepareLiveFeeShare(creator, {intentId: early.intent.id})).rejects.toThrow("after your coin and card are confirmed");
+    await expect(service.prepareLiveFeeShare(otherWallet, {intentId: early.intent.id})).rejects.toThrow("does not belong");
+    tokenVerified = true;
+    await service.confirmLiveToken(creator, {intentId: early.intent.id, signature: "s".repeat(88), messageSha256: early.transaction!.messageSha256});
+    const nft = await service.prepareLiveCreatorNft(creator, {intentId: early.intent.id});
+    nftVerified = true;
+    await service.confirmLiveCreatorNft(creator, {intentId: early.intent.id, signature: "t".repeat(88), messageSha256: nft.transaction!.messageSha256});
+    const prepared = await service.prepareLiveFeeShare(creator, {intentId: early.intent.id});
+    const sent = await service.submitLiveFeeShare(creator, {intentId: early.intent.id, messageSha256: prepared.transaction!.messageSha256, transactionBase64: `${prepared.transaction!.transactionBase64}-signed`});
+    delete env.CARDDEX_LIVE_FEE_SHARING;
+    await expect(service.prepareLiveFeeShare(creator, {intentId: early.intent.id})).rejects.toThrow("not open");
+    await expect(service.submitLiveFeeShare(creator, {intentId: early.intent.id, messageSha256: prepared.transaction!.messageSha256, transactionBase64: `${prepared.transaction!.transactionBase64}-signed`})).rejects.toThrow("not open");
+    feeVerified = true;
+    expect((await service.confirmLiveFeeShare(creator, {intentId: early.intent.id, signature: sent.signature})).intent.feeShare?.status).toBe("complete");
+    // A launch saved without a split has none to set.
+    env.CARDDEX_LIVE_FEE_SHARING = "true";
+    sqlite.query("DELETE FROM live_fee_share_transactions").run(); sqlite.query("DROP TRIGGER carddex_live_fee_share_final").run(); sqlite.query("DELETE FROM live_fee_shares").run();
+    await expect(service.prepareLiveFeeShare(creator, {intentId: early.intent.id})).rejects.toThrow("has no creator fee split");
+    // Someone else's launch id, or none, has no split to skip.
+    await expect(service.skipLiveFeeShare(creator, {intentId: crypto.randomUUID()})).rejects.toThrow("does not belong");
+  });
+  test("with the switch off, a saved launch that chose a split can still be prepared again; its split is kept, never changed, and nothing new is saved", async () => {
+    env.CARDDEX_LIVE_FEE_SHARING = "true";
+    const first = await service.prepareLiveLaunch(creator, {...await input(), feeShares: split});
+    delete env.CARDDEX_LIVE_FEE_SHARING;
+    const again = await service.prepareLiveLaunch(creator, {...await input(), feeShares: split});
+    expect(again.transaction).toBeTruthy();
+    expect(again.intent.id).toBe(first.intent.id);
+    expect(feeRow(first.intent.id)?.status).toBe("requested");
+    // Still frozen: another split is refused even while sharing is off.
+    await expect(service.prepareLiveLaunch(creator, {...await input(), feeShares: [{address: wallets[0], bps: 10_000}]})).rejects.toThrow("already saved with other wallets or shares");
+    // A saved launch with no split saves none while the switch is off.
+    sqlite.query("DELETE FROM live_fee_shares").run();
+    await service.prepareLiveLaunch(creator, {...await input(), feeShares: split});
+    expect(feeRow(first.intent.id)).toBeNull();
+  });
+  test("an expired split is read from the chain only past its finalized expiry; until then it stays pending", async () => {
+    env.CARDDEX_LIVE_FEE_SHARING = "true";
+    const id = await completed();
+    const prepared = await service.prepareLiveFeeShare(creator, {intentId: id});
+    await service.submitLiveFeeShare(creator, {intentId: id, messageSha256: prepared.transaction!.messageSha256, transactionBase64: `${prepared.transaction!.transactionBase64}-signed`});
+    resendAnswer = "expired"; feeRead = {state: "unexpired", shareholders: null};
+    expect((await service.confirmLiveFeeShare(creator, {intentId: id, signature: feeRow(id)!.signature!})).intent.feeShare?.status).toBe("pending");
+    expect(feeReads.at(-1)).toEqual({commitment: undefined, afterBlockHeight: prepared.transaction!.lastValidBlockHeight});
+    feeRead = {state: "unset", shareholders: null};
+    expect((await service.confirmLiveFeeShare(creator, {intentId: id, signature: feeRow(id)!.signature!})).intent.feeShare?.status).toBe("failed");
+    // Skip reads the coin's split first: one that is locked after all settles as complete, never as kept.
+    feeRead = {state: "locked", shareholders: split, slot: 400};
+    expect((await service.skipLiveFeeShare(creator, {intentId: id})).intent.feeShare?.status).toBe("complete");
+    expect(feeReads.at(-1)).toEqual({commitment: "confirmed", afterBlockHeight: undefined});
+  });
+  test("skip keeps 100%: recorded with nothing sent, refused while a sent split can still land, and final", async () => {
+    env.CARDDEX_LIVE_FEE_SHARING = "true";
+    const id = await completed();
+    const prepared = await service.prepareLiveFeeShare(creator, {intentId: id});
+    await service.submitLiveFeeShare(creator, {intentId: id, messageSha256: prepared.transaction!.messageSha256, transactionBase64: `${prepared.transaction!.transactionBase64}-signed`});
+    await expect(service.skipLiveFeeShare(creator, {intentId: id})).rejects.toThrow("was sent");
+    // It expires unlanded and the chain holds no split: failed, so it can be prepared again or skipped.
+    resendAnswer = "expired";
+    const expired = await service.confirmLiveFeeShare(creator, {intentId: id, signature: feeRow(id)!.signature!});
+    expect(expired.intent.feeShare).toMatchObject({status: "failed", error: expect.stringContaining("expired before it landed")});
+    const sends = sendCalls;
+    // Like every fee split action but a sent split's check, refused while the switch is off.
+    delete env.CARDDEX_LIVE_FEE_SHARING;
+    await expect(service.skipLiveFeeShare(creator, {intentId: id})).rejects.toThrow("not open");
+    env.CARDDEX_LIVE_FEE_SHARING = "true";
+    expect((await service.skipLiveFeeShare(creator, {intentId: id})).intent.feeShare?.status).toBe("skipped");
+    expect(sendCalls).toBe(sends);
+    expect((await service.prepareLiveFeeShare(creator, {intentId: id})).transaction).toBeNull();
+    expect(feeRow(id)?.status).toBe("skipped");
+  });
+  test("reconciled from the chain: a failed or expired send whose split is locked anyway, or a split set on pump.fun meanwhile", async () => {
+    env.CARDDEX_LIVE_FEE_SHARING = "true";
+    // Failed on Solana with no split on chain: failed, and prepared again with a fresh transaction.
+    const id = await completed();
+    let prepared = await service.prepareLiveFeeShare(creator, {intentId: id});
+    let sent = await service.submitLiveFeeShare(creator, {intentId: id, messageSha256: prepared.transaction!.messageSha256, transactionBase64: `${prepared.transaction!.transactionBase64}-signed`});
+    feeFailed = true;
+    expect((await service.confirmLiveFeeShare(creator, {intentId: id, signature: sent.signature})).intent.feeShare).toMatchObject({status: "failed", error: expect.stringContaining("failed on Solana")});
+    feeFailed = false;
+    prepared = await service.prepareLiveFeeShare(creator, {intentId: id});
+    expect(feePlans).toBe(2);
+    expect(feeRow(id)?.status).toBe("prepared");
+    sent = await service.submitLiveFeeShare(creator, {intentId: id, messageSha256: prepared.transaction!.messageSha256, transactionBase64: `${prepared.transaction!.transactionBase64}-signed`});
+    // Expired, but the chain holds exactly this split (it landed after all): complete.
+    resendAnswer = "expired"; feeRead = {state: "locked", shareholders: split, slot: 300};
+    expect((await service.getLiveLaunchIntent(creator, id)).feeShare?.status).toBe("complete");
+    // Another launch whose coin got a different split on pump.fun first: set_elsewhere, with what pump.fun pays.
+    const other = [{address: wallets[5], bps: 10_000}];
+    tokenVerified = nftVerified = false; resendAnswer = "resent";
+    sqlite.close(); sqlite = new Database(":memory:");
+    for (const name of readdirSync(migrations).filter(name => name.endsWith(".sql")).sort()) { const sql = readFileSync(resolve(migrations, name), "utf8"); if (sql.replace(/--[^\n]*/g, "").trim()) sqlite.exec(sql); }
+    const second = await completed();
+    feeAlready = {shareholders: other, matches: false};
+    expect((await service.prepareLiveFeeShare(creator, {intentId: second})).transaction).toBeNull();
+    expect((await service.getLiveLaunchIntent(creator, second)).feeShare).toEqual({status: "set_elsewhere", recipients: split, signature: null, error: null, onChain: other});
+  });
+  test("a database without migration 0017 reads saved launches as before, and health names the missing migration", async () => {
+    const plain = await service.prepareLiveLaunch(creator, await input());
+    sqlite.exec("DROP TABLE live_fee_share_transactions"); sqlite.exec("DROP TABLE live_fee_shares");
+    expect((await service.getLiveLaunchIntent(creator, plain.intent.id)).feeShare).toBeUndefined();
+    expect((await service.listLiveLaunchIntents(creator))).toHaveLength(1);
+    const {missingMigrations} = await import("../../src/lib/carddex/live/limits.server");
+    expect(await missingMigrations()).toEqual(["0017"]);
   });
 });

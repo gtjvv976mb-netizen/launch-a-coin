@@ -157,6 +157,8 @@ export const SCHEMA_PROBES: readonly [migration: string, sql: string][] = [
   ["0014", "SELECT published_at FROM live_assets LIMIT 0"],
   ["0015", "SELECT public_until FROM live_assets LIMIT 0"],
   ["0016", "SELECT public_key, secret_ciphertext, secret_iv, status, issued_to, issued_at, used_at FROM live_vanity_mints LIMIT 0"],
+  ["0017", "SELECT intent_id, recipients_json, recipients_sha256, status, signature, receipt_json, error FROM live_fee_shares LIMIT 0"],
+  ["0017", "SELECT id, intent_id, message_sha256, plan_json, signature, signed_transaction_base64, signed_message_sha256, effective_last_valid_block_height FROM live_fee_share_transactions LIMIT 0"],
 ];
 export async function missingMigrations(): Promise<string[]> {
   const missing = new Set<string>();

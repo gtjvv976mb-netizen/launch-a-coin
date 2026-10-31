@@ -5,6 +5,10 @@ import { LIVE_PACKET_LIMIT } from "../../../lib/carddex/live/types";
 import {
   LIGHTHOUSE_PROGRAM_ID, PUMP_LOOKUP_TABLE, decodeV0Message, resolveInstructions, walletMessageChange, type MessageView,
 } from "../../../../../integrations/pumpfun/src/wallet-guards";
+// The fee split's one rule, shared with the server the same way.
+import {
+  PUMP_FEES_PROGRAM, feeShareInstructionsProblem, sameFeeSplit, type FeeRecipient, type FeeShareExpected,
+} from "../../../../../integrations/pumpfun/src/fee-share-rules";
 
 const ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const TOKEN_2022 = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
@@ -14,6 +18,8 @@ export const LIVE_PROGRAMS = {
   pump: "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
   associatedToken: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
   core: "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d",
+  /** pump.fun's fee-sharing program: only in the creator's fee split transaction (kind "fees"), never a coin or card. */
+  pumpFees: PUMP_FEES_PROGRAM,
   /** Lighthouse v2, whose read-only assertions Phantom may append; never part of a prepared plan. */
   lighthouse: LIGHTHOUSE_PROGRAM_ID,
 } as const;
@@ -54,7 +60,8 @@ export function createEphemeralSigner(): EphemeralSigner {
 export function destroyEphemeralSigner(signer: EphemeralSigner | null) { signer?.seed.fill(0); }
 
 export type TransactionPlan = {
-  kind: "token" | "nft";
+  /** "fees": the creator's optional fee split after the card, signed by the creator alone. */
+  kind: "token" | "nft" | "fees";
   network: "solana:mainnet";
   transactionBase64: string;
   messageSha256: string;
@@ -120,7 +127,8 @@ function dataReader(data: Uint8Array) {
 }
 const hex = (bytes: Uint8Array) => Array.from(bytes, b => b.toString(16).padStart(2, "0")).join("");
 const u64 = (bytes: Uint8Array) => { let n = 0n; for (let i = bytes.length - 1; i >= 0; i--) n = n * 256n + BigInt(bytes[i]); return n.toString(); };
-function validateOperations(wire: Wire, expected: ExpectedPlan, plan: TransactionPlan) {
+/** Both compute-budget instructions, exactly as the review prices them. */
+function validateCompute(wire: Pick<Wire, "instructions">, plan: TransactionPlan) {
   const compute = wire.instructions.filter(i => i.program === LIVE_PROGRAMS.compute);
   for (const ix of compute) if (ix.accounts.length || !(ix.data.length === 5 && ix.data[0] === 2 || ix.data.length === 9 && ix.data[0] === 3)) throw new Error("Unexpected compute-budget operation.");
   if (compute.length !== 2 || new Set(compute.map(i => i.data[0])).size !== 2) throw new Error("Unexpected compute-budget operation count.");
@@ -129,6 +137,9 @@ function validateOperations(wire: Wire, expected: ExpectedPlan, plan: Transactio
   const micro = BigInt(u64(compute.find(i => i.data[0] === 3)!.data.slice(1)));
   const priority = (BigInt(limit) * micro + 999_999n) / 1_000_000n;
   if (limit <= 0 || limit > 1_400_000 || micro < 1000n || micro > MAX_MICRO_LAMPORTS || plan.review.computeUnitLimit !== limit || String(plan.review.microLamportsPerComputeUnit) !== micro.toString() || String(plan.review.priorityFeeLamports) !== priority.toString()) throw new Error("The actual priority fee differs from the cost review.");
+}
+function validateOperations(wire: Wire, expected: ExpectedPlan, plan: TransactionPlan) {
+  validateCompute(wire, plan);
   if (expected.kind === "token") {
     const pump = wire.instructions.filter(i => i.program === LIVE_PROGRAMS.pump);
     if (pump.length !== (BigInt(expected.initialBuyQuoteBaseUnits) > 0n ? 2 : 1)) throw new Error("The token transaction has unexpected Pump operations.");
@@ -312,6 +323,106 @@ export async function signPlansWithWallet(items: readonly {plan: TransactionPlan
   });
   if (changes.length) throw new WalletChangedTransaction(changes[0].returned, changes);
   return signed as Uint8Array[];
+}
+
+// ---------------------------------------------------------------- the creator fee split (kind "fees")
+
+export type { FeeRecipient };
+const encoder = new TextEncoder();
+/** Whether 32 bytes are a point on the ed25519 curve: a wallet address. A program address (PDA) never is. */
+export function onCurve(bytes: Uint8Array): boolean {
+  try { ed25519.ExtendedPoint.fromHex(bytes); return true; } catch { return false; }
+}
+/** A Solana wallet address: valid base58 of 32 bytes on the ed25519 curve. */
+export function isWalletAddress(address: string): boolean {
+  if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) return false;
+  try { const bytes = fromBase58(address); return bytes.length === 32 && onCurve(bytes); } catch { return false; }
+}
+/** Solana's findProgramAddress, in the page: the highest bump whose hash is off the curve. */
+export function programAddress(seeds: readonly Uint8Array[], program: string): string {
+  const programBytes = fromBase58(program);
+  for (let bump = 255; bump >= 0; bump--) {
+    const parts = [...seeds, Uint8Array.of(bump), programBytes, encoder.encode("ProgramDerivedAddress")];
+    const joined = new Uint8Array(parts.reduce((total, part) => total + part.length, 0));
+    let offset = 0;
+    for (const part of parts) { joined.set(part, offset); offset += part.length; }
+    const candidate = sha256(joined);
+    if (!onCurve(candidate)) return base58(candidate);
+  }
+  throw new Error("No program address for these seeds.");
+}
+/** What the page expects of the fee split transaction: the saved launch's creator, coin and quote, and the saved split. */
+export type ExpectedFeePlan = { creator: string; tokenMint: string; quoteKey: string; quoteMint: string; quoteTokenProgram: string; recipients: readonly FeeRecipient[] };
+/** The addresses fee-share-rules.ts compares, derived here exactly as the pump.fun SDK derives them. */
+export function feeShareExpectedFor(expected: ExpectedFeePlan): FeeShareExpected {
+  const mint = fromBase58(expected.tokenMint), sol = expected.quoteKey === "sol";
+  const sharingConfig = programAddress([encoder.encode("sharing-config"), mint], LIVE_PROGRAMS.pumpFees);
+  const sharingVault = programAddress([encoder.encode("creator-vault"), fromBase58(sharingConfig)], LIVE_PROGRAMS.pump);
+  return { creator: expected.creator, mint: expected.tokenMint, quoteMint: expected.quoteMint, quoteTokenProgram: expected.quoteTokenProgram, sol,
+    recipients: expected.recipients, bondingCurve: programAddress([encoder.encode("bonding-curve"), mint], LIVE_PROGRAMS.pump), sharingConfig, sharingVault,
+    sharingVaultQuoteAccount: sol ? null : programAddress([fromBase58(sharingVault), fromBase58(expected.quoteTokenProgram), fromBase58(expected.quoteMint)], LIVE_PROGRAMS.associatedToken) };
+}
+/** The fee split's v0 transaction: exactly one required signer, the creator, and no readonly signer. */
+export function parseFeeTransaction(bytes: Uint8Array): Wire {
+  if (bytes.length > LIVE_PACKET_LIMIT || bytes.length < 70) throw new Error("The prepared transaction has an invalid size.");
+  if (bytes[0] !== 1) throw new Error("The fee split must require only your wallet's signature.");
+  const signatureOffset = 1, signatures = [bytes.slice(1, 65)], message = bytes.slice(65);
+  const view = decodeV0Message(message);
+  if (view.header.required !== 1 || view.header.readonlySigned !== 0) throw new Error("Invalid transaction account header.");
+  const instructions = resolveInstructions(view);
+  return { bytes, message, signatureOffset, signatures, signers: view.staticKeys.slice(0, 1), blockhash: view.blockhash,
+    programs: instructions.map(ix => ix.program), keys: view.keys, instructions, view };
+}
+/**
+ * The fee split plan, checked before the wallet opens: creator-only, mainnet, the reviewed message and costs, only the
+ * compute-budget, pump and pump-fees programs (plus the one sharing-vault token account on a token quote), and an
+ * update whose shareholders are exactly the saved split (fee-share-rules.ts). No transfer, no other signer.
+ */
+export function validateFeeSharePlan(plan: TransactionPlan, expected: ExpectedFeePlan): Wire {
+  const bytes = fromBase64(plan.transactionBase64);
+  if (bytes.length > LIVE_PACKET_LIMIT) throw new Error(oversizedPlanError(bytes.length));
+  if (plan.review.transactionBytes !== undefined && plan.review.transactionBytes !== bytes.length) throw new Error("The transaction size differs from the review. Prepare it again.");
+  if (plan.kind !== "fees") throw new Error("This is not the fee split transaction.");
+  const wire = parseFeeTransaction(bytes);
+  if (plan.network !== MAINNET_CHAIN) throw new Error("This transaction is not for Solana mainnet.");
+  if (plan.feePayer !== expected.creator || wire.signers[0] !== expected.creator || plan.requiredSigners.length !== 1 || plan.requiredSigners[0] !== expected.creator) throw new Error("The fee split must be signed by your creator wallet alone.");
+  if (wire.signatures[0].some(Boolean)) throw new Error("The prepared transaction already contains an unexpected signature.");
+  if (wire.blockhash !== plan.blockhash || hexHash(wire.message) !== plan.messageSha256) throw new Error("The transaction does not match its review.");
+  if (wire.view.lookups.some(lookup => lookup.table !== PUMP_LOOKUP_TABLE.address)) throw new Error("The transaction loads an unexpected address lookup table.");
+  if (!Number.isSafeInteger(plan.lastValidBlockHeight) || plan.lastValidBlockHeight <= 0 || !Number.isSafeInteger(plan.verifiedSlot) || plan.verifiedSlot <= 0) throw new Error("The transaction has no valid verification window.");
+  for (const amount of [plan.review.networkFeeLamports, plan.review.priorityFeeLamports, plan.review.rentAndProgramCostLamports, plan.review.totalDebitLamports]) {
+    if (!/^(0|[1-9][0-9]*)$/.test(String(amount))) throw new Error("The transaction review contains an invalid SOL amount.");
+  }
+  const allowed: readonly string[] = [LIVE_PROGRAMS.compute, LIVE_PROGRAMS.pump, LIVE_PROGRAMS.pumpFees, ...(expected.quoteKey === "sol" ? [] : [LIVE_PROGRAMS.associatedToken])];
+  if (wire.programs.some(p => !allowed.includes(p))) throw new Error("The transaction calls an unexpected program.");
+  if (!Array.isArray(plan.instructionPrograms) || new Set(plan.instructionPrograms).size !== new Set(wire.programs).size || wire.programs.some(p => !plan.instructionPrograms.includes(p))) throw new Error("The transaction programs differ from the review.");
+  validateCompute(wire, plan);
+  const problem = feeShareInstructionsProblem(wire.instructions, feeShareExpectedFor(expected));
+  if (problem) throw new Error(problem);
+  const reviewed = plan.review.feeRecipients;
+  if (!Array.isArray(reviewed) || !sameFeeSplit(reviewed as FeeRecipient[], expected.recipients)) throw new Error("The fee split in the review differs from the wallets and shares you chose.");
+  return wire;
+}
+/**
+ * What the wallet returns for the fee split: the reviewed message, or that message with only what the shared wallet rule
+ * accepts (read-only Lighthouse assertions appended, a recompiled key order, a refreshed blockhash the server re-checks),
+ * signed by the creator over the returned message. Anything else is refused and never sent.
+ */
+export function validateFeeWalletResult(unsigned: Uint8Array, signed: Uint8Array, creator: string): Uint8Array {
+  const original = parseFeeTransaction(unsigned);
+  let result: Wire;
+  try { result = parseFeeTransaction(signed); walletMessageChange(original.view, result.view, { allowBlockhashChange: true }); }
+  catch { throw new WalletChangedTransaction(signed.slice()); }
+  if (result.signers[0] !== creator || !ed25519.verify(result.signatures[0], result.message, fromBase58(creator))) throw new Error("Your wallet did not return a valid signature from the creator wallet. Nothing was submitted.");
+  return signed;
+}
+/**
+ * Validates the fee split plan, asks the wallet to sign the unsigned bytes (the creator is the only signer, so the page
+ * adds nothing and never signs first) and returns what the wallet signed.
+ */
+export async function signFeePlanWithWallet(plan: TransactionPlan, expected: ExpectedFeePlan, walletSign: (transaction: Uint8Array) => Promise<Uint8Array>): Promise<Uint8Array> {
+  const unsigned = validateFeeSharePlan(plan, expected).bytes.slice();
+  return validateFeeWalletResult(unsigned, await walletSign(unsigned.slice()), expected.creator);
 }
 
 /** A plan this page received more than ~30 s ago is prepared again before the wallet opens, so its blockhash is fresh. */

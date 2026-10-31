@@ -29,7 +29,9 @@ import { CREATION_MCAP_LABEL } from "../lib/carddex/card-template";
 import type { LiveLaunchHandle, LivePrimary } from "../components/carddex/live/LiveLaunchPanel";
 import { draftDesign, draftPair, firstProblem, enterTarget, formDesign, pairFromSearch, pickDesign as nextDesign, pickPair as nextPick, type FormCheck } from "../components/carddex/launch-form";
 import { DesignChooser } from "../components/carddex/DesignChooser";
-import { liveReadinessQuery, useLiveLaunchOpen, useLiveRecoveryOpen } from "../components/carddex/live/readiness";
+import { liveReadinessQuery, useLiveLaunchOpen, useLiveReadiness, useLiveRecoveryOpen } from "../components/carddex/live/readiness";
+import { decimalText, FeeSplitFields, firstFeeSplitField } from "../components/carddex/live/FeeSplitFields";
+import { checkFeeSplit, EMPTY_FEE_SPLIT, formatShare, readFeeSplitDraft, type FeeSplitDraft } from "../components/carddex/live/fee-split";
 import { formatLiveAmount, parseLiveAmount } from "../components/carddex/live/amounts";
 import { BUY_FIT_AFTER_SIGN_IN, liveBuyOff, useLiveBuyFit, useLiveBuyRefusal } from "../components/carddex/live/buy-fit";
 import { PagedMessage } from "../components/carddex/live/PagedMessage";
@@ -79,6 +81,8 @@ type LaunchDraft = {
   /** True when the creator picked the design (SOL's chooser or a ?design= link). Drafts written before SOL had a
    * chooser always hold SOL's old card (one-piece) without this, so they reopen on SOL's main card instead. */
   designChosen?: boolean;
+  /** "Share creator fees" as typed (on or off, and its rows); drafts written before it have none (off). */
+  feeSplit?: FeeSplitDraft;
 };
 function readDraft(): Partial<LaunchDraft> | null {
   try {
@@ -144,7 +148,7 @@ function linkError(value: string, kind: "web" | "x"): string | null {
 
 type FieldKey = "name" | "ticker" | "website" | "x";
 /** The form's checks, in DOM order: the first one that fails takes focus (Launch pressed, or Enter in a field). */
-type ProblemKey = "name" | "ticker" | "art" | "buy" | "website" | "x" | "terms";
+type ProblemKey = "name" | "ticker" | "art" | "buy" | "website" | "x" | "fees" | "terms";
 
 /**
  * Below 1024px (MintDex's lg; launch.css uses the same query): the live card sits in the form beside Name and
@@ -214,6 +218,9 @@ function Launch() {
   const [moreOpen, setMoreOpen] = useState(false);
   // The live ticket's primary as LiveLaunchPanel reports it (kept for a future mirror; MintDex has no action bar).
   const [livePrimary, setLivePrimary] = useState<LivePrimary | null>(null);
+  // "Share creator fees" (More options), and the connected wallet the panel reports for its first row.
+  const [feeSplit, setFeeSplit] = useState<FeeSplitDraft>(EMPTY_FEE_SPLIT);
+  const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
   const viewId = useId();
   const formId = `${viewId}-form`;
   const phoneCard = usePhoneCard();
@@ -226,6 +233,9 @@ function Launch() {
   const recoveryOpen = useLiveRecoveryOpen();
   const live = liveOpen || recoveryOpen;
   const recoveryOnly = live && !liveOpen;
+  // The creator fee split is offered only while its own switch is on (CARDDEX_LIVE_FEE_SHARING); off, the group is hidden
+  // and a launch keeps pump.fun's default.
+  const feesOpen = useLiveReadiness(live).data?.feeSharing === true && liveOpen;
   const liveRef = useRef<LiveLaunchHandle>(null);
   // The pair picks the card (launch-form.ts): ?quote= opens on that pair, an older ?design= link on that design's pair,
   // anything else on SOL. The card's design follows the pair: its main design, or for SOL the design picked in the
@@ -250,6 +260,8 @@ function Launch() {
     // The saved launch's own initial buy, as a plain decimal in its quote ("" for none).
     const buy = intent.initialBuyQuoteBaseUnits;
     setDevBuy(buy === "0" ? "" : formatLiveAmount(buy, getPairAsset(intent.quoteAssetKey).decimals).replace(/,/g, ""));
+    // The saved launch's own split (locked with it), or none.
+    setFeeSplit(intent.feeShare ? { on: true, rows: intent.feeShare.recipients.map(entry => ({ wallet: entry.address, percent: formatShare(entry.bps).replace("%", "") })) } : EMPTY_FEE_SPLIT);
     setPreview(intent.assets.artwork.url);
   }, []);
   useEffect(() => {
@@ -281,6 +293,7 @@ function Launch() {
       // The draft's pair comes back (its card follows), and for SOL the design picked in its chooser.
       const savedPair = draftPair(d);
       if (!search.design && !search.quote && savedPair) { setQuoteKey(savedPair); setChosenDesign(draftDesign(d)); setDevBuy(str(d.devBuy)); }
+      setFeeSplit(readFeeSplitDraft(d.feeSplit));
     }
     setDraftReady(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -326,8 +339,12 @@ function Launch() {
     else if (devBuy) { if (/[1-9]/.test(devBuy)) setBuyDropped(true); setDevBuy(""); }
   }, [buyBlocked, devBuy]);
   useEffect(() => {
-    if (devBuy || website || xUrl) setMoreOpen(true);
-  }, [devBuy, website, xUrl]);
+    if (devBuy || website || xUrl || feeSplit.on && feesOpen) setMoreOpen(true);
+  }, [devBuy, website, xUrl, feeSplit.on, feesOpen]);
+  // The split counts only while it is offered and switched on; then it must pass every check the form can make.
+  const feeCheck = checkFeeSplit(feeSplit.rows);
+  const feesActive = feesOpen && feeSplit.on;
+  const feesOk = !feesActive || !!feeCheck.shares;
   const websiteError = linkError(website, "web");
   const xError = linkError(xUrl, "x");
   const hasArt = !!preparedArt;
@@ -338,6 +355,7 @@ function Launch() {
     !websiteError &&
     !xError &&
     !devError &&
+    feesOk &&
     !uploading;
 
   // An error shows once the field is left with something in it, or after Launch is pressed.
@@ -350,12 +368,12 @@ function Launch() {
   const xMsg = xError && shown("x", xUrl) ? xError : null;
   const touch = (key: FieldKey) => () => setTouched((t) => (t[key] ? t : { ...t, [key]: true }));
 
-  const dirty = !!(name || ticker || lore || website || xUrl || devBuy || preparedArt);
+  const dirty = !!(name || ticker || lore || website || xUrl || devBuy || preparedArt || feeSplit.on);
   useEffect(() => {
     if (justRestored.current) { justRestored.current = false; return; }
     if (!draftReady || liveLocked || recoveryOnly) return;
-    writeDraft(dirty ? { name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey, designChosen: chosenDesign !== null } : null);
-  }, [draftReady, dirty, name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey, chosenDesign, liveLocked, recoveryOnly]);
+    writeDraft(dirty ? { name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey, designChosen: chosenDesign !== null, ...(feeSplit.on || feeSplit.rows.length ? { feeSplit } : {}) } : null);
+  }, [draftReady, dirty, name, ticker, lore, website, xUrl, devBuy, designKey, quoteKey, chosenDesign, feeSplit, liveLocked, recoveryOnly]);
 
   // The description grows with its text (field-sizing in launch.css); browsers without it are sized here, so the
   // box never scrolls on its own.
@@ -413,15 +431,16 @@ function Launch() {
     { key: "buy", ok: !devError },
     { key: "website", ok: !websiteError },
     { key: "x", ok: !xError },
+    { key: "fees", ok: feesOk },
     // The terms checkbox sits in the ticket, after every field and before the primary.
     { key: "terms", ok: !(live && termsNeeded) },
   ];
-  const problemRefs: Record<Exclude<ProblemKey, "terms">, RefObject<HTMLElement | null>> = {
+  const problemRefs: Record<Exclude<ProblemKey, "terms" | "fees">, RefObject<HTMLElement | null>> = {
     name: nameRef, ticker: tickerRef, art: artRef, buy: devRef, website: websiteRef, x: xRef,
   };
-  const problemEl = (key: ProblemKey) => key === "terms" ? liveRef.current?.terms() : problemRefs[key].current;
+  const problemEl = (key: ProblemKey) => key === "terms" ? liveRef.current?.terms() : key === "fees" ? document.getElementById(firstFeeSplitField(feeCheck) ?? "fee-split-on") : problemRefs[key].current;
   /** A problem inside More options opens it first (a closed disclosure's fields cannot take focus). */
-  const inMore = (key: ProblemKey) => key === "buy" || key === "website" || key === "x";
+  const inMore = (key: ProblemKey) => key === "buy" || key === "website" || key === "x" || key === "fees";
   /** Focus, then bring it into view at once (no smooth scroll); scroll-margin keeps it clear of the screen edges. */
   const land = (el: HTMLElement | null | undefined) => {
     if (!el) return;
@@ -446,7 +465,7 @@ function Launch() {
     const target = enterTarget(checks());
     if (target === "primary") land(visiblePrimary());
     else {
-      if (target !== "terms") setTouched((t) => ({ ...t, [target]: true }));
+      if (target !== "terms" && target !== "fees") setTouched((t) => ({ ...t, [target]: true }));
       if (inMore(target) && !moreOpen) {
         setMoreOpen(true);
         requestAnimationFrame(() => land(problemEl(target)));
@@ -458,7 +477,7 @@ function Launch() {
   const clearedRef = useRef(false);
   function clearFields() {
     writeDraft(null);
-    setName(""); setTicker(""); setLore(""); setWebsite(""); setXUrl(""); setDevBuy("");
+    setName(""); setTicker(""); setLore(""); setWebsite(""); setXUrl(""); setDevBuy(""); setFeeSplit(EMPTY_FEE_SPLIT);
     setPreview(null); setPreparedArt(null); setTickerNote("");
     setTouched({}); setShowErrors(false);
   }
@@ -545,10 +564,12 @@ function Launch() {
   // The draft the mainnet panel prepares, kept as one object while its fields hold still (the panel's effects
   // read it), and a string of those fields for change checks.
   const liveDraft = useMemo(
-    () => ready && preparedArt && liveDev !== null ? { name: name.trim(), symbol: ticker, description: lore.trim(), website: website.trim(), xUrl: xUrl.trim(), cardTemplate: designKey, quoteAssetKey: quoteKey, quoteMint: quoteAsset.mint, initialBuyQuoteBaseUnits: liveDev, artwork: preparedArt } : null,
-    [ready, preparedArt, liveDev, name, ticker, lore, website, xUrl, designKey, quoteKey, quoteAsset.mint],
+    () => ready && preparedArt && liveDev !== null ? { name: name.trim(), symbol: ticker, description: lore.trim(), website: website.trim(), xUrl: xUrl.trim(), cardTemplate: designKey, quoteAssetKey: quoteKey, quoteMint: quoteAsset.mint, initialBuyQuoteBaseUnits: liveDev, artwork: preparedArt,
+      feeShares: feesActive ? feeCheck.shares : null } : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [ready, preparedArt, liveDev, name, ticker, lore, website, xUrl, designKey, quoteKey, quoteAsset.mint, feesActive, JSON.stringify(feeCheck.shares)],
   );
-  const draftKey = [name.trim(), ticker, lore.trim(), website.trim(), xUrl.trim(), designKey, quoteKey, liveDev ?? "", preparedArt?.size ?? 0].join("|");
+  const draftKey = [name.trim(), ticker, lore.trim(), website.trim(), xUrl.trim(), designKey, quoteKey, liveDev ?? "", preparedArt?.size ?? 0, feesActive ? JSON.stringify(feeCheck.shares) : ""].join("|");
   const liveBuyText = live && liveDev && liveDev !== "0" ? `${devBuy.trim()} ${quoteAsset.symbol}` : null;
 
   // ------------------------------------------------ the header's one line: the draft, or a saved launch to finish
@@ -731,7 +752,7 @@ function Launch() {
             <summary>
               <Icon name="chevron-right" size={16} className="cdx-launch-more__chev" />
               <span className="cdx-launch-more__title">More options</span>
-              <span className="cdx-launch-more__sub">Links, initial buy</span>
+              <span className="cdx-launch-more__sub">{feesOpen ? "Links, initial buy, creator fees" : "Links, initial buy"}</span>
             </summary>
             <div className="cdx-launch-more__body">
               <div className="cdx-launch-links">
@@ -785,7 +806,7 @@ function Launch() {
                     enterKeyHint="next"
                     autoComplete="off"
                     value={devBuy}
-                    onChange={(e) => setDevBuy(e.target.value.replace(/[^0-9.]/g, ""))}
+                    onChange={(e) => setDevBuy(decimalText(e.target.value))}
                     placeholder="0"
                     aria-invalid={devError ? true : undefined}
                     aria-describedby="dev-note"
@@ -812,13 +833,16 @@ function Launch() {
                   </select>
                 </label>
               ) : null}
+              {/* Share creator fees: off by default; set after the card by its own approval (CARDDEX_LIVE_FEE_SHARING). A
+                  saved launch shows the split it was saved with, locked. */}
+              {feesOpen || liveLocked && feeSplit.on ? <FeeSplitFields value={feeSplit} onChange={setFeeSplit} connected={connectedWallet} disabled={locked} showErrors={showErrors} /> : null}
             </div>
           </details>
           {spacer}
 
           {/* The ticket: the costs, the total and the one primary, at the panel's foot (MintDex). */}
           <div className="cdx-launch-foot" data-live={live || undefined}>
-            {live ? <Suspense fallback={<div className="mdx-skeleton cdx-launch-live-skeleton" aria-hidden />}><LiveLaunchPanel ref={liveRef} launchesOpen={liveOpen} notice={buyDropped ? buyOffText : null} card={previewCard} draft={liveDraft} draftKey={draftKey} initialBuy={liveBuyText} slippageBps={slippageBps} ready={readyList} onLockedChange={setLiveLocked} onBusyChange={setLiveBusy} onTermsNeeded={setTermsNeeded} onIntentLoaded={restoreLiveIntent} onStartAnother={startAnotherLive} onPrimary={setLivePrimary} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /></Suspense> : pausedTicket}
+            {live ? <Suspense fallback={<div className="mdx-skeleton cdx-launch-live-skeleton" aria-hidden />}><LiveLaunchPanel ref={liveRef} launchesOpen={liveOpen} notice={buyDropped ? buyOffText : null} card={previewCard} draft={liveDraft} draftKey={draftKey} initialBuy={liveBuyText} slippageBps={slippageBps} ready={readyList} onLockedChange={setLiveLocked} onBusyChange={setLiveBusy} onTermsNeeded={setTermsNeeded} onIntentLoaded={restoreLiveIntent} onStartAnother={startAnotherLive} onPrimary={setLivePrimary} onWalletChange={setConnectedWallet} onInvalid={() => { setShowErrors(true); focusFirstProblem(); }} /></Suspense> : pausedTicket}
           </div>
         </form>
 

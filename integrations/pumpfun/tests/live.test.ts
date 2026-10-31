@@ -2,22 +2,23 @@ import { describe, expect, test } from "bun:test";
 import BN from "bn.js";
 import bs58 from "bs58";
 import { createHash } from "node:crypto";
-import { ComputeBudgetProgram, Keypair, PublicKey, TransactionInstruction, TransactionMessage, VersionedTransaction, type AccountInfo } from "@solana/web3.js";
+import { ComputeBudgetProgram, Keypair, PublicKey, SystemProgram, TransactionInstruction, TransactionMessage, VersionedTransaction, type AccountInfo } from "@solana/web3.js";
 import { AccountLayout, AccountState, AccountType, ExtensionType, MintLayout, TOKEN_2022_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { pack } from "@solana/spl-token-metadata";
-import { bondingCurvePda, GLOBAL_PDA, PUMP_FEE_CONFIG_PDA, PUMP_PROGRAM_ID, PUMP_SDK, QUOTE_CONTROL_PDA, newBondingCurve } from "@pump-fun/pump-sdk";
+import { bondingCurvePda, creatorVaultPda, feeSharingConfigPda, GLOBAL_PDA, PUMP_FEE_CONFIG_PDA, PUMP_FEE_PROGRAM_ID, PUMP_PROGRAM_ID, PUMP_SDK, QUOTE_CONTROL_PDA, newBondingCurve } from "@pump-fun/pump-sdk";
 import { getCreateV2InstructionDataSerializer, getUpdateV1InstructionDataSerializer, getPluginHeaderV1AccountDataSerializer, getPluginSerializer, Key, PluginType } from "@metaplex-foundation/mpl-core";
 import { getAssetV1AccountDataSerializer as rawAssetSerializer } from "@metaplex-foundation/mpl-core/dist/src/generated/types/assetV1AccountData.js";
 import { getPluginRegistryV1AccountDataSerializer as rawRegistrySerializer } from "@metaplex-foundation/mpl-core/dist/src/generated/types/pluginRegistryV1AccountData.js";
 import { publicKey as umiKey } from "@metaplex-foundation/umi";
 import { MAINNET_GENESIS_HASH, PAIR_ASSETS } from "../src/index.ts";
 import { RENT_EXEMPT_MINIMUM_LAMPORTS, RPC_TIMEOUT_MS, TransactionFailedOnChain, resendSignedWalletTransaction, rpcFetchWithTimeout } from "../src/live.ts";
+import { MAX_FEE_RECIPIENTS, checkFeeRecipientAccounts, measureFeeShareTransaction, prepareFeeShareTransaction, readFeeSplit, verifyFeeShareLanded, verifyFeeSharePlan, type FeeSharePlan } from "../src/live.ts";
 import { CORE_PROGRAM_ID, PACKET_LIMIT, PUMP_LOOKUP_TABLE, REFRESHED_BLOCKHASH_MARGIN, WALLET_SIZE_TARGET, pinnedLookupTable, SignedTransactionNotSent, assertNftMintReplaceable, broadcastSignedWalletTransaction, checkSignedWalletTransaction, assertTokenMintReplaceable, creatorNftInstructions, describeWalletChange, measureTokenTransaction, prepareCreatorNftAheadOfCoin, prepareCreatorNftTransaction, prepareTokenTransaction, recoverCreatorLaunch, sendSignedWalletTransaction, transactionBytes, validateSignedWalletTransaction, verifyCreatorNft, verifyTokenLaunch, type LiveConnection, type LiveLaunchInput, type WalletTransactionPlan } from "../src/live.ts";
 import fixture from "./fixtures/mainnet-pair-accounts-2026-10-28.json";
 import feeFixture from "./fixtures/mainnet-fee-account-2026-10-28.json";
 import tableFixture from "./fixtures/mainnet-pump-lookup-table-2026-10-29.json";
 import art from "../src/design-assets.json";
-import { signPlanWithWallet, validateLivePlan, WalletChangedTransaction, type ExpectedPlan } from "../../../app/src/components/carddex/live/transaction";
+import { isWalletAddress, programAddress, signFeePlanWithWallet, signPlanWithWallet, validateFeeSharePlan, validateLivePlan, WalletChangedTransaction, type ExpectedPlan } from "../../../app/src/components/carddex/live/transaction";
 import { ALLOW_PERMANENT_DELEGATE_QUOTE_BUY } from "../src/index.ts";
 import { messageOf, payerGuardData, phantomGuarded, tokenGuardData, unsignedTransaction } from "./message-fixtures.ts";
 import { decodeV0Message } from "../src/wallet-guards.ts";
@@ -900,16 +901,286 @@ describe("Phantom's Lighthouse assertions under the shared wallet rule, end to e
     expect(rpc.sent()).toBe(0);
   });
 
-  test("a coin compiled against pump.fun's table must come back with the same lookups", async () => {
+  test("a coin a wallet recompiled without pump.fun's table keeps every key and flag, so it is co-signed and checked", async () => {
     const input = solBuy(), rpc = mockRpc(), plan = await prepareTokenTransaction(input, { connection: rpc.connection });
     const table = pinnedLookupTable(rpc.accounts.get(PUMP_LOOKUP_TABLE.address)!)!;
     const withoutTable = (message: Uint8Array) => {
       const decompiled = TransactionMessage.decompile(VersionedTransaction.deserialize(unsignedTransaction(message)).message, { addressLookupTableAccounts: [table] });
       return new VersionedTransaction(decompiled.compileToV0Message()).message.serialize();
     };
-    const refused = await signPlanWithWallet(plan, expectedPlan(input, plan), { address: input.mint, seed: tokenKey.secretKey.slice(0, 32) }, "wallet-first", walletReturns(withoutTable)).then(() => null, (error: unknown) => error);
-    expect(refused).toBeInstanceOf(WalletChangedTransaction);
-    expect(() => validateSignedWalletTransaction(plan, Buffer.from((refused as WalletChangedTransaction).returned).toString("base64"))).toThrow();
+    const signed = await signPlanWithWallet(plan, expectedPlan(input, plan), { address: input.mint, seed: tokenKey.secretKey.slice(0, 32) }, "wallet-first", walletReturns(withoutTable));
+    expect(VersionedTransaction.deserialize(signed).message.addressTableLookups).toHaveLength(0);
+    expect(validateSignedWalletTransaction(plan, Buffer.from(signed).toString("base64"))).toMatchObject({ messageSha256: plan.messageSha256, walletGuards: 0 });
     expect(rpc.sent()).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------- the creator fee split (mock RPC only)
+
+describe("the creator fee split after the card (one signer, mock RPC only)", () => {
+  const recipientKeys = Array.from({ length: 10 }, (_, index) => Keypair.fromSeed(new Uint8Array(32).fill(120 + index)).publicKey.toBase58());
+  const split = (count: number) => recipientKeys.slice(0, count).map((address, index) => ({ address,
+    bps: index === 0 ? 10_000 - Math.floor(10_000 / count) * (count - 1) : Math.floor(10_000 / count) }));
+  const feeSignature = bs58.encode(new Uint8Array(64).fill(73));
+  const coinInput = (quoteKey: "sol" | "usdc" = "sol"): LiveLaunchInput => ({ ...defaultInput(), quoteKey,
+    card: { ...defaultInput().card, designKey: "obsidian-archive", frontSha256: art["obsidian-archive"].front.sha256, backSha256: art["obsidian-archive"].back.sha256 } });
+  async function landed(quoteKey: "sol" | "usdc" = "sol") {
+    const input = coinInput(quoteKey), rpc = mockRpc();
+    await rpc.addToken(input);
+    if (quoteKey !== "sol") rpc.addQuoteBalance(input, 0n);
+    return { input, rpc };
+  }
+  const feeCoder = () => (PUMP_SDK as any).offlinePumpFeeProgram.coder.accounts;
+  const pumpCoder = () => (PUMP_SDK as any).offlinePumpProgram.coder.accounts;
+  /** The coin's curve with changed fields, as pump.fun would write it. */
+  async function setCurve(rpc: ReturnType<typeof mockRpc>, input: LiveLaunchInput, change: Record<string, unknown>) {
+    const key = bondingCurvePda(new PublicKey(input.mint)).toBase58();
+    const curve = PUMP_SDK.decodeBondingCurve(rpc.accounts.get(key)!);
+    rpc.accounts.set(key, info(PUMP_PROGRAM_ID, await pumpCoder().encode("bondingCurve", { ...curve, ...change })));
+  }
+  /** A sharing config for the coin, and the curve's creator moved to it (what create_fee_sharing_config does). */
+  async function setSplit(rpc: ReturnType<typeof mockRpc>, input: LiveLaunchInput, options: { shareholders: { address: string; bps: number }[]; locked: boolean; admin?: string; mint?: string }) {
+    const mint = new PublicKey(input.mint), sharingConfig = feeSharingConfigPda(mint);
+    const data = await feeCoder().encode("sharingConfig", { bump: 255, version: 2, status: { active: {} }, mint: new PublicKey(options.mint ?? input.mint),
+      admin: new PublicKey(options.admin ?? input.creator), adminRevoked: options.locked,
+      shareholders: options.shareholders.map((entry) => ({ address: new PublicKey(entry.address), shareBps: entry.bps })) });
+    rpc.accounts.set(sharingConfig.toBase58(), info(PUMP_FEE_PROGRAM_ID, data));
+    await setCurve(rpc, input, { creator: sharingConfig });
+  }
+  const expectedFee = (input: LiveLaunchInput, recipients: { address: string; bps: number }[]) => {
+    const quote = PAIR_ASSETS.find((asset) => asset.key === input.quoteKey)!;
+    return { creator: input.creator, tokenMint: input.mint, quoteKey: quote.key, quoteMint: quote.mint, quoteTokenProgram: quote.tokenProgram, recipients };
+  };
+  /** The same plan with its instructions changed and recompiled, as a tampered server answer would arrive. */
+  function rebuilt(plan: FeeSharePlan, change: (instructions: TransactionInstruction[]) => TransactionInstruction[]) {
+    const tables = [pinnedLookupTable(accountFromFixture(tableFixture.value))!];
+    const decompiled = TransactionMessage.decompile(VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64")).message, { addressLookupTableAccounts: tables });
+    decompiled.instructions = change(decompiled.instructions);
+    const tx = new VersionedTransaction(decompiled.compileToV0Message(tables)), bytes = tx.serialize();
+    return { ...plan, transactionBase64: Buffer.from(bytes).toString("base64"), messageSha256: createHash("sha256").update(tx.message.serialize()).digest("hex"),
+      requiredSigners: tx.message.staticAccountKeys.slice(0, tx.message.header.numRequiredSignatures).map((key) => key.toBase58()),
+      instructionPrograms: [...new Set(tx.message.compiledInstructions.map((ix) => tx.message.staticAccountKeys[ix.programIdIndex].toBase58()))],
+      review: { ...plan.review, transactionBytes: bytes.length } } as FeeSharePlan;
+  }
+  async function prepared(quoteKey: "sol" | "usdc", count: number) {
+    const { input, rpc } = await landed(quoteKey), recipients = split(count);
+    const plan = await prepareFeeShareTransaction(input, recipients, { connection: rpc.connection, now });
+    if (!("transactionBase64" in plan)) throw new Error("Expected a fee split plan");
+    return { input, rpc, recipients, plan };
+  }
+
+  for (const quoteKey of ["sol", "usdc"] as const) for (const count of [1, 5, 7]) test(`${quoteKey}: ${count} recipients make one creator-signed transaction in the verified order, under the wallet size target`, async () => {
+    const { input, rpc, recipients, plan } = await prepared(quoteKey, count);
+    const tx = VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64"));
+    expect(plan.kind).toBe("fees");
+    expect(plan.requiredSigners).toEqual([input.creator]);
+    expect(tx.message.header.numRequiredSignatures).toBe(1);
+    expect(tx.message.addressTableLookups.map((lookup) => lookup.accountKey.toBase58())).toEqual([PUMP_LOOKUP_TABLE.address]);
+    const view = decodeV0Message(tx.message.serialize()), programs = view.instructions.map((ix) => view.keys[ix.program]);
+    expect(programs).toEqual([ComputeBudgetProgram.programId.toBase58(), ComputeBudgetProgram.programId.toBase58(), PUMP_PROGRAM_ID.toBase58(), PUMP_FEE_PROGRAM_ID.toBase58(),
+      ...(quoteKey === "sol" ? [] : ["ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"]), PUMP_FEE_PROGRAM_ID.toBase58()]);
+    expect(plan.review.transactionBytes).toBeLessThanOrEqual(WALLET_SIZE_TARGET);
+    expect(plan.review.feeRecipients).toEqual(recipients);
+    expect(() => verifyFeeSharePlan(plan, input, recipients)).not.toThrow();
+    // The browser's own verifier agrees, from the saved launch alone.
+    expect(validateFeeSharePlan(plan, expectedFee(input, recipients)).signers).toEqual([input.creator]);
+    // Measure parity: the size check sees exactly the bytes prepare builds.
+    expect((await measureFeeShareTransaction({ creator: input.creator, mint: input.mint, quoteKey, recipients: count }, { connection: rpc.connection })).bytes).toBe(plan.review.transactionBytes!);
+    expect(rpc.sent()).toBe(0);
+  });
+
+  test("every reviewed pair fits the most recipients this site offers, with the config create, and one more is refused", async () => {
+    const rpc = mockRpc();
+    for (const quote of PAIR_ASSETS) {
+      const size = await measureFeeShareTransaction({ creator: creatorKey.publicKey.toBase58(), mint: tokenKey.publicKey.toBase58(), quoteKey: quote.key, recipients: MAX_FEE_RECIPIENTS }, { connection: rpc.connection });
+      expect([quote.key, size.lookupTable, size.bytes <= WALLET_SIZE_TARGET]).toEqual([quote.key, true, true]);
+    }
+    const { input, rpc: coin } = await landed("sol");
+    await expect(prepareFeeShareTransaction(input, split(MAX_FEE_RECIPIENTS + 1), { connection: coin.connection })).rejects.toThrow(`at most ${MAX_FEE_RECIPIENTS} wallets`);
+  });
+
+  test("recipient rules: wallets only, whole basis points adding to exactly 100%, no duplicates, never this coin's own accounts", async () => {
+    const { input, rpc } = await landed("sol"), connection = rpc.connection;
+    const refuse = (recipients: { address: string; bps: number }[], message: string) => expect(prepareFeeShareTransaction(input, recipients, { connection })).rejects.toThrow(message);
+    await refuse([], "at least one wallet");
+    await refuse([{ address: recipientKeys[0], bps: 6000 }, { address: recipientKeys[1], bps: 3000 }], "add up to 90.00%");
+    await refuse([{ address: recipientKeys[0], bps: 5000 }, { address: recipientKeys[0], bps: 5000 }], "only once");
+    await refuse([{ address: recipientKeys[0], bps: 10_000 }, { address: recipientKeys[1], bps: 0 }], "more than 0%");
+    await refuse([{ address: recipientKeys[0], bps: 9999.5 }, { address: recipientKeys[1], bps: 0.5 }], "more than 0%");
+    // A program address (PDA) and the coin's own accounts are not wallets.
+    await refuse([{ address: feeSharingConfigPda(new PublicKey(input.mint)).toBase58(), bps: 10_000 }], "not a Solana wallet");
+    await refuse([{ address: bondingCurvePda(new PublicKey(input.mint)).toBase58(), bps: 10_000 }], "not a Solana wallet");
+    await refuse([{ address: input.mint, bps: 10_000 }], "coin's own account");
+    await refuse([{ address: input.nftMint, bps: 10_000 }], "coin's own account");
+    await refuse([{ address: "not-a-key", bps: 10_000 }], "Solana wallet address");
+    // A live account that is a program or holds data is refused; an empty address is allowed (pump.fun pays it once its share covers rent).
+    rpc.accounts.set(recipientKeys[0], { ...info(new PublicKey("BPFLoaderUpgradeab1e11111111111111111111111"), new Uint8Array(36)), executable: true });
+    await refuse([{ address: recipientKeys[0], bps: 10_000 }], "is a program, not a wallet");
+    rpc.accounts.set(recipientKeys[0], info(TOKEN_2022_PROGRAM_ID, new Uint8Array(165)));
+    await refuse([{ address: recipientKeys[0], bps: 10_000 }], "not a plain Solana wallet");
+    rpc.accounts.delete(recipientKeys[0]);
+    expect(await checkFeeRecipientAccounts(split(2), { connection })).toEqual({ unfunded: recipientKeys.slice(0, 2) });
+    // The creator may keep a share; Launch a Card never adds itself (the plan's split is exactly the creator's choice).
+    const own = [{ address: input.creator, bps: 2500 }, { address: recipientKeys[1], bps: 7500 }];
+    const plan = await prepareFeeShareTransaction(input, own, { connection });
+    if (!("transactionBase64" in plan)) throw new Error("Expected a plan");
+    expect(plan.review.feeRecipients).toEqual(own);
+  });
+
+  test("a graduated coin is refused and pointed to pump.fun; a creator short of SOL for the config rent is told before simulation", async () => {
+    const { input, rpc } = await landed("sol");
+    await setCurve(rpc, input, { complete: true });
+    await expect(prepareFeeShareTransaction(input, split(1), { connection: rpc.connection })).rejects.toThrow("only be set on pump.fun itself");
+    const poor = await landed("sol");
+    poor.rpc.accounts.set(input.creator, info(PublicKey.default, new Uint8Array(), 890_880));
+    await expect(prepareFeeShareTransaction(poor.input, split(1), { connection: poor.rpc.connection })).rejects.toThrow("Insufficient SOL: setting the split needs about 0.0068 SOL");
+    // A token quote needs the creator's own quote token account (update_fee_shares_v2 pays pending fees through it).
+    const usdc = coinInput("usdc"), noAccount = mockRpc(); await noAccount.addToken(usdc);
+    await expect(prepareFeeShareTransaction(usdc, split(1), { connection: noAccount.connection })).rejects.toThrow("needs a USDC token account");
+  });
+
+  test("a config that exists but was never split skips the create; a locked split needs no transaction", async () => {
+    const { input, rpc } = await landed("sol");
+    await setSplit(rpc, input, { shareholders: [{ address: input.creator, bps: 10_000 }], locked: false });
+    const plan = await prepareFeeShareTransaction(input, split(2), { connection: rpc.connection });
+    if (!("transactionBase64" in plan)) throw new Error("Expected a plan");
+    const view = decodeV0Message(VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64")).message.serialize());
+    expect(view.instructions.map((ix) => view.keys[ix.program]).filter((program) => program === PUMP_FEE_PROGRAM_ID.toBase58())).toHaveLength(1);
+    expect(validateFeeSharePlan(plan, expectedFee(input, split(2))).signers).toEqual([input.creator]);
+    // Administered by someone else: refused.
+    await setSplit(rpc, input, { shareholders: [{ address: input.creator, bps: 10_000 }], locked: false, admin: recipientKeys[9] });
+    await expect(prepareFeeShareTransaction(input, split(2), { connection: rpc.connection })).rejects.toThrow("managed by another wallet");
+    // Locked: no transaction, and whether it is this split.
+    await setSplit(rpc, input, { shareholders: split(2), locked: true });
+    expect(await prepareFeeShareTransaction(input, split(2), { connection: rpc.connection })).toEqual({ status: "already-set", shareholders: split(2), matches: true });
+    expect(await prepareFeeShareTransaction(input, split(3), { connection: rpc.connection })).toMatchObject({ status: "already-set", matches: false });
+    expect(await readFeeSplit(input, { connection: rpc.connection })).toMatchObject({ state: "locked", shareholders: split(2), graduated: false });
+    // Bound to a sent split's expiry: before finalized height passes it, nothing is read ("unexpired"); after, the
+    // config is read at that finalized bank or newer, and an older context is refused.
+    rpc.height(1000);
+    expect(await readFeeSplit(input, { connection: rpc.connection, afterBlockHeight: 1000 })).toMatchObject({ state: "unexpired" });
+    rpc.height(1001);
+    const reads: unknown[] = [], getMultiple = rpc.connection.getMultipleAccountsInfoAndContext.bind(rpc.connection);
+    rpc.connection.getMultipleAccountsInfoAndContext = (async (keys: PublicKey[], config: unknown) => { reads.push(config); return getMultiple(keys, config as never); }) as never;
+    expect(await readFeeSplit(input, { connection: rpc.connection, afterBlockHeight: 1000 })).toMatchObject({ state: "locked", shareholders: split(2) });
+    expect(reads.at(-1)).toMatchObject({ commitment: "finalized", minContextSlot: expect.any(Number) });
+    const epochInfo = rpc.connection.getEpochInfo.bind(rpc.connection);
+    rpc.connection.getEpochInfo = (async () => ({ ...await epochInfo("finalized"), absoluteSlot: Number.MAX_SAFE_INTEGER })) as never;
+    await expect(readFeeSplit(input, { connection: rpc.connection, afterBlockHeight: 1000 })).rejects.toThrow("predates the finalized expiry check");
+    rpc.connection.getEpochInfo = epochInfo; rpc.connection.getMultipleAccountsInfoAndContext = getMultiple;
+    expect(rpc.sent()).toBe(0);
+  });
+
+  test("the wallet signs the unsigned split alone; the server's signature and pre-send checks accept it, and refuse a changed one", async () => {
+    for (const quoteKey of ["sol", "usdc"] as const) {
+      const { input, rpc, recipients, plan } = await prepared(quoteKey, 3), wallet = walletSigns();
+      const signed = await signFeePlanWithWallet(plan, expectedFee(input, recipients), wallet.sign);
+      // Phantom saw unsigned bytes: one empty signature slot, nothing from this page.
+      expect(wallet.shown).toHaveLength(1);
+      expect(wallet.shown[0][0]).toBe(1);
+      expect(wallet.shown[0].slice(1, 65).every((byte) => byte === 0)).toBe(true);
+      const base64 = Buffer.from(signed).toString("base64");
+      expect(validateSignedWalletTransaction(plan, base64).signature).toBe(bs58.encode(signed.slice(1, 65)));
+      expect(await checkSignedWalletTransaction({ plan, transactionBase64: base64 }, { connection: rpc.connection })).toMatchObject({ status: "ready" });
+      const changed = await signFeePlanWithWallet(plan, expectedFee(input, recipients), walletSigns(withGuard).sign).then(() => null, (error: unknown) => error);
+      expect(changed).toBeInstanceOf(WalletChangedTransaction);
+      expect(rpc.sent()).toBe(0);
+    }
+  });
+
+  test("Phantom's read-only assertions on the split, appended or between instructions, are accepted and verify once landed", async () => {
+    for (const at of [undefined, 3]) {
+      const { input, rpc, recipients, plan } = await prepared("usdc", 3);
+      const guards = [{ target: input.creator, data: payerGuardData(9_000_000_000n) }, { target: input.creator, data: payerGuardData(8_000_000_000n) }];
+      const signed = await signFeePlanWithWallet(plan, expectedFee(input, recipients), walletReturns((message) => phantomGuarded(message, guards, at === undefined ? {} : { at })));
+      const validated = validateSignedWalletTransaction(plan, Buffer.from(signed).toString("base64"));
+      expect(validated.walletGuards).toBe(2);
+      expect(rpc.sent()).toBe(0);
+    }
+  });
+
+  test("the browser refuses a tampered split: another program, a second signer, a changed or reordered split, a missing sweep, and mixed kinds", async () => {
+    const { input, rpc, recipients, plan } = await prepared("usdc", 3), expected = expectedFee(input, recipients);
+    const other = Keypair.fromSeed(new Uint8Array(32).fill(99)).publicKey;
+    const refuse = (candidate: FeeSharePlan, wanted = expected, message?: string) => expect(() => validateFeeSharePlan(candidate, wanted)).toThrow(message);
+    refuse(rebuilt(plan, (ixs) => [...ixs, SystemProgram.transfer({ fromPubkey: creatorKey.publicKey, toPubkey: other, lamports: 1 })]), expected, "unexpected program");
+    refuse(rebuilt(plan, (ixs) => [...ixs, new TransactionInstruction({ programId: CORE_PROGRAM_ID, keys: [], data: Buffer.from([1]) })]), expected, "unexpected program");
+    refuse(rebuilt(plan, (ixs) => [...ixs.slice(0, 4), ixs[4], ...ixs.slice(4)]), expected);
+    refuse(rebuilt(plan, (ixs) => ixs.filter((_, index) => index !== 2)), expected);
+    refuse(rebuilt(plan, (ixs) => ixs.map((ix) => ix.programId.equals(PUMP_FEE_PROGRAM_ID) ? new TransactionInstruction({ ...ix, keys: ix.keys.map((key, index) => index === 2 ? { ...key, pubkey: other } : key) }) : ix)), expected, "only your wallet's signature");
+    refuse(plan, { ...expected, recipients: [recipients[1], recipients[0], recipients[2]] }, "differs from the wallets and shares you chose");
+    refuse(plan, { ...expected, recipients: [{ ...recipients[0], bps: recipients[0].bps - 1 }, { ...recipients[1], bps: recipients[1].bps + 1 }, recipients[2]] }, "differs from the wallets and shares you chose");
+    refuse(plan, { ...expected, recipients: [{ ...recipients[0], address: other.toBase58() }, recipients[1], recipients[2]] }, "differs from the wallets and shares you chose");
+    refuse({ ...plan, review: { ...plan.review, feeRecipients: recipients.slice(0, 2) } } as FeeSharePlan, expected, "review differs");
+    // A token-kind plan never carries pump-fees, and a fees-kind plan never carries a second signer.
+    const coin = await prepareTokenTransaction(input, { connection: mockRpc().connection });
+    expect(() => validateLivePlan({ ...plan, kind: "token" } as never, expectedPlan(input, coin))).toThrow();
+    expect(() => validateFeeSharePlan({ ...coin, kind: "fees" } as never, expected)).toThrow("only your wallet's signature");
+    // The server's own pre-relay check refuses the same tampering.
+    expect(() => verifyFeeSharePlan(rebuilt(plan, (ixs) => [...ixs, SystemProgram.transfer({ fromPubkey: creatorKey.publicKey, toPubkey: other, lamports: 1 })]), input, recipients)).toThrow();
+    expect(() => verifyFeeSharePlan(plan, input, recipients.slice().reverse())).toThrow("differs from the wallets and shares");
+  });
+
+  test("the browser derives the same program addresses as the pump.fun SDK", () => {
+    const mint = new PublicKey(tokenKey.publicKey), sharingConfig = feeSharingConfigPda(mint);
+    expect(programAddress([new TextEncoder().encode("sharing-config"), mint.toBytes()], PUMP_FEE_PROGRAM_ID.toBase58())).toBe(sharingConfig.toBase58());
+    expect(programAddress([new TextEncoder().encode("bonding-curve"), mint.toBytes()], PUMP_PROGRAM_ID.toBase58())).toBe(bondingCurvePda(mint).toBase58());
+    expect(programAddress([new TextEncoder().encode("creator-vault"), sharingConfig.toBytes()], PUMP_PROGRAM_ID.toBase58())).toBe(creatorVaultPda(sharingConfig).toBase58());
+    expect(isWalletAddress(creatorKey.publicKey.toBase58())).toBe(true);
+    expect(isWalletAddress(sharingConfig.toBase58())).toBe(false);
+  });
+
+  test("finalized: verified only when the landed transaction and the locked config both match the approved split", async () => {
+    const { input, rpc, recipients, plan } = await prepared("sol", 2);
+    expect(await verifyFeeShareLanded(input, recipients, { connection: rpc.connection, signature: feeSignature })).toMatchObject({ status: "pending" });
+    rpc.remember(plan, feeSignature);
+    // Landed, but the config still editable: refused.
+    await setSplit(rpc, input, { shareholders: recipients, locked: false });
+    await expect(verifyFeeShareLanded(input, recipients, { connection: rpc.connection, signature: feeSignature, expectedMessageSha256: plan.messageSha256 })).rejects.toThrow("differs from the approved one");
+    await setSplit(rpc, input, { shareholders: split(3), locked: true });
+    await expect(verifyFeeShareLanded(input, recipients, { connection: rpc.connection, signature: feeSignature, expectedMessageSha256: plan.messageSha256 })).rejects.toThrow("differs from the approved one");
+    await setSplit(rpc, input, { shareholders: recipients, locked: true, mint: recipientKeys[8] });
+    await expect(verifyFeeShareLanded(input, recipients, { connection: rpc.connection, signature: feeSignature, expectedMessageSha256: plan.messageSha256 })).rejects.toThrow("another coin");
+    await setSplit(rpc, input, { shareholders: recipients, locked: true });
+    expect(await verifyFeeShareLanded(input, recipients, { connection: rpc.connection, signature: feeSignature, expectedMessageSha256: plan.messageSha256 }))
+      .toMatchObject({ status: "verified", signature: feeSignature, sharingConfig: feeSharingConfigPda(new PublicKey(input.mint)).toBase58(), shareholders: recipients });
+    // Another split than the stored one never verifies, whatever landed.
+    await expect(verifyFeeShareLanded(input, split(3), { connection: rpc.connection, signature: feeSignature, expectedMessageSha256: plan.messageSha256 })).rejects.toThrow("differs from the approved one");
+    expect(rpc.sent()).toBe(0);
+  });
+
+  test("a coin whose creator moved to its own sharing config still verifies; any other creator, admin or mode does not", async () => {
+    const input = coinInput("sol"), rpc = mockRpc();
+    const token = await prepareTokenTransaction(input, { connection: rpc.connection });
+    rpc.remember(token, tokenSignature); await rpc.addToken(input);
+    const verify = () => verifyTokenLaunch(input, { connection: rpc.connection, signature: tokenSignature, expectedMessageSha256: token.messageSha256 });
+    await setSplit(rpc, input, { shareholders: split(2), locked: true });
+    expect(await verify()).toMatchObject({ status: "verified" });
+    // The recovery and card paths re-verify the coin the same way.
+    expect((await recoverCreatorLaunch(input, { connection: rpc.connection, tokenSignature, tokenMessageSha256: token.messageSha256 })).status).toBe("token-created-nft-pending");
+    await setSplit(rpc, input, { shareholders: split(2), locked: true, admin: recipientKeys[9] });
+    await expect(verify()).rejects.toThrow("differs from the creator");
+    await setSplit(rpc, input, { shareholders: split(2), locked: true, mint: recipientKeys[8] });
+    await expect(verify()).rejects.toThrow("differs from the creator");
+    await setSplit(rpc, input, { shareholders: split(2), locked: true });
+    await setCurve(rpc, input, { isMayhemMode: true });
+    await expect(verify()).rejects.toThrow("differs from the creator");
+    await setCurve(rpc, input, { isMayhemMode: false, creator: new PublicKey(recipientKeys[9]) });
+    await expect(verify()).rejects.toThrow("differs from the creator");
+    rpc.accounts.delete(feeSharingConfigPda(new PublicKey(input.mint)).toBase58());
+    await setCurve(rpc, input, { creator: feeSharingConfigPda(new PublicKey(input.mint)) });
+    await expect(verify()).rejects.toThrow("differs from the creator");
+  });
+
+  test("the extended lookup pins decode fee messages and leave saved coin messages decoding to the same keys", async () => {
+    const { plan } = await prepared("usdc", 7);
+    const view = decodeV0Message(VersionedTransaction.deserialize(Buffer.from(plan.transactionBase64, "base64")).message.serialize());
+    const pinned = new Map(PUMP_LOOKUP_TABLE.entries);
+    for (const index of [5, 6, 13, 151]) expect(pinned.has(index)).toBe(true);
+    // The pump-fees program is invoked, so it is a static key and never pinned.
+    expect([...pinned.values()]).not.toContain(PUMP_FEE_PROGRAM_ID.toBase58());
+    expect(view.staticKeys).toContain(PUMP_FEE_PROGRAM_ID.toBase58());
+    // Every pinned entry still matches the table fixture (a table only grows; its entries never change).
+    expect(pinnedLookupTable(accountFromFixture(tableFixture.value))).not.toBeNull();
   });
 });

@@ -12,7 +12,17 @@ export type LivePrepareInput = {
    * the launch's identity: the same request with or without it is the same launch.
    */
   withCard?: boolean;
+  /**
+   * The creator fee split chosen at launch (1 to 7 Solana wallets, whole basis points adding to 10,000), set by its own
+   * creator-only transaction after the card. Not part of the launch's identity either: it is saved beside the launch
+   * (live_fee_shares), never in its payload or binding.
+   */
+  feeShares?: LiveFeeRecipient[];
 };
+export type LiveFeeRecipient = { address: string; bps: number };
+export type LiveFeeShareStatus = "requested" | "prepared" | "pending" | "complete" | "set_elsewhere" | "skipped" | "failed";
+/** A launch's creator fee split as saved: what was chosen, where it stands, and (set_elsewhere) the split on chain. */
+export type LiveFeeShare = { status: LiveFeeShareStatus; recipients: LiveFeeRecipient[]; signature: string | null; error: string | null; onChain?: LiveFeeRecipient[] };
 export type LiveComposeInput = Pick<LivePrepareInput, "tokenMint" | "name" | "symbol" | "description" | "website" | "xUrl" | "cardTemplate" | "quoteAssetKey" | "quoteMint">;
 /** A prepare request as the server accepts it: the pair alone names the card (an older client also sends the design). */
 export type LivePrepareRequest = Omit<LivePrepareInput, "cardTemplate" | "quoteAssetKey" | "quoteMint"> & Partial<Pick<LivePrepareInput, "cardTemplate" | "quoteAssetKey" | "quoteMint">>;
@@ -28,6 +38,8 @@ export type LiveReadiness = {
   walletFirst: string[];
   /** Wallet names that approve the coin and its card in one prompt (multi-input solana:signTransaction). Never Phantom. */
   walletBatch: string[];
+  /** The optional creator fee split (CARDDEX_LIVE_FEE_SHARING="true", with recovery ready). Absent means off. */
+  feeSharing?: boolean;
 };
 export type LiveWallet = { wallet: string; expiresAt: number };
 export type LiveLaunchIntent = {
@@ -50,6 +62,8 @@ export type LiveLaunchIntent = {
    * to say or was not run.
    */
   chainCheck?: LiveChainCheck;
+  /** The creator fee split chosen with this launch; absent when none was chosen. */
+  feeShare?: LiveFeeShare;
 };
 /**
  * What the last chain check of a saved launch found. "failed-on-chain": its transaction landed and failed, so nothing

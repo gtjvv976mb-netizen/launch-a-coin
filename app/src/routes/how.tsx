@@ -2,6 +2,7 @@ import { Link, createFileRoute, useRouterState } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
 import { WALLET_NOTICE_COPY, WALLET_NOTICE_TITLE } from "../components/carddex/live/wallet-notice";
+import { OfficialLinksDetails } from "../components/carddex/OfficialLinks";
 import { CalmSwitch, PageFrame, PageHeader, TextLink } from "../components/mintdex/ui";
 import { WORDS } from "../lib/mintdex/copy";
 import { pageHead } from "../lib/mintdex/seo";
@@ -25,7 +26,7 @@ const SOME_DIRECT_HELD = OFFERED_PAIRS.filter(isDirectPair).some((asset) => main
  * carry the fewest words that let someone act, and each links here with one "How it works" or "Details" link).
  * MintDex's reading format, like /legal: the title row, a section list (a column from 1024px, a row on phones)
  * beside one plinth panel. The panel opens with the old guide's three steps, then one anchored section per topic, in
- * the order a newcomer needs them (#launch, #pairs, #cards, #fees, #trading, #wallet, #recovery and #motion). From 1024px the panel scrolls on
+ * the order a newcomer needs them (#launch, #pairs, #cards, #fees, #trading, #wallet, #recovery, #motion and #official). From 1024px the panel scrolls on
  * its own; phones scroll the page. A #hash link lands its section at the top and moves focus to its heading.
  * Terms, privacy and risks stay at /legal. Styles: styles/screens/how.css.
  */
@@ -128,6 +129,11 @@ const SECTIONS: Section[] = [
         </li>
         <li>Coin creation and card issuance are paid mainnet transactions. Exact costs show before your wallet asks.</li>
         <li>
+          Sharing creator fees, when Launch offers it, is an optional separate approval after the card: a network fee
+          and rent for pump.fun's fee-sharing account. pump.fun pays creator fees; Launch a Card takes none and is never
+          in your split.
+        </li>
+        <li>
           Every fee in one table: <TextLink to="/legal" search={{ tab: "fees" }}>Fees</TextLink>.
         </li>
       </ul>
@@ -161,6 +167,7 @@ const SECTIONS: Section[] = [
           <li>Review the token creation costs and any initial buy, then approve the pump.fun transaction in your wallet.</li>
           <li>After the token is verified, approve its one-of-one card NFT to that same wallet. Some wallets sign both in one approval.</li>
           <li>If the token lands before the card, finish the card from Launch. Your token is not created again.</li>
+          <li>If you chose to share creator fees, approve the split last, in its own approval. The split is permanent: pump.fun allows it to be set once. Recipients must be Solana wallets.</li>
         </ol>
         <h3>{WALLET_NOTICE_TITLE}</h3>
         <p>Launch lists what the wallet prompt will carry before it opens:</p>
@@ -205,6 +212,12 @@ const SECTIONS: Section[] = [
         <CalmSwitch size="md" className="cdx-how__calm" />
       </>
     ),
+  },
+  {
+    id: "official",
+    nav: "Official",
+    title: "Official links",
+    body: <OfficialLinksDetails />,
   },
 ];
 

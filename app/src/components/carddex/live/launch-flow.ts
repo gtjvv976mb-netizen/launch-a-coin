@@ -1,8 +1,8 @@
 import { ed25519 } from "@noble/curves/ed25519.js";
 import {
-  destroyEphemeralSigner, fromBase58, PAIR_FRESH_MS, planForWallet, planIsStale, refreshKeepsReview, signPlansWithWallet, signPlanWithWallet, toBase64,
+  destroyEphemeralSigner, fromBase58, PAIR_FRESH_MS, planForWallet, planIsStale, refreshKeepsReview, signFeePlanWithWallet, signPlansWithWallet, signPlanWithWallet, toBase64,
   WalletBatchUnsupported, WalletChangedTransaction,
-  type EphemeralSigner, type ExpectedPlan, type SigningOrder, type TransactionPlan,
+  type EphemeralSigner, type ExpectedFeePlan, type ExpectedPlan, type SigningOrder, type TransactionPlan,
 } from "./transaction";
 import type { LiveChainCheck, LivePrepareInput } from "../../../lib/carddex/live/types";
 import { liveSignInInputProblem, liveSignInOutputProblem, liveSignInProblem, type LiveSignInInput } from "../../../lib/carddex/live/sign-in";
@@ -74,6 +74,50 @@ export async function signForLaunch(step: {
   if (ready === "gone") return { status: "gone" };
   if (ready === "changed") return { status: "changed", plan };
   return { status: "signed", plan, signed: await sign(step.order, true), order: step.order, retried: true };
+}
+
+/**
+ * The creator fee split's wallet step, without UI: the same freshness rule as the coin and card (a plan older than
+ * ~30 s is prepared again first), then the wallet signs the unsigned transaction alone. Nothing for this page to add:
+ * the creator is the only signer, so Phantom only ever sees unsigned bytes. A returned message outside the shared
+ * wallet rule goes only to `onWalletChanged` and the wallet is asked once more; a second refusal stops the step.
+ */
+export async function signFeeShare(step: {
+  plan: TransactionPlan; receivedAt: number; expected: ExpectedFeePlan;
+  refresh: () => Promise<TransactionPlan | null>;
+  walletSign: (transaction: Uint8Array) => Promise<Uint8Array>;
+  onPlan?: (plan: TransactionPlan, receivedAt: number) => void;
+  onWalletOpen?: (retry: boolean) => void;
+  onWalletChanged?: (plan: TransactionPlan, returned: Uint8Array) => void;
+  now?: () => number;
+}): Promise<WalletStep> {
+  const now = step.now ?? Date.now;
+  let plan = step.plan, receivedAt = step.receivedAt;
+  const attempt = async (retry: boolean): Promise<WalletStep> => {
+    const ready = await planForWallet(plan, receivedAt, step.refresh, now());
+    if (ready.status === "gone") return { status: "gone" };
+    if (ready.status !== "fresh") { plan = ready.plan; receivedAt = now(); step.onPlan?.(plan, receivedAt); }
+    if (ready.status === "changed") return { status: "changed", plan };
+    step.onWalletOpen?.(retry);
+    try { return { status: "signed", plan, signed: await signFeePlanWithWallet(plan, step.expected, step.walletSign), order: "wallet-first", retried: retry }; }
+    catch (error) { if (error instanceof WalletChangedTransaction) step.onWalletChanged?.(plan, error.returned); throw error; }
+  };
+  try { return await attempt(false); }
+  catch (error) { if (!(error instanceof WalletChangedTransaction)) throw error; }
+  return attempt(true);
+}
+/** A creator fee split as the saved launch reports it (types.ts LiveFeeShare). */
+export type FeeShareStage = { status: string; signature: string | null };
+/** Statuses after which nothing more is asked for the split. */
+export const FEE_SPLIT_SETTLED = ["complete", "set_elsewhere", "skipped"];
+/**
+ * The fee split's next step, once the coin and card are complete: "prepare" its review and prompt, "confirm" a sent
+ * one, or "none" (none chosen, or settled).
+ */
+export function feeShareNext(stage: { status: string; feeShare?: FeeShareStage }): "prepare" | "confirm" | "none" {
+  const fee = stage.feeShare;
+  if (stage.status !== "complete" || !fee || FEE_SPLIT_SETTLED.includes(fee.status)) return "none";
+  return fee.status === "pending" && fee.signature ? "confirm" : "prepare";
 }
 
 /** The coin and its card, prepared together for one wallet prompt. `card` is null once a refresh could not include it. */
@@ -253,10 +297,17 @@ export function dropLaunchSession() {
 export const CONFIRM_POLL_MS = 2_000, CONFIRM_MAX_POLLS = 45;
 export const STILL_CONFIRMING = "Sent. Solana is still finalizing it, which usually takes under a minute. Check again in a moment; nothing more is sent or charged.";
 /**
- * A saved launch with nothing left to do (finished, or discarded). The page forgets it rather than restoring it over
+ * A saved launch with nothing left to do (finished with its creator fee split settled or none, or discarded). The page forgets it rather than restoring it over
  * a new draft: a later visit, a connect or Launch starts from the creator's fields, never the finished coin's.
  */
-export function launchSettled(saved: { status: string }): boolean { return saved.status === "complete" || saved.status === "abandoned"; }
+export function launchSettled(saved: { status: string; feeShare?: FeeShareStage }, feesOpen = true): boolean {
+  if (saved.status === "abandoned") return true;
+  if (saved.status !== "complete") return false;
+  // A finished coin and card with a creator fee split still to set (or a sent one to check) stays until it is settled.
+  // With fee sharing switched off only a sent split keeps it: nothing else can be done for the split here.
+  const fee = saved.feeShare;
+  return !fee || FEE_SPLIT_SETTLED.includes(fee.status) || !feesOpen && fee.status !== "pending";
+}
 /** Shown when this tab no longer holds a prepared launch's new coin key (a reload): it cannot be signed here. */
 export const PREPARED_WITHOUT_KEY = "This browser no longer holds this launch's new coin key, so it can't be signed here. Discard the unused draft about a minute after it was prepared, then launch again.";
 /**

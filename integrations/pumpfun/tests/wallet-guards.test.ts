@@ -104,13 +104,21 @@ describe("the shared wallet rule", () => {
     const moved = parts.instructions.map((ix, i) => i === 2 ? { ...ix, accounts: [1, 0, 3, 7] } : ix);
     expect(refusal(encodeV0Message({ ...parts, instructions: moved }))).toBe("instructions");
   });
-  test("lookups must stay exactly as planned", () => {
-    const withTable = { ...parts, lookups: [{ table: PUMP_LOOKUP_TABLE.address, writable: [], readonly: [1] }] };
+  test("the table entries a recompile loads may be reordered or moved to static keys; the key set and flags may not change", () => {
+    const withTable = { ...parts, lookups: [{ table: PUMP_LOOKUP_TABLE.address, writable: [19], readonly: [158, 1] }] };
     const tablePlan = decodeV0Message(encodeV0Message(withTable));
-    expect(tablePlan.keys.at(-1)).toBe("4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf");
-    expect(() => walletMessageChange(tablePlan, decodeV0Message(encodeV0Message(parts)))).toThrow(WalletMessageRefused);
-    expect(() => walletMessageChange(tablePlan, decodeV0Message(encodeV0Message({ ...withTable, lookups: [{ ...withTable.lookups[0], readonly: [3] }] })))).toThrow("lookups");
+    expect(tablePlan.keys.slice(-3)).toEqual(["BwWK17cbHxwWBKZkUYvzxLcNQ1YVyaFezduWbtm2de6s", "TSLvdd1pWpHVjahSpsvCXUbgwsL3JAcvokwaKt1eokM", "4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf"]);
+    // Phantom's shape on a Token-2022 stock coin (2026-10-31): the same entries, in another order.
+    expect(walletMessageChange(tablePlan, decodeV0Message(encodeV0Message({ ...withTable, lookups: [{ ...withTable.lookups[0], readonly: [1, 158] }] })))).toMatchObject({ recompiled: true });
     expect(walletMessageChange(tablePlan, decodeV0Message(phantomGuarded(encodeV0Message(withTable), phantom))).guards).toHaveLength(2);
+    // A loaded key moved to the static keys, with its read-only flag kept.
+    const moved = { ...parts, header: { ...parts.header, readonlyUnsigned: parts.header.readonlyUnsigned + 1 }, staticKeys: [...parts.staticKeys, "4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf"],
+      lookups: [{ ...withTable.lookups[0], readonly: [158] }] };
+    expect(walletMessageChange(tablePlan, decodeV0Message(encodeV0Message(moved)))).toMatchObject({ recompiled: true });
+    // A missing key, another key, or a loaded key's writable flag changed is refused.
+    expect(() => walletMessageChange(tablePlan, decodeV0Message(encodeV0Message(parts)))).toThrow(WalletMessageRefused);
+    expect(() => walletMessageChange(tablePlan, decodeV0Message(encodeV0Message({ ...withTable, lookups: [{ ...withTable.lookups[0], readonly: [158, 3] }] })))).toThrow("accounts");
+    expect(() => walletMessageChange(tablePlan, decodeV0Message(encodeV0Message({ ...withTable, lookups: [{ ...withTable.lookups[0], writable: [19, 1], readonly: [158] }] })))).toThrow("flags");
   });
 });
 

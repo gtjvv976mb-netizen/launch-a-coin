@@ -59,6 +59,12 @@ export function walletBatchWallets(value: string | undefined): string[] {
  */
 const switchValue = (value: string | undefined) => (value ?? "").trim().toLowerCase();
 export function launchSwitchOn(value: string | undefined) { return switchValue(value) === "true"; }
+/**
+ * The creator fee split's own kill switch, CARDDEX_LIVE_FEE_SHARING: on only for "true", so unset (the default, and
+ * every local preview) is off. Off hides the "Share creator fees" group and the server refuses every fee split action;
+ * coins and cards are unaffected, and a coin without a split keeps pump.fun's default (the creator keeps 100%).
+ */
+export function feeSharingSwitchOn(value: string | undefined) { return switchValue(value) === "true"; }
 const RECOVERY_OFF_VALUES = new Set(["false", "0", "off", "no"]);
 let warnedRecoveryValue: string | undefined;
 export function recoverySwitchOn(value: string | undefined) {
@@ -93,13 +99,20 @@ export function liveReadiness(): LiveReadiness {
   // A new launch must also be able to finish, so it needs recovery (sign-in, confirmation, the card) too.
   return { implemented: true, configured, enabled, ready: recoveryReady && enabled, recoveryEnabled, recoveryReady,
     network: "solana-mainnet-beta", publicOrigin: origin, blockers, walletFirst: walletFirstWallets(env.CARDDEX_LIVE_WALLET_FIRST),
-    walletBatch: walletBatchWallets(env.CARDDEX_LIVE_WALLET_BATCH) };
+    walletBatch: walletBatchWallets(env.CARDDEX_LIVE_WALLET_BATCH), feeSharing: recoveryReady && feeSharingSwitchOn(env.CARDDEX_LIVE_FEE_SHARING) };
 }
 /** "launch" starts something new; "recovery" serves a creator's existing launch. */
 export function requireLiveConfig(scope: "launch" | "recovery") {
   const readiness = liveReadiness();
   if (!(scope === "launch" ? readiness.ready : readiness.recoveryReady)) throw new UserError((scope === "launch" ? readiness.blockers : readiness.blockers.filter(blocker => blocker !== LAUNCHES_OFF)).join(" "));
   return { origin: readiness.publicOrigin!, rpcUrl: bindings().CARDDEX_MAINNET_RPC_URL! };
+}
+export const FEE_SHARING_OFF = "Creator fee sharing is not open in this deployment. Your coin keeps pump.fun's default: you receive 100% of its creator fees.";
+/** The creator fee split: recovery ready (it follows a finished launch) and its own switch on. */
+export function requireFeeSharing() {
+  const config = requireLiveConfig("recovery");
+  if (!liveReadiness().feeSharing) throw new UserError(FEE_SHARING_OFF);
+  return config;
 }
 /**
  * The Origin check alone, without the readiness switches: sign-out must work while recovery is paused (SEC-7), so a
