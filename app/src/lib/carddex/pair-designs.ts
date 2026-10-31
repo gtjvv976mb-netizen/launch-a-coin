@@ -68,34 +68,24 @@ export const WITHHELD_PAIR_DESIGNS: readonly PairDesignKey[] = Object.freeze(["p
  * the design its pair keeps launching with (the one production offers today); null means the pair is not offered at
  * all. Deleting a line offers its pair with its identity design again (design-pairings.ts PAIR_DESIGNS applies this).
  * Reasons are a visual check of the delivered art, not legal advice.
+ * Released by the owner on 31 October 2026 ("all should go live"), after reviewing Codex's redesigns of them: 67, HODL,
+ * SOLANGELES, TRUMP, GIGA, GMEx, TSLAx, NVDAx, AAPLx, MSTRx, COINx, AMC, SV151 and FARTCOIN now launch with their own
+ * cards, though the art still shows the reasons they were held (a child's likeness, real people, other companies' marks,
+ * FARTCOIN's garbled back wordmark).
  */
 export const HELD_PAIR_DESIGNS: Readonly<Record<string, string | null>> = Object.freeze({
   // Not offered: the pair's only art shows a real child, real identifiable people or other companies' marks.
-  "pair-67": null, // a photoreal child on the back and coin image (a real minor's likeness)
   "pair-agency": null, // OpenAI, Anthropic, Claude, Meta, xAI and DeepSeek marks
   "pair-alon": null, // a cartoon of a real person with the Gadsden snake
-  "pair-hodl": null, // a real person's likeness (and photo fragments in the frame)
   "pair-jeanphil": null, // a real person's likeness
   "pair-claudia": null, // a real person's likeness
   "pair-biketyson": null, // a real person's likeness
   "pair-neet": null, // a real person's likeness
-  "pair-solangeles": null, // caricatures of real-looking people under "YOU'RE NOT WELCOME" (readiness audit)
   // Offered with the design production offers today: the new art has a real person, other companies' logos, a
   // misspelling or a stray bar.
   "pair-ansem": "sovereign", // a photoreal man's head on a bull's body
   "pair-spx": "celestial", // the back misspells the coin ("SBP 6900")
-  "pair-trump": "regal", // a real person ("FIGHT FIGHT FIGHT")
-  "pair-giga": "mythic", // a real person's likeness
-  "pair-gmex": "stock-gme", // the "GS" mark of the token's own xStocks logo (GMEx.png), not an invented one
-  "pair-tslax": "stock-tsla", // Tesla's logo; a grey-white bar baked under the title
-  "pair-nvdax": "stock-nvda", // NVIDIA's logo
-  "pair-aaplx": "stock-aapl", // Apple's logo; a grey-white bar baked under the title
-  "pair-mstrx": "stock-mstr", // Strategy's logo
-  "pair-coinx": "stock-coin", // Coinbase's logo
-  "pair-amc": "amc", // AMC's logo
-  "pair-sv151": "pokemon-classic", // the Pokemon 151 logo
   "pair-vine": "magic-etched", // Vine's logo
-  "pair-fartcoin": "ember", // the back's wordmark is garbled, not FARTCOIN (readiness audit)
 });
 export const isHeldPairDesign = (key?: string | null): boolean => !!key && Object.hasOwn(HELD_PAIR_DESIGNS, key);
 /** Every installed pair design (the staged ones but the two without finished art): each renders for any coin that has it. */

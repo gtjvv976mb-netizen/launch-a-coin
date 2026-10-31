@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
-import { searchSchema, text } from "../lib/mintdex/search";
+import { key, searchSchema, text } from "../lib/mintdex/search";
 import { HeroTurntable } from "../components/carddex/HeroTurntable";
 import { useViewIn3D } from "../components/carddex/CardControls";
 import { MintCard, type CardData } from "../components/mintdex/MintCard";
@@ -53,7 +53,7 @@ const pairedIn = (group: PairGroup) => PAIRED.filter(({ pair }) => group === "al
 export const Route = createFileRoute("/levels")({
   validateSearch: searchSchema({
     design: text(),
-    quote: text(),
+    quote: key(),
     collection: text(),
     icon: text(),
     edition: text(),

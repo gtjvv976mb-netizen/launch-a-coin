@@ -10,6 +10,15 @@ export const text =
   (v) =>
     typeof v === "string" && v.length <= max ? v : undefined;
 
+/**
+ * A key that may look like a number: the router parses `?quote=67` as the number 67, so a hand-typed or shared link to
+ * the 67 pair would be dropped by text(). A whole, non-negative number comes back as its decimal string.
+ */
+export const key =
+  (max = Infinity): Field<string> =>
+  (v) =>
+    typeof v === "number" && Number.isSafeInteger(v) && v >= 0 ? text(max)(String(v)) : text(max)(v);
+
 /** A finite number (zod's z.number()); `int` also requires a whole number. */
 export const num =
   (int = false): Field<number> =>

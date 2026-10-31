@@ -240,17 +240,17 @@ describe("isolated real-launch server lifecycle", () => {
   });
   // A new launch in an old combination is refused in plain words, before any artwork, metadata, plan or row.
   // Designs that pairs offered until the identity designs (spark, doge...) are unpaired now, and so are the held
-  // identities (content holds: pair-sv151, pair-tslax...); another pair's design is refused by name; AAVE, UNI and the
-  // held-out pairs (67, AGENCY...) are not offered at all.
+  // identities (content holds: pair-ansem...) and the stock finishes their pairs left (stock-tsla...); another pair's design is refused by name; AAVE, UNI and the
+  // held-out pairs (AGENCY, ALON...) are not offered at all.
   const SOL_ONLY = "That card design is for the SOL pair only.";
-  const refusedNew: [string, string, string][] = [["pair-doge", "sol", "That card belongs to the DOGE pair. Pick DOGE for it"], ["pokemon-classic", "cards", "The CARDS pair comes with its own card"], ["stock-tsla", "gmex", "The GMEX pair comes with its own card"],
-    ["pokemon-classic", "sol", "That card belongs to the SV151 pair."],
-    ["doge", "doge", UNPAIRED_DESIGN], ["doge", "sol", UNPAIRED_DESIGN], ["pair-sv151", "sv151", UNPAIRED_DESIGN], ["pair-tslax", "tslax", UNPAIRED_DESIGN], ["pair-ansem", "ansem", UNPAIRED_DESIGN],
+  const refusedNew: [string, string, string][] = [["pair-doge", "sol", "That card belongs to the DOGE pair. Pick DOGE for it"], ["pokemon-classic", "cards", "The CARDS pair comes with its own card"], ["stock-tsla", "gmex", UNPAIRED_DESIGN],
+    ["pair-sv151", "sol", "That card belongs to the SV151 pair."],
+    ["doge", "doge", UNPAIRED_DESIGN], ["doge", "sol", UNPAIRED_DESIGN], ["pokemon-classic", "sv151", SOL_ONLY], ["stock-tsla", "tslax", UNPAIRED_DESIGN], ["pair-ansem", "ansem", UNPAIRED_DESIGN],
     ["pair-usdc", "usdc", UNPAIRED_DESIGN], ["pair-usdc", "sol", UNPAIRED_DESIGN], ["duel-masters", "sol", "That card belongs to the USDC pair."],
     ["gamestop", "gmex", UNPAIRED_DESIGN], ["coinbase", "coinx", UNPAIRED_DESIGN], ["strategy", "mstrx", UNPAIRED_DESIGN], ["gamestop", "sol", UNPAIRED_DESIGN],
     // SOL's design options go with SOL only.
     ["spark", "doge", SOL_ONLY], ["pair-sol", "usdc", SOL_ONLY], ["one-piece", "usdc", SOL_ONLY], ["pokemon-full-art", "sv151", SOL_ONLY], ["shib", "usdc", SOL_ONLY], ["ronin", "cate", SOL_ONLY], ["pepe", "toad", SOL_ONLY],
-    ["one-piece", "aave", NOT_OFFERED_PAIR], ["one-piece", "uni", NOT_OFFERED_PAIR], ["pair-67", "67", NOT_OFFERED_PAIR], ["pair-agency", "agency", NOT_OFFERED_PAIR]];
+    ["one-piece", "aave", NOT_OFFERED_PAIR], ["one-piece", "uni", NOT_OFFERED_PAIR], ["pair-alon", "alon", NOT_OFFERED_PAIR], ["pair-agency", "agency", NOT_OFFERED_PAIR]];
   for (const [cardTemplate, quoteKey, message] of refusedNew) test(`a new ${cardTemplate}/${quoteKey} launch is refused: ${message}`, async () => {
     // The request names the old combination; the fixture's own composition is SOL's, so nothing else could pass.
     const quote = getPairAsset(quoteKey), original = {...await input(), cardTemplate, quoteAssetKey: quote.key, quoteMint: quote.mint}, puts = storagePuts;
@@ -269,8 +269,8 @@ describe("isolated real-launch server lifecycle", () => {
     await expect(service.prepareLiveLaunch(creator, {...designOnly, cardTemplate: "gamestop", idempotencyKey: "another-request", tokenMint: otherWallet})).rejects.toThrow(UNPAIRED_DESIGN);
     await expect(service.prepareLiveLaunch(creator, {...designOnly, cardTemplate: "doge", idempotencyKey: "another-request", tokenMint: otherWallet})).rejects.toThrow(UNPAIRED_DESIGN);
   });
-  test("a pair that is not offered (AAVE, UNI; the held-out 67, AGENCY, ALON, HODL...) is refused before any artwork, metadata, plan or row", async () => {
-    for (const key of ["aave", "uni", "67", "agency", "alon", "hodl", "jeanphil", "claudia", "biketyson", "neet"]) {
+  test("a pair that is not offered (AAVE, UNI; the held-out AGENCY, ALON, JEANPHIL...) is refused before any artwork, metadata, plan or row", async () => {
+    for (const key of ["aave", "uni", "agency", "alon", "jeanphil", "claudia", "biketyson", "neet"]) {
       const quote = getPairAsset(key), original = {...await input(), quoteAssetKey: quote.key, quoteMint: quote.mint}, puts = storagePuts;
       const {cardTemplate: _design, ...pairOnly} = original;
       await expect(service.prepareLiveLaunch(creator, pairOnly)).rejects.toThrow(NOT_OFFERED_PAIR);
@@ -294,13 +294,13 @@ describe("isolated real-launch server lifecycle", () => {
     const fields = {tokenMint: mint, name: "Launch Fixture", symbol: "FIX", description: "", quoteAssetKey: zcat.key, quoteMint: zcat.mint};
     await expect(composeLiveAssets(creator, fields, new File([image(128, 128)], "art.png", {type: "image/png"}))).rejects.toThrow(TRANSFER_FEE_PAIR);
     await expect(service.checkLiveLaunchSize(creator, {name: "Launch Fixture", symbol: "FIX", quoteAssetKey: "zcat", initialBuyQuoteBaseUnits: "1"})).rejects.toThrow(TRANSFER_FEE_PAIR);
-    for (const key of ["aave", "67", "agency"]) await expect(service.checkLiveLaunchSize(creator, {name: "Launch Fixture", symbol: "FIX", quoteAssetKey: key, initialBuyQuoteBaseUnits: "1"})).rejects.toThrow(NOT_OFFERED_PAIR);
+    for (const key of ["aave", "alon", "agency"]) await expect(service.checkLiveLaunchSize(creator, {name: "Launch Fixture", symbol: "FIX", quoteAssetKey: key, initialBuyQuoteBaseUnits: "1"})).rejects.toThrow(NOT_OFFERED_PAIR);
     expect(storagePuts).toBe(puts);
   });
   test("a direct pair the owner has not confirmed is refused for mainnet before any upload, coin image, size check, plan or row", async () => {
     const {composeLiveAssets} = await import("../../src/lib/carddex/live/composition.server");
     const direct = OFFERED_PAIRS.filter(asset => mainnetPairHold(asset.key) && asset.key !== "zcat");
-    expect(direct.map(asset => asset.key)).toEqual(["gork", "stonk", "paid", "pepe", "pill", "npc", "wojak", "eacc", "shib", "swordcat", "plague", "ape", "link"]);
+    expect(direct.map(asset => asset.key)).toEqual(["gork", "stonk", "solangeles", "paid", "pepe", "pill", "npc", "wojak", "eacc", "hodl", "shib", "swordcat", "plague", "ape", "link"]);
     for (const quote of direct) {
       const original = {...await input(), cardTemplate: designForPair(quote.key)!, quoteAssetKey: quote.key, quoteMint: quote.mint}, puts = storagePuts;
       const {cardTemplate: _design, ...pairOnly} = original;
@@ -585,7 +585,7 @@ describe("isolated real-launch server lifecycle", () => {
   });
   test("a stock design preserves its actual quote in prepared input, metadata and finalized receipts", async () => {
     const quote = getPairAsset("tslax");
-    const prepared = await service.prepareLiveLaunch(creator, await input({cardTemplate: "stock-tsla", quoteAssetKey: quote.key, quoteMint: quote.mint}));
+    const prepared = await service.prepareLiveLaunch(creator, await input({cardTemplate: "pair-tslax", quoteAssetKey: quote.key, quoteMint: quote.mint}));
     expect(prepared.intent.quoteAssetKey).toBe("tslax"); expect(prepared.intent.quoteMint).toBe(quote.mint);
     const metadata = await (await fetch(prepared.intent.nftMetadataUri)).json() as any;
     expect(metadata.properties.launchACard.quoteMint).toBe(quote.mint);

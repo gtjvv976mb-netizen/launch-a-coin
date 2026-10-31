@@ -119,9 +119,9 @@ describe("CardDex fixed creator cards and token trading", () => {
       expect(item?.coin.stockTicker).toBe(asset.referenceTicker);
       expect(item?.coin.tokenPair).toBe(getTradingPair(`S${String(index).padStart(2, "0")}`, asset.key));
     }
-    // A stock design new coins can launch with (the stock pairs keep their live designs while their identities are held).
+    // A stock design new coins can launch with: the stock pairs' own identity designs since their holds were released.
     const stock = stockDesigns.find((design) => pairForDesign(design.key))!;
-    expect(stock.key).toBe("stock-gme");
+    expect(stock.key).toBe("pair-gmex");
     const base = { name: "Stock Reference", ticker: "SPOOF", image: "/api/img/art/qa-token.png", lore: "Reference artwork only.", devBuy: 0, cardTemplate: stock.key };
     const before = (sqlite.query("SELECT balance FROM users WHERE id = ?").get(user.id) as { balance: number }).balance;
     await expect(service.launchCoin(user, { ...base, stockTicker: "FAKE" })).rejects.toThrow("stock reference must match");
@@ -142,14 +142,14 @@ describe("CardDex fixed creator cards and token trading", () => {
     // The pair picks the card: another design with this pair is refused before anything is written.
     const before = writeCalls;
     await expect(service.launchCoin(user, {...input, cardTemplate: "pair-doge"})).rejects.toThrow("comes with its own card");
-    // TSLAX's identity design is held (content holds): a new launch never gets it.
-    await expect(service.launchCoin(user, {...input, cardTemplate: "pair-tslax"})).rejects.toThrow(UNPAIRED_DESIGN);
+    // TSLAX's earlier stock finish stays bound to it but is no longer offered: its own identity design is.
+    await expect(service.launchCoin(user, {...input, cardTemplate: "stock-tsla"})).rejects.toThrow(UNPAIRED_DESIGN);
     expect(writeCalls).toBe(before);
     const {id} = await service.launchCoin(user, input);
     const page = (await service.getCoinPage(id, "qa-session"))!;
     expect(row(id).quote_mint).toBe(asset.mint);
-    expect(row(id).card_template).toBe("stock-tsla");
-    expect(page.coin).toMatchObject({cardTemplate: "stock-tsla", stockTicker: "TSLA", tokenPair: "NEUTRAL / TSLAX", tradingPair: "NEUTRAL / TSLAX"});
+    expect(row(id).card_template).toBe("pair-tslax");
+    expect(page.coin).toMatchObject({cardTemplate: "pair-tslax", stockTicker: "TSLA", tokenPair: "NEUTRAL / TSLAX", tradingPair: "NEUTRAL / TSLAX"});
     expect((await service.getPortfolio("qa-session"))?.deeds.find(item => item.coin.id === id)?.coin.stockTicker).toBe("TSLA");
     await expect(service.launchCoin(user, {...input, ticker: "WRONG", stockTicker: "GME", tokenPair: "WRONG / TSLAX"})).rejects.toThrow("stock reference must match");
     await expect(service.launchCoin(user, {...input, ticker: "OLDPAIR", tokenPair: "TSLA / SOL"})).rejects.toThrow("reference pair must match");
@@ -340,7 +340,7 @@ describe("CardDex fixed creator cards and token trading", () => {
     await expect(service.launchCoin(user, { ...base, cardTemplate: "spark", quoteAssetKey: "doge" })).rejects.toThrow("for the SOL pair only");
     await expect(service.launchCoin(user, { ...base, cardTemplate: "pokemon-full-art", quoteAssetKey: "sv151" })).rejects.toThrow("for the SOL pair only");
     await expect(service.launchCoin(user, { ...base, cardTemplate: "pokemon-classic", quoteAssetKey: "cards" })).rejects.toThrow("The CARDS pair comes with its own card");
-    await expect(service.launchCoin(user, { ...base, cardTemplate: "pair-sv151", quoteAssetKey: "sv151" })).rejects.toThrow(UNPAIRED_DESIGN);
+    await expect(service.launchCoin(user, { ...base, cardTemplate: "pokemon-classic", quoteAssetKey: "sv151" })).rejects.toThrow("for the SOL pair only");
     await expect(service.launchCoin(user, { ...base, cardTemplate: "pair-sol", quoteAssetKey: "usdc" })).rejects.toThrow("for the SOL pair only");
     await expect(service.launchCoin(user, { ...base, cardTemplate: "pair-usdc", quoteAssetKey: "usdc" })).rejects.toThrow(UNPAIRED_DESIGN);
     // A pair with no finished card is not offered (AAVE, UNI), whatever design the request names.
@@ -589,7 +589,7 @@ describe("CardDex fixed creator cards and token trading", () => {
     const coins = await service.allCoins();
     expect(coins).toHaveLength(10);
     // A fresh database seeds each coin on its pair with that pair's main design (identity designs; USDC keeps its own).
-    expect(coins.map(coin => `${coin.quoteAssetKey}:${coin.cardTemplate}`).sort()).toEqual(["act:pair-act", "cards:pair-cards", "cate:pair-cate", "doge:pair-doge", "fartcoin:ember", "sol:pair-sol", "sv151:pokemon-classic", "toad:pair-toad", "usdc:duel-masters", "vine:magic-etched"]);
+    expect(coins.map(coin => `${coin.quoteAssetKey}:${coin.cardTemplate}`).sort()).toEqual(["act:pair-act", "cards:pair-cards", "cate:pair-cate", "doge:pair-doge", "fartcoin:pair-fartcoin", "sol:pair-sol", "sv151:pair-sv151", "toad:pair-toad", "usdc:duel-masters", "vine:magic-etched"]);
     for (const coin of coins) {
       expect(coin.cardTemplate).toBeTruthy();
       // The pair picks the card: every seed coin trades against its design's own pair.

@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { z } from "zod";
 
-import { num, oneOf, searchSchema, text } from "../../src/lib/mintdex/search";
+import { key, num, oneOf, searchSchema, text } from "../../src/lib/mintdex/search";
 
 // The route search validators replaced zod schemas of the form z.x().optional().catch(undefined). Same answers,
 // ignoring keys zod keeps as undefined (the router drops those).
@@ -38,4 +38,12 @@ test("searchSchema answers like the zod schemas it replaced", () => {
   for (const [ours, zods] of pairs) {
     for (const input of inputs) expect(ours(input)).toEqual(defined(zods.parse(input)));
   }
+});
+
+test("a pair key that looks like a number survives the router's number parsing (?quote=67)", () => {
+  const schema = searchSchema({ quote: key() });
+  expect(schema({ quote: 67 })).toEqual({ quote: "67" });
+  expect(schema({ quote: "67" })).toEqual({ quote: "67" });
+  expect(schema({ quote: "sol" })).toEqual({ quote: "sol" });
+  for (const quote of [6.7, -1, Number.NaN, Infinity, null, true]) expect(schema({ quote })).toEqual({});
 });

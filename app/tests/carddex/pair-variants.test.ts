@@ -61,8 +61,8 @@ describe("the creator's print reads on every offered identity design", () => {
     const inkL = lum(...ink);
     let lowest = Infinity;
     const offered = OFFERED_PAIRS.map(pair => designForPair(pair.key)!).filter(key => key.startsWith("pair-"));
-    // 71: SOL's own card (its main design since 31 October 2026) and 70 other pairs' identity designs.
-    expect(offered).toHaveLength(71);
+    // 85: SOL's own card (its main design since 31 October 2026) and 84 other pairs' identity designs.
+    expect(offered).toHaveLength(85);
     for (const key of offered) {
       const atlas = (renderAssets as Record<string, { previewPath: string }>)[key + (CARD_DESIGNS.find(d => d.key === key)!.category === "stocks" ? "--stock" : "")]!;
       const png = readFileSync(file(atlas.previewPath));
@@ -90,7 +90,7 @@ describe("the creator's print reads on every offered identity design", () => {
   test("the print reads on every SOL design option too (Neon Circuit's light ink on its dark plates)", () => {
     const light = [0xe2, 0xf4, 0xf0] as const;
     const options = designsForPair("sol");
-    expect(options).toHaveLength(28);
+    expect(options).toHaveLength(32);
     let lowest = Infinity;
     for (const key of options) {
       const design = CARD_DESIGNS.find(d => d.key === key)!;

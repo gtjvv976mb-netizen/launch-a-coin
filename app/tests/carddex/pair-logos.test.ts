@@ -55,7 +55,7 @@ function webpSize(buf: Buffer): [number, number] {
 
 describe("pair logos", () => {
   test("one entry per full-release pair, and every offered pair has one", () => {
-    expect(RELEASE.length).toBe(86);
+    expect(RELEASE.length).toBe(89);
     expect(Object.keys(ROWS).sort()).toEqual([...RELEASE].sort());
     for (const asset of OFFERED_PAIRS) expect(Object.hasOwn(ROWS, asset.key)).toBe(true);
   });
@@ -67,7 +67,7 @@ describe("pair logos", () => {
       expect(row.reason!.length).toBeGreaterThan(20);
       expect(row.w128 ?? row.w64 ?? row.source ?? row.derivation).toBeUndefined();
     }
-    expect(withLogo.length).toBe(83);
+    expect(withLogo.length).toBe(86);
   });
 
   test("each logo is a 128 px and a 64 px WebP matching its recorded sha256", () => {
@@ -87,10 +87,10 @@ describe("pair logos", () => {
     const expected = withLogo.flatMap(([key]) => [`${key}.webp`, `${key}-64.webp`]).sort();
     const files = readdirSync(DIR).sort();
     expect(files).toEqual(expected);
-    expect(files.length).toBe(166);
+    expect(files.length).toBe(172);
     const offered = new Set(OFFERED_PAIRS.map(asset => asset.key as string));
     const notOffered = PAIR_ASSET_KEYS.filter(key => !Object.hasOwn(ROWS, key));
-    expect(notOffered.sort()).toEqual(["67", "aave", "agency", "alon", "biketyson", "claudia", "hodl", "jeanphil", "neet", "solangeles", "uni"]);
+    expect(notOffered.sort()).toEqual(["aave", "agency", "alon", "biketyson", "claudia", "jeanphil", "neet", "uni"]);
     for (const key of notOffered) expect(files.some(file => file === `${key}.webp` || file === `${key}-64.webp`)).toBe(false);
     for (const key of offered) expect(Object.hasOwn(ROWS, key)).toBe(true);
     const total = withLogo.reduce((sum, [, row]) => sum + row.w128!.bytes + row.w64!.bytes, 0);
@@ -127,7 +127,7 @@ describe("pair logos", () => {
   test("pairLogo reads only the fields the client keeps (logo)", () => {
     expect(pairLogo("sol")).toEqual({w128: "/assets/pairs/sol.webp", w64: "/assets/pairs/sol-64.webp"});
     for (const [key, row] of withLogo) expect(pairLogo(key)).toEqual({w128: row.w128!.path, w64: row.w64!.path});
-    for (const key of [...MONOGRAMS, "67", "aave", "solangeles", "nope", "", null, undefined]) expect(pairLogo(key)).toBeNull();
+    for (const key of [...MONOGRAMS, "aave", "agency", "nope", "", null, undefined]) expect(pairLogo(key)).toBeNull();
   });
 
   test("Launch's tiles draw every offered pair's logo, and the letter only for GORK, MANIFEST and FARTCOIN", () => {

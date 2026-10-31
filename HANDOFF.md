@@ -1,3 +1,13 @@
+# 31 October Codex redesigns and released holds on `claude/codex-redesigns`
+
+**Codex's redesigns (3716e3a, live as 00a036de).** Codex's receipt (`creative/higgsfield/identity-corrections-2026-10-31/integration-completion-premium43.json` in its folder) lists 43 redesigned pair designs (the owner said 47). Their fronts, backs, atlases (incl. seven `--stock`), previews and token backs are taken byte for byte, with Codex's entries for exactly those keys in `generated-layouts.json`, `render-assets.json`, `token-back-assets.json` and `integrations/pumpfun/src/design-assets.json` (the install gate drops a design whose pins disagree, so all four must move together). 480/640 copies rebuilt with `scripts/generated-face-variants.ts --missing` and `scripts/card-skin-variants.ts --missing`. `CanonicalSkinSurface` gained Codex's `canonicalSource` branch.
+
+**Holds released (the owner, after reviewing the 14 held redesigns: "all should go live").** 67, HODL, SOLANGELES, TRUMP, GIGA, GMEx, TSLAx, NVDAx, AAPLx, MSTRx, COINx, AMC, SV151 and FARTCOIN left `HELD_PAIR_DESIGNS` and `public/.assetsignore`; their art still shows what held them (a child's likeness, real people, other companies' logos, FARTCOIN's garbled back wordmark), and the owner was told so. Six holds remain (AGENCY, ALON, JEANPHIL, CLAUDIA, BIKETYSON, NEET not offered) and three live-design holds (ANSEM sovereign, SPX celestial, VINE magic-etched).
+- 89 pairs offered (Memes 58); HODL and SOLANGELES are direct pairs the owner has not confirmed, so mainnet still refuses them (`mainnetPairHold`), like the other 13 direct pairs. 67 is open on mainnet.
+- Pair logos for 67, HODL, SOLANGELES from Codex's verified intake files (`tools/carddex/make_pair_logos.py`, 89 sources; the other 83 logos came out byte for byte).
+- Freed designs: Regal, Mythic, Ember and Pokemon Classic are SOL options now (32; no person, child or company mark; Pokemon Classic's back is a Poke Ball like Pokemon Prism's). AMC and the six `stock-*` finishes stay bound to their stocks and leave new launches. Coins that carry any of them keep them. Four new 128 px thumbnails.
+- Tests updated for the counts and the released keys (796 pass).
+
 # 31 October card mint fix pass on `claude/pair-identities` (not deployed)
 
 Review of 3a18402 found one real defect and two small ones; all fixed. Nothing was pushed, deployed, signed or sent; no remote command ran.
