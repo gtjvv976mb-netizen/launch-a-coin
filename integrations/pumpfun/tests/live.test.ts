@@ -1088,6 +1088,17 @@ describe("the creator fee split after the card (one signer, mock RPC only)", () 
     }
   });
 
+  test("Phantom's read-only assertions on the split, appended or between instructions, are accepted and verify once landed", async () => {
+    for (const at of [undefined, 3]) {
+      const { input, rpc, recipients, plan } = await prepared("usdc", 3);
+      const guards = [{ target: input.creator, data: payerGuardData(9_000_000_000n) }, { target: input.creator, data: payerGuardData(8_000_000_000n) }];
+      const signed = await signFeePlanWithWallet(plan, expectedFee(input, recipients), walletReturns((message) => phantomGuarded(message, guards, at === undefined ? {} : { at })));
+      const validated = validateSignedWalletTransaction(plan, Buffer.from(signed).toString("base64"));
+      expect(validated.walletGuards).toBe(2);
+      expect(rpc.sent()).toBe(0);
+    }
+  });
+
   test("the browser refuses a tampered split: another program, a second signer, a changed or reordered split, a missing sweep, and mixed kinds", async () => {
     const { input, rpc, recipients, plan } = await prepared("usdc", 3), expected = expectedFee(input, recipients);
     const other = Keypair.fromSeed(new Uint8Array(32).fill(99)).publicKey;
