@@ -401,9 +401,10 @@ export async function prepareTokenTransaction(input: LiveLaunchInput, options: L
     const global = PUMP_SDK.decodeGlobal(globalInfo), quoteControl = PUMP_SDK.decodeQuoteControl(quoteControlInfo);
     const feeConfig = PUMP_SDK.decodeFeeConfig(feeInfo);
     if (id.asset.key !== "sol") {
-      if (!quoteAccount) throw new Error(`Your wallet needs ${id.asset.symbol} before its initial buy`);
+      if (!quoteAccount) throw new Error(`Your initial buy is paid in ${id.asset.symbol}, and this wallet has none. Get ${id.asset.symbol} first, or set the initial buy to 0 and buy after launch`);
       const account = unpackAccount(quoteAta, quoteAccount, new PublicKey(id.asset.tokenProgram));
-      if (!account.owner.equals(id.creator) || !account.mint.equals(id.quoteMint) || account.isFrozen || account.amount < id.buy) throw new Error(`Insufficient or frozen ${id.asset.symbol} quote balance`);
+      if (!account.owner.equals(id.creator) || !account.mint.equals(id.quoteMint) || account.isFrozen) throw new Error(`This wallet's ${id.asset.symbol} can't be spent (the account is frozen or not the wallet's own)`);
+      if (account.amount < id.buy) throw new Error(`This wallet doesn't hold enough ${id.asset.symbol} for the initial buy. Lower the buy, get more ${id.asset.symbol}, or set it to 0 and buy after launch`);
     }
     const curve = launchCurve(global, quoteControl, id.quoteMint, id.creator, id.mint, id.options);
     const estimate = getBuyV3TokenAmountFromQuoteAmount({ global, feeConfig, mintSupply: global.tokenTotalSupply,

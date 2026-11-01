@@ -96,6 +96,9 @@ export const checkLiveLaunchSize = createServerFn({method: "POST"}).validator(z.
   name: z.string().min(1).max(32), symbol: z.string().regex(/^[A-Za-z0-9]{1,13}$/), quoteAssetKey: z.string().max(30),
   initialBuyQuoteBaseUnits: z.string().regex(/^(0|[1-9][0-9]{0,19})$/),
 })).handler(({data}) => attempt("size", async () => { await sameOrigin(); await perAddress(LIMITS.sizeIp); return service.checkLiveLaunchSize(await signedIn(LIMITS.sizeWallet), data); }));
+export const getLiveQuoteBalance = createServerFn({method: "GET"}).validator(z.object({
+  wallet: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/), quoteAssetKey: z.string().max(30),
+})).handler(({data}) => attempt("balance", async () => { await perAddress(LIMITS.balanceIp); return service.getLiveQuoteBalance(data); }));
 export const getLiveLaunchIntent = createServerFn({method: "GET"}).validator(z.object({intentId})).handler(({data}) => attempt("read", async () => ({intent: await service.getLiveLaunchIntent(await signedIn(LIMITS.readWallet), data.intentId)})));
 export const listLiveLaunchIntents = createServerFn({method: "GET"}).handler(() => attempt("list", async () => ({intents: await service.listLiveLaunchIntents(await signedIn(LIMITS.readWallet))})));
 export const abandonLiveLaunchIntent = createServerFn({method: "POST"}).validator(z.object({intentId})).handler(({data}) => attempt("abandon", async () => {

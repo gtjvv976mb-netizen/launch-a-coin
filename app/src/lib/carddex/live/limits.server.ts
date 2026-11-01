@@ -31,6 +31,8 @@ export const LIMITS = {
   prepareCardWallet: { scope: "live:prepare-card:wallet", max: 12, windowMs: MINUTE },
   confirmWallet: { scope: "live:confirm:wallet", max: 60, windowMs: MINUTE },
   readWallet: { scope: "live:read:wallet", max: 60, windowMs: MINUTE },
+  // A wallet's quote balance for the Launch form (public chain data, read through the server RPC).
+  balanceIp: { scope: "live:balance:ip", max: 30, windowMs: MINUTE },
   submitWallet: { scope: "live:submit:wallet", max: 20, windowMs: MINUTE },
   abandonWallet: { scope: "live:abandon:wallet", max: 20, windowMs: MINUTE },
   reportWallet: { scope: "live:report:wallet", max: 10, windowMs: MINUTE },

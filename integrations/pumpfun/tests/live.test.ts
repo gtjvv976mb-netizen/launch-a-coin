@@ -268,9 +268,9 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
   test("initial buy uses exact quote units, current price and fees, minimum output and actual quote balance", async () => {
     const base = defaultInput(), card = { ...base.card, designKey: "obsidian-archive", frontSha256: art["obsidian-archive"].front.sha256, backSha256: art["obsidian-archive"].back.sha256 };
     const input: LiveLaunchInput = { ...base, quoteKey: "usdc", card, initialBuyQuoteBaseUnits: "100000", slippageBps: 1 }, rpc = mockRpc();
-    await expect(prepareTokenTransaction(input, { connection: rpc.connection })).rejects.toThrow("wallet needs USDC");
+    await expect(prepareTokenTransaction(input, { connection: rpc.connection })).rejects.toThrow("Your initial buy is paid in USDC, and this wallet has none");
     rpc.addQuoteBalance(input, 99_999n);
-    await expect(prepareTokenTransaction(input, { connection: rpc.connection })).rejects.toThrow("Insufficient or frozen");
+    await expect(prepareTokenTransaction(input, { connection: rpc.connection })).rejects.toThrow("This wallet doesn't hold enough USDC for the initial buy");
     rpc.addQuoteBalance(input, 1_000_000n);
     const global = PUMP_SDK.decodeGlobal(rpc.accounts.get(GLOBAL_PDA.toBase58())!);
     const recipient = global.buybackFeeRecipients.find((key) => !key.equals(PublicKey.default))!;
@@ -303,7 +303,7 @@ describe("mainnet wallet preparation, independent confirmation and separate NFT 
     input.initialBuyQuoteBaseUnits = "1234567";
     const quote = PAIR_ASSETS.find(asset => asset.key === quoteKey)!;
     rpc.addQuoteBalance(input, 1_234_566n);
-    await expect(prepareTokenTransaction(input, {connection: rpc.connection})).rejects.toThrow(`Insufficient or frozen ${quote.symbol}`);
+    await expect(prepareTokenTransaction(input, {connection: rpc.connection})).rejects.toThrow(`This wallet doesn't hold enough ${quote.symbol} for the initial buy`);
     rpc.addQuoteBalance(input, 1_234_567n);
     const global = PUMP_SDK.decodeGlobal(rpc.accounts.get(GLOBAL_PDA.toBase58())!);
     const recipient = global.buybackFeeRecipients.find(key => !key.equals(PublicKey.default))!;

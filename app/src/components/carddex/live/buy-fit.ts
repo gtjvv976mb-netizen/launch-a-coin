@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { checkLiveLaunchSize } from "../../../lib/carddex/live/api";
+import { checkLiveLaunchSize, getLiveQuoteBalance } from "../../../lib/carddex/live/api";
 
 import { BUY_DOES_NOT_FIT, STOCK_BUY_WARNS } from "../../../lib/carddex/live/copy";
 
@@ -46,3 +46,26 @@ export function liveBuyOff(quoteKind: string, refusal: string | null | undefined
   if (typeof refusal === "string") return refusal;
   return quoteKind === "stock" && refusal !== null ? STOCK_BUY_WARNS : null;
 }
+
+/** The wallet's balance of a token pair's quote, in base units, or null when it could not be read (never a guess). */
+export async function readLiveQuoteBalance(wallet: string, quoteAssetKey: string): Promise<bigint | null> {
+  const result = await getLiveQuoteBalance({ data: { wallet, quoteAssetKey } });
+  return result.ok ? BigInt(result.baseUnits) : null;
+}
+export const liveQuoteBalanceKey = (wallet: string, quoteAssetKey: string) => ["live-quote-balance", wallet, quoteAssetKey] as const;
+/**
+ * The connected wallet's balance of the pair's quote, for the initial buy (token pairs only; a SOL buy is paid in
+ * SOL). Undefined while loading or inactive, null when it could not be read. Refreshed every 30 seconds, so getting
+ * the token in another tab shows up here.
+ */
+export function useLiveQuoteBalance(active: boolean, wallet: string | null, quoteAssetKey: string): bigint | null | undefined {
+  const query = useQuery({
+    queryKey: liveQuoteBalanceKey(wallet ?? "", quoteAssetKey),
+    enabled: active && !!wallet && quoteAssetKey !== "sol",
+    staleTime: 15_000, refetchInterval: 30_000, refetchIntervalInBackground: false, retry: false,
+    queryFn: () => readLiveQuoteBalance(wallet!, quoteAssetKey),
+  });
+  return !active || !wallet || quoteAssetKey === "sol" ? undefined : query.data;
+}
+/** Where to get a pair's quote with SOL: Jupiter's swap page (the site never swaps for anyone). */
+export const getQuoteUrl = (quoteMint: string) => `https://jup.ag/swap/SOL-${quoteMint}`;

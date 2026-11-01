@@ -669,3 +669,6 @@
   .cdx-launch-more__chev,
   .cdx-launch-total__more > svg { transition: none; }
 }
+
+/* The way forward under a buy the wallet cannot pay for (a token pair): get the token, or no buy. */
+.cdx-launch-note__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; margin-top: 4px; }

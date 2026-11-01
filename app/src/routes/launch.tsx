@@ -36,7 +36,8 @@ import { decimalText, FeeSplitFields, firstFeeSplitField } from "../components/c
 import { checkFeeSplit, EMPTY_FEE_SPLIT, formatShare, readFeeSplitDraft, type FeeSplitDraft } from "../components/carddex/live/fee-split";
 import { XAnnounceField } from "../components/carddex/live/XAnnounceField";
 import { formatLiveAmount, parseLiveAmount } from "../components/carddex/live/amounts";
-import { BUY_FIT_AFTER_SIGN_IN, liveBuyOff, useLiveBuyFit, useLiveBuyRefusal } from "../components/carddex/live/buy-fit";
+import { BUY_FIT_AFTER_SIGN_IN, getQuoteUrl, liveBuyOff, useLiveBuyFit, useLiveBuyRefusal, useLiveQuoteBalance } from "../components/carddex/live/buy-fit";
+import { quoteBuyShortfall } from "../lib/carddex/live/quote-buy";
 import { PagedMessage } from "../components/carddex/live/PagedMessage";
 import type { LiveLaunchIntent } from "../lib/carddex/live/types";
 
@@ -356,6 +357,12 @@ function Launch() {
   const buyRefusal = useLiveBuyRefusal(fitActive, fitName, fitTicker, quoteKey);
   const buyOffText = live && liveOpen && !liveLocked ? liveBuyOff(quoteAsset.kind, buyRefusal) : null;
   const buyBlocked = !!buyOffText;
+  // A token pair's initial buy is paid in that token from the creator's wallet: its balance, shown beside the buy, and
+  // a buy larger than it said here with the way forward (owner report 1 November 2026, Fartcoin).
+  const quoteBalance = useLiveQuoteBalance(live && liveOpen && !liveLocked && !buyBlocked, connectedWallet, quoteKey);
+  const balanceText = typeof quoteBalance === "bigint" ? formatLiveAmount(quoteBalance.toString(), quoteAsset.decimals) : null;
+  const buyShort = typeof quoteBalance === "bigint" && liveDev !== null && liveDev !== "0" && BigInt(liveDev) > quoteBalance
+    ? quoteBuyShortfall(quoteAsset.symbol, balanceText, formatLiveAmount(liveDev, quoteAsset.decimals)) : null;
   // A buy cleared here is also named beside the Launch button: the answer can arrive after the creator has moved on.
   const [buyDropped, setBuyDropped] = useState(false);
   useEffect(() => {
@@ -863,8 +870,16 @@ function Launch() {
                     <p role="alert" className="cdx-launch-note__error">{devError}</p>
                   ) : buyBlocked ? (
                     <p role="status">{buyOffText}</p>
+                  ) : buyShort ? (
+                    <>
+                      <p role="alert" className="cdx-launch-note__error">{buyShort}</p>
+                      <p className="cdx-launch-note__actions">
+                        <TextLink href={getQuoteUrl(quoteAsset.mint)} target="_blank">Get {quoteAsset.symbol} on Jupiter<Icon name="external" size={12} /></TextLink>
+                        <button type="button" className="mdx-link mdx-hit" disabled={locked} onClick={() => setDevBuy("")}>Set the buy to 0</button>
+                      </p>
+                    </>
                   ) : (
-                    <p>{`Paid in real ${quoteAsset.symbol} at launch.${buyFits === null ? ` ${BUY_FIT_AFTER_SIGN_IN}` : ""}`}</p>
+                    <p>{`Paid in real ${quoteAsset.symbol} at launch.${balanceText !== null ? ` This wallet has ${balanceText} ${quoteAsset.symbol}.` : ""}${buyFits === null ? ` ${BUY_FIT_AFTER_SIGN_IN}` : ""}`}</p>
                   )}
                 </div>
               </div>

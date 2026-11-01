@@ -13,7 +13,8 @@ import type { CardData } from "../../mintdex/MintCard";
 import { Button, Icon, Modal, TextLink } from "../../mintdex/ui";
 import { EmptyState } from "../../mintdex/empty-state";
 import { WalletConnectDialog } from "../../mintdex/wallet-connect";
-import { BUY_DOES_NOT_FIT, checkLiveBuyFit, LIVE_BUY_FIT, liveBuyFitKey, STOCK_BUY_WARNS } from "./buy-fit";
+import { BUY_DOES_NOT_FIT, checkLiveBuyFit, LIVE_BUY_FIT, liveBuyFitKey, readLiveQuoteBalance, STOCK_BUY_WARNS } from "./buy-fit";
+import { quoteBuyShortfall } from "../../../lib/carddex/live/quote-buy";
 import { formatLiveAmount } from "./amounts";
 import { LiveTokenImage } from "./LiveTokenImage";
 import { LiveWalletNotice } from "./LiveWalletNotice";
@@ -377,6 +378,13 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
         queryClient.setQueryData(liveBuyFitKey(draft.name, draft.symbol, draft.quoteAssetKey), size);
         // buyBlocked: a tokenized-stock quote, whose first buy the server refuses (wallets warn on issuer-controlled tokens).
         if (!size.fits) throw new Error(size.buyBlocked ? STOCK_BUY_WARNS : size.createFits ? BUY_DOES_NOT_FIT : "This coin's name and symbol don't fit in one transaction. Use a shorter name or symbol.");
+        // A token pair's buy is paid in that token: a wallet without enough of it is told now, before any upload.
+        if (draft.quoteAssetKey !== "sol") {
+          const quote = getPairAsset(draft.quoteAssetKey);
+          const have = await readLiveQuoteBalance(address, draft.quoteAssetKey);
+          assertCurrent(version, address);
+          if (have !== null && have < BigInt(draft.initialBuyQuoteBaseUnits)) throw new Error(quoteBuyShortfall(quote.symbol, formatLiveAmount(have.toString(), quote.decimals), formatLiveAmount(draft.initialBuyQuoteBaseUnits, quote.decimals)));
+        }
       }
       if (!tokenKey.current) {
         // A pre-ground address ending in "card", issued to this signed-in wallet and checked here (card-mint.ts), or

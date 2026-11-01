@@ -7,3 +7,4 @@ export const BUY_FIT_AFTER_SIGN_IN = "A buy that can't fit shows after wallet si
  * a permanent delegate, so those launches go without an initial buy (ALLOW_PERMANENT_DELEGATE_QUOTE_BUY).
  */
 export const STOCK_BUY_WARNS = "Wallets warn when a first buy spends a tokenized-stock quote (issuer controls). Launch without a buy, then buy on pump.fun.";
+

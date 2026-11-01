@@ -9,12 +9,12 @@
  * multiplier, so a raw quote amount is worth `multiplier` UI tokens; the figures here are in UI quote tokens.
  */
 import { PublicKey, type AccountInfo, type Connection, type ParsedAccountData } from "@solana/web3.js";
-import { getScaledUiAmountConfig, unpackMint, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
+import { getAssociatedTokenAddressSync, getScaledUiAmountConfig, unpackAccount, unpackMint, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import {
   bondingCurvePda, canonicalPumpPoolPda, canonicalPumpPoolPdaWithQuote, GLOBAL_PDA, isBondingCurveMigrated, pumpPoolAuthorityPda, PUMP_SDK,
 } from "@pump-fun/pump-sdk";
 
-export type MarketConnection = Pick<Connection, "getMultipleAccountsInfo" | "getTokenLargestAccounts" | "getMultipleParsedAccounts">;
+export type MarketConnection = Pick<Connection, "getMultipleAccountsInfo" | "getTokenLargestAccounts" | "getMultipleParsedAccounts" | "getAccountInfo">;
 
 /** The SOL quote as the curve stores it (the default key). */
 const SOL_QUOTE = PublicKey.default.toBase58();
@@ -107,4 +107,17 @@ export async function readTopHolders(connection: Pick<MarketConnection, "getToke
     holders.push({ owner, amount, share: input.supply > 0 ? amount / input.supply : 0, market: input.marketOwners.includes(owner) || input.marketOwners.includes(entry.address.toBase58()) });
   });
   return holders;
+}
+
+/**
+ * How much of a quote token a wallet holds for an initial buy, in base units: the balance of its associated token
+ * account, the one pump.fun's buy spends from (0 when it has none). A frozen account counts as 0: it cannot pay.
+ */
+export async function readQuoteBalance(connection: Pick<MarketConnection, "getAccountInfo">, input: { owner: string; quoteMint: string; tokenProgram: string }): Promise<bigint> {
+  const owner = new PublicKey(input.owner), mint = new PublicKey(input.quoteMint), program = new PublicKey(input.tokenProgram);
+  const ata = getAssociatedTokenAddressSync(mint, owner, false, program);
+  const info = await connection.getAccountInfo(ata, "confirmed");
+  if (!info) return 0n;
+  const account = unpackAccount(ata, info, program);
+  return account.owner.equals(owner) && account.mint.equals(mint) && !account.isFrozen ? account.amount : 0n;
 }

@@ -1,4 +1,5 @@
 import * as sdk from "../../../../../integrations/pumpfun/src/live";
+import { readQuoteBalance } from "../../../../../integrations/pumpfun/src/market";
 import type { FeeSharePlan, LiveLaunchInput, WalletTransactionPlan } from "../../../../../integrations/pumpfun/src/live";
 import { feeRecipientsProblem, sameFeeSplit } from "../../../../../integrations/pumpfun/src/fee-share-rules";
 import { HOLDER_REWARDS_NO_SPLIT, createOptionsProblem, readCreateOptions, type CreateOptions } from "../../../../../integrations/pumpfun/src/create-options";
@@ -271,6 +272,17 @@ export function resetLiveCreateOptions() { optionsCache = null; }
  * `limit` is the wallet size target (Solana's packet limit less room for wallet assertions). `buyBlocked` is set when
  * prepare refuses this quote's first buy for another reason ("issuer-controls": a tokenized-stock quote).
  */
+/**
+ * How much of a token pair's quote a wallet holds for an initial buy, in base units (the Launch form shows it and the
+ * panel checks it before anything is uploaded). Balances are public on chain; this only saves the browser an RPC.
+ */
+export async function getLiveQuoteBalance(raw: {wallet: string; quoteAssetKey: string}) {
+  requireLiveConfig("recovery"); walletBytes(raw.wallet);
+  if (!isPairAssetKey(raw.quoteAssetKey) || raw.quoteAssetKey === "sol") throw new UserError("Choose a token pair.");
+  const asset = getPairAsset(raw.quoteAssetKey);
+  const baseUnits = await readQuoteBalance(connection() as never, {owner: raw.wallet, quoteMint: asset.mint, tokenProgram: asset.tokenProgram});
+  return {quoteAssetKey: asset.key, baseUnits: baseUnits.toString(), decimals: asset.decimals};
+}
 export async function checkLiveLaunchSize(wallet: string, raw: {name: string; symbol: string; quoteAssetKey: string; initialBuyQuoteBaseUnits: string}) {
   requireLiveConfig("launch"); walletBytes(wallet);
   const {name, symbol} = normalizeLiveIdentity(raw);
