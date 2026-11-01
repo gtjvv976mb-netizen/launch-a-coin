@@ -88,11 +88,14 @@ type ScheduledContext = { waitUntil(promise: Promise<unknown>): void };
 export default {
   /**
    * The cron trigger (wrangler `triggers.crons`, added in the Cloudflare dashboard for production: README "Announcements
-   * on @launchacard"): posts at most one approved new-coin announcement per run, on the cron's scheduled time. Off
+   * on @launchacard"): posts at most one approved new-coin announcement per run, on the cron's scheduled time, and runs
+   * the reply helper's search. Off
    * unless CARDDEX_X_AUTOPOST is "true" with its secrets; loaded lazily so page requests never load it.
    */
   async scheduled(controller: ScheduledController, _env: unknown, ctx: ScheduledContext) {
     ctx.waitUntil(import("./lib/carddex/live/x-announce.server").then(m => m.runXAutoPost({scheduledAt: controller.scheduledTime})).catch(error => console.error("x_announce_cron_failed", error instanceof Error ? error.name : "error")));
+    // The reply helper's background search (x-replies.server.ts): new posts are waiting when the owner opens the page.
+    ctx.waitUntil(import("./lib/carddex/live/x-replies.server").then(m => m.runReplySearch({now: controller.scheduledTime})).catch(error => console.error("x_replies_cron_failed", error instanceof Error ? error.name : "error")));
   },
   async fetch(request: Request, env: unknown, ctx: unknown) {
     // One canonical hop also keeps www wallet pages on the configured origin.

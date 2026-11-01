@@ -5,10 +5,12 @@
  * Unset list: the page and every action answer "not found". A signed-in wallet not on the list gets "not found" too.
  *
  * Reads: one X recent-search request (GET /2/tweets/search/recent, the app-only bearer token X_BEARER_TOKEN, which
- * cannot post) per check, at most once per CACHE_MS (the answer is kept in D1, x_reply_cache) and at most
- * CARDDEX_X_REPLY_READS_PER_HOUR times an hour site-wide (rate_events), since X bills each post a search returns.
+ * cannot post) per check, over the last SEARCH_WINDOW_MS only, at most once per CACHE_MS and at most
+ * CARDDEX_X_REPLY_READS_PER_HOUR times an hour site-wide (rate_events), since X bills each post a search returns. The
+ * cron (server.ts scheduled) checks every 10 minutes and the open page every CACHE_MS, so new posts keep arriving;
+ * each answer is merged into a pool of the last day's posts (D1, x_reply_cache), never replacing it.
  *
- * Suggestions (optional, ANTHROPIC_API_KEY): one short draft per post the owner asks about, from Claude Haiku. The page
+ * Suggestions (optional, ANTHROPIC_API_KEY): one short draft per post the owner asks about (SUGGESTION_MODEL). The page
  * shows it in an editable box; the owner posts it themselves through X's reply composer, or not at all.
  *
  * Never: a write to X of any kind. This file makes no POST to X and imports nothing that can (x-client.server.ts is the
@@ -18,7 +20,7 @@ import { bindings } from "../../bindings.server";
 import { one, stmt, UserError } from "../../mintdex/server/db.server";
 import { liveWalletFromToken, walletBytes } from "./auth.server";
 import { enforceLimit, limitUsed, SITE, type LimitRule } from "./limits.server";
-import { cleanSuggestion, rankReplyPosts, X_POST_ID, X_REPLY_PAGE, xReplyQuery, type RankedXReplyPost, type XReplyPost } from "./x-replies";
+import { cleanSuggestion, MAX_AGE_MINUTES, rankReplyPosts, X_POST_ID, X_REPLY_PAGE, xReplyQuery, type RankedXReplyPost, type XReplyPost } from "./x-replies";
 
 export type ReplyFetch = (url: string, init: RequestInit) => Promise<Response>;
 export const X_SEARCH_URL = "https://api.x.com/2/tweets/search/recent";
@@ -28,7 +30,18 @@ export const ANTHROPIC_MESSAGES_URL = "https://api.anthropic.com/v1/messages";
 export const SUGGESTION_MODEL = "claude-fable-5-1";
 export const SUGGESTION_BETA = "server-side-fallback-2026-07-01";
 export const CACHE_MS = 5 * 60_000;
-export const DEFAULT_READS_PER_HOUR = 4, DEFAULT_SUGGESTIONS_PER_HOUR = 30;
+/**
+ * Each read asks for posts from the last 12 hours only: X's recent search otherwise ranks the whole past week, and its
+ * most relevant posts were days old (1 November 2026: of 95 posts, a handful under a day old and none worth a reply).
+ */
+export const SEARCH_WINDOW_MS = 12 * 3_600_000;
+/** The most posts the pool keeps (newest first); a post leaves it after MAX_AGE_MINUTES too. */
+export const POOL_MAX = 400;
+/**
+ * Reads: the cron's 6 an hour plus the open page's checks (owner request 1 November 2026: search constantly).
+ * Suggestions: the most the cap allows (owner, 1 November 2026: 30 an hour ran out in three minutes; credits are no concern).
+ */
+export const DEFAULT_READS_PER_HOUR = 12, DEFAULT_SUGGESTIONS_PER_HOUR = 500;
 const HOUR = 3_600_000, TIMEOUT_MS = 60_000, MAX_RESPONSE_BYTES = 512 * 1024;
 /** The one answer every refused access gets, so the page's existence is not confirmed to anyone else. */
 export const NOT_FOUND = "Not found.";
@@ -108,12 +121,14 @@ export function parseSearch(json: unknown): XReplyPost[] {
   return posts;
 }
 /** One recent-search read: GET only, the bearer token in the Authorization header and nowhere else. */
-export async function searchRecentPosts(bearerToken: string, query: string, options: {fetch?: ReplyFetch; timeoutMs?: number} = {}): Promise<XReplyPost[]> {
+export async function searchRecentPosts(bearerToken: string, query: string, options: {fetch?: ReplyFetch; timeoutMs?: number; since?: number} = {}): Promise<XReplyPost[]> {
   const send = options.fetch ?? ((url: string, init: RequestInit) => globalThis.fetch(url, init));
   const url = new URL(X_SEARCH_URL);
   url.searchParams.set("query", query);
   url.searchParams.set("max_results", String(X_REPLY_PAGE));
   url.searchParams.set("sort_order", "relevancy");
+  // RFC 3339 to the second, as X takes it.
+  if (options.since !== undefined) url.searchParams.set("start_time", new Date(options.since).toISOString().replace(/\.\d{3}Z$/, "Z"));
   url.searchParams.set("tweet.fields", "author_id,created_at,public_metrics,lang");
   url.searchParams.set("expansions", "author_id");
   url.searchParams.set("user.fields", "username,name,public_metrics,verified");
@@ -153,35 +168,65 @@ async function markedIds(ids: string[]): Promise<Set<string>> {
   return new Set((rows.results ?? []).map(row => row.tweet_id));
 }
 /**
- * The owner's feed: the cached search when it is under CACHE_MS old, else one new read if the hour's budget allows
- * (otherwise the older answer, with a notice). Posts already marked are left out.
+ * The newest answer merged into the pool: a post seen again takes its new counts, posts past a day old leave, and the
+ * newest POOL_MAX stay.
  */
+export function mergePool(pool: readonly XReplyPost[], fresh: readonly XReplyPost[], now: number): XReplyPost[] {
+  const byId = new Map<string, XReplyPost>();
+  for (const post of [...pool, ...fresh]) byId.set(post.id, post);
+  return [...byId.values()]
+    .filter(post => now - post.createdAt <= MAX_AGE_MINUTES * 60_000)
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, POOL_MAX);
+}
+type PoolRefresh = {cache: {fetchedAt: number; posts: XReplyPost[]} | null; notice: string | null};
+/**
+ * One new read when the pool is CACHE_MS old and the hour's budget allows (otherwise the pool as it is, with a notice).
+ * Shared by the page and the cron; neither needs a session here (the page checks the owner first).
+ */
+export async function refreshReplyPool(options: {fetch?: ReplyFetch; now?: number} = {}): Promise<PoolRefresh> {
+  const env = bindings(), limits = replyLimits(), now = options.now ?? Date.now();
+  let cache = await cachedPosts(), notice: string | null = null;
+  if (!configured(env.X_BEARER_TOKEN) || (cache && now - cache.fetchedAt < CACHE_MS)) return {cache, notice};
+  let allowed = limits.reads.max > 0;
+  if (allowed) {
+    try { await enforceLimit(limits.reads, SITE, "This hour's searches are used up.", now); }
+    catch (error) { if (!(error instanceof UserError)) throw error; allowed = false; }
+  }
+  if (limits.reads.max <= 0) notice = "Searching is turned off (CARDDEX_X_REPLY_READS_PER_HOUR is 0).";
+  else if (!allowed) notice = cache ? "This hour's searches are used up. The list below is from the last one." : "This hour's searches are used up, and no search has run yet.";
+  else {
+    const query = xReplyQuery();
+    try {
+      const found = await searchRecentPosts(env.X_BEARER_TOKEN!, query, {fetch: options.fetch, since: now - SEARCH_WINDOW_MS});
+      const posts = mergePool(cache?.posts ?? [], found, now);
+      await stmt("INSERT OR REPLACE INTO x_reply_cache (id, query, fetched_at, posts_json) VALUES (?, ?, ?, ?)", CACHE_ID, query, now, JSON.stringify(posts)).run();
+      console.log(JSON.stringify({event: "x_replies_search", found: found.length, pool: posts.length}));
+      cache = {fetchedAt: now, posts};
+    } catch (error) {
+      if (!(error instanceof XSearchError)) throw error;
+      console.log(JSON.stringify({event: "x_replies_search_failed", status: error.status}));
+      notice = cache ? `${error.message}. The list below is from the last search.` : `${error.message}. No search has run yet.`;
+    }
+  }
+  return {cache, notice};
+}
+/**
+ * The background check (the cron, every 10 minutes): one read into the pool, so the page has new posts waiting when it
+ * opens. Off without an owner list, D1 or the bearer token; never throws.
+ */
+export async function runReplySearch(options: {fetch?: ReplyFetch; now?: number} = {}): Promise<void> {
+  const env = bindings();
+  if (!adminWallets(env.CARDDEX_ADMIN_WALLETS).length || !env.DB || !configured(env.X_BEARER_TOKEN)) return;
+  try { await refreshReplyPool(options); }
+  catch (error) { console.error("x_replies_cron_failed", error instanceof Error ? error.name : "error"); }
+}
+/** The owner's feed: the pool, refreshed first when it is due (refreshReplyPool). Posts already marked are left out. */
 export async function replyFeed(sessionToken: string | null | undefined, options: {fetch?: ReplyFetch; now?: number} = {}): Promise<ReplyFeed> {
   await requireReplyAdmin(sessionToken);
   const env = bindings(), limits = replyLimits(), now = options.now ?? Date.now();
   const searchConfigured = configured(env.X_BEARER_TOKEN), suggestConfigured = configured(env.ANTHROPIC_API_KEY);
-  let cache = await cachedPosts(), notice: string | null = null;
-  if (searchConfigured && (!cache || now - cache.fetchedAt >= CACHE_MS)) {
-    let allowed = limits.reads.max > 0;
-    if (allowed) {
-      try { await enforceLimit(limits.reads, SITE, "This hour's searches are used up.", now); }
-      catch (error) { if (!(error instanceof UserError)) throw error; allowed = false; }
-    }
-    if (limits.reads.max <= 0) notice = "Searching is turned off (CARDDEX_X_REPLY_READS_PER_HOUR is 0).";
-    else if (!allowed) notice = cache ? "This hour's searches are used up. The list below is from the last one." : "This hour's searches are used up, and no search has run yet.";
-    else {
-      const query = xReplyQuery();
-      try {
-        const posts = await searchRecentPosts(env.X_BEARER_TOKEN!, query, {fetch: options.fetch});
-        await stmt("INSERT OR REPLACE INTO x_reply_cache (id, query, fetched_at, posts_json) VALUES (?, ?, ?, ?)", CACHE_ID, query, now, JSON.stringify(posts)).run();
-        cache = {fetchedAt: now, posts};
-      } catch (error) {
-        if (!(error instanceof XSearchError)) throw error;
-        console.log(JSON.stringify({event: "x_replies_search_failed", status: error.status}));
-        notice = cache ? `${error.message}. The list below is from the last search.` : `${error.message}. No search has run yet.`;
-      }
-    }
-  }
+  const {cache, notice} = await refreshReplyPool(options);
   const posts = cache?.posts ?? [];
   const ranked = rankReplyPosts(posts, {now, marked: await markedIds(posts.map(post => post.id))});
   return {
