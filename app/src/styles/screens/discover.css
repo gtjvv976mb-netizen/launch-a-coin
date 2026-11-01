@@ -46,3 +46,62 @@
 @media (min-width: 1024px) and (pointer: coarse) {
   .cdx-dex__head .mdx-select { height: 44px; }
 }
+
+/* ---------------------------------------------------------------- the stage (owner request 2 November 2026)
+ * The cards stand on a velvet table under one warm key light, with no tray or glowing disc behind each of them: the
+ * card, its own holo and its contact shadow are enough. Slow light rays turn behind the shelf (the page's one
+ * decorative loop: it runs under full motion only, which the head script already turns off for reduced motion). */
+.cdx-dex .mdx-pocket::before,
+.cdx-dex .mdx-card3d__halo,
+.cdx-dex .mdx-card3d__pedestal { display: none; }
+.cdx-dex__body { isolation: isolate; }
+.cdx-dex__stage {
+  position: absolute;
+  inset: -24px -16px -8px;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: var(--radius-panel);
+  background:
+    radial-gradient(60% 46% at 50% 0%, rgb(var(--rgb-gold-hi) / 0.16), rgb(var(--rgb-gold) / 0.05) 55%, transparent 80%), /* taste-skill-ignore: owner-requested stage light (2 Nov 2026) */
+    radial-gradient(80% 70% at 50% 60%, rgb(var(--rgb-plinth) / 0.55), rgb(var(--rgb-wall) / 0) 75%); /* taste-skill-ignore: owner-requested stage light (2 Nov 2026) */
+  -webkit-mask-image: radial-gradient(90% 80% at 50% 45%, #000 55%, transparent 100%); /* taste-skill-ignore: owner-requested stage light (2 Nov 2026) */
+  mask-image: radial-gradient(90% 80% at 50% 45%, #000 55%, transparent 100%); /* taste-skill-ignore: owner-requested stage light (2 Nov 2026) */
+}
+/* Fine velvet grain: a repeating dot field at a whisper of contrast. */
+.cdx-dex__stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgb(var(--rgb-ink) / 0.035) 0.6px, transparent 0.9px); /* taste-skill-ignore: owner-requested stage light (2 Nov 2026) */
+  background-size: 3px 3px;
+}
+.cdx-dex__rays {
+  position: absolute;
+  left: 50%;
+  top: -40%;
+  width: 160%;
+  aspect-ratio: 1;
+  translate: -50% 0;
+  background: repeating-conic-gradient(from 0deg at 50% 50%, rgb(var(--rgb-gold-hi) / 0.07) 0deg 4deg, transparent 4deg 18deg); /* taste-skill-ignore: owner-requested stage light (2 Nov 2026) */
+  -webkit-mask-image: radial-gradient(closest-side, #000 20%, transparent 70%); /* taste-skill-ignore: owner-requested stage light (2 Nov 2026) */
+  mask-image: radial-gradient(closest-side, #000 20%, transparent 70%); /* taste-skill-ignore: owner-requested stage light (2 Nov 2026) */
+}
+:root:not([data-motion]) .cdx-dex__rays { animation: cdx-dex-rays 90s linear infinite; }
+@keyframes cdx-dex-rays { to { rotate: 1turn; } }
+
+/* The deck the intro deals from: the middle of the shelf (its own pile stays out of sight; the cards are the deck). */
+.cdx-dex .mdx-shelf__deck { top: 38%; opacity: 0; }
+/* Phones scroll a tall shelf: the deck sits near its top, so the fan opens on screen. */
+@media (max-width: 1023.98px) { .cdx-dex .mdx-shelf__deck { top: 96px; } }
+/* A card in flight is not a link yet, and the leaning shelf holds still so the fan keeps its order. */
+.cdx-dex .mdx-shelf__cell:has(.mdx-card3d[data-state~="dealing"]) a { pointer-events: none; }
+.cdx-dex .mdx-shelf:has(.mdx-card3d[data-state~="dealing"]) .mdx-shelf__z { transform: none !important; }
+/* The intro's hold: the server paints the cards hidden under full motion, the deal shows them. If scripts never run,
+ * they appear after four seconds anyway. */
+:root:not([data-motion]) .mdx-shelf[data-intro] .mdx-card3d { opacity: 0; animation: cdx-intro-safety 1ms linear 4s forwards; }
+@keyframes cdx-intro-safety { to { opacity: 1; } }
+/* A coin's name and its 3D button wait for its card: hidden while the card is held for the intro or in flight, then fades in. */
+.cdx-dex :is(.mdx-gridcap, .mdx-v3dbtn) { transition: opacity 220ms cubic-bezier(.23, 1, .32, 1); }
+:root:not([data-motion]) .mdx-shelf[data-intro] :is(.mdx-gridcap, .mdx-v3dbtn),
+.cdx-dex .mdx-shelf__cell:has(.mdx-card3d[data-state~="dealing"]) :is(.mdx-gridcap, .mdx-v3dbtn) { opacity: 0; pointer-events: none; }

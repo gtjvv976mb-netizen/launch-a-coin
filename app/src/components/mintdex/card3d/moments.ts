@@ -7,7 +7,7 @@ import { motionLevel } from "./motion3d";
 
 /* ------------------------------------------------------------------ entrances */
 
-type DealOpts = { deck: HTMLElement | null; index: number; quick: boolean; onStart: () => void; onEnd: () => void };
+type DealOpts = { deck: HTMLElement | null; index: number; quick: boolean; onStart: () => void; onEnd: () => void; fan?: { count: number } | null };
 type DealJob = { scene: HTMLElement; enter: HTMLElement; ground: HTMLElement | null; o: DealOpts };
 
 /** Deals asked for in this commit: measured together, then started together (one layout for a whole shelf). */
@@ -53,21 +53,51 @@ function swayFromRest(scene: HTMLElement) {
   scene.style.setProperty("--float-delay", `${(-dur / 2).toFixed(2)}s`);
 }
 
+/** The deck intro's timings (ms): the fan opens together, holds a beat, then the cards are dealt one by one. */
+export const FAN_OPEN = 560, FAN_HOLD = 260, FAN_STEP = 80, FAN_FLIGHT = 640;
+/** The fan: at most this wide an arc (degrees), and this much turn between neighbours. */
+const FAN_ARC = 64, FAN_STEP_DEG = 9;
+
+/**
+ * Where card `index` of `count` sits in the open fan, relative to the deck's center: an arc around a pivot below the
+ * deck, so the spread reads like cards fanned in a hand. The middle card stays upright; the outer ones lean out.
+ */
+export function fanPose(index: number, count: number, cardH: number) {
+  const n = Math.max(1, count);
+  const step = n > 1 ? Math.min(FAN_STEP_DEG, FAN_ARC / (n - 1)) : 0;
+  const angle = (index - (n - 1) / 2) * step;
+  const radius = cardH * 1.15;
+  return { angle, x: Math.sin(angle * Math.PI / 180) * radius, y: (1 - Math.cos(angle * Math.PI / 180)) * radius };
+}
+
 function fly({ scene, enter, ground, o }: DealJob, r: DOMRect, d: DOMRect | null) {
   const fromX = d ? d.left + d.width / 2 : r.left + r.width / 2;
   const fromY = d ? d.top + d.height / 2 : r.top - 120;
   const dx = fromX - (r.left + r.width / 2);
   const dy = fromY - (r.top + r.height / 2);
   const rz = (Math.random() < 0.5 ? -1 : 1) * 12;
-  const duration = o.quick ? 480 : 720;
-  const delay = Math.min(o.index, 11) * (o.quick ? 30 : 60);
-  const timing: KeyframeAnimationOptions = { duration, delay, easing: "cubic-bezier(.22,1.12,.36,1)", fill: "backwards" };
+  const fan = o.fan ? fanPose(o.index, o.fan.count, r.height * 0.62) : null;
+  const order = Math.min(o.index, 11);
+  // The deck intro: one animation per card, four keyframes: stacked on the deck, fanned out (all cards together),
+  // held while the cards before it are dealt, then dealt face up to its place.
+  const duration = fan ? FAN_OPEN + FAN_HOLD + order * FAN_STEP + FAN_FLIGHT : o.quick ? 480 : 720;
+  const delay = fan ? 0 : order * (o.quick ? 30 : 60);
+  const timing: KeyframeAnimationOptions = { duration, delay, easing: fan ? "linear" : "cubic-bezier(.22,1.12,.36,1)", fill: "backwards" };
   o.onStart();
+  const deckPose = `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, ${(o.index * 0.6).toFixed(1)}px) rotateZ(${(rz * 0.15).toFixed(1)}deg) rotateY(180deg) scale(0.62)`;
+  const rest = "translate3d(0, 0, 0) rotateZ(0deg) rotateY(0deg) scale(1)";
   const fly = enter.animate(
-    [
-      { transform: `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 120px) rotateZ(${rz}deg) rotateY(180deg) scale(0.62)` },
-      { transform: "translate3d(0, 0, 0) rotateZ(0deg) rotateY(0deg) scale(1)" },
-    ],
+    fan
+      ? [
+        { transform: deckPose, easing: "cubic-bezier(.23,1,.32,1)" },
+        { offset: FAN_OPEN / duration, transform: `translate3d(${(dx + fan.x).toFixed(1)}px, ${(dy + fan.y).toFixed(1)}px, ${(o.index * 0.6).toFixed(1)}px) rotateZ(${fan.angle.toFixed(1)}deg) rotateY(180deg) scale(0.62)`, easing: "linear" },
+        { offset: (FAN_OPEN + FAN_HOLD + order * FAN_STEP) / duration, transform: `translate3d(${(dx + fan.x).toFixed(1)}px, ${(dy + fan.y).toFixed(1)}px, ${(o.index * 0.6).toFixed(1)}px) rotateZ(${fan.angle.toFixed(1)}deg) rotateY(180deg) scale(0.62)`, easing: "cubic-bezier(.22,1.12,.36,1)" },
+        { transform: rest },
+      ]
+      : [
+        { transform: `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 120px) rotateZ(${rz}deg) rotateY(180deg) scale(0.62)` },
+        { transform: rest },
+      ],
     timing,
   );
   // Dealt off the top of the deck: the card appears at once (a slow fade would read as a grey ghost over the wall).
@@ -76,7 +106,7 @@ function fly({ scene, enter, ground, o }: DealJob, r: DOMRect, d: DOMRect | null
   ground?.animate(
     [
       { opacity: 0, transform: "scaleX(0.3)" },
-      { opacity: 0, transform: "scaleX(0.3)", offset: 0.62 },
+      { opacity: 0, transform: "scaleX(0.3)", offset: fan ? 1 - FAN_FLIGHT * 0.38 / duration : 0.62 },
       { opacity: 1, transform: "scaleX(1)" },
     ],
     { ...timing, easing: "linear" },
@@ -89,7 +119,8 @@ function fly({ scene, enter, ground, o }: DealJob, r: DOMRect, d: DOMRect | null
     away = true;
     o.onEnd();
   };
-  const left = window.setTimeout(leave, delay + duration * 0.35);
+  // With the fan, the deck has emptied once the fan is open; otherwise when this card has left it.
+  const left = window.setTimeout(leave, fan ? FAN_OPEN : delay + duration * 0.35);
   let ended = false;
   const done = () => {
     if (ended) return;

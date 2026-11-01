@@ -2090,6 +2090,19 @@ function shelfEnter(fresh: boolean): ShelfEnter {
   return "deal";
 }
 
+/** The deck intro deals under full motion, rises under lite and simply shows under calm (no travel). */
+function introEnter(): ShelfEnter {
+  const level = motionLevel();
+  return level === "calm" ? "none" : level === "lite" ? "rise" : "deal";
+}
+/** The fan's size, one object per count so the motion group stays the same between renders. */
+const introCounts = new Map<number, { count: number }>();
+function introCount(count: number) {
+  let value = introCounts.get(count);
+  if (!value) introCounts.set(count, (value = { count }));
+  return value;
+}
+
 /** Cell depth in the parallax shelf (L13): one of -16, -8, 0, 8, 16 px, from the coin's dex number. */
 function cellZ(seed: number) {
   return ((((seed * 37) % 5) + 5) % 5) * 8 - 16;
@@ -2229,6 +2242,7 @@ export function Shelf<T>({
   parallax = false,
   seedOf,
   turntable = true,
+  intro = false,
   className = "",
 }: {
   items: T[];
@@ -2256,6 +2270,13 @@ export function Shelf<T>({
    * neon pedestal (at most 8, 4 on phones), pause facing front under the pointer, and rest under lite and calm.
    */
   turntable?: boolean;
+  /**
+   * The deck intro (Discover, owner request 2 November 2026: "spread out like a deck of cards and then laid out"):
+   * on every open, a hard load included, the cards stack as a deck at the shelf's middle, fan out face down and are
+   * dealt to their places face up. Full motion only (lite: Rise; calm: no travel). The server paints the shelf with
+   * its cards hidden (data-intro, alive.css) so they never show at rest first and vanish.
+   */
+  intro?: boolean;
   className?: string;
 }) {
   const [ref, size] = useSize<HTMLDivElement>({ width: 340, height: 600 });
@@ -2271,8 +2292,24 @@ export function Shelf<T>({
   const [shown, setShown] = useState<{ view: string; shuffle: string; enter: ShelfEnter }>(() => ({
     view,
     shuffle,
-    enter: shelfEnter(fresh),
+    enter: intro ? introEnter() : shelfEnter(fresh),
   }));
+  // The deck intro hides the server-painted cards until the deal has taken them over (the deals start in the frame
+  // after the cards mount; this lifts the CSS hold in the frame after that).
+  const [introHeld, setIntroHeld] = useState(intro);
+  useEffect(() => {
+    if (!introHeld) return;
+    let second = 0;
+    const first = requestAnimationFrame(() => {
+      second = requestAnimationFrame(() => {
+        setIntroHeld(false);
+        // The intro is the open's alone: a card that mounts later (a refresh adds a coin, a resize moves a row) comes in
+        // as on any other shelf, never with a second fan from the deck.
+        setShown((s) => (s.enter === "deal" && s.view === latest.current.view ? { ...s, enter: "none" } : s));
+      });
+    });
+    return () => { cancelAnimationFrame(first); cancelAnimationFrame(second); };
+  }, [introHeld]);
   const live = view === shown.view;
   const frozen = useRef(items);
   if (live) frozen.current = items;
@@ -2337,6 +2374,7 @@ export function Shelf<T>({
     <div
       ref={ref}
       data-settled={settled || undefined}
+      data-intro={introHeld ? "" : undefined}
       data-v3d-group=""
       className={cx(
         "mdx-shelf relative flex w-full min-w-0 flex-col [container-type:inline-size]",
@@ -2351,7 +2389,7 @@ export function Shelf<T>({
       ) : null}
       <CardDeck ref={deckRef} className="mdx-shelf__deck" />
       <div ref={rotorRef} className="mdx-shelf__rotor flex w-full min-w-0 flex-col" style={{ rowGap: rowGap ?? gap }}>
-        <CardMotionProvider enter={shown.enter} deck={deckRef} glint wave={!fresh} turntable={turntable}>
+        <CardMotionProvider enter={shown.enter} deck={deckRef} glint wave={!fresh && !intro} turntable={turntable} intro={introHeld ? introCount(list.length) : null}>
           <Fragment key={shown.view}>
             {rows.map((row, r) => (
               <div key={r} className="mdx-shelf__row relative">
@@ -2372,7 +2410,7 @@ export function Shelf<T>({
                       // The Rise entrance sits on the cell; the deal and the Hold belong to the card itself.
                       <div
                         key={keyOf(item, index)}
-                        className={cx("mdx-shelf__cell min-w-0", !dealing && "mdx-enter")}
+                        className={cx("mdx-shelf__cell min-w-0", !dealing && !intro && "mdx-enter")}
                         style={
                           {
                             "--i": Math.min(index, 10),

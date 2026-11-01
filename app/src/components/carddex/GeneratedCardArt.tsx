@@ -32,9 +32,19 @@ export function GeneratedCardFront({ cardTemplate, designVersion, priority = fal
   return <img ref={ref} className="cdx-generated-front" data-generated-front-ready={image.ready ? "" : undefined} src={source} srcSet={assets.front320 ? generatedSrcSet(assets.front320, source) : undefined} sizes={assets.front320 ? `${priority ? "" : "auto, "}(max-width: 767px) 72vw, 400px` : undefined} alt="" hidden={image.failed} draggable={false} loading={priority ? "eager" : "lazy"} decoding="async" fetchPriority={priority ? "high" : undefined} onLoad={image.onLoad} onError={image.onError} />;
 }
 
-/** A measured metal-only laminate. It shares the physical engine's light without painting over live ink. */
+/**
+ * The card's hologram (owner request 2 November 2026: "hologram effects on the card design itself", a shimmer "more
+ * natural and obvious" that works through a full turn). On the frame only (the art window and text panels cut out):
+ * a rainbow foil band with fine foil lines in it and a specular streak, blended onto the printed frame. Over the whole
+ * card: a soft glare spot and glitter near the light. Every layer follows the engine's one light (--px, --py, --lit:
+ * pointer tilt, gyro, the turntable's turn), and drifts slowly on its own at rest. Styles: carddex-cards.css.
+ */
 export function GeneratedCardFinish({ cardTemplate }: { cardTemplate?: string }) {
-  return <div className="cdx-generated-finish" aria-hidden><i className="cdx-generated-finish__spectrum" /><i className="cdx-generated-finish__glint" /></div>;
+  return <>
+    <div className="cdx-generated-finish" aria-hidden><span className="cdx-generated-finish__spot"><i className="cdx-generated-finish__spectrum" /><i className="cdx-generated-finish__lines" /></span><i className="cdx-generated-finish__glint" /></div>
+    <div className="cdx-holo-glare" aria-hidden />
+    <div className="cdx-holo-sparkle" aria-hidden />
+  </>;
 }
 
 /** Phones (the site's 767px breakpoint) take the 320px copy of a hidden or deferred plate, whatever their pixel ratio. */

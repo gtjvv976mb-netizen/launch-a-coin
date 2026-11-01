@@ -189,11 +189,16 @@ export function Card3DView(p: Card3DProps & Card3DInternal) {
         if (tier) void loadReveal().then((m) => m.mintReveal(c, tier, () => latest.current.onBurst?.(p.front)));
       }
     }
-    if (afterHydration && lvl !== "calm") {
+    // The deck intro deals on every open, a hard load included (its cards were hidden by CSS until now).
+    // Only while the hold still hides this card: once the hold's safety reveal has shown it (a very slow load), the card
+    // stays where it is rather than vanishing and flying in.
+    const intro = !hand && group?.intro && getComputedStyle(scene).opacity === "0" ? group.intro : null;
+    if ((afterHydration || intro) && lvl !== "calm") {
       if (enter === "deal") {
         deal(scene, enterRef.current!, groundRef.current, {
           deck: group?.deck?.current ?? null,
           index: cell?.index ?? 0,
+          fan: intro ? { count: intro.count } : null,
           quick: recentlyGathered(),
           onStart: () => group?.dealStart(),
           onEnd: () => group?.dealEnd(),

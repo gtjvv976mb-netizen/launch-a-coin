@@ -19,6 +19,11 @@ export type MotionGroup = {
   wave: boolean;
   /** The group's table cards are inline turntables (spin.ts) unless a card asks for another idle. */
   turntable?: boolean;
+  /**
+   * The deck intro (Discover, owner request 2 November 2026): on every open, a hard load included, the cards stack as
+   * a deck, fan out face down and are dealt to their places. `count` is how many the fan spreads.
+   */
+  intro?: { count: number } | null;
   register: (el: HTMLElement, weight: () => number) => () => void;
   /** Deal bookkeeping: the deck shows while any card of the group is in flight. */
   dealStart: () => void;
@@ -55,6 +60,7 @@ export function CardMotionProvider({
   glint = false,
   wave = false,
   turntable = false,
+  intro = null,
   children,
 }: {
   enter?: "deal" | "rise" | "liftin" | "none";
@@ -62,6 +68,7 @@ export function CardMotionProvider({
   glint?: boolean;
   wave?: boolean;
   turntable?: boolean;
+  intro?: { count: number } | null;
   children: ReactNode;
 }) {
   const cards = useRef<GlintCard[]>([]);
@@ -127,6 +134,7 @@ export function CardMotionProvider({
       glint,
       wave,
       turntable,
+      intro,
       register(el, weight) {
         const c: GlintCard = { el, weight, cur: 0 };
         cards.current.push(c);
@@ -149,7 +157,7 @@ export function CardMotionProvider({
         }
       },
     }),
-    [enter, glint, wave, turntable],
+    [enter, glint, wave, turntable, intro],
   );
   return <MotionCtx.Provider value={group}>{children}</MotionCtx.Provider>;
 }

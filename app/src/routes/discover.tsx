@@ -32,8 +32,8 @@ import { pageHead } from "../lib/mintdex/seo";
  * Discover (MintDex's format): the header row (Discover, the count, then the Design pill), then the shelf: every
  * launched coin's card in its tray on a ledge, newest first, with its caption (name, then ticker and pair). Desktop
  * fits one page of cards to the screen (the pager in the header row turns pages, kept in ?page=); phones show every
- * card two up and the page scrolls, with the search field on top. The shelf deals in, leans toward the pointer and
- * shuffles on a Design change (Shelf, ui.tsx). Before the first launch: "No coins yet" and the Launch link.
+ * card two up and the page scrolls, with the search field on top. On every open the cards fan out from a deck and are
+ * dealt to their places (Shelf intro, ui.tsx); the shelf leans toward the pointer and shuffles on a Design change. Before the first launch: "No coins yet" and the Launch link.
  * Styles: styles/screens/discover.css.
  */
 export const Route = createFileRoute("/discover")({
@@ -202,6 +202,8 @@ function Discover() {
         }
       />
       <div ref={bodyRef} className="cdx-dex__body">
+        {/* The stage the cards are dealt onto: a warm key light over a velvet table, with slow light rays (decor). */}
+        <div className="cdx-dex__stage" aria-hidden="true"><i className="cdx-dex__rays" /></div>
         {coins.length > 0 ? (
           <Shelf
             items={visible}
@@ -214,6 +216,7 @@ function Discover() {
             shuffleKey={design}
             parallax={desk}
             seedOf={(c: Cell) => order.get(c.id) ?? 0}
+            intro
             render={(c: Cell, w) => <CoinCell coin={c} width={w} list={items} index={order.get(c.id) ?? 99} />}
           />
         ) : !launches.data && launches.isError ? (
