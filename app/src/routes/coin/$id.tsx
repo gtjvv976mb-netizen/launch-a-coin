@@ -125,7 +125,7 @@ function CoinView() {
   const pair = getPairAsset(coin.quoteAssetKey);
   const launched = new Date(coin.createdAt);
   const market = useCoinMarket(coin.tokenMint);
-  const failed = market.isError;
+  const failed = market.failed;
   return (
     <PageFrame className="mdx-page cdx-coin-launched">
       <PageHeader
@@ -153,7 +153,7 @@ function CoinView() {
           </div>
         </section>
       </div>
-      <ChartSection mint={coin.tokenMint} name={coin.name} />
+      <ChartSection mint={coin.tokenMint} name={coin.name} pool={market.pool} waiting={!market.data && !market.failed} />
       <div className="cdx-coin-launched__lists">
         <TradesSection data={market.data} pair={pair} failed={failed} />
         <HoldersSection data={market.data} failed={failed} />

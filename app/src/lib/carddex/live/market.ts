@@ -1,11 +1,12 @@
 /**
- * A launched coin's market data, as GET /api/live/market/<mint> and /api/live/market/<mint>/candles/<range> return it
- * (market.server.ts builds both). Client-safe: the shapes, the chart ranges and the queries the coin page polls.
- *
- * Sources (shown on the page): the price, market cap, curve progress, curve reserves and holders are read from Solana
- * itself; 24-hour volume, change, trade counts, the candles and the trades list come from GeckoTerminal, about a minute
- * behind the chain. Anything a source did not give is null and shows as a dash: no figure is ever made up.
+ * A launched coin's market data, in two halves the coin page combines (combineMarket):
+ * - from Solana, through the site's server (GET /api/live/market/<mint>, market.server.ts): the curve (price in the
+ *   quote asset, market cap, progress, reserves), the pool to follow, and the holders;
+ * - from GeckoTerminal, read in the visitor's browser (gecko.ts): the quote's dollar price, 24-hour change, volume and
+ *   trade counts, the recent trades and the candles, about a minute behind the chain.
+ * Anything a source did not give is null and shows as a dash: no figure is ever made up.
  */
+import type { PoolStats } from "./gecko";
 
 export type MarketStatus = "curve" | "complete" | "migrated";
 
@@ -24,30 +25,22 @@ export type MarketTrade = {
 
 export type MarketHolder = { owner: string; amount: number; share: number; creator: boolean };
 
-export type CoinMarket = {
+/** What the server reads from Solana. */
+export type ChainMarket = {
   mint: string;
   /** When the freshest part was read (ms); null when nothing could be read yet. */
   asOf: number | null;
-  /** Where the dollar price came from: the curve on Solana (with GeckoTerminal's quote price), or GeckoTerminal alone. */
-  priceSource: "chain" | "geckoterminal" | null;
   status: MarketStatus | null;
-  /** One token, in the quote asset and in US dollars. */
+  /** One token in the quote asset (UI units); null once migrated (the curve no longer prices it). */
   priceQuote: number | null;
-  priceUsd: number | null;
-  /** Price times the 1B supply. */
   marketCapQuote: number | null;
-  marketCapUsd: number | null;
-  /** 0..1 to graduation (1 once graduated); null when the curve could not be read. */
+  /** 0..1 to graduation (1 once graduated). */
   progress: number | null;
   /** Quote tokens buyers have put into the curve (what sellers can be paid from). */
   reservesQuote: number | null;
-  reservesUsd: number | null;
-  /** One quote token in US dollars (from GeckoTerminal). */
-  quoteUsd: number | null;
-  change: { m5: number | null; h1: number | null; h6: number | null; h24: number | null };
-  volumeUsd24h: number | null;
-  txns24h: { buys: number; sells: number; buyers: number; sellers: number } | null;
-  trades: MarketTrade[] | null;
+  supply: number | null;
+  /** The pool GeckoTerminal follows: the curve account, or the PumpSwap pool after migration. */
+  pool: string | null;
   /** The largest holders, the curve's own account left out. */
   holders: MarketHolder[] | null;
   /** Wallets holding any of the coin (the curve left out); null when the RPC cannot count them. */
@@ -60,38 +53,77 @@ export type CoinMarket = {
   stale: boolean;
 };
 
+/** The page's view: both halves together. */
+export type CoinMarket = Omit<ChainMarket, "pool" | "supply"> & {
+  /** Where the dollar price came from: the curve on Solana (times GeckoTerminal's quote price), or GeckoTerminal alone. */
+  priceSource: "chain" | "geckoterminal" | null;
+  priceUsd: number | null;
+  marketCapUsd: number | null;
+  reservesUsd: number | null;
+  quoteUsd: number | null;
+  change: PoolStats["change"];
+  volumeUsd24h: number | null;
+  txns24h: PoolStats["txns24h"];
+  trades: MarketTrade[] | null;
+};
+
+const NO_CHANGE: PoolStats["change"] = { m5: null, h1: null, h6: null, h24: null };
+
+/**
+ * The two halves as one view. The dollar price is the curve's price times the quote's dollar price when both are known
+ * (current to the chain); otherwise GeckoTerminal's own price; otherwise nothing.
+ */
+export function combineMarket(mint: string, chain: ChainMarket | null | undefined, stats: PoolStats | null | undefined, trades: MarketTrade[] | null | undefined, geckoStale = false): CoinMarket {
+  const quoteUsd = stats?.quoteUsd ?? null;
+  const priceQuote = chain?.priceQuote ?? null;
+  const chainPrice = priceQuote !== null && quoteUsd !== null;
+  const priceUsd = chainPrice ? priceQuote * quoteUsd : stats?.priceUsd ?? null;
+  const supply = chain?.supply ?? null;
+  const migrated = chain?.status === "migrated";
+  return {
+    mint,
+    asOf: chain?.asOf ?? null,
+    status: chain?.status ?? null,
+    priceQuote,
+    marketCapQuote: chain?.marketCapQuote ?? null,
+    progress: chain?.progress ?? null,
+    reservesQuote: migrated ? null : chain?.reservesQuote ?? null,
+    holders: chain?.holders ?? null,
+    holderCount: chain?.holderCount ?? null,
+    holderCountCapped: chain?.holderCountCapped ?? false,
+    curveShare: chain?.curveShare ?? null,
+    stale: (chain?.stale ?? false) || geckoStale,
+    priceSource: priceUsd === null ? null : chainPrice ? "chain" : "geckoterminal",
+    priceUsd,
+    marketCapUsd: priceUsd !== null && supply !== null ? priceUsd * supply : stats?.fdvUsd ?? null,
+    reservesUsd: migrated ? stats?.reserveUsd ?? null : chain?.reservesQuote != null && quoteUsd !== null ? chain.reservesQuote * quoteUsd : null,
+    quoteUsd,
+    change: stats?.change ?? NO_CHANGE,
+    volumeUsd24h: stats?.volumeUsd24h ?? null,
+    txns24h: stats?.txns24h ?? null,
+    trades: trades ?? null,
+  };
+}
+
 export const CHART_RANGES = ["1m", "5m", "15m", "1h", "4h", "1d"] as const;
 export type ChartRange = (typeof CHART_RANGES)[number];
 export const isChartRange = (value: string): value is ChartRange => (CHART_RANGES as readonly string[]).includes(value);
 /** Each range as an adjective ("5-minute candles"). */
 export const CHART_RANGE_LABEL: Record<ChartRange, string> = { "1m": "1-minute", "5m": "5-minute", "15m": "15-minute", "1h": "1-hour", "4h": "4-hour", "1d": "1-day" };
 
-/** One candle: time in seconds (the chart's unit), prices in US dollars, volume in US dollars. */
+/** One candle: time in seconds (the chart's unit), prices and volume in US dollars. */
 export type Candle = { t: number; o: number; h: number; l: number; c: number; v: number };
-export type CandleAnswer = { range: ChartRange; candles: Candle[]; asOf: number; stale: boolean };
 
-async function readJson<T>(path: string): Promise<T> {
-  const response = await fetch(path, { headers: { accept: "application/json" } });
-  if (!response.ok) throw new Error(`Market ${response.status}`);
-  return (await response.json()) as T;
-}
-
-/** The page's stats, trades and holders: polled every 15 seconds while the tab is visible. */
+/** The Solana half, from the site's server: polled every 15 seconds while the tab is visible. */
 export const coinMarketQuery = (mint: string) => ({
   queryKey: ["coin-market", mint] as const,
-  queryFn: () => readJson<CoinMarket>(`/api/live/market/${mint}`),
+  queryFn: async () => {
+    const response = await fetch(`/api/live/market/${mint}`, { headers: { accept: "application/json" } });
+    if (!response.ok) throw new Error(`Market ${response.status}`);
+    return (await response.json()) as ChainMarket;
+  },
   staleTime: 10_000,
   refetchInterval: 15_000,
-  refetchIntervalInBackground: false,
-  retry: 1,
-});
-
-/** One range's candles: polled every 30 seconds (GeckoTerminal itself updates about once a minute). */
-export const coinCandlesQuery = (mint: string, range: ChartRange) => ({
-  queryKey: ["coin-candles", mint, range] as const,
-  queryFn: () => readJson<CandleAnswer>(`/api/live/market/${mint}/candles/${range}`),
-  staleTime: 20_000,
-  refetchInterval: 30_000,
   refetchIntervalInBackground: false,
   retry: 1,
 });

@@ -27,7 +27,6 @@ import { Route as ApiLiveHealthRouteImport } from './routes/api/live/health'
 import { Route as ApiLiveComposeRouteImport } from './routes/api/live/compose'
 import { Route as ApiLiveAssetsSplatRouteImport } from './routes/api/live/assets/$'
 import { Route as ApiLiveMarketMintIndexRouteImport } from './routes/api/live/market/$mint/index'
-import { Route as ApiLiveMarketMintCandlesRangeRouteImport } from './routes/api/live/market/$mint/candles/$range'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -119,12 +118,6 @@ const ApiLiveMarketMintIndexRoute = ApiLiveMarketMintIndexRouteImport.update({
   path: '/api/live/market/$mint/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiLiveMarketMintCandlesRangeRoute =
-  ApiLiveMarketMintCandlesRangeRouteImport.update({
-    id: '/api/live/market/$mint/candles/$range',
-    path: '/api/live/market/$mint/candles/$range',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -145,7 +138,6 @@ export interface FileRoutesByFullPath {
   '/api/live/launches': typeof ApiLiveLaunchesRoute
   '/api/live/assets/$': typeof ApiLiveAssetsSplatRoute
   '/api/live/market/$mint/': typeof ApiLiveMarketMintIndexRoute
-  '/api/live/market/$mint/candles/$range': typeof ApiLiveMarketMintCandlesRangeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -166,7 +158,6 @@ export interface FileRoutesByTo {
   '/api/live/launches': typeof ApiLiveLaunchesRoute
   '/api/live/assets/$': typeof ApiLiveAssetsSplatRoute
   '/api/live/market/$mint': typeof ApiLiveMarketMintIndexRoute
-  '/api/live/market/$mint/candles/$range': typeof ApiLiveMarketMintCandlesRangeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -188,7 +179,6 @@ export interface FileRoutesById {
   '/api/live/launches': typeof ApiLiveLaunchesRoute
   '/api/live/assets/$': typeof ApiLiveAssetsSplatRoute
   '/api/live/market/$mint/': typeof ApiLiveMarketMintIndexRoute
-  '/api/live/market/$mint/candles/$range': typeof ApiLiveMarketMintCandlesRangeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -211,7 +201,6 @@ export interface FileRouteTypes {
     | '/api/live/launches'
     | '/api/live/assets/$'
     | '/api/live/market/$mint/'
-    | '/api/live/market/$mint/candles/$range'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -232,7 +221,6 @@ export interface FileRouteTypes {
     | '/api/live/launches'
     | '/api/live/assets/$'
     | '/api/live/market/$mint'
-    | '/api/live/market/$mint/candles/$range'
   id:
     | '__root__'
     | '/'
@@ -253,7 +241,6 @@ export interface FileRouteTypes {
     | '/api/live/launches'
     | '/api/live/assets/$'
     | '/api/live/market/$mint/'
-    | '/api/live/market/$mint/candles/$range'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -275,7 +262,6 @@ export interface RootRouteChildren {
   ApiLiveLaunchesRoute: typeof ApiLiveLaunchesRoute
   ApiLiveAssetsSplatRoute: typeof ApiLiveAssetsSplatRoute
   ApiLiveMarketMintIndexRoute: typeof ApiLiveMarketMintIndexRoute
-  ApiLiveMarketMintCandlesRangeRoute: typeof ApiLiveMarketMintCandlesRangeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -406,13 +392,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiLiveMarketMintIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/live/market/$mint/candles/$range': {
-      id: '/api/live/market/$mint/candles/$range'
-      path: '/api/live/market/$mint/candles/$range'
-      fullPath: '/api/live/market/$mint/candles/$range'
-      preLoaderRoute: typeof ApiLiveMarketMintCandlesRangeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -435,7 +414,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiLiveLaunchesRoute: ApiLiveLaunchesRoute,
   ApiLiveAssetsSplatRoute: ApiLiveAssetsSplatRoute,
   ApiLiveMarketMintIndexRoute: ApiLiveMarketMintIndexRoute,
-  ApiLiveMarketMintCandlesRangeRoute: ApiLiveMarketMintCandlesRangeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

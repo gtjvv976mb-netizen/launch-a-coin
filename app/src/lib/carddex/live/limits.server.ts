@@ -44,9 +44,8 @@ export const LIMITS = {
   cardMintIp: { scope: "live:card-mint:ip", max: 4, windowMs: HOUR },
   cardMintIpDay: { scope: "live:card-mint:ip:day", max: 10, windowMs: DAY },
   cardMintSite: { scope: "live:card-mint:site", max: 300, windowMs: DAY },
-  // A coin page's market data (market.server.ts), site-wide: GeckoTerminal's free API allows about 30 calls a minute,
-  // and the mainnet RPC also serves launches. Past either cap the pages show their last answer.
-  marketGeckoSite: { scope: "live:market:gecko:site", max: 24, windowMs: MINUTE },
+  // A coin page's Solana reads (market.server.ts), site-wide: the mainnet RPC also serves launches. Past the cap the
+  // pages show their last answer.
   marketRpcSite: { scope: "live:market:rpc:site", max: 120, windowMs: MINUTE },
 } as const satisfies Record<string, LimitRule>;
 /** The key for a site-wide rule: one bucket for every client. */

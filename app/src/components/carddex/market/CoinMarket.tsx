@@ -2,22 +2,17 @@ import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { Change, CurveTrack, Icon, KpiGroup, Num, SectionHead, Skeleton, Tabs } from "../../mintdex/ui";
-import {
-  CHART_RANGE_LABEL,
-  CHART_RANGES,
-  coinCandlesQuery,
-  coinMarketQuery,
-  type ChartRange,
-  type CoinMarket,
-} from "../../../lib/carddex/live/market";
+import { geckoCandlesQuery, geckoPoolLookupQuery, geckoPoolQuery, geckoTradesQuery } from "../../../lib/carddex/live/gecko";
+import { CHART_RANGE_LABEL, CHART_RANGES, coinMarketQuery, combineMarket, type ChartRange, type CoinMarket } from "../../../lib/carddex/live/market";
 import type { PairAsset } from "../../../lib/carddex/pairs";
 import { ageShort, amountShort, priceFigure, shareText, shortAddress, usdPrice, usdShort } from "./format";
 
 /*
  * A launched coin's market, in four parts the coin page places: the price panel beside the card (price, market cap,
- * 24-hour stats, holders, the bonding curve), the candlestick chart, recent trades and the largest holders. One query
- * (coinMarketQuery) feeds all but the chart, polled every 15 seconds while the tab is visible; the chart polls its own
- * range. A figure a source did not give is a dash, never a zero. Styles: styles/screens/coin.css (.cdx-mkt*).
+ * 24-hour stats, holders, the bonding curve), the candlestick chart, recent trades and the largest holders. The Solana
+ * half comes from the site (coinMarketQuery, every 15 seconds), the GeckoTerminal half straight from GeckoTerminal in
+ * the browser (gecko.ts, every 30 to 60 seconds); both poll only while the tab is visible. A figure a source did not
+ * give is a dash, never a zero. Styles: styles/screens/coin.css (.cdx-mkt*).
  */
 
 const PriceChart = lazy(() => import("./PriceChart"));
@@ -35,8 +30,23 @@ function useNow(): number {
   return now;
 }
 
-export function useCoinMarket(mint: string) {
-  return useQuery(coinMarketQuery(mint));
+/**
+ * The coin's market as the page shows it: undefined until either half has answered; `failed` once both have failed with
+ * nothing to show. `pool` is the pool the chart follows.
+ */
+export function useCoinMarket(mint: string): { data: CoinMarket | undefined; failed: boolean; pool: string | null } {
+  const chain = useQuery(coinMarketQuery(mint));
+  const chainPool = chain.data?.pool ?? null;
+  // GeckoTerminal's own record of the pool, only when the site could not read the curve.
+  const lookup = useQuery(geckoPoolLookupQuery(mint, !chainPool && (chain.isError || (chain.isSuccess && !chainPool))));
+  const pool = chainPool ?? lookup.data ?? null;
+  const stats = useQuery(geckoPoolQuery(pool, mint));
+  const trades = useQuery(geckoTradesQuery(pool, mint));
+  const answered = chain.data !== undefined || stats.data !== undefined || trades.data !== undefined;
+  const geckoStale = (stats.isError && stats.data !== undefined) || (trades.isError && trades.data !== undefined);
+  const data = answered ? combineMarket(mint, chain.data, stats.data, trades.data, geckoStale) : undefined;
+  const failed = !answered && chain.isError && (!pool || (stats.isError && trades.isError)) && !lookup.isFetching;
+  return { data, failed, pool };
 }
 
 function External({ href, children, label }: { href: string; children: ReactNode; label: string }) {
@@ -137,7 +147,7 @@ export function MarketPanel({ mint, pair, data, failed }: { mint: string; pair: 
         {failed && !data
           ? "Market data is unavailable right now. It will try again shortly."
           : data
-            ? <>{data.asOf !== null ? <>Updated {ageShort(data.asOf, Math.max(now, data.asOf))} ago{data.stale ? " (some figures are older than usual)" : ""}. </> : "Market data is not available yet. "}{sourceLine(data)}</>
+            ? <>{data.asOf !== null ? <>Updated {ageShort(data.asOf, Math.max(now, data.asOf))} ago{data.stale ? " (some figures are older than usual)" : ""}. </> : null}{sourceLine(data)}</>
             : "Reading the market…"}
       </p>
       {/* Screen readers hear only a change of state (loading, unavailable), never the ticking age. */}
@@ -148,13 +158,14 @@ export function MarketPanel({ mint, pair, data, failed }: { mint: string; pair: 
 
 // ---------------------------------------------------------------- the chart
 
-export function ChartSection({ mint, name }: { mint: string; name: string }) {
+export function ChartSection({ mint, name, pool, waiting }: { mint: string; name: string; pool: string | null; waiting: boolean }) {
   const [range, setRange] = useState<ChartRange>("5m");
   // The canvas chart draws in the browser only; the server and the first paint keep its frame.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  const query = useQuery({ ...coinCandlesQuery(mint, range), enabled: mounted });
-  const candles = query.data?.candles ?? [];
+  const base = geckoCandlesQuery(pool, mint, range);
+  const query = useQuery({ ...base, enabled: mounted && base.enabled });
+  const candles = query.data ?? [];
   const last = candles[candles.length - 1];
   const high = candles.length ? Math.max(...candles.map((c) => c.h)) : null;
   const low = candles.length ? Math.min(...candles.map((c) => c.l)) : null;
@@ -173,7 +184,7 @@ export function ChartSection({ mint, name }: { mint: string; name: string }) {
         }
       />
       <div className="cdx-mkt-chart">
-        {!mounted || query.isPending ? (
+        {!mounted || waiting || (pool !== null && query.isPending) ? (
           <Skeleton className="cdx-mkt-chart__skeleton rounded-row" />
         ) : candles.length ? (
           <Suspense fallback={<Skeleton className="cdx-mkt-chart__skeleton rounded-row" />}>
@@ -181,7 +192,7 @@ export function ChartSection({ mint, name }: { mint: string; name: string }) {
           </Suspense>
         ) : (
           <div className="cdx-mkt-chart__empty">
-            <p>{query.isError ? "The chart is unavailable right now. It will try again shortly." : "No trades in this range yet. The chart fills in as people buy and sell."}</p>
+            <p>{query.isError || pool === null ? "The chart is unavailable right now. It will try again shortly." : "No trades in this range yet. The chart fills in as people buy and sell."}</p>
           </div>
         )}
       </div>

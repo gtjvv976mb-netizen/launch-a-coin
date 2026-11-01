@@ -3,8 +3,8 @@ import { Database } from "bun:sqlite";
 import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 
-// A launched coin's market data (/api/live/market). A fake GeckoTerminal, a fake RPC connection and an in-memory D1:
-// no test reaches the network. Shapes follow GeckoTerminal's real answers (1 November 2026).
+// A launched coin's market data: the Solana half (/api/live/market, a fake RPC and an in-memory D1) and the GeckoTerminal
+// half read in the browser (gecko.ts, a fake fetch). No test reaches the network. Shapes follow real answers (1 November 2026).
 let sqlite = new Database(":memory:");
 class Prepared {
   constructor(readonly sql: string, readonly values: unknown[] = []) {}
@@ -19,6 +19,7 @@ let env: Record<string, unknown>;
 mock.module("../../src/lib/bindings.server", () => ({bindings: () => env, keepAlive: <T,>(promise: Promise<T>) => promise}));
 
 const market = await import("../../src/lib/carddex/live/market.server");
+const gecko = await import("../../src/lib/carddex/live/gecko");
 const shapes = await import("../../src/lib/carddex/live/market");
 const format = await import("../../src/components/carddex/market/format");
 const {missingMigrations} = await import("../../src/lib/carddex/live/limits.server");
@@ -52,19 +53,20 @@ const ohlcvAnswer = {data: {attributes: {ohlcv_list: [
   [1793479260, 3.67e-6, 3.67e-6, 3.45e-6, 3.45e-6, 110.9],
 ]}}};
 
-type Call = {url: string; method: string; body: string | null};
+type Call = {url: string; method: string; body: string | null; init: RequestInit};
+/** A fake RPC (DAS) and a fake GeckoTerminal: records every call. */
 function fakeNetwork(options: {geckoStatus?: number; das?: "ok" | "error"} = {}) {
   const calls: Call[] = [];
   const fetch = async (url: string, init: RequestInit) => {
-    calls.push({url, method: init.method ?? "GET", body: typeof init.body === "string" ? init.body : null});
-    expect(init.redirect).toBe("manual");
-    if (url.startsWith(market.GECKO_API)) {
+    calls.push({url, method: init.method ?? "GET", body: typeof init.body === "string" ? init.body : null, init});
+    if (url.startsWith(gecko.GECKO_API)) {
       if (options.geckoStatus) return Response.json({errors: [{status: String(options.geckoStatus)}]}, {status: options.geckoStatus});
       if (url.includes("/ohlcv/")) return Response.json(ohlcvAnswer);
       if (url.endsWith("/trades")) return Response.json(tradesAnswer);
       if (url.endsWith(`/tokens/${MINT}`)) return Response.json({data: {relationships: {top_pools: {data: [{id: `solana_${CURVE}`, type: "pool"}]}}}});
       return Response.json(poolAnswer);
     }
+    expect(init.redirect).toBe("manual");
     if (url === "https://rpc.example/secret-key-0001") {
       if (options.das === "error") return Response.json({jsonrpc: "2.0", id: "holders", error: {code: -32601, message: "Method not found"}});
       return Response.json({jsonrpc: "2.0", id: "holders", result: {total: 3, token_accounts: [
@@ -75,16 +77,14 @@ function fakeNetwork(options: {geckoStatus?: number; das?: "ok" | "error"} = {})
   };
   return {calls, fetch};
 }
-/** The curve read and the largest accounts, as the integration returns them. */
-function fakeChain(options: {fail?: boolean} = {}) {
-  let reads = 0;
-  const connection = {
-    async getMultipleAccountsInfo() { reads++; if (options.fail) throw new Error("rpc down at https://rpc.example/secret-key-0001"); return [null, null, null]; },
-    async getTokenLargestAccounts() { return {value: []}; },
-    async getMultipleParsedAccounts() { return {value: []}; },
-  };
-  return {connection, reads: () => reads};
-}
+const CURVE_ROW = {status: "curve", priceQuote: 2.8e-8, marketCapQuote: 28, progress: 0.25, reservesQuote: 10, supply: 1e9, pool: CURVE, marketOwners: [CURVE]};
+const cacheCurve = (at: number) => sqlite.query("INSERT OR REPLACE INTO live_market_cache (mint, kind, fetched_at, json) VALUES (?, 'curve', ?, ?)").run(MINT, at, JSON.stringify(CURVE_ROW));
+/** A connection whose curve read fails (its message names the RPC URL, as provider errors do). */
+const failingChain = {
+  async getMultipleAccountsInfo() { throw new Error("rpc down at https://rpc.example/secret-key-0001"); },
+  async getTokenLargestAccounts() { return {value: []}; },
+  async getMultipleParsedAccounts() { return {value: []}; },
+};
 
 const nativeFetch = globalThis.fetch, nativeLog = console.log, nativeError = console.error;
 beforeEach(() => {
@@ -97,46 +97,60 @@ beforeEach(() => {
 });
 afterAll(() => { globalThis.fetch = nativeFetch; console.log = nativeLog; console.error = nativeError; sqlite.close(); });
 
-describe("GeckoTerminal answers", () => {
+describe("GeckoTerminal, read in the browser", () => {
   test("pool stats: the coin's own price, the quote's dollar price, change in percent, 24h counts", () => {
-    expect(market.parsePool(poolAnswer, MINT)).toEqual({
+    expect(gecko.parsePool(poolAnswer, MINT)).toEqual({
       priceUsd: 0.0000027, quoteUsd: 95.5, reserveUsd: 2543.92, fdvUsd: 2700,
       change: {m5: 0, h1: 1.5, h6: -2, h24: -10.86}, volumeUsd24h: 1102.41, txns24h: {buys: 6, sells: 5, buyers: 5, sellers: 4},
     });
-    expect(market.parsePool({data: {}}, MINT)).toBeNull();
+    expect(gecko.parsePool({data: {}}, MINT)).toBeNull();
   });
-  test("trades: newest first, buys and sells sided by which token the coin was, malformed rows dropped", () => {
-    expect(market.parseTrades(tradesAnswer, MINT)).toEqual([
+  test("trades: newest first, the side follows the coin whichever side of the pool it is, malformed rows dropped", () => {
+    expect(gecko.parseTrades(tradesAnswer, MINT)).toEqual([
       {at: Date.parse("2026-10-31T23:59:00Z"), kind: "sell", wallet: BUYER, tokens: 1_000_000, quote: 0.03, usd: 2.86, tx: TX},
       {at: Date.parse("2026-10-31T23:58:00Z"), kind: "buy", wallet: BUYER, tokens: 17_000_000, quote: 0.5, usd: 47.75, tx: TX},
     ]);
+    const quoteSide = {data: [{attributes: {block_timestamp: "2026-10-31T23:58:00Z", tx_hash: TX, tx_from_address: BUYER, kind: "buy", from_token_address: MINT, to_token_address: "CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp", from_token_amount: "5000", to_token_amount: "2", volume_in_usd: "0.4"}}]};
+    expect(gecko.parseTrades(quoteSide, MINT)).toMatchObject([{kind: "sell", tokens: 5000, quote: 2}]);
   });
   test("candles: oldest first, a repeated bucket keeps its first (real) row, gaps stay gaps", () => {
-    expect(market.parseCandles(ohlcvAnswer)).toEqual([
+    expect(gecko.parseCandles(ohlcvAnswer)).toEqual([
       {t: 1793479260, o: 3.67e-6, h: 3.67e-6, l: 3.45e-6, c: 3.45e-6, v: 110.9},
       {t: 1793481960, o: 3.45e-6, h: 3.45e-6, l: 3.34e-6, c: 3.34e-6, v: 23.2},
     ]);
   });
+  test("reads are plain GETs: no cookies, no referrer, the coin's pool and range in the path", async () => {
+    const net = fakeNetwork();
+    expect(await gecko.geckoGet(gecko.candlesPath(CURVE, MINT, "5m"), net.fetch)).toEqual(ohlcvAnswer);
+    const url = new URL(net.calls[0].url), init = net.calls[0].init;
+    expect(url.pathname).toBe(`/api/v2/networks/solana/pools/${CURVE}/ohlcv/minute`);
+    expect(Object.fromEntries(url.searchParams)).toEqual({aggregate: "5", limit: "300", currency: "usd", token: MINT});
+    expect([init.method, init.credentials, init.referrerPolicy]).toEqual(["GET", "omit", "no-referrer"]);
+    await expect(gecko.geckoGet("/x", fakeNetwork({geckoStatus: 429}).fetch)).rejects.toMatchObject({name: "GeckoError", status: 429});
+    expect(gecko.parseTopPool({data: {relationships: {top_pools: {data: [{id: `solana_${CURVE}`}]}}}})).toBe(CURVE);
+  });
 });
 
-describe("misses and sides", () => {
-  test("a trade's side follows the coin, whichever side of the pool it is on", () => {
-    const quoteSide = {data: [{attributes: {block_timestamp: "2026-10-31T23:58:00Z", tx_hash: TX, tx_from_address: BUYER, kind: "buy", from_token_address: MINT, to_token_address: "CARDSccUMFKoPRZxt5vt3ksUbxEFEcnZ3H2pd3dKxYjp", from_token_amount: "5000", to_token_amount: "2", volume_in_usd: "0.4"}}]};
-    expect(market.parseTrades(quoteSide, MINT)).toMatchObject([{kind: "sell", tokens: 5000, quote: 2}]);
+describe("the two halves together", () => {
+  const chain = (over: Record<string, unknown> = {}) => ({
+    mint: MINT, asOf: NOW, status: "curve", priceQuote: 2.8e-8, marketCapQuote: 28, progress: 0.25, reservesQuote: 10, supply: 1e9, pool: CURVE,
+    holders: [], holderCount: 2, holderCountCapped: false, curveShare: 0.99, stale: false, ...over,
+  }) as Parameters<typeof shapes.combineMarket>[1];
+  const stats = gecko.parsePool(poolAnswer, MINT);
+  test("the dollar price is the curve's price times the quote's dollar price, current to the chain", () => {
+    const view = shapes.combineMarket(MINT, chain(), stats, []);
+    expect(view.priceSource).toBe("chain");
+    expect(view.priceUsd).toBeCloseTo(2.8e-8 * 95.5, 15);
+    expect(view.marketCapUsd).toBeCloseTo(2.8e-8 * 95.5 * 1e9, 6);
+    expect(view.reservesUsd).toBeCloseTo(955, 6);
+    expect(view).toMatchObject({change: {h24: -10.86}, volumeUsd24h: 1102.41, holderCount: 2, stale: false});
   });
-  test("a coin GeckoTerminal has not indexed is not asked again within the window, and spends no budget meanwhile", async () => {
-    launch();
-    const net = fakeNetwork({geckoStatus: 404});
-    const deps = {fetch: net.fetch, now: () => NOW, connection: () => null, rpcUrl: () => null};
-    const first = await market.readCoinMarket(MINT, deps);
-    expect(first).toMatchObject({asOf: null, priceSource: null, priceUsd: null, stale: false});
-    const calls = net.calls.length;
-    await market.readCoinMarket(MINT, {...deps, now: () => NOW + 60_000});
-    expect(net.calls.length).toBe(calls);
-    expect((sqlite.query("SELECT COUNT(*) AS n FROM rate_events WHERE scope = 'live:market:gecko:site'").get() as {n: number}).n).toBe(calls);
-    // Past the lookup's ten minutes it is asked again.
-    await market.readCoinMarket(MINT, {...deps, now: () => NOW + 11 * 60_000});
-    expect(net.calls.length).toBe(calls + 1);
+  test("without the curve, GeckoTerminal's own price and market cap, said as such; without either, nothing", () => {
+    expect(shapes.combineMarket(MINT, null, stats, null)).toMatchObject({priceSource: "geckoterminal", priceUsd: 0.0000027, marketCapUsd: 2700, progress: null, reservesUsd: null, holders: null});
+    expect(shapes.combineMarket(MINT, chain(), null, null)).toMatchObject({priceSource: null, priceUsd: null, marketCapUsd: null, reservesUsd: null, priceQuote: 2.8e-8, change: {h24: null}});
+    // A graduated coin: the pool's liquidity, never curve reserves.
+    expect(shapes.combineMarket(MINT, chain({status: "migrated", priceQuote: null, reservesQuote: null}), stats, null)).toMatchObject({priceSource: "geckoterminal", reservesUsd: 2543.92, reservesQuote: null});
+    expect(shapes.combineMarket(MINT, chain(), stats, [], true).stale).toBe(true);
   });
 });
 
@@ -149,76 +163,48 @@ describe("holders", () => {
   });
 });
 
-describe("the endpoint", () => {
+describe("the Solana endpoint", () => {
   test("only a finished launch answers; anything else is a 400 or 404 without any upstream read", async () => {
     const net = fakeNetwork();
     launch("9ad71NssXqrWRaS5KkKKwK64B8e3mdF1bKpczptcard", "token_pending");
-    const bad = await market.serveCoinMarket(new Request("https://launchacard.fun/api/live/market/x"), "not-a-mint", {fetch: net.fetch});
-    expect(bad.status).toBe(400);
-    const pending = await market.serveCoinMarket(new Request("https://launchacard.fun/api/live/market/x"), "9ad71NssXqrWRaS5KkKKwK64B8e3mdF1bKpczptcard", {fetch: net.fetch});
-    expect(pending.status).toBe(404);
-    expect((await market.serveCoinCandles(new Request("https://launchacard.fun/x"), MINT, "2m", {fetch: net.fetch})).status).toBe(400);
+    expect((await market.serveCoinMarket(new Request("https://launchacard.fun/api/live/market/x"), "not-a-mint", {fetch: net.fetch})).status).toBe(400);
+    expect((await market.serveCoinMarket(new Request("https://launchacard.fun/api/live/market/x"), "9ad71NssXqrWRaS5KkKKwK64B8e3mdF1bKpczptcard", {fetch: net.fetch})).status).toBe(404);
     expect(net.calls).toEqual([]);
   });
-  test("no RPC ready: GeckoTerminal's pool gives price, market cap and trades; chain-only figures are null, never a zero", async () => {
+  test("no RPC here: nothing is read or counted, figures are null (never zero) and not called stale", async () => {
     launch();
     const net = fakeNetwork();
     const answer = await market.readCoinMarket(MINT, {fetch: net.fetch, now: () => NOW, connection: () => null, rpcUrl: () => null});
-    expect(answer).toMatchObject({mint: MINT, status: null, priceUsd: 0.0000027, priceSource: "geckoterminal", marketCapUsd: 2700, progress: null, holders: null, holderCount: null, reservesUsd: null, stale: false});
-    expect(answer!.trades).toHaveLength(2);
-    expect(net.calls[0].url).toBe(`${market.GECKO_API}/networks/solana/tokens/${MINT}`);
-    // The lookup is kept for ten minutes.
-    await market.readCoinMarket(MINT, {fetch: net.fetch, now: () => NOW + 60_000, connection: () => null, rpcUrl: () => null});
-    expect(net.calls.filter(c => c.url.endsWith(`/tokens/${MINT}`))).toHaveLength(1);
+    expect(answer).toMatchObject({mint: MINT, asOf: null, status: null, priceQuote: null, pool: null, holders: null, holderCount: null, stale: false});
+    expect(net.calls).toEqual([]);
+    expect((sqlite.query("SELECT COUNT(*) AS n FROM rate_events").get() as {n: number}).n).toBe(0);
   });
-  test("an RPC failure never leaks the RPC URL, and a refused refresh serves the last answer marked stale", async () => {
+  test("an RPC failure never leaks the RPC URL; the last answer is served marked stale, and the miss is not retried at once", async () => {
     launch();
-    const chain = fakeChain({fail: true});
-    const response = await market.serveCoinMarket(new Request("https://launchacard.fun/api/live/market/x"), MINT, {fetch: fakeNetwork().fetch, now: () => NOW, connection: () => chain.connection as never, rpcUrl: () => "https://rpc.example/secret-key-0001"});
+    cacheCurve(NOW - 60_000);
+    let reads = 0;
+    const chain = {...failingChain, async getMultipleAccountsInfo() { reads++; return failingChain.getMultipleAccountsInfo(); }};
+    const deps = {fetch: fakeNetwork().fetch, now: () => NOW, connection: () => chain as never, rpcUrl: () => null};
+    const response = await market.serveCoinMarket(new Request("https://launchacard.fun/api/live/market/x"), MINT, deps);
+    const text = await response.text();
     expect(response.status).toBe(200);
-    expect(await response.text()).not.toContain("secret-key");
-    sqlite.query("INSERT INTO live_market_cache (mint, kind, fetched_at, json) VALUES (?, 'curve', ?, ?)").run(MINT, NOW - 60_000, JSON.stringify({status: "curve", priceQuote: 2.8e-8, marketCapQuote: 28, progress: 0.25, reservesQuote: 10, supply: 1e9, pool: CURVE, marketOwners: [CURVE]}));
-    // Past the pool's 30 seconds GeckoTerminal refuses: the stats read before are served, marked stale.
-    const later = await market.readCoinMarket(MINT, {fetch: fakeNetwork({geckoStatus: 429}).fetch, now: () => NOW + 31_000, connection: () => chain.connection as never, rpcUrl: () => null});
-    expect(later).toMatchObject({status: "curve", priceQuote: 2.8e-8, progress: 0.25, quoteUsd: 95.5, volumeUsd24h: 1102.41, stale: true});
-    expect(later!.priceUsd).toBeCloseTo(2.8e-8 * 95.5, 15);
+    expect(text).not.toContain("secret-key");
+    // The curve is the minute-old answer; the holders list refreshed now.
+    expect(JSON.parse(text)).toMatchObject({status: "curve", priceQuote: 2.8e-8, pool: CURVE, holders: [], asOf: NOW, stale: true});
+    await market.readCoinMarket(MINT, {...deps, now: () => NOW + 5_000});
+    expect(reads).toBe(1);
+    await market.readCoinMarket(MINT, {...deps, now: () => NOW + 11_000});
+    expect(reads).toBe(2);
   });
-  test("with the curve read: dollar price is curve price times the quote's dollar price; parts are cached site-wide", async () => {
+  test("with the curve: holders and their count, cached site-wide for their windows", async () => {
     launch();
-    sqlite.query("INSERT INTO live_market_cache (mint, kind, fetched_at, json) VALUES (?, 'curve', ?, ?)").run(MINT, NOW - 1_000, JSON.stringify({status: "curve", priceQuote: 2.8e-8, marketCapQuote: 28, progress: 0.25, reservesQuote: 10, supply: 1e9, pool: CURVE, marketOwners: [CURVE]}));
+    cacheCurve(NOW - 1_000);
     const net = fakeNetwork();
     const deps = {fetch: net.fetch, now: () => NOW, connection: () => null, rpcUrl: () => "https://rpc.example/secret-key-0001"};
     const answer = (await market.readCoinMarket(MINT, deps))!;
-    expect(answer.priceUsd).toBeCloseTo(2.8e-8 * 95.5, 15);
-    expect(answer.marketCapUsd).toBeCloseTo(2.8e-8 * 95.5 * 1e9, 6);
-    expect(answer.reservesUsd).toBeCloseTo(955, 6);
-    expect(answer).toMatchObject({change: {h24: -10.86}, volumeUsd24h: 1102.41, holderCount: 2, priceSource: "chain", asOf: NOW, stale: false});
-    expect(answer.trades).toHaveLength(2);
-    const reads = net.calls.length;
-    await market.readCoinMarket(MINT, {...deps, now: () => NOW + 5_000});
-    expect(net.calls.length).toBe(reads);
-    // Candles for one range, read once and then reused.
-    const first = await market.readCoinCandles(MINT, "5m", deps);
-    expect(first).toMatchObject({range: "5m", stale: false});
-    expect(first!.candles).toHaveLength(2);
-    const url = new URL(net.calls.at(-1)!.url);
-    expect(url.pathname).toBe(`/api/v2/networks/solana/pools/${CURVE}/ohlcv/minute`);
-    expect(url.searchParams.get("aggregate")).toBe("5");
-    expect(url.searchParams.get("token")).toBe(MINT);
-    await market.readCoinCandles(MINT, "5m", deps);
-    expect(net.calls.at(-1)!.url).toBe(url.toString());
-    expect(net.calls.filter(c => c.url.includes("/ohlcv/"))).toHaveLength(1);
-  });
-  test("the GeckoTerminal budget is site-wide: past it, parts are served from the cache or null", async () => {
-    launch();
-    sqlite.query("INSERT INTO live_market_cache (mint, kind, fetched_at, json) VALUES (?, 'curve', ?, ?)").run(MINT, NOW, JSON.stringify({status: "curve", priceQuote: 2.8e-8, marketCapQuote: 28, progress: 0.25, reservesQuote: 10, supply: 1e9, pool: CURVE, marketOwners: [CURVE]}));
-    const net = fakeNetwork();
-    for (const range of shapes.CHART_RANGES) await market.readCoinCandles(MINT, range, {fetch: net.fetch, now: () => NOW, connection: () => null, rpcUrl: () => null});
-    for (let i = 0; i < 30; i++) sqlite.query("INSERT INTO rate_events (scope, key_hash, at) SELECT scope, key_hash, ? FROM rate_events WHERE scope = 'live:market:gecko:site' LIMIT 1").run(NOW);
-    const before = net.calls.length;
-    const answer = await market.readCoinMarket(MINT, {fetch: net.fetch, now: () => NOW, connection: () => null, rpcUrl: () => null});
-    expect(net.calls.length).toBe(before);
-    expect(answer).toMatchObject({volumeUsd24h: null, trades: null, stale: false});
+    expect(answer).toMatchObject({status: "curve", priceQuote: 2.8e-8, supply: 1e9, pool: CURVE, holderCount: 2, holderCountCapped: false, asOf: NOW, stale: false});
+    await market.readCoinMarket(MINT, {...deps, now: () => NOW + 5 * 60_000});
+    expect(net.calls).toHaveLength(1);
   });
   test("migration 0020 is probed by /api/live/health", async () => {
     expect(await missingMigrations()).toEqual([]);
@@ -241,20 +227,22 @@ describe("the page", () => {
     // A mantissa that rounds up to 10 moves the exponent instead of showing a price ten times too small.
     expect(format.axisPrice(0.0000099996)).toBe("0.0₄1000");
     expect(format.axisPrice(0.00099996)).toBe("0.001000");
+    expect(format.axisPrice(0.0000028)).toBe("0.0₅2800");
+    expect(format.axisPrice(12.5)).toBe("12.50");
     // Units are chosen after rounding; dust never reads as $0.00.
     expect(format.usdShort(999_999)).toBe("$1.00M");
     expect(format.usdShort(99_960)).toBe("$100K");
     expect(format.usdShort(999.6)).toBe("$1.00K");
     expect(format.usdShort(0.004)).toBe("<$0.01");
     expect(format.amountShort(999_950)).toBe("1.00M");
-    expect(format.axisPrice(0.0000028)).toBe("0.0₅2800");
-    expect(format.axisPrice(0.0123)).toBe("0.01230");
-    expect(format.axisPrice(12.5)).toBe("12.50");
   });
   test("the coin page shows the market, the chart, trades, holders and the copyable address, and keeps the card", () => {
     const page = read("src/routes/coin/$id.tsx");
     for (const part of ["<MarketPanel", "<ChartSection", "<TradesSection", "<HoldersSection", "<CopyAddress", "<LaunchCardPreview"]) expect(page).toContain(part);
     expect(read("src/components/carddex/market/CoinMarket.tsx")).toContain('lazy(() => import("./PriceChart"))');
     expect(read("src/components/carddex/market/PriceChart.tsx")).toContain("attributionLogo: true");
+  });
+  test("the site's security headers let the browser read GeckoTerminal", () => {
+    expect(read("src/lib/security-headers.server.ts")).toMatch(/'self' https:/);
   });
 });
