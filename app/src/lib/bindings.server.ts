@@ -56,6 +56,10 @@ type AppEnv = {
   /** Optional: most X searches per hour (default 4) and reply suggestions per hour (default 30). */
   CARDDEX_X_REPLY_READS_PER_HOUR?: string;
   CARDDEX_X_REPLY_SUGGESTIONS_PER_HOUR?: string;
+  /** "true": a token pair's initial buy may first get its quote with SOL (a Jupiter swap the creator approves). */
+  CARDDEX_LIVE_QUOTE_SWAP?: string;
+  /** The most SOL one such swap may take, in SOL (default 2). */
+  CARDDEX_LIVE_QUOTE_SWAP_MAX_SOL?: string;
   // Secrets: X's app-only bearer token (recent search; read only, it cannot post), and an Anthropic API key for the
   // optional reply suggestions. Either missing turns its half off. Never logged, never reported.
   X_BEARER_TOKEN?: string;

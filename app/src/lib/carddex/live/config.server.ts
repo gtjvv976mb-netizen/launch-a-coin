@@ -122,6 +122,7 @@ export function liveReadiness(): LiveReadiness {
   return { implemented: true, configured, enabled, ready: recoveryReady && enabled, recoveryEnabled, recoveryReady,
     network: "solana-mainnet-beta", publicOrigin: origin, blockers, walletFirst: walletFirstWallets(env.CARDDEX_LIVE_WALLET_FIRST),
     walletBatch: walletBatchWallets(env.CARDDEX_LIVE_WALLET_BATCH), feeSharing: recoveryReady && feeSharingSwitchOn(env.CARDDEX_LIVE_FEE_SHARING),
+    quoteSwap: recoveryReady && switchValue(env.CARDDEX_LIVE_QUOTE_SWAP) === "true",
     xAnnounce, xAutoApprove: xAnnounce && xAutoApproveSwitchOn(env.CARDDEX_X_AUTO_APPROVE) };
 }
 /** "launch" starts something new; "recovery" serves a creator's existing launch. */

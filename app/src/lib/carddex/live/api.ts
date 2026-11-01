@@ -99,6 +99,21 @@ export const checkLiveLaunchSize = createServerFn({method: "POST"}).validator(z.
 export const getLiveQuoteBalance = createServerFn({method: "GET"}).validator(z.object({
   wallet: z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/), quoteAssetKey: z.string().max(30),
 })).handler(({data}) => attempt("balance", async () => { await perAddress(LIMITS.balanceIp); return service.getLiveQuoteBalance(data); }));
+const jupiterInstruction = z.object({programId: z.string().max(64), accounts: z.array(z.object({pubkey: z.string().max(64), isSigner: z.boolean(), isWritable: z.boolean()})).max(80), data: z.string().max(4096)});
+export const prepareLiveQuoteSwap = createServerFn({method: "POST"}).validator(z.object({
+  quoteAssetKey: z.string().max(30), needBaseUnits: z.string().regex(/^[1-9][0-9]{0,19}$/),
+  instructions: z.object({
+    computeBudgetInstructions: z.array(jupiterInstruction).max(4).nullish(), setupInstructions: z.array(jupiterInstruction).max(10).nullish(),
+    swapInstruction: jupiterInstruction, cleanupInstruction: jupiterInstruction.nullish(), otherInstructions: z.array(jupiterInstruction).max(4).nullish(),
+    tokenLedgerInstruction: jupiterInstruction.nullish(), addressLookupTableAddresses: z.array(z.string().max(64)).max(4).nullish(),
+  }),
+})).handler(({data}) => attempt("swap-prepare", async () => { await sameOrigin(); return service.prepareLiveQuoteSwap(await signedIn(LIMITS.swapWallet), data); }));
+export const submitLiveQuoteSwap = createServerFn({method: "POST"}).validator(z.object({swapId: z.string().uuid(), transactionBase64: z.string().max(4096)})).handler(({data}) => attempt("swap-submit", async () => {
+  await sameOrigin(); return service.submitLiveQuoteSwap(await signedIn(LIMITS.swapWallet), data);
+}));
+export const confirmLiveQuoteSwap = createServerFn({method: "POST"}).validator(z.object({swapId: z.string().uuid()})).handler(({data}) => attempt("swap-confirm", async () => {
+  await sameOrigin(); return service.confirmLiveQuoteSwap(await signedIn(LIMITS.swapConfirmWallet), data);
+}));
 export const getLiveLaunchIntent = createServerFn({method: "GET"}).validator(z.object({intentId})).handler(({data}) => attempt("read", async () => ({intent: await service.getLiveLaunchIntent(await signedIn(LIMITS.readWallet), data.intentId)})));
 export const listLiveLaunchIntents = createServerFn({method: "GET"}).handler(() => attempt("list", async () => ({intents: await service.listLiveLaunchIntents(await signedIn(LIMITS.readWallet))})));
 export const abandonLiveLaunchIntent = createServerFn({method: "POST"}).validator(z.object({intentId})).handler(({data}) => attempt("abandon", async () => {

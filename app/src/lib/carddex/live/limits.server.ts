@@ -33,6 +33,9 @@ export const LIMITS = {
   readWallet: { scope: "live:read:wallet", max: 60, windowMs: MINUTE },
   // A wallet's quote balance for the Launch form (public chain data, read through the server RPC).
   balanceIp: { scope: "live:balance:ip", max: 30, windowMs: MINUTE },
+  // Getting a pair's quote with SOL before an initial buy: prepared swaps per wallet, and their sends and checks.
+  swapWallet: { scope: "live:swap:wallet", max: 10, windowMs: 10 * MINUTE },
+  swapConfirmWallet: { scope: "live:swap-confirm:wallet", max: 120, windowMs: MINUTE },
   submitWallet: { scope: "live:submit:wallet", max: 20, windowMs: MINUTE },
   abandonWallet: { scope: "live:abandon:wallet", max: 20, windowMs: MINUTE },
   reportWallet: { scope: "live:report:wallet", max: 10, windowMs: MINUTE },
@@ -179,6 +182,7 @@ export const SCHEMA_PROBES: readonly [migration: string, sql: string][] = [
   ["0019", "SELECT id, query, fetched_at, posts_json FROM x_reply_cache LIMIT 0"],
   ["0019", "SELECT tweet_id, mark, wallet, created_at FROM x_reply_marks LIMIT 0"],
   ["0020", "SELECT mint, kind, fetched_at, json FROM live_market_cache LIMIT 0"],
+  ["0021", "SELECT id, wallet, quote_key, need, message_sha256, plan_json, status, signature, signed_transaction_base64 FROM live_quote_swaps LIMIT 0"],
 ];
 export async function missingMigrations(): Promise<string[]> {
   const missing = new Set<string>();

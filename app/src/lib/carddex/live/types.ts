@@ -58,6 +58,8 @@ export type LiveReadiness = {
   walletBatch: string[];
   /** The optional creator fee split (CARDDEX_LIVE_FEE_SHARING="true", with recovery ready). Absent means off. */
   feeSharing?: boolean;
+  /** A token pair's initial buy may first get its quote with SOL through a Jupiter swap (CARDDEX_LIVE_QUOTE_SWAP="true", with recovery ready). */
+  quoteSwap?: boolean;
   /** Announcements on @launchacard (CARDDEX_X_AUTOPOST="true" with its secrets, and recovery ready). Absent means off. */
   xAnnounce?: boolean;
   /** Announcements that pass the post filters are queued without an owner's approval (CARDDEX_X_AUTO_APPROVE="true", with xAnnounce). */

@@ -1,5 +1,6 @@
 import * as sdk from "../../../../../integrations/pumpfun/src/live";
 import { readQuoteBalance } from "../../../../../integrations/pumpfun/src/market";
+import { checkSignedQuoteSwap, prepareQuoteSwap, signedBlockhash, SwapRefused, type JupiterSwapInstructions, type QuoteSwapPlan } from "../../../../../integrations/pumpfun/src/swap";
 import type { FeeSharePlan, LiveLaunchInput, WalletTransactionPlan } from "../../../../../integrations/pumpfun/src/live";
 import { feeRecipientsProblem, sameFeeSplit } from "../../../../../integrations/pumpfun/src/fee-share-rules";
 import { HOLDER_REWARDS_NO_SPLIT, createOptionsProblem, readCreateOptions, type CreateOptions } from "../../../../../integrations/pumpfun/src/create-options";
@@ -81,7 +82,7 @@ const redact = (text: string) => text.replace(/https?:\/\/\S+/g, "[provider]").r
  * One structured line per launch stage change and refusal (REL-6), so a failed mainnet launch can be traced after the
  * fact by its intent id (the support reference is its first 8 characters). Never addresses, keys, signatures or URLs.
  */
-export function logLaunchEvent(event: string, fields: {intentId?: string; kind?: "token" | "nft" | "fees"; reason?: string} & Record<string, string | number | boolean | undefined>) {
+export function logLaunchEvent(event: string, fields: {intentId?: string; kind?: "token" | "nft" | "fees" | "swap"; reason?: string} & Record<string, string | number | boolean | undefined>) {
   console.info("live_launch_event", JSON.stringify({event, ...fields, ...(fields.reason ? {reason: redact(fields.reason)} : {})}));
 }
 /**
@@ -996,4 +997,155 @@ export async function skipLiveFeeShare(wallet: string, input: {intentId: string}
     stmt("UPDATE live_fee_shares SET status = 'skipped', updated_at = ? WHERE intent_id = ? AND status IN ('requested','prepared','failed')", Date.now(), row.id)]);
   logLaunchEvent("fee_split_skipped", {intentId: row.id, kind: "fees"});
   return {intent: await feeIntent(wallet, row.id)};
+}
+
+// ---------------------------------------------------------------- getting a pair's quote with SOL (swap.ts)
+
+export const QUOTE_SWAP_OFF = "Getting the token with SOL is not open here. Get it first (for example on Jupiter), or set the initial buy to 0.";
+const DEFAULT_SWAP_MAX_SOL = 2;
+type SwapRow = {id: string; wallet: string; quote_key: string; need: string; message_sha256: string; plan_json: string; status: "prepared" | "pending" | "confirmed" | "failed" | "expired"; signature: string | null; signed_transaction_base64: string | null; created_at: number};
+function swapTarget(wallet: string, quoteAssetKey: string, need: bigint) {
+  if (!liveReadiness().quoteSwap) throw new UserError(QUOTE_SWAP_OFF);
+  if (!isOfferedPair(quoteAssetKey) || quoteAssetKey === "sol") throw new UserError("Choose a token pair.");
+  const asset = getPairAsset(quoteAssetKey);
+  // A tokenized stock's first buy is refused anyway (issuer controls): never swap into one for it.
+  if (asset.kind === "stock") throw new UserError(STOCK_BUY_WARNS);
+  const maxSol = Number(runtime.bindings().CARDDEX_LIVE_QUOTE_SWAP_MAX_SOL ?? "");
+  const maxSpend = BigInt(Math.round((Number.isFinite(maxSol) && maxSol > 0 && maxSol <= 50 ? maxSol : DEFAULT_SWAP_MAX_SOL) * 1e9));
+  if (need <= 0n) throw new UserError("Nothing to get: the initial buy is 0.");
+  return {creator: wallet, quoteMint: asset.mint, quoteTokenProgram: asset.tokenProgram, need, maxSpend, symbol: asset.symbol};
+}
+const swapError = (error: unknown) => error instanceof SwapRefused ? new UserError(`${error.message}.`) : plainChainError(error, "fees");
+/** A swap may cost at most this much more than Jupiter's independent price for the same amount (bps). */
+export const SWAP_FAIR_PRICE_TOLERANCE_BPS = 1_500n;
+const JUPITER_PRICE_URL = "https://lite-api.jup.ag/price/v3";
+/**
+ * Jupiter's own price for `amount` of the quote, in lamports, read by the server (never from the page): the bound a
+ * proposed route's cost is held to. Kept a minute in D1. Null when no price could be read.
+ */
+async function fairSwapLamports(quoteMint: string, decimals: number, amount: bigint, now = Date.now()): Promise<bigint | null> {
+  type Prices = {quoteUsd: number; solUsd: number};
+  const WSOL = "So11111111111111111111111111111111111111112";
+  const headers = {accept: "application/json", "user-agent": "LaunchACard/1.0 (+https://launchacard.fun)"};
+  let cached: {at: number; prices: Prices} | null = null;
+  try {
+    const row = await one<{fetched_at: number; json: string}>("SELECT fetched_at, json FROM live_market_cache WHERE mint = ? AND kind = 'jup-price'", quoteMint);
+    if (row) cached = {at: row.fetched_at, prices: JSON.parse(row.json) as Prices};
+  } catch { /* No cache. */ }
+  let prices: Prices | null = cached && now - cached.at < 60_000 ? cached.prices : null;
+  // Jupiter's price service first; DexScreener (the deepest pair for each token) when Jupiter refuses this address.
+  const sources: (() => Promise<Prices | null>)[] = [
+    async () => {
+      const response = await fetch(`${JUPITER_PRICE_URL}?ids=${quoteMint},${WSOL}`, {headers, redirect: "manual", signal: AbortSignal.timeout(6_000)});
+      if (!response.ok) { logLaunchEvent("swap_price_unavailable", {kind: "swap", reason: `jupiter ${response.status}`}); return null; }
+      const body = await response.json() as Record<string, {usdPrice?: number} | undefined>;
+      return {quoteUsd: Number(body[quoteMint]?.usdPrice), solUsd: Number(body[WSOL]?.usdPrice)};
+    },
+    async () => {
+      const response = await fetch(`https://api.dexscreener.com/tokens/v1/solana/${quoteMint},${WSOL}`, {headers, redirect: "manual", signal: AbortSignal.timeout(6_000)});
+      if (!response.ok) { logLaunchEvent("swap_price_unavailable", {kind: "swap", reason: `dexscreener ${response.status}`}); return null; }
+      const pairs = await response.json() as {baseToken?: {address?: string}; priceUsd?: string; liquidity?: {usd?: number}}[];
+      const deepest = (mint: string) => (Array.isArray(pairs) ? pairs : []).filter(p => p.baseToken?.address === mint).sort((a, b) => (b.liquidity?.usd ?? 0) - (a.liquidity?.usd ?? 0))[0];
+      return {quoteUsd: Number(deepest(quoteMint)?.priceUsd), solUsd: Number(deepest(WSOL)?.priceUsd)};
+    },
+  ];
+  for (const source of prices ? [] : sources) {
+    try {
+      const read = await source();
+      if (read && read.quoteUsd > 0 && read.solUsd > 0) { prices = read; break; }
+    } catch { logLaunchEvent("swap_price_unavailable", {kind: "swap", reason: "unreachable"}); }
+  }
+  if (prices && prices !== cached?.prices) await stmt("INSERT OR REPLACE INTO live_market_cache (mint, kind, fetched_at, json) VALUES (?, 'jup-price', ?, ?)", quoteMint, now, JSON.stringify(prices)).run().catch(() => undefined);
+  // Both refused: a price read in the last five minutes still bounds the swap.
+  if (!prices && cached && now - cached.at < 5 * 60_000) prices = cached.prices;
+  if (!prices) return null;
+  const lamports = Number(amount) / 10 ** decimals * prices.quoteUsd / prices.solUsd * 1e9;
+  return Number.isFinite(lamports) && lamports > 0 ? BigInt(Math.ceil(lamports)) : null;
+}
+/**
+ * Checks and prepares the swap Jupiter proposed for this wallet (swap.ts): the creator's wallet signs it next. `need` is
+ * the whole quote balance the initial buy spends; the server reads what the wallet already holds. One swap at a time per
+ * wallet: one still on its way is settled first, and a wallet that already holds enough is told so (nothing prepared).
+ */
+export async function prepareLiveQuoteSwap(wallet: string, input: {quoteAssetKey: string; needBaseUnits: string; instructions: JupiterSwapInstructions}) {
+  requireLiveConfig("launch"); walletBytes(wallet);
+  const target = swapTarget(wallet, input.quoteAssetKey, BigInt(input.needBaseUnits));
+  const inFlight = (await stmt("SELECT * FROM live_quote_swaps WHERE wallet = ? AND status = 'pending'", wallet).all<SwapRow>()).results ?? [];
+  for (const row of inFlight) if ((await confirmLiveQuoteSwap(wallet, {swapId: row.id})).status === "pending") throw new UserError("Your earlier swap is still on its way. Wait a moment, then press Launch again.");
+  // Earlier prepared swaps are never sent now: only the newest one can be.
+  await stmt("UPDATE live_quote_swaps SET status = 'expired', updated_at = ? WHERE wallet = ? AND status = 'prepared'", Date.now(), wallet).run();
+  const asset = getPairAsset(input.quoteAssetKey);
+  const have = await chain(() => readQuoteBalance(connection() as never, {owner: wallet, quoteMint: asset.mint, tokenProgram: asset.tokenProgram}), "fees");
+  if (have >= target.need) return {alreadyEnough: true as const};
+  // The fair price for the amount missing, read here (never from the page), before anything is simulated.
+  const fair = await fairSwapLamports(asset.mint, asset.decimals, target.need - have);
+  if (fair === null) throw new UserError(`A fair price for ${asset.symbol} couldn't be confirmed right now, so no swap was prepared. Try again in a moment, or get ${asset.symbol} on Jupiter yourself.`);
+  let plan: QuoteSwapPlan;
+  try { plan = await prepareQuoteSwap(connection() as never, input.instructions, target); }
+  catch (error) { throw swapError(error); }
+  if (BigInt(plan.routeMaxIn) > fair + fair * SWAP_FAIR_PRICE_TOLERANCE_BPS / 10_000n + 10_000n) {
+    logLaunchEvent("swap_price_refused", {kind: "swap", quote: input.quoteAssetKey});
+    throw new UserError(`This swap costs well above ${asset.symbol}'s current price (thin liquidity or a fast-moving price), so it wasn't prepared. Lower the initial buy or try again.`);
+  }
+  const id = crypto.randomUUID(), now = Date.now();
+  await stmt("INSERT INTO live_quote_swaps (id, wallet, quote_key, need, message_sha256, plan_json, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'prepared', ?, ?)",
+    id, wallet, input.quoteAssetKey, target.need.toString(), plan.messageSha256, JSON.stringify(plan), now, now).run();
+  logLaunchEvent("swap_prepared", {kind: "swap", quote: input.quoteAssetKey});
+  return {alreadyEnough: false as const, swapId: id, transactionBase64: plan.transactionBase64, messageSha256: plan.messageSha256, spendLamports: plan.spendLamports, quoteAfter: plan.quoteAfter, symbol: target.symbol};
+}
+async function ownedSwap(wallet: string, swapId: string) {
+  const row = await one<SwapRow>("SELECT * FROM live_quote_swaps WHERE id = ? AND wallet = ?", swapId, wallet);
+  if (!row) throw new UserError("This swap was not prepared for this wallet.");
+  return row;
+}
+/** The creator's signed swap: checked again (simulation included), saved, then sent. */
+export async function submitLiveQuoteSwap(wallet: string, input: {swapId: string; transactionBase64: string}) {
+  requireLiveConfig("launch");
+  const row = await ownedSwap(wallet, input.swapId);
+  if (row.status !== "prepared" && row.status !== "pending") throw new UserError("This swap has already finished. Check your balance before trying again.");
+  const plan = JSON.parse(row.plan_json) as QuoteSwapPlan;
+  const target = {...swapTarget(wallet, row.quote_key, BigInt(row.need)), reviewedSpend: BigInt(plan.spendLamports), lookupTables: plan.lookupTables, preparedBase64: plan.transactionBase64};
+  // A wallet that already holds enough (another swap landed) is not charged again.
+  const asset = getPairAsset(row.quote_key);
+  const have = await chain(() => readQuoteBalance(connection() as never, {owner: wallet, quoteMint: asset.mint, tokenProgram: asset.tokenProgram}), "fees");
+  if (have >= BigInt(row.need)) {
+    await stmt("UPDATE live_quote_swaps SET status = 'expired', updated_at = ? WHERE id = ? AND status = 'prepared'", Date.now(), row.id).run();
+    throw new UserError(`This wallet already holds enough ${asset.symbol}, so no swap was sent. Press Launch again.`);
+  }
+  let checked: Awaited<ReturnType<typeof checkSignedQuoteSwap>>;
+  try { checked = await checkSignedQuoteSwap(connection() as never, input.transactionBase64, target); }
+  catch (error) { throw swapError(error); }
+  if (row.signature && row.signature !== checked.signature) throw new UserError("A different swap is already on its way. Wait for it before trying again.");
+  // In one statement: this row is still the one to send, and no other swap of this wallet is on its way or landed since
+  // this one was prepared (two tabs, two approvals: only one is ever sent).
+  const bytes = Buffer.from(checked.bytes).toString("base64");
+  const saved = await stmt(`UPDATE live_quote_swaps SET status = 'pending', signature = ?, signed_transaction_base64 = ?, updated_at = ?
+    WHERE id = ? AND status IN ('prepared','pending') AND (signature IS NULL OR (signature = ? AND signed_transaction_base64 = ?))
+    AND NOT EXISTS (SELECT 1 FROM live_quote_swaps o WHERE o.wallet = ? AND o.id <> ? AND (o.status = 'pending' OR (o.status = 'confirmed' AND o.updated_at >= ?)))`,
+    checked.signature, bytes, Date.now(), row.id, checked.signature, bytes, wallet, row.id, row.created_at).run();
+  if (saved.meta?.changes !== 1) throw new UserError("Another swap for this wallet is on its way or has landed, so this one was not sent. Press Launch again.");
+  try { await kept(connection().sendRawTransaction(checked.bytes, {skipPreflight: true, maxRetries: 3})); }
+  catch (error) { logLaunchEvent("send_uncertain", {kind: "swap", reason: error instanceof Error ? error.message : "unknown"}); }
+  logLaunchEvent("sent", {kind: "swap", quote: row.quote_key});
+  return {signature: checked.signature};
+}
+/** Where the sent swap stands: confirmed (done), failed on Solana, expired unlanded, or still pending (sent again). */
+export async function confirmLiveQuoteSwap(wallet: string, input: {swapId: string}) {
+  const row = await ownedSwap(wallet, input.swapId);
+  if (row.status === "confirmed" || row.status === "failed" || row.status === "expired") return {status: row.status};
+  if (!row.signature || !row.signed_transaction_base64) return {status: "prepared" as const};
+  const rpc = connection();
+  const status = await chain(() => rpc.getSignatureStatuses([row.signature!], {searchTransactionHistory: true}), "fees");
+  const value = status.value[0];
+  const settle = async (next: "confirmed" | "failed" | "expired") => {
+    await stmt("UPDATE live_quote_swaps SET status = ?, updated_at = ? WHERE id = ? AND status = 'pending'", next, Date.now(), row.id).run();
+    logLaunchEvent(next === "confirmed" ? "verified" : next === "failed" ? "landed_failed" : "expired_unlanded", {kind: "swap"});
+    return {status: next};
+  };
+  if (value && (value.confirmationStatus === "confirmed" || value.confirmationStatus === "finalized")) return settle(value.err ? "failed" : "confirmed");
+  const bytes = Buffer.from(row.signed_transaction_base64, "base64");
+  const signed = signedBlockhash(bytes);
+  if (signed && !(await chain(() => rpc.isBlockhashValid(signed, {commitment: "confirmed"}), "fees")).value) return settle("expired");
+  try { await rpc.sendRawTransaction(bytes, {skipPreflight: true, maxRetries: 0}); } catch { /* Sent again on the next check. */ }
+  return {status: "pending" as const};
 }

@@ -250,6 +250,8 @@ function Launch() {
   const feesOpen = useLiveReadiness(live).data?.feeSharing === true && liveOpen;
   // The @launchacard announcement is offered only while its own switch is on (CARDDEX_X_AUTOPOST, with its secrets).
   const xOpen = useLiveReadiness(live).data?.xAnnounce === true && liveOpen;
+  // A token pair's initial buy the wallet is short of is got with SOL at launch (one more wallet approval).
+  const swapOpen = useLiveReadiness(live).data?.quoteSwap === true && liveOpen;
   const liveRef = useRef<LiveLaunchHandle>(null);
   // The pair picks the card (launch-form.ts): ?quote= opens on that pair, an older ?design= link on that design's pair,
   // anything else on SOL. The card's design follows the pair: its main design, or for SOL the design picked in the
@@ -870,6 +872,13 @@ function Launch() {
                     <p role="alert" className="cdx-launch-note__error">{devError}</p>
                   ) : buyBlocked ? (
                     <p role="status">{buyOffText}</p>
+                  ) : buyShort && swapOpen && quoteAsset.kind !== "stock" ? (
+                    <>
+                      <p role="status">{`This wallet has ${balanceText} ${quoteAsset.symbol}. When you launch, your wallet will first ask you to swap SOL for the ${quoteAsset.symbol} the buy needs, through Jupiter.`}</p>
+                      <p className="cdx-launch-note__actions">
+                        <TextLink href={getQuoteUrl(quoteAsset.mint)} target="_blank">Or get {quoteAsset.symbol} on Jupiter yourself<Icon name="external" size={12} /></TextLink>
+                      </p>
+                    </>
                   ) : buyShort ? (
                     <>
                       <p role="alert" className="cdx-launch-note__error">{buyShort}</p>

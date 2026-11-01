@@ -137,6 +137,10 @@ const SECTIONS: Section[] = [
         </li>
         <li>Coin creation and card issuance are paid mainnet transactions. Exact costs show before your wallet asks.</li>
         <li>
+          An initial buy on a token pair is paid in that token. If your wallet doesn't hold enough, Launch can first swap SOL
+          for it through Jupiter, in its own approval. The swap pays Jupiter's route and the network fee, and Launch adds no fee.
+        </li>
+        <li>
           Sharing creator fees, when Launch offers it, is an optional separate approval after the card: a network fee
           and rent for pump.fun's fee-sharing account. pump.fun pays creator fees; Launch a Card takes none and is never
           in your split.
@@ -181,6 +185,7 @@ const SECTIONS: Section[] = [
         <ol className="cdx-how__ol">
           <li>Pick your coin's pair: its card design comes with it (with SOL, pick one of its designs). Add your token name, ticker and artwork.</li>
           <li>Connect your creator wallet and sign an ownership message. It starts your launch session and spends nothing.</li>
+          <li>With an initial buy on a token pair your wallet is short of: approve a swap of SOL for that token first. Launch shows the most SOL it can take.</li>
           <li>Review the token creation costs and any initial buy, then approve the pump.fun transaction in your wallet.</li>
           <li>After the token is verified, approve its one-of-one card NFT to that same wallet. Some wallets sign both in one approval.</li>
           <li>If the token lands before the card, finish the card from Launch. Your token is not created again.</li>

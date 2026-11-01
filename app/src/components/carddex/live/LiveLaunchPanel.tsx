@@ -1,9 +1,9 @@
 import { useEffect, useImperativeHandle, useRef, useState, type Dispatch, type ReactNode, type Ref, type SetStateAction } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  abandonLiveLaunchIntent, confirmLiveCreatorNft, confirmLiveFeeShare, confirmLiveToken, getLiveLaunchIntent,
+  abandonLiveLaunchIntent, confirmLiveCreatorNft, confirmLiveFeeShare, confirmLiveQuoteSwap, confirmLiveToken, getLiveLaunchIntent,
   getLiveWallet, holdLiveCard, issueLiveCardMint, listLiveLaunchIntents, prepareLiveCreatorNft, prepareLiveFeeShare,
-  prepareLiveLaunch, reportLiveWalletChange, skipLiveFeeShare, submitLiveFeeShare, submitLiveTransaction,
+  prepareLiveLaunch, prepareLiveQuoteSwap, reportLiveWalletChange, skipLiveFeeShare, submitLiveFeeShare, submitLiveQuoteSwap, submitLiveTransaction,
   type LiveApprovedCard, type LiveFeeRecipient, type LiveLaunchIntent, type LivePrepareInput, type LiveResult,
 } from "../../../lib/carddex/live/api";
 import { composeCreatorCard } from "../../../lib/carddex/live/compose-client";
@@ -14,6 +14,7 @@ import { Button, Icon, Modal, TextLink } from "../../mintdex/ui";
 import { EmptyState } from "../../mintdex/empty-state";
 import { WalletConnectDialog } from "../../mintdex/wallet-connect";
 import { BUY_DOES_NOT_FIT, checkLiveBuyFit, LIVE_BUY_FIT, liveBuyFitKey, readLiveQuoteBalance, STOCK_BUY_WARNS } from "./buy-fit";
+import { quoteSolFor, swapInstructions } from "../../../lib/carddex/live/jupiter";
 import { quoteBuyShortfall } from "../../../lib/carddex/live/quote-buy";
 import { formatLiveAmount } from "./amounts";
 import { LiveTokenImage } from "./LiveTokenImage";
@@ -22,8 +23,9 @@ import { ShareCoin, assetHref } from "../ShareCoin";
 import { PagedMessage } from "./PagedMessage";
 import { useLiveReadiness } from "./readiness";
 import { connectLiveWallet, getLiveWalletSnapshot, signLiveTransaction, signLiveTransactions, useLiveWallet, walletSupportsSignIn } from "./wallet";
+import { walletRejected } from "./wallet-errors";
 import {
-  createEphemeralSigner, destroyEphemeralSigner, signingOrderFor, signsBothFor, toBase64, unsentStageNext,
+  createEphemeralSigner, destroyEphemeralSigner, fromBase64, signingOrderFor, signsBothFor, toBase64, unsentStageNext,
   isWalletAddress, validateFeeSharePlan, validateLivePlan, type EphemeralSigner, type ExpectedFeePlan, type ExpectedPlan, type SigningOrder, type TransactionPlan,
 } from "./transaction";
 import {
@@ -62,12 +64,13 @@ export type LiveLaunchHandle = { submit(): void; startAnother(): void; /** The t
 export type LivePrimary = { kind: "submit" | "startAnother"; label: string; pendingLabel?: string; pending: boolean; disabled: boolean; blockedByPair: boolean; status?: { text: string; alert: boolean } | null };
 // coinImage: a new launch's first prepare, where the server also makes the coin's turning image. Every other prepare
 // (a saved launch prepared again, the buy-fit check, the card) is "preparing" and makes no image.
-type Busy = "ownership" | "artwork" | "coinImage" | "preparing" | "refreshing" | "wallet" | "submitting" | "confirming" | "recovering" | null;
+type Busy = "ownership" | "artwork" | "coinImage" | "preparing" | "swapping" | "refreshing" | "wallet" | "submitting" | "confirming" | "recovering" | null;
 const BUSY_COPY: Record<NonNullable<Busy>, string> = {
   ownership: SIGN_IN_COPY,
   artwork: "Preparing your art…",
   coinImage: "Making your coin image and checking costs…",
   preparing: "Checking balances and exact costs…",
+  swapping: "Finding the best swap for the token your initial buy needs…",
   refreshing: "Getting fresh costs for your wallet…",
   wallet: WALLET_OPEN_COPY,
   submitting: "Submitting the transaction you approved…",
@@ -135,6 +138,8 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
   const readiness = useLiveReadiness();
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState<Busy>(null), [error, setError] = useState("");
+  // What the wallet is being asked to approve while a pair's token is got with SOL (getQuoteWithSol).
+  const [swapNote, setSwapNote] = useState("");
   const [terms, setTerms] = useState(false);
   // Set once a wallet action has started on this page: from then on an error is shown on the progress rows.
   const [attempted, setAttempted] = useState(false);
@@ -271,6 +276,48 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
     void queryClient.invalidateQueries({ queryKey: [LIVE_BUY_FIT] });
     assertCurrent(version, address);
   }
+  /**
+   * A token pair's initial buy is paid in that token: get what the wallet is short of with SOL first, as its own
+   * transaction. Jupiter proposes the route (in this browser), the server checks and simulates it and builds the
+   * transaction, the wallet approves it, the server checks the signed copy again and sends it. The launch then goes on.
+   */
+  async function getQuoteWithSol(address: string, version: number, quoteAssetKey: string, have: bigint, need: bigint) {
+    const quote = getPairAsset(quoteAssetKey), short = need - have;
+    setBusy("swapping");
+    const offer = await quoteSolFor(quote.mint, short);
+    assertCurrent(version, address);
+    const instructions = await swapInstructions(offer, address);
+    assertCurrent(version, address);
+    const prepared = unwrap(await prepareLiveQuoteSwap({ data: { quoteAssetKey, needBaseUnits: need.toString(), instructions } }));
+    assertCurrent(version, address);
+    // The wallet holds enough after all (an earlier swap landed): the launch simply goes on.
+    if (prepared.alreadyEnough) return;
+    setSwapNote(`Your initial buy is paid in ${quote.symbol}. Approve the swap in your wallet: up to ${formatLiveAmount(prepared.spendLamports, 9)} SOL (fees included) for ${formatLiveAmount(short.toString(), quote.decimals)} ${quote.symbol}. SOL the swap doesn't use comes back.`);
+    try {
+      setBusy("wallet");
+      let signed: Uint8Array;
+      try { signed = await signLiveTransaction(fromBase64(prepared.transactionBase64), address); }
+      catch (error) { if (walletRejected(error)) throw new Error(`You declined the swap, so nothing was spent. To launch without it, set the initial buy to 0.`); throw error; }
+      assertCurrent(version, address);
+      setBusy("submitting");
+      unwrap(await submitLiveQuoteSwap({ data: { swapId: prepared.swapId, transactionBase64: toBase64(signed) } }));
+      setBusy("confirming");
+      let status = "pending";
+      for (let i = 0; i < 45 && status === "pending"; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 2_000));
+        status = unwrap(await confirmLiveQuoteSwap({ data: { swapId: prepared.swapId } })).status;
+      }
+      assertCurrent(version, address);
+      if (status === "failed") throw new Error(`The swap failed on Solana, so no ${quote.symbol} was bought; only the network fee was spent. Try again, or set the initial buy to 0.`);
+      if (status === "expired") throw new Error("The swap expired before it landed, so nothing was spent. Try again.");
+      if (status !== "confirmed") throw new Error(`The swap is still on its way. Check your wallet for ${quote.symbol}, then press Launch again.`);
+      // The launch spends from the wallet itself: read what it now holds.
+      const after = await readLiveQuoteBalance(address, quoteAssetKey);
+      assertCurrent(version, address);
+      if (after !== null && after < need) throw new Error(quoteBuyShortfall(quote.symbol, formatLiveAmount(after.toString(), quote.decimals), formatLiveAmount(need.toString(), quote.decimals)));
+      void queryClient.invalidateQueries({ queryKey: ["live-quote-balance"] });
+    } finally { setSwapNote(""); }
+  }
   async function operate(action: (address: string, version: number) => Promise<void>) {
     if (running.current) return;
     // The store, not this render's copy: a launch that continues after connecting runs before the next render.
@@ -383,7 +430,11 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
           const quote = getPairAsset(draft.quoteAssetKey);
           const have = await readLiveQuoteBalance(address, draft.quoteAssetKey);
           assertCurrent(version, address);
-          if (have !== null && have < BigInt(draft.initialBuyQuoteBaseUnits)) throw new Error(quoteBuyShortfall(quote.symbol, formatLiveAmount(have.toString(), quote.decimals), formatLiveAmount(draft.initialBuyQuoteBaseUnits, quote.decimals)));
+          if (have !== null && have < BigInt(draft.initialBuyQuoteBaseUnits)) {
+            // Getting it with SOL first, in its own wallet approval (owner request 1 November 2026), where this site offers it.
+            if (!readiness.data?.quoteSwap || quote.kind === "stock") throw new Error(quoteBuyShortfall(quote.symbol, formatLiveAmount(have.toString(), quote.decimals), formatLiveAmount(draft.initialBuyQuoteBaseUnits, quote.decimals)));
+            await getQuoteWithSol(address, version, draft.quoteAssetKey, have, BigInt(draft.initialBuyQuoteBaseUnits));
+          }
         }
       }
       if (!tokenKey.current) {
@@ -990,7 +1041,7 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
       {intent?.status === "nft_pending" && (intent.nftSignature || uncertain) ? <Button variant="outline" block pending={!!busy} disabled={!canRecover} onClick={() => void checkConfirmation()}>Check card confirmation</Button> : null}
     </div>
     {/* What the launch waits on, or why it stopped, right under the primary (the stage rows below say which step). */}
-    {busy ? <PagedMessage text={busy === "wallet" && pairCard ? WALLET_OPEN_PAIR_COPY : BUSY_COPY[busy]} /> : null}
+    {busy ? <PagedMessage text={swapNote && busy !== "swapping" ? swapNote : busy === "wallet" && pairCard ? WALLET_OPEN_PAIR_COPY : BUSY_COPY[busy]} /> : null}
     {error ? <PagedMessage text={error} alert /> : null}
     {recoverNote && !savedListShown ? <p className="cdx-live-meta" role="status">{recoverNote}</p> : null}
     {wallet.address ? <p className="cdx-live-wallet-line">Creator wallet · <span className="cdx-live-address">{brief(wallet.address)}</span>{!wallet.mainnet ? " · Switch to mainnet" : ""}</p> : null}
@@ -1142,6 +1193,7 @@ const PHASE: Record<NonNullable<Busy>, string> = {
   artwork: "Preparing your artwork",
   coinImage: "Making your coin image",
   preparing: "Preparing the transaction",
+  swapping: "Getting the token with SOL",
   refreshing: "Refreshing the transaction",
   wallet: "Waiting for your wallet",
   submitting: "Sending",

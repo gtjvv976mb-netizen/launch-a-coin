@@ -28,6 +28,9 @@
     "CARDDEX_LIVE_RECOVERY_ENABLED": "true",
     // CARDDEX_LIVE_FEE_SHARING ("true" only) offers the optional pump.fun creator fee split after the card.
     "CARDDEX_LIVE_FEE_SHARING": "true",
+    // CARDDEX_LIVE_QUOTE_SWAP ("true" only): a token pair's initial buy the wallet is short of is got with SOL first,
+    // through a Jupiter swap the server checks and the creator approves (integrations/pumpfun/src/swap.ts).
+    "CARDDEX_LIVE_QUOTE_SWAP": "true",
     "CARDDEX_X_AUTOPOST": "true",
     "CARDDEX_X_AUTO_APPROVE": "true",
     "CARDDEX_ADMIN_WALLETS": "48G9GNHNRTQZQGBxvXuEEendXEcFTJCXfita9hVAh7EP,D2bkDa8ZFYAbdYtJFBLhc5Fzuvmvc5RxHNTG7mk9QBiC,3J57tqAJqRmSBn1ZYDu9JpMMyTfBHdcGGwECiPQeiji3"

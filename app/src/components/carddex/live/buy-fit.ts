@@ -67,5 +67,5 @@ export function useLiveQuoteBalance(active: boolean, wallet: string | null, quot
   });
   return !active || !wallet || quoteAssetKey === "sol" ? undefined : query.data;
 }
-/** Where to get a pair's quote with SOL: Jupiter's swap page (the site never swaps for anyone). */
+/** Jupiter's swap page for a pair's quote: the manual way, beside the launch's own swap (getQuoteWithSol). */
 export const getQuoteUrl = (quoteMint: string) => `https://jup.ag/swap/SOL-${quoteMint}`;
