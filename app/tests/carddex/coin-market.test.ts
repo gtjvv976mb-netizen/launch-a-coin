@@ -22,6 +22,7 @@ const market = await import("../../src/lib/carddex/live/market.server");
 const gecko = await import("../../src/lib/carddex/live/gecko");
 const shapes = await import("../../src/lib/carddex/live/market");
 const format = await import("../../src/components/carddex/market/format");
+const share = await import("../../src/components/carddex/ShareCoin");
 const {missingMigrations} = await import("../../src/lib/carddex/live/limits.server");
 
 const APP = resolve(import.meta.dir, "../..");
@@ -244,5 +245,29 @@ describe("the page", () => {
   });
   test("the site's security headers let the browser read GeckoTerminal", () => {
     expect(read("src/lib/security-headers.server.ts")).toMatch(/'self' https:/);
+  });
+});
+
+describe("sharing a coin", () => {
+  test("X's composer opens prefilled with the coin, its cashtag, our handle and the coin page", () => {
+    const text = share.shareText({name: "Charizard!", ticker: "CHARI", creator: true});
+    expect(text).toBe("I just launched Charizard! ($CHARI) on @launchacard 🃏 It comes with its own one-of-one NFT card.");
+    const url = new URL(share.xShareUrl(text, share.coinPageUrl(MINT)));
+    expect(`${url.origin}${url.pathname}`).toBe("https://x.com/intent/tweet");
+    expect(url.searchParams.get("text")).toBe(text);
+    expect(url.searchParams.get("url")).toBe(`https://launchacard.fun/coin/${MINT}`);
+    expect(share.shareText({name: "Charizard!", ticker: "CHARI"})).toBe("Charizard! ($CHARI) has its own one-of-one NFT card on @launchacard 🃏");
+  });
+  test("only a stored launch asset is offered to save, as a same-origin path", () => {
+    expect(share.assetHref("https://launchacard.fun/api/live/assets/abc/card.png")).toBe("/api/live/assets/abc/card.png");
+    expect(share.assetHref("/api/live/assets/abc/card.png")).toBe("/api/live/assets/abc/card.png");
+    expect(share.assetHref("https://evil.example/x.png")).toBeNull();
+    expect(share.assetHref(null)).toBeNull();
+  });
+  test("the launch panel offers sharing once a launch is complete, and every coin page offers it", () => {
+    const panel = read("src/components/carddex/live/LiveLaunchPanel.tsx");
+    expect(panel).toMatch(/status === "complete" && intent \? <section[^>]*cdx-live-share/);
+    expect(panel).toContain("<ShareCoin creator");
+    expect(read("src/routes/coin/$id.tsx")).toContain("<ShareCoin ");
   });
 });

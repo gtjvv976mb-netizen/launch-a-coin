@@ -374,3 +374,12 @@
 .cdx-coin-launched__manual { display: flex; flex-direction: column; gap: 6px; font-size: var(--text-caption); color: var(--color-slate); text-align: left; }
 .cdx-coin-launched__manual input { width: min(100%, 30em); min-height: 40px; padding: 0 12px; border: 1px solid var(--color-control-border); border-radius: var(--radius-row); background: var(--color-sheet); color: var(--color-ink); font-size: 16px; }
 .cdx-coin-launched__manual input:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; }
+
+/* ------------------------------------------------ sharing a coin (components/carddex/ShareCoin.tsx) */
+.cdx-share { display: flex; flex-direction: column; gap: 8px; }
+.cdx-share__row { display: flex; flex-wrap: wrap; gap: 8px; }
+.cdx-share__row > a, .cdx-share__row > button { gap: 6px; }
+.cdx-share__tip { margin: 0; font-size: var(--text-caption); line-height: 16px; color: var(--color-slate); }
+.cdx-share__manual { display: flex; flex-direction: column; gap: 6px; font-size: var(--text-caption); color: var(--color-slate); }
+.cdx-share__manual input { width: 100%; min-height: 40px; padding: 0 12px; border: 1px solid var(--color-control-border); border-radius: var(--radius-row); background: var(--color-sheet); color: var(--color-ink); font-size: 16px; }
+.cdx-share__manual input:focus-visible { outline: 2px solid var(--color-zap); outline-offset: 2px; }

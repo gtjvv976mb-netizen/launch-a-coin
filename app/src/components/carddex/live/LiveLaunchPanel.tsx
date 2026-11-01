@@ -17,6 +17,7 @@ import { BUY_DOES_NOT_FIT, checkLiveBuyFit, LIVE_BUY_FIT, liveBuyFitKey, STOCK_B
 import { formatLiveAmount } from "./amounts";
 import { LiveTokenImage } from "./LiveTokenImage";
 import { LiveWalletNotice } from "./LiveWalletNotice";
+import { ShareCoin, assetHref } from "../ShareCoin";
 import { PagedMessage } from "./PagedMessage";
 import { useLiveReadiness } from "./readiness";
 import { connectLiveWallet, getLiveWalletSnapshot, signLiveTransaction, signLiveTransactions, useLiveWallet, walletSupportsSignIn } from "./wallet";
@@ -986,6 +987,11 @@ export function LiveLaunchPanel({ draft, draftKey, card, launchesOpen, notice, i
     {recoverNote && !savedListShown ? <p className="cdx-live-meta" role="status">{recoverNote}</p> : null}
     {wallet.address ? <p className="cdx-live-wallet-line">Creator wallet · <span className="cdx-live-address">{brief(wallet.address)}</span>{!wallet.mainnet ? " · Switch to mainnet" : ""}</p> : null}
 
+    {status === "complete" && intent ? <section className="cdx-live-block cdx-live-share" aria-labelledby="cdx-live-share">
+      <h3 id="cdx-live-share" className="cdx-live-subhead">Share your card</h3>
+      <ShareCoin creator name={intent.name} ticker={intent.symbol} mint={intent.tokenMint} cardImage={assetHref(intent.assets?.cardImage?.url)} />
+      <TextLink to="/coin/$id" params={{ id: intent.tokenMint }}>Open your coin page</TextLink>
+    </section> : null}
     {showProgress ? <section className="cdx-live-block" aria-labelledby="cdx-live-progress">
       <h3 id="cdx-live-progress" className={intent ? "sr-only" : "cdx-live-subhead"}>Progress</h3>
       <ol className="cdx-live-stages">

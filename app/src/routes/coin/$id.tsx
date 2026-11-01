@@ -3,6 +3,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 import { LaunchCardPreview } from "../../components/carddex/live/LaunchCardPreview";
+import { ShareCoin } from "../../components/carddex/ShareCoin";
 import { ChartSection, HoldersSection, MarketPanel, TradesSection, useCoinMarket } from "../../components/carddex/market/CoinMarket";
 import { PairLogo } from "../../components/carddex/PairLogo";
 import { EmptyState } from "../../components/mintdex/empty-state";
@@ -151,6 +152,7 @@ function CoinView() {
               Solscan
             </External>
           </div>
+          <ShareCoin name={coin.name} ticker={coin.ticker} mint={coin.tokenMint} cardImage={coin.cardImage} className="cdx-coin-launched__share" />
         </section>
       </div>
       <ChartSection mint={coin.tokenMint} name={coin.name} pool={market.pool} waiting={!market.data && !market.failed} />
