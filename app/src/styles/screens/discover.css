@@ -49,8 +49,8 @@
 
 /* ---------------------------------------------------------------- the stage (owner request 2 November 2026)
  * The cards stand on a velvet table under one warm key light, with no tray or glowing disc behind each of them: the
- * card, its own holo and its contact shadow are enough. Slow light rays turn behind the shelf (the page's one
- * decorative loop: it runs under full motion only, which the head script already turns off for reduced motion). */
+ * card, its own holo and its contact shadow are enough. Still light rays fan out behind the shelf (they never turn:
+ * a turning layer this size cost every frame, owner report 2 November 2026). */
 .cdx-dex .mdx-pocket::before,
 .cdx-dex .mdx-card3d__halo,
 .cdx-dex .mdx-card3d__pedestal { display: none; }
@@ -87,8 +87,6 @@
   -webkit-mask-image: radial-gradient(closest-side, #000 20%, transparent 70%); /* taste-skill-ignore: owner-requested stage light (2 Nov 2026) */
   mask-image: radial-gradient(closest-side, #000 20%, transparent 70%); /* taste-skill-ignore: owner-requested stage light (2 Nov 2026) */
 }
-:root:not([data-motion]) .cdx-dex__rays { animation: cdx-dex-rays 90s linear infinite; }
-@keyframes cdx-dex-rays { to { rotate: 1turn; } }
 
 /* The deck the intro deals from: the middle of the shelf (its own pile stays out of sight; the cards are the deck). */
 .cdx-dex .mdx-shelf__deck { top: 38%; opacity: 0; }
