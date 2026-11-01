@@ -103,3 +103,10 @@
 .cdx-dex :is(.mdx-gridcap, .mdx-v3dbtn) { transition: opacity 220ms cubic-bezier(.23, 1, .32, 1); }
 :root:not([data-motion]) .mdx-shelf[data-intro] :is(.mdx-gridcap, .mdx-v3dbtn),
 .cdx-dex .mdx-shelf__cell:has(.mdx-card3d[data-state~="dealing"]) :is(.mdx-gridcap, .mdx-v3dbtn) { opacity: 0; pointer-events: none; }
+
+/* Alive on the table (owner request 2 November 2026: "naturally move and rotate ... as realistic as possible"): cards in
+ * view turn slowly on their own (spin.ts, data-ambient-spin; the light and the hologram follow the turn), and any card
+ * not turning sways gently instead (the engine's own sway, a compositor animation). Full motion only. */
+:root:not([data-motion="calm"]):not([data-motion="lite"]) .cdx-dex .mdx-card3d[data-depth="table"]:not([data-still]):not([data-spin3d]):not([data-state~="dealing"]) > .mdx-card3d__enter {
+  animation: mdx-sway var(--float-dur, 7s) var(--ease-drift) var(--float-delay, 0s) infinite alternate;
+}

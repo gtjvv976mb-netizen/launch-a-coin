@@ -2243,6 +2243,7 @@ export function Shelf<T>({
   seedOf,
   turntable = true,
   intro = false,
+  ambient = false,
   className = "",
 }: {
   items: T[];
@@ -2277,6 +2278,8 @@ export function Shelf<T>({
    * its cards hidden (data-intro, alive.css) so they never show at rest first and vanish.
    */
   intro?: boolean;
+  /** Cards in view turn on their own (spin.ts data-ambient-spin; Discover), and the rest sway gently. */
+  ambient?: boolean;
   className?: string;
 }) {
   const [ref, size] = useSize<HTMLDivElement>({ width: 340, height: 600 });
@@ -2375,6 +2378,7 @@ export function Shelf<T>({
       ref={ref}
       data-settled={settled || undefined}
       data-intro={introHeld ? "" : undefined}
+      data-ambient-spin={ambient ? "" : undefined}
       data-v3d-group=""
       className={cx(
         "mdx-shelf relative flex w-full min-w-0 flex-col [container-type:inline-size]",

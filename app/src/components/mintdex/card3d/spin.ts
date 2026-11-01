@@ -2,7 +2,9 @@
  * The inline turntables (owner 2026-10-17: "the 3d turntable available on the main site itself while users scroll
  * through the tokens"). Every table card in a list (Shelf) registers here. Only a card the mouse rests on or keyboard
  * focus is in turns (a browse grid never turns by itself: people compare names and prices there), and only while it
- * is well inside the viewport; the rest rest facing front. Touch keeps direct dragging. Scrolling gives the spinning cards a push. Full motion only: lite and calm keep every card at rest, and the
+ * is well inside the viewport; the rest rest facing front. A shelf marked data-ambient-spin (Discover, owner request
+ * 2 November 2026: "make the cards naturally move and rotate ... as realistic as possible") is the exception: its cards
+ * in view turn on their own, at about half the speed, up to the same cap. Touch keeps direct dragging. Scrolling gives the spinning cards a push. Full motion only: lite and calm keep every card at rest, and the
  * engine already pauses everything in a hidden tab and under dialogs.
  */
 import { Engine, motionLevel, onMotionLevel, type Body } from "./motion3d";
@@ -16,7 +18,7 @@ export type SpinCard = {
 };
 
 /** engaged: the pointer is over the card or focus is inside it. Only an engaged card turns (MOT-3). */
-type Entry = SpinCard & { el: HTMLElement; ratio: number; on: boolean; hover: boolean; focus: boolean };
+type Entry = SpinCard & { el: HTMLElement; ratio: number; on: boolean; hover: boolean; focus: boolean; ambient: boolean };
 
 const entries = new Map<HTMLElement, Entry>();
 let io: IntersectionObserver | null = null;
@@ -51,7 +53,7 @@ function pick() {
   const cands: Array<{ e: Entry; d: number }> = [];
   if (full) {
     for (const e of entries.values()) {
-      if (!e.el.isConnected || e.ratio < 0.35 || !(e.hover || e.focus)) continue;
+      if (!e.el.isConnected || e.ratio < 0.35 || !(e.hover || e.focus || e.ambient)) continue;
       const r = e.el.getBoundingClientRect();
       const d = Math.abs(r.top + r.height / 2 - mid) + 0.25 * Math.abs(r.left + r.width / 2 - midX);
       cands.push({ e, d });
@@ -73,7 +75,8 @@ function pick() {
       e.prepare();
       // A small stagger, so cards that come into view together do not start in step.
       b.spinFrom = performance.now() + (i++ % 8) * 420 + (Math.abs(e.seed) % 5) * 150;
-      b.spinRate = rateOf(e.seed);
+      // An ambient turn is slower than a hovered one: a card turning on its own, not one being looked at.
+      b.spinRate = e.ambient && !e.hover && !e.focus ? rateOf(e.seed) * 0.55 : rateOf(e.seed);
       b.spinCard = true;
       e.el.setAttribute("data-spin", "");
     } else {
@@ -132,7 +135,7 @@ function wire() {
 export function registerSpin(el: HTMLElement, card: SpinCard) {
   if (typeof window === "undefined") return () => {};
   wire();
-  const e: Entry = { ...card, el, ratio: 0, on: false, hover: false, focus: false };
+  const e: Entry = { ...card, el, ratio: 0, on: false, hover: false, focus: false, ambient: !!el.closest("[data-ambient-spin]") };
   entries.set(el, e);
   io?.observe(el);
   // The card a mouse rests on, or the one keyboard focus is in: a browse grid never turns by itself.

@@ -217,6 +217,7 @@ function Discover() {
             parallax={desk}
             seedOf={(c: Cell) => order.get(c.id) ?? 0}
             intro
+            ambient
             render={(c: Cell, w) => <CoinCell coin={c} width={w} list={items} index={order.get(c.id) ?? 99} />}
           />
         ) : !launches.data && launches.isError ? (
