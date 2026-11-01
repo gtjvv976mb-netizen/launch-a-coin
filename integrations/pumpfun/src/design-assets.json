@@ -492,7 +492,7 @@
   "pair-tslax": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-tslax-front.webp",
-      "sha256": "e8dad6bd4db2e3ca7a6041b4c488546f08938f7405c754ab6559a4712c5e1dd2"
+      "sha256": "0bc75462e1efa6a80208b59f4edefcd45e911d633a42796cf79f2983b1e6c15e"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-tslax-back.webp",
@@ -512,7 +512,7 @@
   "pair-pnut": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-pnut-front.webp",
-      "sha256": "968c0c80bf9d021c51683d57f68401b5f0918cca1ccffd89281a5369d81ebe62"
+      "sha256": "8e97748bdda1cb0378cb0fb80f65a7bdbe6b4fd377d5cc676abc8648c3f59442"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-pnut-back.webp",
@@ -532,7 +532,7 @@
   "pair-gmex": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-gmex-front.webp",
-      "sha256": "89f4d85babfc649f56292d0ecfff8ade8f02623df004b8668f2b37ab39ab887e"
+      "sha256": "0c699020252a0e641320995a592810110111c63829a8f69e7faa1a06c081ae55"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-gmex-back.webp",
@@ -542,7 +542,7 @@
   "pair-nvdax": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-nvdax-front.webp",
-      "sha256": "334783552e86778f57197cc16c7878439362a6bfe96cb4114487ee7b389357e9"
+      "sha256": "84d5743e87f0e80f5fc70326c5f9fc8043618e250060d8d43b80d903949e1503"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-nvdax-back.webp",
@@ -552,7 +552,7 @@
   "pair-aaplx": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-aaplx-front.webp",
-      "sha256": "d7e2a1305c0dccf65cbe69e02830134be985d0b45caceee9f0453a70b784a2b3"
+      "sha256": "5129da355e66d02949e3763675ba0843549d2e5c7e42ccd77ec2d3229d610931"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-aaplx-back.webp",
@@ -562,7 +562,7 @@
   "pair-mstrx": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-mstrx-front.webp",
-      "sha256": "76ad6f28f05f8d9dba3d7724e21f6c20ce10d9e893a19b48489b8a08cd1157eb"
+      "sha256": "4f88a8b69893637ad27d48b7c5ea7cd7de4cb4efae3c3dd4c51df8b3964ac85f"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-mstrx-back.webp",
@@ -572,7 +572,7 @@
   "pair-coinx": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-coinx-front.webp",
-      "sha256": "37c16f964d18810222e42decfd2ce68758e3e7776317361cbb3f6ea442073d51"
+      "sha256": "21e0e2488688556e460740718eaa7d2fa311afecdee377ff500c1e3ffa378a59"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-coinx-back.webp",
@@ -602,7 +602,7 @@
   "pair-eth": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-eth-front.webp",
-      "sha256": "d0154ddfc39751e854335c33f52413c0ecf851a4cf9c60da47a11889f907dc29"
+      "sha256": "2c872e5a5d1227f5b97bfa024891650f2b649bf4d8f878d396f9db1680385fd9"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-eth-back.webp",
@@ -642,7 +642,7 @@
   "pair-zec": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-zec-front.webp",
-      "sha256": "ecda5b8a22db0ad5e5ef0ca9e812b2ea47dcb8411dcd76f372d363d5eed8e8fc"
+      "sha256": "b7b0d954be20a680edaa9ef8885379baa46ebbacb1ec32a0ac006c074ab5d04a"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-zec-back.webp",
@@ -652,7 +652,7 @@
   "pair-near": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-near-front.webp",
-      "sha256": "8ed0dce1197da0450e11a01f819ba78f376e10cec496c9c82262332e966e6612"
+      "sha256": "7cc263780f301495b2c3473431dd1cacd9bbc044aad32bf664425b5c392c8fc7"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-near-back.webp",
@@ -722,7 +722,7 @@
   "pair-fartcoin": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-fartcoin-front.webp",
-      "sha256": "861812b2fb26da91b8ae24fca75444eff1db456cf939d8248584e3b834b600b3"
+      "sha256": "7e3a9f900135bad757ded7bb7a39a39f84a0d42636da828d7f38739ffb08d709"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-fartcoin-back.webp",
@@ -782,7 +782,7 @@
   "pair-buttcoin": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-buttcoin-front.webp",
-      "sha256": "2208b0e181d63337ff673b4be6859c3c38bf307542e3e6a84b8f31bd8b240a82"
+      "sha256": "3803db7a7674cb9d18c21011fdd7ca63b44f567b8e051d049b1be7218a370e37"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-buttcoin-back.webp",
@@ -792,7 +792,7 @@
   "pair-cupsey": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-cupsey-front.webp",
-      "sha256": "01874eac83b9dcefb13c9a72c2664b8e9b7f9bdb5ed6e9ade0877dfa68e1a4e6"
+      "sha256": "f3c64e5697ff5ac22de19903b8f1edb1feaf97341758914d79e762e18f1f3e04"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-cupsey-back.webp",
@@ -812,7 +812,7 @@
   "pair-bobo": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-bobo-front.webp",
-      "sha256": "b97718bed1ca4e6b5d004d763c9c0fdd8ed4fa68d3e6e0c23743a78642e828b7"
+      "sha256": "3cc9974561cb3a568d65d623337fe8771d87a0b32873b64dae941bfe2fc64d29"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-bobo-back.webp",
@@ -822,7 +822,7 @@
   "pair-claw": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-claw-front.webp",
-      "sha256": "21d5909c47a48f58698edbdec3f7fff8efae0ce81e6b57b2cd05cb21622af2da"
+      "sha256": "a8683785f46c0499f4d6600530973fb77ecf87f0fe76ef053f92d951a5428bf4"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-claw-back.webp",
@@ -872,7 +872,7 @@
   "pair-pumpcade": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-pumpcade-front.webp",
-      "sha256": "2a0518d5ce793afd08085d2eaba451c415c65a7813de05b538e6d08afaa49c15"
+      "sha256": "6441c37016a655cb2918650040572f9e3145f52b6c4163830616576f601fdb75"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-pumpcade-back.webp",
@@ -932,7 +932,7 @@
   "pair-cards": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-cards-front.webp",
-      "sha256": "b3e176fa68c04315e3d562bd8064a91a4f6d412777f9f919069287deef96804c"
+      "sha256": "044bf28f9a4b75628cd0046214f931eca530437065c4a3c08a2ff166014f8cc1"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-cards-back.webp",
@@ -942,7 +942,7 @@
   "pair-goat": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-goat-front.webp",
-      "sha256": "2c98331fce4dfb0650ddb1ad732191d382729b8f493f2b4d10f2fc3a22373cf7"
+      "sha256": "11c9eabc4269fc97f12ef41ddbbbef102f2b8e56f2a560421517c0963dc19ee5"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-goat-back.webp",
@@ -962,7 +962,7 @@
   "pair-aura": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-aura-front.webp",
-      "sha256": "0497df32fc8cf901aff040f7b1f5e135b6d5ba57a940e18587fed68f3e5413f8"
+      "sha256": "a639aa43b55884ec4989fca5cb7b7eb7ec89150a4b8c43b8981b9ab6bd784684"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-aura-back.webp",
@@ -1032,7 +1032,7 @@
   "pair-baton": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-baton-front.webp",
-      "sha256": "c4823ec074156fc7a0363c4debbebc2fcea04ad256f491af3161e89cdc13556b"
+      "sha256": "e284e71e20dcadb95fbc41e5bd0e5118dde5f055994e03b905078d2a1bdfc78f"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-baton-back.webp",
@@ -1092,7 +1092,7 @@
   "pair-giga": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-giga-front.webp",
-      "sha256": "741aa71417dc677b2c526c8c495e86f343a833c63aefe488a70ab0b48e340a9d"
+      "sha256": "82b1ce7e1e066f2d39d41e1e7d6373d1de8fdb681ef91693124e33998f96f376"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-giga-back.webp",
@@ -1122,7 +1122,7 @@
   "pair-troll": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-troll-front.webp",
-      "sha256": "ff7a97548fd47496228e4a69a5fcb1eb32a7066572ab4bb44433fd3e157cb467"
+      "sha256": "eaacc4bbcbb8520c01cb5f39ac22efa30fa39ed0b7dde5ff8d15aba2fe21ffe0"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-troll-back.webp",
@@ -1152,7 +1152,7 @@
   "pair-useless": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-useless-front.webp",
-      "sha256": "5df85627bc5d51268aa3744d975053d61b65a887030ffa183926028982616cc9"
+      "sha256": "be632c4e8e6f6cc0f4e7c5090eae95095e925a72a491aaca0a3776757d85f0ef"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-useless-back.webp",
@@ -1172,7 +1172,7 @@
   "pair-pippin": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-pippin-front.webp",
-      "sha256": "838187cee87b68154f625a0db6a93ad1dbb91005e225ae0a031e47bcbc5e42d2"
+      "sha256": "8f77c10df1a102b3c72c35731859f0cd8d6d12f6c52c8fb2398b2c8bc89bc6ec"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-pippin-back.webp",
@@ -1212,7 +1212,7 @@
   "pair-otc": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-otc-front.webp",
-      "sha256": "b921641190fde00ba5411e1b08e13cb7185a83c28dabdb6e837a180bb3e8dc51"
+      "sha256": "91739555b8368187137a4dc9249ea60ec27dd5e96f82c0c2994ec0bfe66764f7"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-otc-back.webp",
@@ -1242,7 +1242,7 @@
   "pair-manifest": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-manifest-front.webp",
-      "sha256": "afcc3987504a2af9c7041109966525763fb85d5de327975bf3746535e6cceb4b"
+      "sha256": "6c04af83649b482f235602a70e17338c38bc0750d2ef9d571cba46541c3aef9b"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-manifest-back.webp",
@@ -1262,7 +1262,7 @@
   "pair-stonk": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-stonk-front.webp",
-      "sha256": "8b3f05963555cfa479df2e2291aaa0be1377d4adb3630ba51cbd93598da13ba2"
+      "sha256": "b5eca78b2dde43aefef4c11304b2eb0c220b93c0aed8e6fda22ad0ed73bc49cc"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-stonk-back.webp",
@@ -1382,7 +1382,7 @@
   "pair-pengu": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-pengu-front.webp",
-      "sha256": "dfd51f19bf98520f0cd45e236417e5d31ca6e55bc231d469c1da647b1fb64dff"
+      "sha256": "23effd52596ea92bd9dc4280a92c5974ba3b408ef90b26e0175b17436c5652f4"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-pengu-back.webp",
@@ -1432,7 +1432,7 @@
   "pair-ray": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-ray-front.webp",
-      "sha256": "6affd588d76b3d87838bcc2f2637a22714a992c510fde7500cb21f78506d36df"
+      "sha256": "28f224b95c46e3a56db460b7b04dc3457e91c9a1e2c2a297a2131078f15101d6"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-ray-back.webp",
@@ -1442,7 +1442,7 @@
   "pair-met": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-met-front.webp",
-      "sha256": "40e7957d9e010d5667fea38452d051494223c48aab839c1f27d502db1f151cdf"
+      "sha256": "d5aae371c85cb84432b9e3949bb18e3e8634ca4e87bde34ec4e05f0d1a996f3a"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-met-back.webp",
@@ -1452,7 +1452,7 @@
   "pair-bp": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-bp-front.webp",
-      "sha256": "61efdb44d9e592caf76ee2c249d6386a58681306f2db2f98dde0334a451ee83b"
+      "sha256": "f7c12f0024ef8c4dbb97251ec4d79e50a80f5879b72745fcaa5f4529b8e5b2a0"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-bp-back.webp",
@@ -1462,7 +1462,7 @@
   "pair-w": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-w-front.webp",
-      "sha256": "a0b5ae8b61d615f631ec982471cf6bfc817d942961dab838730e8c8bbdfdf982"
+      "sha256": "39a0f351fffad8fde5cccfcb83c31d7c813cc702b4e7c619329cadd37fcc07b9"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-w-back.webp",
@@ -1472,7 +1472,7 @@
   "pair-psol": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-psol-front.webp",
-      "sha256": "fb5def5166ea4bfce595c5c45f0796da9ddb7c6659b78bde2bdc3ac5ab18ccd9"
+      "sha256": "f40e884bedbf7ac9c93fa3cde666a49efd218a74eee358ca0fde2cff527fae7f"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-psol-back.webp",
@@ -1482,7 +1482,7 @@
   "pair-hsol": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-hsol-front.webp",
-      "sha256": "7281c79d4db6fc1179a76f0ca25ef53331efab734ccac01c59333d8212ff3a0a"
+      "sha256": "f23e156a83fc13518bf6595acd83b1c803664e72abb96c68f2732996b8aa702e"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-hsol-back.webp",
@@ -1522,7 +1522,7 @@
   "pair-qqqx": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-qqqx-front.webp",
-      "sha256": "da3cfbb506ef995c4eedeefa69ea2b91a7d1fd7e48cb034009e80aa8516bc1f5"
+      "sha256": "3ab56ecb4976740472f043e388975f1e1b7c4cd70076b499a2bc1cdfc107f386"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-qqqx-back.webp",
@@ -1532,7 +1532,7 @@
   "pair-googlx": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-googlx-front.webp",
-      "sha256": "30bb08f7510df40955e20c00bfeb0ac4965bc536994c0cf5e7f63955192e9292"
+      "sha256": "a14afed942bc4e39d47c61ba3bf687eea48f7e5d34ac34ecefa51bd5e72d8cc9"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-googlx-back.webp",
@@ -1542,7 +1542,7 @@
   "pair-msftx": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-msftx-front.webp",
-      "sha256": "6af08ef70f3b47981dfceea5e0f7e39ba986d1112a7bc126393756bbb27da5a4"
+      "sha256": "56028d55b2d9444ae92447f0b9c283d5410a1cdf3c4be92e1c45b5529d49d162"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-msftx-back.webp",
@@ -1552,7 +1552,7 @@
   "pair-metax": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-metax-front.webp",
-      "sha256": "35c0b20ef1ab22fe29ba707a51a81d2073f73e2ca5c5f62ab3431dd8d7238e23"
+      "sha256": "93cae7a409fd281be63c55e80b5bda845796266d20f20da6e21ffea2bc4ab8bf"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-metax-back.webp",
@@ -1562,7 +1562,7 @@
   "pair-amznx": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-amznx-front.webp",
-      "sha256": "5b3f038aafba8a18edc2af4ba87eb4bdc90747b4acac6929616b428cbd0821d5"
+      "sha256": "205b51b277147ee604f61a450e247e25cb2f1721fb2272bc1c97bfd75ca12091"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-amznx-back.webp",
@@ -1572,7 +1572,7 @@
   "pair-crclx": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-crclx-front.webp",
-      "sha256": "d158bf4cd223678aa08b032b198a4bb6232fffe68bd0ad9ff244f2bd893791e0"
+      "sha256": "698fb7862d01e419f95d5dc1a97b5829daa40616ddd25f3c511c4c01ab7d7bdd"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-crclx-back.webp",
@@ -1582,7 +1582,7 @@
   "pair-hoodx": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-hoodx-front.webp",
-      "sha256": "5fc1bf5ee81685482b7189e57c9ffea4912b2e891cd46cfc121841cab39a0414"
+      "sha256": "58fa23270faf2d05240696fbccc6c24573ad776798bd7f33605a1f9662907354"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-hoodx-back.webp",
@@ -1592,7 +1592,7 @@
   "pair-gldx": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-gldx-front.webp",
-      "sha256": "26de2997e143d031a4a784db717f92d463b6ef98e98bec7679e572a6a830a9cd"
+      "sha256": "777c758548cec268c60d986232c6663b3b1c4915844cf172ca7e237d49018911"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-gldx-back.webp",
@@ -1602,7 +1602,7 @@
   "pair-pltrx": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-pltrx-front.webp",
-      "sha256": "51090203f82c27ddb0af45c28dd7519322e3bbe4c3287b6bcba0dbe4948b5da9"
+      "sha256": "41a06aafdab06a70f3b949a495a1dd4fde5fd5d1d86120250c384ade7fe323c9"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-pltrx-back.webp",
@@ -1612,7 +1612,7 @@
   "pair-mcdx": {
     "front": {
       "path": "/assets/carddex/higgsfield/pair-mcdx-front.webp",
-      "sha256": "1f87b81199e326255fdcfcc206c18736e7290df0045697f06236dbf87c1cb3d6"
+      "sha256": "3df8145c6d7bc25e2ca109492e4b91c9c7b46dfd4f04f818bd88fd2ebd724f3b"
     },
     "back": {
       "path": "/assets/carddex/higgsfield/pair-mcdx-back.webp",

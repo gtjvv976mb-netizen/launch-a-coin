@@ -109,6 +109,116 @@
         "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/render/preview/pair-aaplx--stock.png": "7c7c6e7a264bb57df5d59dd8dc245373f79b8cf46c7a923fd027ca616b38ee9d",
         "/assets/carddex/archive/pair-aaplx/2f04d8465028-ead0438f2c47/token-backs/pair-aaplx.png": "07b0622f53df3e8db4d054bf859dfc26d10482a0652cfad2485603bc5010ab92"
       }
+    },
+    "d7e2a1305c0d-e626a02056c0": {
+      "designKey": "pair-aaplx",
+      "version": "d7e2a1305c0d-e626a02056c0",
+      "ref": "bd85ff9e71186b167e53f830b7886c1870e56e57",
+      "source": {
+        "front": {
+          "path": "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/higgsfield/pair-aaplx-front.webp",
+          "sha256": "d7e2a1305c0dccf65cbe69e02830134be985d0b45caceee9f0453a70b784a2b3"
+        },
+        "back": {
+          "path": "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/higgsfield/pair-aaplx-back.webp",
+          "sha256": "e626a02056c0c7d5ad41316115eae5430f28e5de520bb638f9b1b0f4c0fbbdb9"
+        }
+      },
+      "generated": {
+        "front": "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/higgsfield/pair-aaplx-front.webp",
+        "back": "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/higgsfield/pair-aaplx-back.webp",
+        "front320": "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/higgsfield/pair-aaplx-front-320.webp",
+        "back320": "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/higgsfield/pair-aaplx-back-320.webp"
+      },
+      "layout": {
+        "art": {
+          "x": 0.1,
+          "y": 0.15,
+          "w": 0.8,
+          "h": 0.44
+        },
+        "mask": {
+          "width": 1008,
+          "height": 774,
+          "path": "M0 0H1008V774H0Z"
+        },
+        "prints": {
+          "name": {
+            "x": 0.1,
+            "y": 0.055,
+            "w": 0.8,
+            "h": 0.06
+          },
+          "type": {
+            "x": 0.1,
+            "y": 0.615,
+            "w": 0.8,
+            "h": 0.034
+          },
+          "text": {
+            "x": 0.1,
+            "y": 0.67,
+            "w": 0.8,
+            "h": 0.255
+          }
+        },
+        "canonicalSource": true
+      },
+      "atlases": {
+        "pair-aaplx--stock": {
+          "designKey": "pair-aaplx",
+          "kind": "stock",
+          "path": "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/render/pair-aaplx--stock.png",
+          "sha256": "706be7a85330ef456f17af3c22922f41b07456cee2176f4c39c39280764b7a5c",
+          "previewPath": "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/render/preview/pair-aaplx--stock.png",
+          "previewSha256": "12f38ed03e812c0184f88e46d2c18c43dc1effc91ab28f47808e9f9a1d0980b1",
+          "sourceSha256": "d7e2a1305c0dccf65cbe69e02830134be985d0b45caceee9f0453a70b784a2b3",
+          "width": 1260,
+          "height": 1760,
+          "rendererVersion": "launchacard-canonical-v2.1"
+        }
+      },
+      "variants": {
+        "pair-aaplx--stock": {
+          "atlasSha256": "706be7a85330ef456f17af3c22922f41b07456cee2176f4c39c39280764b7a5c",
+          "w480": {
+            "path": "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/render/preview/pair-aaplx--stock-480.webp",
+            "width": 480,
+            "height": 670,
+            "sha256": "12c81fe991977461dd08a20b13fb8feb8392eaa0fdc38011e0690cd9148f87f1"
+          },
+          "w640": {
+            "path": "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/render/preview/pair-aaplx--stock-640.webp",
+            "width": 640,
+            "height": 894,
+            "sha256": "bcf0aa0c3b146368b05f799244d5981aaaf607bbc463e2a37aea6139953f2107"
+          }
+        }
+      },
+      "tokenBack": {
+        "designKey": "pair-aaplx",
+        "path": "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/token-backs/pair-aaplx.png",
+        "sha256": "a1bee31dd7dca3914c88bbe66c181cc3fd5054ba695cfd216889f74d8d57cfb1",
+        "sourceSha256": "e626a02056c0c7d5ad41316115eae5430f28e5de520bb638f9b1b0f4c0fbbdb9",
+        "width": 630,
+        "height": 880,
+        "conversionVersion": "launchacard-token-back-png-v1"
+      },
+      "files": {
+        "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/higgsfield/pair-aaplx-back-320.webp": "78e1eaf5e0ebd891d7f2e4a56aada8c94fc34ddb83c707beda22320d2cd462f3",
+        "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/higgsfield/pair-aaplx-back-480.webp": "5bf514c2d4e1a0cec7edc93a756ea5545a3ba11850ab555ec35d91a985809078",
+        "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/higgsfield/pair-aaplx-back-640.webp": "c9d60666f4dc5d1757d318c122c868c3c3db1a56353b1609f5ea6bc276f4e02c",
+        "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/higgsfield/pair-aaplx-back.webp": "e626a02056c0c7d5ad41316115eae5430f28e5de520bb638f9b1b0f4c0fbbdb9",
+        "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/higgsfield/pair-aaplx-front-320.webp": "19bfbe5f568ce16e2400d17b936e3e18fc43325bc2452681cde9bfeeecc196d3",
+        "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/higgsfield/pair-aaplx-front-480.webp": "8fffca63dd6130c0b9d6fd9f1bdbbd6e3f998d569598df02f8b9385b7541771a",
+        "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/higgsfield/pair-aaplx-front-640.webp": "ec87d0eb0134c82e5739f3ca40b1abdd7677eeafe05de7335e4075c58ffaf64b",
+        "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/higgsfield/pair-aaplx-front.webp": "d7e2a1305c0dccf65cbe69e02830134be985d0b45caceee9f0453a70b784a2b3",
+        "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/render/pair-aaplx--stock.png": "706be7a85330ef456f17af3c22922f41b07456cee2176f4c39c39280764b7a5c",
+        "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/render/preview/pair-aaplx--stock-480.webp": "12c81fe991977461dd08a20b13fb8feb8392eaa0fdc38011e0690cd9148f87f1",
+        "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/render/preview/pair-aaplx--stock-640.webp": "bcf0aa0c3b146368b05f799244d5981aaaf607bbc463e2a37aea6139953f2107",
+        "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/render/preview/pair-aaplx--stock.png": "12f38ed03e812c0184f88e46d2c18c43dc1effc91ab28f47808e9f9a1d0980b1",
+        "/assets/carddex/archive/pair-aaplx/d7e2a1305c0d-e626a02056c0/token-backs/pair-aaplx.png": "a1bee31dd7dca3914c88bbe66c181cc3fd5054ba695cfd216889f74d8d57cfb1"
+      }
     }
   },
   "pair-cards": {
@@ -220,6 +330,228 @@
         "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/render/preview/pair-cards-640.webp": "50a2f721b4cc228dc7c24a13fc96eb64510423c0cfe3bf2dfd14ef8cd062752f",
         "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/render/preview/pair-cards.png": "194cd183aceaca468e443a9b902b1d1fdbbd84f7391288dd991a11101823a812",
         "/assets/carddex/archive/pair-cards/0fab1e5bae07-b901b5f8852c/token-backs/pair-cards.png": "264f2dadd94eaf407d6313f9a9fae6b7936c2f01bc6212cb6a6e7cd817a2da1a"
+      }
+    },
+    "b3e176fa68c0-49727f9d39a5": {
+      "designKey": "pair-cards",
+      "version": "b3e176fa68c0-49727f9d39a5",
+      "ref": "bd85ff9e71186b167e53f830b7886c1870e56e57",
+      "source": {
+        "front": {
+          "path": "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/higgsfield/pair-cards-front.webp",
+          "sha256": "b3e176fa68c04315e3d562bd8064a91a4f6d412777f9f919069287deef96804c"
+        },
+        "back": {
+          "path": "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/higgsfield/pair-cards-back.webp",
+          "sha256": "49727f9d39a58201ff158d8ca7db3eed9602a61c86cb67433453c222de5c7758"
+        }
+      },
+      "generated": {
+        "front": "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/higgsfield/pair-cards-front.webp",
+        "back": "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/higgsfield/pair-cards-back.webp",
+        "front320": "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/higgsfield/pair-cards-front-320.webp",
+        "back320": "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/higgsfield/pair-cards-back-320.webp"
+      },
+      "layout": {
+        "art": {
+          "x": 0.1,
+          "y": 0.15,
+          "w": 0.8,
+          "h": 0.44
+        },
+        "mask": {
+          "width": 1008,
+          "height": 774,
+          "path": "M0 0H1008V774H0Z"
+        },
+        "prints": {
+          "name": {
+            "x": 0.1,
+            "y": 0.055,
+            "w": 0.8,
+            "h": 0.06
+          },
+          "type": {
+            "x": 0.1,
+            "y": 0.615,
+            "w": 0.8,
+            "h": 0.034
+          },
+          "text": {
+            "x": 0.1,
+            "y": 0.67,
+            "w": 0.8,
+            "h": 0.255
+          }
+        },
+        "canonicalSource": true
+      },
+      "atlases": {
+        "pair-cards": {
+          "designKey": "pair-cards",
+          "kind": "plain",
+          "path": "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/render/pair-cards.png",
+          "sha256": "21b02c0c320ada4b1996c7484023ed78364d9095b1e44513a4d0270fea1b36b2",
+          "previewPath": "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/render/preview/pair-cards.png",
+          "previewSha256": "66daac5da52c654f29a2cb150fb578e472d45b16521c5954b4d17d49585b39b0",
+          "sourceSha256": "b3e176fa68c04315e3d562bd8064a91a4f6d412777f9f919069287deef96804c",
+          "width": 1260,
+          "height": 1760,
+          "rendererVersion": "launchacard-canonical-v2.1"
+        }
+      },
+      "variants": {
+        "pair-cards": {
+          "atlasSha256": "21b02c0c320ada4b1996c7484023ed78364d9095b1e44513a4d0270fea1b36b2",
+          "w480": {
+            "path": "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/render/preview/pair-cards-480.webp",
+            "width": 480,
+            "height": 670,
+            "sha256": "00341e045811004a88f6c8e124a7b91a9d5083d030c8c717622950e6b1a31e03"
+          },
+          "w640": {
+            "path": "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/render/preview/pair-cards-640.webp",
+            "width": 640,
+            "height": 894,
+            "sha256": "d4735b6419fa82490a10d4e229af8cc97eac302986f28c0870a65a252f872ce8"
+          }
+        }
+      },
+      "tokenBack": {
+        "designKey": "pair-cards",
+        "path": "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/token-backs/pair-cards.png",
+        "sha256": "8f65bad4f29a5880dafb6688dc91f7bb08cecfb0e6de2f7aa37b69de80f54485",
+        "sourceSha256": "49727f9d39a58201ff158d8ca7db3eed9602a61c86cb67433453c222de5c7758",
+        "width": 630,
+        "height": 880,
+        "conversionVersion": "launchacard-token-back-png-v1"
+      },
+      "files": {
+        "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/higgsfield/pair-cards-back-320.webp": "170e7753483c9eac675c7b4dad60b0bd11ab8ac27575ebe4859bf9e646bf5cc8",
+        "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/higgsfield/pair-cards-back-480.webp": "2743aa0c2b7860a3d565425f15fc03bf2cf15d5deac0d6d2368c8a700006cde6",
+        "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/higgsfield/pair-cards-back-640.webp": "0e105078a4e706f4c5df0976df1ec136d94e2dd04246a9b2c019a50c4ff8cb95",
+        "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/higgsfield/pair-cards-back.webp": "49727f9d39a58201ff158d8ca7db3eed9602a61c86cb67433453c222de5c7758",
+        "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/higgsfield/pair-cards-front-320.webp": "5122e3f35c8dc6378af444641dd16afbd4c05112c2eaf16166c3e880aceeceff",
+        "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/higgsfield/pair-cards-front-480.webp": "f198df37ceeb6f6a330068405ad1f7c92d4fd54df85a20e39ca4396509c5314c",
+        "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/higgsfield/pair-cards-front-640.webp": "19396df6c6dfc05001197229019638fc09782919a5c74f3f9c12928dd9ec0e26",
+        "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/higgsfield/pair-cards-front.webp": "b3e176fa68c04315e3d562bd8064a91a4f6d412777f9f919069287deef96804c",
+        "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/render/pair-cards.png": "21b02c0c320ada4b1996c7484023ed78364d9095b1e44513a4d0270fea1b36b2",
+        "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/render/preview/pair-cards-480.webp": "00341e045811004a88f6c8e124a7b91a9d5083d030c8c717622950e6b1a31e03",
+        "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/render/preview/pair-cards-640.webp": "d4735b6419fa82490a10d4e229af8cc97eac302986f28c0870a65a252f872ce8",
+        "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/render/preview/pair-cards.png": "66daac5da52c654f29a2cb150fb578e472d45b16521c5954b4d17d49585b39b0",
+        "/assets/carddex/archive/pair-cards/b3e176fa68c0-49727f9d39a5/token-backs/pair-cards.png": "8f65bad4f29a5880dafb6688dc91f7bb08cecfb0e6de2f7aa37b69de80f54485"
+      }
+    }
+  },
+  "pair-mcdx": {
+    "1f87b81199e3-80c5706bbaff": {
+      "designKey": "pair-mcdx",
+      "version": "1f87b81199e3-80c5706bbaff",
+      "ref": "bd85ff9e71186b167e53f830b7886c1870e56e57",
+      "source": {
+        "front": {
+          "path": "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/higgsfield/pair-mcdx-front.webp",
+          "sha256": "1f87b81199e326255fdcfcc206c18736e7290df0045697f06236dbf87c1cb3d6"
+        },
+        "back": {
+          "path": "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/higgsfield/pair-mcdx-back.webp",
+          "sha256": "80c5706bbafffc12ef2f885cba1ce073ce134884182100bd729a3072fe6eb9f0"
+        }
+      },
+      "generated": {
+        "front": "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/higgsfield/pair-mcdx-front.webp",
+        "back": "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/higgsfield/pair-mcdx-back.webp",
+        "front320": "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/higgsfield/pair-mcdx-front-320.webp",
+        "back320": "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/higgsfield/pair-mcdx-back-320.webp"
+      },
+      "layout": {
+        "art": {
+          "x": 0.1,
+          "y": 0.15,
+          "w": 0.8,
+          "h": 0.44
+        },
+        "mask": {
+          "width": 1008,
+          "height": 774,
+          "path": "M0 0H1008V774H0Z"
+        },
+        "prints": {
+          "name": {
+            "x": 0.1,
+            "y": 0.055,
+            "w": 0.8,
+            "h": 0.06
+          },
+          "type": {
+            "x": 0.1,
+            "y": 0.615,
+            "w": 0.8,
+            "h": 0.034
+          },
+          "text": {
+            "x": 0.1,
+            "y": 0.67,
+            "w": 0.8,
+            "h": 0.255
+          }
+        },
+        "canonicalSource": true
+      },
+      "atlases": {
+        "pair-mcdx--stock": {
+          "designKey": "pair-mcdx",
+          "kind": "stock",
+          "path": "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/render/pair-mcdx--stock.png",
+          "sha256": "f932641156be2bd307c253318916f9b067101815a25898acc032a054436c301a",
+          "previewPath": "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/render/preview/pair-mcdx--stock.png",
+          "previewSha256": "2f98079ff1c7dee90f93df91ecd549744d3bd92f1a6db941d9af5cbaa740b894",
+          "sourceSha256": "1f87b81199e326255fdcfcc206c18736e7290df0045697f06236dbf87c1cb3d6",
+          "width": 1260,
+          "height": 1760,
+          "rendererVersion": "launchacard-canonical-v2.1"
+        }
+      },
+      "variants": {
+        "pair-mcdx--stock": {
+          "atlasSha256": "f932641156be2bd307c253318916f9b067101815a25898acc032a054436c301a",
+          "w480": {
+            "path": "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/render/preview/pair-mcdx--stock-480.webp",
+            "width": 480,
+            "height": 670,
+            "sha256": "d52f967ec24da5152c0cad7afba0ab8cbf987db1b43d7ab83a2987ab53e97cfd"
+          },
+          "w640": {
+            "path": "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/render/preview/pair-mcdx--stock-640.webp",
+            "width": 640,
+            "height": 894,
+            "sha256": "bb02dde9dadb9724ff019e0dd286b134b2279a358afd4b6ab5184fe4abfab609"
+          }
+        }
+      },
+      "tokenBack": {
+        "designKey": "pair-mcdx",
+        "path": "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/token-backs/pair-mcdx.png",
+        "sha256": "f6d8ecd4c0e94abac96b3905de0b72a2d1b1645923e0dcd74c929de4f6e94e7f",
+        "sourceSha256": "80c5706bbafffc12ef2f885cba1ce073ce134884182100bd729a3072fe6eb9f0",
+        "width": 630,
+        "height": 880,
+        "conversionVersion": "launchacard-token-back-png-v1"
+      },
+      "files": {
+        "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/higgsfield/pair-mcdx-back-320.webp": "caf6ff68469c44b24b54bcba4528e1071cc564ef2e7c7c38b5d4a2fbf47421b6",
+        "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/higgsfield/pair-mcdx-back-480.webp": "af8902cbf153595883849d7444ed82929e301f7cfeb1141ef49e1edfdd4d40cb",
+        "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/higgsfield/pair-mcdx-back-640.webp": "425bf5dc7d18faf41c5506cf5f340097889e83822ba09b765b96003689a80afc",
+        "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/higgsfield/pair-mcdx-back.webp": "80c5706bbafffc12ef2f885cba1ce073ce134884182100bd729a3072fe6eb9f0",
+        "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/higgsfield/pair-mcdx-front-320.webp": "9dfda582b6fdef5fde7ffdb6d1af75fa6c0c8dc088ad3cbefaa4f04d7238a015",
+        "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/higgsfield/pair-mcdx-front-480.webp": "ba32b45a7e14e891601a64cf4453faac85d81efb0ec06d5525d2bc08d524f2bd",
+        "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/higgsfield/pair-mcdx-front-640.webp": "3669eeeeafda035bb21211239ccd9eaa88d54f039833c4405a7fb9d3890c7dc2",
+        "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/higgsfield/pair-mcdx-front.webp": "1f87b81199e326255fdcfcc206c18736e7290df0045697f06236dbf87c1cb3d6",
+        "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/render/pair-mcdx--stock.png": "f932641156be2bd307c253318916f9b067101815a25898acc032a054436c301a",
+        "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/render/preview/pair-mcdx--stock-480.webp": "d52f967ec24da5152c0cad7afba0ab8cbf987db1b43d7ab83a2987ab53e97cfd",
+        "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/render/preview/pair-mcdx--stock-640.webp": "bb02dde9dadb9724ff019e0dd286b134b2279a358afd4b6ab5184fe4abfab609",
+        "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/render/preview/pair-mcdx--stock.png": "2f98079ff1c7dee90f93df91ecd549744d3bd92f1a6db941d9af5cbaa740b894",
+        "/assets/carddex/archive/pair-mcdx/1f87b81199e3-80c5706bbaff/token-backs/pair-mcdx.png": "f6d8ecd4c0e94abac96b3905de0b72a2d1b1645923e0dcd74c929de4f6e94e7f"
       }
     }
   }
