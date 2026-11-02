@@ -384,8 +384,41 @@
   }
  },
  "fartcoin": {
-  "logo": null,
-  "reason": "token image is a screenshot of a terminal chat (text and an ASCII wordmark), not a logo; its 80 px square crop reads as an empty dark disc at tile size"
+  "logo": "/assets/pairs/fartcoin.webp",
+  "w128": {
+   "path": "/assets/pairs/fartcoin.webp",
+   "sha256": "c67c01fdfdb19b3e2f5658b101bd183f422c270dd2bdc1a62313f7f53998efd4",
+   "bytes": 2138
+  },
+  "w64": {
+   "path": "/assets/pairs/fartcoin-64.webp",
+   "sha256": "0f459782b2cd9cf1ed666cf952ce04fd43a5a59c9c7eadca79a8fb6bfb025e85",
+   "bytes": 722
+  },
+  "source": {
+   "folder": "reports/pair-logo-fix-2026-11-02/logo-sources",
+   "file": "fartcoin-f7cb566164b8.png",
+   "sha256": "f7cb566164b888861d95b989a93d1456ee735177805b1f80d949562d130b47bb",
+   "record": "reports/pair-logo-fix-2026-11-02/token-identities.json#fartcoin.logoSourceSha256",
+   "url": "https://cdn.dexscreener.com/cms/images/9af5672845c89585e9ff1e3b26a640090324aa4d92222052d1043e60ef8182de?width=800&height=800&quality=95&format=png"
+  },
+  "derivation": {
+   "mode": "whole",
+   "crop": [
+    0,
+    0,
+    564
+   ],
+   "plate": null,
+   "sourcePx": [
+    564,
+    564
+   ],
+   "upscaled": false,
+   "resample": "high",
+   "strokes": "3 px max filter at source size so the 1-2 px ASCII strokes survive 64 px and 24 px",
+   "encoder": "Pillow 12.3.0 image/webp q90 (added by hand: make_pair_logos.py keeps FARTCOIN a monogram)"
+  }
  },
  "pnut": {
   "logo": "/assets/pairs/pnut.webp",

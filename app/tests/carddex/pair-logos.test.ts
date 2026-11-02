@@ -25,8 +25,9 @@ type Row = {logo: string | null; reason?: string; w128?: File; w64?: File;
 const ROWS = logos as unknown as Record<string, Row>;
 const PUBLIC = path.join(import.meta.dir, "../../public");
 const DIR = path.join(PUBLIC, "assets/pairs");
-/** Token images that hold no logo; FARTCOIN since the fix pass (visual check LOGO-1). */
-const MONOGRAMS = ["fartcoin", "gork", "manifest"];
+/** Token images that hold no logo. FARTCOIN was one (visual check LOGO-1) until 2 November 2026: it now shows the
+ * ASCII wordmark it lists on DexScreener (reports/pair-logo-fix-2026-11-02). */
+const MONOGRAMS = ["gork", "manifest"];
 
 /** The full release's pairs: every identity pair whose design is not held as "not offered" (the same on the release step). */
 const RELEASE = Object.entries(PAIR_IDENTITY_DESIGNS)
@@ -60,14 +61,14 @@ describe("pair logos", () => {
     for (const asset of OFFERED_PAIRS) expect(Object.hasOwn(ROWS, asset.key)).toBe(true);
   });
 
-  test("exactly GORK, MANIFEST and FARTCOIN keep the monogram, each with its reason", () => {
+  test("exactly GORK and MANIFEST keep the monogram, each with its reason", () => {
     const mono = Object.entries(ROWS).filter(([, row]) => row.logo === null);
     expect(mono.map(([key]) => key).sort()).toEqual(MONOGRAMS);
     for (const [, row] of mono) {
       expect(row.reason!.length).toBeGreaterThan(20);
       expect(row.w128 ?? row.w64 ?? row.source ?? row.derivation).toBeUndefined();
     }
-    expect(withLogo.length).toBe(106);
+    expect(withLogo.length).toBe(107);
   });
 
   test("each logo is a 128 px and a 64 px WebP matching its recorded sha256", () => {
@@ -87,7 +88,7 @@ describe("pair logos", () => {
     const expected = withLogo.flatMap(([key]) => [`${key}.webp`, `${key}-64.webp`]).sort();
     const files = readdirSync(DIR).sort();
     expect(files).toEqual(expected);
-    expect(files.length).toBe(212);
+    expect(files.length).toBe(214);
     const offered = new Set(OFFERED_PAIRS.map(asset => asset.key as string));
     const notOffered = PAIR_ASSET_KEYS.filter(key => !Object.hasOwn(ROWS, key));
     expect(notOffered.sort()).toEqual(["aave", "agency", "alon", "biketyson", "claudia", "jeanphil", "neet", "uni"]);
@@ -97,19 +98,21 @@ describe("pair logos", () => {
     expect(total).toBeLessThanOrEqual(600 * 1024);
   });
 
-  test("each logo records its source: Codex's file (or, for the 31 October pairs, the committed token image), its sha256, the record and the URL", () => {
-    const EXPANSION = "reports/pair-expansion-2026-10-31";
+  test("each logo records its source: Codex's file (or, for the 31 October pairs and FARTCOIN, the committed image), its sha256, the record and the URL", () => {
+    const EXPANSION = "reports/pair-expansion-2026-10-31", FIX = "reports/pair-logo-fix-2026-11-02";
     const expansion = withLogo.filter(([, row]) => row.source!.folder === `${EXPANSION}/logo-sources`);
+    expect(withLogo.filter(([, row]) => row.source!.folder === `${FIX}/logo-sources`).map(([key]) => key)).toEqual(["fartcoin"]);
     expect(expansion.map(([key]) => key)).toEqual(["ray", "met", "bp", "w", "psol", "hsol", "cbltc", "cbada", "spyx", "qqqx", "googlx", "msftx", "metax", "amznx", "crclx", "hoodx", "gldx", "pltrx", "mcdx", "kox"]);
     for (const [key, row] of withLogo) {
       const source = row.source!;
       expect(path.basename(source.file).startsWith(`${key}-`)).toBe(true);
       expect(source.sha256).toMatch(/^[a-f0-9]{64}$/);
-      if (source.folder === `${EXPANSION}/logo-sources`) {
+      const committed = [EXPANSION, FIX].find(dir => source.folder === `${dir}/logo-sources`);
+      if (committed) {
         // The token's own image is in the repository: its bytes must still hash to the recorded value.
         const bytes = readFileSync(path.join(import.meta.dir, "../../..", source.folder, source.file));
         expect(createHash("sha256").update(bytes).digest("hex")).toBe(source.sha256);
-        expect(source.record).toBe(`${EXPANSION}/token-identities.json#${key}.logoSourceSha256`);
+        expect(source.record).toBe(`${committed}/token-identities.json#${key}.logoSourceSha256`);
       } else {
         expect(source.folder).toBe("creative/higgsfield/pair-identities-2026-10-30");
         expect(source.record).toMatch(/^research\/[a-z0-9-]+\.json#[A-Za-z0-9.]+$/);
@@ -140,7 +143,7 @@ describe("pair logos", () => {
     for (const key of [...MONOGRAMS, "aave", "agency", "nope", "", null, undefined]) expect(pairLogo(key)).toBeNull();
   });
 
-  test("Launch's tiles draw every offered pair's logo, and the letter only for GORK, MANIFEST and FARTCOIN", () => {
+  test("Launch's tiles draw every offered pair's logo, and the letter only for GORK and MANIFEST", () => {
     const html = (key: string, size?: number) => renderToStaticMarkup(createElement(PairLogo, {asset: getPairAsset(key), size}));
     for (const asset of OFFERED_PAIRS) {
       const out = html(asset.key);
@@ -155,7 +158,7 @@ describe("pair logos", () => {
     }
     expect(html("gork")).toContain(">G</span>");
     expect(html("manifest")).toContain(">M</span>");
-    expect(html("fartcoin")).toContain(">F</span>");
+    expect(html("fartcoin")).toContain('src="/assets/pairs/fartcoin-64.webp"');
     expect(html("sol", 20)).toContain('sizes="20px" width="20" height="20"');
   });
 
@@ -166,7 +169,8 @@ describe("pair logos", () => {
     expect(Object.keys(client).sort()).toEqual(Object.keys(ROWS).sort());
     for (const [key, row] of Object.entries(client)) expect(row).toEqual({logo: ROWS[key]!.logo});
     expect(client.sol).toEqual({logo: "/assets/pairs/sol.webp"});
-    expect(client.fartcoin).toEqual({logo: null});
+    expect(client.gork).toEqual({logo: null});
+    expect(client.fartcoin).toEqual({logo: "/assets/pairs/fartcoin.webp"});
     for (const name of ["render-assets.json", "pair-assets.json"]) {
       const whole = JSON.parse(raw(name)) as Record<string, Record<string, unknown>> | Record<string, unknown>[];
       const copy = JSON.parse(clientRegistryCopy(name, raw(name))!) as typeof whole;

@@ -15,7 +15,8 @@ it is dark (alpha-weighted luminance < 0.35) or a chocolate plate otherwise. An 
 opaque non-square one gets a centred square crop of its short side. SVGs render at 1024 px on the long side. Output:
 <key>.webp (128 px) and <key>-64.webp (64 px), canvas image/webp quality 0.9. PEPE (64 px pixel art) doubles with
 nearest-neighbour; other sources under 128 px are smoothed up and marked upscaled. GORK, MANIFEST and FARTCOIN keep the
-monogram.
+monogram here; FARTCOIN's logo was added by hand on 2 November 2026 (reports/pair-logo-fix-2026-11-02), so a rerun must
+keep its pair-logos.json entry and files.
 """
 import argparse, base64, hashlib, json, os, sys
 from pathlib import Path

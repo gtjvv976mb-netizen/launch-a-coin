@@ -1,0 +1,11 @@
+{
+ "fartcoin": {
+  "mint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+  "symbol": "Fartcoin",
+  "name": "Fartcoin",
+  "note": "The token's own metadata image is a terminal-chat screenshot, so the logo is the ASCII FARTCOIN wordmark Fartcoin lists on DexScreener (CoinGecko shows the same mark), fetched 2 November 2026.",
+  "icon": "https://cdn.dexscreener.com/cms/images/9af5672845c89585e9ff1e3b26a640090324aa4d92222052d1043e60ef8182de?width=800&height=800&quality=95&format=png",
+  "iconSha256": "f7cb566164b888861d95b989a93d1456ee735177805b1f80d949562d130b47bb",
+  "logoSourceSha256": "f7cb566164b888861d95b989a93d1456ee735177805b1f80d949562d130b47bb"
+ }
+}

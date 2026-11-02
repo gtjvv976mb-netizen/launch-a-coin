@@ -6,8 +6,9 @@ import logos from "./pair-logos.json";
  * file's sha256 and bytes and its source's file, sha256, record and URL for the tests and the server; the client copy
  * keeps only `logo` (client-registry-fields.ts CLIENT_DROPPED_FIELDS), so read it through pairLogo, never
  * directly.
- * A pair whose token image holds no logo (GORK, MANIFEST, FARTCOIN) has `logo: null` and a `reason` (server and tests
- * only), and keeps its monogram.
+ * A pair whose token image holds no logo (GORK, MANIFEST) has `logo: null` and a `reason` (server and tests only), and
+ * keeps its monogram. FARTCOIN's was added by hand on 2 November 2026 from the wordmark it lists on DexScreener
+ * (reports/pair-logo-fix-2026-11-02).
  */
 type LogoRow = { logo: string | null };
 const ROWS = logos as unknown as Readonly<Record<string, LogoRow>>;
