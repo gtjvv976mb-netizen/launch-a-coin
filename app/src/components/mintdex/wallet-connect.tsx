@@ -7,12 +7,16 @@
  *   no wallet    what to do (install Phantom, Solflare or Backpack from its own site and reload, or open this page in
  *                the wallet app's browser on a phone), the official links, then the same line.
  *   connected    the wallet, its full address, whether the account is on mainnet, then [Disconnect] [Done].
+ *                Disconnect also ends this site's sign-in session, so another wallet can sign in, then reloads the
+ *                route's data (a page that needs a signed-in owner shows its sign-in again).
  *
  * Errors stay on the page in one alert line that says what happened and what to try next. Connecting and
  * disconnecting go through carddex/live/wallet.ts; nothing here signs or sends anything.
  */
+import { useRouter } from "@tanstack/react-router";
 import { useId, useState } from "react";
 
+import { signOutLiveWallet } from "../../lib/carddex/live/api";
 import { connectLiveWallet, disconnectLiveWallet, useLiveWallet } from "../carddex/live/wallet";
 import { Badge, Button, Icon, Modal } from "./ui";
 
@@ -39,7 +43,14 @@ function withNextStep(message: string) {
  */
 export function WalletConnectDialog({ open, onOpenChange, connect = connectLiveWallet, busyCopy }: { open: boolean; onOpenChange: (o: boolean) => void; connect?: (walletName: string) => Promise<unknown>; busyCopy?: (walletName: string) => string | null }) {
   const wallet = useLiveWallet();
+  const router = useRouter();
   const [error, setError] = useState("");
+  // The session ends first (a failed sign-out still disconnects; the session then expires on its own).
+  const signOut = async () => {
+    await signOutLiveWallet().catch(() => null);
+    await disconnectLiveWallet();
+    await router.invalidate();
+  };
   const id = useId();
   const address = wallet.address;
   const signingIn = wallet.connecting ? busyCopy?.(wallet.connecting) ?? null : null;
@@ -84,7 +95,7 @@ export function WalletConnectDialog({ open, onOpenChange, connect = connectLiveW
               <Button
                 variant="outline"
                 onClick={() => {
-                  void disconnectLiveWallet();
+                  void signOut();
                   close();
                 }}
               >
