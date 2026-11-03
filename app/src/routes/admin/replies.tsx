@@ -2,8 +2,9 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, notFound, useRouter } from "@tanstack/react-router";
 
-import { signInCreator } from "../../components/carddex/live/ownership";
-import { useLiveWallet } from "../../components/carddex/live/wallet";
+import { SIGN_IN_COPY } from "../../components/carddex/live/launch-flow";
+import { connectAndSignIn, signInCreator } from "../../components/carddex/live/ownership";
+import { useLiveWallet, walletSupportsSignIn } from "../../components/carddex/live/wallet";
 import { Button, buttonClass, Icon, PageFrame, PageHeader, TextLink } from "../../components/mintdex/ui";
 import { getXReviewQueue, reviewXAnnouncement } from "../../lib/carddex/live/x-announce-api";
 import type { XReviewItem, XUpcomingItem } from "../../lib/carddex/live/x-announce.server";
@@ -38,7 +39,11 @@ function ReplyHelper() {
   return access.state === "admin" ? <Feed /> : <SignIn />;
 }
 
-/** Signed out: the same wallet sign-in as Launch, then the loader runs again. Shows nothing about the page. */
+/**
+ * Signed out: the same wallet sign-in as Launch, then the loader runs again. Shows nothing about the page. Choosing a
+ * wallet in the list connects and signs in at once (connectAndSignIn); a wallet already connected without a session
+ * signs in with the button.
+ */
 function SignIn() {
   const wallet = useLiveWallet();
   const router = useRouter();
@@ -51,12 +56,26 @@ function SignIn() {
     catch (e) { setError(e instanceof Error ? e.message : "Sign-in failed."); }
     finally { setBusy(false); }
   }
+  // From the wallet list: connect and sign in, then show the page. The wallet may connect before the sign-in fails, and
+  // the list shows errors only while nothing is connected, so a failure closes the list and stays here beside Sign in.
+  async function connectThenSignIn(walletName: string) {
+    setBusy(true); setError(null);
+    try { await connectAndSignIn(walletName); await router.invalidate(); }
+    catch (e) { setError(e instanceof Error && e.message ? e.message : "Sign-in was canceled."); }
+    finally { setBusy(false); }
+  }
+  const signInLine = (walletName: string) => walletSupportsSignIn(walletName) ? SIGN_IN_COPY : null;
   return (
     <PageFrame className="mdx-page cdx-replies">
-      <PageHeader title="Sign in" context="Sign in with your wallet to continue." />
+      <PageHeader
+        title="Sign in"
+        context={wallet.address
+          ? "Your wallet is connected. Press Sign in, then approve the request in your wallet."
+          : "Connect your wallet and approve the sign-in request to continue."}
+      />
       <div className="cdx-replies__signin">
         <Suspense fallback={null}>
-          <LiveWalletButton compact quiet={!!wallet.address} />
+          <LiveWalletButton compact quiet={!!wallet.address} connect={connectThenSignIn} busyCopy={signInLine} />
         </Suspense>
         {wallet.address ? <Button size="sm" pending={busy} pendingLabel="Check your wallet" onClick={signIn}>Sign in</Button> : null}
         {error ? <p role="alert" className="cdx-replies__error">{error}</p> : null}

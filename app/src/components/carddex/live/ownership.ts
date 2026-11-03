@@ -30,3 +30,10 @@ export async function connectForLaunch(walletName: string): Promise<string> {
   if (!walletSupportsSignIn(walletName)) return connectLiveWallet(walletName);
   return whileConnecting(walletName, async () => (await signInCreator(walletName, null)).address);
 }
+/**
+ * Connect and sign in from the wallet list, always (the owner page): one solana:signIn prompt where the wallet has it,
+ * else a connect and then the ownership message. Plain connect leaves the owner on Sign in with a second press to find.
+ */
+export function connectAndSignIn(walletName: string): Promise<string> {
+  return whileConnecting(walletName, async () => (await signInCreator(walletName, null)).address);
+}
